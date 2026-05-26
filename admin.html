@@ -162,6 +162,7 @@
         <button class="dcard" onclick="openPanel('gallery')"><span class="dcard-icon">📸</span><div class="dcard-name">Gallery</div><div class="dcard-desc">Upload match photos</div></button>
         <button class="dcard" onclick="openPanel('matchreport')"><span class="dcard-icon">📋</span><div class="dcard-name">Match Report</div><div class="dcard-desc">Post-match writeup</div></button>
         <button class="dcard" onclick="openPanel('players')"><span class="dcard-icon">🏃</span><div class="dcard-name">Player Profiles</div><div class="dcard-desc">Add &amp; manage players</div></button>
+        <button class="dcard" onclick="openPanel('mail')"><span class="dcard-icon">📧</span><div class="dcard-name">Club Email</div><div class="dcard-desc">Access staff inboxes</div></button>
       </div>
       <button class="dcard" style="width:100%;margin-top:4px;border-top-color:var(--gr)" onclick="openPanel('settings')">
         <span class="dcard-icon" style="font-size:18px">⚙️</span>
@@ -381,6 +382,74 @@
       <div id="pl-list"></div>
       <button class="save" style="margin-top:10px" onclick="savePlayerProfiles()">&#10003; Push Profiles to Site</button>
       <div class="dep" id="dep-players"></div>
+    </div>
+
+    <!-- MAIL -->
+    <div class="panel" id="panel-mail">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128231; Club Email</div></div>
+      <div class="slbl">Staff Email Accounts</div>
+      <p style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:0 0 16px;line-height:1.6">Tap any account below to open the inbox in a new tab. Log in with the full email address and your password.</p>
+
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+        <a href="https://mail.one.com" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
+          <span style="font-size:24px">👑</span>
+          <div style="flex:1">
+            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Chairman</div>
+            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">chairman@raynerslanefc.co.uk</div>
+          </div>
+          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
+        </a>
+
+        <a href="https://mail.one.com" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
+          <span style="font-size:24px">📬</span>
+          <div style="flex:1">
+            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Club Info</div>
+            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">info@raynerslanefc.co.uk</div>
+          </div>
+          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
+        </a>
+
+        <a href="https://mail.one.com" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
+          <span style="font-size:24px">⚽</span>
+          <div style="flex:1">
+            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Match Day</div>
+            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">matchday@raynerslanefc.co.uk</div>
+          </div>
+          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
+        </a>
+
+        <a href="https://mail.one.com" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
+          <span style="font-size:24px">📱</span>
+          <div style="flex:1">
+            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Media</div>
+            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">media@raynerslanefc.co.uk</div>
+          </div>
+          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
+        </a>
+
+        <a href="https://mail.one.com" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
+          <span style="font-size:24px">📋</span>
+          <div style="flex:1">
+            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Secretary</div>
+            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">secretary@raynerslanefc.co.uk</div>
+          </div>
+          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
+        </a>
+      </div>
+
+      <div style="background:var(--c2);border:1px solid var(--br);border-left:3px solid var(--gr);padding:16px">
+        <div style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:8px">Login Details</div>
+        <div style="font-family:var(--fc);font-size:13px;color:var(--lgr);line-height:1.7">
+          Website: <span style="color:var(--w)">mail.one.com</span><br>
+          Username: <span style="color:var(--w)">your full email address</span><br>
+          Password: <span style="color:var(--w)">as set by the administrator</span>
+        </div>
+      </div>
     </div>
 
     <!-- SETTINGS -->
