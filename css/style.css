@@ -90,7 +90,7 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .hero__sub{font-family:var(--font-c);font-size:17px;font-weight:400;color:var(--grey);letter-spacing:.04em;max-width:400px;margin-bottom:44px;line-height:1.6}
 .hero__btns{display:flex;gap:14px;flex-wrap:wrap}
 .hero__right{position:relative;overflow:hidden;background:linear-gradient(160deg,#132A1E 0%,#0A1A10 60%,#080808 100%)}
-.hero__right::before{content:'';position:absolute;left:-50px;top:0;bottom:0;width:100px;background:var(--black);clip-path:polygon(0 0,40% 0,100% 100%,0 100%);z-index:1}
+.hero__right::before{display:none}
 .hero__pitch{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero__pitch-lines{width:90%;height:90%;border:2px solid rgba(255,255,255,.04);border-radius:4px;position:relative}
 .hero__pitch-lines::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.04);transform:translateY(-50%)}
