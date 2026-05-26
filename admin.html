@@ -455,7 +455,7 @@ function checkPin() {
   if (pinVal === PIN) {
     document.getElementById('pin-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    var tok = localStorage.getItem('rlfc_gh_token') || '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';
+    var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
     if (tok) document.getElementById('gh-tok').value = tok;
     loadAll();
   } else {
@@ -492,11 +492,11 @@ function back() {
 // ── LOAD DATA ──
 function loadAll() {
   if (!localStorage.getItem('rlfc_gh_token')) {
-    localStorage.setItem('rlfc_gh_token', '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');
+    localStorage.setItem('rlfc_gh_token', '');
   }
   // Pre-populate GitHub token if not already set
   if (!localStorage.getItem('rlfc_gh_token')) {
-    localStorage.setItem('rlfc_gh_token', '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');
+    localStorage.setItem('rlfc_gh_token', '');
   }
   fetchJSON('squad',     function(d) { if (d && d.players) squad = d.players; });
   fetchJSON('committee', function(d) { if (d && d.members) committee = d.members; });
@@ -576,7 +576,7 @@ function saveMatchDay(activate) {
 
 // ── PROGRAMME ──
 function saveProgramme() {
-  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   var data = {
     opponent: gv('pr-opp'), date: gv('pr-date'),
     competition: gv('pr-comp'), managerNotes: gv('pr-mgr'),
@@ -649,7 +649,7 @@ function publishArticle() {
     image: imgStore['nw'] ? imgStore['nw'].dataUrl : (imgs[cat] || 'img/news/news-default.svg'),
     excerpt: gv('nw-exc'), body: body,
   };
-  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   if (imgStore['nw'] && tok) {
     uploadImg('nw', tok, function(path) {
       if (path) art.image = path;
@@ -785,7 +785,7 @@ function renderPlayerList() {
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No profiles yet</div>';
 }
 function savePlayerProfiles() {
-  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   var data = {players:playerProfiles.map(function(p){
     return {id:p.id,number:p.number,name:p.name,position:p.position,
             nationality:p.nationality,nickname:p.nickname,bio:p.bio,
@@ -902,7 +902,7 @@ function uploadImg(prefix, tok, cb) {
 // ── SAVE + TRIGGER DEPLOY ──
 function pushToGitHub(name, data, depId) {
   var el = document.getElementById(depId);
-  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   var content = JSON.stringify(data, null, 2);
   var b64 = btoa(unescape(encodeURIComponent(content)));
   var path = 'data/' + name + '.json';
@@ -974,5 +974,6 @@ function toast(msg, err) {
   t._t = setTimeout(function() { t.className = 'toast'; }, 3000);
 }
 </script>
+<script src="js/t.js"></script>
 </body>
 </html>
