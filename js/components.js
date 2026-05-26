@@ -453,11 +453,8 @@ function initComponents(currentPage) {
 
 
   // ── PWA INSTALL PROMPT ──
-  var isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-  var isAndroid = /android/.test(navigator.userAgent.toLowerCase());
-  var isMobile = isIOS || isAndroid;
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isMobile && !isStandalone) {
+  if (!isStandalone) {
     var banner = document.createElement('div');
     banner.id = 'pwa-banner';
     banner.style.cssText = 'background:#FFD100;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10001;';
