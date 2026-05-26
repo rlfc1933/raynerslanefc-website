@@ -457,9 +457,7 @@ function initComponents(currentPage) {
   var isAndroid = /android/.test(navigator.userAgent.toLowerCase());
   var isMobile = isIOS || isAndroid;
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  var dismissed = localStorage.getItem('rlfc_pwa_dismissed');
-
-  if (isMobile && !isStandalone && !dismissed) {
+  if (isMobile && !isStandalone) {
     var banner = document.createElement('div');
     banner.id = 'pwa-banner';
     banner.style.cssText = 'background:#FFD100;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10001;';
