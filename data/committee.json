@@ -1,1 +1,42 @@
-{"members":[{"name":"Pete Singh","role":"Club Chairman & Owner","featured":true},{"name":"Nigel Hanlon","role":"Vice Chairman","note":"Hanlon Dry Lining — Home Shirt Sponsor"},{"name":"Martin Noblett","role":"Club President"},{"name":"Gary Pitt","role":"First Team Manager"},{"name":"Russell Nugent","role":"Committee"},{"name":"Darren Nugent","role":"Committee"},{"name":"Tony Pratt","role":"Hospitality"}]}
+{
+  "members": [
+    {
+      "name": "Pete Singh",
+      "role": "Club Chairman",
+      "featured": true
+    },
+    {
+      "name": "Nigel Hanlon",
+      "role": "Vice Chairman",
+      "note": "Hanlon Dry Lining \u2014 Home Shirt Sponsor"
+    },
+    {
+      "name": "Martin Noblett",
+      "role": "Club President"
+    },
+    {
+      "name": "Jenny Pitt",
+      "role": "Club Secretary"
+    },
+    {
+      "name": "Gary Pitt",
+      "role": "First Team Manager"
+    },
+    {
+      "name": "Russell Nugent",
+      "role": "Committee"
+    },
+    {
+      "name": "Darren Nugent",
+      "role": "Committee"
+    },
+    {
+      "name": "Tony Pratt",
+      "role": "Hospitality"
+    },
+    {
+      "name": "Pete Singh",
+      "role": "Club Welfare Officer"
+    }
+  ]
+}
