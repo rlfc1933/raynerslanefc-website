@@ -15,6 +15,17 @@ function toggleMobileNav() {
 }
 
 
+function acceptCookies() {
+  localStorage.setItem('rlfc_cookies_accepted', '1');
+  var b = document.getElementById('cookie-banner');
+  if (b) b.remove();
+}
+function declineCookies() {
+  localStorage.setItem('rlfc_cookies_accepted', '0');
+  var b = document.getElementById('cookie-banner');
+  if (b) b.remove();
+}
+
 // ── GOOGLE ANALYTICS 4 ──────────────────
 (function() {
   var s1 = document.createElement('script');
@@ -406,6 +417,23 @@ function initComponents(currentPage) {
   if (twitter) twitter.innerHTML = buildTwitterSection();
   if (footer)  footer.innerHTML  = buildFooter();
 
+
+
+  // ── COOKIE BANNER ──
+  if (!localStorage.getItem('rlfc_cookies_accepted')) {
+    var banner = document.createElement('div');
+    banner.id = 'cookie-banner';
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;border-top:2px solid var(--yellow);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:10000;flex-wrap:wrap;';
+    banner.innerHTML = '<div style="font-family:var(--font-c);font-size:12px;color:var(--lgrey);letter-spacing:.04em;flex:1;min-width:200px">' +
+      '<span style="color:var(--yellow);font-weight:700">🍪 Cookies</span> — We use cookies to improve your experience and track site visits via Google Analytics. ' +
+      '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Learn more</a>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-shrink:0">' +
+      '<button onclick="acceptCookies()" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent">Accept</button>' +
+      '<button onclick="declineCookies()" style="background:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">Decline</button>' +
+      '</div>';
+    document.body.appendChild(banner);
+  }
 
   document.addEventListener('click', e => {
     const btn  = document.getElementById('hamburger');
