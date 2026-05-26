@@ -54,18 +54,34 @@ async function loadMatchDay() {
 function startCountdown(dateStr) {
   var el = document.getElementById('countdown');
   if (!el) return;
+  // Validate date
+  if (!dateStr) {
+    el.innerHTML = '<span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Fixtures releasing soon</span>';
+    return;
+  }
+  var target = new Date(dateStr);
+  if (isNaN(target.getTime())) {
+    el.innerHTML = '<span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Fixtures releasing soon</span>';
+    return;
+  }
   function tick() {
-    var diff = new Date(dateStr) - new Date();
-    if (diff <= 0) { el.innerHTML = '<span style="font-family:var(--font-d);color:var(--yellow);font-size:20px;letter-spacing:.04em">KICK OFF</span>'; return; }
+    var diff = target - new Date();
+    if (diff <= 0) {
+      el.innerHTML = '<span style="font-family:var(--font-d);color:var(--yellow);font-size:20px;letter-spacing:.04em">KICK OFF</span>';
+      return;
+    }
     var d = Math.floor(diff/86400000);
     var h = Math.floor((diff%86400000)/3600000);
     var m = Math.floor((diff%3600000)/60000);
     var s = Math.floor((diff%60000)/1000);
+    el.style.display = 'flex';
     el.innerHTML = [d,h,m,s].map(function(v,i) {
       var labels = ['DAYS','HRS','MIN','SEC'];
-      return '<div style="text-align:center;margin-right:12px"><div style="font-family:var(--font-d);font-size:clamp(24px,4vw,40px);letter-spacing:.04em;color:var(--yellow);line-height:1">'+String(v).padStart(2,'0')+'</div><div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--grey);margin-top:2px">'+labels[i]+'</div></div>';
+      return '<div style="text-align:center;margin-right:12px">' +
+        '<div style="font-family:var(--font-d);font-size:clamp(24px,4vw,40px);letter-spacing:.04em;color:var(--yellow);line-height:1">' + String(v).padStart(2,'0') + '</div>' +
+        '<div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--grey);margin-top:2px">' + labels[i] + '</div>' +
+        '</div>';
     }).join('');
-    el.style.display = 'flex';
   }
   tick();
   setInterval(tick, 1000);
