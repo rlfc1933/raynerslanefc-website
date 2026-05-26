@@ -419,6 +419,32 @@ function initComponents(currentPage) {
 
 
 
+
+  // ── PWA / ADD TO HOME SCREEN ──
+  var pwaHead = [
+    '<link rel="manifest" href="/manifest.json">',
+    '<meta name="mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
+    '<meta name="apple-mobile-web-app-title" content="The Lane">',
+    '<link rel="apple-touch-icon" href="/img/badge.png">',
+    '<meta name="theme-color" content="#FFD100">',
+  ];
+  pwaHead.forEach(function(tag) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = tag;
+    var el = tmp.firstChild;
+    if (!document.querySelector('[rel="'+el.getAttribute('rel')+'"]') &&
+        !document.querySelector('[name="'+el.getAttribute('name')+'"]')) {
+      document.head.appendChild(el);
+    }
+  });
+
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  }
+
   // ── COOKIE BANNER ──
   if (!localStorage.getItem('rlfc_cookies_accepted')) {
     var banner = document.createElement('div');
