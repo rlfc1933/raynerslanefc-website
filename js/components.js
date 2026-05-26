@@ -1,3 +1,19 @@
+function toggleMobileNav() {
+  var links = document.getElementById('nav-links');
+  var burger = document.getElementById('nav-burger');
+  if (!links) return;
+  var isOpen = links.getAttribute('data-open') === '1';
+  if (isOpen) {
+    links.setAttribute('data-open','0');
+    links.style.display = 'none';
+    if (burger) burger.setAttribute('data-open','0');
+  } else {
+    links.setAttribute('data-open','1');
+    links.style.cssText = 'display:flex !important;position:fixed;top:var(--nav-h);left:0;right:0;flex-direction:column;background:#0A0A0A;border-bottom:3px solid #FFD100;z-index:9999;padding:0;margin:0;box-shadow:0 8px 32px rgba(0,0,0,.9)';
+    if (burger) burger.setAttribute('data-open','1');
+  }
+}
+
 
 // ── GOOGLE ANALYTICS 4 ──────────────────
 (function() {
