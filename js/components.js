@@ -15,6 +15,12 @@ function toggleMobileNav() {
 }
 
 
+function dismissPWA() {
+  localStorage.setItem('rlfc_pwa_dismissed', '1');
+  var b = document.getElementById('pwa-banner');
+  if (b) b.remove();
+}
+
 function acceptCookies() {
   localStorage.setItem('rlfc_cookies_accepted', '1');
   var b = document.getElementById('cookie-banner');
@@ -443,6 +449,30 @@ function initComponents(currentPage) {
   // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(){});
+  }
+
+
+  // ── PWA INSTALL PROMPT ──
+  var isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  var isAndroid = /android/.test(navigator.userAgent.toLowerCase());
+  var isMobile = isIOS || isAndroid;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  var dismissed = localStorage.getItem('rlfc_pwa_dismissed');
+
+  if (isMobile && !isStandalone && !dismissed) {
+    var banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.style.cssText = 'background:#FFD100;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10001;';
+    var icon = isIOS
+      ? '&#11014; Tap <strong>Share</strong> then <strong>Add to Home Screen</strong> to install The Lane app'
+      : '&#11014; Tap <strong>Add to Home Screen</strong> to install The Lane app';
+    banner.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+        '<img src="/img/badge.png" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
+        '<div style="font-family:var(--font-c);font-size:12px;font-weight:600;color:#000;letter-spacing:.02em;line-height:1.4">' + icon + '</div>' +
+      '</div>' +
+      '<button onclick="dismissPWA()" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent">✕</button>';
+    document.body.insertBefore(banner, document.body.firstChild);
   }
 
   // ── COOKIE BANNER ──
