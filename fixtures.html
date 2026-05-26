@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fixtures &amp; Results | Rayners Lane FC</title>
+  <meta name="description" content="Rayners Lane FC fixtures, results and league table. Sync to Apple Calendar or Google Calendar. Combined Counties Premier Division North 2026-27.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Override FWP embed colours to match club theme */
+    .fwp-embed-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .fwp-embed-container iframe {
+      display: block;
+      width: 100%;
+      min-height: 600px;
+      border: none;
+      /* Invert + hue-rotate to force dark mode on the widget */
+      filter: invert(1) hue-rotate(180deg) contrast(0.9) brightness(0.95);
+    }
+    .fwp-embed-container iframe img,
+    .fwp-embed-container iframe .badge {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .tab-row { display:flex; gap:2px; margin-bottom:2px; }
+    .tab-btn {
+      flex:1; background:var(--card); border:none; color:var(--grey);
+      font-family:var(--font-c); font-size:13px; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; padding:16px 12px;
+      cursor:pointer; transition:background .2s,color .2s; border-bottom:3px solid transparent;
+    }
+    .tab-btn:hover { color:var(--white); background:var(--card2); }
+    .tab-btn.active { color:var(--yellow); border-bottom-color:var(--yellow); background:var(--card2); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- PAGE HEADER -->
+<div class="page-header" data-title="FIXTURES">
+  <div class="container">
+    <div class="page-header__eyebrow"><span class="label">Combined Counties Premier Division North &middot; Step 5</span></div>
+    <h1 class="page-header__h">Fixtures <span>&amp; Results</span></h1>
+    <p class="page-header__meta">2026-27 Season &middot; Live data via Football Web Pages &amp; FA Full-Time</p>
+  </div>
+    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px">&#9993; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
+</div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- ═══ CALENDAR SYNC ═══ -->
+    <div class="cal-sync" id="calendar">
+      <h2 class="cal-sync__title">Get Fixtures on <span style="color:var(--yellow)">Your Phone</span></h2>
+      <p class="cal-sync__sub">One tap. All fixtures sync automatically — every postponement, rescheduled game and new cup tie updates itself.</p>
+      <div class="cal-sync__btns">
+
+        <a class="cal-btn cal-btn--apple"
+           href="webcal://www.raynerslanefc.co.uk/onewebmedia/rayners_lane_fixtures_full.ics">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          iPhone / Apple Calendar
+        </a>
+
+        <a class="cal-btn cal-btn--google"
+           href="https://calendar.google.com/calendar/r?cid=webcal://www.raynerslanefc.co.uk/onewebmedia/rayners_lane_fixtures_full.ics"
+           target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Android / Google Calendar
+        </a>
+
+        <a class="cal-btn cal-btn--ics"
+           href="https://www.raynerslanefc.co.uk/onewebmedia/rayners_lane_fixtures_full.ics"
+           download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download .ics
+        </a>
+
+      </div>
+      <div style="margin-top:16px;padding:14px 18px;background:rgba(255,209,0,.05);border:1px solid rgba(255,209,0,.12);border-radius:3px">
+        <p style="font-family:var(--font-c);font-size:13px;color:var(--lgrey);letter-spacing:.03em;line-height:1.7">
+          <strong style="color:var(--yellow)">&#128241; iPhone:</strong> Tap "iPhone / Apple Calendar" &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.<br>
+          <strong style="color:var(--yellow)">&#129302; Android:</strong> Tap "Android / Google Calendar" &rarr; sign in &rarr; tap Add. Syncs every few hours.<br>
+          <strong style="color:var(--yellow)">&#128190; Other:</strong> Download the .ics and open with Outlook, Thunderbird etc.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══ LIVE FIXTURES & RESULTS — Football Web Pages ═══ -->
+    <div style="margin-bottom:24px">
+      <span class="label" style="display:block;margin-bottom:8px">Live Data</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:var(--font-d);font-size:clamp(36px,4vw,60px);letter-spacing:.03em">
+          Fixtures, Results <span style="color:var(--yellow)">&amp; Table</span>
+        </h2>
+        <a href="https://www.footballwebpages.co.uk/rayners-lane" target="_blank" rel="noopener"
+           style="font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s"
+           onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--grey)'">
+          Data via Football Web Pages &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="fixtures">Fixtures &amp; Results</button>
+      <button class="tab-btn" data-tab="table">League Table</button>
+      <button class="tab-btn" data-tab="form">Form Guide</button>
+    </div>
+
+    <!-- Fixtures & Results tab -->
+    <div class="tab-panel active" id="tab-fixtures">
+      <div class="fwp-embed-container">
+        <div class="fwp-embed" data-url="rayners-lane/fixtures-results"></div>
+        <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+      </div>
+    </div>
+
+    <!-- League Table tab -->
+    <div class="tab-panel" id="tab-table">
+      <div class="fwp-embed-container">
+        <div class="fwp-embed" data-url="combined-counties-premier-north/league-table"></div>
+      </div>
+    </div>
+
+    <!-- Form Guide tab -->
+    <div class="tab-panel" id="tab-form">
+      <div class="fwp-embed-container">
+        <div class="fwp-embed" data-url="rayners-lane/form-guide"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PITCHERO LINK ═══ -->
+    <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="label" style="margin-bottom:6px">Official Club Platform</div>
+        <p style="font-family:var(--font-c);font-size:15px;font-weight:600;color:var(--lgrey);letter-spacing:.04em">
+          Full match reports, player stats and squad availability on Pitchero
+        </p>
+      </div>
+      <a class="btn btn-outline" href="https://www.pitchero.com/clubs/raynerslanefc/matches" target="_blank" rel="noopener">
+        View on Pitchero &rarr;
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  initComponents("fixtures.html");
+
+  // Tab switching
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-" + target).classList.add("active");
+    });
+  });
+});
+</script>
+</body>
+</html>

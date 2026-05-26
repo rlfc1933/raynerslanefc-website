@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media | Rayners Lane FC</title>
+  <meta name="description" content="Watch Rayners Lane FC highlights, interviews and match videos on our YouTube channel.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .video-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:2px; }
+    .video-card { background:var(--card); cursor:pointer; transition:background .2s; }
+    .video-card:hover { background:var(--card2); }
+    .video-thumb { aspect-ratio:16/9; position:relative; overflow:hidden; }
+    .video-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
+    .video-card:hover .video-thumb img { transform:scale(1.03); }
+    .play-btn { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+    .play-circle { width:56px; height:56px; background:rgba(255,209,0,.9); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .video-body { padding:16px 20px; }
+    .video-title { font-family:var(--font-c); font-size:15px; font-weight:700; color:var(--white); line-height:1.35; margin-bottom:6px; }
+    .video-meta { font-family:var(--font-c); font-size:11px; color:var(--grey); letter-spacing:.06em; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div style="background:var(--black);padding:80px 0 48px;border-bottom:3px solid var(--yellow)">
+  <div class="container">
+    <span class="label" style="display:block;margin-bottom:12px">Watch</span>
+    <h1 style="font-family:var(--font-d);font-size:clamp(56px,9vw,110px);letter-spacing:.02em;line-height:.9;color:var(--white);margin-bottom:16px">
+      THE LANE<br><span style="color:var(--yellow)">MEDIA</span>
+    </h1>
+    <p style="font-family:var(--font-c);font-size:17px;font-weight:500;color:var(--grey);letter-spacing:.04em;margin-bottom:28px">
+      Highlights, interviews and behind the scenes from Tithe Farm.
+    </p>
+    <a href="https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:10px;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:13px 24px;text-decoration:none">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+      Subscribe on YouTube
+    </a>
+  </div>
+</div>
+
+<!-- YouTube Channel Embed -->
+<section class="section">
+  <div class="container">
+    <span class="label" style="display:block;margin-bottom:16px">YouTube Channel</span>
+    <h2 class="section-title" style="margin-bottom:24px">Latest <span>Videos</span></h2>
+    <!-- YouTube channel feed embed -->
+    <div style="background:var(--card);border:1px solid var(--border);overflow:hidden;margin-bottom:2px">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)">@RaynersLaneFCOfficial</span>
+        <a href="https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" rel="noopener"
+           style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)">View Channel &rarr;</a>
+      </div>
+      <!-- Embed the channel page as iframe -->
+      <div style="aspect-ratio:16/9;max-height:420px">
+        <iframe
+          src="https://www.youtube.com/embed?listType=user_uploads&list=UCN6SkwSIRK86x9Wk0AFoydA"
+          style="width:100%;height:100%;border:none;display:block"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          loading="lazy"
+          title="Rayners Lane FC YouTube Channel">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Quick links to gallery and social -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-top:2px">
+      <a href="gallery.html" style="background:var(--card);border:1px solid var(--border);padding:24px;text-decoration:none;transition:background .2s;display:block" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+        <div style="font-size:24px;margin-bottom:10px">📸</div>
+        <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">Photo Gallery</div>
+        <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.06em">Matchday &amp; squad photos</div>
+      </a>
+      <a href="https://instagram.com/raynerslanefc" target="_blank" rel="noopener" style="background:var(--card);border:1px solid var(--border);padding:24px;text-decoration:none;transition:background .2s;display:block" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+        <div style="font-size:24px;margin-bottom:10px">📱</div>
+        <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">Instagram</div>
+        <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.06em">@raynerslanefc</div>
+      </a>
+      <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener" style="background:var(--card);border:1px solid var(--border);padding:24px;text-decoration:none;transition:background .2s;display:block" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+        <div style="font-size:24px;margin-bottom:10px">🐦</div>
+        <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">X / Twitter</div>
+        <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.06em">@RaynersLaneFC</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>initComponents("media.html"));</script>
+</body>
+</html>

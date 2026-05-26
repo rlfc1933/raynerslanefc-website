@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Squad | Rayners Lane FC</title>
+  <meta name="description" content="Rayners Lane FC first team squad. 2026-27 Combined Counties Premier Division North. Manager: Gary Pitt.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .squad-tabs { display:flex; gap:2px; margin-bottom:2px; }
+    .squad-tab-btn {
+      flex:1; background:var(--card); border:none; color:var(--grey);
+      font-family:var(--font-c); font-size:14px; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; padding:18px 16px;
+      cursor:pointer; transition:all .2s; border-bottom:3px solid transparent;
+    }
+    .squad-tab-btn:hover { color:var(--white); background:var(--card2); }
+    .squad-tab-btn.active { color:var(--yellow); border-bottom-color:var(--yellow); background:var(--card2); }
+    .squad-tab-btn .tab-badge {
+      display:inline-block; font-size:10px; font-weight:700;
+      letter-spacing:.12em; padding:2px 7px; border-radius:2px;
+      margin-left:8px; vertical-align:middle;
+    }
+    .tab-badge-sheet { background:rgba(255,209,0,.15); color:var(--yellow); }
+    .tab-badge-live  { background:rgba(34,197,94,.15);  color:#22C55E; }
+    .squad-tab-panel { display:none; }
+    .squad-tab-panel.active { display:block; }
+    .pitchero-frame-wrap {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:3px; overflow:hidden; position:relative;
+    }
+    .pitchero-frame-wrap iframe {
+      display:block; width:100%; min-height:800px; border:none;
+    }
+    .sheet-setup-banner {
+      background:rgba(255,209,0,.07); border:1px solid rgba(255,209,0,.2);
+      border-left:4px solid var(--yellow); padding:20px 24px;
+      margin-bottom:2px; display:none;
+    }
+    .sheet-setup-banner.visible { display:block; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- PAGE HEADER -->
+<div class="page-header" data-title="SQUAD">
+  <div class="container">
+    <div class="page-header__eyebrow">
+      <span class="label">2026-27 Season &middot; Manager: Gary Pitt</span>
+    </div>
+    <h1 class="page-header__h">The <span>Squad</span></h1>
+    <p class="page-header__meta">Combined Counties Premier Division North &middot; Step 5 &middot; Tithe Farm</p>
+  </div>
+    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px">&#9993; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
+</div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Management strip -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px;margin-bottom:48px">
+      <div style="background:var(--green);padding:24px 20px;border-top:3px solid var(--yellow)">
+        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Pete Singh</div>
+        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)">Club Chairman &amp; Owner</div>
+      </div>
+      <div style="background:var(--card);padding:24px 20px;border-top:3px solid var(--yellow)">
+        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Gary Pitt</div>
+        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)">First Team Manager</div>
+      </div>
+      <div style="background:var(--card2);padding:24px 20px;border-top:3px solid var(--border)">
+        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Nigel Hanlon</div>
+        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lgrey)">Vice Chairman</div>
+      </div>
+      <div style="background:var(--card2);padding:24px 20px;border-top:3px solid var(--border)">
+        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Martin Noblett</div>
+        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lgrey)">Club President</div>
+      </div>
+    </div>
+
+    <!-- Trials CTA -->
+    <div style="background:linear-gradient(135deg,var(--green),#0A2014);padding:28px 32px;margin-bottom:40px;border-left:4px solid var(--yellow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="label" style="margin-bottom:6px">&#9917; Summer Trials 2026</div>
+        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em">Wear the Yellow of The Lane?</div>
+        <p style="font-family:var(--font-c);font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.04em;margin-top:4px">Gary Pitt is building The Lane's 2026-27 squad. Wear the yellow. Play for Harrow. Register for trials at Tithe Farm.</p>
+      </div>
+      <a class="btn btn-primary" href="https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html" target="_blank">Register Now</a>
+    </div>
+
+    <!-- Google Sheet setup notice (shown when sheet not connected) -->
+    <div class="sheet-setup-banner" id="sheet-banner">
+      <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">
+        &#9888; Developer Setup Required
+      </div>
+      <p style="font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.7">
+        Player Cards tab needs a Google Sheet connected. See <strong style="color:var(--white)">SETUP-GUIDE.md</strong> 
+        for instructions. Use the <strong style="color:var(--white)">Live Pitchero</strong> tab in the meantime 
+        — it always shows the current squad automatically.
+      </p>
+    </div>
+
+    <!-- ═══ TABS ═══ -->
+    <div class="squad-tabs">
+      <button class="squad-tab-btn active" data-tab="cards">
+        Player Cards
+      </button>
+      <button class="squad-tab-btn" data-tab="pitchero">
+        View on Pitchero
+        <span class="tab-badge tab-badge-live">&#x2197; New Tab</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Styled Player Cards (Google Sheet) -->
+    <div class="squad-tab-panel active" id="tab-cards">
+      <div style="background:var(--card);border:1px solid var(--border);padding:2px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
+
+          <div class="filter-tabs" style="margin:0">
+            <button class="filter-tab active" data-pos="all">All</button>
+            <button class="filter-tab" data-pos="goalkeeper">GK</button>
+            <button class="filter-tab" data-pos="defender">DEF</button>
+            <button class="filter-tab" data-pos="midfielder">MID</button>
+            <button class="filter-tab" data-pos="forward">FWD</button>
+          </div>
+        </div>
+        <div style="padding:2px">
+          <div class="squad-grid" id="squad-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Pitchero Link -->
+    <div class="squad-tab-panel" id="tab-pitchero">
+      <a href="https://www.pitchero.com/clubs/raynerslanefc/teams/259686" target="_blank" rel="noopener"
+         style="display:block;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--yellow);padding:40px;text-decoration:none;transition:background .2s"
+         onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+          <div>
+            <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px">Official Club Platform</div>
+            <div style="font-family:var(--font-d);font-size:clamp(28px,4vw,48px);letter-spacing:.03em;color:var(--white);margin-bottom:10px">View Full Squad on Pitchero</div>
+            <p style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.7;max-width:520px">
+              Full registered squad, player profiles, appearances and stats — all live on the official Rayners Lane FC Pitchero page. Opens in a new tab.
+            </p>
+          </div>
+          <div style="font-family:var(--font-d);font-size:64px;color:var(--yellow);letter-spacing:.02em;flex-shrink:0">&rarr;</div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.5; transform:scale(1.3); }
+}
+</style>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script src="js/squad.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // Tab switching
+  document.querySelectorAll(".squad-tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".squad-tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".squad-tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // Position filter tabs
+  document.querySelectorAll(".filter-tab[data-pos]").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".filter-tab[data-pos]").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      const pos = tab.dataset.pos;
+      document.querySelectorAll(".player-card").forEach(card => {
+        if (pos === "all") {
+          card.style.display = "";
+        } else {
+          const cardPos = card.dataset.pos || "";
+          card.style.display = cardPos.toLowerCase().includes(pos) ? "" : "none";
+        }
+      });
+      // Show/hide position headers
+      document.querySelectorAll(".squad-pos-header").forEach(h => {
+        h.style.display = pos === "all" ? "" : "none";
+      });
+    });
+  });
+
+});
+</script>
+</body>
+</html>

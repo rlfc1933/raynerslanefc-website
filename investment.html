@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment &amp; Sponsorship | Rayners Lane FC</title>
+  <meta name="description" content="Partner with Rayners Lane FC. Shirt sponsorship, pitch-side advertising, matchday packages and commercial investment opportunities. info@raynerslanefc.co.uk">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .invest-hero {
+      background:linear-gradient(135deg,#060E06 0%,var(--green) 50%,#0A1A0A 100%);
+      padding:100px 0 80px; position:relative; overflow:hidden;
+    }
+    .invest-hero::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse at 70% 50%,rgba(255,209,0,.12) 0%,transparent 60%);
+    }
+    .invest-hero-inner { position:relative; z-index:1; }
+    .invest-hero-badge {
+      display:inline-flex; align-items:center; gap:10px;
+      background:var(--yellow); color:var(--black);
+      font-family:var(--font-c); font-size:13px; font-weight:800;
+      letter-spacing:.14em; text-transform:uppercase;
+      padding:8px 20px; margin-bottom:24px;
+    }
+    .tier-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:2px;
+    }
+    .tier-card {
+      background:var(--card); padding:40px 32px;
+      border-top:4px solid var(--border); position:relative;
+      transition:background .2s;
+    }
+    .tier-card:hover { background:var(--card2); }
+    .tier-card.featured { border-top-color:var(--yellow); background:var(--card2); }
+    .tier-card.featured::before {
+      content:'MOST POPULAR'; position:absolute; top:16px; right:16px;
+      font-family:var(--font-c); font-size:9px; font-weight:700;
+      letter-spacing:.16em; color:var(--yellow); border:1px solid var(--yellow);
+      padding:3px 8px;
+    }
+    .tier-name {
+      font-family:var(--font-d); font-size:32px; letter-spacing:.04em;
+      color:var(--white); margin-bottom:8px;
+    }
+    .tier-price {
+      font-family:var(--font-d); font-size:48px; letter-spacing:.02em;
+      color:var(--yellow); line-height:1; margin-bottom:20px;
+    }
+    .tier-price span {
+      font-family:var(--font-c); font-size:16px; font-weight:600;
+      letter-spacing:.06em; color:var(--grey);
+    }
+    .tier-features {
+      list-style:none; display:flex; flex-direction:column; gap:10px;
+      margin-bottom:28px;
+    }
+    .tier-features li {
+      font-family:var(--font-b); font-size:14px; color:var(--lgrey);
+      line-height:1.5; display:flex; align-items:flex-start; gap:10px;
+    }
+    .tier-features li::before {
+      content:"✓"; color:var(--yellow); font-weight:700;
+      flex-shrink:0; margin-top:1px;
+    }
+    .tier-features li.no::before { content:"—"; color:var(--grey); }
+    .reach-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:2px; margin:32px 0;
+    }
+    .reach-stat {
+      background:var(--card); padding:24px 20px; text-align:center;
+    }
+    .reach-num {
+      font-family:var(--font-d); font-size:44px; color:var(--yellow);
+      letter-spacing:.02em; line-height:1;
+    }
+    .reach-lbl {
+      font-family:var(--font-c); font-size:11px; font-weight:600;
+      letter-spacing:.12em; text-transform:uppercase; color:var(--grey);
+      margin-top:6px;
+    }
+    .current-sponsors {
+      display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+      padding:24px 28px; background:var(--card); border:1px solid var(--border);
+      margin-top:48px;
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- HERO -->
+<div class="invest-hero">
+  <div class="container invest-hero-inner">
+    <div class="invest-hero-badge">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Partner with Rayners Lane FC
+    </div>
+    <h1 style="font-family:var(--font-d);font-size:clamp(56px,8vw,120px);letter-spacing:.02em;line-height:.9;color:var(--white);margin-bottom:24px">
+      BACK<br>THE<br><span style="color:var(--yellow)">LANE.</span>
+    </h1>
+    <p style="font-family:var(--font-c);font-size:18px;font-weight:400;color:rgba(255,255,255,.7);letter-spacing:.04em;max-width:480px;line-height:1.6;margin-bottom:40px">
+      The Lane is Harrow's club — 90+ years of football in HA2.
+      Your brand alongside ours means something real to real people in a real community.
+    </p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="mailto:info@raynerslanefc.co.uk?subject=Sponsorship%20Enquiry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email Us Now
+      </a>
+      <a class="btn btn-outline" href="https://www.pitchero.com/clubs/raynerslanefc/news/rayners-lane-fc-202627-commercial-sponsorship-2980361.html" target="_blank">
+        Download Pitch Deck
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- REACH -->
+    <div style="margin-bottom:64px">
+      <span class="label">Your Audience</span>
+      <div class="divider"></div>
+      <h2 class="section-title" style="margin-bottom:8px">Why <span>Rayners Lane?</span></h2>
+      <p style="font-family:var(--font-b);font-size:16px;color:var(--grey);max-width:600px;line-height:1.8;margin-bottom:0">
+        A club embedded in one of London's most diverse communities. Real reach, real people, real loyalty.
+      </p>
+      <div class="reach-grid">
+        <div class="reach-stat">
+          <div class="reach-num">1933</div>
+          <div class="reach-lbl">Year Founded</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">90+</div>
+          <div class="reach-lbl">Years in Harrow</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">5K+</div>
+          <div class="reach-lbl">Social Followers</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">300+</div>
+          <div class="reach-lbl">Match Day Fans</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">18+</div>
+          <div class="reach-lbl">Home Fixtures</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">HA2</div>
+          <div class="reach-lbl">Heart of Harrow</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKAGES -->
+    <span class="label">Sponsorship Packages 2026-27</span>
+    <div class="divider"></div>
+    <h2 class="section-title" style="margin-bottom:40px">Choose Your <span>Package</span></h2>
+
+    <div class="tier-grid">
+
+      <!-- Shirt Sponsor -->
+      <div class="tier-card featured">
+        <div class="tier-name">Shirt Sponsor</div>
+        <div class="tier-price">POA <span>/ season</span></div>
+        <ul class="tier-features">
+          <li>Your logo on the home or away shirt — worn every match</li>
+          <li>Prominent placement on the club website</li>
+          <li>Logo on match day programmes</li>
+          <li>Social media feature and announcement</li>
+          <li>Pitch-side branding at Tithe Farm</li>
+          <li>Hospitality invite to a home fixture</li>
+          <li>Full season — all competitions</li>
+        </ul>
+        <a class="btn btn-primary" href="mailto:info@raynerslanefc.co.uk?subject=Shirt%20Sponsorship%20Enquiry" style="width:100%;justify-content:center">
+          Enquire Now
+        </a>
+      </div>
+
+      <!-- Match Sponsor -->
+      <div class="tier-card">
+        <div class="tier-name">Match Sponsor</div>
+        <div class="tier-price">POA <span>/ match</span></div>
+        <ul class="tier-features">
+          <li>Named sponsor of a chosen home fixture</li>
+          <li>Match ball sponsorship in your name</li>
+          <li>Programme ad for that fixture</li>
+          <li>Pitch-side banner on match day</li>
+          <li>Social media match day feature</li>
+          <li>Hospitality for up to 4 guests</li>
+          <li class="no">Full season placement</li>
+        </ul>
+        <a class="btn btn-outline" href="mailto:info@raynerslanefc.co.uk?subject=Match%20Sponsorship%20Enquiry" style="width:100%;justify-content:center">
+          Enquire Now
+        </a>
+      </div>
+
+      <!-- Player Sponsor -->
+      <div class="tier-card">
+        <div class="tier-name">Player Sponsor</div>
+        <div class="tier-price">POA <span>/ season</span></div>
+        <ul class="tier-features">
+          <li>Sponsor a named first team player</li>
+          <li>Your name on the player's profile page</li>
+          <li>Feature in match day programme</li>
+          <li>Social media player spotlight feature</li>
+          <li>Framed squad photo with your branding</li>
+          <li class="no">Shirt logo placement</li>
+          <li class="no">Pitch-side branding</li>
+        </ul>
+        <a class="btn btn-outline" href="mailto:info@raynerslanefc.co.uk?subject=Player%20Sponsorship%20Enquiry" style="width:100%;justify-content:center">
+          Enquire Now
+        </a>
+      </div>
+
+      <!-- Pitch-side Advertising -->
+      <div class="tier-card">
+        <div class="tier-name">Pitch-side Board</div>
+        <div class="tier-price">POA <span>/ season</span></div>
+        <ul class="tier-features">
+          <li>Your branded board on the Tithe Farm perimeter</li>
+          <li>Visible in all match photography and video</li>
+          <li>Full season placement — all home fixtures</li>
+          <li>Feature on club website sponsors section</li>
+          <li class="no">Shirt placement</li>
+          <li class="no">Programme advertising</li>
+          <li class="no">Hospitality</li>
+        </ul>
+        <a class="btn btn-outline" href="mailto:info@raynerslanefc.co.uk?subject=Pitch-side%20Board%20Enquiry" style="width:100%;justify-content:center">
+          Enquire Now
+        </a>
+      </div>
+
+      <!-- Programme Ad -->
+      <div class="tier-card">
+        <div class="tier-name">Programme Ad</div>
+        <div class="tier-price">POA <span>/ season</span></div>
+        <ul class="tier-features">
+          <li>Full or half page ad in every home programme</li>
+          <li>Your brand in front of every match day attendee</li>
+          <li>Digital version on the website programme page</li>
+          <li class="no">Pitch-side branding</li>
+          <li class="no">Social media feature</li>
+          <li class="no">Shirt placement</li>
+          <li class="no">Hospitality</li>
+        </ul>
+        <a class="btn btn-outline" href="mailto:info@raynerslanefc.co.uk?subject=Programme%20Ad%20Enquiry" style="width:100%;justify-content:center">
+          Enquire Now
+        </a>
+      </div>
+
+      <!-- Bespoke -->
+      <div class="tier-card" style="background:linear-gradient(160deg,var(--green),#060E06);border-top-color:var(--yellow)">
+        <div class="tier-name">Bespoke Package</div>
+        <div class="tier-price" style="font-size:36px">Let's Talk</div>
+        <p style="font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:28px">
+          Have something different in mind? We're open to creative partnerships. 
+          Community initiatives, kit deals, ground naming rights — get in touch and let's build something together.
+        </p>
+        <a class="btn btn-primary" href="mailto:info@raynerslanefc.co.uk?subject=Bespoke%20Partnership%20Enquiry" style="width:100%;justify-content:center">
+          Start the Conversation
+        </a>
+      </div>
+
+    </div>
+
+    <!-- CURRENT SPONSORS -->
+    <div class="current-sponsors">
+      <div>
+        <span class="label-grey">2026-27 Club Partners</span>
+        <div style="font-family:var(--font-d);font-size:24px;letter-spacing:.04em;color:var(--white);margin-top:6px">Our Current Sponsors</div>
+      </div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-left:auto">
+        <div style="background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase">
+          Hanlon Dry Lining<br><span style="color:var(--grey);font-weight:400;font-size:10px">Home Shirt Sponsor</span>
+        </div>
+        <a href="https://harrow.mccaffertysbars.com/" target="_blank" style="background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase">
+          McCafferty's Bar<br><span style="color:var(--grey);font-weight:400;font-size:10px">Away Shirt Sponsor</span>
+        </a>
+        <a href="https://www.higginson.co.uk/" target="_blank" style="background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase">
+          Higginson Stairs<br><span style="color:var(--grey);font-weight:400;font-size:10px">Programme Sponsor</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="margin-top:48px;text-align:center;padding:64px 32px;background:linear-gradient(135deg,var(--green),#060E06);position:relative;overflow:hidden">
+      <div style="font-family:var(--font-d);font-size:160px;color:rgba(255,255,255,.03);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none">RLFC</div>
+      <div style="position:relative;z-index:1">
+        <h2 style="font-family:var(--font-d);font-size:clamp(36px,5vw,64px);letter-spacing:.03em;color:var(--white);margin-bottom:16px">
+          Ready to Back the Lane?
+        </h2>
+        <p style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.6);letter-spacing:.04em;max-width:480px;margin:0 auto 32px;line-height:1.7">
+          All enquiries to Pete Singh and the commercial team. We'll get back to you within 48 hours.
+        </p>
+        <a class="btn btn-primary" href="mailto:info@raynerslanefc.co.uk?subject=Sponsorship%20Enquiry" style="font-size:15px;padding:16px 36px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          info@raynerslanefc.co.uk
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>document.addEventListener("DOMContentLoaded", () => initComponents("investment.html"));</script>
+</body>
+</html>

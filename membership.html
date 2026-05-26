@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership | Rayners Lane FC</title>
+  <meta name="description" content="Become a Rayners Lane FC member. Season tickets, supporter memberships and more. Be part of The Lane.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .tier-card { background:var(--card); border:1px solid var(--border); padding:36px 28px; position:relative; transition:transform .2s; }
+    .tier-card:hover { transform:translateY(-4px); }
+    .tier-card.featured { background:linear-gradient(160deg,var(--green),#060E06); border-color:var(--yellow); border-width:2px; }
+    .tier-price { font-family:var(--font-d); font-size:72px; letter-spacing:.02em; line-height:1; color:var(--yellow); }
+    .tier-period { font-family:var(--font-c); font-size:14px; color:var(--grey); letter-spacing:.08em; }
+    .tier-feature { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-family:var(--font-b); font-size:14px; color:var(--lgrey); line-height:1.5; }
+    .tier-check { color:var(--yellow); font-weight:700; flex-shrink:0; margin-top:1px; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- Hero -->
+<div style="background:var(--black);padding:80px 0 56px;border-bottom:3px solid var(--yellow)">
+  <div class="container">
+    <span class="label" style="display:block;margin-bottom:12px">2026-27 Season</span>
+    <h1 style="font-family:var(--font-d);font-size:clamp(56px,9vw,110px);letter-spacing:.02em;line-height:.9;color:var(--white);margin-bottom:16px">
+      BECOME<br><span style="color:var(--yellow)">A MEMBER</span>
+    </h1>
+    <p style="font-family:var(--font-c);font-size:18px;font-weight:500;color:var(--grey);letter-spacing:.04em;max-width:500px">
+      Back The Lane for a full season. Save money, get exclusive benefits and be part of something special at Tithe Farm.
+    </p>
+  </div>
+</div>
+
+<!-- Tiers -->
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2px;margin-bottom:48px">
+
+      <!-- Supporter -->
+      <div class="tier-card">
+        <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px">Supporter</div>
+        <div class="tier-price">£40</div>
+        <div class="tier-period">per season</div>
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Official membership card &amp; badge</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> 10% off match day admission</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Club newsletter</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Name in match day programme</div>
+        <div style="height:20px"></div>
+        <a href="#register" style="display:block;text-align:center;background:var(--card2);border:1px solid var(--border);color:var(--white);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:13px;text-decoration:none">
+          Register Interest
+        </a>
+      </div>
+
+      <!-- Season Ticket - Featured -->
+      <div class="tier-card featured">
+        <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:4px 14px;white-space:nowrap">Most Popular</div>
+        <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px">Season Ticket</div>
+        <div class="tier-price">£120</div>
+        <div class="tier-period">per season · Save £70+</div>
+        <div style="height:1px;background:rgba(255,255,255,.1);margin:20px 0"></div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> All home league admissions included</div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> Priority seating</div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> Membership card, badge &amp; scarf</div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> Name in every match day programme</div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> 15% off club shop</div>
+        <div class="tier-feature" style="border-color:rgba(255,255,255,.08)"><span class="tier-check">✓</span> Exclusive pre-season event invite</div>
+        <div style="height:20px"></div>
+        <a href="#register" style="display:block;text-align:center;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:13px;text-decoration:none">
+          Register Interest
+        </a>
+      </div>
+
+      <!-- Club 1933 -->
+      <div class="tier-card">
+        <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px">Club 1933</div>
+        <div class="tier-price">£250</div>
+        <div class="tier-period">per season</div>
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Everything in Season Ticket</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Home &amp; away kit included</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Personalised kit with name/number</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Invite to Chairman's end of season dinner</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> Meet the manager &amp; players</div>
+        <div class="tier-feature"><span class="tier-check">✓</span> 20% off club shop all season</div>
+        <div style="height:20px"></div>
+        <a href="#register" style="display:block;text-align:center;background:var(--card2);border:1px solid var(--border);color:var(--white);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:13px;text-decoration:none">
+          Register Interest
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Register Interest Form -->
+    <div id="register" style="max-width:600px;margin:0 auto;scroll-margin-top:80px">
+      <div style="text-align:center;margin-bottom:32px">
+        <h2 style="font-family:var(--font-d);font-size:clamp(32px,5vw,52px);letter-spacing:.04em;color:var(--white);margin-bottom:8px">Register Your <span style="color:var(--yellow)">Interest</span></h2>
+        <p style="font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em">2026-27 memberships open soon. Register now and you'll be first to know when they go on sale.</p>
+      </div>
+      <form name="membership" method="POST" data-netlify="true" style="display:flex;flex-direction:column;gap:14px">
+        <input type="hidden" name="form-name" value="membership">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Full Name</label>
+            <input type="text" name="name" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="Your name">
+          </div>
+          <div>
+            <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Email</label>
+            <input type="email" name="email" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="your@email.com">
+          </div>
+        </div>
+        <div>
+          <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Membership Type</label>
+          <select name="tier" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none">
+            <option value="">Select...</option>
+            <option>Supporter (£40)</option>
+            <option>Season Ticket (£120)</option>
+            <option>Club 1933 (£250)</option>
+          </select>
+        </div>
+        <button type="submit" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:15px;border:none;cursor:pointer">
+          Register My Interest
+        </button>
+        <p style="font-family:var(--font-c);font-size:12px;color:var(--grey);text-align:center;letter-spacing:.04em">No payment required now. We'll contact you when memberships go on sale.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>initComponents("membership.html"));</script>
+</body>
+</html>

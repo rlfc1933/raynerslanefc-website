@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Day Programme | Rayners Lane FC</title>
+  <meta name="description" content="Rayners Lane FC official match day programme. Squad, manager notes, fixtures and league table.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── MAGAZINE STYLES ── */
+    :root { --prog-yellow:#FFD100; --prog-green:#1A5C32; }
+
+    /* Cover - full viewport magazine cover */
+    .prog-cover-wrap {
+      min-height:100svh; background:var(--black);
+      display:flex; flex-direction:column;
+      position:relative; overflow:hidden;
+    }
+    .prog-cover-bg {
+      position:absolute; inset:0;
+      background:linear-gradient(160deg,#060E08 0%,#0A0A0A 40%,#0A1A10 100%);
+    }
+    .prog-cover-pitch {
+      position:absolute; inset:0; opacity:0.07;
+      background-image:
+        linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+      background-size:80px 80px;
+    }
+    .prog-cover-glow {
+      position:absolute; top:-20%; left:50%; transform:translateX(-50%);
+      width:800px; height:600px;
+      background:radial-gradient(ellipse,rgba(255,209,0,.12) 0%,transparent 70%);
+    }
+    .prog-cover-content {
+      position:relative; z-index:2; flex:1;
+      display:flex; flex-direction:column;
+    }
+    /* Cover top bar */
+    .prog-cover-topbar {
+      background:var(--yellow); padding:10px 40px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .prog-cover-topbar-left {
+      font-family:var(--font-d); font-size:14px; letter-spacing:.12em; color:var(--black);
+    }
+    .prog-cover-topbar-right {
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:rgba(0,0,0,.6);
+    }
+    /* Cover main area */
+    .prog-cover-main {
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:40px 40px 20px; gap:0;
+    }
+    /* Competition label */
+    .prog-comp-label {
+      font-family:var(--font-c); font-size:12px; font-weight:700;
+      letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(255,255,255,.4); margin-bottom:32px;
+    }
+    /* VS block */
+    .prog-vs-block {
+      display:grid; grid-template-columns:1fr auto 1fr;
+      align-items:center; gap:32px; width:100%; max-width:900px;
+    }
+    .prog-team-block { display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .prog-team-badge {
+      width:140px; height:140px; object-fit:contain;
+      filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));
+    }
+    .prog-team-name {
+      font-family:var(--font-d); font-size:clamp(18px,2.5vw,28px);
+      letter-spacing:.06em; color:var(--white); text-align:center;
+      line-height:1.1;
+    }
+    .prog-vs-center {
+      text-align:center;
+    }
+    .prog-vs-text {
+      font-family:var(--font-d); font-size:clamp(80px,12vw,160px);
+      letter-spacing:-.02em; color:var(--yellow); line-height:1;
+    }
+    .prog-vs-divider {
+      width:2px; height:100px; background:rgba(255,209,0,.2);
+      margin:0 auto 8px;
+    }
+    /* Cover date bar */
+    .prog-cover-datebar {
+      background:rgba(255,255,255,.04); border-top:1px solid rgba(255,255,255,.08);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      padding:16px 40px;
+      display:flex; align-items:center; justify-content:center; gap:32px;
+      flex-wrap:wrap;
+    }
+    .prog-cover-detail {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+    }
+    .prog-cover-detail-label {
+      font-family:var(--font-c); font-size:9px; font-weight:700;
+      letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.3);
+    }
+    .prog-cover-detail-val {
+      font-family:var(--font-c); font-size:15px; font-weight:700;
+      letter-spacing:.06em; color:var(--white);
+    }
+    /* Cover bottom bar */
+    .prog-cover-bottom {
+      background:var(--green); padding:14px 40px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-top:3px solid var(--yellow);
+    }
+    .prog-cover-bottom-brand {
+      display:flex; align-items:center; gap:12px;
+    }
+    .prog-cover-bottom-badge {
+      width:36px; height:36px; object-fit:contain;
+    }
+    .prog-cover-bottom-name {
+      font-family:var(--font-d); font-size:20px;
+      letter-spacing:.06em; color:white;
+    }
+    .prog-cover-bottom-social {
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.6);
+    }
+    /* Scroll indicator */
+    .prog-scroll-hint {
+      position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+      z-index:3; display:flex; flex-direction:column; align-items:center; gap:6px;
+      animation:bounce 2s infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+    .prog-scroll-hint span {
+      font-family:var(--font-c); font-size:10px; font-weight:700;
+      letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.3);
+    }
+
+    /* ── MAGAZINE BODY ── */
+    .prog-magazine { background:var(--black); }
+
+    /* Section header - magazine style */
+    .mag-section {
+      padding:64px 0; border-bottom:1px solid var(--border);
+    }
+    .mag-section:last-child { border-bottom:none; }
+    .mag-section-inner { max-width:1340px; margin:0 auto; padding:0 40px; }
+
+    .mag-label {
+      font-family:var(--font-c); font-size:10px; font-weight:700;
+      letter-spacing:.22em; text-transform:uppercase; color:var(--yellow);
+      display:block; margin-bottom:8px;
+    }
+    .mag-title {
+      font-family:var(--font-d); font-size:clamp(40px,5vw,72px);
+      letter-spacing:.03em; color:var(--white); line-height:.95;
+      margin-bottom:8px;
+    }
+    .mag-title span { color:var(--yellow); }
+    .mag-rule { width:48px; height:4px; background:var(--yellow); margin:16px 0 28px; }
+    .prog-body-text {
+      font-family:var(--font-b); font-size:17px; color:var(--lgrey);
+      line-height:1.9; margin-bottom:18px; max-width:720px;
+    }
+    .prog-placeholder {
+      font-family:var(--font-b); font-size:16px; color:var(--grey);
+      font-style:italic; line-height:1.8;
+    }
+
+    /* Manager Notes - magazine pull quote */
+    .mag-manager-layout {
+      display:grid; grid-template-columns:260px 1fr; gap:40px; align-items:start;
+    }
+    .mag-manager-card {
+      background:linear-gradient(160deg,var(--green),#060E06);
+      padding:28px; border-top:4px solid var(--yellow);
+    }
+    .mag-manager-name {
+      font-family:var(--font-d); font-size:36px; letter-spacing:.04em;
+      color:var(--white); margin-bottom:6px;
+    }
+    .mag-manager-role {
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--yellow);
+    }
+    .mag-manager-img {
+      width:100%; aspect-ratio:3/4; object-fit:cover;
+      margin-bottom:16px; filter:grayscale(0.3);
+    }
+    .mag-pull-quote {
+      font-family:var(--font-d); font-size:clamp(24px,3vw,40px);
+      letter-spacing:.02em; color:var(--white); line-height:1.2;
+      border-left:5px solid var(--yellow); padding-left:24px;
+      margin-bottom:28px;
+    }
+
+    /* Welcome section - split layout */
+    .mag-welcome-layout {
+      display:grid; grid-template-columns:1fr 1fr; gap:2px;
+    }
+    .mag-welcome-left {
+      background:var(--card); padding:48px 40px;
+    }
+    .mag-welcome-right {
+      background:var(--green); padding:48px 40px;
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; text-align:center; gap:20px;
+    }
+    .mag-opp-logo {
+      width:120px; height:120px; object-fit:contain;
+      filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
+    }
+    .mag-opp-name {
+      font-family:var(--font-d); font-size:36px; letter-spacing:.04em;
+      color:var(--white); line-height:1.1;
+    }
+
+    /* Squad - magazine grid */
+    .squad-pos-block { margin-bottom:32px; }
+    .squad-pos-label {
+      font-family:var(--font-c); font-size:10px; font-weight:700;
+      letter-spacing:.2em; text-transform:uppercase; color:var(--yellow);
+      border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:10px;
+    }
+    .squad-player-row {
+      display:flex; align-items:center; gap:14px;
+      padding:8px 14px; margin-bottom:2px;
+      background:rgba(255,255,255,.02); transition:background .15s;
+    }
+    .squad-player-row:hover { background:rgba(255,255,255,.05); }
+    .squad-player-num {
+      font-family:var(--font-d); font-size:28px; color:rgba(255,209,0,.4);
+      width:36px; text-align:right; flex-shrink:0; line-height:1;
+    }
+    .squad-player-name {
+      font-family:var(--font-c); font-size:16px; font-weight:800;
+      letter-spacing:.04em; color:var(--white); flex:1;
+    }
+    .squad-player-pos {
+      font-family:var(--font-c); font-size:10px; font-weight:600;
+      letter-spacing:.12em; text-transform:uppercase; color:var(--grey);
+    }
+    .mag-squad-layout {
+      display:grid; grid-template-columns:1fr 1fr; gap:32px;
+    }
+
+    /* Sponsors - double page style */
+    .mag-sponsors-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+      gap:2px; margin-bottom:24px;
+    }
+    .mag-sponsor-card {
+      background:var(--card); padding:40px 32px; text-align:center;
+      border-top:4px solid var(--border); transition:background .2s;
+    }
+    .mag-sponsor-card:hover { background:var(--card2); }
+    .mag-sponsor-card.featured { border-top-color:var(--yellow); }
+    .mag-sponsor-logo {
+      font-family:var(--font-d); font-size:28px; letter-spacing:.04em;
+      color:var(--white); margin-bottom:8px;
+    }
+    .mag-sponsor-role {
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--yellow);
+      margin-bottom:8px;
+    }
+    .mag-sponsor-note {
+      font-family:var(--font-b); font-size:13px; color:var(--grey); line-height:1.5;
+    }
+    .mag-sponsor-cta {
+      background:linear-gradient(135deg,var(--green),#060E06);
+      padding:40px; text-align:center; border-top:3px solid var(--yellow);
+    }
+
+    /* FWP embed magazine wrapper */
+    .mag-fwp-wrap {
+      background:var(--card); border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .mag-fwp-header {
+      background:var(--card2); border-bottom:1px solid var(--border);
+      padding:14px 20px;
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--grey);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+
+    /* Chairman block */
+    .mag-chairman {
+      background:var(--dark); border:1px solid var(--border);
+      border-left:6px solid var(--yellow); padding:40px 48px;
+    }
+    .mag-chairman-quote {
+      font-family:var(--font-d); font-size:clamp(24px,3vw,42px);
+      letter-spacing:.02em; color:var(--white); line-height:1.15;
+      margin-bottom:20px;
+    }
+    .mag-chairman-quote em { color:var(--yellow); font-style:normal; }
+
+    @media(max-width:768px) {
+      .prog-vs-block { grid-template-columns:1fr; gap:20px; }
+      .prog-vs-center { order:-1; }
+      .prog-vs-text { font-size:80px; }
+      .prog-team-badge { width:100px; height:100px; }
+      .mag-manager-layout { grid-template-columns:1fr; }
+      .mag-welcome-layout { grid-template-columns:1fr; }
+      .mag-squad-layout { grid-template-columns:1fr; }
+      .mag-section-inner { padding:0 20px; }
+      .prog-cover-topbar, .prog-cover-datebar,
+      .prog-cover-bottom, .prog-cover-main { padding-left:20px; padding-right:20px; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- ══════════════════════════════════════
+     MAGAZINE COVER — Full viewport
+═══════════════════════════════════════ -->
+<div class="prog-cover-wrap">
+  <div class="prog-cover-bg"></div>
+  <div class="prog-cover-pitch"></div>
+  <div class="prog-cover-glow"></div>
+
+  <div class="prog-cover-content">
+
+    <!-- Top yellow bar -->
+    <div class="prog-cover-topbar">
+      <span class="prog-cover-topbar-left">RAYNERS LANE FC &middot; OFFICIAL MATCH DAY PROGRAMME</span>
+      <span class="prog-cover-topbar-right">Tithe Farm Social Club &middot; Harrow &middot; HA2 0XH</span>
+    </div>
+
+    <!-- Main cover area -->
+    <div class="prog-cover-main">
+      <div class="prog-comp-label" id="prog-competition">Combined Counties Premier Division North</div>
+
+      <!-- VS block -->
+      <div class="prog-vs-block">
+
+        <!-- Home team -->
+        <div class="prog-team-block">
+          <img src="img/badge.png" alt="Rayners Lane FC" class="prog-team-badge">
+          <div class="prog-team-name">RAYNERS LANE FC</div>
+        </div>
+
+        <!-- VS -->
+        <div class="prog-vs-center">
+          <div class="prog-vs-divider"></div>
+          <div class="prog-vs-text">VS</div>
+        </div>
+
+        <!-- Away team -->
+        <div class="prog-team-block">
+          <img id="prog-opp-logo" src="img/badge.png" alt="Opposition" class="prog-team-badge"
+               style="filter:grayscale(1) brightness(.4)">
+          <div class="prog-team-name" id="prog-opp-name">Loading...</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Date / competition bar -->
+    <div class="prog-cover-datebar">
+      <div class="prog-cover-detail">
+        <span class="prog-cover-detail-label">Date</span>
+        <span class="prog-cover-detail-val" id="prog-match-date">2026-27 Season</span>
+      </div>
+      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
+      <div class="prog-cover-detail">
+        <span class="prog-cover-detail-label">Venue</span>
+        <span class="prog-cover-detail-val">Tithe Farm Social Club</span>
+      </div>
+      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
+      <div class="prog-cover-detail">
+        <span class="prog-cover-detail-label">Competition</span>
+        <span class="prog-cover-detail-val">CCL Premier Div North</span>
+      </div>
+      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
+      <div class="prog-cover-detail">
+        <span class="prog-cover-detail-label">Kick-off</span>
+        <span class="prog-cover-detail-val">3:00 PM</span>
+      </div>
+    </div>
+
+    <!-- Bottom green bar -->
+    <div class="prog-cover-bottom">
+      <div class="prog-cover-bottom-brand">
+        <img src="img/badge.png" alt="RLFC" class="prog-cover-bottom-badge">
+        <span class="prog-cover-bottom-name">THE LANE</span>
+      </div>
+      <span class="prog-cover-bottom-social">Follow @RaynersLaneFC for live updates</span>
+    </div>
+
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="prog-scroll-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" width="20" height="20"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    <span>Read the programme</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAGAZINE BODY
+═══════════════════════════════════════ -->
+<div class="prog-magazine">
+
+  <!-- ── CHAIRMAN MESSAGE ── -->
+  <div class="mag-section" style="background:var(--dark)">
+    <div class="mag-section-inner">
+      <div class="mag-chairman">
+        <span class="mag-label">From the Chairman</span>
+        <div class="mag-chairman-quote">
+          "Welcome to Tithe Farm.<br>
+          <em>This is The Lane.</em>"
+        </div>
+        <div class="prog-body-text">
+          Whether you're a lifelong supporter or visiting for the first time today — thank you for being here.
+          This club belongs to Harrow. It always has. It always will. Enjoy the match.
+        </div>
+        <div style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-top:16px">
+          Pete Singh &mdash; Club Chairman &amp; Owner
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MANAGER NOTES ── -->
+  <div class="mag-section">
+    <div class="mag-section-inner">
+      <span class="mag-label">From the Dugout</span>
+      <div class="mag-title">The <span>Gaffer</span> Speaks</div>
+      <div class="mag-rule"></div>
+      <div class="mag-manager-layout">
+        <div>
+          <div class="mag-manager-card">
+            <img src="img/players/player-mid-2.svg" alt="Manager" class="mag-manager-img">
+            <div class="mag-manager-name">Gary Pitt</div>
+            <div class="mag-manager-role">First Team Manager</div>
+          </div>
+        </div>
+        <div>
+          <div class="mag-pull-quote" id="prog-vs-text">vs <span id="prog-vs-text-inner">Today's Opponents</span></div>
+          <div id="prog-manager-notes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WELCOME OPPOSITION ── -->
+  <div class="mag-section" style="padding:0">
+    <div class="mag-welcome-layout">
+      <div class="mag-welcome-left">
+        <span class="mag-label">Welcome</span>
+        <div class="mag-title" style="font-size:clamp(32px,4vw,56px)">
+          Welcome to<br><span id="prog-welcome-team">Our Guests</span>
+        </div>
+        <div class="mag-rule"></div>
+        <div id="prog-welcome-notes"></div>
+      </div>
+      <div class="mag-welcome-right">
+        <img id="prog-opp-logo-2" src="img/badge.png" alt="Opposition" class="mag-opp-logo"
+             style="filter:grayscale(1) brightness(.4)">
+        <div class="mag-opp-name" id="prog-opp-name-2">Loading...</div>
+        <div style="font-family:var(--font-c);font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.08em">
+          Today's visitors
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MATCH PREVIEW ── -->
+  <div class="mag-section">
+    <div class="mag-section-inner">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+        <div>
+          <span class="mag-label">Preview</span>
+          <div class="mag-title" style="font-size:clamp(30px,3.5vw,52px)">What We're<br><span>Looking Forward To</span></div>
+          <div class="mag-rule"></div>
+          <div id="prog-looking-forward"></div>
+        </div>
+        <div>
+          <span class="mag-label">History</span>
+          <div class="mag-title" style="font-size:clamp(30px,3.5vw,52px)">Head <span>to Head</span></div>
+          <div class="mag-rule"></div>
+          <div id="prog-h2h-notes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── THE SQUAD ── -->
+  <div class="mag-section" style="background:var(--dark)">
+    <div class="mag-section-inner">
+      <span class="mag-label">2026-27 First Team</span>
+      <div class="mag-title">The <span>Squad</span></div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:4px">
+        <div class="mag-rule" style="margin:0"></div>
+        <span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Manager: Gary Pitt</span>
+      </div>
+      <div style="height:16px"></div>
+
+      <!-- Player illustration strip -->
+      <div style="display:flex;gap:2px;margin-bottom:32px;overflow:hidden;height:200px">
+        <img src="img/players/player-gk-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+        <img src="img/players/player-def-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+        <img src="img/players/player-mid-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+        <img src="img/players/player-mid-2.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+        <img src="img/players/player-forward-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+        <img src="img/players/player-forward-2.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
+      </div>
+
+      <div class="mag-squad-layout" id="prog-squad-grid">
+        <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em">Loading squad...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEAGUE TABLE ── -->
+  <div class="mag-section">
+    <div class="mag-section-inner">
+      <span class="mag-label">2026-27 Season</span>
+      <div class="mag-title">League <span>Table</span></div>
+      <div class="mag-rule"></div>
+      <div class="mag-fwp-wrap">
+        <div class="mag-fwp-header">
+          <span>Combined Counties Premier Division North</span>
+          <span style="color:var(--yellow)">&#x25CF; Live Data</span>
+        </div>
+        <div class="fwp-embed" data-url="combined-counties-premier-north/league-table"></div>
+        <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FIXTURES ── -->
+  <div class="mag-section" style="background:var(--dark)">
+    <div class="mag-section-inner">
+      <span class="mag-label">Coming Up</span>
+      <div class="mag-title">Fixtures <span>&amp; Results</span></div>
+      <div class="mag-rule"></div>
+      <div class="mag-fwp-wrap">
+        <div class="mag-fwp-header">
+          <span>Rayners Lane FC — All Competitions</span>
+          <a href="fixtures.html" style="color:var(--yellow);font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sync to Phone &rarr;</a>
+        </div>
+        <div class="fwp-embed" data-url="rayners-lane/fixtures-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SPONSORS ── -->
+  <div class="mag-section">
+    <div class="mag-section-inner">
+      <span class="mag-label">Club Partners 2026-27</span>
+      <div class="mag-title">Our <span>Sponsors</span></div>
+      <div class="mag-rule"></div>
+      <div class="mag-sponsors-grid">
+        <div class="mag-sponsor-card featured">
+          <div class="mag-sponsor-logo">Hanlon Dry Lining</div>
+          <div class="mag-sponsor-role">Home Shirt Sponsor</div>
+          <div class="mag-sponsor-note">Nigel Hanlon — Vice Chairman<br>Proud to back The Lane</div>
+        </div>
+        <a href="https://harrow.mccaffertysbars.com/" target="_blank" rel="noopener" style="text-decoration:none" class="mag-sponsor-card">
+          <div class="mag-sponsor-logo">McCafferty's Bar</div>
+          <div class="mag-sponsor-role">Away Shirt Sponsor</div>
+          <div class="mag-sponsor-note">Harrow's favourite bar.<br>harrow.mccaffertysbars.com</div>
+        </a>
+        <a href="https://www.higginson.co.uk/" target="_blank" rel="noopener" style="text-decoration:none" class="mag-sponsor-card">
+          <div class="mag-sponsor-logo">Higginson Stairs</div>
+          <div class="mag-sponsor-role">Programme Sponsor</div>
+          <div class="mag-sponsor-note">Quality staircases.<br>higginson.co.uk</div>
+        </a>
+      </div>
+      <!-- Become a sponsor -->
+      <div class="mag-sponsor-cta">
+        <div style="font-family:var(--font-d);font-size:clamp(28px,4vw,52px);letter-spacing:.03em;color:var(--white);margin-bottom:12px">
+          Want Your Brand Here?
+        </div>
+        <p style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.5);letter-spacing:.04em;max-width:480px;margin:0 auto 24px;line-height:1.6">
+          Shirt sponsorship, match sponsorship, pitch-side boards, programme ads.
+          Multiple packages available for 2026-27.
+        </p>
+        <a href="mailto:info@raynerslanefc.co.uk?subject=Sponsorship%20Enquiry"
+           style="display:inline-flex;align-items:center;gap:10px;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:14px 32px;text-decoration:none;transition:opacity .2s"
+           onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          info@raynerslanefc.co.uk
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOLLOW THE LANE ── -->
+  <div class="mag-section" style="background:linear-gradient(160deg,var(--green),#060E06);border-bottom:none">
+    <div class="mag-section-inner" style="text-align:center">
+      <img src="img/badge.png" alt="Rayners Lane FC" style="width:80px;height:80px;object-fit:contain;margin:0 auto 20px;display:block">
+      <div style="font-family:var(--font-d);font-size:clamp(36px,5vw,64px);letter-spacing:.03em;color:var(--white);margin-bottom:12px">
+        The Lane. Est. 1933.
+      </div>
+      <div style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.5);letter-spacing:.06em;margin-bottom:32px">
+        Yellow first. Harrow always.
+      </div>
+      <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
+        <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          @RaynersLaneFC
+        </a>
+        <a href="https://instagram.com/raynerslanefc" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          @raynerslanefc
+        </a>
+        <a href="fixtures.html" style="display:flex;align-items:center;gap:10px;background:var(--yellow);border:1px solid var(--yellow);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--black);text-decoration:none">
+          Sync Fixtures to Phone
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script src="js/programme.js"></script>
+<script>
+  // Sync opp logo and name to both cover locations
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver(() => {
+      const logo1 = document.getElementById('prog-opp-logo');
+      const logo2 = document.getElementById('prog-opp-logo-2');
+      const name1 = document.getElementById('prog-opp-name');
+      const name2 = document.getElementById('prog-opp-name-2');
+      if (logo1 && logo2) { logo2.src = logo1.src; logo2.style.filter = logo1.style.filter; }
+      if (name1 && name2) name2.textContent = name1.textContent;
+    });
+    const logo1 = document.getElementById('prog-opp-logo');
+    const name1 = document.getElementById('prog-opp-name');
+    if (logo1) observer.observe(logo1, { attributes:true });
+    if (name1) observer.observe(name1, { childList:true, characterData:true, subtree:true });
+  });
+</script>
+</body>
+</html>

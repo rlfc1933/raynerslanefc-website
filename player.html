@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Profile | Rayners Lane FC</title>
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .player-hero { background:var(--black); min-height:420px; display:grid; grid-template-columns:360px 1fr; overflow:hidden; border-bottom:3px solid var(--yellow); }
+    .player-hero-img { position:relative; overflow:hidden; background:linear-gradient(160deg,var(--green),#060E08); display:flex; align-items:flex-end; justify-content:center; }
+    .player-hero-img img { width:100%; height:100%; object-fit:cover; object-position:top; }
+    .player-hero-img .player-number { position:absolute; top:-20px; right:-10px; font-family:var(--font-d); font-size:200px; color:rgba(255,209,0,.08); line-height:1; }
+    .player-hero-info { padding:48px 40px; display:flex; flex-direction:column; justify-content:flex-end; }
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:2px; margin-top:32px; }
+    .stat-card { background:var(--card); padding:20px; text-align:center; }
+    .stat-num { font-family:var(--font-d); font-size:48px; letter-spacing:.04em; color:var(--yellow); line-height:1; }
+    .stat-lbl { font-family:var(--font-c); font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--grey); margin-top:4px; }
+    @media(max-width:768px) { .player-hero { grid-template-columns:1fr; } .player-hero-img { min-height:300px; } .player-hero-info { padding:24px; } }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div id="player-content">
+  <div style="min-height:60vh;display:flex;align-items:center;justify-content:center">
+    <div style="font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.08em">Loading...</div>
+  </div>
+</div>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initComponents('player.html');
+  loadPlayer();
+});
+
+async function loadPlayer() {
+  var id = new URLSearchParams(window.location.search).get('id');
+  if (!id) { window.location.href = 'squad.html'; return; }
+
+  try {
+    var r = await fetch('data/players.json?t=' + Date.now());
+    var d = await r.json();
+    var player = (d.players || []).find(function(p) { return p.id === id; });
+    if (!player) { window.location.href = 'squad.html'; return; }
+    renderPlayer(player);
+  } catch(e) { window.location.href = 'squad.html'; }
+}
+
+function renderPlayer(p) {
+  document.title = (p.name || 'Player') + ' | Rayners Lane FC';
+  var posColour = {Goalkeeper:'#1A5C32',Defender:'#1A3A6E',Midfielder:'#6B3A1F',Forward:'#EF4444'}[p.position] || '#FFD100';
+
+  var html = '<div class="player-hero">' +
+    '<div class="player-hero-img">' +
+      '<div class="player-number">' + (p.number||'') + '</div>' +
+      (p.photo
+        ? '<img src="' + p.photo + '" alt="' + p.name + '">'
+        : '<img src="img/players/player-' + getIllustration(p.position) + '.svg" alt="' + (p.name||'') + '">') +
+    '</div>' +
+    '<div class="player-hero-info">' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
+        '<div style="background:' + posColour + ';font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:white;padding:4px 12px">' + (p.position||'') + '</div>' +
+        (p.nationality ? '<div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">' + p.nationality + '</div>' : '') +
+      '</div>' +
+      '<div style="font-family:var(--font-d);font-size:clamp(48px,7vw,90px);letter-spacing:.03em;color:var(--white);line-height:.9;margin-bottom:8px">' + (p.name||'') + '</div>' +
+      (p.nickname ? '<div style="font-family:var(--font-c);font-size:16px;color:var(--yellow);letter-spacing:.08em;margin-bottom:16px">"' + p.nickname + '"</div>' : '') +
+      (p.bio ? '<div style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.75;max-width:540px">' + p.bio + '</div>' : '') +
+      '<div class="stat-grid">' +
+        statCard(p.apps || 0, 'Appearances') +
+        statCard(p.goals || 0, 'Goals') +
+        statCard(p.assists || 0, 'Assists') +
+        statCard(p.number || '-', 'Squad No.') +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+  '<div style="background:var(--dark);padding:16px 0;border-bottom:1px solid var(--border)">' +
+    '<div class="container"><a href="squad.html" style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">&larr; Back to Squad</a></div>' +
+  '</div>';
+
+  document.getElementById('player-content').innerHTML = html;
+}
+
+function statCard(val, label) {
+  return '<div class="stat-card"><div class="stat-num">' + val + '</div><div class="stat-lbl">' + label + '</div></div>';
+}
+
+function getIllustration(pos) {
+  var m = {Goalkeeper:'gk-1',Defender:'def-1',Midfielder:'mid-1',Forward:'forward-1'};
+  return m[pos] || 'forward-1';
+}
+</script>
+</body>
+</html>

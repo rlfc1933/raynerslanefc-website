@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policies &amp; Legal | Rayners Lane FC</title>
+  <meta name="description" content="Rayners Lane FC club policies including safeguarding, equality, codes of conduct, privacy policy and FA Charter Standard compliance.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .policy-nav {
+      background:var(--card); border:1px solid var(--border);
+      padding:24px 28px; margin-bottom:48px; border-radius:3px;
+    }
+    .policy-nav h3 {
+      font-family:var(--font-c); font-size:11px; font-weight:700;
+      letter-spacing:.18em; text-transform:uppercase; color:var(--yellow);
+      margin-bottom:16px;
+    }
+    .policy-nav ul {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:6px; list-style:none;
+    }
+    .policy-nav li a {
+      font-family:var(--font-c); font-size:14px; font-weight:600;
+      letter-spacing:.04em; color:var(--lgrey); transition:color .2s;
+      display:flex; align-items:center; gap:8px;
+    }
+    .policy-nav li a:hover { color:var(--yellow); }
+    .policy-nav li a::before {
+      content:""; width:4px; height:4px; border-radius:50%;
+      background:var(--yellow); flex-shrink:0;
+    }
+    .policy-section {
+      margin-bottom:64px; scroll-margin-top:90px;
+    }
+    .policy-section h2 {
+      font-family:var(--font-d); font-size:clamp(32px,4vw,52px);
+      letter-spacing:.03em; color:var(--white); margin-bottom:8px;
+    }
+    .policy-section h2 span { color:var(--yellow); }
+    .policy-divider {
+      width:40px; height:3px; background:var(--yellow); margin:12px 0 24px;
+    }
+    .policy-body {
+      font-family:var(--font-b); font-size:15px; color:var(--lgrey);
+      line-height:1.85; max-width:780px;
+    }
+    .policy-body p { margin-bottom:14px; }
+    .policy-body h3 {
+      font-family:var(--font-c); font-size:13px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--white);
+      margin:24px 0 10px;
+    }
+    .policy-body ul {
+      list-style:none; margin-bottom:14px; display:flex;
+      flex-direction:column; gap:6px;
+    }
+    .policy-body ul li {
+      padding-left:20px; position:relative; color:var(--lgrey);
+    }
+    .policy-body ul li::before {
+      content:""; position:absolute; left:0; top:9px;
+      width:6px; height:6px; border-radius:50%;
+      background:var(--yellow); flex-shrink:0;
+    }
+    .policy-body strong { color:var(--white); font-weight:600; }
+    .policy-body a { color:var(--yellow); text-decoration:underline; }
+    .emergency-box {
+      background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3);
+      border-left:4px solid #EF4444; padding:20px 24px;
+      margin:24px 0; border-radius:0 3px 3px 0;
+    }
+    .emergency-box h3 {
+      font-family:var(--font-c); font-size:12px; font-weight:700;
+      letter-spacing:.16em; text-transform:uppercase; color:#EF4444;
+      margin-bottom:10px;
+    }
+    .emergency-box p {
+      font-family:var(--font-b); font-size:14px; color:var(--lgrey);
+      line-height:1.7; margin:0;
+    }
+    .emergency-box strong { color:var(--white); }
+    .info-box {
+      background:rgba(255,209,0,.06); border:1px solid rgba(255,209,0,.2);
+      border-left:4px solid var(--yellow); padding:20px 24px;
+      margin:24px 0; border-radius:0 3px 3px 0;
+    }
+    .info-box p {
+      font-family:var(--font-b); font-size:14px; color:var(--lgrey);
+      line-height:1.7; margin:0;
+    }
+    .policy-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--green); color:rgba(255,255,255,.8);
+      font-family:var(--font-c); font-size:10px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase;
+      padding:4px 10px; border-radius:2px; margin-bottom:12px;
+    }
+    .policy-date {
+      font-family:var(--font-c); font-size:12px; color:var(--grey);
+      letter-spacing:.08em; margin-bottom:20px;
+    }
+    .conduct-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:2px; margin:20px 0;
+    }
+    .conduct-card {
+      background:var(--card); padding:24px 20px;
+      border-top:3px solid var(--border);
+    }
+    .conduct-card.yellow { border-top-color:var(--yellow); }
+    .conduct-card.green  { border-top-color:var(--green-light,#22783F); }
+    .conduct-card h4 {
+      font-family:var(--font-c); font-size:13px; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase; color:var(--yellow);
+      margin-bottom:14px;
+    }
+    .conduct-card ul {
+      list-style:none; display:flex; flex-direction:column; gap:8px;
+    }
+    .conduct-card ul li {
+      font-family:var(--font-b); font-size:13px; color:var(--lgrey);
+      line-height:1.6; padding-left:16px; position:relative;
+    }
+    .conduct-card ul li::before {
+      content:""; position:absolute; left:0; top:8px;
+      width:5px; height:5px; border-radius:50%; background:var(--yellow);
+    }
+    hr.policy-hr {
+      border:none; border-top:1px solid var(--border); margin:56px 0;
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- PAGE HEADER -->
+<div class="page-header" data-title="POLICIES">
+  <div class="container">
+    <div class="page-header__eyebrow">
+      <span class="label">FA Charter Standard Community Club &middot; Middlesex County FA</span>
+    </div>
+    <h1 class="page-header__h">Club <span>Policies</span></h1>
+    <p class="page-header__meta">Rayners Lane FC &middot; Tithe Farm Sports &amp; Social Club LTD &middot; Last reviewed May 2026</p>
+  </div>
+    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px">&#9993; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
+</div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- QUICK NAV -->
+    <div class="policy-nav">
+      <h3>Jump to policy</h3>
+      <ul>
+        <li><a href="#safeguarding">Safeguarding &amp; Child Welfare</a></li>
+        <li><a href="#equality">Equality &amp; Anti-Discrimination</a></li>
+        <li><a href="#antibullying">Anti-Bullying Policy</a></li>
+        <li><a href="#conduct">Codes of Conduct</a></li>
+        <li><a href="#respect">FA Respect Policy</a></li>
+        <li><a href="#photography">Photography &amp; Filming</a></li>
+        <li><a href="#social-media">Social Media Policy</a></li>
+        <li><a href="#health-safety">Health &amp; Safety</a></li>
+        <li><a href="#complaints">Complaints Procedure</a></li>
+        <li><a href="#privacy">Privacy Policy (GDPR)</a></li>
+        <li><a href="#cookies">Cookie Policy</a></li>
+        <li><a href="#accessibility">Accessibility</a></li>
+      </ul>
+    </div>
+
+    <!-- ═══ 1. SAFEGUARDING ═══ -->
+    <div class="policy-section" id="safeguarding">
+      <span class="policy-tag">FA Required</span>
+      <h2>Safeguarding <span>&amp; Child Welfare</span></h2>
+      <div class="policy-divider"></div>
+      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+
+      <div class="emergency-box">
+        <h3>&#9888; If a Child is at Immediate Risk</h3>
+        <p>
+          Call <strong>999</strong> immediately.<br>
+          FA Safeguarding Team: <strong>0800 169 1863</strong><br>
+          NSPCC Helpline: <strong>0808 800 5000</strong><br>
+          Middlesex County FA Welfare Officer: <a href="https://www.middlesexfa.com/about-us/welfare" target="_blank">middlesexfa.com/about-us/welfare</a>
+        </p>
+      </div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC is committed to ensuring the safety and welfare of all children and young people involved in football at our club. As an FA Charter Standard Community Club, we fully endorse and implement The FA's Safeguarding Children Policy and Procedures.</p>
+
+        <h3>Club Welfare Officer</h3>
+        <p>Rayners Lane FC has a designated Club Welfare Officer (CWO) who is responsible for safeguarding matters at the club. The CWO has completed The FA Safeguarding Children Workshop and holds a current FA-Enhanced DBS certificate.</p>
+        <div class="info-box">
+          <p><strong style="color:var(--yellow)">Club Welfare Officer:</strong> Pete Singh (Club Chairman &amp; Owner)<br>Contact: <a href="contact.html">club contact page</a> &middot; Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH</p>
+        </div>
+
+        <h3>Key Principles</h3>
+        <ul>
+          <li>The welfare of the child is, and must always be, the paramount consideration</li>
+          <li>All children and young people have a right to be protected from abuse regardless of age, gender, disability, culture, language, racial origin, religious beliefs or sexual orientation</li>
+          <li>All suspicions and allegations of abuse will be taken seriously and responded to swiftly and appropriately</li>
+          <li>Working in partnership with other organisations, children, young people and their parents/carers is essential</li>
+          <li>All club officials working with children hold a current FA-enhanced DBS certificate</li>
+        </ul>
+
+        <h3>Reporting Concerns</h3>
+        <p>Any adult or young person with concerns about a colleague can contact The FA Safeguarding Team on <strong>0800 169 1863</strong>, or by writing to The FA Case Manager, Wembley Stadium, London HA9 0WS. Concerns can also be reported to the NSPCC on <strong>0808 800 5000</strong>.</p>
+
+        <p>This policy operates in conjunction with The FA Safeguarding Children Policy and Procedures, available at <a href="https://www.thefa.com/football-rules-governance/safeguarding" target="_blank">thefa.com/safeguarding</a>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 2. EQUALITY ═══ -->
+    <div class="policy-section" id="equality">
+      <span class="policy-tag">FA Required</span>
+      <h2>Equality <span>&amp; Anti-Discrimination</span></h2>
+      <div class="policy-divider"></div>
+      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC is committed to promoting equality and opposing all forms of discrimination. The club is responsible for setting standards and values to apply throughout the club at every level.</p>
+
+        <p>Football is for everyone. Rayners Lane FC is committed to ensuring that everyone involved in football — whether as a player, official, volunteer, supporter or spectator — has an equal opportunity to participate, and that no individual is treated less favourably than another on grounds of age, gender, gender reassignment, sexual orientation, marital status, race, nationality, ethnic origin, colour, religion or belief, ability or disability.</p>
+
+        <h3>Commitments</h3>
+        <ul>
+          <li>Rayners Lane FC will not tolerate discriminatory behaviour or language in any form</li>
+          <li>The club will challenge and report any discriminatory behaviour, language or attitudes</li>
+          <li>Any club member, player or official found guilty of discriminatory behaviour will be subject to disciplinary action</li>
+          <li>The club actively promotes equality in player recruitment, coaching and committee roles</li>
+          <li>The club supports the FA&apos;s Kick It Out campaign and Rainbow Laces initiatives</li>
+        </ul>
+
+        <h3>Reporting Discrimination</h3>
+        <p>To report an incident of discrimination at Rayners Lane FC, contact the club via our <a href="contact.html">contact page</a> or report directly to The FA via <a href="https://www.kickitout.org/report" target="_blank">kickitout.org/report</a> or the Kick It Out app.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 3. ANTI-BULLYING ═══ -->
+    <div class="policy-section" id="antibullying">
+      <span class="policy-tag">FA Required</span>
+      <h2>Anti-Bullying <span>Policy</span></h2>
+      <div class="policy-divider"></div>
+      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC is committed to providing a safe, friendly and supportive environment for all participants. Bullying of any kind is unacceptable at our club and will not be tolerated.</p>
+
+        <h3>What is Bullying?</h3>
+        <p>Bullying is behaviour that hurts someone else — it can be physical, verbal, psychological or conducted online (cyberbullying). It is usually repeated over time and intentionally hurts or harms another person or group.</p>
+
+        <h3>Our Commitments</h3>
+        <ul>
+          <li>All forms of bullying will be taken seriously and dealt with promptly</li>
+          <li>Players, officials, parents and supporters are expected to treat all individuals with respect</li>
+          <li>Bullying will be treated as a disciplinary matter under the club&apos;s complaints procedure</li>
+          <li>Anyone experiencing or witnessing bullying should report it to the Club Welfare Officer or a committee member immediately</li>
+          <li>All reports will be handled sensitively and confidentially</li>
+        </ul>
+
+        <p>If you are concerned about bullying involving a child, contact the Club Welfare Officer. In an emergency, contact the NSPCC on <strong>0808 800 5000</strong> or call <strong>999</strong>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 4. CODES OF CONDUCT ═══ -->
+    <div class="policy-section" id="conduct">
+      <span class="policy-tag">FA Respect Programme</span>
+      <h2>Codes of <span>Conduct</span></h2>
+      <div class="policy-divider"></div>
+      <div class="policy-date">In accordance with The FA Respect Programme &middot; Reviewed May 2026</div>
+
+      <div class="conduct-grid">
+
+        <div class="conduct-card yellow">
+          <h4>Players</h4>
+          <ul>
+            <li>Play fairly and to the best of your ability at all times</li>
+            <li>Respect team-mates, opponents, officials and spectators</li>
+            <li>Accept the referee&apos;s decisions without argument</li>
+            <li>Never use violence, intimidation or abusive language</li>
+            <li>Shake hands with opponents before and after the game</li>
+            <li>Behave responsibly in all club environments including social media</li>
+            <li>Inform the manager as early as possible if unavailable</li>
+            <li>Represent the club with pride at all times</li>
+          </ul>
+        </div>
+
+        <div class="conduct-card yellow">
+          <h4>Officials &amp; Management</h4>
+          <ul>
+            <li>Show respect to all match officials at all times</li>
+            <li>Never enter the field of play without the referee&apos;s permission</li>
+            <li>Do not use foul, abusive or discriminatory language</li>
+            <li>Promote fair play and the positive aspects of the game</li>
+            <li>Ensure players adhere to The FA&apos;s codes of conduct</li>
+            <li>Hold valid FA coaching/management qualifications and DBS check</li>
+            <li>Act in the best interests of players at all times</li>
+            <li>Challenge and report all discriminatory behaviour</li>
+          </ul>
+        </div>
+
+        <div class="conduct-card yellow">
+          <h4>Spectators &amp; Supporters</h4>
+          <ul>
+            <li>Applaud good play from both teams</li>
+            <li>Never use offensive, abusive, racist or discriminatory language</li>
+            <li>Do not enter the field of play</li>
+            <li>Respect match officials and their decisions</li>
+            <li>Never harass, intimidate or threaten players, officials or opponents</li>
+            <li>Support the club&apos;s values and the FA Respect programme</li>
+            <li>Report any concerns to club officials</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="policy-body">
+        <p>Failure to comply with these codes of conduct may result in disciplinary action by the club and/or referral to Middlesex County FA. All participants are expected to uphold The FA&apos;s values of respect, integrity and fair play.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 5. FA RESPECT ═══ -->
+    <div class="policy-section" id="respect">
+      <span class="policy-tag">FA Required</span>
+      <h2>FA Respect <span>Policy</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC fully supports and implements The FA&apos;s Respect programme. We are committed to creating a safe, positive and enjoyable football environment for everyone involved in the game.</p>
+
+        <p>As part of our commitment to the Respect programme, Rayners Lane FC:</p>
+        <ul>
+          <li>Displays the Respect barriers and signage at Tithe Farm Social Club on match days</li>
+          <li>Ensures the Respect codes of conduct are distributed to all players, officials and spectators</li>
+          <li>Challenges and reports all incidents that are contrary to the spirit of the Respect campaign</li>
+          <li>Supports and respects all match officials</li>
+          <li>Creates a welcoming environment for all participants regardless of background</li>
+        </ul>
+
+        <p>More information: <a href="https://www.thefa.com/football-rules-governance/respect" target="_blank">thefa.com/respect</a></p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 6. PHOTOGRAPHY ═══ -->
+    <div class="policy-section" id="photography">
+      <span class="policy-tag">Safeguarding</span>
+      <h2>Photography <span>&amp; Filming Policy</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC recognises the need to ensure the welfare and safety of all young people in football. In line with The FA&apos;s guidance, we have adopted the following policy on photography and filming at club events.</p>
+
+        <h3>General Principles</h3>
+        <ul>
+          <li>Photography and video filming are permitted at Tithe Farm Social Club matches for personal use and club media</li>
+          <li>Anyone wishing to photograph or film at club events involving under-18s must seek the permission of a club official</li>
+          <li>The club will always seek consent from parents/guardians before publishing images or footage of under-18s on the club website or social media</li>
+          <li>Photographs or footage must not be used in any way that could be deemed inappropriate or harmful</li>
+          <li>Anyone suspected of using photography or filming for inappropriate purposes will be asked to leave the ground immediately and may be reported to the police</li>
+        </ul>
+
+        <h3>Club Media</h3>
+        <p>The club may use photographs and video for official club purposes including the website, social media, programmes and promotional materials. By participating in club events, members and their parents/guardians consent to the club&apos;s use of such material unless they notify the club otherwise.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 7. SOCIAL MEDIA ═══ -->
+    <div class="policy-section" id="social-media">
+      <span class="policy-tag">Club Policy</span>
+      <h2>Social Media <span>Policy</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC recognises the value of social media in promoting the club and engaging with supporters. All club members, players, officials and volunteers are expected to use social media responsibly.</p>
+
+        <h3>Expected Standards</h3>
+        <ul>
+          <li>Never post content that is discriminatory, offensive, harassing or defamatory</li>
+          <li>Do not post comments that could bring Rayners Lane FC, Tithe Farm Social Club or any individual into disrepute</li>
+          <li>Do not share confidential club information on personal social media accounts</li>
+          <li>Do not post images of under-18s without parental consent</li>
+          <li>Do not engage in online abuse directed at match officials, opponents or other supporters</li>
+          <li>Report any abusive or threatening content directed at club members to a committee member</li>
+        </ul>
+
+        <p>Breaches of this policy may result in disciplinary action. Social media activity is considered an extension of conduct at the club itself.</p>
+
+        <p>Official club social media: <a href="https://twitter.com/RaynersLaneFC" target="_blank">@RaynersLaneFC on X</a> &middot; <a href="https://instagram.com/raynerslanefc" target="_blank">@raynerslanefc on Instagram</a></p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 8. HEALTH & SAFETY ═══ -->
+    <div class="policy-section" id="health-safety">
+      <span class="policy-tag">Club Policy</span>
+      <h2>Health <span>&amp; Safety</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC is committed to maintaining a safe environment for all players, officials, volunteers and spectators at Tithe Farm Social Club and at all away fixtures.</p>
+
+        <h3>At Tithe Farm Social Club</h3>
+        <ul>
+          <li>First aid equipment is available at all home fixtures</li>
+          <li>At least one qualified first aider or person with FA Emergency Aid certification is present at all first team matches</li>
+          <li>The pitch and surrounding areas are inspected before each match for hazards</li>
+          <li>Emergency evacuation procedures are in place at Tithe Farm Social Club</li>
+          <li>In the event of a medical emergency, call <strong>999</strong> immediately and inform a club official</li>
+        </ul>
+
+        <h3>Player Welfare</h3>
+        <ul>
+          <li>Players must inform management of any medical conditions, injuries or medications that may affect their ability to participate safely</li>
+          <li>Head injury and concussion protocols follow FA and NHS guidance &mdash; any player suspected of concussion will be immediately removed from play and must follow return-to-play protocols</li>
+          <li>Players are responsible for ensuring they are fit to participate</li>
+        </ul>
+
+        <p>Health and safety concerns should be reported to a club official immediately. In an emergency, call <strong>999</strong>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 9. COMPLAINTS ═══ -->
+    <div class="policy-section" id="complaints">
+      <span class="policy-tag">FA Required</span>
+      <h2>Complaints <span>Procedure</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC takes all complaints seriously and is committed to resolving them fairly, promptly and confidentially.</p>
+
+        <h3>How to Make a Complaint</h3>
+        <ul>
+          <li><strong>Step 1 — Informal:</strong> Raise your concern directly with the relevant person or a club official. Many issues can be resolved this way.</li>
+          <li><strong>Step 2 — Formal:</strong> If the matter is not resolved, submit a written complaint to the club via <a href="contact.html">our contact page</a>, addressed to the Club Chairman Pete Singh.</li>
+          <li><strong>Step 3 — Acknowledgement:</strong> The club will acknowledge your complaint within 5 working days.</li>
+          <li><strong>Step 4 — Investigation:</strong> The committee will investigate and respond within 21 days.</li>
+          <li><strong>Step 5 — Appeal:</strong> If you are not satisfied with the outcome, you may appeal to Middlesex County FA.</li>
+        </ul>
+
+        <h3>Safeguarding Complaints</h3>
+        <p>Complaints relating to the welfare or safeguarding of children should be referred immediately to the Club Welfare Officer or directly to Middlesex County FA / The FA Safeguarding Team on <strong>0800 169 1863</strong>. Do not delay.</p>
+
+        <h3>Discrimination Complaints</h3>
+        <p>Incidents of discrimination can be reported to the club, to Middlesex County FA, or directly via Kick It Out at <a href="https://www.kickitout.org/report" target="_blank">kickitout.org/report</a>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 10. PRIVACY POLICY ═══ -->
+    <div class="policy-section" id="privacy">
+      <span class="policy-tag">GDPR &middot; UK Law</span>
+      <h2>Privacy <span>Policy</span></h2>
+      <div class="policy-divider"></div>
+      <div class="policy-date">Effective: May 2026 &middot; Controller: Rayners Lane FC / Tithe Farm Sports &amp; Social Club LTD</div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC (&ldquo;the Club&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is committed to protecting your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.</p>
+
+        <h3>Data Controller</h3>
+        <p>Rayners Lane FC / Tithe Farm Sports &amp; Social Club LTD, 151 Rayners Lane, Harrow, Middlesex HA2 0XH. Contact: <a href="contact.html">club contact page</a>.</p>
+
+        <h3>What Data We Collect</h3>
+        <ul>
+          <li>Contact form submissions (name, email, message)</li>
+          <li>Member and player registration details (where applicable)</li>
+          <li>Push notification subscriptions (email address or device token)</li>
+          <li>Website usage data via cookies (see Cookie Policy below)</li>
+        </ul>
+
+        <h3>How We Use Your Data</h3>
+        <ul>
+          <li>To respond to enquiries and contact form submissions</li>
+          <li>To administer club membership and player registrations</li>
+          <li>To send match alerts and club updates (only if you have subscribed)</li>
+          <li>To comply with FA and Middlesex County FA registration requirements</li>
+        </ul>
+
+        <h3>Your Rights</h3>
+        <ul>
+          <li>The right to access your personal data</li>
+          <li>The right to correct inaccurate data</li>
+          <li>The right to request deletion of your data (&ldquo;right to be forgotten&rdquo;)</li>
+          <li>The right to withdraw consent at any time</li>
+          <li>The right to lodge a complaint with the ICO at <a href="https://ico.org.uk" target="_blank">ico.org.uk</a></li>
+        </ul>
+
+        <h3>Data Retention</h3>
+        <p>Contact form data is retained for a maximum of 12 months. Player registration data is retained for the duration of membership plus 2 years in compliance with FA requirements. You may request deletion at any time.</p>
+
+        <h3>Third Parties</h3>
+        <p>We use the following third-party services: Netlify (website hosting &mdash; <a href="https://www.netlify.com/privacy/" target="_blank">privacy policy</a>), Google Sheets (squad management), Pitchero (club management platform &mdash; <a href="https://www.pitchero.com/privacy-policy" target="_blank">privacy policy</a>), Football Web Pages (fixtures data). We do not sell your data to third parties.</p>
+
+        <p>To exercise your rights or ask questions about your data, contact us via <a href="contact.html">our contact page</a>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 11. COOKIES ═══ -->
+    <div class="policy-section" id="cookies">
+      <span class="policy-tag">UK Law</span>
+      <h2>Cookie <span>Policy</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Our website (<strong>raynerslanefc.co.uk</strong>) uses minimal cookies necessary for the site to function. We do not use advertising cookies or sell data to advertisers.</p>
+
+        <h3>Cookies We Use</h3>
+        <ul>
+          <li><strong>Essential cookies:</strong> Required for basic site functionality. Cannot be disabled.</li>
+          <li><strong>Analytics cookies (Netlify):</strong> Anonymous usage data to help us improve the site. No personal information is collected.</li>
+          <li><strong>Third-party embeds:</strong> Football Web Pages and Pitchero embeds may set their own cookies when displayed on our fixtures and squad pages. See their respective privacy policies.</li>
+        </ul>
+
+        <p>By using this website you consent to our use of essential cookies. You can control non-essential cookies through your browser settings. For more information visit <a href="https://ico.org.uk/for-the-public/online/cookies/" target="_blank">ico.org.uk</a>.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- ═══ 12. ACCESSIBILITY ═══ -->
+    <div class="policy-section" id="accessibility">
+      <span class="policy-tag">Club Commitment</span>
+      <h2>Accessibility <span>Statement</span></h2>
+      <div class="policy-divider"></div>
+
+      <div class="policy-body">
+        <p>Rayners Lane FC is committed to ensuring this website is accessible to as many people as possible, including those with disabilities.</p>
+
+        <ul>
+          <li>The site is designed to work on all devices including mobile phones and tablets</li>
+          <li>Text can be resized using your browser without loss of functionality</li>
+          <li>We aim to provide sufficient colour contrast throughout the site</li>
+          <li>Images include descriptive alternative text where appropriate</li>
+        </ul>
+
+        <p>If you experience accessibility issues with this website, please contact us via <a href="contact.html">our contact page</a> and we will endeavour to provide information in an alternative format.</p>
+      </div>
+    </div>
+
+    <hr class="policy-hr">
+
+    <!-- BOTTOM CTA -->
+    <div style="background:var(--card);border:1px solid var(--border);padding:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="label" style="margin-bottom:8px">Questions about our policies?</div>
+        <p style="font-family:var(--font-b);font-size:15px;color:var(--lgrey);max-width:480px;line-height:1.6">
+          Contact Pete Singh (Chairman) or any committee member via the club contact page.
+          For safeguarding concerns contact Middlesex County FA directly.
+        </p>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn btn-primary" href="contact.html">Contact the Club</a>
+        <a class="btn btn-outline" href="https://www.middlesexfa.com/about-us/welfare" target="_blank">Middlesex FA Welfare</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>document.addEventListener("DOMContentLoaded", () => initComponents("policies.html"));</script>
+</body>
+</html>

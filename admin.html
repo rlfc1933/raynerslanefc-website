@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Admin | Rayners Lane FC</title>
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bk);color:var(--w);font-family:var(--fb);min-height:100svh;-webkit-font-smoothing:antialiased}
+    /* PIN */
+    #pin-screen{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:24px}
+    .pin-logo{width:70px;height:70px;object-fit:contain}
+    .pin-title{font-family:var(--fd);font-size:34px;letter-spacing:.06em;text-align:center}
+    .pin-sub{font-family:var(--fc);font-size:14px;color:var(--gr);letter-spacing:.08em;text-align:center}
+    .pin-dots{display:flex;gap:12px}
+    .pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--br);background:transparent;transition:all .15s}
+    .pin-dot.filled{background:var(--y);border-color:var(--y)}
+    .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:260px}
+    .pin-btn{background:var(--c);border:1px solid var(--br);color:var(--w);font-family:var(--fd);font-size:26px;padding:16px;border-radius:4px;cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .pin-btn:active{background:var(--c2);border-color:var(--y)}
+    .pin-err{color:var(--re);font-family:var(--fc);font-size:13px;letter-spacing:.1em;text-align:center;min-height:20px}
+    /* APP */
+    #app{display:none}
+    .app-hdr{background:var(--dk);border-bottom:1px solid var(--br);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+    .app-hdr img{width:36px;height:36px;object-fit:contain}
+    .app-ttl{font-family:var(--fd);font-size:22px;letter-spacing:.06em;flex:1}
+    .lock-btn{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;cursor:pointer;border-radius:3px;touch-action:manipulation}
+    /* DASHBOARD */
+    .dash{padding:20px 16px;max-width:600px;margin:0 auto}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+    .dcard{background:var(--c);border:1px solid var(--br);border-top:3px solid var(--br);padding:18px 14px;cursor:pointer;transition:all .2s;text-align:left;-webkit-tap-highlight-color:transparent;touch-action:manipulation;width:100%}
+    .dcard:active{background:var(--c2);border-top-color:var(--y)}
+    .dcard-icon{font-size:26px;margin-bottom:8px;display:block}
+    .dcard-name{font-family:var(--fd);font-size:20px;letter-spacing:.04em;color:var(--w)}
+    .dcard-desc{font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-top:3px}
+    /* PANELS */
+    .panel{display:none}
+    .panel.on{display:block}
+    .phdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+    .pback{background:none;border:1px solid var(--br);color:var(--gr);font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-radius:3px;touch-action:manipulation}
+    .pttl{font-family:var(--fd);font-size:26px;letter-spacing:.04em;flex:1}
+    /* FORM */
+    .field{margin-bottom:14px}
+    .fl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);display:block;margin-bottom:6px}
+    input,select,textarea{width:100%;background:var(--dk);border:1px solid var(--br);color:var(--w);font-family:var(--fb);font-size:16px;padding:11px 13px;border-radius:4px;outline:none;transition:border-color .2s;resize:vertical;-webkit-appearance:none;appearance:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--y)}
+    select option{background:var(--dk)}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    /* TOGGLE */
+    .tog-wrap{display:flex;align-items:center;justify-content:space-between;background:var(--c);border:1px solid var(--br);padding:14px;border-radius:4px;margin-bottom:12px}
+    .tog-lbl{font-family:var(--fc);font-size:15px;font-weight:700;color:var(--w)}
+    .tog-sub{font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:2px}
+    .tog{width:48px;height:26px;background:var(--br);border-radius:13px;position:relative;cursor:pointer;border:none;flex-shrink:0;touch-action:manipulation;transition:background .2s}
+    .tog.on{background:var(--su)}
+    .tog::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform .2s}
+    .tog.on::after{transform:translateX(22px)}
+    /* HA */
+    .ha{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+    .ha-btn{background:var(--c);border:2px solid var(--br);color:var(--gr);font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px;cursor:pointer;transition:all .2s;touch-action:manipulation}
+    .ha-btn.hm{border-color:var(--y);color:var(--y);background:rgba(255,209,0,.07)}
+    .ha-btn.aw{border-color:var(--bl);color:var(--bl);background:rgba(59,130,246,.07)}
+    /* STATUS */
+    .stat{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:4px;margin-bottom:12px}
+    .stat.live{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)}
+    .stat.off{background:var(--c);border:1px solid var(--br)}
+    .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .stat.live .sdot{background:var(--re)}
+    .stat.off .sdot{background:var(--gr)}
+    .stxt{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.08em}
+    .stat.live .stxt{color:var(--re)}
+    .stat.off .stxt{color:var(--gr)}
+    /* SAVE */
+    .save{width:100%;background:var(--y);color:var(--bk);font-family:var(--fc);font-size:15px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:14px;border:none;border-radius:4px;cursor:pointer;margin-top:8px;transition:opacity .2s;touch-action:manipulation}
+    .save:active{opacity:.8}
+    .save.red{background:var(--re);color:white;margin-top:6px}
+    .save.sec{background:var(--c);color:var(--w);border:1px solid var(--br)}
+    /* DEPLOY */
+    .dep{background:var(--c);border:1px solid var(--br);border-radius:4px;padding:12px 14px;margin-top:10px;display:none;align-items:center;gap:10px}
+    .dep.on{display:flex}
+    .dep-msg{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.06em}
+    /* LIST */
+    .li{background:var(--c);border:1px solid var(--br);padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:2px}
+    .li-main{flex:1}
+    .li-name{font-family:var(--fc);font-size:15px;font-weight:800;color:var(--w)}
+    .li-sub{font-family:var(--fc);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin-top:2px}
+    .li-num{font-family:var(--fd);font-size:22px;color:rgba(255,209,0,.3);width:30px;text-align:center;flex-shrink:0}
+    .li-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--re);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:3px;cursor:pointer;touch-action:manipulation}
+    /* DIV */
+    .div{height:1px;background:var(--br);margin:16px 0}
+    .slbl{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y);display:block;margin-bottom:10px}
+    /* IMG UPLOAD */
+    .iup-wrap{border:2px dashed var(--br);border-radius:4px;padding:18px;text-align:center;cursor:pointer;margin-bottom:12px;position:relative;transition:border-color .2s;touch-action:manipulation}
+    .iup-wrap:hover,.iup-wrap:active{border-color:var(--y)}
+    .iup-wrap input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .iup-icon{font-size:26px;margin-bottom:6px}
+    .iup-lbl{font-family:var(--fc);font-size:13px;font-weight:700;color:var(--gr);letter-spacing:.06em}
+    .iup-sub{font-family:var(--fc);font-size:11px;color:var(--br);margin-top:3px}
+    .iup-prev{display:none;position:relative;margin-bottom:12px}
+    .iup-prev img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid var(--br)}
+    .iup-rm{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.75);border:1px solid var(--br);color:var(--w);font-family:var(--fc);font-size:11px;font-weight:700;padding:5px 10px;border-radius:3px;cursor:pointer;touch-action:manipulation}
+    /* SETTINGS NOTE */
+    .snote{background:rgba(255,209,0,.06);border:1px solid rgba(255,209,0,.15);border-left:3px solid var(--y);padding:13px 15px;border-radius:0 4px 4px 0;margin-bottom:13px}
+    .snote p{font-family:var(--fb);font-size:14px;color:var(--gr);line-height:1.7}
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--su);color:white;font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:.08em;padding:12px 22px;border-radius:4px;transition:transform .3s;z-index:9999;white-space:nowrap;pointer-events:none}
+    .toast.on{transform:translateX(-50%) translateY(0)}
+    .toast.err{background:var(--re)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  </style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pin-screen">
+  <img src="img/badge.png" class="pin-logo" alt="RLFC">
+  <div><div class="pin-title">THE LANE ADMIN</div><div class="pin-sub">Staff access only &mdash; PIN required</div></div>
+  <div class="pin-dots" id="pdots"></div>
+  <div class="pin-err" id="perr"></div>
+  <div class="pin-grid">
+    <button class="pin-btn" onclick="pp(1)">1</button>
+    <button class="pin-btn" onclick="pp(2)">2</button>
+    <button class="pin-btn" onclick="pp(3)">3</button>
+    <button class="pin-btn" onclick="pp(4)">4</button>
+    <button class="pin-btn" onclick="pp(5)">5</button>
+    <button class="pin-btn" onclick="pp(6)">6</button>
+    <button class="pin-btn" onclick="pp(7)">7</button>
+    <button class="pin-btn" onclick="pp(8)">8</button>
+    <button class="pin-btn" onclick="pp(9)">9</button>
+    <button class="pin-btn" style="grid-column:2" onclick="pp(0)">0</button>
+    <button class="pin-btn" style="font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.1em" onclick="pd()">DEL</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="app-hdr">
+    <img src="img/badge.png" alt="RLFC">
+    <div class="app-ttl">Admin Panel</div>
+    <a href="index.html" style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;border-radius:3px;text-decoration:none;margin-right:6px">&#127968; Site</a>
+    <button class="lock-btn" onclick="lock()">Lock</button>
+  </div>
+  <div class="dash">
+
+    <!-- DASHBOARD -->
+    <div id="dash-home">
+      <div style="margin-bottom:16px">
+        <div style="font-family:var(--fd);font-size:26px;letter-spacing:.04em">What would you like to update?</div>
+        <div style="font-family:var(--fc);font-size:12px;color:var(--gr);letter-spacing:.04em;margin-top:3px">Changes go live in ~30 seconds</div>
+      </div>
+      <div class="dash-grid">
+        <button class="dcard" onclick="openPanel('matchday')"><span class="dcard-icon">🔴</span><div class="dcard-name">Match Day</div><div class="dcard-desc">Live scoreboard on/off</div></button>
+        <button class="dcard" onclick="openPanel('programme')"><span class="dcard-icon">📰</span><div class="dcard-name">Programme</div><div class="dcard-desc">Match notes &amp; preview</div></button>
+        <button class="dcard" onclick="openPanel('squad')"><span class="dcard-icon">⚽</span><div class="dcard-name">Squad</div><div class="dcard-desc">Players &amp; positions</div></button>
+        <button class="dcard" onclick="openPanel('news')"><span class="dcard-icon">📢</span><div class="dcard-name">Club News</div><div class="dcard-desc">Post an article</div></button>
+        <button class="dcard" onclick="openPanel('committee')"><span class="dcard-icon">👥</span><div class="dcard-name">Committee</div><div class="dcard-desc">Club officials</div></button>
+        <button class="dcard" onclick="openPanel('sponsors')"><span class="dcard-icon">🤝</span><div class="dcard-name">Sponsors</div><div class="dcard-desc">Commercial partners</div></button>
+      </div>
+      <div class="dash-grid" style="margin-top:8px">
+        <button class="dcard" onclick="openPanel('gallery')"><span class="dcard-icon">📸</span><div class="dcard-name">Gallery</div><div class="dcard-desc">Upload match photos</div></button>
+        <button class="dcard" onclick="openPanel('matchreport')"><span class="dcard-icon">📋</span><div class="dcard-name">Match Report</div><div class="dcard-desc">Post-match writeup</div></button>
+        <button class="dcard" onclick="openPanel('players')"><span class="dcard-icon">🏃</span><div class="dcard-name">Player Profiles</div><div class="dcard-desc">Add &amp; manage players</div></button>
+      </div>
+      <button class="dcard" style="width:100%;margin-top:4px;border-top-color:var(--gr)" onclick="openPanel('settings')">
+        <span class="dcard-icon" style="font-size:18px">⚙️</span>
+        <div class="dcard-name" style="font-size:18px">Settings</div>
+        <div class="dcard-desc">How everything works</div>
+      </button>
+    </div>
+
+    <!-- MATCH DAY -->
+    <div class="panel" id="panel-matchday">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128308; Match Day</div></div>
+      <div id="s-live" class="stat live" style="display:none"><div class="sdot" style="animation:pulse 1.5s infinite"></div><div class="stxt">SCOREBOARD IS LIVE ON SITE</div></div>
+      <div id="s-off" class="stat off"><div class="sdot"></div><div class="stxt">Scoreboard is off</div></div>
+      <div class="tog-wrap">
+        <div><div class="tog-lbl">Activate Live Scoreboard</div><div class="tog-sub" id="tog-sub">Turn on at kick-off</div></div>
+        <button class="tog" id="ltog" onclick="togLive()"></button>
+      </div>
+      <div class="slbl">Home or Away?</div>
+      <div class="ha">
+        <button class="ha-btn" id="btn-h" onclick="setHA(true)">&#127968; Home</button>
+        <button class="ha-btn" id="btn-a" onclick="setHA(false)">&#128652; Away</button>
+      </div>
+      <div class="field"><label class="fl">Opposition</label><input type="text" id="md-opp" placeholder="e.g. Harefield United"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="md-date"></div>
+        <div class="field"><label class="fl">Kick-off</label><input type="time" id="md-ko" value="15:00"></div>
+      </div>
+      <div class="field" id="md-vf"><label class="fl">Venue</label><input type="text" id="md-venue" value="Tithe Farm Social Club"></div>
+      <div class="field"><label class="fl">Competition</label><input type="text" id="md-comp" value="Combined Counties Premier Division North"></div>
+      <button class="save" onclick="saveMatchDay(true)">&#10003; Activate &amp; Go Live</button>
+      <button class="save red" onclick="saveMatchDay(false)">Deactivate Scoreboard</button>
+      <div class="dep" id="dep-matchday"></div>
+    </div>
+
+    <!-- PROGRAMME -->
+    <div class="panel" id="panel-programme">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128240; Programme</div></div>
+      <div class="slbl">Match Info</div>
+      <div class="field"><label class="fl">Opposition</label><input type="text" id="pr-opp" placeholder="Harefield United"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="pr-date"></div>
+        <div class="field"><label class="fl">Competition</label><input type="text" id="pr-comp" value="CCL Premier Div North"></div>
+      </div>
+      <div class="field">
+        <label class="fl">Cover Image (optional)</label>
+        <div class="iup-wrap" id="pr-iw"><input type="file" accept="image/*" onchange="prevImg('pr',this)"><div class="iup-icon">📸</div><div class="iup-lbl">Tap to upload match photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-prev" id="pr-ip"><img id="pr-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('pr')">✕ Remove</button></div>
+      </div>
+      <div class="div"></div>
+      <div class="slbl">Manager's Notes</div>
+      <div class="field"><textarea id="pr-mgr" rows="5" placeholder="Pre-match notes from the manager..."></textarea></div>
+      <div class="div"></div>
+      <div class="slbl">Welcome to Our Guests</div>
+      <div class="field"><textarea id="pr-wel" rows="4" placeholder="Welcome message for the opposition..."></textarea></div>
+      <div class="div"></div>
+      <div class="slbl">What We're Looking Forward To</div>
+      <div class="field"><textarea id="pr-lf" rows="4" placeholder="Match preview..."></textarea></div>
+      <div class="div"></div>
+      <div class="slbl">Head to Head / History</div>
+      <div class="field"><textarea id="pr-h2h" rows="4" placeholder="Any history between the clubs..."></textarea></div>
+      <button class="save" onclick="saveProgramme()">&#10003; Publish Programme</button>
+      <div class="dep" id="dep-programme"></div>
+    </div>
+
+    <!-- SQUAD -->
+    <div class="panel" id="panel-squad">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9917; Squad</div></div>
+      <div class="slbl">Add Player</div>
+      <div class="row2" style="margin-bottom:10px">
+        <div class="field" style="margin:0"><label class="fl"># No</label><input type="number" id="sq-no" placeholder="9" min="1" max="99"></div>
+        <div class="field" style="margin:0"><label class="fl">Full Name</label><input type="text" id="sq-name" placeholder="Joe Smith"></div>
+      </div>
+      <div class="field"><label class="fl">Position</label><select id="sq-pos"><option value="">Select...</option><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option></select></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Apps</label><input type="number" id="sq-apps" value="0" min="0"></div>
+        <div class="field"><label class="fl">Goals</label><input type="number" id="sq-goals" value="0" min="0"></div>
+      </div>
+      <button class="save sec" onclick="addPlayer()">+ Add Player</button>
+      <div class="div"></div>
+      <div class="slbl" id="sq-cnt">Current Squad</div>
+      <div id="sq-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveSquad()">&#10003; Save Squad to Site</button>
+      <div class="dep" id="dep-squad"></div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="panel" id="panel-news">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128226; Club News</div></div>
+      <div class="slbl">New Article</div>
+      <div class="field"><label class="fl">Headline</label><input type="text" id="nw-title" placeholder="Club Update"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Category</label><select id="nw-cat"><option>News</option><option>Signing</option><option>Trials</option><option>Match Report</option><option>Commercial</option><option>League</option><option>Club</option></select></div>
+        <div class="field"><label class="fl">Date</label><input type="date" id="nw-date"></div>
+      </div>
+      <div class="field"><label class="fl">Author</label><input type="text" id="nw-author" value="Russell Nugent"></div>
+      <div class="field">
+        <label class="fl">Article Image (optional)</label>
+        <div class="iup-wrap" id="nw-iw"><input type="file" accept="image/*" onchange="prevImg('nw',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload image</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-prev" id="nw-ip"><img id="nw-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('nw')">&#10005; Remove</button></div>
+      </div>
+      <div class="field"><label class="fl">Short Summary (card preview)</label><textarea id="nw-exc" rows="2" placeholder="One or two sentences..."></textarea></div>
+      <div class="field"><label class="fl">Full Article</label><textarea id="nw-body" rows="8" placeholder="Write the full article here..."></textarea></div>
+      <button class="save" onclick="publishArticle()">&#10003; Publish Article</button>
+      <div class="div"></div>
+      <div class="slbl" id="nw-cnt">Published Articles</div>
+      <div id="nw-list"></div>
+      <div class="dep" id="dep-news"></div>
+    </div>
+
+    <!-- COMMITTEE -->
+    <div class="panel" id="panel-committee">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Committee</div></div>
+      <div class="slbl">Add Member</div>
+      <div class="field"><label class="fl">Full Name</label><input type="text" id="cm-name" placeholder="John Smith"></div>
+      <div class="field"><label class="fl">Role</label><input type="text" id="cm-role" placeholder="Club Secretary"></div>
+      <div class="field"><label class="fl">Note (optional)</label><input type="text" id="cm-note" placeholder="sponsor, contact, etc."></div>
+      <button class="save sec" onclick="addMember()">+ Add Member</button>
+      <div class="div"></div>
+      <div class="slbl" id="cm-cnt">Committee</div>
+      <div id="cm-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveCommittee()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-committee"></div>
+    </div>
+
+    <!-- SPONSORS -->
+    <div class="panel" id="panel-sponsors">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#129309; Sponsors</div></div>
+      <div class="slbl">Add Sponsor</div>
+      <div class="field"><label class="fl">Company Name</label><input type="text" id="sp-name" placeholder="Hanlon Dry Lining"></div>
+      <div class="field"><label class="fl">Role / Package</label><input type="text" id="sp-role" placeholder="Home Shirt Sponsor"></div>
+      <div class="field"><label class="fl">Website (optional)</label><input type="text" id="sp-url" placeholder="https://"></div>
+      <div class="field"><label class="fl">Note (optional)</label><input type="text" id="sp-note" placeholder="Extra info"></div>
+      <button class="save sec" onclick="addSponsor()">+ Add Sponsor</button>
+      <div class="div"></div>
+      <div class="slbl" id="sp-cnt">Current Sponsors</div>
+      <div id="sp-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveSponsors()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-sponsors"></div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="panel" id="panel-gallery">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128247; Gallery</div></div>
+      <div class="slbl">Add Photo</div>
+      <div class="field">
+        <label class="fl">Caption</label>
+        <input type="text" id="gl-caption" placeholder="Match day at Tithe Farm...">
+      </div>
+      <div class="field">
+        <label class="fl">Category</label>
+        <select id="gl-cat">
+          <option value="matchday">Match Day</option>
+          <option value="squad">Squad</option>
+          <option value="ground">Ground</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="fl">Photo</label>
+        <div class="iup-wrap" id="gl-iw"><input type="file" accept="image/*" onchange="prevImg('gl',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-prev" id="gl-ip"><img id="gl-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('gl')">&#10005; Remove</button></div>
+      </div>
+      <button class="save" onclick="addGalleryPhoto()">+ Add to Gallery</button>
+      <div class="div"></div>
+      <div class="slbl" id="gl-cnt">Gallery Photos</div>
+      <div id="gl-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveGallery()">&#10003; Save Gallery to Site</button>
+      <div class="dep" id="dep-gallery"></div>
+    </div>
+
+    <!-- MATCH REPORT -->
+    <div class="panel" id="panel-matchreport">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128203; Match Report</div></div>
+      <div class="slbl">Post a Match Report</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Opposition</label><input type="text" id="mr-opp" placeholder="Harefield United"></div>
+        <div class="field"><label class="fl">Date</label><input type="date" id="mr-date"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Our Score</label><input type="number" id="mr-us" value="0" min="0"></div>
+        <div class="field"><label class="fl">Their Score</label><input type="number" id="mr-them" value="0" min="0"></div>
+      </div>
+      <div class="field"><label class="fl">Goal Scorers (comma separated)</label><input type="text" id="mr-scorers" placeholder="Smith 34, Jones 67"></div>
+      <div class="field"><label class="fl">Match Report</label><textarea id="mr-body" rows="8" placeholder="Write the match report here..."></textarea></div>
+      <button class="save" onclick="publishMatchReport()">&#10003; Publish Match Report</button>
+      <div class="dep" id="dep-matchreport"></div>
+    </div>
+
+    <!-- PLAYER PROFILES -->
+    <div class="panel" id="panel-players">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#127939; Player Profiles</div></div>
+      <div class="slbl">Add / Update Player</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Squad No.</label><input type="number" id="pl-no" placeholder="9" min="1" max="99"></div>
+        <div class="field"><label class="fl">Full Name</label><input type="text" id="pl-name" placeholder="Joe Smith"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Position</label>
+          <select id="pl-pos"><option value="">Select...</option><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option></select>
+        </div>
+        <div class="field"><label class="fl">Nationality</label><input type="text" id="pl-nat" placeholder="English"></div>
+      </div>
+      <div class="field"><label class="fl">Nickname (optional)</label><input type="text" id="pl-nick" placeholder="The Wall, Rocket etc."></div>
+      <div class="field"><label class="fl">Player Bio</label><textarea id="pl-bio" rows="4" placeholder="A brief description of the player, where they came from, strengths..."></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Apps</label><input type="number" id="pl-apps" value="0" min="0"></div>
+        <div class="field"><label class="fl">Goals</label><input type="number" id="pl-goals" value="0" min="0"></div>
+      </div>
+      <div class="field"><label class="fl">Assists</label><input type="number" id="pl-assists" value="0" min="0"></div>
+      <div class="field">
+        <label class="fl">Player Photo (optional)</label>
+        <div class="iup-wrap" id="pl-iw"><input type="file" accept="image/*" onchange="prevImg('pl',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload player photo</div><div class="iup-sub">Head shot or action photo — JPG, PNG</div></div>
+        <div class="iup-prev" id="pl-ip"><img id="pl-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('pl')">&#10005; Remove</button></div>
+      </div>
+      <button class="save sec" onclick="addPlayerProfile()">+ Add Player Profile</button>
+      <div class="div"></div>
+      <div class="slbl" id="pl-cnt">Current Profiles</div>
+      <div id="pl-list"></div>
+      <button class="save" style="margin-top:10px" onclick="savePlayerProfiles()">&#10003; Push Profiles to Site</button>
+      <div class="dep" id="dep-players"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
+        <p><strong style="color:var(--w)">Auto-deploy is active.</strong> Every Save button triggers an automatic Netlify rebuild. The site goes live in ~30 seconds. No tokens, no terminal, nothing to set up.</p>
+      </div>
+      <div class="div"></div>
+      <div class="slbl">Match Day Scoreboard</div>
+      <div class="snote">
+        <p>To show the live scoreboard to ALL fans — share this link on WhatsApp at kick-off:</p>
+        <div style="background:var(--dk);border:1px solid var(--br);padding:12px 14px;border-radius:4px;margin-top:10px;font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--y);word-break:break-all">raynerslanefc.co.uk?live=1</div>
+        <p style="margin-top:8px">Anyone who taps that link sees the live scoreboard. Works instantly, no setup needed.</p>
+      </div>
+      <div class="div"></div>
+      <div class="slbl">How It Works</div>
+      <div class="snote">
+        <p><strong style="color:var(--w)">Squad</strong> — Gary edits the Google Sheet directly. Updates on the site within minutes, no Save needed.</p>
+      </div>
+      <div class="snote" style="margin-top:6px">
+        <p><strong style="color:var(--w)">Programme</strong> — Russell fills in the Google Form the night before. Programme page updates automatically.</p>
+      </div>
+      <div class="snote" style="margin-top:6px">
+        <p><strong style="color:var(--w)">News, Committee, Sponsors</strong> — Use the admin panels above. Hit Save and the site rebuilds in 30 seconds.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PIN = '19332026';
+const BUILD_HOOK = 'https://api.netlify.com/build_hooks/6a10e5d0c22b131a9544d269';
+
+var pinVal = '';
+var isLive = false;
+var isHome = true;
+var squad = [];
+var committee = [];
+var sponsors = [];
+var articles = [];
+var imgStore = {};
+
+// ── RENDER PIN DOTS ──
+function renderDots() {
+  var h = '';
+  for (var i = 0; i < 8; i++) {
+    h += '<div class="pin-dot' + (i < pinVal.length ? ' filled' : '') + '"></div>';
+  }
+  document.getElementById('pdots').innerHTML = h;
+}
+renderDots();
+
+// ── PIN ENTRY ──
+function pp(n) {
+  if (pinVal.length >= 8) return;
+  pinVal += String(n);
+  renderDots();
+  if (pinVal.length === 8) {
+    setTimeout(checkPin, 100);
+  }
+}
+function pd() {
+  pinVal = pinVal.slice(0, -1);
+  document.getElementById('perr').textContent = '';
+  renderDots();
+}
+function checkPin() {
+  if (pinVal === PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    var tok = localStorage.getItem('rlfc_gh_token') || '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';
+    if (tok) document.getElementById('gh-tok').value = tok;
+    loadAll();
+  } else {
+    document.getElementById('perr').textContent = 'Wrong PIN — try again';
+    pinVal = '';
+    renderDots();
+    setTimeout(function() { document.getElementById('perr').textContent = ''; }, 2000);
+  }
+}
+function lock() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pin-screen').style.display = 'flex';
+  pinVal = '';
+  renderDots();
+  back();
+}
+
+// ── NAVIGATION ──
+function openPanel(name) {
+  document.getElementById('dash-home').style.display = 'none';
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  document.getElementById('panel-' + name).classList.add('on');
+  if (name === 'squad')     renderSquad();
+  if (name === 'committee') renderCommittee();
+  if (name === 'sponsors')  renderSponsors();
+  if (name === 'news')      renderNews();
+  if (name === 'matchday')  initMD();
+}
+function back() {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  document.getElementById('dash-home').style.display = 'block';
+}
+
+// ── LOAD DATA ──
+function loadAll() {
+  if (!localStorage.getItem('rlfc_gh_token')) {
+    localStorage.setItem('rlfc_gh_token', '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');
+  }
+  // Pre-populate GitHub token if not already set
+  if (!localStorage.getItem('rlfc_gh_token')) {
+    localStorage.setItem('rlfc_gh_token', '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');
+  }
+  fetchJSON('squad',     function(d) { if (d && d.players) squad = d.players; });
+  fetchJSON('committee', function(d) { if (d && d.members) committee = d.members; });
+  fetchJSON('sponsors',  function(d) { if (d && d.sponsors) sponsors = d.sponsors; });
+  fetchJSON('news',      function(d) { if (d && d.articles) articles = d.articles; });
+  fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; } });
+  fetchJSON('matchday',  function(d) {
+    if (!d) return;
+    isLive = d.isLive || false;
+    isHome = d.isHome !== false;
+  });
+  fetchJSON('programme', function(d) {
+    if (!d) return;
+    setVal('pr-opp', d.opponent || '');
+    setVal('pr-date', d.date || '');
+    setVal('pr-comp', d.competition || 'CCL Premier Div North');
+    setVal('pr-mgr', d.managerNotes || '');
+    setVal('pr-wel', d.welcomeNotes || '');
+    setVal('pr-lf', d.lookingForward || '');
+    setVal('pr-h2h', d.headToHead || '');
+  });
+}
+function fetchJSON(name, cb) {
+  fetch('data/' + name + '.json?t=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(cb)
+    .catch(function() { cb(null); });
+}
+function setVal(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ── MATCH DAY ──
+function initMD() {
+  setHA(isHome);
+  updateLiveUI();
+  fetchJSON('matchday', function(d) {
+    if (!d) return;
+    setVal('md-opp', d.opponent || '');
+    setVal('md-date', d.date || '');
+    setVal('md-ko', d.kickoff || '15:00');
+    setVal('md-venue', d.venue || 'Tithe Farm Social Club');
+    setVal('md-comp', d.competition || 'Combined Counties Premier Division North');
+  });
+}
+function setHA(home) {
+  isHome = home;
+  document.getElementById('btn-h').className = 'ha-btn' + (home ? ' hm' : '');
+  document.getElementById('btn-a').className = 'ha-btn' + (!home ? ' aw' : '');
+  var vi = document.getElementById('md-venue');
+  var vf = document.getElementById('md-vf');
+  if (home) { vi.value = 'Tithe Farm Social Club'; vf.style.opacity = '.5'; }
+  else { if (vi.value === 'Tithe Farm Social Club') vi.value = ''; vf.style.opacity = '1'; }
+}
+function togLive() { isLive = !isLive; updateLiveUI(); }
+function updateLiveUI() {
+  document.getElementById('ltog').className = 'tog' + (isLive ? ' on' : '');
+  document.getElementById('s-live').style.display = isLive ? 'flex' : 'none';
+  document.getElementById('s-off').style.display  = isLive ? 'none' : 'flex';
+  document.getElementById('tog-sub').textContent = isLive ? 'Scoreboard is LIVE' : 'Turn on at kick-off';
+}
+function saveMatchDay(activate) {
+  isLive = activate;
+  updateLiveUI();
+  var data = {
+    isLive: isLive, isHome: isHome,
+    opponent:    gv('md-opp'),
+    date:        gv('md-date'),
+    kickoff:     gv('md-ko'),
+    venue:       isHome ? 'Tithe Farm Social Club' : gv('md-venue'),
+    competition: gv('md-comp'),
+  };
+  pushToGitHub('matchday', data, 'dep-matchday');
+  toast(activate ? 'Scoreboard is LIVE ✓' : 'Scoreboard deactivated');
+}
+
+// ── PROGRAMME ──
+function saveProgramme() {
+  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var data = {
+    opponent: gv('pr-opp'), date: gv('pr-date'),
+    competition: gv('pr-comp'), managerNotes: gv('pr-mgr'),
+    welcomeNotes: gv('pr-wel'), lookingForward: gv('pr-lf'),
+    headToHead: gv('pr-h2h'), coverImage: '',
+    updatedAt: new Date().toISOString(),
+  };
+  if (imgStore['pr'] && tok) {
+    uploadImg('pr', tok, function(path) {
+      data.coverImage = path || '';
+      pushToGitHub('programme', data, 'dep-programme');
+      toast('Programme published ✓');
+    });
+  } else {
+    pushToGitHub('programme', data, 'dep-programme');
+    toast('Programme published ✓');
+  }
+}
+
+// ── SQUAD ──
+function addPlayer() {
+  var no = parseInt(gv('sq-no')) || 0;
+  var name = gv('sq-name');
+  var pos  = gv('sq-pos');
+  var apps = parseInt(gv('sq-apps')) || 0;
+  var goals= parseInt(gv('sq-goals')) || 0;
+  if (!name) { toast('Enter a name', true); return; }
+  if (!pos)  { toast('Select a position', true); return; }
+  squad = squad.filter(function(p) { return p.name !== name; });
+  squad.push({no:no,name:name,pos:pos,apps:apps,goals:goals});
+  renderSquad();
+  setVal('sq-no',''); setVal('sq-name','');
+  toast(name + ' added ✓');
+}
+function removePlayer(name) {
+  if (!confirm('Remove ' + name + '?')) return;
+  squad = squad.filter(function(p) { return p.name !== name; });
+  renderSquad();
+  toast(name + ' removed');
+}
+function saveSquad() {
+  pushToGitHub('squad', {players:squad, updatedAt:new Date().toISOString()}, 'dep-squad');
+  toast('Squad saved ✓');
+}
+function renderSquad() {
+  var POS = ['Goalkeeper','Defender','Midfielder','Forward'];
+  document.getElementById('sq-cnt').textContent = 'Current Squad (' + squad.length + ')';
+  var sorted = squad.slice().sort(function(a,b) {
+    var pi = function(p) { return POS.indexOf(p.pos); };
+    return pi(a) !== pi(b) ? pi(a)-pi(b) : (a.no||99)-(b.no||99);
+  });
+  document.getElementById('sq-list').innerHTML = sorted.length
+    ? sorted.map(function(p) {
+        return '<div class="li"><span class="li-num">' + (p.no||'') + '</span><div class="li-main"><div class="li-name">' + p.name + '</div><div class="li-sub">' + p.pos + '</div></div><button class="li-del" onclick="removePlayer(\'' + esc(p.name) + '\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No players yet</div>';
+}
+
+// ── NEWS ──
+function publishArticle() {
+  var title = gv('nw-title');
+  var body  = gv('nw-body');
+  if (!title || !body) { toast('Enter title and article body', true); return; }
+  var cat   = gv('nw-cat');
+  var imgs  = {Signing:'img/news/news-signing.svg',Trials:'img/news/news-trials.svg',League:'img/news/news-league.svg',Commercial:'img/news/news-commercial.svg','Match Report':'img/news/news-matchday.svg'};
+  var art   = {
+    id: 'article-' + Date.now(),
+    title: title, category: cat,
+    date: gv('nw-date'), author: gv('nw-author'),
+    image: imgStore['nw'] ? imgStore['nw'].dataUrl : (imgs[cat] || 'img/news/news-default.svg'),
+    excerpt: gv('nw-exc'), body: body,
+  };
+  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  if (imgStore['nw'] && tok) {
+    uploadImg('nw', tok, function(path) {
+      if (path) art.image = path;
+      articles.unshift(art);
+      renderNews();
+      pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-news');
+      setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+      rmImg('nw');
+      toast('Article published ✓');
+    });
+  } else {
+    articles.unshift(art);
+    renderNews();
+    pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-news');
+    setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+    toast('Article published ✓');
+  }
+}
+function deleteArticle(id) {
+  if (!confirm('Delete this article?')) return;
+  articles = articles.filter(function(a) { return a.id !== id; });
+  renderNews();
+  toast('Deleted');
+}
+function renderNews() {
+  document.getElementById('nw-cnt').textContent = 'Published (' + articles.length + ')';
+  document.getElementById('nw-list').innerHTML = articles.length
+    ? articles.map(function(a) {
+        return '<div class="li"><div class="li-main"><div class="li-name">' + a.title + '</div><div class="li-sub">' + a.category + ' &middot; ' + (a.date||'') + '</div></div><button class="li-del" onclick="deleteArticle(\'' + esc(a.id) + '\')">Delete</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No articles yet</div>';
+}
+
+// ── COMMITTEE ──
+function addMember() {
+  var name = gv('cm-name'); var role = gv('cm-role'); var note = gv('cm-note');
+  if (!name || !role) { toast('Enter name and role', true); return; }
+  committee = committee.filter(function(m) { return m.name !== name; });
+  committee.push({name:name, role:role, note:note, featured:false});
+  renderCommittee();
+  setVal('cm-name',''); setVal('cm-role',''); setVal('cm-note','');
+  toast(name + ' added ✓');
+}
+function removeMember(name) {
+  if (!confirm('Remove ' + name + '?')) return;
+  committee = committee.filter(function(m) { return m.name !== name; });
+  renderCommittee();
+}
+function saveCommittee() {
+  pushToGitHub('committee', {members:committee, updatedAt:new Date().toISOString()}, 'dep-committee');
+  toast('Committee saved ✓');
+}
+function renderCommittee() {
+  document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';
+  document.getElementById('cm-list').innerHTML = committee.length
+    ? committee.map(function(m) {
+        return '<div class="li"><div class="li-main"><div class="li-name">' + m.name + '</div><div class="li-sub">' + m.role + (m.note ? ' &middot; ' + m.note : '') + '</div></div><button class="li-del" onclick="removeMember(\'' + esc(m.name) + '\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+
+// ── SPONSORS ──
+function addSponsor() {
+  var name = gv('sp-name'); var role = gv('sp-role');
+  if (!name || !role) { toast('Enter name and role', true); return; }
+  sponsors = sponsors.filter(function(s) { return s.name !== name; });
+  sponsors.push({name:name, role:role, url:gv('sp-url'), note:gv('sp-note')});
+  renderSponsors();
+  setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note','');
+  toast(name + ' added ✓');
+}
+function removeSponsor(name) {
+  if (!confirm('Remove ' + name + '?')) return;
+  sponsors = sponsors.filter(function(s) { return s.name !== name; });
+  renderSponsors();
+}
+function saveSponsors() {
+  pushToGitHub('sponsors', {sponsors:sponsors, updatedAt:new Date().toISOString()}, 'dep-sponsors');
+  toast('Sponsors saved ✓');
+}
+function renderSponsors() {
+  document.getElementById('sp-cnt').textContent = 'Sponsors (' + sponsors.length + ')';
+  document.getElementById('sp-list').innerHTML = sponsors.length
+    ? sponsors.map(function(s) {
+        return '<div class="li"><div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+
+// ── PLAYER PROFILES ──
+var playerProfiles = [];
+
+function addPlayerProfile() {
+  var no   = parseInt(gv('pl-no'))||0;
+  var name = gv('pl-name');
+  var pos  = gv('pl-pos');
+  if (!name || !pos) { toast('Enter name and position', true); return; }
+  var id = 'player-' + name.toLowerCase().replace(/\s+/g,'-');
+  playerProfiles = playerProfiles.filter(function(p){ return p.id !== id; });
+  playerProfiles.push({
+    id:id, number:no, name:name, position:pos,
+    nationality:gv('pl-nat'), nickname:gv('pl-nick'),
+    bio:gv('pl-bio'),
+    apps:parseInt(gv('pl-apps'))||0,
+    goals:parseInt(gv('pl-goals'))||0,
+    assists:parseInt(gv('pl-assists'))||0,
+    photo: imgStore['pl'] ? imgStore['pl'].dataUrl : '',
+  });
+  renderPlayerList();
+  setVal('pl-name',''); setVal('pl-no',''); setVal('pl-bio',''); setVal('pl-nick',''); setVal('pl-nat','');
+  if (imgStore['pl']) rmImg('pl');
+  toast(name + ' added ✓');
+}
+function removePlayerProfile(id) {
+  playerProfiles = playerProfiles.filter(function(p){ return p.id!==id; });
+  renderPlayerList();
+}
+function renderPlayerList() {
+  var POS = ['Goalkeeper','Defender','Midfielder','Forward'];
+  document.getElementById('pl-cnt').textContent = 'Profiles (' + playerProfiles.length + ')';
+  var sorted = playerProfiles.slice().sort(function(a,b){
+    var pi = function(p){ return POS.indexOf(p.position); };
+    return pi(a)!==pi(b) ? pi(a)-pi(b) : (a.number||99)-(b.number||99);
+  });
+  document.getElementById('pl-list').innerHTML = sorted.length
+    ? sorted.map(function(p){
+        return '<div class="li">' +
+          (p.photo ? '<img src="'+p.photo+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<span class="li-num">'+(p.number||'')+'</span>') +
+          '<div class="li-main"><div class="li-name">'+p.name+'</div><div class="li-sub">'+p.position+'</div></div>' +
+          '<a href="player.html?id='+p.id+'" target="_blank" style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em;text-decoration:none;margin-right:8px">View</a>' +
+          '<button class="li-del" onclick="removePlayerProfile(&quot;'+p.id+'&quot;)">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No profiles yet</div>';
+}
+function savePlayerProfiles() {
+  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var data = {players:playerProfiles.map(function(p){
+    return {id:p.id,number:p.number,name:p.name,position:p.position,
+            nationality:p.nationality,nickname:p.nickname,bio:p.bio,
+            apps:p.apps,goals:p.goals,assists:p.assists,
+            photo:p.photo||''};
+  }), updatedAt:new Date().toISOString()};
+  pushToGitHub('players', data, 'dep-players');
+  toast('Player profiles saved ✓');
+}
+
+// ── GALLERY ──
+var gallery = [];
+function addGalleryPhoto() {
+  var caption = gv('gl-caption');
+  var cat = gv('gl-cat');
+  if (!imgStore['gl'] && !caption) { toast('Add a photo or caption', true); return; }
+  var item = {
+    id: 'photo-' + Date.now(),
+    src: imgStore['gl'] ? imgStore['gl'].dataUrl : 'img/news/news-matchday.svg',
+    label: caption,
+    cat: cat,
+    imgData: imgStore['gl'] ? {base64:imgStore['gl'].base64, filename:imgStore['gl'].filename} : null,
+  };
+  gallery.push(item);
+  renderGalleryList();
+  setVal('gl-caption','');
+  if (imgStore['gl']) rmImg('gl');
+  toast('Photo added ✓');
+}
+function removeGalleryItem(id) { gallery=gallery.filter(g=>g.id!==id); renderGalleryList(); }
+function renderGalleryList() {
+  document.getElementById('gl-cnt').textContent='Gallery ('+gallery.length+')';
+  document.getElementById('gl-list').innerHTML = gallery.length
+    ? gallery.map(g=>'<div class="li"><div class="li-main"><div class="li-name">'+(g.label||'Untitled')+'</div><div class="li-sub">'+g.cat+'</div></div><button class="li-del" onclick="removeGalleryItem(&quot;'+g.id+'&quot;)">Remove</button></div>').join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No photos yet</div>';
+}
+function saveGallery() {
+  var data = {items:gallery.map(g=>({id:g.id,src:g.src,label:g.label,cat:g.cat})), updatedAt:new Date().toISOString()};
+  pushToGitHub('gallery', data, 'dep-gallery');
+  toast('Gallery saved ✓');
+}
+
+// ── MATCH REPORT ──
+function publishMatchReport() {
+  var opp = gv('mr-opp');
+  var body = gv('mr-body');
+  if (!opp || !body) { toast('Enter opposition and report', true); return; }
+  var us = gv('mr-us')||'0';
+  var them = gv('mr-them')||'0';
+  var scorers = gv('mr-scorers');
+  var title = 'RLFC ' + us + '-' + them + ' ' + opp;
+  var excerpt = 'Rayners Lane FC ' + us + '-' + them + ' ' + opp + (scorers ? '. Goals: ' + scorers : '');
+  var fullBody = excerpt + '. ' + body;
+  var art = {
+    id: 'report-' + Date.now(),
+    title: title,
+    category: 'Match Report',
+    date: gv('mr-date') || new Date().toISOString().split('T')[0],
+    author: 'Russell Nugent',
+    image: 'img/news/news-matchday.svg',
+    excerpt: excerpt,
+    body: fullBody,
+  };
+  articles.unshift(art);
+  renderNews();
+  pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-matchreport');
+  setVal('mr-opp',''); setVal('mr-body',''); setVal('mr-scorers','');
+  toast('Match report published ✓');
+};
+
+// ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
+
+// ── IMAGE UPLOAD ──
+function prevImg(prefix, input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 4 * 1024 * 1024) { toast('Image too large — max 4MB', true); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result;
+    imgStore[prefix] = {
+      base64: b64.split(',')[1],
+      dataUrl: b64,
+      filename: 'img/uploads/' + Date.now() + '-' + file.name.replace(/\s+/g,'-').toLowerCase(),
+      mime: file.type,
+    };
+    document.getElementById(prefix + '-pi').src = b64;
+    document.getElementById(prefix + '-ip').style.display = 'block';
+    document.getElementById(prefix + '-iw').style.display = 'none';
+    toast('Image ready ✓');
+  };
+  reader.readAsDataURL(file);
+}
+function rmImg(prefix) {
+  delete imgStore[prefix];
+  document.getElementById(prefix + '-ip').style.display = 'none';
+  document.getElementById(prefix + '-iw').style.display = 'block';
+}
+function uploadImg(prefix, tok, cb) {
+  var img = imgStore[prefix];
+  if (!img) { cb(null); return; }
+  var url = 'https://api.github.com/repos/' + REPO + '/contents/' + img.filename;
+  fetch(url, {headers:{'Authorization':'token '+tok,'Accept':'application/vnd.github.v3+json'}})
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(info) {
+      var body = {message:'Upload image via admin', content:img.base64};
+      if (info && info.sha) body.sha = info.sha;
+      return fetch(url, {method:'PUT',headers:{'Authorization':'token '+tok,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});
+    })
+    .then(function(r) { return r.ok ? cb(img.filename) : cb(img.dataUrl); })
+    .catch(function() { cb(img.dataUrl); });
+}
+
+// ── SAVE + TRIGGER DEPLOY ──
+function pushToGitHub(name, data, depId) {
+  var el = document.getElementById(depId);
+  var tok = localStorage.getItem('rlfc_gh_token') || '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';
+  var content = JSON.stringify(data, null, 2);
+  var b64 = btoa(unescape(encodeURIComponent(content)));
+  var path = 'data/' + name + '.json';
+  var apiBase = 'https://api.github.com/repos/rlfc1933/raynerslanefc-website/contents/';
+
+  showDep(el, 'loading', 'Saving to site...');
+
+  if (!tok) {
+    // No token — fall back to build hook only, warn user
+    showDep(el, 'warn', 'No GitHub token. Add it in Settings. Triggering rebuild...');
+    fetch(BUILD_HOOK, {method:'POST'});
+    return;
+  }
+
+  // Step 1: get current file SHA
+  fetch(apiBase + path, {
+    headers: {
+      'Authorization': 'token ' + tok,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  })
+  .then(function(r) { return r.ok ? r.json() : {sha: null}; })
+  .then(function(fileData) {
+    var body = {
+      message: 'Admin: update ' + name,
+      content: b64,
+    };
+    if (fileData.sha) body.sha = fileData.sha;
+    // Step 2: commit to GitHub
+    return fetch(apiBase + path, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + tok,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+  })
+  .then(function(r) {
+    if (r.ok) {
+      showDep(el, 'ok', 'Saved to site — live in ~30 seconds');
+    } else {
+      return r.json().then(function(e) { throw new Error(e.message); });
+    }
+  })
+  .catch(function(err) {
+    // GitHub failed — try build hook as fallback
+    showDep(el, 'warn', 'GitHub error: ' + err.message + '. Check token in Settings.');
+  });
+}
+
+function showDep(el, type, msg) {
+  if (!el) return;
+  el.className = 'dep on';
+  var col = {loading:'var(--gr)',ok:'var(--su)',err:'var(--re)',warn:'var(--y)'};
+  el.innerHTML = '<span class="dep-msg" style="color:' + (col[type]||'var(--gr)') + '">' + msg + '</span>';
+  if (type === 'ok') setTimeout(function() { el.className='dep'; }, 5000);
+}
+
+// ── HELPERS ──
+function gv(id) { var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function toast(msg, err) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast on' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.className = 'toast'; }, 3000);
+}
+</script>
+</body>
+</html>

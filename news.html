@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsroom | Rayners Lane FC</title>
+  <meta name="description" content="The Rayners Lane FC Newsroom — club news, non-league football, FA updates and Combined Counties League coverage. Updated live.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── NEWSROOM LAYOUT ── */
+    .newsroom-header {
+      background: var(--black);
+      border-bottom: 3px solid var(--yellow);
+      padding: 0;
+    }
+    .newsroom-topbar {
+      background: var(--yellow);
+      padding: 8px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .newsroom-topbar-left {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .newsroom-masthead {
+      font-family: var(--font-d); font-size: clamp(36px,7vw,72px);
+      letter-spacing: .04em; color: var(--white); line-height: 1;
+      padding: 24px 0 20px;
+    }
+    .newsroom-masthead span { color: var(--yellow); }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--red, #EF4444); padding: 4px 12px;
+      font-family: var(--font-c); font-size: 11px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; color: white;
+    }
+    .live-badge-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: white;
+      animation: pulse 1.5s infinite;
+    }
+    /* SOURCE FILTER TABS */
+    .source-tabs {
+      display: flex; gap: 0; border-bottom: 1px solid var(--border);
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .source-tab {
+      background: none; border: none; border-bottom: 3px solid transparent;
+      color: var(--grey); font-family: var(--font-c); font-size: 13px;
+      font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 14px 20px; cursor: pointer; transition: all .2s;
+      white-space: nowrap; -webkit-tap-highlight-color: transparent;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .source-tab:hover { color: var(--white); }
+    .source-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+    .source-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    /* NEWS GRID LAYOUT */
+    .newsroom-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2px;
+      align-items: start;
+    }
+    .newsroom-main { min-width: 0; }
+    .newsroom-sidebar {
+      position: sticky; top: 72px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    /* FEATURED STORY */
+    .featured-card {
+      background: var(--card); display: block; text-decoration: none;
+      transition: background .2s; cursor: pointer;
+    }
+    .featured-card:hover { background: var(--card2); }
+    .featured-img {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover;
+      display: block;
+    }
+    .featured-body { padding: 28px 32px 32px; }
+    .featured-source-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-c); font-size: 10px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase;
+      padding: 4px 10px; margin-bottom: 14px;
+    }
+    .featured-title {
+      font-family: var(--font-d); font-size: clamp(28px,4vw,44px);
+      letter-spacing: .03em; color: var(--white); line-height: 1.1;
+      margin-bottom: 14px;
+    }
+    .featured-excerpt {
+      font-family: var(--font-b); font-size: 16px; color: var(--grey);
+      line-height: 1.75; margin-bottom: 20px;
+    }
+    /* SECONDARY GRID */
+    .secondary-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    }
+    .news-card {
+      background: var(--card); display: block; text-decoration: none;
+      transition: background .2s;
+    }
+    .news-card:hover { background: var(--card2); }
+    .news-card-img {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
+    }
+    .news-card-body { padding: 16px 20px 20px; }
+    .news-card-source {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: var(--font-c); font-size: 9px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .news-card-title {
+      font-family: var(--font-d); font-size: clamp(17px,2vw,22px);
+      letter-spacing: .03em; color: var(--white); line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .news-card-meta {
+      font-family: var(--font-c); font-size: 11px; color: var(--grey);
+      letter-spacing: .06em; margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    /* SIDEBAR */
+    .sidebar-section {
+      background: var(--card); padding: 20px;
+    }
+    .sidebar-title {
+      font-family: var(--font-d); font-size: 22px; letter-spacing: .04em;
+      color: var(--white); margin-bottom: 4px;
+    }
+    .sidebar-label {
+      font-family: var(--font-c); font-size: 10px; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--yellow);
+      display: block; margin-bottom: 12px;
+    }
+    .ticker-item {
+      border-bottom: 1px solid var(--border); padding: 12px 0;
+    }
+    .ticker-item:last-child { border-bottom: none; }
+    .ticker-source {
+      font-family: var(--font-c); font-size: 9px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; margin-bottom: 5px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .ticker-title {
+      font-family: var(--font-c); font-size: 13px; font-weight: 700;
+      color: var(--white); line-height: 1.35;
+    }
+    .ticker-time {
+      font-family: var(--font-c); font-size: 10px; color: var(--grey);
+      letter-spacing: .06em; margin-top: 4px;
+    }
+    /* REFRESH NOTICE */
+    .refresh-bar {
+      background: var(--dark); border-bottom: 1px solid var(--border);
+      padding: 8px 0;
+    }
+    /* LOADING */
+    .skeleton {
+      background: var(--card); animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0%,100%{ opacity: 1 } 50%{ opacity: .5 }
+    }
+    .load-placeholder {
+      background: var(--card); padding: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-c); font-size: 13px; color: var(--grey);
+      letter-spacing: .08em; min-height: 200px;
+    }
+    @media(max-width: 960px) {
+      .newsroom-layout { grid-template-columns: 1fr; }
+      .newsroom-sidebar { position: static; }
+      .secondary-grid { grid-template-columns: 1fr; }
+    }
+    @media(max-width: 600px) {
+      .featured-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- NEWSROOM HEADER -->
+<div class="newsroom-header">
+  <!-- Top yellow bar -->
+  <div class="newsroom-topbar">
+    <div class="container newsroom-topbar-left">
+      <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.6)">
+        &#128240; Rayners Lane FC Newsroom
+      </span>
+      <div class="live-badge">
+        <div class="live-badge-dot"></div>
+        Live &amp; Auto-Updating
+      </div>
+    </div>
+    <div class="container" style="margin-left:auto">
+      <span id="last-updated" style="font-family:var(--font-c);font-size:10px;color:rgba(0,0,0,.45);letter-spacing:.08em"></span>
+    </div>
+  </div>
+
+  <!-- Masthead -->
+  <div class="container">
+    <div class="newsroom-masthead">
+      THE LANE<br><span>NEWSROOM</span>
+    </div>
+  </div>
+
+  <!-- Source filter tabs -->
+  <div class="container" style="padding-bottom:0">
+    <div class="source-tabs" id="source-tabs">
+      <button class="source-tab active" data-source="all" onclick="filterSource('all',this)">
+        <div class="source-dot" style="background:var(--yellow)"></div>
+        All News
+      </button>
+      <button class="source-tab" data-source="club" onclick="filterSource('club',this)">
+        <div class="source-dot" style="background:#FFD100"></div>
+        Club News
+      </button>
+      <button class="source-tab" data-source="nonleague" onclick="filterSource('nonleague',this)">
+        <div class="source-dot" style="background:#EF4444"></div>
+        Non-League
+      </button>
+      <button class="source-tab" data-source="fa" onclick="filterSource('fa',this)">
+        <div class="source-dot" style="background:#1D4ED8"></div>
+        FA &amp; League
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NEWSROOM -->
+<div style="background:var(--black);padding:2px 0 48px">
+  <div class="container" style="padding-top:2px">
+    <div class="newsroom-layout">
+
+      <!-- MAIN COLUMN -->
+      <div class="newsroom-main">
+        <!-- Featured -->
+        <div id="featured-wrap">
+          <div class="load-placeholder skeleton">Loading latest news...</div>
+        </div>
+        <!-- Secondary grid -->
+        <div class="secondary-grid" id="secondary-grid" style="margin-top:2px"></div>
+        <!-- Load more -->
+        <div id="load-more-wrap" style="display:none;margin-top:2px">
+          <button onclick="loadMore()" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--lgrey);font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:16px;cursor:pointer;transition:all .2s"
+            onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--lgrey)'">
+            Load More Articles
+          </button>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="newsroom-sidebar">
+        <!-- Latest ticker -->
+        <div class="sidebar-section">
+          <span class="sidebar-label">Breaking &amp; Latest</span>
+          <div id="ticker-list">
+            <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em;padding:12px 0">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Club badge + social -->
+        <div class="sidebar-section" style="background:linear-gradient(160deg,var(--green),#060E06);text-align:center;padding:32px 20px">
+          <img src="img/badge.png" alt="RLFC" style="width:72px;height:72px;object-fit:contain;margin:0 auto 14px;display:block">
+          <div style="font-family:var(--font-d);font-size:24px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">Rayners Lane FC</div>
+          <div style="font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-bottom:20px">Est. 1933 · Harrow</div>
+          <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener"
+             style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:11px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none;margin-bottom:6px">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Follow @RaynersLaneFC
+          </a>
+          <a href="programme.html"
+             style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--yellow);padding:11px;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--black);text-decoration:none">
+            &#128240; Match Day Programme
+          </a>
+        </div>
+
+        <!-- Sources info -->
+        <div class="sidebar-section">
+          <span class="sidebar-label">News Sources</span>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#FFD100;flex-shrink:0"></div>
+              <div>
+                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Rayners Lane FC</div>
+                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official club news · live</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#EF4444;flex-shrink:0"></div>
+              <div>
+                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The Non-League Paper</div>
+                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Non-league football news · live</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#1D4ED8;flex-shrink:0"></div>
+              <div>
+                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The FA</div>
+                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official FA announcements · live</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#22C55E;flex-shrink:0"></div>
+              <div>
+                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Combined Counties League</div>
+                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Division news · live</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.06em">Auto-refreshes every 5 minutes</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+var SOURCES = {
+  club:      { label:'Rayners Lane FC',  colour:'#FFD100', text:'#000' },
+  pitchero:  { label:'Rayners Lane FC',  colour:'#FFD100', text:'#000' },
+  nonleague: { label:'Non-League Paper', colour:'#EF4444', text:'#fff' },
+  fa:        { label:'The FA',           colour:'#1D4ED8', text:'#fff' },
+  ccl:       { label:'Combined Counties',colour:'#22C55E', text:'#000' },
+};
+
+var BAKED_ARTICLES = [
+  { source:'club', priority:0, id:'launch-2026',
+    title:'The Lane Goes Digital — A New Era for Rayners Lane FC',
+    excerpt:'Pete Singh commissioned former committee member and creative director Sukh to build something levels above. CXLLAB LDN delivered.',
+    image:'img/news/news-launch.svg', date:'2026-05-22',
+    link:'news-article.html?id=launch-2026', external:false },
+  { source:'club', priority:0,
+    title:'League Allocation 2026-27 Confirmed',
+    excerpt:'Back at Step 5 in the Combined Counties Premier Division North. Gary Pitt leads the charge for the new season.',
+    image:'img/news/news-league.svg', date:'2026-05-14',
+    link:'https://www.pitchero.com/clubs/raynerslanefc/news/league-allocation-20262027-2979103.html', external:true },
+  { source:'club', priority:0,
+    title:'1st Team Summer Trials 2026',
+    excerpt:'Register for 1st team trials at Tithe Farm Social Club. Gary Pitt is building his squad.',
+    image:'img/news/news-trials.svg', date:'2026-05-05',
+    link:'https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html', external:true },
+  { source:'club', priority:0,
+    title:'2026-27 Commercial Sponsorship Guide',
+    excerpt:'Multiple sponsorship packages available for the new season. Get your brand in front of Harrow.',
+    image:'img/news/news-commercial.svg', date:'2026-05-01',
+    link:'https://www.pitchero.com/clubs/raynerslanefc/news/rayners-lane-fc-202627-commercial-sponsorship-2980361.html', external:true },
+];
+
+var allArticles = BAKED_ARTICLES.slice();
+var displayCount = 12;
+var activeSource = 'all';
+var IMG_FALLBACK = 'img/news/news-default.svg';
+
+document.addEventListener('DOMContentLoaded', function() {
+  initComponents('news.html');
+  renderNewsroom();
+  loadExtraNews();
+  setInterval(loadExtraNews, 5 * 60 * 1000);
+});
+
+async function loadExtraNews() {
+  var extra = [];
+  try {
+    var r = await fetch('data/news.json?t=' + Date.now());
+    if (r.ok) {
+      var d = await r.json();
+      (d.articles || []).forEach(function(a) {
+        if (!allArticles.find(function(x){ return x.title === a.title; })) {
+          extra.push({ source:'club', priority:0, id:a.id, title:a.title,
+            excerpt:a.excerpt||'', image:a.image||IMG_FALLBACK,
+            date:a.date||'', link:'news-article.html?id='+a.id, external:false });
+        }
+      });
+    }
+  } catch(e) {}
+
+  try {
+    var res = await fetch('/.netlify/functions/fetch-news');
+    if (res.ok) {
+      var data = await res.json();
+      (data.articles || []).forEach(function(a) {
+        if (!allArticles.find(function(x){ return x.title === a.title; })) {
+          var src = a.key === 'pitchero' ? 'club' : (a.key || 'nonleague');
+          extra.push({ source:src, priority:src==='club'?0:2,
+            title:a.title, excerpt:a.excerpt||'',
+            image:a.image||imgForSource(src),
+            date:a.date||'', link:a.link||'#', external:true });
+        }
+      });
+    }
+  } catch(e) {}
+
+  if (extra.length) {
+    allArticles = allArticles.concat(extra);
+    allArticles.sort(function(a,b) {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      return (b.date||'').localeCompare(a.date||'');
+    });
+    var seen = {};
+    allArticles = allArticles.filter(function(a) {
+      if (seen[a.title]) return false;
+      seen[a.title] = true; return true;
+    });
+    renderNewsroom();
+  }
+  var el = document.getElementById('last-updated');
+  if (el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function imgForSource(src) {
+  var m = { club:IMG_FALLBACK, nonleague:'img/news/news-league.svg',
+            fa:'img/news/news-league.svg', ccl:'img/news/news-matchday.svg' };
+  return m[src] || IMG_FALLBACK;
+}
+
+function filterSource(source, btn) {
+  activeSource = source;
+  document.querySelectorAll('.source-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  displayCount = 12;
+  renderNewsroom();
+}
+
+function loadMore() { displayCount += 12; renderNewsroom(); }
+
+function makeCard(a, featured) {
+  var src = SOURCES[a.source] || SOURCES.club;
+  var href = a.link || '#';
+  var target = a.external ? ' target="_blank" rel="noopener"' : '';
+  var dateStr = a.date ? new Date(a.date).toLocaleDateString('en-GB',{day:'numeric',month:featured?'long':'short',year:'numeric'}) : '';
+  var excerpt = (a.excerpt || '').slice(0, featured ? 280 : 120);
+  if (a.excerpt && a.excerpt.length > (featured ? 280 : 120)) excerpt += '...';
+
+  var card = document.createElement('a');
+  card.href = href;
+  if (a.external) { card.target = '_blank'; card.rel = 'noopener'; }
+  card.className = featured ? 'featured-card' : 'news-card';
+
+  var img = document.createElement('img');
+  img.src = a.image || IMG_FALLBACK;
+  img.alt = a.title || '';
+  img.className = featured ? 'featured-img' : 'news-card-img';
+  img.loading = 'lazy';
+  img.onerror = function(){ this.src = IMG_FALLBACK; };
+
+  var imgWrap = document.createElement('div');
+  imgWrap.className = featured ? '' : 'news-card-img-wrap';
+  imgWrap.appendChild(img);
+
+  var badge = document.createElement('div');
+  badge.className = featured ? 'featured-source-badge' : 'news-card-source';
+  badge.style.color = src.colour;
+  if (featured) {
+    badge.style.background = src.colour;
+    badge.style.color = src.text;
+  }
+  var dot = document.createElement('div');
+  dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + src.colour + ';flex-shrink:0';
+  badge.appendChild(dot);
+  badge.appendChild(document.createTextNode(src.label));
+
+  var title = document.createElement('div');
+  title.className = featured ? 'featured-title' : 'news-card-title';
+  title.textContent = a.title || '';
+
+  var body = document.createElement('div');
+  body.className = featured ? 'featured-body' : 'news-card-body';
+  body.appendChild(badge);
+  body.appendChild(title);
+
+  if (excerpt) {
+    var ex = document.createElement('div');
+    ex.className = featured ? 'featured-excerpt' : '';
+    if (!featured) ex.style.cssText = 'font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.6;margin-bottom:10px';
+    ex.textContent = excerpt;
+    body.appendChild(ex);
+  }
+
+  var meta = document.createElement('div');
+  meta.className = featured ? '' : 'news-card-meta';
+  meta.style.cssText = 'font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.06em;' + (featured?'display:flex;align-items:center;gap:10px;':'');
+  if (dateStr) meta.textContent = dateStr;
+  if (featured) {
+    var arrow = document.createElement('span');
+    arrow.style.color = 'var(--yellow)';
+    arrow.style.fontWeight = '700';
+    arrow.textContent = ' Read More →';
+    meta.appendChild(arrow);
+  }
+  body.appendChild(meta);
+
+  card.appendChild(imgWrap);
+  card.appendChild(body);
+  return card;
+}
+
+function renderNewsroom() {
+  var filtered = activeSource === 'all' ? allArticles :
+    allArticles.filter(function(a) {
+      if (activeSource === 'club') return a.source === 'club' || a.source === 'pitchero';
+      if (activeSource === 'nonleague') return a.source === 'nonleague';
+      if (activeSource === 'fa') return a.source === 'fa' || a.source === 'ccl';
+      return true;
+    });
+
+  var featWrap = document.getElementById('featured-wrap');
+  var secGrid  = document.getElementById('secondary-grid');
+  var moreWrap = document.getElementById('load-more-wrap');
+  if (!featWrap) return;
+
+  if (!filtered.length) {
+    featWrap.innerHTML = '<div class="load-placeholder"><div style="text-align:center"><div style="font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:8px">No articles found</div><div style="font-family:var(--font-c);font-size:13px;color:var(--grey)">Follow @RaynersLaneFC for the latest</div></div></div>';
+    secGrid.innerHTML = '';
+    return;
+  }
+
+  featWrap.innerHTML = '';
+  featWrap.appendChild(makeCard(filtered[0], true));
+
+  secGrid.innerHTML = '';
+  filtered.slice(1, displayCount).forEach(function(a) {
+    secGrid.appendChild(makeCard(a, false));
+  });
+
+  if (moreWrap) moreWrap.style.display = filtered.length > displayCount ? 'block' : 'none';
+  renderTicker(filtered.slice(0, 8));
+}
+
+function renderTicker(articles) {
+  var el = document.getElementById('ticker-list');
+  if (!el) return;
+  el.innerHTML = '';
+  articles.forEach(function(a) {
+    var src = SOURCES[a.source] || SOURCES.club;
+    var ago = a.date ? timeAgo(a.date) : '';
+    var item = document.createElement('div');
+    item.className = 'ticker-item';
+    item.innerHTML = '<div class="ticker-source" style="color:' + src.colour + '">' +
+      '<div style="width:6px;height:6px;border-radius:50%;background:' + src.colour + '"></div>' + src.label + '</div>' +
+      '<div class="ticker-title">' + (a.title||'') + '</div>' +
+      (ago ? '<div class="ticker-time">' + ago + '</div>' : '');
+    item.querySelector('.ticker-title').addEventListener('click', function() {
+      if (a.external) window.open(a.link,'_blank'); else window.location.href = a.link;
+    });
+    item.querySelector('.ticker-title').style.cursor = 'pointer';
+    el.appendChild(item);
+  });
+}
+
+function timeAgo(d) {
+  var s = (Date.now() - new Date(d)) / 1000;
+  if (s < 3600)   return Math.floor(s/60) + 'm ago';
+  if (s < 86400)  return Math.floor(s/3600) + 'h ago';
+  if (s < 604800) return Math.floor(s/86400) + 'd ago';
+  return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+</script>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery | Rayners Lane FC</title>
+  <meta name="description" content="Photos from Rayners Lane FC - matchday, ground, squad and more.">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:2px; }
+    .gallery-item { aspect-ratio:4/3; overflow:hidden; position:relative; cursor:pointer; background:var(--card); }
+    .gallery-item img { width:100%; height:100%; object-fit:cover; transition:transform .4s; display:block; }
+    .gallery-item:hover img { transform:scale(1.05); }
+    .gallery-item-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .3s; display:flex; align-items:flex-end; }
+    .gallery-item:hover .gallery-item-overlay { background:rgba(0,0,0,.4); }
+    .gallery-item-label { font-family:var(--font-c); font-size:13px; font-weight:700; color:white; padding:12px 14px; opacity:0; transition:opacity .3s; letter-spacing:.06em; }
+    .gallery-item:hover .gallery-item-label { opacity:1; }
+    /* Lightbox */
+    #lightbox { position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:1000; display:none; align-items:center; justify-content:center; }
+    #lightbox.open { display:flex; }
+    #lightbox img { max-width:90vw; max-height:90vh; object-fit:contain; }
+    #lb-close { position:absolute; top:20px; right:20px; background:none; border:1px solid rgba(255,255,255,.3); color:white; font-family:var(--font-c); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 16px; cursor:pointer; }
+    .gallery-empty { grid-column:1/-1; padding:80px 24px; text-align:center; }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div style="background:var(--yellow);padding:72px 0 56px;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--font-d);font-size:200px;color:rgba(0,0,0,.06);pointer-events:none">GALLERY</div>
+  <div class="container" style="position:relative;z-index:1">
+    <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.5);display:block;margin-bottom:12px">The Lane</span>
+    <h1 style="font-family:var(--font-d);font-size:clamp(56px,9vw,110px);letter-spacing:.02em;line-height:.9;color:var(--black);margin-bottom:16px">GALLERY</h1>
+    <p style="font-family:var(--font-c);font-size:17px;font-weight:500;color:rgba(0,0,0,.55);letter-spacing:.04em">Matchday. Ground. Squad. All things The Lane.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Filter -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px" id="gallery-filters">
+      <button class="filter-btn active" onclick="filterGallery('all',this)"
+        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:var(--card);border:1px solid var(--yellow);padding:8px 16px;cursor:pointer">All</button>
+      <button class="filter-btn" onclick="filterGallery('matchday',this)"
+        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Match Day</button>
+      <button class="filter-btn" onclick="filterGallery('ground',this)"
+        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Ground</button>
+      <button class="filter-btn" onclick="filterGallery('squad',this)"
+        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Squad</button>
+    </div>
+
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Items rendered by JS from data/gallery.json -->
+    </div>
+
+    <!-- Upload prompt -->
+    <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div style="font-family:var(--font-c);font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Got photos from match day?</div>
+        <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.04em">Send them to us and we'll add them to the gallery.</div>
+      </div>
+      <a href="mailto:info@raynerslanefc.co.uk?subject=Gallery%20Photos"
+         style="display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:11px 20px;text-decoration:none">
+        Send Photos &rarr;
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lb-close" onclick="closeLightbox()">✕ Close</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  initComponents("gallery.html");
+  loadGallery();
+});
+
+var galleryItems = [];
+var activeFilter = "all";
+
+// Placeholder items using our editorial images until real photos are uploaded
+var DEFAULT_ITEMS = [
+  { id:1, src:"img/news/news-matchday.svg",   label:"Match Day at Tithe Farm",  cat:"matchday" },
+  { id:2, src:"img/players/player-forward-1.svg", label:"The Lane Attack",     cat:"squad"    },
+  { id:3, src:"img/news/news-trials.svg",    label:"Summer Trials 2026",        cat:"squad"    },
+  { id:4, src:"img/players/player-gk-1.svg",label:"Shot Stopping",             cat:"squad"    },
+  { id:5, src:"img/news/news-signing.svg",   label:"New Signing",               cat:"squad"    },
+  { id:6, src:"img/players/player-def-1.svg",label:"Defensive Unit",           cat:"squad"    },
+  { id:7, src:"img/news/news-league.svg",    label:"League Football",           cat:"matchday" },
+  { id:8, src:"img/players/player-mid-1.svg",label:"Midfield Magic",           cat:"squad"    },
+  { id:9, src:"img/news/news-commercial.svg",label:"2026-27 Campaign",         cat:"ground"   },
+];
+
+async function loadGallery() {
+  try {
+    var r = await fetch("data/gallery.json?t=" + Date.now());
+    if (r.ok) {
+      var d = await r.json();
+      if (d.items && d.items.length) { galleryItems = d.items; renderGallery(); return; }
+    }
+  } catch(e) {}
+  galleryItems = DEFAULT_ITEMS;
+  renderGallery();
+}
+
+function filterGallery(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll(".filter-btn").forEach(b => {
+    b.style.color = "var(--grey)"; b.style.borderColor = "var(--border)";
+  });
+  btn.style.color = "var(--yellow)"; btn.style.borderColor = "var(--yellow)";
+  renderGallery();
+}
+
+function renderGallery() {
+  var filtered = activeFilter === "all" ? galleryItems : galleryItems.filter(i => i.cat === activeFilter);
+  var grid = document.getElementById("gallery-grid");
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="gallery-empty" style="grid-column:1/-1;padding:60px 24px;text-align:center"><div style="font-family:var(--font-d);font-size:28px;color:var(--white)">No photos yet</div><div style="font-family:var(--font-c);font-size:14px;color:var(--grey);margin-top:8px">Send us your match day photos!</div></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(item =>
+    `<div class="gallery-item" onclick="openLightbox('${item.src}','${item.label||""}')">
+      <img src="${item.src}" alt="${item.label||""}" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div class="gallery-item-label">${item.label||""}</div>
+      </div>
+    </div>`
+  ).join("");
+}
+
+function openLightbox(src, label) {
+  document.getElementById("lb-img").src = src;
+  document.getElementById("lightbox").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeLightbox() {
+  document.getElementById("lightbox").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.getElementById("lightbox").addEventListener("click", function(e) {
+  if (e.target === this) closeLightbox();
+});
+</script>
+</body>
+</html>

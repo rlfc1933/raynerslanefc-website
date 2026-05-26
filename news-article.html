@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News | Rayners Lane FC</title>
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800&family=Barlow:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .article-hero{background:var(--dark);padding:64px 0 48px;border-bottom:1px solid var(--border)}
+    .article-body{max-width:720px;margin:0 auto;padding:48px 24px}
+    .article-body p{font-family:var(--font-b);font-size:17px;color:var(--lgrey);line-height:1.9;margin-bottom:20px}
+    .article-img{width:100%;aspect-ratio:16/9;object-fit:cover;margin-bottom:32px}
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="article-hero">
+  <div class="container">
+    <a href="index.html" style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">← Back to News</a>
+    <div style="height:20px"></div>
+    <div id="art-cat" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px"></div>
+    <h1 id="art-title" style="font-family:var(--font-d);font-size:clamp(36px,6vw,72px);letter-spacing:.03em;line-height:.95;color:var(--white);margin-bottom:16px"></h1>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <span id="art-date" style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em"></span>
+      <span id="art-author" style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em"></span>
+    </div>
+  </div>
+</div>
+
+<div class="article-body">
+  <img id="art-img" src="" alt="" class="article-img" style="display:none">
+  <div id="art-body"></div>
+  <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border)">
+    <a href="index.html" style="font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow)">← All News</a>
+  </div>
+</div>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  initComponents('news-article.html');
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (!id) { window.location.href='index.html'; return; }
+  try {
+    const r = await fetch('data/news.json?t='+Date.now());
+    const d = await r.json();
+    const art = d.articles.find(a => a.id === id);
+    if (!art) { window.location.href='index.html'; return; }
+    document.title = art.title+' | Rayners Lane FC';
+    document.getElementById('art-title').textContent = art.title;
+    document.getElementById('art-cat').textContent = art.category || 'Club News';
+    document.getElementById('art-date').textContent = art.date || '';
+    document.getElementById('art-author').textContent = art.author ? 'By '+art.author : '';
+    if (art.image) {
+      const img = document.getElementById('art-img');
+      img.src = art.image; img.style.display='block';
+    }
+    document.getElementById('art-body').innerHTML = (art.body||'')
+      .split('\n').filter(l=>l.trim())
+      .map(l=>`<p>${l}</p>`).join('');
+  } catch(e) {
+    document.getElementById('art-body').innerHTML = '<p style="color:var(--grey)">Article not found.</p>';
+  }
+});
+</script>
+</body>
+</html>

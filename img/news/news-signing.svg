@@ -1,0 +1,44 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0A0800"/><stop offset="100%" stop-color="#080808"/></linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FFD100" stop-opacity="0.12"/><stop offset="50%" stop-color="#FFD100" stop-opacity="0"/><stop offset="100%" stop-color="#1A5C32" stop-opacity="0.12"/></linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#a)"/>
+  <rect width="800" height="450" fill="url(#b)"/>
+  <polygon points="0,0 280,0 230,450 0,450" fill="rgba(255,209,0,.06)"/>
+  <g transform="translate(60,18)" opacity="0.88">
+    <ellipse cx="170" cy="432" rx="82" ry="14" fill="rgba(0,0,0,.45)"/>
+    <rect x="148" y="304" width="24" height="120" rx="9" fill="#FFD100"/>
+    <rect x="182" y="304" width="24" height="120" rx="9" fill="#FFD100"/>
+    <rect x="148" y="378" width="24" height="46" rx="5" fill="white"/>
+    <rect x="182" y="378" width="24" height="46" rx="5" fill="white"/>
+    <rect x="144" y="416" width="30" height="14" rx="4" fill="#111"/>
+    <rect x="180" y="416" width="30" height="14" rx="4" fill="#111"/>
+    <path d="M125,298 L135,278 C142,266 158,260 175,258 C192,260 208,266 215,278 L225,298 L220,304 L130,304 Z" fill="#1A5C32"/>
+    <path d="M116,150 L126,130 C133,118 152,112 175,110 C198,112 217,118 224,130 L234,150 L228,298 L122,298 Z" fill="#FFD100"/>
+    <text x="175" y="228" font-family="Arial Black,sans-serif" font-size="40" font-weight="900" fill="rgba(26,92,50,.5)" text-anchor="middle">7</text>
+    <path d="M118,165 L76,202 C70,208 68,214 72,218 C76,222 82,220 87,215 L124,182 Z" fill="#FFD100"/>
+    <path d="M232,165 L274,202 C280,208 282,214 278,218 C274,222 268,220 263,215 L226,182 Z" fill="#FFD100"/>
+    <circle cx="74" cy="219" r="11" fill="#C4834A"/>
+    <circle cx="276" cy="219" r="11" fill="#2C1508"/>
+    <rect x="163" y="90" width="26" height="22" rx="7" fill="#C4834A"/>
+    <ellipse cx="176" cy="68" rx="36" ry="40" fill="#2C1508"/>
+    <ellipse cx="176" cy="32" rx="34" ry="14" fill="#0A0502"/>
+    <ellipse cx="163" cy="66" rx="6.5" ry="5.5" fill="white"/>
+    <ellipse cx="189" cy="66" rx="6.5" ry="5.5" fill="white"/>
+    <circle cx="164" cy="67" r="3.5" fill="#0A0000"/>
+    <circle cx="190" cy="67" r="3.5" fill="#0A0000"/>
+    <circle cx="165" cy="65" r="1.2" fill="white"/>
+    <circle cx="191" cy="65" r="1.2" fill="white"/>
+    <path d="M170,82 C174,87 178,87 182,82" stroke="#1A0800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  <rect x="4" y="0" width="800" height="5" fill="#FFD100" x="0"/>
+  <rect x="472" y="80" width="4" height="280" fill="#FFD100"/>
+  <text x="494" y="140" font-family="Arial,sans-serif" font-size="11" fill="rgba(255,209,0,.55)" letter-spacing="3">THE LANE</text>
+  <text x="492" y="208" font-family="Arial Black,sans-serif" font-size="60" font-weight="900" fill="white">NEW</text>
+  <text x="492" y="272" font-family="Arial Black,sans-serif" font-size="60" font-weight="900" fill="#FFD100">ERA.</text>
+  <text x="492" y="330" font-family="Arial,sans-serif" font-size="16" fill="rgba(255,255,255,.38)" letter-spacing="1">GARY PITT</text>
+  <text x="492" y="355" font-family="Arial,sans-serif" font-size="13" fill="rgba(255,255,255,.22)" letter-spacing="1">FIRST TEAM MANAGER</text>
+  <rect x="492" y="372" width="240" height="2" fill="rgba(255,209,0,.15)"/>
+  <text x="492" y="405" font-family="Arial,sans-serif" font-size="12" fill="rgba(255,255,255,.18)" letter-spacing="1">RAYNERS LANE FC · 2026-27</text>
+</svg>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club Shop | Rayners Lane FC</title>
+  <meta name="description" content="Rayners Lane FC official club shop. Home kit, away kit, training wear, scarves and more. Order via info@raynerslanefc.co.uk">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shop-hero {
+      background: var(--yellow);
+      padding: 80px 0 72px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-hero::after {
+      content: 'SHOP';
+      position: absolute; right: -10px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-d); font-size: 240px;
+      color: rgba(0,0,0,.06); pointer-events: none; line-height: 1;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2px;
+    }
+    .product-card {
+      background: var(--card);
+      display: flex; flex-direction: column;
+      transition: background .2s;
+    }
+    .product-card:hover { background: var(--card2); }
+    .product-img {
+      aspect-ratio: 3/4;
+      position: relative; overflow: hidden;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .product-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .product-img-bg {
+      position: absolute; inset: 0;
+    }
+    .product-img-player {
+      position: absolute; bottom: 0;
+      width: 85%; object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.4));
+    }
+    .product-tag {
+      position: absolute; top: 14px; left: 14px;
+      font-family: var(--font-c); font-size: 10px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase;
+      background: var(--yellow); color: var(--black);
+      padding: 4px 10px; z-index: 2;
+    }
+    .product-tag.green { background: var(--green); color: white; }
+    .product-body {
+      padding: 20px 22px 24px;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .product-name {
+      font-family: var(--font-d); font-size: 26px;
+      letter-spacing: .04em; color: var(--white);
+      line-height: 1.1; margin-bottom: 6px;
+    }
+    .product-desc {
+      font-family: var(--font-b); font-size: 13px;
+      color: var(--grey); line-height: 1.6;
+      margin-bottom: 16px; flex: 1;
+    }
+    .product-colours {
+      display: flex; gap: 8px; margin-bottom: 16px;
+      align-items: center;
+    }
+    .colour-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2);
+    }
+    .colour-label {
+      font-family: var(--font-c); font-size: 11px;
+      color: var(--grey); letter-spacing: .08em;
+    }
+    .product-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      background: var(--yellow); color: var(--black);
+      font-family: var(--font-c); font-size: 13px; font-weight: 800;
+      letter-spacing: .12em; text-transform: uppercase;
+      padding: 13px 20px; border: 2px solid var(--yellow);
+      text-decoration: none; transition: all .2s;
+    }
+    .product-btn:hover {
+      background: transparent; color: var(--yellow);
+    }
+    .how-to-order {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 4px solid var(--yellow);
+      padding: 32px 36px; margin-bottom: 48px;
+    }
+    .size-table {
+      width: 100%; border-collapse: collapse; margin-top: 16px;
+    }
+    .size-table th {
+      font-family: var(--font-c); font-size: 11px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--yellow); padding: 10px 16px;
+      border-bottom: 1px solid var(--border); text-align: left;
+    }
+    .size-table td {
+      font-family: var(--font-b); font-size: 14px; color: var(--lgrey);
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+    }
+    .size-table tr:last-child td { border-bottom: none; }
+    @media(max-width: 768px) {
+      .shop-hero { padding: 56px 0 48px; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- HERO — yellow background, black text, bold -->
+<div class="shop-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.5);display:block;margin-bottom:12px">Official Merchandise</span>
+    <h1 style="font-family:var(--font-d);font-size:clamp(60px,9vw,120px);letter-spacing:.02em;line-height:.88;color:var(--black);margin-bottom:20px">
+      WEAR<br>THE LANE.
+    </h1>
+    <p style="font-family:var(--font-c);font-size:18px;font-weight:500;color:rgba(0,0,0,.6);letter-spacing:.04em;max-width:420px;line-height:1.6;margin-bottom:32px">
+      Yellow first. The Lane forever.<br>
+      Every purchase goes straight back into the club.
+    </p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn" style="background:var(--black);color:var(--yellow);border:2px solid var(--black);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:14px 28px;display:inline-flex;align-items:center;gap:8px"
+         href="mailto:info@raynerslanefc.co.uk?subject=Kit%20Order%20Enquiry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Order via Email
+      </a>
+      <a class="btn" style="background:transparent;color:var(--black);border:2px solid var(--black);font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:14px 28px"
+         href="contact.html">Contact the Club</a>
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- HOW TO ORDER -->
+    <div class="how-to-order">
+      <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div class="label" style="margin-bottom:10px">How to Order</div>
+          <h2 style="font-family:var(--font-d);font-size:32px;letter-spacing:.04em;margin-bottom:12px">
+            Email Us to Order
+          </h2>
+          <p style="font-family:var(--font-b);font-size:15px;color:var(--lgrey);line-height:1.7">
+            All orders are placed directly through the club. Email us with the item, size and your details — we'll confirm availability and get it sorted.
+          </p>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div style="background:var(--dark);border:1px solid var(--border);padding:20px 24px">
+            <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Orders &amp; Enquiries</div>
+            <a href="mailto:info@raynerslanefc.co.uk?subject=Shop%20Order" style="font-family:var(--font-d);font-size:clamp(18px,2.5vw,28px);letter-spacing:.04em;color:var(--yellow)">
+              info@raynerslanefc.co.uk
+            </a>
+            <p style="font-family:var(--font-c);font-size:13px;color:var(--grey);margin-top:8px;letter-spacing:.04em">
+              Include: item name, size, your name &amp; contact number
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <span class="label" style="display:block;margin-bottom:16px">2026-27 Collection</span>
+    <h2 class="section-title" style="margin-bottom:32px">The <span>Kit</span></h2>
+
+    <div class="shop-grid">
+
+      <!-- HOME KIT -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#1A1500,#080600)"></div>
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--yellow)"></div>
+          <span class="product-tag">New Season</span>
+          <img class="product-img-player" src="img/players/player-forward-1.svg" alt="Home Kit">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Home Shirt<br>2026-27</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <div class="colour-dot" style="background:#1A5C32"></div>
+            <span class="colour-label">Yellow / Green</span>
+          </div>
+          <p class="product-desc">The Lane's iconic yellow home shirt. Sponsored by Hanlon Dry Lining. Available S–XXL.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Home%20Shirt%20Order%202026-27">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- AWAY KIT -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#001A08,#000A04)"></div>
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div>
+          <span class="product-tag green">Away</span>
+          <img class="product-img-player" src="img/players/player-mid-2.svg" alt="Away Kit">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Away Shirt<br>2026-27</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#1A5C32"></div>
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <span class="colour-label">Green / Yellow</span>
+          </div>
+          <p class="product-desc">The away shirt. Sponsored by McCafferty's Bar, Harrow. Available S–XXL.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Away%20Shirt%20Order%202026-27">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- GK KIT -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#0A000A,#040004)"></div>
+          <span class="product-tag" style="background:var(--card2);color:var(--lgrey)">GK</span>
+          <img class="product-img-player" src="img/players/player-gk-1.svg" alt="GK Kit">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Goalkeeper<br>Shirt</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#333"></div>
+            <span class="colour-label">Contact for colours</span>
+          </div>
+          <p class="product-desc">Goalkeeper shirt. Contact us for current colourway and sizing.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Goalkeeper%20Shirt%20Enquiry">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Enquire
+          </a>
+        </div>
+      </div>
+
+      <!-- TRAINING TOP -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#0A0A00,#050500)"></div>
+          <span class="product-tag">Training</span>
+          <img class="product-img-player" src="img/players/player-mid-1.svg" alt="Training">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Training<br>Top</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <span class="colour-label">Yellow</span>
+          </div>
+          <p class="product-desc">Club training top. Lightweight, breathable. Available S–XXL.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Training%20Top%20Order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- SCARF -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#1A1500,#080600)"></div>
+          <!-- Scarf graphic -->
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:32px">
+            <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
+              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
+              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
+              <div style="height:18px;background:var(--black);border-radius:2px;display:flex;align-items:center;justify-content:center">
+                <span style="font-family:var(--font-d);font-size:13px;letter-spacing:.12em;color:var(--yellow)">THE LANE</span>
+              </div>
+              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
+              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
+              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
+            </div>
+          </div>
+          <span class="product-tag">Supporter</span>
+        </div>
+        <div class="product-body">
+          <div class="product-name">Club<br>Scarf</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <div class="colour-dot" style="background:#1A5C32"></div>
+            <span class="colour-label">Yellow &amp; Green</span>
+          </div>
+          <p class="product-desc">The Lane scarf. Yellow and green. Show your colours on the terraces.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Scarf%20Order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- BADGE PIN -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#100800,#060400)"></div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <img src="img/badge.png" alt="Club Badge" style="width:65%;object-fit:contain;filter:drop-shadow(0 8px 32px rgba(255,209,0,.3))">
+          </div>
+          <span class="product-tag">Collector</span>
+        </div>
+        <div class="product-body">
+          <div class="product-name">Enamel<br>Badge Pin</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <div class="colour-dot" style="background:#1A5C32"></div>
+            <span class="colour-label">Club colours</span>
+          </div>
+          <p class="product-desc">Official Rayners Lane FC enamel badge pin. The Lane crest. Collector's item.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Badge%20Pin%20Order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- PERSONALISED -->
+      <div class="product-card" style="background:linear-gradient(160deg,var(--green),#060E06)">
+        <div class="product-img" style="aspect-ratio:3/4">
+          <div class="product-img-bg" style="background:transparent"></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:16px">
+            <img class="product-img-player" src="img/players/player-forward-2.svg" alt="Custom Kit" style="position:relative;width:75%;bottom:auto;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5))">
+          </div>
+          <span class="product-tag">Custom</span>
+        </div>
+        <div class="product-body" style="background:transparent">
+          <div class="product-name">Personalised<br>Kit</div>
+          <div class="product-colours">
+            <div class="colour-dot" style="background:#FFD100"></div>
+            <span class="colour-label">Name &amp; number added</span>
+          </div>
+          <p class="product-desc">Get your name and squad number printed on any kit item. Email us with your details.</p>
+          <a class="product-btn" href="mailto:info@raynerslanefc.co.uk?subject=Personalised%20Kit%20Order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- MATCH DAY PROGRAMME -->
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-img-bg" style="background:linear-gradient(160deg,#0A1A10,#040A08)"></div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px">
+            <div style="background:linear-gradient(160deg,var(--green),#080808);width:75%;aspect-ratio:2/3;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;position:relative;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.6)">
+              <div style="font-family:var(--font-d);font-size:60px;color:rgba(255,255,255,.04);position:absolute;right:-5px;top:-5px;line-height:1">01</div>
+              <div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px">Rayners Lane FC</div>
+              <div style="font-family:var(--font-d);font-size:18px;color:var(--white);letter-spacing:.03em;line-height:1.2;margin-bottom:8px">vs The Lane<br>Opposition</div>
+              <div style="height:2px;background:var(--yellow);width:32px"></div>
+            </div>
+          </div>
+          <span class="product-tag green">Programme</span>
+        </div>
+        <div class="product-body">
+          <div class="product-name">Match Day<br>Programme</div>
+          <div class="product-colours">
+            <span class="colour-label">Available at every home game</span>
+          </div>
+          <p class="product-desc">Collect every issue. Chairman's notes, squad list, opposition preview, stats. Available at Tithe Farm on match day.</p>
+          <a class="product-btn" href="programme.html">
+            View Digital Programme
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIZE GUIDE -->
+    <div style="margin-top:64px">
+      <span class="label" style="display:block;margin-bottom:16px">Size Guide</span>
+      <h2 class="section-title" style="margin-bottom:24px;font-size:clamp(32px,4vw,52px)">Kit <span>Sizing</span></h2>
+      <div style="overflow-x:auto">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Chest (inches)</th>
+              <th>Chest (cm)</th>
+              <th>Recommended for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>34–36"</td><td>86–91cm</td><td>Slim/average build</td></tr>
+            <tr><td>M</td><td>38–40"</td><td>96–101cm</td><td>Average build</td></tr>
+            <tr><td>L</td><td>42–44"</td><td>106–111cm</td><td>Larger build</td></tr>
+            <tr><td>XL</td><td>46–48"</td><td>116–121cm</td><td>Larger / broader build</td></tr>
+            <tr><td>XXL</td><td>50–52"</td><td>127–132cm</td><td>XL+ build</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-family:var(--font-b);font-size:14px;color:var(--grey);margin-top:16px;line-height:1.6">
+        Not sure on sizing? Email <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow)">info@raynerslanefc.co.uk</a> and we'll help you find the right fit.
+      </p>
+    </div>
+
+    <!-- BOTTOM CTA -->
+    <div style="margin-top:64px;background:var(--yellow);padding:48px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div>
+        <div style="font-family:var(--font-d);font-size:clamp(32px,5vw,60px);letter-spacing:.03em;color:var(--black);line-height:1">
+          Ready to Order?
+        </div>
+        <p style="font-family:var(--font-c);font-size:16px;color:rgba(0,0,0,.6);letter-spacing:.04em;margin-top:8px">
+          Email us — we'll get back to you within 48 hours.
+        </p>
+      </div>
+      <a href="mailto:info@raynerslanefc.co.uk?subject=Shop%20Order" 
+         style="background:var(--black);color:var(--yellow);font-family:var(--font-d);font-size:28px;letter-spacing:.06em;padding:16px 32px;text-decoration:none;white-space:nowrap;transition:opacity .2s"
+         onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+        info@raynerslanefc.co.uk
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div id="twitter-placeholder"></div>
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>document.addEventListener("DOMContentLoaded", () => initComponents("shop.html"));</script>
+</body>
+</html>

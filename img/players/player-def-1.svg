@@ -1,0 +1,71 @@
+<svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="280" fill="#0A100A"/>
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="120" fill="rgba(255,209,0,0.04)"/>
+  <!-- Kit number watermark -->
+  <text x="100" y="200" text-anchor="middle" font-family="Arial Black,sans-serif" 
+        font-size="140" font-weight="900" fill="rgba(255,209,0,0.06)">5</text>
+  
+  <!-- Player figure -->
+  
+        <!-- Upright body - confident -->
+        <path d="M74,147 L78,127 C82,119 90,115 100,127 C110,115 118,119 122,127 L126,147 Z" fill="#FFD100"/>
+        <text x="100" y="144" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="#1A5C32">5</text>
+        <!-- Left arm crossed -->
+        <path d="M76,130 L60,138 C56,140 55,144 58,146 C61,148 65,147 68,144 L78,137 Z" fill="#FFD100"/>
+        <!-- Right arm crossed -->
+        <path d="M124,130 L140,138 C144,140 145,144 142,146 C139,148 135,147 132,144 L122,137 Z" fill="#FFD100"/>
+        <!-- Hands -->
+        <circle cx="58" cy="147" r="7" fill="#A07040"/>
+        <circle cx="142" cy="147" r="7" fill="#A07040"/>
+        <!-- Shorts -->
+        <path d="M76,147 L80,177 L96,177 L100,163 L104,177 L120,177 L124,147 Z" fill="#1A5C32"/>
+        <!-- Legs - wide stance -->
+        <rect x="80" y="177" width="16" height="50" rx="5" fill="#A07040"/>
+        <rect x="104" y="177" width="16" height="50" rx="5" fill="#A07040"/>
+        <!-- Socks -->
+        <rect x="80" y="208" width="16" height="22" rx="3" fill="white"/>
+        <rect x="104" y="208" width="16" height="22" rx="3" fill="white"/>
+        <!-- Boots -->
+        <rect x="77" y="222" width="22" height="12" rx="4" fill="#111111"/>
+        <rect x="101" y="222" width="22" height="12" rx="4" fill="#111111"/>
+        
+  
+  <!-- Neck -->
+  <rect x="89" y="106" width="22" height="22" rx="6" fill="#A07040"/>
+  
+  <!-- Head -->
+  <ellipse cx="100" cy="90" rx="28" ry="30" fill="#A07040"/>
+  
+  <!-- Hair -->
+  <ellipse cx="100" cy="66" rx="26" ry="16" fill="#1A1008"/><circle cx="82" cy="60" r="8" fill="#1A1008"/><circle cx="100" cy="56" r="9" fill="#1A1008"/><circle cx="118" cy="60" r="8" fill="#1A1008"/>
+  
+  <!-- Ears -->
+  <ellipse cx="72" cy="92" rx="5" ry="7" fill="#8A5E30"/>
+  <ellipse cx="128" cy="92" rx="5" ry="7" fill="#8A5E30"/>
+  
+  <!-- Eyes white -->
+  <ellipse cx="90" cy="92" rx="6" ry="5" fill="white"/>
+  <ellipse cx="110" cy="92" rx="6" ry="5" fill="white"/>
+  <!-- Pupils -->
+  <circle cx="91" cy="93" r="3.5" fill="#1A0800"/>
+  <circle cx="109" cy="93" r="3.5" fill="#1A0800"/>
+  <!-- Eye shine -->
+  <circle cx="93" cy="91" r="1.2" fill="white"/>
+  <circle cx="111" cy="91" r="1.2" fill="white"/>
+  <!-- Eyebrows -->
+  <path d="M84,82 C87,79 92,79 95,82" 
+        stroke="#1A0800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M105,82 C108,79 113,79 116,82" 
+        stroke="#1A0800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Nose -->
+  <ellipse cx="100" cy="100" rx="4" ry="3" fill="#8A5E30" opacity="0.6"/>
+  <!-- Mouth / smile -->
+  <path d="M92,108 C96,112 104,112 108,108" 
+        stroke="#8A5E30" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Yellow kit collar -->
+  <path d="M88,122 C94,130 106,130 112,122" 
+        fill="#FFD100"/>
+</svg>
