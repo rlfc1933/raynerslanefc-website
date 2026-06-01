@@ -28,6 +28,14 @@ async function loadMatchDay() {
 
   var m = Object.assign({}, defaults, matchday || {});
 
+  // The admin panel saves `opponent` + `isHome`. Build the fixture from those
+  // (home team is always listed first) so the saved match shows on the site.
+  var RLFC = 'Rayners Lane FC';
+  if (m.opponent) {
+    if (m.isHome === false) { m.homeTeam = m.opponent; m.awayTeam = RLFC; }
+    else                    { m.homeTeam = RLFC;       m.awayTeam = m.opponent; }
+  }
+
   // Live scoreboard
   var liveBar = document.getElementById('live-bar');
   var isLive = m.isLive || new URLSearchParams(window.location.search).get('live')==='1';
@@ -38,7 +46,7 @@ async function loadMatchDay() {
     var liveOpp     = document.getElementById('live-opp');
     if (homeScoreEl) homeScoreEl.textContent = m.homeScore || 0;
     if (awayScoreEl) awayScoreEl.textContent = m.awayScore || 0;
-    if (liveOpp) liveOpp.textContent = m.awayTeam || 'Opposition';
+    if (liveOpp) liveOpp.textContent = m.opponent || 'Opposition';
   }
 
   // Next match badge

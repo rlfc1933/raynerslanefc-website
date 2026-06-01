@@ -233,7 +233,7 @@
 <div class="sponsors">
   <div class="container">
     <div class="sponsors__label"><span class="label-grey">Club Sponsors 2026-27</span></div>
-    <div class="sponsors__grid">
+    <div class="sponsors__grid" id="sponsors-grid">
       <div class="sponsor-item">
         <div class="sponsor-item__logo">Hanlon Dry Lining</div>
         <div class="sponsor-item__role">Home Shirt Sponsor<br><span style="color:rgba(255,255,255,.3);font-size:10px">Nigel Hanlon &mdash; Vice Chairman</span></div>
@@ -314,7 +314,32 @@
   document.addEventListener('DOMContentLoaded', () => {
     initPitcheroNews();
     loadHeroNews();
+    loadSponsors();
   });
+
+  // Render club sponsors live from data/sponsors.json (set by the admin panel).
+  // Keeps the "Your Brand Here" call-to-action card at the end. Falls back to
+  // the static cards already in the HTML if the file is empty/unreachable.
+  async function loadSponsors() {
+    var grid = document.getElementById('sponsors-grid');
+    if (!grid) return;
+    try {
+      var r = await fetch('data/sponsors.json?t=' + Date.now());
+      if (!r.ok) return;
+      var d = await r.json();
+      if (!d.sponsors || !d.sponsors.length) return;
+      var esc = function (s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+      var cards = d.sponsors.map(function (s) {
+        var logo = '<div class="sponsor-item__logo">' + esc(s.name) + '</div>';
+        if (s.url) logo = '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + logo + '</a>';
+        var role = esc(s.role) + (s.note ? '<br><span style="color:rgba(255,255,255,.3);font-size:10px">' + esc(s.note) + '</span>' : '');
+        return '<div class="sponsor-item">' + logo + '<div class="sponsor-item__role">' + role + '</div></div>';
+      }).join('');
+      var cta = '<div class="sponsor-item"><div class="sponsor-item__logo" style="border-color:var(--yellow);color:var(--yellow)">Your Brand Here</div>' +
+        '<div class="sponsor-item__role"><a href="investment.html" style="color:var(--yellow)">View 2026-27 Packages &rarr;</a></div></div>';
+      grid.innerHTML = cards + cta;
+    } catch (e) {}
+  }
 
   async function loadHeroNews() {
     const el = document.getElementById('hero-news');
