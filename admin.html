@@ -456,7 +456,7 @@
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
-        <p><strong style="color:var(--w)">Auto-deploy is active.</strong> Every Save button triggers an automatic Netlify rebuild. The site goes live in ~30 seconds. No tokens, no terminal, nothing to set up.</p>
+        <p><strong style="color:var(--w)">Auto-deploy is active.</strong> Every Save commits to GitHub through a secure Netlify function and the site goes live in ~30 seconds. The GitHub token is stored safely on Netlify (Site settings → Environment variables → <code>GITHUB_TOKEN</code>) — never in this page. One-time setup only; nothing to do day-to-day.</p>
       </div>
       <div class="div"></div>
       <div class="slbl">Match Day Scoreboard</div>
@@ -653,7 +653,7 @@ function saveProgramme() {
     headToHead: gv('pr-h2h'), coverImage: '',
     updatedAt: new Date().toISOString(),
   };
-  if (imgStore['pr'] && tok) {
+  if (imgStore['pr']) {
     uploadImg('pr', tok, function(path) {
       data.coverImage = path || '';
       pushToGitHub('programme', data, 'dep-programme');
@@ -719,7 +719,7 @@ function publishArticle() {
     excerpt: gv('nw-exc'), body: body,
   };
   var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
-  if (imgStore['nw'] && tok) {
+  if (imgStore['nw']) {
     uploadImg('nw', tok, function(path) {
       if (path) art.image = path;
       articles.unshift(art);
@@ -953,74 +953,48 @@ function rmImg(prefix) {
   document.getElementById(prefix + '-ip').style.display = 'none';
   document.getElementById(prefix + '-iw').style.display = 'block';
 }
+// Upload an image through the secure proxy. Falls back to the inline data URL
+// (which still displays correctly) if the upload fails for any reason.
 function uploadImg(prefix, tok, cb) {
   var img = imgStore[prefix];
   if (!img) { cb(null); return; }
-  var url = 'https://api.github.com/repos/' + REPO + '/contents/' + img.filename;
-  fetch(url, {headers:{'Authorization':'token '+tok,'Accept':'application/vnd.github.v3+json'}})
-    .then(function(r) { return r.ok ? r.json() : null; })
-    .then(function(info) {
-      var body = {message:'Upload image via admin', content:img.base64};
-      if (info && info.sha) body.sha = info.sha;
-      return fetch(url, {method:'PUT',headers:{'Authorization':'token '+tok,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});
-    })
-    .then(function(r) { return r.ok ? cb(img.filename) : cb(img.dataUrl); })
+  fetch('/.netlify/functions/save-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, path: img.filename, content: img.base64 })
+  })
+    .then(function(r) { return r.ok ? cb('/' + img.filename) : cb(img.dataUrl); })
     .catch(function() { cb(img.dataUrl); });
 }
 
-// ── SAVE + TRIGGER DEPLOY ──
+// ── SAVE TO SITE (via secure Netlify function) ──
+// The GitHub token lives server-side as a Netlify env var, never in the browser.
 function pushToGitHub(name, data, depId) {
   var el = document.getElementById(depId);
-  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
-  var content = JSON.stringify(data, null, 2);
-  var b64 = btoa(unescape(encodeURIComponent(content)));
-  var path = 'data/' + name + '.json';
-  var apiBase = 'https://api.github.com/repos/rlfc1933/raynerslanefc-website/contents/';
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
   showDep(el, 'loading', 'Saving to site...');
 
-  if (!tok) {
-    // No token — fall back to build hook only, warn user
-    showDep(el, 'warn', 'No GitHub token. Add it in Settings. Triggering rebuild...');
-    fetch(BUILD_HOOK, {method:'POST'});
-    return;
-  }
-
-  // Step 1: get current file SHA
-  fetch(apiBase + path, {
-    headers: {
-      'Authorization': 'token ' + tok,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  })
-  .then(function(r) { return r.ok ? r.json() : {sha: null}; })
-  .then(function(fileData) {
-    var body = {
-      message: 'Admin: update ' + name,
-      content: b64,
-    };
-    if (fileData.sha) body.sha = fileData.sha;
-    // Step 2: commit to GitHub
-    return fetch(apiBase + path, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + tok,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
+  fetch('/.netlify/functions/save-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, path: 'data/' + name + '.json', content: content })
   })
   .then(function(r) {
-    if (r.ok) {
+    return r.json().catch(function() { return {}; }).then(function(j) { return { ok: r.ok, j: j }; });
+  })
+  .then(function(res) {
+    if (res.ok) {
       showDep(el, 'ok', 'Saved to site — live in ~30 seconds');
+      // Nudge a deploy in case the GitHub→Netlify auto-build is ever delayed.
+      try { fetch(BUILD_HOOK, { method: 'POST' }); } catch (e) {}
     } else {
-      return r.json().then(function(e) { throw new Error(e.message); });
+      var msg = (res.j && res.j.error) || 'Save failed';
+      showDep(el, 'err', msg);
     }
   })
   .catch(function(err) {
-    // GitHub failed — try build hook as fallback
-    showDep(el, 'warn', 'GitHub error: ' + err.message + '. Check token in Settings.');
+    showDep(el, 'err', 'Network error: ' + err.message);
   });
 }
 
