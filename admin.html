@@ -110,6 +110,56 @@
     .toast.on{transform:translateX(-50%) translateY(0)}
     .toast.err{background:var(--re)}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* ───────── THE LANE · STAFF HQ PORTAL ───────── */
+    body{background:radial-gradient(120% 80% at 50% -10%,#13160d 0%,var(--bk) 55%) fixed}
+    .app-hdr{background:rgba(10,10,10,.82);backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--br)}
+    .app-hdr img{width:34px;height:34px;filter:drop-shadow(0 2px 6px rgba(255,209,0,.35))}
+    .app-ttl{font-family:var(--fd);font-size:22px;letter-spacing:.06em;flex:1;background:linear-gradient(90deg,#fff,var(--y));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .dash{padding:18px 16px 60px;max-width:640px;margin:0 auto}
+
+    .hq-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 20px;margin-bottom:18px;background:linear-gradient(135deg,var(--g) 0%,#0a1c10 60%,#06120a 100%);border:1px solid #21402b}
+    .hq-hero::before{content:"";position:absolute;right:-30px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,209,0,.22),transparent 70%);pointer-events:none}
+    .hq-hero::after{content:"THE LANE";position:absolute;right:-8px;bottom:-22px;font-family:var(--fd);font-size:84px;letter-spacing:.04em;color:rgba(255,255,255,.04);pointer-events:none;line-height:1}
+    .hq-eyebrow{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y);margin-bottom:6px}
+    .hq-greet{font-family:var(--fd);font-size:30px;letter-spacing:.03em;color:#fff;line-height:1;position:relative;z-index:1}
+    .hq-sub{font-family:var(--fc);font-size:12.5px;color:rgba(255,255,255,.6);letter-spacing:.04em;margin-top:7px;position:relative;z-index:1}
+    .hq-live{display:inline-flex;align-items:center;gap:7px;margin-top:14px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 13px;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;position:relative;z-index:1}
+    .hq-live .dot{width:9px;height:9px;border-radius:50%;background:var(--gr)}
+    .hq-live.on .dot{background:var(--re);animation:pulse 1.3s infinite;box-shadow:0 0 10px var(--re)}
+    .hq-live.on{color:#fff;border-color:rgba(239,68,68,.5)}
+
+    .sect-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gr);margin:18px 2px 10px;display:flex;align-items:center;gap:10px}
+    .sect-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--br),transparent)}
+
+    .tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .tile{position:relative;background:linear-gradient(165deg,var(--c) 0%,var(--dk) 100%);border:1px solid var(--br);border-radius:15px;padding:15px 14px 16px;cursor:pointer;text-align:left;width:100%;overflow:hidden;transition:transform .18s ease,border-color .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;animation:tileIn .45s cubic-bezier(.2,.7,.2,1) backwards}
+    .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent,var(--y));opacity:.85}
+    .tile:hover{transform:translateY(-3px);border-color:var(--accent,var(--y));box-shadow:0 14px 34px -16px var(--accent,var(--y))}
+    .tile:active{transform:translateY(0) scale(.975)}
+    .tile-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:rgba(255,255,255,.05);background:color-mix(in srgb,var(--accent,var(--y)) 16%,transparent);border:1px solid color-mix(in srgb,var(--accent,var(--y)) 30%,transparent)}
+    .tile-ic svg{width:22px;height:22px;stroke:var(--accent,var(--y));fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .tile-name{font-family:var(--fd);font-size:19px;letter-spacing:.04em;color:var(--w);line-height:1}
+    .tile-desc{font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.03em;margin-top:5px;line-height:1.35}
+    .tile-arrow{position:absolute;right:13px;top:15px;color:var(--gr);opacity:.45;transition:.18s}
+    .tile:hover .tile-arrow{opacity:1;transform:translateX(3px);color:var(--accent,var(--y))}
+    .tile-wide{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:16px}
+    .tile-wide .tile-ic{margin-bottom:0;flex-shrink:0}
+    .tile-wide .tile-body{flex:1}
+    .tile-badge{position:absolute;right:13px;bottom:13px;font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent,var(--y));background:color-mix(in srgb,var(--accent,var(--y)) 14%,transparent);border-radius:5px;padding:3px 7px}
+    .tile:nth-child(1){animation-delay:.03s}.tile:nth-child(2){animation-delay:.07s}.tile:nth-child(3){animation-delay:.11s}.tile:nth-child(4){animation-delay:.15s}.tile:nth-child(5){animation-delay:.19s}.tile:nth-child(6){animation-delay:.23s}.tile:nth-child(7){animation-delay:.27s}.tile:nth-child(8){animation-delay:.31s}
+    @keyframes tileIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){.tile{animation:none}}
+
+    /* password gate overlay */
+    .lock-screen{position:fixed;inset:0;z-index:9000;background:rgba(8,8,8,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px}
+    .lock-screen.on{display:flex}
+    .lock-card{width:100%;max-width:360px;background:linear-gradient(160deg,var(--c),var(--dk));border:1px solid var(--br);border-top:3px solid var(--y);border-radius:16px;padding:30px 26px;text-align:center}
+    .lock-card .lc-ic{font-size:34px;margin-bottom:8px}
+    .lock-card h3{font-family:var(--fd);font-size:26px;letter-spacing:.03em;color:#fff;margin-bottom:6px}
+    .lock-card p{font-family:var(--fc);font-size:12.5px;color:var(--gr);letter-spacing:.03em;margin-bottom:18px}
+    .lock-card input{width:100%;background:var(--dk);border:1px solid var(--br);border-radius:8px;color:#fff;font-family:var(--fb);font-size:16px;padding:13px 14px;margin-bottom:12px;text-align:center;letter-spacing:.05em}
+    .lock-err{color:var(--re);font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.06em;min-height:16px;margin-bottom:8px}
   </style>
 </head>
 <body>
@@ -147,34 +197,97 @@
 
     <!-- DASHBOARD -->
     <div id="dash-home">
-      <div style="margin-bottom:16px">
-        <div style="font-family:var(--fd);font-size:26px;letter-spacing:.04em">What would you like to update?</div>
-        <div style="font-family:var(--fc);font-size:12px;color:var(--gr);letter-spacing:.04em;margin-top:3px">Changes go live in ~30 seconds</div>
+      <div class="hq-hero">
+        <div class="hq-eyebrow">Rayners Lane FC &middot; Staff HQ</div>
+        <div class="hq-greet" id="hq-greet">Welcome to The Lane</div>
+        <div class="hq-sub">Update the site from your pocket. Everything you change goes live in ~30 seconds.</div>
+        <div class="hq-live" id="hq-live"><span class="dot"></span><span id="hq-live-txt">Scoreboard off</span></div>
       </div>
-      <div class="dash-grid">
-        <button class="dcard" onclick="openPanel('matchday')"><span class="dcard-icon">🔴</span><div class="dcard-name">Match Day</div><div class="dcard-desc">Live scoreboard on/off</div></button>
-        <button class="dcard" onclick="openPanel('programme')"><span class="dcard-icon">📰</span><div class="dcard-name">Programme</div><div class="dcard-desc">Match notes &amp; preview</div></button>
-        <button class="dcard" onclick="openPanel('squad')"><span class="dcard-icon">⚽</span><div class="dcard-name">Squad</div><div class="dcard-desc">Players &amp; positions</div></button>
-        <button class="dcard" onclick="openPanel('news')"><span class="dcard-icon">📢</span><div class="dcard-name">Club News</div><div class="dcard-desc">Post an article</div></button>
-        <button class="dcard" onclick="openPanel('committee')"><span class="dcard-icon">👥</span><div class="dcard-name">Committee</div><div class="dcard-desc">Club officials</div></button>
-        <button class="dcard" onclick="openPanel('sponsors')"><span class="dcard-icon">🤝</span><div class="dcard-name">Sponsors</div><div class="dcard-desc">Commercial partners</div></button>
+
+      <div class="sect-lbl">Match Day</div>
+      <div class="tile-grid">
+        <button class="tile" style="--accent:#EF4444" onclick="openPanel('matchday')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/></svg></span>
+          <div class="tile-name">Match Day</div><div class="tile-desc">Live scoreboard on/off</div>
+        </button>
+        <button class="tile" style="--accent:#3B82F6" onclick="openPanel('programme')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 4h13v16H4z"/><path d="M17 8h3v10a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg></span>
+          <div class="tile-name">Programme</div><div class="tile-desc">Match notes &amp; preview</div>
+        </button>
+        <button class="tile" style="--accent:#22C55E" onclick="openPanel('matchreport')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h4"/></svg></span>
+          <div class="tile-name">Match Report</div><div class="tile-desc">Post-match writeup</div>
+        </button>
+        <button class="tile" style="--accent:#A855F7" onclick="openPanel('gallery')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>
+          <div class="tile-name">Gallery</div><div class="tile-desc">Upload match photos</div>
+        </button>
       </div>
-      <div class="dash-grid" style="margin-top:8px">
-        <button class="dcard" onclick="openPanel('gallery')"><span class="dcard-icon">📸</span><div class="dcard-name">Gallery</div><div class="dcard-desc">Upload match photos</div></button>
-        <button class="dcard" onclick="openPanel('matchreport')"><span class="dcard-icon">📋</span><div class="dcard-name">Match Report</div><div class="dcard-desc">Post-match writeup</div></button>
-        <button class="dcard" onclick="openPanel('players')"><span class="dcard-icon">🏃</span><div class="dcard-name">Player Profiles</div><div class="dcard-desc">Add &amp; manage players</div></button>
-        <button class="dcard" onclick="openPanel('mail')"><span class="dcard-icon">📧</span><div class="dcard-name">Club Email</div><div class="dcard-desc">Access staff inboxes</div></button>
+
+      <div class="sect-lbl">Team &amp; Content</div>
+      <div class="tile-grid">
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('squad')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M8 3l4 2 4-2 5 4-3 3-2-1v11H8V9L6 10 3 7z"/></svg></span>
+          <div class="tile-name">Squad</div><div class="tile-desc">Players &amp; positions</div>
+        </button>
+        <button class="tile" style="--accent:#F59E0B" onclick="openPanel('players')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M13 10h5M13 14h5M5 16.5a3 3 0 0 1 6 0"/></svg></span>
+          <div class="tile-name">Player Profiles</div><div class="tile-desc">Bios, photos &amp; stats</div>
+        </button>
+        <button class="tile" style="--accent:#FF7A00" onclick="openPanel('news')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 11l13-6v14L3 13z"/><path d="M3 11v3h3M8 18l1 3"/></svg></span>
+          <div class="tile-name">Club News</div><div class="tile-desc">Post an article</div>
+        </button>
+        <button class="tile" style="--accent:#14B8A6" onclick="openPanel('committee')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5M20.5 20a5.5 5.5 0 0 0-4-5.3"/></svg></span>
+          <div class="tile-name">Committee</div><div class="tile-desc">Club officials</div>
+        </button>
       </div>
-      <button class="dcard" style="width:100%;margin-top:8px;border-top-color:var(--y)" onclick="openPanel('analytics')">
-        <span class="dcard-icon" style="font-size:18px">📊</span>
-        <div class="dcard-name" style="font-size:18px">Match Day Analytics</div>
-        <div class="dcard-desc">Attendance, takings, check-ins &amp; performance charts</div>
-      </button>
-      <button class="dcard" style="width:100%;margin-top:4px;border-top-color:var(--gr)" onclick="openPanel('settings')">
-        <span class="dcard-icon" style="font-size:18px">⚙️</span>
-        <div class="dcard-name" style="font-size:18px">Settings</div>
-        <div class="dcard-desc">How everything works</div>
-      </button>
+
+      <div class="sect-lbl">Commercial &amp; Comms</div>
+      <div class="tile-grid">
+        <button class="tile" style="--accent:#EC4899" onclick="openPanel('sponsors')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg></span>
+          <div class="tile-name">Sponsors</div><div class="tile-desc">Commercial partners</div>
+        </button>
+        <button class="tile" style="--accent:#06B6D4" onclick="openPanel('social')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+          <div class="tile-name">Social Media</div><div class="tile-desc">Strategy &amp; planner</div>
+        </button>
+        <button class="tile" style="--accent:#60A5FA" onclick="openPanel('mail')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+          <div class="tile-name">Club Email</div><div class="tile-desc">Access staff inboxes</div>
+        </button>
+        <button class="tile" style="--accent:#84CC16" onclick="location.href='staff-guide.html'">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M5 4a2 2 0 0 1 2-2h12v18H7a2 2 0 0 0-2 2z"/><path d="M9 6h7M9 10h5"/></svg></span>
+          <div class="tile-name">How To Guide</div><div class="tile-desc">Run the whole site</div>
+        </button>
+      </div>
+
+      <div class="sect-lbl">Boardroom</div>
+      <div class="tile-grid">
+        <button class="tile tile-wide" style="--accent:#FFD100" onclick="openPanel('analytics')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="11" width="3" height="7" rx="1"/><rect x="10.5" y="6" width="3" height="12" rx="1"/><rect x="16" y="13" width="3" height="5" rx="1"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Match Day Analytics</div><div class="tile-desc">Attendance, takings, check-ins &amp; performance charts</div></div>
+          <span class="tile-badge">Chairman</span>
+        </button>
+        <button class="tile tile-wide" style="--accent:#888" onclick="openPanel('settings')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Settings</div><div class="tile-desc">How everything works &amp; admin options</div></div>
+        </button>
+      </div>
     </div>
 
     <!-- MATCH DAY -->
@@ -458,6 +571,96 @@
       </div>
     </div>
 
+    <!-- SOCIAL MEDIA -->
+    <style>
+      .soc-pill{display:inline-block;background:color-mix(in srgb,#06B6D4 16%,transparent);border:1px solid color-mix(in srgb,#06B6D4 34%,transparent);color:#22d3ee;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin:0 6px 6px 0}
+      .soc-card{background:var(--c);border:1px solid var(--br);border-radius:12px;border-left:3px solid var(--y);padding:14px 16px;margin-bottom:10px}
+      .soc-card h4{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+      .soc-card p{font-family:var(--fb);font-size:13.5px;color:var(--lgrey,#bbb);line-height:1.6}
+      .soc-card ul{list-style:none;margin-top:6px;display:flex;flex-direction:column;gap:5px}
+      .soc-card li{font-family:var(--fb);font-size:13px;color:#bbb;line-height:1.5;padding-left:16px;position:relative}
+      .soc-card li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--y)}
+      .soc-week{display:grid;grid-template-columns:78px 1fr;gap:2px;background:var(--br);border-radius:10px;overflow:hidden;border:1px solid var(--br)}
+      .soc-week>div{background:var(--c);padding:9px 12px;font-family:var(--fb);font-size:13px;color:#ccc}
+      .soc-week>.d{background:var(--dk);font-family:var(--fc);font-weight:700;letter-spacing:.06em;color:var(--y);font-size:12px;text-transform:uppercase;display:flex;align-items:center}
+      .soc-month{border:1px solid var(--br);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:linear-gradient(160deg,var(--c),var(--dk))}
+      .soc-month b{font-family:var(--fd);font-size:18px;letter-spacing:.04em;color:#fff}
+      .soc-month span{font-family:var(--fc);font-size:11px;color:#06B6D4;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+      .soc-month p{font-family:var(--fb);font-size:12.5px;color:#aaa;line-height:1.5;margin-top:5px}
+    </style>
+    <div class="panel" id="panel-social">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128241; Social Media</div></div>
+
+      <div class="snote" style="border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.06)">
+        <p><strong style="color:var(--w)">Open to all staff.</strong> This is The Lane's social playbook for the 2026-27 season — what to post, when, and why. Consistency beats perfection. Post like a club three divisions above us.</p>
+      </div>
+
+      <div class="slbl">The Golden Rules</div>
+      <div class="soc-card">
+        <ul>
+          <li><strong style="color:#fff">Yellow first, always.</strong> Every graphic uses club yellow &amp; green. Same fonts, same badge, every time.</li>
+          <li><strong style="color:#fff">Faces &amp; emotion win.</strong> Players, fans, celebrations &gt; empty pitches and logos.</li>
+          <li><strong style="color:#fff">Reply to everything.</strong> Every comment, every tag. Engagement is free reach.</li>
+          <li><strong style="color:#fff">Tag everyone.</strong> Opponents, the league, players, sponsors, Middlesex FA. Borrow their audience.</li>
+          <li><strong style="color:#fff">Video &gt; photo &gt; text.</strong> A 9:16 vertical clip will always outperform a still.</li>
+        </ul>
+      </div>
+
+      <div class="slbl">Where We Play</div>
+      <div style="margin-bottom:6px">
+        <span class="soc-pill">📸 Instagram — flagship</span>
+        <span class="soc-pill">✖️ X / Twitter — live &amp; news</span>
+        <span class="soc-pill">🎵 TikTok — reach &amp; youth</span>
+        <span class="soc-pill">▶️ YouTube — highlights</span>
+        <span class="soc-pill">📘 Facebook — local &amp; older fans</span>
+      </div>
+      <div class="soc-card"><p>Shoot everything <strong style="color:#fff">vertical (9:16)</strong> on a phone. One Reel posts natively to Instagram, TikTok &amp; YouTube Shorts — three platforms, one clip.</p></div>
+
+      <div class="slbl">Content Pillars (rotate these)</div>
+      <div class="soc-card"><h4>⚽ Match Day</h4><p>Line-up drops, kick-off posts, live score updates, full-time graphics, MOTM, player ratings.</p></div>
+      <div class="soc-card"><h4>👤 People &amp; Personality</h4><p>Player Q&amp;As, "day in the life", new signing reveals, gaffer's view, fan of the week.</p></div>
+      <div class="soc-card"><h4>🏟️ The Lane Story</h4><p>1933 throwbacks, Tithe Farm matchday atmosphere, "why we're yellow", community work.</p></div>
+      <div class="soc-card"><h4>🤝 Commercial</h4><p>Sponsor spotlights, "your brand here", matchday hospitality, shirt &amp; merch drops.</p></div>
+
+      <div class="slbl">The Match Week Rhythm</div>
+      <div class="soc-week">
+        <div class="d">Mon</div><div>Last match recap / MOTM reveal + a throwback</div>
+        <div class="d">Tue</div><div>Player or staff feature (Q&amp;A, story)</div>
+        <div class="d">Wed</div><div>Sponsor or community spotlight</div>
+        <div class="d">Thu</div><div>Opponent preview + "this is us" hype clip</div>
+        <div class="d">Fri</div><div>Matchday -1: fixture graphic, ticket/entry info, how to get there</div>
+        <div class="d">Sat</div><div>LIVE: line-up → kick-off → goals → full-time. Stories all day.</div>
+        <div class="d">Sun</div><div>Gallery dump + thank the fans &amp; sponsors</div>
+      </div>
+
+      <div class="slbl" style="margin-top:16px">Season Plan — Jun 2026 to May 2027</div>
+      <div class="soc-month"><b>June</b><span>Build</span><p>Pre-season hype. New manager Gary Pitt intro reel. "The Lane is back" teaser. Push trials &amp; recruitment. Launch the new site.</p></div>
+      <div class="soc-month"><b>July</b><span>Squad</span><p>Player announcement series (one a day). Kit reveal. Friendly fixtures. Behind-the-scenes pre-season training clips.</p></div>
+      <div class="soc-month"><b>August</b><span>Kick-Off</span><p>Season opener countdown. First league line-up graphic. Establish the live matchday format. Season-ticket / membership push.</p></div>
+      <div class="soc-month"><b>Sept–Oct</b><span>Momentum</span><p>Lock the weekly rhythm. Goal-of-the-month, player ratings, sponsor spotlights. Start a recurring fan content slot.</p></div>
+      <div class="soc-month"><b>Nov–Dec</b><span>Community</span><p>Remembrance, festive content, community/charity work, "year in review" reel. Boxing Day / NYD fixtures big push.</p></div>
+      <div class="soc-month"><b>Jan–Feb</b><span>Run-In</span><p>Transfer/new faces, mid-season awards, throwbacks. Ramp up highlight reels as games matter more.</p></div>
+      <div class="soc-month"><b>Mar–Apr</b><span>Business End</span><p>Every result amplified. Player-of-the-season voting opens. Push hospitality &amp; end-of-season events.</p></div>
+      <div class="soc-month"><b>May</b><span>Finale</span><p>Awards night, season montage, thank-you to fans &amp; sponsors. Tease next season. Capture summer momentum.</p></div>
+
+      <div class="slbl" style="margin-top:16px">Go-To Hashtags</div>
+      <div class="soc-card"><p style="font-family:var(--fc);letter-spacing:.04em;color:#22d3ee">#TheLane &nbsp; #RaynersLaneFC &nbsp; #YellowArmy &nbsp; #UpTheLane &nbsp; #NonLeague &nbsp; #CCLPremierNorth &nbsp; #HarrowFootball &nbsp; #StepFive</p></div>
+
+      <div class="div"></div>
+      <div class="slbl">📅 Post Planner <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— plan upcoming posts (saved for all staff)</span></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="so-date"></div>
+        <div class="field"><label class="fl">Platform</label><select id="so-plat"><option>Instagram</option><option>X / Twitter</option><option>TikTok</option><option>YouTube</option><option>Facebook</option><option>All</option></select></div>
+      </div>
+      <div class="field"><label class="fl">Post Idea / Caption</label><textarea id="so-idea" rows="2" placeholder="e.g. Line-up graphic vs Harefield + 'Matchday is here' reel"></textarea></div>
+      <button class="save sec" onclick="addSocialPost()">+ Add to Planner</button>
+      <div class="div"></div>
+      <div class="slbl" id="so-cnt">Planned Posts</div>
+      <div id="so-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveSocial()">&#10003; Save Planner to Site</button>
+      <div class="dep" id="dep-social"></div>
+    </div>
+
     <!-- MATCH DAY ANALYTICS -->
     <style>
       .an-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
@@ -529,6 +732,7 @@
       <div class="an-chart-card"><div class="an-chart-ttl">Total Income Breakdown</div><canvas id="an-chart-pie" height="200"></canvas></div>
 
       <button class="save" style="margin-top:14px" onclick="saveAnalytics()">&#10003; Save Analytics to Site</button>
+      <button class="save sec" style="margin-top:8px" onclick="changeAnalyticsPassword()">&#128273; Change Analytics Password</button>
       <div class="dep" id="dep-analytics"></div>
     </div>
 
@@ -561,6 +765,20 @@
   </div>
 </div>
 
+<!-- ANALYTICS PASSWORD GATE -->
+<div class="lock-screen" id="an-lock">
+  <div class="lock-card">
+    <div class="lc-ic">🔒</div>
+    <h3>Chairman Access</h3>
+    <p>Match Day Analytics is restricted. Enter the analytics password.</p>
+    <input type="password" id="an-pass" placeholder="Password" autocomplete="off"
+      onkeydown="if(event.key==='Enter')submitAnalyticsGate()">
+    <div class="lock-err" id="an-lock-err"></div>
+    <button class="save" onclick="submitAnalyticsGate()">Unlock</button>
+    <button class="save sec" style="margin-top:8px" onclick="document.getElementById('an-lock').classList.remove('on')">Cancel</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -576,6 +794,10 @@ var sponsors = [];
 var articles = [];
 var analytics = [];
 var imgStore = {};
+// Analytics is chairman-gated. Default password 'petesinghchairman' (SHA-256
+// below); data/config.json overrides the hash if the password is changed.
+var analyticsUnlocked = false;
+var analyticsHash = '3d7e6322ad89bfffa774d5656b5d5c25deb21850780ed3c3f618ddca0b06bf63';
 
 // ── RENDER PIN DOTS ──
 function renderDots() {
@@ -605,9 +827,8 @@ function checkPin() {
   if (pinVal === PIN) {
     document.getElementById('pin-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
-    if (tok) document.getElementById('gh-tok').value = tok;
     loadAll();
+    initDash();
   } else {
     document.getElementById('perr').textContent = 'Wrong PIN — try again';
     pinVal = '';
@@ -625,19 +846,38 @@ function lock() {
 
 // ── NAVIGATION ──
 function openPanel(name) {
+  if (name === 'analytics' && !analyticsUnlocked) { showAnalyticsGate(); return; }
   document.getElementById('dash-home').style.display = 'none';
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
-  document.getElementById('panel-' + name).classList.add('on');
+  var p = document.getElementById('panel-' + name);
+  if (p) p.classList.add('on');
+  window.scrollTo(0, 0);
   if (name === 'squad')     renderSquad();
   if (name === 'committee') renderCommittee();
   if (name === 'sponsors')  renderSponsors();
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
   if (name === 'analytics') renderAnalytics();
+  if (name === 'social')    renderSocial();
 }
 function back() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
   document.getElementById('dash-home').style.display = 'block';
+  initDash();
+}
+// Greeting + live status on the dashboard hero
+function initDash() {
+  var g = document.getElementById('hq-greet');
+  if (g) {
+    var h = new Date().getHours();
+    var part = h < 12 ? 'Good morning' : (h < 18 ? 'Good afternoon' : 'Good evening');
+    g.textContent = part + ', Lane';
+  }
+  var pill = document.getElementById('hq-live'), txt = document.getElementById('hq-live-txt');
+  if (pill && txt) {
+    if (isLive) { pill.classList.add('on'); txt.textContent = 'Scoreboard is LIVE'; }
+    else { pill.classList.remove('on'); txt.textContent = 'Scoreboard off'; }
+  }
 }
 
 // ── LOAD DATA ──
@@ -655,6 +895,8 @@ function loadAll() {
   fetchJSON('news',      function(d) { if (d && d.articles) articles = d.articles; });
   fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; } });
   fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
+  fetchJSON('config',    function(d) { if (d && d.analyticsHash) { analyticsHash = d.analyticsHash; } });
+  fetchJSON('social',    function(d) { if (d && d.posts) { socialPosts = d.posts; } });
   fetchJSON('matchday',  function(d) {
     if (!d) return;
     isLive = d.isLive || false;
@@ -1023,14 +1265,66 @@ function publishMatchReport() {
 // ── MATCH DAY ANALYTICS ──
 var _anCharts = {};
 
+var ANALYTICS_SQUAD_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR1-egjqN8gi8QpgL5-oGC_hMSzH5MzC5fFYL0ZxoTxT9dyb4YAGOPx9m9KT3pUtI2oCBUJ4ptRX9qz/pub?output=csv';
+
+// Player check-list is LINKED to the real squad: prefers the admin Squad
+// (data/squad.json), and falls back to the same Google Sheet squad.html uses,
+// so it's never empty if players exist anywhere.
+function loadSquadLabels(cb) {
+  if (squad && squad.length) {
+    cb(squad.map(function(p){ return (p.no ? '#'+p.no+' ' : '') + p.name; }));
+    return;
+  }
+  fetch(ANALYTICS_SQUAD_SHEET).then(function(r){ return r.ok ? r.text() : ''; }).then(function(csv){
+    var out = [];
+    csv.trim().split('\n').slice(1).forEach(function(line){
+      var c = line.split(','); if (!c[1]) return;
+      out.push((c[0] && c[0].trim() ? '#'+c[0].trim()+' ' : '') + c[1].trim().replace(/"/g,''));
+    });
+    cb(out);
+  }).catch(function(){ cb([]); });
+}
+
 function renderAnalytics() {
-  renderCheckList('an-players', squad.map(function(p){ return (p.no ? '#'+p.no+' ' : '') + p.name; }),
-    'No players yet — add them in the Squad panel, Save, then return here.');
+  loadSquadLabels(function(labels){
+    renderCheckList('an-players', labels,
+      'No players found — add them in the Squad panel (or the squad Google Sheet), Save, then return here.');
+  });
   renderCheckList('an-staff', committee.map(function(m){ return m.name + (m.role ? ' — '+m.role : ''); }),
     'No committee yet — add them in the Committee panel first.');
   renderAnalyticsSummary();
   renderAnalyticsTable();
   renderAnalyticsCharts();
+}
+
+// ── Analytics password gate (chairman) ──
+async function sha256hex(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0'+b.toString(16)).slice(-2); }).join('');
+}
+function showAnalyticsGate() {
+  document.getElementById('an-lock').classList.add('on');
+  setVal('an-pass',''); document.getElementById('an-lock-err').textContent = '';
+  setTimeout(function(){ var i=document.getElementById('an-pass'); if (i) i.focus(); }, 120);
+}
+async function submitAnalyticsGate() {
+  var h = await sha256hex(gv('an-pass'));
+  if (h === analyticsHash) {
+    analyticsUnlocked = true;
+    document.getElementById('an-lock').classList.remove('on');
+    openPanel('analytics');
+  } else {
+    document.getElementById('an-lock-err').textContent = 'Wrong password — chairman access only';
+    setVal('an-pass','');
+  }
+}
+async function changeAnalyticsPassword() {
+  var np = prompt('Enter a NEW analytics password (min 4 characters):');
+  if (np === null) return;
+  if (np.length < 4) { toast('Password too short', true); return; }
+  analyticsHash = await sha256hex(np);
+  pushToGitHub('config', { analyticsHash: analyticsHash, updatedAt: new Date().toISOString() }, 'dep-analytics');
+  toast('Analytics password updated ✓');
 }
 
 function renderCheckList(containerId, items, emptyMsg) {
@@ -1167,6 +1461,37 @@ function renderAnalyticsCharts() {
 function saveAnalytics() {
   pushToGitHub('analytics', { matches: analytics, updatedAt: new Date().toISOString() }, 'dep-analytics');
   toast('Analytics saved ✓');
+}
+
+// ── SOCIAL MEDIA PLANNER ──
+var socialPosts = [];
+function renderSocial() {
+  var el = document.getElementById('so-list'); if (!el) return;
+  var sorted = socialPosts.slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+  document.getElementById('so-cnt').textContent = 'Planned Posts (' + socialPosts.length + ')';
+  el.innerHTML = sorted.length
+    ? sorted.map(function(p){
+        return '<div class="li"><div class="li-main"><div class="li-name">' + esc(p.idea||'') + '</div>' +
+          '<div class="li-sub">' + (p.date||'') + ' &middot; ' + esc(p.platform||'') + '</div></div>' +
+          '<button class="li-del" onclick="removeSocialPost(\''+p.id+'\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No posts planned yet</div>';
+}
+function addSocialPost() {
+  var idea = gv('so-idea');
+  if (!idea) { toast('Write a post idea', true); return; }
+  socialPosts.push({ id:'post-'+Date.now(), date:gv('so-date'), platform:gv('so-plat'), idea:idea });
+  renderSocial();
+  setVal('so-idea','');
+  toast('Added to planner ✓ — press Save');
+}
+function removeSocialPost(id) {
+  socialPosts = socialPosts.filter(function(p){ return p.id !== id; });
+  renderSocial();
+}
+function saveSocial() {
+  pushToGitHub('social', { posts: socialPosts, updatedAt: new Date().toISOString() }, 'dep-social');
+  toast('Planner saved ✓');
 }
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)

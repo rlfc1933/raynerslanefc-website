@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Guide — How to Run The Lane | Rayners Lane FC</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#999;--lg:#bbb;--su:#22C55E;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:radial-gradient(120% 70% at 50% -5%,#13160d 0%,var(--bk) 55%) fixed;color:var(--w);font-family:var(--fb);-webkit-font-smoothing:antialiased;line-height:1.6;padding-bottom:80px}
+    .top{position:sticky;top:0;z-index:20;background:rgba(10,10,10,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--br);padding:12px 18px;display:flex;align-items:center;gap:12px}
+    .top img{width:32px;height:32px;filter:drop-shadow(0 2px 6px rgba(255,209,0,.35))}
+    .top .t{font-family:var(--fd);font-size:20px;letter-spacing:.05em;flex:1}
+    .top a{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);border:1px solid var(--br);padding:7px 13px;border-radius:6px;text-decoration:none}
+    .top a:hover{color:var(--y);border-color:var(--y)}
+    .wrap{max-width:760px;margin:0 auto;padding:24px 18px}
+    .hero{position:relative;overflow:hidden;border-radius:18px;padding:30px 26px;margin-bottom:26px;background:linear-gradient(135deg,var(--g),#0a1c10 60%,#06120a);border:1px solid #21402b}
+    .hero::after{content:"THE LANE";position:absolute;right:-6px;bottom:-26px;font-family:var(--fd);font-size:96px;color:rgba(255,255,255,.04);line-height:1}
+    .hero .eb{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y)}
+    .hero h1{font-family:var(--fd);font-size:46px;letter-spacing:.03em;line-height:.95;margin:6px 0 10px}
+    .hero p{font-size:15px;color:rgba(255,255,255,.7);max-width:520px;position:relative;z-index:1}
+    .toc{background:var(--c);border:1px solid var(--br);border-radius:12px;padding:18px 20px;margin-bottom:30px}
+    .toc h3{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--y);margin-bottom:12px}
+    .toc ol{list-style:none;counter-reset:t;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .toc li{counter-increment:t}
+    .toc a{font-family:var(--fc);font-size:14px;font-weight:600;color:var(--lg);text-decoration:none;display:flex;gap:9px;align-items:baseline}
+    .toc a:hover{color:var(--y)}
+    .toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--fd);font-size:13px;color:var(--y);opacity:.7}
+    section{margin-bottom:42px;scroll-margin-top:70px}
+    h2{font-family:var(--fd);font-size:32px;letter-spacing:.03em;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+    h2 .n{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(255,209,0,.14);border:1px solid rgba(255,209,0,.3);color:var(--y);font-size:22px;flex-shrink:0}
+    .lead{color:var(--gr);font-size:14px;margin-bottom:16px}
+    .card{background:var(--c);border:1px solid var(--br);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+    .card.warn{border-left:3px solid var(--y);background:rgba(255,209,0,.05)}
+    .card.go{border-left:3px solid var(--su);background:rgba(34,197,94,.05)}
+    .card h4{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin-bottom:8px}
+    ol.steps{margin:8px 0 0 0;padding-left:0;list-style:none;counter-reset:s}
+    ol.steps li{counter-increment:s;position:relative;padding:7px 0 7px 38px;font-size:14.5px;color:var(--lg);border-bottom:1px dashed var(--br)}
+    ol.steps li:last-child{border-bottom:none}
+    ol.steps li::before{content:counter(s);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:var(--y);color:var(--bk);font-family:var(--fc);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .map{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--br);border-radius:10px;overflow:hidden;border:1px solid var(--br);margin-top:10px}
+    .map>div{background:var(--c);padding:10px 13px;font-size:13.5px}
+    .map .k{background:var(--dk);font-family:var(--fc);font-weight:700;color:var(--y);letter-spacing:.04em;display:flex;align-items:center}
+    code{background:var(--dk);border:1px solid var(--br);border-radius:5px;padding:2px 8px;font-family:var(--fc);font-size:14px;color:var(--y);letter-spacing:.03em}
+    strong{color:#fff}
+    .tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    .tbl td{border:1px solid var(--br);padding:9px 12px;color:var(--lg)}
+    .tbl td:first-child{background:var(--dk);font-family:var(--fc);font-weight:700;color:var(--y);width:42%;letter-spacing:.03em}
+    .tip{font-size:13px;color:var(--gr);margin-top:8px;font-style:italic}
+    a.inline{color:var(--y)}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <img src="img/badge.png" alt="RLFC">
+    <div class="t">Staff Guide</div>
+    <a href="admin.html">&#8592; Admin</a>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <div class="eb">Rayners Lane FC &middot; Staff HQ</div>
+      <h1>How To Run<br>The Lane Online</h1>
+      <p>Everything you need — in plain English. If you can use WhatsApp, you can run this website. Take your time, you can't break anything.</p>
+    </div>
+
+    <div class="toc">
+      <h3>What's in this guide</h3>
+      <ol>
+        <li><a href="#what">What the admin is</a></li>
+        <li><a href="#open">Getting in</a></li>
+        <li><a href="#golden">The golden rule</a></li>
+        <li><a href="#sections">Updating each section</a></li>
+        <li><a href="#analytics">Match Day Analytics</a></li>
+        <li><a href="#social">Social media</a></li>
+        <li><a href="#email">Email on your phone</a></li>
+        <li><a href="#trouble">If something looks wrong</a></li>
+      </ol>
+    </div>
+
+    <section id="what">
+      <h2><span class="n">i</span> What is the Staff Admin?</h2>
+      <p class="lead">Your control panel for the whole website.</p>
+      <div class="card">
+        <p>The Staff Admin is a private control panel that lets you update the public Rayners Lane FC website yourself — no developer, no code, no laptop needed. Add a player, post news, log the match-day takings — hit <strong>Save</strong>, and the public site updates on its own in about 30 seconds.</p>
+        <p class="tip">Think of it like the club's social media — but for the actual website.</p>
+      </div>
+    </section>
+
+    <section id="open">
+      <h2><span class="n">1</span> Getting In</h2>
+      <div class="card">
+        <ol class="steps">
+          <li>On your phone or computer, open <code>raynerslanefc.co.uk/admin.html</code></li>
+          <li>Tip: tap the share icon → <strong>Add to Home Screen</strong> so it sits like an app you can open with one tap.</li>
+          <li>Enter the 8-digit PIN: <code>1933&nbsp;2026</code> (the club's founding year + this season).</li>
+          <li>You're in. Tap any coloured tile to open that section. Tap <strong>&#8592; Back</strong> to return. Tap <strong>Lock</strong> when you're done.</li>
+        </ol>
+      </div>
+      <div class="card warn"><h4>Keep it private</h4><p>The PIN is for committee &amp; staff only. Don't share it publicly or post screenshots that show it.</p></div>
+    </section>
+
+    <section id="golden">
+      <h2><span class="n">2</span> The Golden Rule</h2>
+      <div class="card go">
+        <p style="font-size:16px"><strong>Every section has a yellow "Save" button. Nothing goes live until you press it.</strong></p>
+        <p style="margin-top:8px">When you press Save you'll see <span style="color:var(--su)">"Saved to site — live in ~30 seconds"</span>. Wait half a minute, refresh the public page, and your change is there. If you ever see a <span style="color:#EF4444">red message</span> instead, the change didn't save — read it and try again.</p>
+      </div>
+    </section>
+
+    <section id="sections">
+      <h2><span class="n">3</span> Updating Each Section</h2>
+      <p class="lead">What each tile does, and exactly where it shows up for fans.</p>
+      <div class="map">
+        <div class="k">Match Day</div><div>Turns the live scoreboard on/off and sets the next fixture → <strong>home page</strong> next-match badge.</div>
+        <div class="k">Programme</div><div>Match notes, manager's preview, head-to-head → <strong>Programme page</strong>.</div>
+        <div class="k">Squad</div><div>Add players, numbers &amp; positions → <strong>Squad page</strong>.</div>
+        <div class="k">Player Profiles</div><div>Photos, bios &amp; stats → each player's <strong>profile page</strong>.</div>
+        <div class="k">Club News</div><div>Post an article → <strong>News page</strong> &amp; home page.</div>
+        <div class="k">Match Report</div><div>Score + write-up → posts automatically to <strong>News</strong>.</div>
+        <div class="k">Gallery</div><div>Upload match photos → <strong>Gallery page</strong>.</div>
+        <div class="k">Committee</div><div>Club officials → <strong>About page</strong>.</div>
+        <div class="k">Sponsors</div><div>Commercial partners → <strong>home page</strong> sponsors row.</div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h4>The routine for any section</h4>
+        <ol class="steps">
+          <li>Open the tile.</li>
+          <li>Fill in the boxes (or tap <strong>+ Add</strong> to add a player/article/etc.).</li>
+          <li>Press the yellow <strong>Save</strong> button.</li>
+          <li>Wait for the green tick, then check the public page.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="analytics">
+      <h2><span class="n">4</span> Match Day Analytics</h2>
+      <p class="lead">The boardroom numbers — chairman access only.</p>
+      <div class="card">
+        <p>This is where we track the club like a business: attendance, takings (gate, programmes, merch), which players were available and which staff checked in — with charts that build up over the season.</p>
+        <ol class="steps">
+          <li>Tap <strong>Match Day Analytics</strong>. You'll be asked for the analytics password (default <code>petesinghchairman</code>).</li>
+          <li>Fill in the match: date, opponent, score, attendance and the takings boxes.</li>
+          <li>Tick the players who were available and the staff who checked in (these are pulled from your Squad &amp; Committee).</li>
+          <li>Tap <strong>+ Add Match to Log</strong>, then <strong>Save Analytics to Site</strong>.</li>
+          <li>The summary cards and charts update automatically.</li>
+        </ol>
+        <p class="tip">To change the password, open Analytics and tap <strong>Change Analytics Password</strong>.</p>
+      </div>
+    </section>
+
+    <section id="social">
+      <h2><span class="n">5</span> Social Media</h2>
+      <div class="card">
+        <p>Open to all staff. The <strong>Social Media</strong> tile holds The Lane's full posting playbook for the season — content pillars, a Monday-to-Sunday match-week rhythm, a month-by-month plan and our hashtags. There's also a <strong>Post Planner</strong>: jot upcoming posts, hit Save, and everyone on staff sees the plan.</p>
+        <p class="tip">Golden rule of socials: shoot everything vertical on your phone, tag everyone, and reply to every comment.</p>
+      </div>
+    </section>
+
+    <section id="email">
+      <h2><span class="n">6</span> Your Club Email on Your Phone</h2>
+      <p class="lead">Set up your <strong>@raynerslanefc.co.uk</strong> address (hosted by one.com) in your phone's Mail app.</p>
+      <div class="card warn"><h4>You'll need</h4><p>Your full club email (e.g. <code>you@raynerslanefc.co.uk</code>) and the password you were given. If you don't have these, ask the chairman.</p></div>
+
+      <div class="card">
+        <h4>iPhone / iPad</h4>
+        <ol class="steps">
+          <li>Open <strong>Settings</strong> → <strong>Mail</strong> → <strong>Accounts</strong> → <strong>Add Account</strong>.</li>
+          <li>Choose <strong>Other</strong> → <strong>Add Mail Account</strong>.</li>
+          <li>Enter your name, your full club email, your password, a description (e.g. "RLFC"). Tap <strong>Next</strong>.</li>
+          <li>Make sure <strong>IMAP</strong> is selected, then enter the server settings in the table below.</li>
+          <li>Tap <strong>Save</strong>. Your club email now arrives in the Mail app.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h4>Android (Gmail app)</h4>
+        <ol class="steps">
+          <li>Open <strong>Gmail</strong> → tap your profile circle → <strong>Add another account</strong>.</li>
+          <li>Choose <strong>Other</strong> and type your full club email → <strong>Next</strong>.</li>
+          <li>Choose <strong>Personal (IMAP)</strong> → enter your password.</li>
+          <li>Enter the incoming &amp; outgoing server settings from the table below.</li>
+          <li>Finish — your club email syncs into Gmail.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h4>one.com server settings (the important bit)</h4>
+        <table class="tbl">
+          <tr><td>Email / Username</td><td>your full address, e.g. you@raynerslanefc.co.uk</td></tr>
+          <tr><td>Password</td><td>your email password</td></tr>
+          <tr><td>Incoming (IMAP) server</td><td><code>imap.one.com</code></td></tr>
+          <tr><td>IMAP port / security</td><td><code>993</code> &middot; SSL/TLS</td></tr>
+          <tr><td>Outgoing (SMTP) server</td><td><code>send.one.com</code></td></tr>
+          <tr><td>SMTP port / security</td><td><code>465</code> &middot; SSL/TLS</td></tr>
+        </table>
+        <p class="tip">Use the SAME username (your full email) and password for both incoming and outgoing. If sending fails, double-check the outgoing server is <code>send.one.com</code> on port 465.</p>
+      </div>
+      <div class="card go"><h4>Prefer the browser?</h4><p>You can always read club email at <a class="inline" href="https://www.one.com/webmail/" target="_blank">one.com/webmail</a> — log in with your full address and password. (The <strong>Club Email</strong> tile in the admin links here too.)</p></div>
+    </section>
+
+    <section id="trouble">
+      <h2><span class="n">7</span> "I Saved It But Don't See It"</h2>
+      <div class="card">
+        <ol class="steps">
+          <li><strong>Wait 60 seconds.</strong> The site rebuilds itself after each save — give it a moment.</li>
+          <li><strong>Hard refresh the page.</strong> Your phone may be showing an old saved copy. On iPhone, close the tab and reopen; on a computer press <code>Cmd/Ctrl + Shift + R</code>.</li>
+          <li><strong>Check you got the green tick.</strong> No green message = it didn't save. Red message = read it (usually try again).</li>
+          <li>Still stuck? Note exactly what you did and tell the chairman — nothing is ever lost, the site saves a full history.</li>
+        </ol>
+      </div>
+      <div class="card warn"><h4>Remember</h4><p>You genuinely cannot break the website from here. Worst case, a save can be undone. Be brave, post often, make The Lane look huge. 💛</p></div>
+    </section>
+
+    <p style="text-align:center;margin-top:30px"><a href="admin.html" style="display:inline-block;background:var(--y);color:var(--bk);font-family:var(--fc);font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:14px 28px;border-radius:8px;text-decoration:none">&#8592; Back to the Admin Panel</a></p>
+  </div>
+</body>
+</html>
