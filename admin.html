@@ -240,6 +240,20 @@
         </button>
       </div>
 
+      <div class="sect-lbl">Spotlight</div>
+      <div class="tile-grid">
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('motm')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.5-.8z"/></svg></span>
+          <div class="tile-name">Man of the Match</div><div class="tile-desc">Feature your star &rarr; home page</div>
+        </button>
+        <button class="tile" style="--accent:#22C55E" onclick="openPanel('signing')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 11-5.7M17 14v6M14 17h6"/></svg></span>
+          <div class="tile-name">New Signing</div><div class="tile-desc">Announce a signing &rarr; home page</div>
+        </button>
+      </div>
+
       <div class="sect-lbl">Team &amp; Content</div>
       <div class="tile-grid">
         <button class="tile" style="--accent:#FFD100" onclick="openPanel('squad')">
@@ -585,6 +599,57 @@
       </div>
     </div>
 
+    <!-- MAN OF THE MATCH -->
+    <div class="panel" id="panel-motm">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#11088; Man of the Match</div></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Pick your star — it appears in a floating card by the hero on the home page. Leave any box blank and it just won't show. Newest one is the one that's live.</p></div>
+      <div class="slbl">New Man of the Match</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Player</label><input type="text" id="mm-name" list="mm-squad" placeholder="Start typing a name…"><datalist id="mm-squad"></datalist></div>
+        <div class="field"><label class="fl">Position</label><input type="text" id="mm-pos" placeholder="Forward"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Vs (opponent)</label><input type="text" id="mm-opp" placeholder="Harefield United"></div>
+        <div class="field"><label class="fl">Goals (optional)</label><input type="number" id="mm-goals" min="0" placeholder="0"></div>
+      </div>
+      <div class="field">
+        <label class="fl">Headshot (optional)</label>
+        <div class="iup-wrap" id="mm-iw"><input type="file" accept="image/*" onchange="prevImg('mm',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload headshot</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-prev" id="mm-ip"><img id="mm-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('mm')">&#10005; Remove</button></div>
+      </div>
+      <div class="field"><label class="fl">Short description (optional)</label><textarea id="mm-desc" rows="2" placeholder="Ran the show from midfield and grabbed the winner."></textarea></div>
+      <button class="save sec" onclick="addMotm()">+ Add &amp; Make Live</button>
+      <div class="div"></div>
+      <div class="slbl" id="mm-cnt">Previous Winners</div>
+      <div id="mm-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveMotm()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-motm"></div>
+    </div>
+
+    <!-- NEW SIGNING -->
+    <div class="panel" id="panel-signing">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#127881; New Signing</div></div>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p>Announce a new signing — it appears as a "NEW SIGNING" card near the top of the home page. Optional boxes stay hidden if blank. Newest is the one that shows.</p></div>
+      <div class="slbl">Announce a Signing</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Player Name</label><input type="text" id="sg-name" placeholder="Joe Smith"></div>
+        <div class="field"><label class="fl">Position</label><input type="text" id="sg-pos" placeholder="Midfielder"></div>
+      </div>
+      <div class="field"><label class="fl">Previous Club (optional)</label><input type="text" id="sg-from" placeholder="e.g. Harrow Borough"></div>
+      <div class="field">
+        <label class="fl">Photo (optional)</label>
+        <div class="iup-wrap" id="sg-iw"><input type="file" accept="image/*" onchange="prevImg('sg',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-prev" id="sg-ip"><img id="sg-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('sg')">&#10005; Remove</button></div>
+      </div>
+      <div class="field"><label class="fl">Welcome message (optional)</label><textarea id="sg-desc" rows="2" placeholder="The Lane is delighted to welcome…"></textarea></div>
+      <button class="save sec" onclick="addSigning()">+ Announce &amp; Make Live</button>
+      <div class="div"></div>
+      <div class="slbl" id="sg-cnt">Recent Signings</div>
+      <div id="sg-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveSigning()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-signing"></div>
+    </div>
+
     <!-- SOCIAL MEDIA -->
     <style>
       .soc-pill{display:inline-block;background:color-mix(in srgb,#06B6D4 16%,transparent);border:1px solid color-mix(in srgb,#06B6D4 34%,transparent);color:#22d3ee;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin:0 6px 6px 0}
@@ -890,6 +955,8 @@ function openPanel(name) {
   if (name === 'matchday')  initMD();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
+  if (name === 'motm')      renderMotm();
+  if (name === 'signing')   renderSigning();
 }
 function back() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
@@ -928,6 +995,8 @@ function loadAll() {
   fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
   fetchJSON('config',    function(d) { if (d && d.analyticsHash) { analyticsHash = d.analyticsHash; } });
   fetchJSON('social',    function(d) { if (d && d.posts) { socialPosts = d.posts; } });
+  fetchJSON('motm',      function(d) { if (d && d.entries) { motms = d.entries; } });
+  fetchJSON('signing',   function(d) { if (d && d.entries) { signings = d.entries; } });
   fetchJSON('matchday',  function(d) {
     if (!d) return;
     isLive = d.isLive || false;
@@ -1525,6 +1594,74 @@ function saveSocial() {
   pushToGitHub('social', { posts: socialPosts, updatedAt: new Date().toISOString() }, 'dep-social');
   toast('Planner saved ✓');
 }
+
+// ── MAN OF THE MATCH ──
+var motms = [];
+function renderMotm() {
+  // datalist of squad names for quick pick
+  var dl = document.getElementById('mm-squad');
+  if (dl) dl.innerHTML = squad.map(function(p){ return '<option value="'+esc(p.name)+'">'; }).join('');
+  var el = document.getElementById('mm-list');
+  document.getElementById('mm-cnt').textContent = 'Previous Winners (' + motms.length + ')';
+  el.innerHTML = motms.length
+    ? motms.map(function(m, i){
+        return '<div class="li">' +
+          (m.photo ? '<img src="'+m.photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<span class="li-num">&#11088;</span>') +
+          '<div class="li-main"><div class="li-name">'+esc(m.name||'')+(i===0?' <span style="color:var(--y);font-size:10px">● LIVE</span>':'')+'</div>' +
+          '<div class="li-sub">'+esc(m.position||'')+(m.opponent?' &middot; vs '+esc(m.opponent):'')+(m.goals?' &middot; '+m.goals+' goal'+(m.goals>1?'s':''):'')+'</div></div>' +
+          '<button class="li-del" onclick="removeMotm(\''+m.id+'\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No winners yet</div>';
+}
+function addMotm() {
+  var name = gv('mm-name');
+  if (!name) { toast('Enter a player name', true); return; }
+  var entry = { id:'motm-'+Date.now(), date:new Date().toISOString().split('T')[0],
+    name:name, position:gv('mm-pos'), opponent:gv('mm-opp'),
+    goals:parseInt(gv('mm-goals'))||0, description:gv('mm-desc'), photo:'' };
+  var finish = function(){
+    motms.unshift(entry); renderMotm();
+    setVal('mm-name',''); setVal('mm-pos',''); setVal('mm-opp',''); setVal('mm-goals',''); setVal('mm-desc','');
+    if (imgStore['mm']) rmImg('mm');
+    toast(name + ' set as MOTM ✓ — press Save');
+  };
+  if (imgStore['mm']) { uploadImg('mm','',function(path){ entry.photo = path || imgStore['mm'].dataUrl; finish(); }); }
+  else finish();
+}
+function removeMotm(id) { if (!confirm('Remove this winner?')) return; motms = motms.filter(function(m){return m.id!==id;}); renderMotm(); }
+function saveMotm() { pushToGitHub('motm', { entries: motms, updatedAt: new Date().toISOString() }, 'dep-motm'); toast('Man of the Match saved ✓'); }
+
+// ── NEW SIGNING ──
+var signings = [];
+function renderSigning() {
+  var el = document.getElementById('sg-list');
+  document.getElementById('sg-cnt').textContent = 'Recent Signings (' + signings.length + ')';
+  el.innerHTML = signings.length
+    ? signings.map(function(s, i){
+        return '<div class="li">' +
+          (s.photo ? '<img src="'+s.photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<span class="li-num">&#127881;</span>') +
+          '<div class="li-main"><div class="li-name">'+esc(s.name||'')+(i===0?' <span style="color:var(--su);font-size:10px">● LIVE</span>':'')+'</div>' +
+          '<div class="li-sub">'+esc(s.position||'')+(s.from?' &middot; from '+esc(s.from):'')+'</div></div>' +
+          '<button class="li-del" onclick="removeSigning(\''+s.id+'\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No signings yet</div>';
+}
+function addSigning() {
+  var name = gv('sg-name');
+  if (!name) { toast('Enter a player name', true); return; }
+  var entry = { id:'sign-'+Date.now(), date:new Date().toISOString().split('T')[0],
+    name:name, position:gv('sg-pos'), from:gv('sg-from'), description:gv('sg-desc'), photo:'' };
+  var finish = function(){
+    signings.unshift(entry); renderSigning();
+    setVal('sg-name',''); setVal('sg-pos',''); setVal('sg-from',''); setVal('sg-desc','');
+    if (imgStore['sg']) rmImg('sg');
+    toast(name + ' announced ✓ — press Save');
+  };
+  if (imgStore['sg']) { uploadImg('sg','',function(path){ entry.photo = path || imgStore['sg'].dataUrl; finish(); }); }
+  else finish();
+}
+function removeSigning(id) { if (!confirm('Remove this signing?')) return; signings = signings.filter(function(s){return s.id!==id;}); renderSigning(); }
+function saveSigning() { pushToGitHub('signing', { entries: signings, updatedAt: new Date().toISOString() }, 'dep-signing'); toast('Signing saved ✓'); }
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
 

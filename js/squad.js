@@ -96,6 +96,11 @@ function renderSquad(players) {
       card.href = 'player.html?id=' + id;
       card.className = 'player-card';
       card.style.textDecoration = 'none';
+      // Open a profile pop-up instead of navigating (link still works if JS off)
+      card.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        openPlayerModal(id, { name: name, number: num, position: pos, photo: (p.photo || ''), fallback: img });
+      });
 
       var imgWrap = document.createElement('div');
       imgWrap.className = 'player-card__img';
@@ -128,4 +133,85 @@ function renderSquad(players) {
     section.appendChild(row);
     grid.appendChild(section);
   });
+}
+
+/* ── PLAYER PROFILE POP-UP ── */
+var _profiles = {};
+(function(){
+  fetch('data/players.json?t=' + Date.now())
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if (d && d.players) d.players.forEach(function(p){ _profiles[p.id] = p; }); })
+    .catch(function(){});
+  // inject modal styles + container once
+  var st = document.createElement('style');
+  st.textContent =
+    '.pm-overlay{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:99999!important;background:rgba(6,6,6,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:18px;opacity:0;transition:opacity .2s}' +
+    '.pm-overlay.on{display:flex!important;opacity:1}' +
+    '.pm-card{position:relative;width:100%;max-width:440px;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#141414,#0b0b0b);border:1px solid var(--border);border-radius:20px;transform:translateY(14px) scale(.98);transition:transform .25s cubic-bezier(.2,.7,.2,1)}' +
+    '.pm-overlay.on .pm-card{transform:none}' +
+    '.pm-hero{position:relative;background:linear-gradient(160deg,var(--green) 0%,#06120a 100%);padding:26px 24px 18px;display:flex;align-items:flex-end;gap:18px;overflow:hidden}' +
+    '.pm-hero::after{content:"";position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,0,.18),transparent 70%)}' +
+    '.pm-photo{width:104px;height:104px;border-radius:16px;object-fit:cover;border:2px solid rgba(255,255,255,.15);background:#000;flex-shrink:0;position:relative;z-index:1}' +
+    '.pm-num{position:absolute;top:18px;right:20px;font-family:var(--font-d);font-size:64px;color:rgba(255,255,255,.12);line-height:1;z-index:0}' +
+    '.pm-id{position:relative;z-index:1}' +
+    '.pm-pos{display:inline-block;font-family:var(--font-c);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;padding:4px 10px;border-radius:4px;margin-bottom:8px}' +
+    '.pm-name{font-family:var(--font-d);font-size:34px;letter-spacing:.03em;color:#fff;line-height:.95}' +
+    '.pm-nat{font-family:var(--font-c);font-size:12px;letter-spacing:.08em;color:rgba(255,255,255,.6);margin-top:4px}' +
+    '.pm-body{padding:20px 24px 26px}' +
+    '.pm-nick{font-family:var(--font-c);font-size:14px;color:var(--yellow);letter-spacing:.06em;margin-bottom:12px}' +
+    '.pm-bio{font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.7}' +
+    '.pm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:18px;background:var(--border);border-radius:10px;overflow:hidden}' +
+    '.pm-stat{background:#111;padding:14px 6px;text-align:center}' +
+    '.pm-stat b{display:block;font-family:var(--font-d);font-size:26px;color:var(--yellow);line-height:1}' +
+    '.pm-stat span{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}' +
+    '.pm-close{position:absolute;top:14px;right:14px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;line-height:1}' +
+    '.pm-empty{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:14px;letter-spacing:.04em}';
+  document.head.appendChild(st);
+  var ov = document.createElement('div');
+  ov.className = 'pm-overlay'; ov.id = 'pm-overlay';
+  ov.innerHTML = '<div class="pm-card" id="pm-card"></div>';
+  ov.addEventListener('click', function(e){ if (e.target === ov) closePlayerModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePlayerModal(); });
+  document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(ov); });
+})();
+
+function pmEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function closePlayerModal(){ var o=document.getElementById('pm-overlay'); if(o) o.classList.remove('on'); document.body.style.overflow=''; }
+
+function openPlayerModal(id, basic) {
+  var p = _profiles[id] || {};
+  var name = p.name || basic.name || 'TBC';
+  var pos  = p.position || basic.position || '';
+  var num  = p.number || basic.number || '';
+  var photo = p.photo || basic.photo || '';
+  var colour = {Goalkeeper:'#1A5C32',Defender:'#1A3A6E',Midfielder:'#6B3A1F',Forward:'#8B0000'}[pos] || 'var(--green)';
+  var img = photo
+    ? '<img class="pm-photo" src="'+pmEsc(photo)+'" alt="'+pmEsc(name)+'">'
+    : '<img class="pm-photo" src="'+pmEsc(basic.fallback||'')+'" alt="'+pmEsc(name)+'" onerror="this.style.display=\'none\'">';
+  var hasProfile = !!(p.bio || p.nickname || p.nationality || p.apps || p.goals || p.assists);
+  var stats = hasProfile
+    ? '<div class="pm-stats">' +
+        '<div class="pm-stat"><b>'+(p.apps||0)+'</b><span>Apps</span></div>' +
+        '<div class="pm-stat"><b>'+(p.goals||0)+'</b><span>Goals</span></div>' +
+        '<div class="pm-stat"><b>'+(p.assists||0)+'</b><span>Assists</span></div>' +
+        '<div class="pm-stat"><b>'+(num||'-')+'</b><span>Squad No</span></div>' +
+      '</div>'
+    : '';
+  var body = '<div class="pm-body">' +
+    (p.nickname ? '<div class="pm-nick">"'+pmEsc(p.nickname)+'"</div>' : '') +
+    (p.bio ? '<div class="pm-bio">'+pmEsc(p.bio)+'</div>' : (hasProfile ? '' : '<div class="pm-empty">Full profile coming soon.</div>')) +
+    stats +
+  '</div>';
+  document.getElementById('pm-card').innerHTML =
+    '<button class="pm-close" onclick="closePlayerModal()" aria-label="Close">&times;</button>' +
+    '<div class="pm-hero">' +
+      (num ? '<div class="pm-num">'+pmEsc(num)+'</div>' : '') + img +
+      '<div class="pm-id">' +
+        (pos ? '<span class="pm-pos" style="background:'+colour+'">'+pmEsc(pos)+'</span>' : '') +
+        '<div class="pm-name">'+pmEsc(name)+'</div>' +
+        (p.nationality ? '<div class="pm-nat">'+pmEsc(p.nationality)+'</div>' : '') +
+      '</div>' +
+    '</div>' + body;
+  var o = document.getElementById('pm-overlay');
+  o.classList.add('on'); document.body.style.overflow = 'hidden';
 }
