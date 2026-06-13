@@ -261,48 +261,30 @@
 
 <!-- ══════════ OFFICIAL PARTNERS ══════════ -->
 <style>
-  .partners{background:linear-gradient(180deg,#0c0c0c,#080808);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:34px 0 30px;position:relative;overflow:hidden}
-  .partners::before{content:"";position:absolute;left:50%;top:-1px;width:120px;height:3px;background:var(--yellow);transform:translateX(-50%)}
-  .partners__head{text-align:center;margin-bottom:22px}
-  .partners__eyebrow{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--yellow)}
-  .partners__sub{font-family:var(--font-c);font-size:12px;letter-spacing:.1em;color:var(--grey);margin-top:4px}
-  .ptr-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:14px}
-  .ptr-tier-lbl{width:100%;text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:8px 0 2px}
-  .ptr{display:flex;flex-direction:column;align-items:center;gap:9px;text-decoration:none;transition:transform .2s}
-  .ptr:hover{transform:translateY(-4px)}
-  .ptr-chip{background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px -14px rgba(0,0,0,.8);overflow:hidden}
-  .ptr-chip img{width:100%;height:100%;object-fit:contain}
-  .ptr-chip .txt{font-family:var(--font-d);letter-spacing:.03em;color:#0d0d0d;text-align:center;padding:0 14px;line-height:.95}
-  .ptr--principal .ptr-chip{width:220px;height:120px;padding:18px 24px}
-  .ptr--principal .ptr-chip .txt{font-size:30px}
-  .ptr--mid .ptr-chip{width:160px;height:96px;padding:14px 18px}
-  .ptr--mid .ptr-chip .txt{font-size:22px}
-  .ptr-role{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow)}
-  .ptr-note{font-family:var(--font-c);font-size:10px;letter-spacing:.06em;color:var(--grey)}
-  .ptr-cta{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:160px;height:96px;border:1.5px dashed rgba(255,209,0,.5);border-radius:14px;text-decoration:none;transition:.2s}
-  .ptr-cta:hover{background:rgba(255,209,0,.06);border-color:var(--yellow)}
-  .ptr-cta b{font-family:var(--font-d);font-size:18px;letter-spacing:.03em;color:var(--yellow)}
-  .ptr-cta span{font-family:var(--font-c);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
-  .ptr-aff{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);text-align:center}
-  .ptr-aff__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:12px}
-  .ptr-aff__row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px}
-  .aff-chip{background:#fff;border-radius:10px;height:64px;padding:10px 16px;display:flex;align-items:center;justify-content:center}
-  .aff-chip img{height:100%;width:auto;object-fit:contain}
-  .aff-chip .txt{font-family:var(--font-c);font-weight:700;font-size:13px;color:#0d0d0d;letter-spacing:.04em}
-  @media(max-width:600px){.ptr--principal .ptr-chip{width:150px;height:90px}.ptr--principal .ptr-chip .txt{font-size:20px}.ptr--mid .ptr-chip{width:128px;height:78px}.ptr--mid .ptr-chip .txt{font-size:16px}.ptr-cta{width:128px;height:78px}}
+  .partners{padding:22px 0 20px;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+  .partners__eyebrow{text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:16px}
+  .ptr-strip{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 44px}
+  .ptr{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;opacity:.9;transition:transform .2s,opacity .2s}
+  .ptr:hover{transform:translateY(-2px);opacity:1}
+  .ptr img{display:block;width:auto;object-fit:contain;filter:drop-shadow(0 1px 7px rgba(255,255,255,.12))}
+  .ptr--principal img{height:50px;max-width:158px}
+  .ptr--mid img{height:38px;max-width:120px}
+  .ptr .txt{font-family:var(--font-d);color:#fff;letter-spacing:.03em;font-size:22px;line-height:1}
+  .ptr-cta{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;text-decoration:none;padding-left:18px;margin-left:6px;border-left:1px solid rgba(255,255,255,.14)}
+  .ptr-cta b{font-family:var(--font-d);font-size:17px;letter-spacing:.03em;color:var(--yellow);line-height:1}
+  .ptr-cta span{font-family:var(--font-c);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}
+  .ptr-aff{margin-top:16px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 20px}
+  .ptr-aff__lbl{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+  .ptr-aff img{height:30px;width:auto;max-width:120px;object-fit:contain;opacity:.85;filter:drop-shadow(0 1px 6px rgba(255,255,255,.16));transition:opacity .2s}
+  .ptr-aff a:hover img{opacity:1}
+  .ptr-aff .txt{font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.5)}
+  @media(max-width:600px){.ptr--principal img{height:44px}.ptr--mid img{height:34px}.ptr-strip{gap:20px 28px}.ptr-cta{border-left:none;padding-left:0;margin-left:0;align-items:center}}
 </style>
 <section class="partners">
   <div class="container">
-    <div class="partners__head">
-      <div class="partners__eyebrow">Official Partners 2026&ndash;27</div>
-      <div class="partners__sub">The businesses backing The Lane</div>
-    </div>
-    <div id="partners-main" class="ptr-row"></div>
-    <div id="partners-sec" class="ptr-row"></div>
-    <div class="ptr-aff" id="partners-aff" style="display:none">
-      <div class="ptr-aff__lbl">Proudly part of</div>
-      <div class="ptr-aff__row" id="partners-aff-row"></div>
-    </div>
+    <div class="partners__eyebrow">Official Partners 2026&ndash;27</div>
+    <div class="ptr-strip" id="partners-strip"></div>
+    <div class="ptr-aff" id="partners-aff" style="display:none"></div>
   </div>
 </section>
 
@@ -529,47 +511,40 @@
     wrap.style.display = 'block';
   }
 
-  // Official Partners band — live from data/sponsors.json (editable in admin).
-  // Logos sit on white chips; if a logo file is missing it shows the name as
-  // text, so it always looks complete and lights up when logos are added.
+  // Official Partners — a tight strip of logos sitting directly on the dark
+  // brand (no boxes), live from data/sponsors.json. Falls back to the name as
+  // text only if a logo file is missing.
   function ptrEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function ptrChip(s, cls) {
+  function ptrLogo(s, cls) {
     var inner = s.logo
       ? '<img src="'+ptrEsc(s.logo)+'" alt="'+ptrEsc(s.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(s.name).replace(/'/g,'')+'</span>\'">'
       : '<span class="txt">'+ptrEsc(s.name)+'</span>';
-    var body = '<span class="ptr-chip">'+inner+'</span>' +
-      (s.role ? '<span class="ptr-role">'+ptrEsc(s.role)+'</span>' : '') +
-      (s.note ? '<span class="ptr-note">'+ptrEsc(s.note)+'</span>' : '');
+    var title = ptrEsc(s.name) + (s.role ? ' — ' + ptrEsc(s.role) : '');
     return s.url
-      ? '<a class="ptr '+cls+'" href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener">'+body+'</a>'
-      : '<div class="ptr '+cls+'">'+body+'</div>';
+      ? '<a class="ptr '+cls+'" href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener" title="'+title+'">'+inner+'</a>'
+      : '<div class="ptr '+cls+'" title="'+title+'">'+inner+'</div>';
   }
   async function renderPartners() {
-    var main = document.getElementById('partners-main'), sec = document.getElementById('partners-sec');
-    if (!main || !sec) return;
+    var strip = document.getElementById('partners-strip');
+    if (!strip) return;
     try {
       var d = await (await fetch('data/sponsors.json?t=' + Date.now())).json();
       var list = d.sponsors || [];
       var principal = list.filter(function(s){ return /principal|main/i.test(s.tier||''); });
       var others = list.filter(function(s){ return !/principal|main/i.test(s.tier||''); });
-      main.innerHTML = principal.map(function(s){ return ptrChip(s,'ptr--principal'); }).join('');
-      var secHtml = '';
-      var seenTier = '';
-      others.forEach(function(s){
-        if ((s.tier||'') !== seenTier) { secHtml += '<div class="ptr-tier-lbl">'+ptrEsc(s.tier||'Partner')+'</div>'; seenTier = s.tier||''; }
-        secHtml += ptrChip(s,'ptr--mid');
-      });
-      secHtml += '<a class="ptr-cta" href="investment.html"><b>Your Brand Here</b><span>2026-27 Packages &rarr;</span></a>';
-      sec.innerHTML = secHtml;
-      // Affiliations
+      strip.innerHTML =
+        principal.map(function(s){ return ptrLogo(s,'ptr--principal'); }).join('') +
+        others.map(function(s){ return ptrLogo(s,'ptr--mid'); }).join('') +
+        '<a class="ptr-cta" href="investment.html"><b>Your Brand Here</b><span>Partner with us &rarr;</span></a>';
       var aff = d.affiliations || [];
       if (aff.length) {
-        document.getElementById('partners-aff').style.display = 'block';
-        document.getElementById('partners-aff-row').innerHTML = aff.map(function(a){
-          var inner = a.logo
-            ? '<img src="'+ptrEsc(a.logo)+'" alt="'+ptrEsc(a.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(a.name).replace(/'/g,'')+'</span>\'">'
-            : '<span class="txt">'+ptrEsc(a.name)+'</span>';
-          return a.url ? '<a class="aff-chip" href="'+ptrEsc(a.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<div class="aff-chip">'+inner+'</div>';
+        var a = document.getElementById('partners-aff');
+        a.style.display = 'flex';
+        a.innerHTML = '<span class="ptr-aff__lbl">Proudly part of</span>' + aff.map(function(x){
+          var inner = x.logo
+            ? '<img src="'+ptrEsc(x.logo)+'" alt="'+ptrEsc(x.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(x.name).replace(/'/g,'')+'</span>\'">'
+            : '<span class="txt">'+ptrEsc(x.name)+'</span>';
+          return x.url ? '<a href="'+ptrEsc(x.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<span>'+inner+'</span>';
         }).join('');
       }
     } catch (e) {}
