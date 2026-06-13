@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
-Disallow: /programme-admin.html
-Sitemap: https://www.raynerslanefc.co.uk/sitemap.xml
+
+Sitemap: https://raynerslanefc.co.uk/sitemap.xml
