@@ -3,12 +3,14 @@
     {
       "name": "Pete Singh",
       "role": "Club Chairman",
-      "featured": true
+      "featured": true,
+      "photo": "img/committee/pete-singh.jpg"
     },
     {
       "name": "Nigel Hanlon",
       "role": "Vice Chairman",
-      "note": "Hanlon Dry Lining \u2014 Home Shirt Sponsor"
+      "note": "Hanlon Dry Lining \u2014 Home Shirt Sponsor",
+      "photo": "img/committee/nigel-hanlon.jpg"
     },
     {
       "name": "Martin Noblett",
