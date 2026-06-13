@@ -788,6 +788,21 @@ function renderSquad() {
 }
 
 // ── NEWS ──
+// Merge a new article into the LATEST live news before saving. Guards against
+// a stale/empty in-memory list wiping existing articles (which once happened
+// on a test save and lost the launch story).
+function commitArticle(art, depId, after) {
+  fetchJSON('news', function(d) {
+    var list = (d && d.articles) ? d.articles : articles;
+    list = list.filter(function(a) { return a.id !== art.id; });
+    list.unshift(art);
+    articles = list;
+    renderNews();
+    pushToGitHub('news', { articles: articles, updatedAt: new Date().toISOString() }, depId || 'dep-news');
+    if (after) after();
+  });
+}
+
 function publishArticle() {
   var title = gv('nw-title');
   var body  = gv('nw-body');
@@ -805,19 +820,17 @@ function publishArticle() {
   if (imgStore['nw']) {
     uploadImg('nw', tok, function(path) {
       if (path) art.image = path;
-      articles.unshift(art);
-      renderNews();
-      pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-news');
-      setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
-      rmImg('nw');
-      toast('Article published ✓');
+      commitArticle(art, 'dep-news', function() {
+        setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+        rmImg('nw');
+        toast('Article published ✓');
+      });
     });
   } else {
-    articles.unshift(art);
-    renderNews();
-    pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-news');
-    setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
-    toast('Article published ✓');
+    commitArticle(art, 'dep-news', function() {
+      setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+      toast('Article published ✓');
+    });
   }
 }
 function deleteArticle(id) {
@@ -1001,11 +1014,10 @@ function publishMatchReport() {
     excerpt: excerpt,
     body: fullBody,
   };
-  articles.unshift(art);
-  renderNews();
-  pushToGitHub('news', {articles:articles, updatedAt:new Date().toISOString()}, 'dep-matchreport');
-  setVal('mr-opp',''); setVal('mr-body',''); setVal('mr-scorers','');
-  toast('Match report published ✓');
+  commitArticle(art, 'dep-matchreport', function() {
+    setVal('mr-opp',''); setVal('mr-body',''); setVal('mr-scorers','');
+    toast('Match report published ✓');
+  });
 };
 
 // ── MATCH DAY ANALYTICS ──
