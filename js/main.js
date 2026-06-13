@@ -61,6 +61,21 @@ async function loadMatchDay() {
 
   var m = Object.assign({}, defaults, matchday || {});
 
+  // AUTO-FIXTURES: if the Football Web Pages feed is configured, let the real
+  // league fixture set the next match + countdown automatically (overrides the
+  // manual one). A live match the staff have toggled always takes priority.
+  if (!m.isLive) {
+    try {
+      var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
+      if (fx && fx.configured && fx.next && fx.next.opponent) {
+        m.opponent = fx.next.opponent;
+        m.isHome = fx.next.isHome;
+        m.competition = fx.next.competition || m.competition;
+        m.date = (fx.next.date || '') + 'T' + (fx.next.kickoff || '15:00') + ':00';
+      }
+    } catch (e) {}
+  }
+
   // The admin panel saves `opponent` + `isHome`. Build the fixture from those
   // (home team is always listed first) so the saved match shows on the site.
   var RLFC = 'Rayners Lane FC';
