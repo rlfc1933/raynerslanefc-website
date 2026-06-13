@@ -1,0 +1,17 @@
+{
+  "name": "Lane Staff HQ",
+  "short_name": "Lane HQ",
+  "description": "Rayners Lane FC staff control panel — update the website from your phone.",
+  "start_url": "/admin.html",
+  "scope": "/admin.html",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#FFD100",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "img/badge.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/badge.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["sports", "productivity"],
+  "lang": "en-GB"
+}

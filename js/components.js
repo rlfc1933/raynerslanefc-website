@@ -451,6 +451,34 @@ function initComponents(currentPage) {
     navigator.serviceWorker.register('/sw.js').catch(function(){});
   }
 
+  // ── ONE-TAP INSTALL ("Add to Home Screen") ──
+  // Captures the native install prompt (Android/Chrome) so any button can
+  // trigger it; on iOS/desktop it shows the manual steps instead.
+  window._lanePrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    window._lanePrompt = e;
+    document.querySelectorAll('.js-install').forEach(function(b){ b.style.display = ''; });
+  });
+  window.addEventListener('appinstalled', function(){
+    document.querySelectorAll('.js-install').forEach(function(b){ b.style.display = 'none'; });
+  });
+  // Already installed? Hide install buttons.
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    document.querySelectorAll('.js-install').forEach(function(b){ b.style.display = 'none'; });
+  }
+  window.laneInstall = function() {
+    if (window._lanePrompt) {
+      window._lanePrompt.prompt();
+      window._lanePrompt.userChoice.finally(function(){ window._lanePrompt = null; });
+      return;
+    }
+    var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(iOS
+      ? 'To install The Lane app:\n\n1. Tap the Share button (the square with an arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap Add — done!'
+      : 'To install The Lane app:\n\nOpen your browser menu (⋮) and choose "Install app" or "Add to Home screen".');
+  };
+
 
   // ── PWA INSTALL PROMPT ──
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;

@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Admin | Rayners Lane FC</title>
   <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="manifest" href="/admin-manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lane HQ">
+  <link rel="apple-touch-icon" href="img/badge.png">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
@@ -116,6 +122,8 @@
     .app-hdr{background:rgba(10,10,10,.82);backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--br)}
     .app-hdr img{width:34px;height:34px;filter:drop-shadow(0 2px 6px rgba(255,209,0,.35))}
     .app-ttl{font-family:var(--fd);font-size:22px;letter-spacing:.06em;flex:1;background:linear-gradient(90deg,#fff,var(--y));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .install-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#fff3bf,var(--y));color:#0d0d0d;border:none;border-radius:8px;padding:7px 12px;font-family:var(--fc);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px -4px rgba(255,209,0,.6)}
+    .install-btn:active{transform:scale(.96)}
     .dash{padding:18px 16px 60px;max-width:640px;margin:0 auto}
 
     .hq-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 20px;margin-bottom:18px;background:linear-gradient(135deg,var(--g) 0%,#0a1c10 60%,#06120a 100%);border:1px solid #21402b}
@@ -190,7 +198,11 @@
   <div class="app-hdr">
     <img src="img/badge.png" alt="RLFC">
     <div class="app-ttl">Admin Panel</div>
-    <a href="index.html" style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;border-radius:3px;text-decoration:none;margin-right:6px">&#127968; Site</a>
+    <button class="install-btn" id="admin-install" onclick="adminInstall()" title="Add to home screen">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
+      <span>Install</span>
+    </button>
+    <a href="index.html" style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;border-radius:6px;text-decoration:none">&#127968;</a>
     <button class="lock-btn" onclick="lock()">Lock</button>
   </div>
   <div class="dash">
@@ -411,7 +423,9 @@
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#129309; Sponsors</div></div>
       <div class="slbl">Add Sponsor</div>
       <div class="field"><label class="fl">Company Name</label><input type="text" id="sp-name" placeholder="Hanlon Dry Lining"></div>
+      <div class="field"><label class="fl">Tier</label><select id="sp-tier"><option>Principal Partner</option><option>Kit Sponsor</option><option>Training Kit Sponsor</option><option>Programme Sponsor</option><option>Club Partner</option></select></div>
       <div class="field"><label class="fl">Role / Package</label><input type="text" id="sp-role" placeholder="Home Shirt Sponsor"></div>
+      <div class="field"><label class="fl">Logo file name (optional)</label><input type="text" id="sp-logo" placeholder="img/sponsors/hanlon-dry-lining.png"></div>
       <div class="field"><label class="fl">Website (optional)</label><input type="text" id="sp-url" placeholder="https://"></div>
       <div class="field"><label class="fl">Note (optional)</label><input type="text" id="sp-note" placeholder="Extra info"></div>
       <button class="save sec" onclick="addSponsor()">+ Add Sponsor</button>
@@ -785,12 +799,29 @@
 const PIN = '19332026';
 const BUILD_HOOK = 'https://api.netlify.com/build_hooks/6a10e5d0c22b131a9544d269';
 
+// ── INSTALL THIS ADMIN AS AN APP ──
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function(){}); }
+var _adminPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); _adminPrompt = e; });
+window.addEventListener('appinstalled', function(){ var b=document.getElementById('admin-install'); if(b) b.style.display='none'; });
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  document.addEventListener('DOMContentLoaded', function(){ var b=document.getElementById('admin-install'); if(b) b.style.display='none'; });
+}
+function adminInstall() {
+  if (_adminPrompt) { _adminPrompt.prompt(); _adminPrompt.userChoice.finally(function(){ _adminPrompt=null; }); return; }
+  var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  alert(iOS
+    ? 'Add Lane HQ to your home screen:\n\n1. Tap the Share button (square with an arrow)\n2. Tap "Add to Home Screen"\n3. Tap Add — open it like an app any time.'
+    : 'Install Lane HQ:\n\nOpen your browser menu (⋮) and choose "Install app" or "Add to Home screen".');
+}
+
 var pinVal = '';
 var isLive = false;
 var isHome = true;
 var squad = [];
 var committee = [];
 var sponsors = [];
+var sponsorAffiliations = [];
 var articles = [];
 var analytics = [];
 var imgStore = {};
@@ -891,7 +922,7 @@ function loadAll() {
   }
   fetchJSON('squad',     function(d) { if (d && d.players) squad = d.players; });
   fetchJSON('committee', function(d) { if (d && d.members) committee = d.members; });
-  fetchJSON('sponsors',  function(d) { if (d && d.sponsors) sponsors = d.sponsors; });
+  fetchJSON('sponsors',  function(d) { if (d) { if (d.sponsors) sponsors = d.sponsors; if (d.affiliations) sponsorAffiliations = d.affiliations; } });
   fetchJSON('news',      function(d) { if (d && d.articles) articles = d.articles; });
   fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; } });
   fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
@@ -1123,9 +1154,9 @@ function addSponsor() {
   var name = gv('sp-name'); var role = gv('sp-role');
   if (!name || !role) { toast('Enter name and role', true); return; }
   sponsors = sponsors.filter(function(s) { return s.name !== name; });
-  sponsors.push({name:name, role:role, url:gv('sp-url'), note:gv('sp-note')});
+  sponsors.push({name:name, tier:gv('sp-tier'), role:role, logo:gv('sp-logo'), url:gv('sp-url'), note:gv('sp-note')});
   renderSponsors();
-  setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note','');
+  setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note',''); setVal('sp-logo','');
   toast(name + ' added ✓');
 }
 function removeSponsor(name) {
@@ -1134,14 +1165,15 @@ function removeSponsor(name) {
   renderSponsors();
 }
 function saveSponsors() {
-  pushToGitHub('sponsors', {sponsors:sponsors, updatedAt:new Date().toISOString()}, 'dep-sponsors');
+  // Preserve the affiliations block (league / FA) so saving sponsors never wipes it.
+  pushToGitHub('sponsors', {sponsors:sponsors, affiliations:sponsorAffiliations, updatedAt:new Date().toISOString()}, 'dep-sponsors');
   toast('Sponsors saved ✓');
 }
 function renderSponsors() {
   document.getElementById('sp-cnt').textContent = 'Sponsors (' + sponsors.length + ')';
   document.getElementById('sp-list').innerHTML = sponsors.length
     ? sponsors.map(function(s) {
-        return '<div class="li"><div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
+        return '<div class="li"><div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
 }

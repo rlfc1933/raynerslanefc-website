@@ -133,7 +133,17 @@
       </a>
       <a class="btn btn-outline" href="squad.html">Meet the Squad</a>
     </div>
+    <button class="install-cta js-install" onclick="laneInstall()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
+      <span>Install The Lane App <em>— free, on your home screen</em></span>
+    </button>
   </div>
+  <style>
+    .install-cta{margin-top:18px;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:999px;padding:11px 20px;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;box-shadow:0 8px 24px -8px rgba(255,209,0,.6);transition:transform .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent}
+    .install-cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(255,209,0,.75)}
+    .install-cta em{font-style:normal;font-weight:600;opacity:.7}
+    @media(max-width:600px){.install-cta em{display:none}}
+  </style>
 
   <div class="hero__right" style="display:flex;flex-direction:column;overflow:hidden;">
 
@@ -199,6 +209,53 @@
       <div id="countdown" style="margin-top:12px"></div>
     </div>
 
+  </div>
+</section>
+
+<!-- ══════════ OFFICIAL PARTNERS ══════════ -->
+<style>
+  .partners{background:linear-gradient(180deg,#0c0c0c,#080808);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:34px 0 30px;position:relative;overflow:hidden}
+  .partners::before{content:"";position:absolute;left:50%;top:-1px;width:120px;height:3px;background:var(--yellow);transform:translateX(-50%)}
+  .partners__head{text-align:center;margin-bottom:22px}
+  .partners__eyebrow{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--yellow)}
+  .partners__sub{font-family:var(--font-c);font-size:12px;letter-spacing:.1em;color:var(--grey);margin-top:4px}
+  .ptr-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:14px}
+  .ptr-tier-lbl{width:100%;text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:8px 0 2px}
+  .ptr{display:flex;flex-direction:column;align-items:center;gap:9px;text-decoration:none;transition:transform .2s}
+  .ptr:hover{transform:translateY(-4px)}
+  .ptr-chip{background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px -14px rgba(0,0,0,.8);overflow:hidden}
+  .ptr-chip img{width:100%;height:100%;object-fit:contain}
+  .ptr-chip .txt{font-family:var(--font-d);letter-spacing:.03em;color:#0d0d0d;text-align:center;padding:0 14px;line-height:.95}
+  .ptr--principal .ptr-chip{width:220px;height:120px;padding:18px 24px}
+  .ptr--principal .ptr-chip .txt{font-size:30px}
+  .ptr--mid .ptr-chip{width:160px;height:96px;padding:14px 18px}
+  .ptr--mid .ptr-chip .txt{font-size:22px}
+  .ptr-role{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow)}
+  .ptr-note{font-family:var(--font-c);font-size:10px;letter-spacing:.06em;color:var(--grey)}
+  .ptr-cta{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:160px;height:96px;border:1.5px dashed rgba(255,209,0,.5);border-radius:14px;text-decoration:none;transition:.2s}
+  .ptr-cta:hover{background:rgba(255,209,0,.06);border-color:var(--yellow)}
+  .ptr-cta b{font-family:var(--font-d);font-size:18px;letter-spacing:.03em;color:var(--yellow)}
+  .ptr-cta span{font-family:var(--font-c);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+  .ptr-aff{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);text-align:center}
+  .ptr-aff__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:12px}
+  .ptr-aff__row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px}
+  .aff-chip{background:#fff;border-radius:10px;height:64px;padding:10px 16px;display:flex;align-items:center;justify-content:center}
+  .aff-chip img{height:100%;width:auto;object-fit:contain}
+  .aff-chip .txt{font-family:var(--font-c);font-weight:700;font-size:13px;color:#0d0d0d;letter-spacing:.04em}
+  @media(max-width:600px){.ptr--principal .ptr-chip{width:150px;height:90px}.ptr--principal .ptr-chip .txt{font-size:20px}.ptr--mid .ptr-chip{width:128px;height:78px}.ptr--mid .ptr-chip .txt{font-size:16px}.ptr-cta{width:128px;height:78px}}
+</style>
+<section class="partners">
+  <div class="container">
+    <div class="partners__head">
+      <div class="partners__eyebrow">Official Partners 2026&ndash;27</div>
+      <div class="partners__sub">The businesses backing The Lane</div>
+    </div>
+    <div id="partners-main" class="ptr-row"></div>
+    <div id="partners-sec" class="ptr-row"></div>
+    <div class="ptr-aff" id="partners-aff" style="display:none">
+      <div class="ptr-aff__lbl">Proudly part of</div>
+      <div class="ptr-aff__row" id="partners-aff-row"></div>
+    </div>
   </div>
 </section>
 
@@ -322,34 +379,7 @@
   </div>
 </section>
 
-<!-- ══════════ SPONSORS ══════════ -->
-<div class="sponsors">
-  <div class="container">
-    <div class="sponsors__label"><span class="label-grey">Club Sponsors 2026-27</span></div>
-    <div class="sponsors__grid" id="sponsors-grid">
-      <div class="sponsor-item">
-        <div class="sponsor-item__logo">Hanlon Dry Lining</div>
-        <div class="sponsor-item__role">Home Shirt Sponsor<br><span style="color:rgba(255,255,255,.3);font-size:10px">Nigel Hanlon &mdash; Vice Chairman</span></div>
-      </div>
-      <div class="sponsor-item">
-        <a href="https://harrow.mccaffertysbars.com/" target="_blank" rel="noopener">
-          <div class="sponsor-item__logo">McCafferty's Bar</div>
-        </a>
-        <div class="sponsor-item__role">Away Shirt Sponsor &middot; Harrow</div>
-      </div>
-      <div class="sponsor-item">
-        <a href="https://www.higginson.co.uk/" target="_blank" rel="noopener">
-          <div class="sponsor-item__logo">Higginson Stairs</div>
-        </a>
-        <div class="sponsor-item__role">Programme Sponsor</div>
-      </div>
-      <div class="sponsor-item">
-        <div class="sponsor-item__logo" style="border-color:var(--yellow);color:var(--yellow)">Your Brand Here</div>
-        <div class="sponsor-item__role"><a href="investment.html" style="color:var(--yellow)">View 2026-27 Packages &rarr;</a></div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Sponsors are shown in the Official Partners band near the top of the page -->
 
 <!-- ══════════ GROUND ══════════ -->
 <section style="padding:0">
@@ -407,30 +437,52 @@
   document.addEventListener('DOMContentLoaded', () => {
     initPitcheroNews();
     loadHeroNews();
-    loadSponsors();
+    renderPartners();
   });
 
-  // Render club sponsors live from data/sponsors.json (set by the admin panel).
-  // Keeps the "Your Brand Here" call-to-action card at the end. Falls back to
-  // the static cards already in the HTML if the file is empty/unreachable.
-  async function loadSponsors() {
-    var grid = document.getElementById('sponsors-grid');
-    if (!grid) return;
+  // Official Partners band — live from data/sponsors.json (editable in admin).
+  // Logos sit on white chips; if a logo file is missing it shows the name as
+  // text, so it always looks complete and lights up when logos are added.
+  function ptrEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function ptrChip(s, cls) {
+    var inner = s.logo
+      ? '<img src="'+ptrEsc(s.logo)+'" alt="'+ptrEsc(s.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(s.name).replace(/'/g,'')+'</span>\'">'
+      : '<span class="txt">'+ptrEsc(s.name)+'</span>';
+    var body = '<span class="ptr-chip">'+inner+'</span>' +
+      (s.role ? '<span class="ptr-role">'+ptrEsc(s.role)+'</span>' : '') +
+      (s.note ? '<span class="ptr-note">'+ptrEsc(s.note)+'</span>' : '');
+    return s.url
+      ? '<a class="ptr '+cls+'" href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener">'+body+'</a>'
+      : '<div class="ptr '+cls+'">'+body+'</div>';
+  }
+  async function renderPartners() {
+    var main = document.getElementById('partners-main'), sec = document.getElementById('partners-sec');
+    if (!main || !sec) return;
     try {
-      var r = await fetch('data/sponsors.json?t=' + Date.now());
-      if (!r.ok) return;
-      var d = await r.json();
-      if (!d.sponsors || !d.sponsors.length) return;
-      var esc = function (s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-      var cards = d.sponsors.map(function (s) {
-        var logo = '<div class="sponsor-item__logo">' + esc(s.name) + '</div>';
-        if (s.url) logo = '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + logo + '</a>';
-        var role = esc(s.role) + (s.note ? '<br><span style="color:rgba(255,255,255,.3);font-size:10px">' + esc(s.note) + '</span>' : '');
-        return '<div class="sponsor-item">' + logo + '<div class="sponsor-item__role">' + role + '</div></div>';
-      }).join('');
-      var cta = '<div class="sponsor-item"><div class="sponsor-item__logo" style="border-color:var(--yellow);color:var(--yellow)">Your Brand Here</div>' +
-        '<div class="sponsor-item__role"><a href="investment.html" style="color:var(--yellow)">View 2026-27 Packages &rarr;</a></div></div>';
-      grid.innerHTML = cards + cta;
+      var d = await (await fetch('data/sponsors.json?t=' + Date.now())).json();
+      var list = d.sponsors || [];
+      var principal = list.filter(function(s){ return /principal|main/i.test(s.tier||''); });
+      var others = list.filter(function(s){ return !/principal|main/i.test(s.tier||''); });
+      main.innerHTML = principal.map(function(s){ return ptrChip(s,'ptr--principal'); }).join('');
+      var secHtml = '';
+      var seenTier = '';
+      others.forEach(function(s){
+        if ((s.tier||'') !== seenTier) { secHtml += '<div class="ptr-tier-lbl">'+ptrEsc(s.tier||'Partner')+'</div>'; seenTier = s.tier||''; }
+        secHtml += ptrChip(s,'ptr--mid');
+      });
+      secHtml += '<a class="ptr-cta" href="investment.html"><b>Your Brand Here</b><span>2026-27 Packages &rarr;</span></a>';
+      sec.innerHTML = secHtml;
+      // Affiliations
+      var aff = d.affiliations || [];
+      if (aff.length) {
+        document.getElementById('partners-aff').style.display = 'block';
+        document.getElementById('partners-aff-row').innerHTML = aff.map(function(a){
+          var inner = a.logo
+            ? '<img src="'+ptrEsc(a.logo)+'" alt="'+ptrEsc(a.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(a.name).replace(/'/g,'')+'</span>\'">'
+            : '<span class="txt">'+ptrEsc(a.name)+'</span>';
+          return a.url ? '<a class="aff-chip" href="'+ptrEsc(a.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<div class="aff-chip">'+inner+'</div>';
+        }).join('');
+      }
     } catch (e) {}
   }
 

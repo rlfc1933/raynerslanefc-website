@@ -1,1 +1,14 @@
-{"sponsors":[{"name":"Hanlon Dry Lining","role":"Home Shirt Sponsor","url":"","note":"Nigel Hanlon — Vice Chairman"},{"name":"McCafferty's Bar","role":"Away Shirt Sponsor","url":"https://harrow.mccaffertysbars.com/","note":"Harrow"},{"name":"Higginson Stairs","role":"Programme Sponsor","url":"https://www.higginson.co.uk/","note":""}]}
+{
+  "sponsors": [
+    {"name":"Hanlon Dry Lining","tier":"Principal Partner","role":"Home Shirt Sponsor","url":"","logo":"img/sponsors/hanlon-dry-lining.png","note":"Nigel Hanlon — Vice Chairman"},
+    {"name":"McCafferty's","tier":"Principal Partner","role":"Away Shirt Sponsor","url":"https://harrow.mccaffertysbars.com/","logo":"img/sponsors/mccaffertys.png","note":"Harrow"},
+    {"name":"Kit Sponsor","tier":"Kit Sponsor","role":"Match Kit","url":"","logo":"img/sponsors/kit-sponsor.png","note":""},
+    {"name":"The King, Denham","tier":"Training Kit Sponsor","role":"Training Wear","url":"","logo":"img/sponsors/the-king-denham.png","note":""},
+    {"name":"Higginson Stairs","tier":"Programme Sponsor","role":"Programme","url":"https://www.higginson.co.uk/","logo":"","note":""}
+  ],
+  "affiliations": [
+    {"name":"Combined Counties Football League","logo":"img/sponsors/combined-counties-league.png","url":"https://www.pitchero.com/clubs/raynerslanefc"},
+    {"name":"Middlesex FA · England Football","logo":"img/sponsors/middlesex-fa.png","url":"https://www.middlesexfa.com/"}
+  ],
+  "updatedAt": ""
+}
