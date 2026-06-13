@@ -5,7 +5,40 @@
 document.addEventListener('DOMContentLoaded', function() {
   loadMatchDay();
   initBgCrossfade();
+  liveScoreboard();
+  setInterval(liveScoreboard, 20000); // auto-refresh the live score every 20s
 });
+
+// ── LIVE SCOREBOARD ──────────────────────────
+// Reads data/matchday.json (set from the admin's score buttons). Shows a red
+// live bar at the top of the home page whenever a match is live, and quietly
+// refreshes itself every 20s — fans never reload, staff just tap +.
+async function liveScoreboard() {
+  var bar = document.getElementById('rlfc-livebar');
+  if (!bar) return;
+  try {
+    var m = await (await fetch('data/matchday.json?t=' + Date.now())).json();
+    var live = m.isLive || new URLSearchParams(location.search).get('live') === '1';
+    if (!live) { bar.style.display = 'none'; return; }
+    var RLFC = 'Rayners Lane', opp = m.opponent || 'Opposition';
+    var homeTeam = m.isHome === false ? opp : RLFC;
+    var awayTeam = m.isHome === false ? RLFC : opp;
+    var hs = m.homeScore || 0, as = m.awayScore || 0;
+    bar.innerHTML =
+      '<div class="livebar__in">' +
+        '<span class="livebar__badge"><span class="d"></span>Live</span>' +
+        '<span class="livebar__teams">' +
+          '<span class="livebar__t">' + homeTeam + '</span>' +
+          '<span class="livebar__sc">' + hs + '</span>' +
+          '<span class="livebar__sc">' + as + '</span>' +
+          '<span class="livebar__t">' + awayTeam + '</span>' +
+        '</span>' +
+        (m.status ? '<span class="livebar__status">' + m.status + '</span>' : '') +
+        (m.scorers ? '<span class="livebar__scorers">&#9917; ' + m.scorers + '</span>' : '') +
+      '</div>';
+    bar.style.display = 'block';
+  } catch (e) {}
+}
 
 async function loadMatchDay() {
   var matchday = null;
