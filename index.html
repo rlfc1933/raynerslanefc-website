@@ -558,86 +558,72 @@
     } catch (e) {}
   }
 
+  // Fast: render the club's own news from data/news.json INSTANTLY (same-origin,
+  // no slow public proxy), then quietly top up with external feeds in the
+  // background via our own Netlify function (also fast, server-side).
+  function heroNewsRow(title, link, desc, dateStr) {
+    var d = dateStr ? new Date(dateStr).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+    return '<a href="'+link+'" '+(/^https?:/.test(link)?'target="_blank" rel="noopener"':'')+
+      ' style="display:block;padding:16px 20px;border-bottom:1px solid var(--border);text-decoration:none;transition:background .15s"'+
+      ' onmouseover="this.style.background=\'var(--card)\'" onmouseout="this.style.background=\'transparent\'">'+
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">'+
+        '<div style="font-family:var(--font-c);font-size:14px;font-weight:700;letter-spacing:.03em;color:var(--white);line-height:1.3">'+title+'</div>'+
+        '<div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.06em;flex-shrink:0;margin-top:2px">'+d+'</div>'+
+      '</div>'+
+      (desc ? '<div style="font-family:var(--font-b);font-size:12px;color:var(--grey);line-height:1.5">'+desc+'</div>' : '')+
+    '</a>';
+  }
   async function loadHeroNews() {
     const el = document.getElementById('hero-news');
     if (!el) return;
-    const PROXY = 'https://api.allorigins.win/get?url=';
-    const RSS   = 'https://www.pitchero.com/clubs/raynerslanefc/rss.xml';
+    var seen = {}, rows = [];
+    function add(title, link, desc, date) {
+      if (!title || seen[title]) return;
+      seen[title] = true;
+      rows.push(heroNewsRow(title, link || '#', (desc||'').replace(/<[^>]+>/g,'').trim().slice(0,90), date));
+    }
+    // 1) Club news first — instant
     try {
-      const res  = await fetch(PROXY + encodeURIComponent(RSS), { cache:'no-cache' });
-      const json = await res.json();
-      const xml  = new DOMParser().parseFromString(json.contents, 'text/xml');
-      const items = Array.from(xml.querySelectorAll('item')).slice(0, 6);
-      if (!items.length) throw new Error('no items');
-      el.innerHTML = items.map(item => {
-        const title = item.querySelector('title')?.textContent?.trim() || 'Club News';
-        const link  = item.querySelector('link')?.textContent?.trim()  || '#';
-        const raw   = item.querySelector('description')?.textContent || '';
-        const desc  = raw.replace(/<[^>]+>/g,'').trim().slice(0,90);
-        const date  = item.querySelector('pubDate')?.textContent || '';
-        const d     = date ? new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
-        return `<a href="${link}" target="_blank" rel="noopener"
-          style="display:block;padding:16px 20px;border-bottom:1px solid var(--border);text-decoration:none;transition:background .15s"
-          onmouseover="this.style.background='var(--card)'" onmouseout="this.style.background='transparent'">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
-            <div style="font-family:var(--font-c);font-size:14px;font-weight:700;letter-spacing:.03em;color:var(--white);line-height:1.3">${title}</div>
-            <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.06em;flex-shrink:0;margin-top:2px">${d}</div>
-          </div>
-          ${desc ? `<div style="font-family:var(--font-b);font-size:12px;color:var(--grey);line-height:1.5">${desc}...</div>` : ''}
-        </a>`;
-      }).join('');
-    } catch(e) {
-      el.innerHTML = `<div style="padding:24px 20px;display:flex;flex-direction:column;gap:2px">
-        <a href="https://www.pitchero.com/clubs/raynerslanefc/news/rayners-lane-fc-202627-commercial-sponsorship-2980361.html" target="_blank" style="display:block;padding:14px 0;border-bottom:1px solid var(--border);font-family:var(--font-c);font-size:14px;font-weight:700;color:var(--white);text-decoration:none">2026-27 Commercial Sponsorship Guide</a>
-        <a href="https://www.pitchero.com/clubs/raynerslanefc/news/league-allocation-20262027-2979103.html" target="_blank" style="display:block;padding:14px 0;border-bottom:1px solid var(--border);font-family:var(--font-c);font-size:14px;font-weight:700;color:var(--white);text-decoration:none">League Allocation 2026-27 Confirmed</a>
-        <a href="https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html" target="_blank" style="display:block;padding:14px 0;font-family:var(--font-c);font-size:14px;font-weight:700;color:var(--white);text-decoration:none">1st Team Summer Trials 2026</a>
-      </div>`;
+      const d = await (await fetch('data/news.json?t=' + Date.now())).json();
+      (d.articles || []).slice(0, 6).forEach(function(a){ add(a.title, 'news-article.html?id='+a.id, a.excerpt, a.date); });
+      if (rows.length) el.innerHTML = rows.join('');
+    } catch(e) {}
+    // 2) Top up with external feeds in the background (don't block, short timeout)
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(function(){ ctl.abort(); }, 6000);
+      const res = await fetch('/.netlify/functions/fetch-news', { signal: ctl.signal });
+      clearTimeout(t);
+      if (res.ok) {
+        const data = await res.json();
+        (data.articles || []).forEach(function(a){ add(a.title, a.link, a.excerpt, a.date); });
+        if (rows.length) el.innerHTML = rows.slice(0, 7).join('');
+      }
+    } catch(e) {}
+    if (!rows.length) {
+      el.innerHTML = '<div style="padding:24px 20px;font-family:var(--font-c);color:var(--grey)">Latest news coming soon — follow us <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" style="color:var(--yellow)">on Pitchero</a>.</div>';
     }
   }
 
 // ── LIVE MATCH SCOREBOARD ────────────────
-// Checks FWP for today's fixture and shows live score if match in progress
-const FWP_PROXY = 'https://api.allorigins.win/get?url=';
-const FWP_FIXTURES = 'https://www.footballwebpages.co.uk/rayners-lane/fixtures-results';
-
+// Driven by the admin Match Day toggle (data/matchday.json) — fast and
+// reliable. (Football Web Pages is Cloudflare-protected and can't be scraped
+// reliably, so we use the staff-controlled flag instead.)
 async function checkMatchDay() {
   const board = document.getElementById('live-board');
   if (!board) return;
-
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-
   try {
-    const res  = await fetch(FWP_PROXY + encodeURIComponent(FWP_FIXTURES), { cache:'no-cache' });
-    const json = await res.json();
-    const html = json.contents || '';
-
-    // Check if today's date appears in fixtures page
-    const months = ['January','February','March','April','May','June',
-                    'July','August','September','October','November','December'];
-    const d = today;
-    const datePatterns = [
-      `${d.getDate()} ${months[d.getMonth()]}`,
-      `${months[d.getMonth()]} ${d.getDate()}`,
-      todayStr,
-    ];
-
-    const hasMatchToday = datePatterns.some(p => html.includes(p));
-    const isLive = html.toLowerCase().includes('live') || html.includes('HT') || html.includes('FT');
-
-    if (hasMatchToday || isLive) {
+    const m = await (await fetch('data/matchday.json?t=' + Date.now())).json();
+    const isLive = m.isLive || new URLSearchParams(location.search).get('live') === '1';
+    if (isLive) {
       board.style.display = 'block';
-      document.getElementById('live-match-status').textContent = isLive ? 'LIVE NOW' : 'MATCH DAY';
-      if (isLive) {
-        document.getElementById('live-badge').style.background = '#EF4444';
-        document.getElementById('live-badge-dot').style.background = 'white';
-      }
-      // Refresh every 60 seconds during match
-      if (isLive) setTimeout(checkMatchDay, 60000);
+      var s = document.getElementById('live-match-status');
+      if (s) s.textContent = 'LIVE NOW';
+      var b = document.getElementById('live-badge'); if (b) b.style.background = '#EF4444';
+      var dot = document.getElementById('live-badge-dot'); if (dot) dot.style.background = 'white';
+      setTimeout(checkMatchDay, 30000);
     }
-  } catch(e) {
-    console.warn('Match day check failed:', e);
-  }
+  } catch(e) {}
 }
 
 // Also allow manual override — Pete/Russell can share a URL with ?live=1

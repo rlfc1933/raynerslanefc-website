@@ -90,12 +90,19 @@ function buildNav(currentPage) {
     { label:'Contact',     href:'contact.html'    },
   ];
 
+  var ico = {
+    home:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+    news:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v15H5a1 1 0 0 1-1-1z"/><path d="M17 8h3v9a2 2 0 0 1-2 2"/><path d="M7 9h7M7 13h7M7 17h4"/></svg>',
+    fix:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    squad:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5M20.5 20a5.5 5.5 0 0 0-4-5.3"/></svg>',
+    more:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+  };
   const bottomLinks = [
-    { label:'Home',     href:'index.html',     icon:'&#127968;' },
-    { label:'News',     href:'news.html',      icon:'&#128240;' },
-    { label:'Fixtures', href:'fixtures.html',  icon:'&#9917;'   },
-    { label:'Squad',    href:'squad.html',     icon:'&#128101;' },
-    { label:'More',     href:'about.html',     icon:'&#8942;'   },
+    { label:'Home',     href:'index.html',     icon:ico.home },
+    { label:'News',     href:'news.html',      icon:ico.news },
+    { label:'Fixtures', href:'fixtures.html',  icon:ico.fix  },
+    { label:'Squad',    href:'squad.html',     icon:ico.squad },
+    { label:'More',     href:'about.html',     icon:ico.more },
   ];
 
   const navLinks = links.map(l =>
@@ -119,7 +126,16 @@ function buildNav(currentPage) {
         </div>
       </a>
       <div class="nav__links" id="nav-links">${navLinks}</div>
-      <a href="fixtures.html" class="btn btn-primary nav__cta">&#9917; Fixtures</a>
+      <div class="nav__actions">
+        <button class="nav__install js-install" onclick="laneInstall()" title="Install the app">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
+          <span>Install App</span>
+        </button>
+        <a href="fixtures.html" class="btn btn-primary nav__cta">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Fixtures
+        </a>
+      </div>
     </div>
   </nav>
   <nav class="bnav" role="navigation" aria-label="Mobile navigation">

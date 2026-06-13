@@ -1,8 +1,26 @@
 [build]
   functions = "netlify/functions"
 
+# HTML must always revalidate so staff/fans see updates immediately
+# (no more "I saved it but still see the old version").
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/data/*"
   [headers.values]
     Cache-Control = "no-cache"
     Access-Control-Allow-Origin = "*"
+
+# JS/CSS revalidate too (not content-hashed) so design changes show up
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

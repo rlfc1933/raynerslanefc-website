@@ -4,24 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Not Found | Rayners Lane FC</title>
+  <meta name="robots" content="noindex">
   <link rel="icon" type="image/png" href="img/badge.png">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .e404{min-height:84vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:56px 24px;position:relative;overflow:hidden}
+    .e404::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%,rgba(255,209,0,.07),transparent 60%);pointer-events:none}
+    .e404__num{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--font-d);font-size:clamp(120px,26vw,260px);letter-spacing:.02em;color:#fff;line-height:.9;position:relative;z-index:1}
+    .e404__num span{background:linear-gradient(180deg,#fff,#FFD100 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .e404__ball{width:.78em;height:.78em;flex-shrink:0;animation:ballBounce 1.4s cubic-bezier(.5,.05,.5,.95) infinite,ballSpin 1.4s linear infinite;transform-origin:center}
+    @keyframes ballBounce{0%,100%{transform:translateY(-14%)}50%{transform:translateY(14%)}}
+    @keyframes ballSpin{to{transform:rotate(360deg)}}
+    .e404__shadow{width:120px;height:12px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(5px);margin:-6px auto 26px;animation:shadowPulse 1.4s ease-in-out infinite;position:relative;z-index:0}
+    @keyframes shadowPulse{0%,100%{transform:scaleX(.7);opacity:.4}50%{transform:scaleX(1.1);opacity:.7}}
+    .e404 h1{font-family:var(--font-d);font-size:clamp(36px,6vw,68px);letter-spacing:.04em;color:#fff;margin-bottom:10px;position:relative;z-index:1}
+    .e404 h1 em{color:var(--yellow);font-style:normal}
+    .e404__sub{font-family:var(--font-c);font-size:clamp(15px,2.2vw,19px);color:var(--grey);letter-spacing:.05em;max-width:460px;margin-bottom:30px;min-height:1.5em;position:relative;z-index:1;transition:opacity .35s}
+    .e404__btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+    .e404__ghost{background:var(--card);border:1px solid var(--border);color:#fff;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:14px 24px;text-decoration:none;border-radius:4px;transition:.2s}
+    .e404__ghost:hover{border-color:var(--yellow);color:var(--yellow)}
+    @media(prefers-reduced-motion:reduce){.e404__ball,.e404__shadow{animation:none}}
+  </style>
 </head>
 <body>
 <div id="nav-placeholder"></div>
-<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px">
-  <div style="font-family:var(--font-d);font-size:clamp(120px,20vw,220px);letter-spacing:.02em;color:rgba(255,209,0,.12);line-height:1;margin-bottom:-20px">404</div>
-  <img src="img/badge.png" alt="RLFC" style="width:80px;height:80px;object-fit:contain;margin-bottom:24px;position:relative;z-index:1">
-  <h1 style="font-family:var(--font-d);font-size:clamp(36px,6vw,72px);letter-spacing:.04em;color:var(--white);margin-bottom:12px">Off the pitch.</h1>
-  <p style="font-family:var(--font-c);font-size:18px;color:var(--grey);letter-spacing:.04em;max-width:400px;margin-bottom:32px">That page doesn't exist. Let's get you back to Tithe Farm.</p>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-    <a href="index.html" class="btn btn-primary">Back to Homepage</a>
-    <a href="fixtures.html" style="background:var(--card);border:1px solid var(--border);color:var(--white);font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:14px 24px;text-decoration:none">View Fixtures</a>
+
+<div class="e404">
+  <div class="e404__num">
+    4
+    <svg class="e404__ball" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="48" fill="#fff" stroke="#0d0d0d" stroke-width="2"/>
+      <path d="M50 22l16 12-6 19H40l-6-19z" fill="#1A5C32"/>
+      <path d="M50 22l16 12M50 22L34 34M66 34l12-6M34 34l-12-6M40 53l-9 15M60 53l9 15M50 78V63" stroke="#0d0d0d" stroke-width="3" fill="none" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="48" fill="none" stroke="#0d0d0d" stroke-width="2"/>
+    </svg>
+    <span>4</span>
+  </div>
+  <div class="e404__shadow"></div>
+  <h1>Ball's gone <em>over the fence.</em></h1>
+  <p class="e404__sub" id="e404-line">That page doesn't exist — let's get you back to Tithe Farm.</p>
+  <div class="e404__btns">
+    <a href="index.html" class="btn btn-primary">&#8592; Back to Homepage</a>
+    <a href="fixtures.html" class="e404__ghost">View Fixtures</a>
+    <a href="squad.html" class="e404__ghost">Meet the Squad</a>
   </div>
 </div>
+
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
-<script>document.addEventListener("DOMContentLoaded",()=>initComponents("404.html"));</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    initComponents("404.html");
+    // Rotating, on-brand one-liners
+    var lines = [
+      "That page doesn't exist — let's get you back to Tithe Farm.",
+      "Even VAR couldn't find this one.",
+      "This page got relegated. Sorry about that.",
+      "Offside. Take it again from the homepage.",
+      "Whatever you're after, it's not on this pitch.",
+      "404: doing a lap of the car park."
+    ];
+    var el = document.getElementById('e404-line'), i = 0;
+    setInterval(function(){
+      el.style.opacity = 0;
+      setTimeout(function(){ i = (i+1) % lines.length; el.textContent = lines[i]; el.style.opacity = 1; }, 350);
+    }, 3200);
+  });
+</script>
 </body>
 </html>

@@ -142,29 +142,37 @@ const FALLBACK_NEWS = [
 ];
 
 // ── INIT ─────────────────────────────────────
+function fmtNewsDate(s){ return s ? new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : ''; }
+
 async function initPitcheroNews() {
-  // Load internal news first (posted via admin panel)
+  var items = [], seen = {};
+  function push(it){ if (it && it.title && !seen[it.title]) { seen[it.title] = true; items.push(it); } }
+
+  // 1) Render the club's OWN news from data/news.json INSTANTLY (no slow proxy)
   try {
     const r = await fetch('data/news.json?t='+Date.now());
     if (r.ok) {
       const d = await r.json();
-      if (d.articles && d.articles.length > 0) {
-        // Merge internal articles into STATIC_ARTICLES at the front
-        d.articles.forEach(a => {
-          if (!STATIC_ARTICLES.find(s => s.title === a.title)) {
-            STATIC_ARTICLES.unshift({
-              title: a.title,
-              link: 'news-article.html?id='+a.id,
-              date: a.date,
-              img: a.image || 'img/news/news-default.svg',
-              cat: a.category || 'News',
-            });
-          }
-        });
-      }
+      (d.articles || []).forEach(function(a){
+        push({ title:a.title, link:'news-article.html?id='+a.id, date:fmtNewsDate(a.date), desc:(a.excerpt||'').slice(0,140), img:a.image || '' });
+      });
     }
-  } catch(e) { /* use existing static articles */ }
-  showNewsSkeleton();
-  const items = await fetchPitcheroFeed();
-  renderNews(items || FALLBACK_NEWS);
+  } catch(e) {}
+  renderNews(items.length ? items.slice(0,6) : FALLBACK_NEWS);
+
+  // 2) Quietly top up with external feeds via our own fast Netlify function
+  //    (server-side, no CORS, short timeout — never blocks the page).
+  try {
+    const ctl = new AbortController();
+    const tm = setTimeout(function(){ ctl.abort(); }, 6000);
+    const res = await fetch('/.netlify/functions/fetch-news', { signal: ctl.signal });
+    clearTimeout(tm);
+    if (res.ok) {
+      const data = await res.json();
+      (data.articles || []).forEach(function(a){
+        push({ title:a.title, link:a.link || '#', date:fmtNewsDate(a.date), desc:(a.excerpt||'').slice(0,140), img:a.image || '' });
+      });
+      if (items.length) renderNews(items.slice(0,6));
+    }
+  } catch(e) {}
 }
