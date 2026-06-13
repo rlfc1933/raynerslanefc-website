@@ -6,6 +6,7 @@
   <title>Admin | Rayners Lane FC</title>
   <link rel="icon" type="image/png" href="img/badge.png">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -164,6 +165,11 @@
         <button class="dcard" onclick="openPanel('players')"><span class="dcard-icon">🏃</span><div class="dcard-name">Player Profiles</div><div class="dcard-desc">Add &amp; manage players</div></button>
         <button class="dcard" onclick="openPanel('mail')"><span class="dcard-icon">📧</span><div class="dcard-name">Club Email</div><div class="dcard-desc">Access staff inboxes</div></button>
       </div>
+      <button class="dcard" style="width:100%;margin-top:8px;border-top-color:var(--y)" onclick="openPanel('analytics')">
+        <span class="dcard-icon" style="font-size:18px">📊</span>
+        <div class="dcard-name" style="font-size:18px">Match Day Analytics</div>
+        <div class="dcard-desc">Attendance, takings, check-ins &amp; performance charts</div>
+      </button>
       <button class="dcard" style="width:100%;margin-top:4px;border-top-color:var(--gr)" onclick="openPanel('settings')">
         <span class="dcard-icon" style="font-size:18px">⚙️</span>
         <div class="dcard-name" style="font-size:18px">Settings</div>
@@ -452,6 +458,80 @@
       </div>
     </div>
 
+    <!-- MATCH DAY ANALYTICS -->
+    <style>
+      .an-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
+      .an-stat{background:var(--c);border:1px solid var(--br);border-top:2px solid var(--y);padding:14px}
+      .an-stat-num{font-family:var(--fd);font-size:30px;color:var(--y);line-height:1}
+      .an-stat-lbl{font-family:var(--fc);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-top:4px}
+      .an-multi{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow:auto;background:var(--dk);border:1px solid var(--br);border-radius:6px;padding:8px}
+      .an-chk{display:flex;align-items:center;gap:6px;font-family:var(--fc);font-size:13px;color:var(--w);background:var(--c);border:1px solid var(--br);border-radius:4px;padding:6px 10px;cursor:pointer}
+      .an-chk input{accent-color:var(--y);width:15px;height:15px}
+      .an-empty{font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px}
+      .an-table-wrap{overflow-x:auto;border:1px solid var(--br);border-radius:6px}
+      .an-table{width:100%;border-collapse:collapse;font-family:var(--fc);font-size:12px;white-space:nowrap}
+      .an-table th{background:var(--c2);color:var(--gr);text-align:left;padding:8px 10px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--br)}
+      .an-table td{padding:8px 10px;color:var(--w);border-bottom:1px solid var(--br)}
+      .an-table tr:last-child td{border-bottom:none}
+      .an-chart-card{background:var(--c);border:1px solid var(--br);border-radius:8px;padding:14px;margin-top:10px}
+      .an-chart-ttl{font-family:var(--fc);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-bottom:10px}
+      .an-chart-card canvas{height:210px!important;width:100%!important}
+    </style>
+    <div class="panel" id="panel-analytics">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128202; Match Day Analytics</div></div>
+
+      <div class="an-stats" id="an-summary"></div>
+
+      <div class="div"></div>
+      <div class="slbl">Log a Match Day</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="an-date"></div>
+        <div class="field"><label class="fl">Opposition</label><input type="text" id="an-opp" placeholder="Harefield United"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Home / Away</label><select id="an-ha"><option value="home">Home</option><option value="away">Away</option></select></div>
+        <div class="field"><label class="fl">Competition</label><input type="text" id="an-comp" value="CCL Premier Div North"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Our Score</label><input type="number" id="an-us" value="0" min="0"></div>
+        <div class="field"><label class="fl">Their Score</label><input type="number" id="an-them" value="0" min="0"></div>
+      </div>
+      <div class="field"><label class="fl">Attendance (total through the gate)</label><input type="number" id="an-att" placeholder="0" min="0"></div>
+
+      <div class="slbl" style="margin-top:14px">Match Day Takings (&pound;)</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Entry / Gate</label><input type="number" id="an-t-entry" value="0" min="0" step="0.01"></div>
+        <div class="field"><label class="fl">Programmes</label><input type="number" id="an-t-prog" value="0" min="0" step="0.01"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Merchandise</label><input type="number" id="an-t-merch" value="0" min="0" step="0.01"></div>
+        <div class="field"><label class="fl">Other (bar, raffle&hellip;)</label><input type="number" id="an-t-other" value="0" min="0" step="0.01"></div>
+      </div>
+
+      <div class="field"><label class="fl">Players Available <span id="an-pl-count" style="color:var(--gr);font-weight:400"></span></label>
+        <div class="an-multi" id="an-players"></div>
+      </div>
+      <div class="field"><label class="fl">Staff / Committee Checked In <span id="an-st-count" style="color:var(--gr);font-weight:400"></span></label>
+        <div class="an-multi" id="an-staff"></div>
+      </div>
+      <div class="field"><label class="fl">Notes (optional)</label><textarea id="an-notes" rows="2" placeholder="Weather, Man of the Match, incidents&hellip;"></textarea></div>
+
+      <button class="save sec" onclick="addMatchRecord()">+ Add Match to Log</button>
+
+      <div class="div"></div>
+      <div class="slbl" id="an-cnt">Match Log</div>
+      <div class="an-table-wrap"><table class="an-table" id="an-table"></table></div>
+
+      <div class="div"></div>
+      <div class="slbl">Performance &amp; Revenue Charts</div>
+      <div class="an-chart-card"><div class="an-chart-ttl">Attendance per Match</div><canvas id="an-chart-att" height="170"></canvas></div>
+      <div class="an-chart-card"><div class="an-chart-ttl">Takings per Match (&pound;)</div><canvas id="an-chart-tak" height="170"></canvas></div>
+      <div class="an-chart-card"><div class="an-chart-ttl">Total Income Breakdown</div><canvas id="an-chart-pie" height="200"></canvas></div>
+
+      <button class="save" style="margin-top:14px" onclick="saveAnalytics()">&#10003; Save Analytics to Site</button>
+      <div class="dep" id="dep-analytics"></div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
@@ -494,6 +574,7 @@ var squad = [];
 var committee = [];
 var sponsors = [];
 var articles = [];
+var analytics = [];
 var imgStore = {};
 
 // ── RENDER PIN DOTS ──
@@ -552,6 +633,7 @@ function openPanel(name) {
   if (name === 'sponsors')  renderSponsors();
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
+  if (name === 'analytics') renderAnalytics();
 }
 function back() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
@@ -572,6 +654,7 @@ function loadAll() {
   fetchJSON('sponsors',  function(d) { if (d && d.sponsors) sponsors = d.sponsors; });
   fetchJSON('news',      function(d) { if (d && d.articles) articles = d.articles; });
   fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; } });
+  fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
   fetchJSON('matchday',  function(d) {
     if (!d) return;
     isLive = d.isLive || false;
@@ -924,6 +1007,155 @@ function publishMatchReport() {
   setVal('mr-opp',''); setVal('mr-body',''); setVal('mr-scorers','');
   toast('Match report published ✓');
 };
+
+// ── MATCH DAY ANALYTICS ──
+var _anCharts = {};
+
+function renderAnalytics() {
+  renderCheckList('an-players', squad.map(function(p){ return (p.no ? '#'+p.no+' ' : '') + p.name; }),
+    'No players yet — add them in the Squad panel, Save, then return here.');
+  renderCheckList('an-staff', committee.map(function(m){ return m.name + (m.role ? ' — '+m.role : ''); }),
+    'No committee yet — add them in the Committee panel first.');
+  renderAnalyticsSummary();
+  renderAnalyticsTable();
+  renderAnalyticsCharts();
+}
+
+function renderCheckList(containerId, items, emptyMsg) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = items.length
+    ? items.map(function(label){ return '<label class="an-chk"><input type="checkbox" value="'+esc(label)+'">'+label+'</label>'; }).join('')
+    : '<div class="an-empty">'+emptyMsg+'</div>';
+}
+
+function getChecked(containerId) {
+  return Array.prototype.slice.call(document.querySelectorAll('#'+containerId+' input:checked'))
+    .map(function(c){ return c.value; });
+}
+
+function addMatchRecord() {
+  var opp = gv('an-opp'), date = gv('an-date');
+  if (!date || !opp) { toast('Enter a date and opposition', true); return; }
+  analytics.push({
+    id: 'match-' + Date.now(),
+    date: date, opponent: opp,
+    homeAway: gv('an-ha') || 'home',
+    competition: gv('an-comp'),
+    scoreUs: parseInt(gv('an-us')) || 0,
+    scoreThem: parseInt(gv('an-them')) || 0,
+    attendance: parseInt(gv('an-att')) || 0,
+    takings: {
+      entry:      parseFloat(gv('an-t-entry')) || 0,
+      programmes: parseFloat(gv('an-t-prog'))  || 0,
+      merch:      parseFloat(gv('an-t-merch')) || 0,
+      other:      parseFloat(gv('an-t-other')) || 0,
+    },
+    playersAttended: getChecked('an-players'),
+    staffCheckedIn:  getChecked('an-staff'),
+    notes: gv('an-notes'),
+  });
+  analytics.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+  renderAnalytics();
+  setVal('an-opp',''); setVal('an-att',''); setVal('an-us','0'); setVal('an-them','0');
+  setVal('an-t-entry','0'); setVal('an-t-prog','0'); setVal('an-t-merch','0'); setVal('an-t-other','0');
+  setVal('an-notes','');
+  toast(opp + ' logged ✓ — press Save to publish');
+}
+
+function removeMatchRecord(id) {
+  if (!confirm('Remove this match from the log?')) return;
+  analytics = analytics.filter(function(m){ return m.id !== id; });
+  renderAnalytics();
+}
+
+function matchTotal(m) { var t = m.takings || {}; return (t.entry||0)+(t.programmes||0)+(t.merch||0)+(t.other||0); }
+function fmtGBP(n) { return '£' + (Math.round(n*100)/100).toLocaleString('en-GB'); }
+
+function renderAnalyticsSummary() {
+  var el = document.getElementById('an-summary'); if (!el) return;
+  var n = analytics.length;
+  var totAtt = analytics.reduce(function(s,m){ return s + (m.attendance||0); }, 0);
+  var totTak = analytics.reduce(function(s,m){ return s + matchTotal(m); }, 0);
+  var hiAtt  = analytics.reduce(function(s,m){ return Math.max(s, m.attendance||0); }, 0);
+  var cards = [
+    ['Matches Logged', n],
+    ['Avg Attendance', n ? Math.round(totAtt/n) : 0],
+    ['Best Crowd', hiAtt],
+    ['Total Takings', fmtGBP(totTak)],
+  ];
+  el.innerHTML = cards.map(function(c){
+    return '<div class="an-stat"><div class="an-stat-num">'+c[1]+'</div><div class="an-stat-lbl">'+c[0]+'</div></div>';
+  }).join('');
+}
+
+function renderAnalyticsTable() {
+  var el = document.getElementById('an-table'); if (!el) return;
+  document.getElementById('an-cnt').textContent = 'Match Log (' + analytics.length + ')';
+  if (!analytics.length) { el.innerHTML = '<tbody><tr><td class="an-empty" colspan="9">No matches logged yet</td></tr></tbody>'; return; }
+  var head = '<thead><tr><th>Date</th><th>Opponent</th><th>H/A</th><th>Score</th><th>Att.</th><th>Avail.</th><th>Gate</th><th>Total &pound;</th><th></th></tr></thead>';
+  var rows = analytics.map(function(m){
+    return '<tr>' +
+      '<td>'+(m.date||'')+'</td>' +
+      '<td>'+esc(m.opponent||'')+'</td>' +
+      '<td>'+(m.homeAway==='away'?'A':'H')+'</td>' +
+      '<td>'+(m.scoreUs||0)+'&ndash;'+(m.scoreThem||0)+'</td>' +
+      '<td>'+(m.attendance||0)+'</td>' +
+      '<td>'+((m.playersAttended||[]).length)+'</td>' +
+      '<td>'+fmtGBP((m.takings||{}).entry||0)+'</td>' +
+      '<td>'+fmtGBP(matchTotal(m))+'</td>' +
+      '<td><button class="li-del" onclick="removeMatchRecord(\''+m.id+'\')">&#10005;</button></td>' +
+    '</tr>';
+  }).join('');
+  el.innerHTML = head + '<tbody>' + rows + '</tbody>';
+}
+
+function anChartOpts(stacked) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#F5F3ED', font: { family: 'Barlow Condensed' } } } },
+    scales: {
+      x: { stacked: !!stacked, ticks: { color: '#888' }, grid: { color: '#2A2A2A' } },
+      y: { stacked: !!stacked, beginAtZero: true, ticks: { color: '#888' }, grid: { color: '#2A2A2A' } }
+    }
+  };
+}
+
+function renderAnalyticsCharts() {
+  if (typeof Chart === 'undefined') return;
+  Object.keys(_anCharts).forEach(function(k){ if (_anCharts[k]) _anCharts[k].destroy(); });
+  var labels = analytics.map(function(m){ return (m.opponent||'').slice(0,12) + (m.date ? ' '+m.date.slice(5) : ''); });
+  var Y='#FFD100', G='#1A5C32', B='#3B82F6', GR='#888';
+
+  var cA = document.getElementById('an-chart-att');
+  if (cA) _anCharts.att = new Chart(cA, { type:'line',
+    data:{ labels:labels, datasets:[{ label:'Attendance', data:analytics.map(function(m){return m.attendance||0;}),
+      borderColor:Y, backgroundColor:'rgba(255,209,0,.15)', fill:true, tension:.3, pointBackgroundColor:Y }] },
+    options: anChartOpts() });
+
+  var cT = document.getElementById('an-chart-tak');
+  if (cT) _anCharts.tak = new Chart(cT, { type:'bar',
+    data:{ labels:labels, datasets:[
+      { label:'Gate', data:analytics.map(function(m){return (m.takings||{}).entry||0;}), backgroundColor:Y },
+      { label:'Programmes', data:analytics.map(function(m){return (m.takings||{}).programmes||0;}), backgroundColor:G },
+      { label:'Merch', data:analytics.map(function(m){return (m.takings||{}).merch||0;}), backgroundColor:B },
+      { label:'Other', data:analytics.map(function(m){return (m.takings||{}).other||0;}), backgroundColor:GR },
+    ]},
+    options: anChartOpts(true) });
+
+  var cP = document.getElementById('an-chart-pie');
+  if (cP) {
+    var sums = analytics.reduce(function(a,m){ var t=m.takings||{}; a[0]+=t.entry||0; a[1]+=t.programmes||0; a[2]+=t.merch||0; a[3]+=t.other||0; return a; }, [0,0,0,0]);
+    _anCharts.pie = new Chart(cP, { type:'doughnut',
+      data:{ labels:['Gate','Programmes','Merch','Other'], datasets:[{ data:sums, backgroundColor:[Y,G,B,GR], borderColor:'#161616', borderWidth:2 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#F5F3ED', font:{ family:'Barlow Condensed' } } } } } });
+  }
+}
+
+function saveAnalytics() {
+  pushToGitHub('analytics', { matches: analytics, updatedAt: new Date().toISOString() }, 'dep-analytics');
+  toast('Analytics saved ✓');
+}
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
 
