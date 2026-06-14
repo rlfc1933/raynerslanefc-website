@@ -72,6 +72,42 @@
 <section class="section">
   <div class="container">
 
+    <!-- ═══ LIVE FIXTURES, RESULTS & TABLE (top of page) ═══ -->
+    <div style="margin-bottom:18px">
+      <span class="label" style="display:block;margin-bottom:8px">Live Data</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <h2 style="font-family:var(--font-d);font-size:clamp(32px,4vw,52px);letter-spacing:.03em">
+          Fixtures, Results <span style="color:var(--yellow)">&amp; Table</span>
+        </h2>
+        <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" rel="noopener"
+           style="font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s"
+           onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--grey)'">
+          Updates automatically &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="fixtures">Fixtures &amp; Results</button>
+      <button class="tab-btn" data-tab="table">League Table</button>
+      <button class="tab-btn" data-tab="form">Form Guide</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-fixtures">
+      <div id="fx-next"></div>
+      <div id="fx-results"><div class="fx-loading">Loading results…</div></div>
+      <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
+    </div>
+    <div class="tab-panel" id="tab-table">
+      <div id="fx-table"><div class="fx-loading">Loading table…</div></div>
+      <div class="fx-attr">League table via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA)</div>
+    </div>
+    <div class="tab-panel" id="tab-form">
+      <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
+    </div>
+
+    <div class="div" style="height:1px;background:var(--border);margin:40px 0"></div>
+
     <!-- ═══ CALENDAR SYNC ═══ -->
     <div class="cal-sync" id="calendar">
       <h2 class="cal-sync__title">Get Fixtures on <span style="color:var(--yellow)">Your Phone</span></h2>
@@ -119,46 +155,6 @@
       </div>
     </div>
 
-    <!-- ═══ LIVE FIXTURES & RESULTS — Football Web Pages ═══ -->
-    <div style="margin-bottom:24px">
-      <span class="label" style="display:block;margin-bottom:8px">Live Data</span>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <h2 style="font-family:var(--font-d);font-size:clamp(36px,4vw,60px);letter-spacing:.03em">
-          Fixtures, Results <span style="color:var(--yellow)">&amp; Table</span>
-        </h2>
-        <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" rel="noopener"
-           style="font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s"
-           onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--grey)'">
-          Updates automatically &rarr;
-        </a>
-      </div>
-    </div>
-
-    <!-- Tab buttons -->
-    <div class="tab-row">
-      <button class="tab-btn active" data-tab="fixtures">Fixtures &amp; Results</button>
-      <button class="tab-btn" data-tab="table">League Table</button>
-      <button class="tab-btn" data-tab="form">Form Guide</button>
-    </div>
-
-    <!-- Fixtures & Results tab -->
-    <div class="tab-panel active" id="tab-fixtures">
-      <div id="fx-next"></div>
-      <div id="fx-results"><div class="fx-loading">Loading results…</div></div>
-      <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
-    </div>
-
-    <!-- League Table tab -->
-    <div class="tab-panel" id="tab-table">
-      <div id="fx-table"><div class="fx-loading">Loading table…</div></div>
-      <div class="fx-attr">League table via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA)</div>
-    </div>
-
-    <!-- Form Guide tab -->
-    <div class="tab-panel" id="tab-form">
-      <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
-    </div>
-
     <!-- ═══ PITCHERO LINK ═══ -->
     <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
       <div>
@@ -179,22 +175,25 @@
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  initComponents("fixtures.html");
-
-  // Tab switching
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.tab;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("tab-" + target).classList.add("active");
+(function () {
+  function fxInit() {
+    try { initComponents("fixtures.html"); } catch (e) {}
+    // Tab switching
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = btn.dataset.tab;
+        document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+        document.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+        btn.classList.add("active");
+        var panel = document.getElementById("tab-" + target);
+        if (panel) panel.classList.add("active");
+      });
     });
-  });
-
-  loadFixturesData();
-});
+    loadFixturesData();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fxInit);
+  else fxInit();
+})();
 
 function fxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
