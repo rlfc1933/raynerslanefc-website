@@ -77,48 +77,155 @@ function renderQR(id, text) {
 function unlockedRewards(f) { var h = homeGames(f); return REWARDS.filter(function (r) { return h >= r.home; }); }
 function nextReward(f) { var h = homeGames(f); for (var i = 0; i < REWARDS.length; i++) if (h < REWARDS[i].home) return { reward: REWARDS[i], left: REWARDS[i].home - h }; return null; }
 
-function getFan()  { try { return JSON.parse(localStorage.getItem(FAN_KEY)) || null; } catch (e) { return null; } }
-function setFan(f) { localStorage.setItem(FAN_KEY, JSON.stringify(f)); }
 function esc(s)    { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* ---------- ACCOUNT / SIGN IN-OUT ----------
-   The fan's account IS their Lane Card (stored on this device). "Log out" hides
-   it behind a gate and locks the members area; "Log in" brings it back. The
-   account data is never deleted by logging out. (True cross-device login needs
-   a server account — Supabase — which is a future upgrade.) */
+/* ---------- ACCOUNTS ----------
+   REAL accounts (email + username + password, unique, cross-device) run on
+   Supabase the moment js/supabase-config.js is filled in. Until then everything
+   below falls back to the on-device Lane Card (no password) so the site still
+   works. SB === null means "not configured → device mode". */
+var SBCFG = (window.RLFC_SUPABASE || {});
+var SB = (SBCFG.url && SBCFG.anonKey && window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SBCFG.url, SBCFG.anonKey) : null;
+var sbUser = null, sbProfile = null;
 var SESSION_OUT = 'rlfc_signedout';
-function isSignedIn() { return !!getFan() && localStorage.getItem(SESSION_OUT) !== '1'; }
-function signOut() { localStorage.setItem(SESSION_OUT, '1'); refreshFanUI(); toast('Logged out — your card is safe on this device. Log back in any time.'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function signIn()  { if (!getFan()) { openCardEditor(); return; } localStorage.removeItem(SESSION_OUT); refreshFanUI(); toast('Welcome back 💛'); }
+
+async function sbLoadProfile() {
+  if (!SB || !sbUser) { sbProfile = null; return; }
+  try { var r = await SB.from('fans').select('*').eq('id', sbUser.id).single(); sbProfile = r.data || null; }
+  catch (e) { sbProfile = null; }
+}
+async function sbRestore() {
+  if (!SB) return;
+  try { var s = await SB.auth.getSession(); sbUser = (s.data && s.data.session) ? s.data.session.user : null; } catch (e) { sbUser = null; }
+  await sbLoadProfile();
+}
+async function sbUsernameTaken(u) { try { var r = await SB.rpc('username_taken', { u: u }); return !!r.data; } catch (e) { return false; } }
+function sbRandLane() { return String(Math.floor(Math.random() * 9000) + 1000); }
+async function sbSignUp(d) {
+  var email = (d.email || '').trim(), pass = d.password || '', username = (d.username || '').trim();
+  var name = (d.name || '').trim(), town = (d.town || '').trim();
+  if (!email || !pass || !username || !name) return { error: 'Please fill in your name, email, username and password.' };
+  if (pass.length < 6) return { error: 'Password must be at least 6 characters.' };
+  if (!/^[a-zA-Z0-9_.]{3,}$/.test(username)) return { error: 'Username: 3+ letters, numbers, _ or . only.' };
+  if (await sbUsernameTaken(username)) return { error: 'That username is already taken — pick another.' };
+  var su = await SB.auth.signUp({ email: email, password: pass });
+  if (su.error) return { error: su.error.message };
+  if (!su.data.user) return { error: 'Could not create the account.' };
+  if (!su.data.session) return { needConfirm: true };       // email-confirmation is on
+  sbUser = su.data.user;
+  var ok = false, tries = 0;
+  while (!ok && tries < 6) {
+    tries++;
+    var ins = await SB.from('fans').insert({ id: sbUser.id, username: username, name: name, town: town, since: d.since || '', lane_no: sbRandLane() });
+    if (!ins.error) { ok = true; break; }
+    if (/lane_no/.test(ins.error.message || '')) continue;
+    if (/username/.test(ins.error.message || '')) return { error: 'That username was just taken — try another.' };
+    return { error: ins.error.message };
+  }
+  await sbLoadProfile();
+  return { ok: true };
+}
+async function sbLogin(email, pass) {
+  var r = await SB.auth.signInWithPassword({ email: (email || '').trim(), password: pass || '' });
+  if (r.error) return { error: r.error.message };
+  sbUser = r.data.user; await sbLoadProfile();
+  if (!sbProfile) return { error: 'Logged in, but no Lane profile found for this account.' };
+  return { ok: true };
+}
+async function sbLogout() { try { await SB.auth.signOut(); } catch (e) {} sbUser = null; sbProfile = null; }
+
+function getFan() {
+  if (SB) {
+    if (!sbProfile) return null;
+    return { username: sbProfile.name || sbProfile.username, handle: sbProfile.username, town: sbProfile.town,
+             since: sbProfile.since, laneNo: sbProfile.lane_no, meaning: sbProfile.meaning,
+             joined: (sbProfile.created_at || '').slice(0, 10), photo: sbProfile.photo || '' };
+  }
+  try { return JSON.parse(localStorage.getItem(FAN_KEY)) || null; } catch (e) { return null; }
+}
+function setFan(f) { if (SB) return; localStorage.setItem(FAN_KEY, JSON.stringify(f)); }
+function isSignedIn() { return SB ? (!!sbUser && !!sbProfile) : (!!getFan() && localStorage.getItem(SESSION_OUT) !== '1'); }
+function joinOrCreate(mode) { if (SB) openAuth(mode || 'signup'); else openCardEditor(); }
+function signIn() {
+  if (SB) { openAuth('login'); return; }
+  if (!getFan()) { openCardEditor(); return; }
+  localStorage.removeItem(SESSION_OUT); refreshFanUI(); toast('Welcome back 💛');
+}
+async function signOut() {
+  if (SB) { await sbLogout(); refreshFanUI(); toast('Logged out 💛'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  localStorage.setItem(SESSION_OUT, '1'); refreshFanUI(); toast('Logged out — your card is safe on this device. Log back in any time.'); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 function refreshFanUI() { renderAccountBar(); renderFanCard(); renderMembers(); renderLadder(getFan()); }
 
 function renderAccountBar() {
   var el = document.getElementById('fz-account'); if (!el) return;
   var f = getFan();
-  if (!f) {
-    el.innerHTML = '<div class="fz-acct">' +
-      '<div class="fz-acct__av">&#10024;</div>' +
-      '<div class="fz-acct__main"><div class="fz-acct__hi">Join The Lane</div>' +
-      '<div class="fz-acct__sub">Create your free account to unlock member perks &amp; vouchers</div></div>' +
-      '<button class="fz-acct__btn fz-acct__btn--y" onclick="openCardEditor()">Join Free</button></div>';
+  if (!f || !isSignedIn()) {
+    var sub = SB ? 'Create your free account — log in from any device.' : 'Create your free card to unlock member perks &amp; vouchers.';
+    var btns = SB
+      ? '<button class="fz-acct__btn" onclick="openAuth(\'login\')">Log in</button><button class="fz-acct__btn fz-acct__btn--y" style="margin-left:6px" onclick="openAuth(\'signup\')">Join</button>'
+      : (f ? '<button class="fz-acct__btn fz-acct__btn--y" onclick="signIn()">Log in</button>' : '<button class="fz-acct__btn fz-acct__btn--y" onclick="openCardEditor()">Join Free</button>');
+    el.innerHTML = '<div class="fz-acct"><div class="fz-acct__av">&#10024;</div>' +
+      '<div class="fz-acct__main"><div class="fz-acct__hi">' + (f && !SB ? 'Welcome back' : 'Join The Lane') + '</div>' +
+      '<div class="fz-acct__sub">' + sub + '</div></div>' + btns + '</div>';
     return;
   }
   var laneNo = ensureLaneNo(f);
   var initials = (f.username || 'L').trim().slice(0, 2).toUpperCase();
   var av = f.photo ? '<img src="' + f.photo + '" alt="">' : esc(initials);
-  if (isSignedIn()) {
-    el.innerHTML = '<div class="fz-acct">' +
-      '<div class="fz-acct__av">' + av + '</div>' +
-      '<div class="fz-acct__main"><div class="fz-acct__hi">Hi, ' + esc(f.username || 'Lane Fan') + '</div>' +
-      '<div class="fz-acct__sub">Lane <b>#' + esc(laneNo) + '</b> &middot; signed in</div></div>' +
-      '<button class="fz-acct__btn" onclick="signOut()">Log out</button></div>';
-  } else {
-    el.innerHTML = '<div class="fz-acct">' +
-      '<div class="fz-acct__av">' + av + '</div>' +
-      '<div class="fz-acct__main"><div class="fz-acct__hi">Welcome back, ' + esc(f.username || 'Lane Fan') + '</div>' +
-      '<div class="fz-acct__sub">You&rsquo;re logged out</div></div>' +
-      '<button class="fz-acct__btn fz-acct__btn--y" onclick="signIn()">Log in</button></div>';
+  el.innerHTML = '<div class="fz-acct">' +
+    '<div class="fz-acct__av">' + av + '</div>' +
+    '<div class="fz-acct__main"><div class="fz-acct__hi">Hi, ' + esc(f.username || 'Lane Fan') + '</div>' +
+    '<div class="fz-acct__sub">' + (f.handle ? '@' + esc(f.handle) + ' &middot; ' : '') + 'Lane <b>#' + esc(laneNo) + '</b> &middot; signed in</div></div>' +
+    '<button class="fz-acct__btn" onclick="signOut()">Log out</button></div>';
+}
+
+/* ---------- LOGIN / SIGN-UP MODAL (Supabase) ---------- */
+function authErr(msg) { var e = document.getElementById('au-err'); if (e) { e.innerHTML = msg; e.style.display = 'block'; } }
+function openAuth(mode) {
+  if (!SB) { openCardEditor(); return; }
+  mode = mode || 'login';
+  var ov = document.getElementById('fz-editor');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'fz-editor'; ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(6,6,6,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px'; document.body.appendChild(ov); }
+  function fld(id, label, type, ph) {
+    return '<label style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:11px 0 5px">' + label + '</label>' +
+      '<input id="' + id + '" type="' + type + '" placeholder="' + (ph || '') + '" autocomplete="off" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px">';
   }
+  var login = fld('au-email', 'Email', 'email', 'you@email.com') + fld('au-pass', 'Password', 'password', '') +
+    '<button class="fz-btn fz-btn--y" style="width:100%;margin-top:16px" onclick="doLogin()">Log In</button>' +
+    '<p style="text-align:center;font-family:var(--font-b);font-size:13px;color:var(--grey);margin-top:14px">New here? <a onclick="openAuth(\'signup\')" style="color:var(--yellow);cursor:pointer;font-weight:700">Create an account</a></p>';
+  var signup = fld('au-name', 'Your name', 'text', 'Sukh Banwait') + fld('au-town', 'Town', 'text', 'Slough') +
+    fld('au-email', 'Email', 'email', 'you@email.com') + fld('au-user', 'Username (your handle)', 'text', 'sukh_b') + fld('au-pass', 'Password (min 6)', 'password', '') +
+    '<button class="fz-btn fz-btn--y" style="width:100%;margin-top:16px" onclick="doSignup()">Create My Account</button>' +
+    '<p style="text-align:center;font-family:var(--font-b);font-size:13px;color:var(--grey);margin-top:14px">Already a member? <a onclick="openAuth(\'login\')" style="color:var(--yellow);cursor:pointer;font-weight:700">Log in</a></p>';
+  ov.innerHTML = '<div style="width:100%;max-width:400px;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#141414,#0b0b0b);border:1px solid var(--border);border-top:3px solid var(--yellow);border-radius:18px;padding:24px">' +
+    '<div style="font-family:var(--font-d);font-size:26px;letter-spacing:.03em">' + (mode === 'signup' ? 'Join The Lane' : 'Welcome back') + '</div>' +
+    '<div style="font-family:var(--font-b);font-size:13px;color:var(--grey);margin:4px 0 8px">' + (mode === 'signup' ? 'Your free Lane membership — works on any device.' : 'Log in to your Lane account.') + '</div>' +
+    '<div id="au-err" style="display:none;font-family:var(--font-b);font-size:13px;color:#fca5a5;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px 12px;margin:6px 0"></div>' +
+    (mode === 'signup' ? signup : login) +
+    '<button class="fz-btn fz-btn--g" style="width:100%;margin-top:8px" onclick="closeEditor()">Cancel</button>' +
+    '</div>';
+  ov.style.display = 'flex';
+}
+async function doLogin() {
+  var email = (document.getElementById('au-email').value || '').trim(), pass = document.getElementById('au-pass').value || '';
+  if (!email || !pass) { authErr('Enter your email and password.'); return; }
+  authErr('Logging in…');
+  var r = await sbLogin(email, pass);
+  if (r.error) { authErr(r.error); return; }
+  closeEditor(); refreshFanUI(); toast('Welcome back 💛');
+}
+async function doSignup() {
+  authErr('Creating your account…');
+  var r = await sbSignUp({
+    name: document.getElementById('au-name').value || '', town: document.getElementById('au-town').value || '',
+    email: document.getElementById('au-email').value || '', username: document.getElementById('au-user').value || '',
+    password: document.getElementById('au-pass').value || ''
+  });
+  if (r && r.error) { authErr(r.error); return; }
+  if (r && r.needConfirm) { authErr('Account created — check your email to confirm, then log in.'); return; }
+  closeEditor(); refreshFanUI(); toast('Welcome to The Lane! 💛');
 }
 
 /* ---------- MEMBERS AREA (vouchers, promos, member news) ---------- */
@@ -158,6 +265,13 @@ async function renderMembers() {
 
 async function initFanZone() {
   await loadAttendance();
+  if (SB) {
+    await sbRestore();
+    // The old no-password "Join the Family List" form is replaced by real
+    // accounts — hide it so there's one clear way in.
+    var oldForm = document.querySelector('form[name="fan-signup"]');
+    if (oldForm) { var s = oldForm.closest('.fz-sec'); if (s) s.style.display = 'none'; }
+  }
   renderAccountBar();
   renderLadder(getFan());
   renderFanCard();
@@ -199,8 +313,8 @@ function renderFanCard() {
     mount.innerHTML =
       '<div class="fancard" style="text-align:center;padding:34px 24px">' +
         '<div style="font-family:var(--font-d);font-size:30px;letter-spacing:.03em;margin-bottom:8px">Get Your Lane Membership</div>' +
-        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">A free digital membership card — your own Lane number &amp; QR code. Show it at the turnstile and collect a yellow heart every game.</p>' +
-        '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="openCardEditor()">Create My Card</button>' +
+        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">A free membership card — your own Lane number &amp; QR code. Show it at the turnstile and collect a yellow heart every game.</p>' +
+        '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="joinOrCreate(\'signup\')">' + (SB ? 'Create My Account' : 'Create My Card') + '</button>' +
       '</div>';
     return;
   }
@@ -368,18 +482,35 @@ function fcPhoto(input) {
   };
   reader.readAsDataURL(file);
 }
-function saveCard() {
+async function saveCard() {
   var name = (document.getElementById('fc-name').value || '').trim();
-  if (!name) { toast('Add a display name', true); return; }
+  if (!name) { toast('Add your name', true); return; }
+  var ov = document.getElementById('fz-editor');
+  // Real account: update the Supabase profile.
+  if (SB) {
+    if (!sbUser) { toast('Please log in first', true); return; }
+    var upd = {
+      name: name,
+      town: (document.getElementById('fc-town').value || '').trim(),
+      since: (document.getElementById('fc-since').value || '').trim(),
+      meaning: (document.getElementById('fc-meaning').value || '').trim()
+    };
+    if (ov && ov._photo) upd.photo = ov._photo;
+    var r = await SB.from('fans').update(upd).eq('id', sbUser.id);
+    if (r.error) { toast(r.error.message, true); return; }
+    await sbLoadProfile();
+    closeEditor(); refreshFanUI(); toast('Profile updated 💛');
+    return;
+  }
+  // Device mode: on-phone card.
   var f = getFan() || { attended: [] };
   f.username = name;
   f.town = (document.getElementById('fc-town').value || '').trim();
   f.since = (document.getElementById('fc-since').value || '').trim();
   f.meaning = (document.getElementById('fc-meaning').value || '').trim();
-  var ov = document.getElementById('fz-editor');
-  if (ov._photo) f.photo = ov._photo;
+  if (ov && ov._photo) f.photo = ov._photo;
   setFan(f);
-  localStorage.removeItem(SESSION_OUT); // saving a card signs you in
+  localStorage.removeItem(SESSION_OUT);
   closeEditor();
   refreshFanUI();
   toast('Card saved to your phone 💛');

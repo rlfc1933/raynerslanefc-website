@@ -3558,8 +3558,31 @@ async function loadFanSignups() {
   var el = document.getElementById('fansignups');
   if (!el || _fansLoading) return;
   _fansLoading = true;
-  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading sign-ups…</div>';
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading members…</div>';
   try {
+    // 1) Real Lane accounts (Supabase). If configured, this is the source of truth.
+    try {
+      var mr = await fetch('/.netlify/functions/list-members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+      var md = await mr.json();
+      if (md && md.ok) {
+        var mem = md.members || [];
+        if (!mem.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No members yet — they appear here the moment a fan creates an account in the Fan Zone.</div>'; _fansLoading = false; return; }
+        el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + mem.length + ' member account' + (mem.length === 1 ? '' : 's') + ' &middot; newest first</div>' +
+          mem.map(function (f) {
+            var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+            var sub = [];
+            if (f.username) sub.push('@' + escH(f.username));
+            if (f.town) sub.push(escH(f.town));
+            if (f.since) sub.push('since ' + escH(String(f.since)));
+            if (f.lane_no) sub.push('Lane #' + escH(String(f.lane_no)));
+            return '<div class="li"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + escH(f.name || f.username || '—') + '</div>' +
+              '<div class="li-sub">' + (f.email ? '<a href="mailto:' + escH(f.email) + '" style="color:var(--y)">' + escH(f.email) + '</a>' : '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div></div>' +
+              '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
+          }).join('');
+        _fansLoading = false; return;
+      }
+    } catch (e) {}
+    // 2) Fall back to Netlify-Forms sign-ups (before Supabase is set up).
     var r = await fetch('/.netlify/functions/list-fans', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: PIN })
