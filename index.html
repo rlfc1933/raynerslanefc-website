@@ -276,11 +276,11 @@
   .ptr img{display:block;width:auto;object-fit:contain;filter:drop-shadow(0 1px 7px rgba(255,255,255,.12))}
   .ptr--principal img{height:50px;max-width:158px}
   .ptr--mid img{height:38px;max-width:120px}
-  /* showcased sponsor (e.g. a dark logo) — bigger + a soft glow so it pops */
-  .ptr--glow{position:relative}
-  .ptr--glow::before{content:"";position:absolute;inset:-18px -22px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,255,255,.22),rgba(255,209,0,.10) 45%,transparent 72%);z-index:0;pointer-events:none}
-  .ptr--glow img{position:relative;z-index:1;height:58px!important;max-width:176px!important;filter:drop-shadow(0 1px 10px rgba(255,255,255,.35))}
-  @media(max-width:600px){.ptr--glow img{height:46px!important;max-width:140px!important}}
+  /* a dark logo (e.g. The King Denham) genuinely needs a light backing to be
+     seen — give it ONE clean, bigger plaque so the sponsor is showcased */
+  .ptr--glow{background:#fff;border-radius:13px;padding:14px 22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.75)}
+  .ptr--glow img{height:62px!important;max-width:200px!important;filter:none!important}
+  @media(max-width:600px){.ptr--glow{padding:11px 16px}.ptr--glow img{height:50px!important;max-width:160px!important}}
   .ptr .txt{font-family:var(--font-d);color:#fff;letter-spacing:.03em;font-size:22px;line-height:1}
   .ptr-cta{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;text-decoration:none;padding-left:18px;margin-left:6px;border-left:1px solid rgba(255,255,255,.14)}
   .ptr-cta b{font-family:var(--font-d);font-size:17px;letter-spacing:.03em;color:var(--yellow);line-height:1}
