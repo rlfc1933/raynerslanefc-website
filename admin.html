@@ -178,6 +178,41 @@
     /* Pitch generator */
     .pg-ctl{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
     .pg-ctl select{flex:1;min-width:160px;background:var(--c);border:1px solid var(--br);border-radius:8px;color:#fff;font-family:var(--fb);font-size:14px;padding:11px}
+    /* Playbook v4 — jump nav, accountability, projections, Wins Board */
+    .pb-jump{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+    .pb-jump button{background:var(--c);border:1px solid var(--br);border-radius:999px;color:#ddd;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.03em;padding:7px 12px;cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent}
+    .pb-jump button:hover,.pb-jump button:active{border-color:var(--y);color:var(--y)}
+    .pb-excuse{background:linear-gradient(135deg,#2a1410,#140a08);border:1px solid rgba(239,68,68,.4);border-left:4px solid #ef4444;border-radius:12px;padding:17px 18px;margin-bottom:14px}
+    .pb-excuse b{color:#fff}
+    .pb-excuse p{font-family:var(--fb);font-size:14px;color:#e6dcda;line-height:1.7;margin:0 0 9px}
+    .pb-excuse p:last-child{margin-bottom:0}
+    .pb-excuse .k{color:#fca5a5;font-weight:700}
+    .pb-excuse .up{color:var(--y);font-weight:700}
+    .pj{display:flex;flex-direction:column;gap:10px}
+    .pj-yr{background:var(--c);border:1px solid var(--br);border-radius:12px;padding:15px 16px;border-left:4px solid var(--accent,var(--y))}
+    .pj-yr__h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+    .pj-yr__n{font-family:var(--fd);font-size:18px;color:#fff;letter-spacing:.02em}
+    .pj-yr__v{font-family:var(--fd);font-size:19px;color:var(--y);white-space:nowrap}
+    .pj-yr p{font-family:var(--fb);font-size:13px;color:#cfcfcf;line-height:1.65;margin:0}
+    .wb-head{display:flex;gap:10px;margin-bottom:13px}
+    .wb-stat{flex:1;background:linear-gradient(165deg,#16300f,#0b160a);border:1px solid rgba(255,209,0,.3);border-radius:12px;padding:14px 10px;text-align:center}
+    .wb-stat b{display:block;font-family:var(--fd);font-size:28px;color:var(--y);line-height:1}
+    .wb-stat span{font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);margin-top:5px;display:block}
+    .wb-form{background:var(--dk);border:1px solid var(--br);border-radius:11px;padding:13px;margin-bottom:12px}
+    .wb-form input{width:100%;background:var(--c);border:1px solid var(--br);border-radius:7px;color:#fff;font-family:var(--fb);font-size:14px;padding:10px 12px;margin-bottom:8px}
+    .wb-form input:focus{border-color:var(--y);outline:none}
+    .wb-win{display:flex;align-items:flex-start;gap:11px;background:var(--c);border:1px solid var(--br);border-radius:10px;padding:11px 13px;margin-bottom:7px;animation:tileIn .4s backwards}
+    .wb-win .wb-ic{font-size:18px;flex-shrink:0;line-height:1.2}
+    .wb-win .wb-m{flex:1;min-width:0}
+    .wb-win .wb-w{font-family:var(--fc);font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em}
+    .wb-win .wb-who{font-family:var(--fb);font-size:11.5px;color:var(--gr);margin-top:1px}
+    .wb-win .wb-v{font-family:var(--fd);font-size:16px;color:var(--y);white-space:nowrap}
+    .wb-empty{text-align:center;font-family:var(--fb);font-size:13.5px;color:var(--gr);line-height:1.6;padding:18px 10px}
+    .pb-mission{background:var(--c);border:1px solid var(--br);border-radius:11px;padding:14px 15px;margin-bottom:9px}
+    .pb-mission__r{font-family:var(--fd);font-size:17px;color:#fff;letter-spacing:.02em;margin-bottom:3px}
+    .pb-mission__d{font-family:var(--fb);font-size:13px;color:#cfcfcf;line-height:1.6;margin-bottom:9px}
+    .pb-mission__a{display:flex;gap:9px;align-items:flex-start;background:rgba(255,209,0,.07);border-radius:8px;padding:9px 11px;font-family:var(--fb);font-size:12.5px;color:#f1e7c2;line-height:1.5}
+    .pb-mission__a b{color:var(--y);font-family:var(--fc);font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;padding-top:1px}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -1422,12 +1457,37 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="pb-intro">
         <div class="pb-intro__h">From one matchday to a club that pays its own way</div>
         <p>Let's be honest with each other. Almost everything the club earns comes through the turnstile on a Saturday — and because we don't own Tithe Farm, that single gate is carrying the whole club on its back. A wet afternoon, a rough run, or a change behind the scenes, and the money dries up. That's why every year can feel like starting again with an empty tin.</p>
-        <p>This isn't about a magic figure. It's about building a club that earns in <b>several different ways</b>, so no single bad week sinks us — and so the volunteers stop forever firefighting. None of it is luck or quick. But clubs no bigger than us have done it. Tap any section below to open it.</p>
+        <p>This isn't about a magic figure. It's about building a club that earns in <b>several different ways</b>, so no single bad week sinks us — and so the volunteers stop forever firefighting. None of it is luck or quick. But clubs no bigger than us have done it.</p>
       </div>
+
+      <div class="pb-excuse">
+        <p><b>Let's not dress it up.</b> We got <span class="k">relegated</span> — we're a Step 5 club that was a division higher not long ago. And every year since, the story's been the same three words: <span class="k">"no budget."</span></p>
+        <p>That excuse stops here. Relegation wasn't just bad luck — it's what happens when a club stops building the business behind the team. The flip side is the good bit: it's completely fixable, and the people who fix it are <span class="up">in this committee</span>. Nobody's coming to save The Lane. We are the plan. So let's stop talking about what we can't do, and own what we can.</p>
+      </div>
+
+      <div class="pb-jump" id="pb-jump"></div>
 
       <!-- 1. WHY GROW -->
       <details class="pb-sec"><summary>Why bother? The case for growing</summary><div class="pb-sec__b">
         <div class="soc-card"><p>Growing the income isn't greed — it's <b style="color:#fff">breathing room</b>. A club earning from several places can keep its better players instead of losing them every summer, plan a season instead of surviving one, and becomes somewhere sponsors and young families <b style="color:#fff">want</b> to be. It looks after the volunteers too: when the club isn't skint, nobody's begging for raffle prizes the night before a game. Stability is the prize — everything else here is just how you buy it.</p></div>
+      </div></details>
+
+      <!-- WINS BOARD — the dopamine engine -->
+      <details class="pb-sec" open><summary>🏆 The Wins Board — what we're bringing in</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">This is <b>ours</b>, and it's live for the whole committee. Every time you land something for The Lane — a board sold, ten lottery members signed, an event booked, a sponsor's yes — <b>put your name on the board.</b> Watch it grow. This is how we hold each other up, and how we prove "no budget" was always a choice.</p>
+        <div class="wb-head">
+          <div class="wb-stat"><b id="wb-count">0</b><span>Wins logged</span></div>
+          <div class="wb-stat"><b id="wb-value">£0</b><span>Brought in</span></div>
+          <div class="wb-stat"><b id="wb-people">0</b><span>People chipping in</span></div>
+        </div>
+        <div class="wb-form">
+          <input type="text" id="wb-who" placeholder="Your name (e.g. Nigel)" maxlength="40">
+          <input type="text" id="wb-what" placeholder="What did you land? (e.g. Sold a board to the barbers)" maxlength="90">
+          <input type="number" id="wb-amt" placeholder="Value £ (optional, per year)" min="0">
+          <button class="save sec" style="margin:0" onclick="addWin()">🎉 Put it on the board</button>
+        </div>
+        <div id="wb-list"><div class="wb-empty">The board's empty. Be the <b style="color:var(--y)">first name</b> on it — even a small one counts.</div></div>
+        <div class="dep" id="dep-wins"></div>
       </div></details>
 
       <!-- 2. WHY RAYNERS LANE (investment case) + PITCH GENERATOR -->
@@ -1435,7 +1495,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <p class="pb-sec__lead">Before anyone hands money over — a sponsor, a local firm, a serious backer — they need to know <b>why this club</b>. Here's the case. It's a strong one.</p>
         <div class="pb-area">
           <div class="pb-area__h"><div class="pb-area__n">A club with pedigree &amp; ambition</div></div>
-          <p>The Lane has competed at <b>Step 4 — two levels above where we sit today.</b> That isn't a wound to pick at; it's proof of what this club is capable of. The mission is simple and it sells: <b>climb back, and this time build the business underneath it so we stay there.</b> People back ambition with a track record. We have both.</p>
+          <p>The Lane has competed at <b>Step 4 — the division above where we sit today.</b> We were there, and we got relegated back to Step 5. That's not a track record to hide; handled right it's proof of what this club <em>can</em> reach. The mission is simple and it sells: <b>climb back, and this time build the business underneath it so we actually stay there.</b> People back ambition with history behind it. We have both.</p>
         </div>
         <div class="pb-area">
           <div class="pb-area__h"><div class="pb-area__n">90+ years &amp; a town on the doorstep</div></div>
@@ -1496,6 +1556,26 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Community &amp; grants</div><span class="pb-area__e h">Paperwork</span></div><p>Honest truth: grants are applications and patience, not a button you press — and you won't win them all. But they're real and big. Football Foundation, the FA, Middlesex FA, the council and National Lottery back clubs <b>doing good locally</b>. Needs one organised person to own the forms.</p></div>
       </div></details>
 
+      <!-- PROJECTIONS — where this gets us -->
+      <details class="pb-sec"><summary>📈 Where this gets us — the 3-year climb</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">Estimates, not promises — but grounded in what clubs like us actually do. The point is the <b>shape</b>: it compounds. Year one is graft for a modest return; by year three the recurring streams and the audience are doing the heavy lifting. These are figures the club can genuinely build toward.</p>
+        <div class="pj">
+          <div class="pj-yr" style="--accent:#22C55E">
+            <div class="pj-yr__h"><div class="pj-yr__n">Year 1 — Foundations</div><div class="pj-yr__v">~£15k–25k</div></div>
+            <p>Get the 100 Club live (aim 80–100 members), sell the first 10–15 boards, run a tighter matchday with a 50/50 and food, and one or two events. Hard yards for a real return — and every brick laid here pays out again next year.</p>
+          </div>
+          <div class="pj-yr" style="--accent:var(--y)">
+            <div class="pj-yr__h"><div class="pj-yr__n">Year 2 — Momentum</div><div class="pj-yr__v">~£25k–40k</div></div>
+            <p>The lottery renews and grows, boards fill out and renew, supporter memberships climb, the social following starts attracting content sponsors, and you land your first proper grant. Attendances tick up because the matchday's worth coming to.</p>
+          </div>
+          <div class="pj-yr" style="--accent:#fb923c">
+            <div class="pj-yr__h"><div class="pj-yr__n">Year 3 — Established</div><div class="pj-yr__v">~£40k–60k+</div></div>
+            <p>Recurring income (lottery, boards, members) is a dependable floor that survives any bad run. Merch and content are earning. The club looks investable — the kind of platform a serious backer or a headline partner finally says yes to. This is what "climbing back, sustainably" actually looks like on paper.</p>
+          </div>
+        </div>
+        <p class="pb-sec__lead" style="margin:12px 2px 0">Want to pressure-test it against your own effort? Open the <b>Income Builder</b> below and put in honest numbers — you'll see year one is closer than the excuses suggest.</p>
+      </div></details>
+
       <!-- 5. SOCIAL MEDIA ROADMAP -->
       <details class="pb-sec"><summary>📲 The social media money roadmap</summary><div class="pb-sec__b">
         <p class="pb-sec__lead">Why this matters: an audience is an <b>asset</b>. It earns directly through the platforms, and it's what makes sponsors and merch work. It costs nothing but consistency — and a non-league club's honesty and characters are exactly what does well online.</p>
@@ -1548,15 +1628,15 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div></details>
 
       <!-- 9. EVERYONE'S PART -->
-      <details class="pb-sec"><summary>Everyone has a part</summary><div class="pb-sec__b">
-        <p class="pb-sec__lead">No one here takes a wage, so nobody can carry this alone. It works when each person owns one corner.</p>
-        <div class="dmap-item"><b>Chairman</b><span>Holds the vision and the relationships money can't buy. Walks in the door for the bigger asks and the investors.</span></div>
-        <div class="dmap-item"><b>Vice Chairman / Commercial</b><span>Owns local business — boards, match sponsors, the Sponsor Hub. Target: fill the boards before game one.</span></div>
-        <div class="dmap-item"><b>Treasurer</b><span>Watches the money in Club Analytics and tells everyone plainly how we're doing. Clean books win investors.</span></div>
-        <div class="dmap-item"><b>Secretary</b><span>Owns the grant applications and admin. Free money is a paperwork job — give it to someone organised.</span></div>
-        <div class="dmap-item"><b>Marketing / Social</b><span>Drives the fans and the following, and runs the social-media roadmap. A loud club gets sponsors.</span></div>
-        <div class="dmap-item"><b>Matchday team</b><span>Gate, programme, 50/50, food — each needs a named person every home game. That's what makes the day earn.</span></div>
-        <div class="dmap-item"><b>Everyone on the committee</b><span>Bring one thing. One board. Ten lottery members. One event. If everybody brings one, the whole club changes.</span></div>
+      <details class="pb-sec"><summary>🎯 Your mission — pick your corner</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">No one here takes a wage, so nobody can carry this alone — and nobody should sit on the bench either. Find your role, own it, and put your wins on the board above. This is where you matter.</p>
+        <div class="pb-mission"><div class="pb-mission__r">Chairman</div><div class="pb-mission__d">You hold the vision and the relationships money can't buy. The big asks and the serious backers are yours.</div><div class="pb-mission__a"><b>This week</b><span>Line up one face-to-face with a local business owner you already know — and bring the pitch from above.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Vice Chairman / Commercial</div><div class="pb-mission__d">You own local business — boards, match sponsors, the Sponsor Hub pipeline. You're the one who fills the perimeter.</div><div class="pb-mission__a"><b>This week</b><span>Make the one-page board offer and target 5 firms. Log every "yes" on the Wins Board.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Treasurer</div><div class="pb-mission__d">You watch the money and tell everyone, plainly, how we're doing. Clean books are what win an investor's trust.</div><div class="pb-mission__a"><b>This week</b><span>Open Club Analytics and set the simple monthly figure everyone reports to.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Secretary</div><div class="pb-mission__d">You own the grant applications and the admin. Free money is a paperwork job for someone organised — that's you.</div><div class="pb-mission__a"><b>This week</b><span>Find and start <em>one</em> grant application (Football Foundation or Middlesex FA).</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Marketing / Social</div><div class="pb-mission__d">You drive the fans and the following and run the social roadmap. A loud club gets sponsors; a quiet one gets forgotten.</div><div class="pb-mission__a"><b>This week</b><span>Post three times using the captions in the Social tab. Pick the flagship channel and commit.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Matchday team</div><div class="pb-mission__d">Gate, programme, 50/50, food — each needs a named owner every single home game. That's what turns a fixture into income.</div><div class="pb-mission__a"><b>This week</b><span>Put a name against each matchday job for game one. No gaps.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Everyone on the committee</div><div class="pb-mission__d">Whatever your title, you can bring <b>one thing</b>. One board. Ten lottery members. One event. One business through the door.</div><div class="pb-mission__a"><b>This week</b><span>Decide your one thing — then log it on the Wins Board when it's done.</span></div></div>
       </div></details>
 
       <!-- 10. WHY DIFFERENT -->
@@ -1997,7 +2077,7 @@ function openPanel(name) {
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'clubstats') loadClubStats();
   if (name === 'settings')  runSystemCheck();
-  if (name === 'playbook')  calcIncome();
+  if (name === 'playbook')  { buildJumpNav(); calcIncome(); loadWins(); }
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -2095,6 +2175,7 @@ var WHATS_NEW = [
   { id:'nf-splogo',    i:'🖼️', t:'Upload sponsor logos', d:'Add a sponsor logo straight from your phone (JPG/PNG) — no filenames. (Sponsors tab)' },
   { id:'nf-officials', i:'⚖️', t:'Editable policy names', d:'Change the Welfare Officer, Chairman or Secretary once → every mention on the Policies page updates. (Club Roles tab)' },
   { id:'nf-playbook',  i:'💰', t:'The Lane Business Playbook', d:'How to grow the club\'s income — real examples from clubs like us, honest revenue ideas, grants & every role\'s part. Pinned at the top: Start Here.' },
+  { id:'nf-winsboard', i:'🏆', t:'The Wins Board is live', d:'Landed something for The Lane — a board, lottery members, a sponsor\'s yes? Put your name on the Wins Board (top of the Business Playbook). Watch it grow.' },
 ];
 function newsSeen()      { try { return JSON.parse(localStorage.getItem('rlfc_news_seen') || '[]'); } catch (e) { return []; } }
 function newsDismissed() { try { return JSON.parse(localStorage.getItem('rlfc_news_dismissed') || '[]'); } catch (e) { return []; } }
@@ -2667,6 +2748,68 @@ function generatePitch() {
   };
   var out = document.getElementById('pg-out');
   if (out) out.innerHTML = '<div class="soc-cap">' + esc(pitches[aud] || pitches.local) + '</div>';
+}
+
+// ── PLAYBOOK navigation (jump pills) ──
+var PB_JUMP = [
+  ['🏆 Wins', 'Wins Board'], ['Why us', 'Why Rayners Lane'], ['Ways to earn', 'bring money in'],
+  ['📈 Climb', '3-year climb'], ['📲 Socials', 'social media money'], ['🏦 Investors', 'Approaching investors'],
+  ['🧮 Builder', 'Income Builder'], ['🎯 Mission', 'Your mission'],
+];
+function buildJumpNav() {
+  var el = document.getElementById('pb-jump'); if (!el || el.dataset.built) return;
+  el.innerHTML = PB_JUMP.map(function (j) { return '<button onclick="pbJump(\'' + j[1] + '\')">' + j[0] + '</button>'; }).join('');
+  el.dataset.built = '1';
+}
+function pbJump(q) {
+  document.querySelectorAll('#panel-playbook details.pb-sec').forEach(function (d) {
+    var s = d.querySelector('summary');
+    if (s && s.textContent.indexOf(q) > -1) { d.open = true; setTimeout(function () { d.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 30); }
+  });
+}
+
+// ── WINS BOARD — shared, live, dopamine ──
+var wins = [];
+function loadWins() { fetchJSON('committee-wins', function (d) { wins = (d && d.wins) || []; renderWins(); }); }
+function renderWins() {
+  var list = document.getElementById('wb-list'); if (!list) return;
+  var total = wins.reduce(function (a, w) { return a + (parseFloat(w.amt) || 0); }, 0);
+  var people = {}; wins.forEach(function (w) { if (w.who) people[String(w.who).toLowerCase().trim()] = 1; });
+  var c = document.getElementById('wb-count'), v = document.getElementById('wb-value'), p = document.getElementById('wb-people');
+  if (c) c.textContent = wins.length;
+  if (v) v.textContent = '£' + Math.round(total).toLocaleString('en-GB');
+  if (p) p.textContent = Object.keys(people).length;
+  list.innerHTML = wins.length
+    ? wins.map(function (w) {
+        var when = w.date ? new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+        return '<div class="wb-win"><span class="wb-ic">💛</span><div class="wb-m"><div class="wb-w">' + esc(w.what || '') + '</div>' +
+          '<div class="wb-who">' + esc(w.who || 'Someone') + (when ? ' &middot; ' + when : '') + '</div></div>' +
+          (w.amt ? '<span class="wb-v">£' + Math.round(w.amt).toLocaleString('en-GB') + '</span>' : '') + '</div>';
+      }).join('')
+    : '<div class="wb-empty">The board\'s empty. Be the <b style="color:var(--y)">first name</b> on it — even a small one counts.</div>';
+}
+function addWin() {
+  var who = gv('wb-who'), what = gv('wb-what'), amt = parseFloat(gv('wb-amt')) || 0;
+  if (!what) { toast('What did you land? Add a quick line.', true); return; }
+  wins.unshift({ who: who || 'A committee member', what: what, amt: amt, date: new Date().toISOString().slice(0, 10) });
+  renderWins();
+  setVal('wb-who', ''); setVal('wb-what', ''); setVal('wb-amt', '');
+  pbCelebrate();
+  toast('🎉 On the board! That\'s another brick in the wall.');
+  pushToGitHub('committee-wins', { wins: wins, updatedAt: new Date().toISOString() }, 'dep-wins');
+}
+function pbCelebrate() {
+  var cols = ['#FFD100', '#22C55E', '#ffffff', '#fb923c'];
+  for (var i = 0; i < 18; i++) {
+    (function (i) {
+      var s = document.createElement('div');
+      s.style.cssText = 'position:fixed;top:-14px;left:' + (8 + Math.random() * 84) + '%;width:9px;height:9px;background:' + cols[i % 4] + ';border-radius:2px;z-index:100000;pointer-events:none';
+      document.body.appendChild(s);
+      var dur = 900 + Math.random() * 800;
+      s.animate([{ transform: 'translateY(0) rotate(0)', opacity: 1 }, { transform: 'translateY(' + (window.innerHeight + 50) + 'px) rotate(' + (360 + Math.random() * 360) + 'deg)', opacity: .3 }], { duration: dur, easing: 'cubic-bezier(.25,.6,.5,1)' });
+      setTimeout(function () { s.remove(); }, dur);
+    })(i);
+  }
 }
 
 // Tap any caption template to copy it to the clipboard.
