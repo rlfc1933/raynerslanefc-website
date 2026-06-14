@@ -88,6 +88,28 @@
     /* DEPLOY */
     .dep{background:var(--c);border:1px solid var(--br);border-radius:4px;padding:12px 14px;margin-top:10px;display:none;align-items:center;gap:10px}
     .dep.on{display:flex}
+    .cs-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+    .cs-card{background:linear-gradient(165deg,var(--c),var(--dk));border:1px solid var(--br);border-radius:13px;padding:15px 16px;border-top:3px solid var(--accent,var(--y))}
+    .cs-card b{display:block;font-family:var(--fd);font-size:30px;letter-spacing:.02em;color:#fff;line-height:1}
+    .cs-card span{display:block;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:6px}
+    .cs-card em{font-style:normal;color:var(--y)}
+    .cs-chart-wrap{background:var(--c);border:1px solid var(--br);border-radius:13px;padding:16px;margin-bottom:14px}
+    .cs-chart-ttl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-bottom:12px}
+    /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
+       #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
+    @media(min-width:900px){
+      #app .dash{max-width:1120px;padding:30px 30px 90px}
+      #app .tile-grid{grid-template-columns:repeat(3,1fr);gap:16px}
+      #app .tile{padding:20px 18px 22px}
+      #app .tile-name{font-size:22px}
+      #app .panel{max-width:760px;margin:0 auto}
+      #app .hq-hero{padding:36px 38px}
+      #app .hq-greet{font-size:40px}
+      #app .cs-cards{grid-template-columns:repeat(3,1fr)}
+      #app .cs-chart-wrap{max-width:760px;margin:0 auto 14px}
+      .app-hdr{padding:14px 30px}
+    }
+    @media(min-width:1280px){ #app .tile-grid{grid-template-columns:repeat(4,1fr)} }
     .dep-msg{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.06em}
     /* LIST */
     .li{background:var(--c);border:1px solid var(--br);padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:2px}
@@ -371,6 +393,11 @@
 
       <div class="sect-lbl">Boardroom</div>
       <div class="tile-grid">
+        <button class="tile tile-wide" style="--accent:#34D399" onclick="openPanel('clubstats')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-6"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="12" r="1"/><circle cx="13" cy="14" r="1"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Club Analytics</div><div class="tile-desc">Fan Zone, sponsorship, income &amp; programmes — open to all staff</div></div>
+          <span class="tile-badge">All Staff</span>
+        </button>
         <button class="tile tile-wide" style="--accent:#FFD100" onclick="openPanel('analytics')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="11" width="3" height="7" rx="1"/><rect x="10.5" y="6" width="3" height="12" rx="1"/><rect x="16" y="13" width="3" height="5" rx="1"/></svg></span>
           <div class="tile-body"><div class="tile-name">Match Day Analytics</div><div class="tile-desc">Attendance, takings, check-ins &amp; performance charts</div></div>
@@ -1011,7 +1038,8 @@
       <div id="pk-list"></div>
 
       <div class="div"></div>
-      <div class="slbl">Add Members-Only News</div>
+      <div class="slbl">📣 Message All Members</div>
+      <div class="snote"><p>This is your <strong style="color:var(--w)">broadcast</strong> — it appears instantly in <strong style="color:var(--w)">every signed-in member's Fan Zone</strong>. To message one fan directly, use the email links in <strong>Fan Club → Fan Sign-Ups</strong>.</p></div>
       <div class="field"><label class="fl">Headline</label><input type="text" id="mn-title" placeholder="Members get first dibs on season tickets"></div>
       <div class="field"><label class="fl">Message</label><textarea id="mn-body" rows="2" placeholder="Early access window before general sale…"></textarea></div>
       <button class="save sec" onclick="addMemberNews()">+ Add Member News</button>
@@ -1044,6 +1072,17 @@
       <div id="sh-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap Refresh to load applications.</div></div>
       <button class="save" style="margin-top:12px" onclick="saveSponsorCrm()">&#10003; Save Pipeline to Site</button>
       <div class="dep" id="dep-sponsorcrm"></div>
+    </div>
+
+    <!-- CLUB ANALYTICS (open to all staff) -->
+    <div class="panel" id="panel-clubstats">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128202; Club Analytics</div></div>
+      <div class="snote" style="border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)"><p>A live read-out of how the club's doing — <strong style="color:var(--w)">open to all staff</strong>. Fan Zone, sponsorship, income &amp; programmes. The chairman's detailed match-by-match financials live in the separate Match Day Analytics tab.</p></div>
+      <div id="cs-cards" class="cs-cards"></div>
+      <div class="cs-chart-wrap"><div class="cs-chart-ttl">Sponsorship Pipeline</div><canvas id="cs-pipeline" height="150"></canvas></div>
+      <div class="cs-chart-wrap"><div class="cs-chart-ttl">Income by Source</div><canvas id="cs-income" height="150"></canvas></div>
+      <div class="cs-chart-wrap"><div class="cs-chart-ttl">Fan Hearts Awarded — by match</div><canvas id="cs-hearts" height="150"></canvas></div>
+      <p style="font-family:var(--fc);font-size:11px;color:var(--gr);text-align:center;margin-top:14px">Updates as the season runs — log match takings in Match Day Analytics, award hearts in Fan Club.</p>
     </div>
 
     <!-- STAFF & MANAGEMENT (private profiles) -->
@@ -1453,6 +1492,7 @@ function openPanel(name) {
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
+  if (name === 'clubstats') loadClubStats();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -2045,6 +2085,64 @@ function buildQuote(id) {
 function saveSponsorCrm() {
   pushToGitHub('sponsor-crm', { deals: sponsorCrm, updatedAt: new Date().toISOString() }, 'dep-sponsorcrm');
   toast('Pipeline saved ✓');
+}
+
+// ── CLUB ANALYTICS (open to all staff) — aggregates every data source ──
+var _csCharts = {};
+async function loadClubStats() {
+  function jget(name) { return new Promise(function (r) { fetchJSON(name, function (d) { r(d || {}); }); }); }
+  var att = await jget('attendance');
+  var patrons = await jget('patrons');
+  var crm = await jget('sponsor-crm');
+  var an = await jget('analytics');
+  // fan sign-ups (private, needs token) — graceful if missing
+  var fanCount = null;
+  try {
+    var fr = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var fd = await fr.json(); if (fd && fd.ok && typeof fd.count === 'number') fanCount = fd.count;
+  } catch (e) {}
+
+  var matches = att.matches || [];
+  var hearts = 0; matches.forEach(function (m) { hearts += (m.lanes || []).length; });
+  var patronCount = (patrons.patrons || []).length;
+  var deals = (crm.deals && Object.keys(crm.deals).map(function (k) { return crm.deals[k]; })) || [];
+  var paid = deals.filter(function (d) { return d.status === 'Paid'; });
+  var pipelineValue = deals.reduce(function (a, d) { return a + (parseFloat(d.amount) || 0); }, 0);
+  var paidValue = paid.reduce(function (a, d) { return a + (parseFloat(d.amount) || 0); }, 0);
+  var ams = an.matches || [];
+  var income = ams.reduce(function (a, m) { return a + matchTotal(m); }, 0);
+  var progTotal = ams.reduce(function (a, m) { return a + ((m.takings || {}).programmes || 0); }, 0);
+
+  var cards = [
+    { n: fanCount == null ? '—' : fanCount, l: 'Fan sign-ups', c: '#34D399' },
+    { n: hearts, l: 'Hearts awarded', c: '#FFD100' },
+    { n: patronCount, l: 'Patrons championed', c: '#F43F5E' },
+    { n: '£' + Math.round(pipelineValue).toLocaleString('en-GB'), l: 'Sponsorship pipeline', c: '#10B981' },
+    { n: '£' + Math.round(paidValue).toLocaleString('en-GB'), l: 'Sponsorship paid', c: '#22C55E' },
+    { n: '£' + Math.round(income).toLocaleString('en-GB'), l: 'Matchday income', c: '#3B82F6' },
+  ];
+  document.getElementById('cs-cards').innerHTML = cards.map(function (c) {
+    return '<div class="cs-card" style="--accent:' + c.c + '"><b>' + c.n + '</b><span>' + c.l + '</span></div>';
+  }).join('');
+
+  Object.keys(_csCharts).forEach(function (k) { try { _csCharts[k].destroy(); } catch (e) {} });
+  if (typeof Chart === 'undefined') return;
+  var gridC = 'rgba(255,255,255,.06)', tickC = '#8a8a8a';
+  var baseOpts = { responsive: true, plugins: { legend: { labels: { color: tickC, font: { size: 10 } } } }, scales: { x: { ticks: { color: tickC }, grid: { color: gridC } }, y: { ticks: { color: tickC }, grid: { color: gridC }, beginAtZero: true } } };
+
+  // Sponsorship pipeline by stage
+  var stageCounts = STAGES.map(function (st) { return deals.filter(function (d) { return (d.status || 'New') === st; }).length; });
+  var cp = document.getElementById('cs-pipeline');
+  if (cp) _csCharts.pipe = new Chart(cp, { type: 'bar', data: { labels: STAGES, datasets: [{ label: 'Deals', data: stageCounts, backgroundColor: '#10B981' }] }, options: baseOpts });
+
+  // Income by source (doughnut)
+  var sums = ams.reduce(function (a, m) { var t = m.takings || {}; a[0] += t.entry || 0; a[1] += t.programmes || 0; a[2] += t.merch || 0; a[3] += t.other || 0; return a; }, [0, 0, 0, 0]);
+  var ci = document.getElementById('cs-income');
+  if (ci) _csCharts.inc = new Chart(ci, { type: 'doughnut', data: { labels: ['Gate', 'Programmes', 'Merch', 'Other'], datasets: [{ data: sums, backgroundColor: ['#FFD100', '#22C55E', '#3B82F6', '#8a8a8a'] }] }, options: { responsive: true, plugins: { legend: { labels: { color: tickC, font: { size: 10 } } } } } });
+
+  // Hearts by match (line)
+  var ch = document.getElementById('cs-hearts');
+  if (ch) _csCharts.h = new Chart(ch, { type: 'line', data: { labels: matches.map(function (m) { return m.opponent || m.date || ''; }), datasets: [{ label: 'Hearts', data: matches.map(function (m) { return (m.lanes || []).length; }), borderColor: '#FFD100', backgroundColor: 'rgba(255,209,0,.15)', fill: true, tension: .3 }] }, options: baseOpts });
 }
 function renderCommittee() {
   document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';
