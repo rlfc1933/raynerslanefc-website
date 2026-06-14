@@ -6,16 +6,28 @@
 
 var FAN_KEY = 'rlfc_fan';
 
-// Loyalty tiers by games attended
+// ── LOYALTY: 5 tiers by total games attended ──
 var TIERS = [
-  { min: 50, name: 'Terrace Royalty', perk: 'Legend status. First call on everything The Lane does.' },
-  { min: 25, name: 'Lane Legend',     perk: 'Featured Patron. Priority for matchday rewards & events.' },
-  { min: 10, name: 'Loyal Laner',     perk: 'Patron of The Lane — your name on the wall.' },
-  { min: 5,  name: 'Regular',         perk: 'One of the faithful. Shout-outs & early news.' },
-  { min: 1,  name: 'Matchgoer',       perk: 'You showed up. That\'s what counts at The Lane.' },
-  { min: 0,  name: 'New Lane',        perk: 'Welcome to the family. Get to a game!' },
+  { min: 50, name: 'Terrace Royalty', icon: '👑' },
+  { min: 25, name: 'Lane Legend',     icon: '🏆' },
+  { min: 10, name: 'Lane Loyal',      icon: '💛' },
+  { min: 5,  name: 'Yellow Regular',  icon: '⚽' },
+  { min: 1,  name: 'Local Laner',     icon: '🧣' },
+  { min: 0,  name: 'New to The Lane', icon: '✨' },
 ];
 function tierFor(games) { for (var i = 0; i < TIERS.length; i++) if (games >= TIERS[i].min) return TIERS[i]; return TIERS[TIERS.length - 1]; }
+
+// ── REWARDS by HOME games (mostly free / sponsor-funded) ──
+var REWARDS = [
+  { home: 5,  title: '6th home game FREE',        note: 'Your next home match is on us. Show this at the gate.' },
+  { home: 10, title: 'A drink on the house',      note: 'Powered by McCafferty\'s — show this at the bar.' },
+  { home: 20, title: 'Matchday VIP',              note: 'Half-time shout-out, programme mention & toss the coin.' },
+  { home: 38, title: 'After-Season Party invite', note: 'An ever-present at The Lane. You earned your seat.' },
+];
+function homeGames(f) { return ((f && f.attended) || []).filter(function (a) { return a.home; }).length; }
+function totalGames(f) { return ((f && f.attended) || []).length; }
+function unlockedRewards(f) { var h = homeGames(f); return REWARDS.filter(function (r) { return h >= r.home; }); }
+function nextReward(f) { var h = homeGames(f); for (var i = 0; i < REWARDS.length; i++) if (h < REWARDS[i].home) return { reward: REWARDS[i], left: REWARDS[i].home - h }; return null; }
 
 function getFan()  { try { return JSON.parse(localStorage.getItem(FAN_KEY)) || null; } catch (e) { return null; } }
 function setFan(f) { localStorage.setItem(FAN_KEY, JSON.stringify(f)); }
@@ -41,27 +53,49 @@ function renderFanCard() {
       '</div>';
     return;
   }
-  var games = (f.attended || []).length;
+  var games = totalGames(f);
+  var home = homeGames(f);
   var tier = tierFor(games);
   var initials = (f.username || 'L').trim().slice(0, 2).toUpperCase();
   var photo = f.photo
     ? '<img class="fancard__photo" src="' + f.photo + '" alt="">'
     : '<div class="fancard__photo" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;color:#fff">' + esc(initials) + '</div>';
+  // yellow hearts — one per game (cap the row, show +N)
+  var maxHearts = 16, hearts = '';
+  for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '💛';
+  if (games > maxHearts) hearts += ' <span style="font-family:var(--font-c);font-size:12px;color:var(--yellow);font-weight:700">+' + (games - maxHearts) + '</span>';
+  var heartsRow = games ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + hearts + '</div>' : '';
+  // unlocked rewards + next reward progress
+  var unlocked = unlockedRewards(f);
+  var rewardsHtml = unlocked.length
+    ? '<div style="padding:6px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">🎁 Your Rewards</div>' +
+      unlocked.map(function (r) {
+        return '<div style="background:rgba(255,209,0,.08);border:1px solid rgba(255,209,0,.25);border-radius:8px;padding:9px 12px;margin-bottom:6px">' +
+          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em">' + esc(r.title) + '</div>' +
+          '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey);line-height:1.4">' + esc(r.note) + '</div></div>';
+      }).join('') + '</div>'
+    : '';
+  var nr = nextReward(f);
+  var nextHtml = nr
+    ? '<div style="padding:0 18px 16px"><div style="font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.04em"><strong style="color:var(--yellow)">' + nr.left + ' more home game' + (nr.left > 1 ? 's' : '') + '</strong> → ' + esc(nr.reward.title) + '</div></div>'
+    : '';
   mount.innerHTML =
     '<div class="fancard">' +
       '<div class="fancard__top">' + photo +
         '<div class="fancard__id">' +
-          '<span class="fancard__tier">' + esc(tier.name) + '</span>' +
+          '<span class="fancard__tier">' + (tier.icon ? tier.icon + ' ' : '') + esc(tier.name) + '</span>' +
           '<div class="fancard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
           '<div class="fancard__since">' + (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '') + '</div>' +
         '</div>' +
       '</div>' +
+      heartsRow +
       '<div class="fancard__stats">' +
         '<div class="fancard__stat"><div class="fancard__num">' + games + '</div><div class="fancard__lbl">Games</div></div>' +
-        '<div class="fancard__stat"><div class="fancard__num">' + (f.since ? (2026 - parseInt(f.since) || 0) : 0) + '</div><div class="fancard__lbl">Years</div></div>' +
+        '<div class="fancard__stat"><div class="fancard__num">' + home + '</div><div class="fancard__lbl">At Home</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + nextMilestone(games) + '</div><div class="fancard__lbl">To Next Tier</div></div>' +
       '</div>' +
       (f.meaning ? '<div class="fancard__meaning">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
+      rewardsHtml + nextHtml +
       '<div class="fancard__foot">' +
         '<button class="fz-btn fz-btn--y" onclick="checkInToday()">&#9917; I Was There</button>' +
         '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Card</button>' +
@@ -80,14 +114,20 @@ async function checkInToday() {
   f.attended = f.attended || [];
   var today = new Date().toISOString().slice(0, 10);
   if (f.attended.some(function (a) { return a.date === today; })) { toast('Already checked in today — see you next game!'); return; }
-  var opp = '';
-  try { var m = await (await fetch('data/matchday.json?t=' + Date.now())).json(); opp = m.opponent || ''; } catch (e) {}
-  f.attended.push({ date: today, opponent: opp });
+  var opp = '', home = true;
+  try { var m = await (await fetch('data/matchday.json?t=' + Date.now())).json(); opp = m.opponent || ''; home = m.isHome !== false; } catch (e) {}
+  var beforeRewards = unlockedRewards(f).length;
+  f.attended.push({ date: today, opponent: opp, home: home });
   setFan(f);
-  var games = f.attended.length;
+  var games = totalGames(f);
   renderFanCard(); renderLadder(f);
-  var tier = tierFor(games);
-  toast('Checked in! ' + games + ' game' + (games > 1 ? 's' : '') + ' &middot; ' + tier.name + ' 💛');
+  var afterRewards = unlockedRewards(f).length;
+  if (afterRewards > beforeRewards) {
+    var r = unlockedRewards(f)[afterRewards - 1];
+    toast('🎉 REWARD UNLOCKED: ' + r.title + '!');
+  } else {
+    toast('Checked in! 💛 ' + games + ' game' + (games > 1 ? 's' : '') + ' &middot; ' + tierFor(games).name);
+  }
 }
 
 /* ---------- CARD EDITOR ---------- */
@@ -159,17 +199,17 @@ function saveCard() {
 /* ---------- LADDER ---------- */
 function renderLadder(f) {
   var el = document.getElementById('fz-ladder'); if (!el) return;
-  var games = f ? (f.attended || []).length : -1;
+  var games = f ? totalGames(f) : -1;
   var rungs = [
-    { g: 1, t: 'Matchgoer', d: 'Your first game in. You\'re one of us.' },
-    { g: 5, t: 'Regular', d: 'Shout-outs & early team news.' },
-    { g: 10, t: 'Loyal Laner', d: 'Become a Patron — your name on the wall.' },
-    { g: 25, t: 'Lane Legend', d: 'Priority for matchday rewards & events.' },
-    { g: 50, t: 'Terrace Royalty', d: 'First call on everything The Lane does.' },
+    { g: 1,  t: 'Local Laner',     i: '🧣', d: 'Your first game in. You\'re one of us.' },
+    { g: 5,  t: 'Yellow Regular',  i: '⚽', d: 'Shout-outs, early team news + your 6th home game free.' },
+    { g: 10, t: 'Lane Loyal',      i: '💛', d: 'Name on the Patrons wall + a drink on the house.' },
+    { g: 25, t: 'Lane Legend',     i: '🏆', d: 'Matchday VIP — shout-outs, programme mention, coin toss.' },
+    { g: 50, t: 'Terrace Royalty', i: '👑', d: 'Ever-present. After-season party invite + club pin badge.' },
   ];
   el.innerHTML = rungs.map(function (r) {
     var on = games >= r.g;
-    return '<div class="fz-rung' + (on ? ' on' : '') + '"><div class="fz-rung__g">' + r.g + '</div>' +
+    return '<div class="fz-rung' + (on ? ' on' : '') + '"><div class="fz-rung__g">' + r.i + ' ' + r.g + '</div>' +
       '<div class="fz-rung__t">' + r.t + (on ? ' ✓' : '') + '</div>' +
       '<div class="fz-rung__d">' + r.d + '</div></div>';
   }).join('');
