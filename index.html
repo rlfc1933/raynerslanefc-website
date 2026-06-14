@@ -297,12 +297,12 @@
   .ptr-card--cta:hover{border-color:var(--yellow);background:rgba(255,209,0,.1);transform:translateY(-5px)}
   .ptr-card--cta .ptr-txt{color:var(--yellow);font-size:21px}
   .ptr-card--cta .ptr-role{color:rgba(255,255,255,.55)}
-  .ptr-aff{margin:32px auto 0;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;max-width:760px}
-  .ptr-aff__lbl{width:100%;text-align:center;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.34);margin-bottom:4px}
-  .ptr-affcard{display:inline-flex;align-items:center;gap:11px;background:linear-gradient(165deg,#10220F,#0A140A);border:1px solid rgba(255,209,0,.16);border-radius:12px;padding:11px 18px;text-decoration:none;transition:border-color .2s,transform .2s}
+  .ptr-aff{margin:36px auto 0;display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:14px;max-width:760px}
+  .ptr-aff__lbl{width:100%;text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px}
+  .ptr-affcard{display:inline-flex;align-items:center;gap:15px;background:linear-gradient(165deg,#10220F,#0A140A);border:1px solid rgba(255,209,0,.16);border-radius:14px;padding:16px 24px;text-decoration:none;transition:border-color .2s,transform .2s}
   .ptr-affcard:hover{border-color:var(--yellow);transform:translateY(-2px)}
-  .ptr-affcard img{height:40px;width:auto;max-width:150px;object-fit:contain}
-  .ptr-affcard .txt{font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.62)}
+  .ptr-affcard img{height:64px;width:auto;max-width:180px;object-fit:contain}
+  .ptr-affcard .txt{font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.78);line-height:1.3;max-width:150px}
   @media(max-width:600px){
     .partners{padding:40px 0 36px}
     .ptr-card{flex:1 1 140px;min-height:112px;padding:16px 12px;gap:10px}
@@ -311,7 +311,9 @@
     .ptr-card--principal{flex:1 1 100%;min-height:132px}
     .ptr-card--principal img{height:64px}
     .ptr-card--principal .ptr-txt{font-size:30px}
-    .ptr-affcard img{height:32px}
+    .ptr-affcard{padding:13px 18px;gap:12px}
+    .ptr-affcard img{height:50px}
+    .ptr-affcard .txt{font-size:12px}
   }
 </style>
 <section class="partners">
@@ -638,9 +640,8 @@
         var a = document.getElementById('partners-aff');
         a.style.display = 'flex';
         a.innerHTML = '<span class="ptr-aff__lbl">Proudly affiliated</span>' + aff.map(function(x){
-          var inner = x.logo
-            ? '<img src="'+ptrEsc(x.logo)+'" alt="'+ptrEsc(x.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(x.name).replace(/'/g,'')+'</span>\'">'
-            : '<span class="txt">'+ptrEsc(x.name)+'</span>';
+          var logo = x.logo ? '<img src="'+ptrEsc(x.logo)+'" alt="'+ptrEsc(x.name)+'" loading="lazy" onerror="this.remove()">' : '';
+          var inner = logo + '<span class="txt">'+ptrEsc(x.name)+'</span>';
           return x.url ? '<a class="ptr-affcard" href="'+ptrEsc(x.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<span class="ptr-affcard">'+inner+'</span>';
         }).join('');
       }
