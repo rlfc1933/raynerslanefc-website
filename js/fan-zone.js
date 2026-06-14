@@ -19,10 +19,10 @@ function tierFor(games) { for (var i = 0; i < TIERS.length; i++) if (games >= TI
 
 // ── REWARDS by HOME games (mostly free / sponsor-funded) ──
 var REWARDS = [
-  { home: 5,  title: '6th home game FREE',        note: 'Your next home match is on us. Show this at the gate.' },
-  { home: 10, title: 'A drink on the house',      note: 'Powered by McCafferty\'s — show this at the bar.' },
-  { home: 20, title: 'Matchday VIP',              note: 'Half-time shout-out, programme mention & toss the coin.' },
-  { home: 38, title: 'After-Season Party invite', note: 'An ever-present at The Lane. You earned your seat.' },
+  { home: 5,  title: '6th home game FREE',        note: 'Your next home match is on us. Show this at the gate.', sponsor: '' },
+  { home: 10, title: 'A drink on the house',      note: 'Show this at the bar.', sponsor: "McCafferty's" },
+  { home: 20, title: 'Matchday VIP',              note: 'Half-time shout-out, programme mention & toss the coin.', sponsor: '' },
+  { home: 38, title: 'After-Season Party invite', note: 'An ever-present at The Lane. You earned your seat.', sponsor: '' },
 ];
 // Official attendance is awarded by the CLUB (back end) — the fan's hearts come
 // from data/attendance.json, matched on their unique Lane number. Staff enter
@@ -41,6 +41,18 @@ function officialFor(laneNo) {
 }
 function homeGames(f)  { return officialFor(f && f.laneNo).home; }
 function totalGames(f) { return officialFor(f && f.laneNo).total; }
+// Consecutive most-recent matches attended (a streak breaks the moment one is missed)
+function attendStreak(f) {
+  if (!f || !f.laneNo) return 0;
+  var ms = fanAttendance.slice().sort(function (a, b) { return (a.date || '').localeCompare(b.date || ''); });
+  var streak = 0;
+  for (var i = ms.length - 1; i >= 0; i--) {
+    if ((ms[i].lanes || []).indexOf(String(f.laneNo)) > -1) streak++; else break;
+  }
+  return streak;
+}
+// Previous reward threshold the fan has already passed (for the progress bar)
+function prevRewardThreshold(home) { var p = 0; REWARDS.forEach(function (r) { if (home >= r.home) p = r.home; }); return p; }
 
 // Each member gets a permanent unique Lane number (kept on their device + given
 // to the club when they register, so the turnstile can match them).
@@ -95,22 +107,47 @@ function renderFanCard() {
   var maxHearts = 16, hearts = '';
   for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '💛';
   if (games > maxHearts) hearts += ' <span style="font-family:var(--font-c);font-size:12px;color:var(--yellow);font-weight:700">+' + (games - maxHearts) + '</span>';
+  var streak = attendStreak(f);
+  var streakBadge = streak >= 2
+    ? '<span style="float:right;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.04em;color:#fb923c;background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.3);border-radius:999px;padding:2px 10px">🔥 ' + streak + ' in a row</span>'
+    : '';
   var heartsRow = games
-    ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + hearts + '</div>'
+    ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + streakBadge + hearts + '</div>'
     : '<div style="padding:14px 18px 2px;font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.5">No hearts yet — show your card at the gate and the club adds a 💛 after every game.</div>';
-  var unlocked = unlockedRewards(f);
-  var rewardsHtml = unlocked.length
-    ? '<div style="padding:6px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">🎁 Your Rewards</div>' +
-      unlocked.map(function (r) {
-        return '<div style="background:rgba(255,209,0,.08);border:1px solid rgba(255,209,0,.25);border-radius:8px;padding:9px 12px;margin-bottom:6px">' +
-          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em">' + esc(r.title) + '</div>' +
-          '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey);line-height:1.4">' + esc(r.note) + '</div></div>';
-      }).join('') + '</div>'
-    : '';
+
+  // Progress bar to the next reward (anticipation)
   var nr = nextReward(f);
-  var nextHtml = nr
-    ? '<div style="padding:0 18px 16px"><div style="font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.04em"><strong style="color:var(--yellow)">' + nr.left + ' more home game' + (nr.left > 1 ? 's' : '') + '</strong> → ' + esc(nr.reward.title) + '</div></div>'
-    : '';
+  var nextHtml = '';
+  if (nr) {
+    var prev = prevRewardThreshold(home), span = (nr.reward.home - prev) || 1;
+    var pct = Math.max(4, Math.min(100, Math.round(((home - prev) / span) * 100)));
+    nextHtml =
+      '<div style="padding:8px 18px 14px">' +
+        '<div style="display:flex;justify-content:space-between;font-family:var(--font-c);font-size:11px;letter-spacing:.04em;margin-bottom:6px">' +
+          '<span style="color:#fff;font-weight:700">' + esc(nr.reward.title) + '</span>' +
+          '<span style="color:var(--yellow);font-weight:700">' + nr.left + ' to go</span>' +
+        '</div>' +
+        '<div style="height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">' +
+          '<div style="height:100%;width:' + pct + '%;border-radius:999px;background:linear-gradient(90deg,#FFD100,#fbbf24)"></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // All rewards — unlocked shine, locked tease (mystery), each "powered by" its sponsor
+  var rewardsHtml =
+    '<div style="padding:2px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">🎁 Rewards</div>' +
+    REWARDS.map(function (r) {
+      var got = home >= r.home;
+      var powered = r.sponsor ? '<span style="display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4ade80;background:rgba(34,197,94,.12);border-radius:4px;padding:2px 7px;margin-top:5px">⚡ Powered by ' + esc(r.sponsor) + '</span>' : '';
+      if (got) {
+        return '<div style="background:rgba(255,209,0,.08);border:1px solid rgba(255,209,0,.3);border-radius:8px;padding:9px 12px;margin-bottom:6px">' +
+          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff">✓ ' + esc(r.title) + '</div>' +
+          '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey);line-height:1.4">' + esc(r.note) + '</div>' + powered + '</div>';
+      }
+      return '<div style="background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;opacity:.72">' +
+        '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--lgrey,#bbb)">🔒 ' + esc(r.title) + '</div>' +
+        '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey)">' + (r.home - home) + ' more home game' + ((r.home - home) > 1 ? 's' : '') + ' to unlock</div>' + powered + '</div>';
+    }).join('') + '</div>';
   mount.innerHTML =
     '<div class="fancard" id="lane-card">' +
       '<div class="memcard__bar">' +
@@ -131,7 +168,7 @@ function renderFanCard() {
         '<div class="fancard__stat"><div class="fancard__num">' + nextMilestone(games) + '</div><div class="fancard__lbl">To Next Tier</div></div>' +
       '</div>' +
       (f.meaning ? '<div class="fancard__meaning">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
-      rewardsHtml + nextHtml +
+      nextHtml + rewardsHtml +
       '<div class="memcard__qr"><img id="memcard-qr" alt="Membership QR code"><div class="memcard__qrnote">Show at the turnstile to collect your 💛</div></div>' +
       '<div class="fancard__foot">' +
         '<button class="fz-btn fz-btn--y" onclick="saveToPhone()">📲 Save to Phone</button>' +
