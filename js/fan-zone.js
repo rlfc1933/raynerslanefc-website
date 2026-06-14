@@ -156,7 +156,12 @@ async function signOut() {
   if (SB) { await sbLogout(); refreshFanUI(); toast('Logged out 💛'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   localStorage.setItem(SESSION_OUT, '1'); refreshFanUI(); toast('Logged out — your card is safe on this device. Log back in any time.'); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function refreshFanUI() { renderAccountBar(); renderFanCard(); renderMembers(); renderLadder(getFan()); }
+function refreshFanUI() {
+  // Let the rest of the site know they're a member, so the homepage join-prompt
+  // never pesters someone who already has an account.
+  try { if (getFan()) localStorage.setItem('rlfc_member', '1'); } catch (e) {}
+  renderAccountBar(); renderFanCard(); renderMembers(); renderLadder(getFan());
+}
 
 function renderAccountBar() {
   var el = document.getElementById('fz-account'); if (!el) return;

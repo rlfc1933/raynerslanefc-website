@@ -771,6 +771,45 @@ if (new URLSearchParams(window.location.search).get('live') === '1') {
 
 document.addEventListener('DOMContentLoaded', checkMatchDay);
 
+// ── "Get Your Lane Membership" nudge ──
+// Slides in after ~30s for visitors who aren't members yet. Remembers a
+// dismissal for 7 days so it never nags, and never shows to existing members.
+(function () {
+  function isMember() { try { return localStorage.getItem('rlfc_member') === '1' || !!localStorage.getItem('rlfc_fan'); } catch (e) { return false; } }
+  function recentlyDismissed() {
+    try { var t = parseInt(localStorage.getItem('rlfc_join_dismissed') || '0', 10); return t && (Date.now() - t) < 7 * 864e5; } catch (e) { return false; }
+  }
+  window.laneJoinClose = function (remember) {
+    var d = document.getElementById('lane-join-pop'); if (!d) return;
+    d.style.transform = 'translateX(-50%) translateY(150%)';
+    setTimeout(function () { d.remove(); }, 500);
+    if (remember) { try { localStorage.setItem('rlfc_join_dismissed', String(Date.now())); } catch (e) {} }
+  };
+  function showJoin() {
+    if (isMember() || recentlyDismissed() || document.getElementById('lane-join-pop')) return;
+    var d = document.createElement('div');
+    d.id = 'lane-join-pop';
+    d.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(150%);width:92vw;max-width:430px;background:linear-gradient(180deg,#161616,#0a0a0a);border:1px solid var(--border);border-top:3px solid var(--yellow);border-radius:16px;box-shadow:0 26px 64px -18px rgba(0,0,0,.92);z-index:10050;padding:20px 22px;transition:transform .5s cubic-bezier(.2,.8,.2,1)';
+    d.innerHTML =
+      '<button onclick="laneJoinClose(true)" aria-label="Close" style="position:absolute;top:10px;right:13px;background:none;border:none;color:var(--grey);font-size:20px;line-height:1;cursor:pointer">&times;</button>' +
+      '<div style="display:flex;align-items:center;gap:14px">' +
+        '<img src="img/badge.png" alt="Rayners Lane FC" style="width:54px;height:54px;object-fit:contain;flex-shrink:0">' +
+        '<div>' +
+          '<div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:3px">Free &middot; The Lane Family</div>' +
+          '<div style="font-family:var(--font-d);font-size:24px;letter-spacing:.02em;color:#fff;line-height:1.05">Get Your Lane Membership</div>' +
+        '</div>' +
+      '</div>' +
+      '<p style="font-family:var(--font-b);font-size:13.5px;color:var(--grey);line-height:1.6;margin:13px 0 16px">Your own Lane number &amp; QR card, a yellow heart every game you attend, and members-only vouchers &amp; perks. Free, forever.</p>' +
+      '<div style="display:flex;gap:10px;align-items:center">' +
+        '<a href="fan-zone.html" class="btn btn-primary" style="flex:1;justify-content:center;font-size:14px;padding:13px">Join Free &rarr;</a>' +
+        '<button onclick="laneJoinClose(true)" style="background:none;border:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;white-space:nowrap;padding:8px">Maybe later</button>' +
+      '</div>';
+    document.body.appendChild(d);
+    requestAnimationFrame(function () { d.style.transform = 'translateX(-50%) translateY(0)'; });
+  }
+  setTimeout(showJoin, 30000);
+})();
+
 </script>
 </body>
 </html>
