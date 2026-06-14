@@ -360,6 +360,11 @@
           <div class="tile-body"><div class="tile-name">Staff &amp; Management</div><div class="tile-desc">Private profiles — emergency &amp; medical info</div></div>
           <span class="tile-badge">Private</span>
         </button>
+        <button class="tile tile-wide" style="--accent:#EF4444" onclick="openPanel('swot')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg></span>
+          <div class="tile-body"><div class="tile-name">SWOT &amp; Risk</div><div class="tile-desc">Where the club stands &amp; what to watch</div></div>
+          <span class="tile-badge">Boardroom</span>
+        </button>
         <button class="tile tile-wide" style="--accent:#888" onclick="openPanel('settings')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>
           <div class="tile-body"><div class="tile-name">Settings</div><div class="tile-desc">How everything works &amp; admin options</div></div>
@@ -1088,6 +1093,79 @@
         <div class="ld-fact">🚀 <span>Run a Step 5 club with the polish of a professional one — and if The Lane ever grows, everything's already built to grow with it.</span></div>
         <div class="ld-fact">💬 <span><b>Yellow first. The Lane always. Community built, Harrow proud.</b></span></div>
       </div>
+    </div>
+
+    <!-- SWOT & RISK -->
+    <style>
+      .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+      .swot-q{border-radius:10px;padding:14px;border:1px solid var(--br)}
+      .swot-q h4{font-family:var(--fd);font-size:18px;letter-spacing:.03em;margin-bottom:8px}
+      .swot-q ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+      .swot-q li{font-family:var(--fb);font-size:12.5px;line-height:1.45;color:#ccc;padding-left:14px;position:relative}
+      .swot-q li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%}
+      .swot-s{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3)} .swot-s h4{color:#22C55E} .swot-s li::before{background:#22C55E}
+      .swot-w{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.3)} .swot-w h4{color:#EF4444} .swot-w li::before{background:#EF4444}
+      .swot-o{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.3)} .swot-o h4{color:#3B82F6} .swot-o li::before{background:#3B82F6}
+      .swot-t{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.3)} .swot-t h4{color:#FBBF24} .swot-t li::before{background:#FBBF24}
+      @media(max-width:560px){.swot-grid{grid-template-columns:1fr}}
+      .risk-tbl{width:100%;border-collapse:collapse;font-family:var(--fb);font-size:12.5px;border:1px solid var(--br);border-radius:8px;overflow:hidden}
+      .risk-tbl th{background:var(--c2);color:var(--gr);font-family:var(--fc);font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:8px 10px}
+      .risk-tbl td{padding:9px 10px;border-top:1px solid var(--br);color:#ccc;vertical-align:top}
+      .risk-tbl td b{color:#fff}
+      .rl{display:inline-block;font-family:var(--fc);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px}
+      .rl-h{background:rgba(239,68,68,.18);color:#f87171} .rl-m{background:rgba(251,191,36,.18);color:#fbbf24} .rl-l{background:rgba(34,197,94,.18);color:#4ade80}
+    </style>
+    <div class="panel" id="panel-swot">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128202; SWOT &amp; Risk</div></div>
+      <div class="snote" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)"><p>An honest boardroom view of where Rayners Lane FC stands &amp; what to keep an eye on. A living document — revisit it each season.</p></div>
+      <div class="slbl">SWOT Analysis</div>
+      <div class="swot-grid">
+        <div class="swot-q swot-s"><h4>💪 Strengths</h4><ul>
+          <li>90+ years of heritage &amp; deep local identity in Harrow.</li>
+          <li>Genuine community club — members' section of Tithe Farm.</li>
+          <li>A professional-grade digital platform rare at Step 5.</li>
+          <li>Ambitious new chairman &amp; manager driving the era.</li>
+          <li>Home ground by Rayners Lane tube — easy to reach.</li>
+          <li>FA Charter Standard credibility; existing sponsor base.</li>
+        </ul></div>
+        <div class="swot-q swot-w"><h4>⚠️ Weaknesses</h4><ul>
+          <li>Step 5 budget — modest crowds &amp; revenue.</li>
+          <li>Volunteer-run; reliant on a few key people.</li>
+          <li>No central fan login/database yet (device-based).</li>
+          <li>Income concentrated on matchday + a few sponsors.</li>
+          <li>Squad still being built — results uncertain.</li>
+        </ul></div>
+        <div class="swot-q swot-o"><h4>🚀 Opportunities</h4><ul>
+          <li>Grow attendance &amp; membership via the loyalty programme.</li>
+          <li>Convert engaged fans into sponsors (give-to-give-back).</li>
+          <li>Punch above our weight on social &amp; local media.</li>
+          <li>Commercial packages: matchball, matchday, hospitality.</li>
+          <li>Community &amp; youth programmes to widen the base.</li>
+          <li>Data-led decisions from the analytics tools.</li>
+        </ul></div>
+        <div class="swot-q swot-t"><h4>🌩️ Threats</h4><ul>
+          <li>Losing a key sponsor or key committee member.</li>
+          <li>Volunteer fatigue / burnout.</li>
+          <li>Competition for local fans &amp; sponsors.</li>
+          <li>Rising costs — pitch hire, twice-weekly travel.</li>
+          <li>Poor results denting momentum &amp; income.</li>
+          <li>Handling fan/staff data responsibly (GDPR).</li>
+        </ul></div>
+      </div>
+
+      <div class="slbl">Key Risks &amp; Mitigations</div>
+      <table class="risk-tbl">
+        <tr><th>Risk</th><th>Impact</th><th>How we manage it</th></tr>
+        <tr><td><b>Key-person dependency</b><br>(committee/volunteers)</td><td><span class="rl rl-h">High</span></td><td>Document everything (this admin + guides), share logins, actively recruit &amp; train volunteers.</td></tr>
+        <tr><td><b>Loss of a major sponsor</b></td><td><span class="rl rl-h">High</span></td><td>Diversify the sponsor base, fan-funded matchdays, aim for multi-season deals.</td></tr>
+        <tr><td><b>Data breach</b><br>(fan/staff personal info)</td><td><span class="rl rl-h">High</span></td><td>PII kept private (Netlify Forms, not the public site), GDPR basics, clear consent, limited access.</td></tr>
+        <tr><td><b>Financial shortfall</b></td><td><span class="rl rl-m">Medium</span></td><td>Track takings in Analytics, grow membership income, control costs, build a small reserve.</td></tr>
+        <tr><td><b>On-pitch underperformance</b></td><td><span class="rl rl-m">Medium</span></td><td>Manage expectations; keep fans engaged off the pitch via content &amp; community.</td></tr>
+        <tr><td><b>Safeguarding incident</b></td><td><span class="rl rl-h">High</span></td><td>Welfare Officer (Jenny Pitt), FA Charter Standard policies, DBS checks, clear reporting.</td></tr>
+        <tr><td><b>Website / hosting failure</b></td><td><span class="rl rl-l">Low</span></td><td>Auto-deploys with full history, offline-capable app, documented one-time setup.</td></tr>
+        <tr><td><b>Weather / ground availability</b></td><td><span class="rl rl-m">Medium</span></td><td>Communicate early on socials, flexible rescheduling, alternative income streams.</td></tr>
+      </table>
+      <div class="snote" style="margin-top:12px"><p>📌 <strong style="color:var(--w)">Review action:</strong> revisit this at the start &amp; end of each season. Turn the top opportunities into a plan; check each high risk has an owner.</p></div>
     </div>
 
     <!-- SETTINGS -->
