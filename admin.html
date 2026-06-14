@@ -903,6 +903,23 @@
       <div id="fp-list"></div>
       <button class="save" style="margin-top:10px" onclick="savePatrons()">&#10003; Save to Site</button>
       <div class="dep" id="dep-fanclub"></div>
+
+      <div class="div"></div>
+      <div class="slbl">💛 Award Yellow Hearts <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— after each game</span></div>
+      <div class="snote"><p>At the turnstile, jot the <strong style="color:var(--w)">Lane numbers</strong> from members' cards. Enter them here after the game and each fan gets a yellow heart on their profile.</p></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Match Date</label><input type="date" id="at-date"></div>
+        <div class="field"><label class="fl">Opponent</label><input type="text" id="at-opp" placeholder="Harefield United"></div>
+      </div>
+      <div class="field"><label class="fl">Home or Away</label><select id="at-ha"><option value="home">Home</option><option value="away">Away</option></select></div>
+      <div class="field"><label class="fl">Lane Numbers attended (one per line or comma-separated)</label><textarea id="at-lanes" rows="3" placeholder="0427&#10;1183&#10;3902"></textarea></div>
+      <button class="save sec" onclick="addAttendance()">+ Award Hearts for this Match</button>
+      <div class="div"></div>
+      <div class="slbl" id="at-cnt">Matches Logged</div>
+      <div id="at-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveAttendance()">&#10003; Save Hearts to Site</button>
+      <div class="dep" id="dep-attendance"></div>
+
       <div class="div"></div>
       <div class="slbl">Private Sign-Ups (birthdays, emails)</div>
       <div class="snote"><p>When fans "Join the Family List" on the Fan Zone, their name, email &amp; birthday arrive <strong style="color:var(--w)">privately</strong> in Netlify. Read them at <strong>Netlify &rarr; your site &rarr; Forms &rarr; "fan-signup"</strong>. Never shown on the website. Use them to send birthday treats, free tickets &amp; event invites.</p></div>
@@ -1085,7 +1102,7 @@ function openPanel(name) {
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
-  if (name === 'fanclub')   renderPatrons();
+  if (name === 'fanclub')   { renderPatrons(); renderAttendance(); }
 }
 function back() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
@@ -1178,6 +1195,7 @@ function loadAll() {
   fetchJSON('motm',      function(d) { if (d && d.entries) { motms = d.entries; } });
   fetchJSON('signing',   function(d) { if (d && d.entries) { signings = d.entries; } });
   fetchJSON('patrons',   function(d) { if (d) { if (d.patrons) patrons = d.patrons; if (d.fanOfMonth) fanOfMonth = d.fanOfMonth; } });
+  fetchJSON('attendance',function(d) { if (d && d.matches) attendance = d.matches; });
   fetchJSON('matchday',  function(d) {
     if (!d) return;
     isLive = d.isLive || false;
@@ -1944,6 +1962,39 @@ function submitStaffProfile(form) {
 function staffThanks(form) {
   form.innerHTML = '<div style="text-align:center;padding:24px"><div style="font-family:var(--fd);font-size:26px;color:var(--y);margin-bottom:8px">Profile saved privately ✓</div>' +
     '<p style="font-family:var(--fb);color:var(--gr);font-size:14px;line-height:1.6">Thank you. Your details are stored securely for club emergencies only — never shown on the website.</p></div>';
+}
+
+// ── AWARD HEARTS (match attendance → data/attendance.json) ──
+var attendance = [];
+function renderAttendance() {
+  var el = document.getElementById('at-list'); if (!el) return;
+  document.getElementById('at-cnt').textContent = 'Matches Logged (' + attendance.length + ')';
+  el.innerHTML = attendance.length
+    ? attendance.slice().reverse().map(function(m){
+        return '<div class="li"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + esc(m.opponent||'') + ' <span style="color:var(--gr);font-size:11px">(' + (m.home?'H':'A') + ')</span></div>' +
+          '<div class="li-sub">' + (m.date||'') + ' &middot; ' + ((m.lanes||[]).length) + ' hearts awarded</div></div>' +
+          '<button class="li-del" onclick="removeAttendance(\''+m.id+'\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No matches logged yet</div>';
+}
+function addAttendance() {
+  var date = gv('at-date'), opp = gv('at-opp');
+  var lanes = gv('at-lanes').split(/[\s,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  if (!date) { toast('Enter the match date', true); return; }
+  if (!lanes.length) { toast('Enter at least one Lane number', true); return; }
+  attendance.push({ id:'att-'+Date.now(), date:date, opponent:opp, home:gv('at-ha')==='home', lanes:lanes });
+  renderAttendance();
+  setVal('at-opp',''); setVal('at-lanes','');
+  toast(lanes.length + ' heart' + (lanes.length>1?'s':'') + ' ready ✓ — press Save');
+}
+function removeAttendance(id) {
+  if (!confirm('Remove this match\'s hearts?')) return;
+  attendance = attendance.filter(function(m){return m.id!==id;});
+  renderAttendance();
+}
+function saveAttendance() {
+  pushToGitHub('attendance', { matches: attendance, updatedAt: new Date().toISOString() }, 'dep-attendance');
+  toast('Hearts saved ✓');
 }
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)

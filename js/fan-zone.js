@@ -24,8 +24,38 @@ var REWARDS = [
   { home: 20, title: 'Matchday VIP',              note: 'Half-time shout-out, programme mention & toss the coin.' },
   { home: 38, title: 'After-Season Party invite', note: 'An ever-present at The Lane. You earned your seat.' },
 ];
-function homeGames(f) { return ((f && f.attended) || []).filter(function (a) { return a.home; }).length; }
-function totalGames(f) { return ((f && f.attended) || []).length; }
+// Official attendance is awarded by the CLUB (back end) — the fan's hearts come
+// from data/attendance.json, matched on their unique Lane number. Staff enter
+// the Lane numbers seen at the turnstile after each game.
+var fanAttendance = [];
+async function loadAttendance() {
+  try { var d = await (await fetch('data/attendance.json?t=' + Date.now())).json(); fanAttendance = d.matches || []; }
+  catch (e) { fanAttendance = []; }
+}
+function officialFor(laneNo) {
+  var t = 0, h = 0;
+  if (laneNo) fanAttendance.forEach(function (m) {
+    if ((m.lanes || []).indexOf(String(laneNo)) > -1) { t++; if (m.home) h++; }
+  });
+  return { total: t, home: h };
+}
+function homeGames(f)  { return officialFor(f && f.laneNo).home; }
+function totalGames(f) { return officialFor(f && f.laneNo).total; }
+
+// Each member gets a permanent unique Lane number (kept on their device + given
+// to the club when they register, so the turnstile can match them).
+function ensureLaneNo(f) {
+  if (f.laneNo) return f.laneNo;
+  var s = (f.username || '') + (f.since || '') + new Date().getTime() + Math.floor(Math.random() * 9999);
+  var hash = 0; for (var i = 0; i < s.length; i++) { hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0; }
+  f.laneNo = String(Math.abs(hash) % 9000 + 1000);
+  setFan(f);
+  return f.laneNo;
+}
+function renderQR(id, text) {
+  if (typeof qrcode === 'undefined') return;
+  try { var qr = qrcode(0, 'M'); qr.addData(text); qr.make(); var el = document.getElementById(id); if (el) el.src = qr.createDataURL(5, 6); } catch (e) {}
+}
 function unlockedRewards(f) { var h = homeGames(f); return REWARDS.filter(function (r) { return h >= r.home; }); }
 function nextReward(f) { var h = homeGames(f); for (var i = 0; i < REWARDS.length; i++) if (h < REWARDS[i].home) return { reward: REWARDS[i], left: REWARDS[i].home - h }; return null; }
 
@@ -33,7 +63,8 @@ function getFan()  { try { return JSON.parse(localStorage.getItem(FAN_KEY)) || n
 function setFan(f) { localStorage.setItem(FAN_KEY, JSON.stringify(f)); }
 function esc(s)    { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function initFanZone() {
+async function initFanZone() {
+  await loadAttendance();
   renderLadder(getFan());
   renderFanCard();
   renderWall();
@@ -47,12 +78,13 @@ function renderFanCard() {
   if (!f) {
     mount.innerHTML =
       '<div class="fancard" style="text-align:center;padding:34px 24px">' +
-        '<div style="font-family:var(--font-d);font-size:30px;letter-spacing:.03em;margin-bottom:8px">Create Your Free Card</div>' +
-        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">It lives on your phone. Add a photo, check in at games, watch your Lane story grow.</p>' +
-        '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="openCardEditor()">Build My Lane Card</button>' +
+        '<div style="font-family:var(--font-d);font-size:30px;letter-spacing:.03em;margin-bottom:8px">Get Your Lane Membership</div>' +
+        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">A free digital membership card — your own Lane number &amp; QR code. Show it at the turnstile and collect a yellow heart every game.</p>' +
+        '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="openCardEditor()">Create My Card</button>' +
       '</div>';
     return;
   }
+  var laneNo = ensureLaneNo(f);
   var games = totalGames(f);
   var home = homeGames(f);
   var tier = tierFor(games);
@@ -60,12 +92,12 @@ function renderFanCard() {
   var photo = f.photo
     ? '<img class="fancard__photo" src="' + f.photo + '" alt="">'
     : '<div class="fancard__photo" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;color:#fff">' + esc(initials) + '</div>';
-  // yellow hearts — one per game (cap the row, show +N)
   var maxHearts = 16, hearts = '';
   for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '💛';
   if (games > maxHearts) hearts += ' <span style="font-family:var(--font-c);font-size:12px;color:var(--yellow);font-weight:700">+' + (games - maxHearts) + '</span>';
-  var heartsRow = games ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + hearts + '</div>' : '';
-  // unlocked rewards + next reward progress
+  var heartsRow = games
+    ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + hearts + '</div>'
+    : '<div style="padding:14px 18px 2px;font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.5">No hearts yet — show your card at the gate and the club adds a 💛 after every game.</div>';
   var unlocked = unlockedRewards(f);
   var rewardsHtml = unlocked.length
     ? '<div style="padding:6px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">🎁 Your Rewards</div>' +
@@ -80,27 +112,37 @@ function renderFanCard() {
     ? '<div style="padding:0 18px 16px"><div style="font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.04em"><strong style="color:var(--yellow)">' + nr.left + ' more home game' + (nr.left > 1 ? 's' : '') + '</strong> → ' + esc(nr.reward.title) + '</div></div>'
     : '';
   mount.innerHTML =
-    '<div class="fancard">' +
+    '<div class="fancard" id="lane-card">' +
+      '<div class="memcard__bar">' +
+        '<img class="memcard__badge" src="img/badge.png" alt="RLFC">' +
+        '<div style="flex:1"><div class="memcard__title">The Lane Membership</div><div class="memcard__no">No. ' + esc(laneNo) + '</div></div>' +
+        '<span class="fancard__tier">' + (tier.icon ? tier.icon + ' ' : '') + esc(tier.name) + '</span>' +
+      '</div>' +
       '<div class="fancard__top">' + photo +
         '<div class="fancard__id">' +
-          '<span class="fancard__tier">' + (tier.icon ? tier.icon + ' ' : '') + esc(tier.name) + '</span>' +
           '<div class="fancard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
           '<div class="fancard__since">' + (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '') + '</div>' +
         '</div>' +
       '</div>' +
       heartsRow +
       '<div class="fancard__stats">' +
-        '<div class="fancard__stat"><div class="fancard__num">' + games + '</div><div class="fancard__lbl">Games</div></div>' +
+        '<div class="fancard__stat"><div class="fancard__num">' + games + '</div><div class="fancard__lbl">Hearts</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + home + '</div><div class="fancard__lbl">At Home</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + nextMilestone(games) + '</div><div class="fancard__lbl">To Next Tier</div></div>' +
       '</div>' +
       (f.meaning ? '<div class="fancard__meaning">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
       rewardsHtml + nextHtml +
+      '<div class="memcard__qr"><img id="memcard-qr" alt="Membership QR code"><div class="memcard__qrnote">Show at the turnstile to collect your 💛</div></div>' +
       '<div class="fancard__foot">' +
-        '<button class="fz-btn fz-btn--y" onclick="checkInToday()">&#9917; I Was There</button>' +
+        '<button class="fz-btn fz-btn--y" onclick="saveToPhone()">📲 Save to Phone</button>' +
         '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Card</button>' +
       '</div>' +
     '</div>';
+  renderQR('memcard-qr', 'RLFC LANE-' + laneNo + ' ' + (f.username || ''));
+  var li = document.getElementById('sg-lane'); if (li) li.value = 'LANE-' + laneNo;
+}
+function saveToPhone() {
+  toast('To save your card: take a screenshot, or tap your browser Share → "Add to Home Screen". Wallet passes coming soon!');
 }
 function nextMilestone(games) {
   var ups = [1, 5, 10, 25, 50];
