@@ -81,10 +81,87 @@ function getFan()  { try { return JSON.parse(localStorage.getItem(FAN_KEY)) || n
 function setFan(f) { localStorage.setItem(FAN_KEY, JSON.stringify(f)); }
 function esc(s)    { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* ---------- ACCOUNT / SIGN IN-OUT ----------
+   The fan's account IS their Lane Card (stored on this device). "Log out" hides
+   it behind a gate and locks the members area; "Log in" brings it back. The
+   account data is never deleted by logging out. (True cross-device login needs
+   a server account — Supabase — which is a future upgrade.) */
+var SESSION_OUT = 'rlfc_signedout';
+function isSignedIn() { return !!getFan() && localStorage.getItem(SESSION_OUT) !== '1'; }
+function signOut() { localStorage.setItem(SESSION_OUT, '1'); refreshFanUI(); toast('Logged out — your card is safe on this device. Log back in any time.'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function signIn()  { if (!getFan()) { openCardEditor(); return; } localStorage.removeItem(SESSION_OUT); refreshFanUI(); toast('Welcome back 💛'); }
+function refreshFanUI() { renderAccountBar(); renderFanCard(); renderMembers(); renderLadder(getFan()); }
+
+function renderAccountBar() {
+  var el = document.getElementById('fz-account'); if (!el) return;
+  var f = getFan();
+  if (!f) {
+    el.innerHTML = '<div class="fz-acct">' +
+      '<div class="fz-acct__av">&#10024;</div>' +
+      '<div class="fz-acct__main"><div class="fz-acct__hi">Join The Lane</div>' +
+      '<div class="fz-acct__sub">Create your free account to unlock member perks &amp; vouchers</div></div>' +
+      '<button class="fz-acct__btn fz-acct__btn--y" onclick="openCardEditor()">Join Free</button></div>';
+    return;
+  }
+  var laneNo = ensureLaneNo(f);
+  var initials = (f.username || 'L').trim().slice(0, 2).toUpperCase();
+  var av = f.photo ? '<img src="' + f.photo + '" alt="">' : esc(initials);
+  if (isSignedIn()) {
+    el.innerHTML = '<div class="fz-acct">' +
+      '<div class="fz-acct__av">' + av + '</div>' +
+      '<div class="fz-acct__main"><div class="fz-acct__hi">Hi, ' + esc(f.username || 'Lane Fan') + '</div>' +
+      '<div class="fz-acct__sub">Lane <b>#' + esc(laneNo) + '</b> &middot; signed in</div></div>' +
+      '<button class="fz-acct__btn" onclick="signOut()">Log out</button></div>';
+  } else {
+    el.innerHTML = '<div class="fz-acct">' +
+      '<div class="fz-acct__av">' + av + '</div>' +
+      '<div class="fz-acct__main"><div class="fz-acct__hi">Welcome back, ' + esc(f.username || 'Lane Fan') + '</div>' +
+      '<div class="fz-acct__sub">You&rsquo;re logged out</div></div>' +
+      '<button class="fz-acct__btn fz-acct__btn--y" onclick="signIn()">Log in</button></div>';
+  }
+}
+
+/* ---------- MEMBERS AREA (vouchers, promos, member news) ---------- */
+async function renderMembers() {
+  var el = document.getElementById('fz-members'); if (!el) return;
+  if (!isSignedIn()) {
+    el.innerHTML = '<div class="fz-locked"><div class="fz-locked__ic">&#128274;</div>' +
+      '<div class="fz-locked__t">Members-only perks</div>' +
+      '<div class="fz-locked__p">Vouchers, promos and exclusive member news live here. Create your free Lane account (or log in) to unlock them.</div>' +
+      '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="signIn()">' + (getFan() ? 'Log in' : 'Join Free') + '</button></div>';
+    return;
+  }
+  var perks = [], news = [];
+  try { var d = await (await fetch('data/perks.json?t=' + Date.now())).json(); perks = d.perks || []; news = d.news || []; } catch (e) {}
+  var html = '';
+  if (perks.length) {
+    html += '<div class="fz-perks">' + perks.map(function (p) {
+      return '<div class="fz-voucher"><span class="fz-voucher__tag">' + (p.sponsor ? esc(p.sponsor) : 'The Lane') + '</span>' +
+        '<div class="fz-voucher__title">' + esc(p.title) + '</div>' +
+        '<div class="fz-voucher__detail">' + esc(p.detail) + '</div>' +
+        '<div class="fz-voucher__foot">' +
+          (p.code ? '<span class="fz-voucher__code">' + esc(p.code) + '</span>' : '<span class="fz-voucher__exp">Show your Lane Card</span>') +
+          (p.expiry ? '<span class="fz-voucher__exp">' + esc(p.expiry) + '</span>' : '') +
+        '</div></div>';
+    }).join('') + '</div>';
+  }
+  if (news.length) {
+    html += '<div class="fz-mnews">' + news.map(function (n) {
+      var dt = n.date ? new Date(n.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      return '<div class="fz-mnews__item"><div class="fz-mnews__t">' + esc(n.title) + '</div>' +
+        '<div class="fz-mnews__b">' + esc(n.body) + '</div>' + (dt ? '<div class="fz-mnews__d">' + dt + '</div>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+  if (!html) html = '<div class="fz-locked"><div class="fz-locked__ic">&#128153;</div><div class="fz-locked__t">You&rsquo;re all set</div><div class="fz-locked__p">No perks live right now — as a member you&rsquo;ll be first to know when they drop.</div></div>';
+  el.innerHTML = html;
+}
+
 async function initFanZone() {
   await loadAttendance();
+  renderAccountBar();
   renderLadder(getFan());
   renderFanCard();
+  renderMembers();
   renderWall();
   renderByNumbers();
 }
@@ -109,6 +186,15 @@ function renderFanCard() {
   var mount = document.getElementById('fancard-mount');
   if (!mount) return;
   var f = getFan();
+  if (f && !isSignedIn()) {
+    mount.innerHTML =
+      '<div class="fancard" style="text-align:center;padding:34px 24px">' +
+        '<div style="font-family:var(--font-d);font-size:28px;letter-spacing:.03em;margin-bottom:8px">You&rsquo;re logged out</div>' +
+        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">Your Lane Card is safely saved on this device. Log in to see it, your hearts and your member perks.</p>' +
+        '<button class="fz-btn fz-btn--y" style="max-width:260px;margin:0 auto" onclick="signIn()">Log in as ' + esc(f.username || 'me') + '</button>' +
+      '</div>';
+    return;
+  }
   if (!f) {
     mount.innerHTML =
       '<div class="fancard" style="text-align:center;padding:34px 24px">' +
@@ -293,8 +379,9 @@ function saveCard() {
   var ov = document.getElementById('fz-editor');
   if (ov._photo) f.photo = ov._photo;
   setFan(f);
+  localStorage.removeItem(SESSION_OUT); // saving a card signs you in
   closeEditor();
-  renderFanCard(); renderLadder(f);
+  refreshFanUI();
   toast('Card saved to your phone 💛');
 }
 
@@ -357,6 +444,17 @@ function fanSignup(form) {
   fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() })
     .then(function () { fanThanks(form); })
     .catch(function () { fanThanks(form); });
+  // Joining the Family List also creates an on-device Lane account + signs them
+  // in, so they immediately get their card, Lane number and member perks.
+  var f = getFan() || { attended: [] };
+  if (!f.username) f.username = (data.get('name') || '').trim();
+  if (!f.town)     f.town     = (data.get('town') || '').trim();
+  if (!f.since)    f.since    = (data.get('since') || '').trim();
+  if (!f.meaning)  f.meaning  = (data.get('meaning') || '').trim();
+  setFan(f);
+  ensureLaneNo(f);
+  localStorage.removeItem(SESSION_OUT);
+  refreshFanUI();
   return false;
 }
 function fanThanks(form) {

@@ -88,6 +88,36 @@
     .fz-num{background:linear-gradient(160deg,var(--card),#0c0c0c);padding:22px 12px;text-align:center}
     .fz-num b{display:block;font-family:var(--font-d);font-size:clamp(30px,6vw,40px);color:var(--yellow);line-height:1}
     .fz-num span{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:6px;display:block}
+    /* ── ACCOUNT BAR ── */
+    .fz-acct{display:flex;align-items:center;gap:14px;background:linear-gradient(160deg,var(--card),#0c0c0c);border:1px solid var(--border);border-top:3px solid var(--yellow);border-radius:14px;padding:14px 18px;margin-bottom:26px}
+    .fz-acct__av{width:46px;height:46px;border-radius:50%;flex-shrink:0;background:linear-gradient(160deg,#1f1f1f,#0c0c0c);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff;overflow:hidden}
+    .fz-acct__av img{width:100%;height:100%;object-fit:cover}
+    .fz-acct__main{flex:1;min-width:0}
+    .fz-acct__hi{font-family:var(--font-d);font-size:19px;letter-spacing:.03em;color:#fff;line-height:1.1}
+    .fz-acct__sub{font-family:var(--font-c);font-size:11px;letter-spacing:.05em;color:var(--grey);margin-top:2px}
+    .fz-acct__sub b{color:var(--yellow)}
+    .fz-acct__btn{flex-shrink:0;font-family:var(--font-c);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:9px 15px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--grey);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,color .2s}
+    .fz-acct__btn:hover{border-color:var(--yellow);color:var(--yellow)}
+    .fz-acct__btn--y{background:var(--yellow);color:#0d0d0d;border-color:var(--yellow)}
+    /* ── MEMBER PERKS / VOUCHERS ── */
+    .fz-perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    .fz-voucher{position:relative;background:linear-gradient(160deg,#16300f,#0b160a);border:1px solid rgba(255,209,0,.28);border-radius:14px;padding:20px 20px 18px;overflow:hidden}
+    .fz-voucher::after{content:"";position:absolute;left:-9px;top:50%;width:18px;height:18px;border-radius:50%;background:var(--bg,#0a0a0a);transform:translateY(-50%);box-shadow:calc(100% + 18px) 0 0 var(--bg,#0a0a0a)}
+    .fz-voucher__tag{display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0d0d0d;background:var(--yellow);border-radius:5px;padding:3px 9px;margin-bottom:11px}
+    .fz-voucher__title{font-family:var(--font-d);font-size:24px;letter-spacing:.02em;color:#fff;line-height:1.05;margin-bottom:7px}
+    .fz-voucher__detail{font-family:var(--font-b);font-size:13px;color:var(--lgrey,#b9b9b9);line-height:1.5;margin-bottom:13px}
+    .fz-voucher__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px dashed rgba(255,255,255,.16);padding-top:11px}
+    .fz-voucher__code{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.14em;color:var(--yellow);background:rgba(255,209,0,.1);border:1px dashed rgba(255,209,0,.4);border-radius:6px;padding:5px 11px}
+    .fz-voucher__exp{font-family:var(--font-c);font-size:10px;letter-spacing:.04em;color:var(--grey)}
+    .fz-mnews{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+    .fz-mnews__item{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:10px;padding:14px 16px}
+    .fz-mnews__t{font-family:var(--font-c);font-size:14px;font-weight:700;letter-spacing:.02em;color:#fff;margin-bottom:4px}
+    .fz-mnews__b{font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.55}
+    .fz-mnews__d{font-family:var(--font-c);font-size:10px;letter-spacing:.06em;color:var(--yellow);margin-top:6px;text-transform:uppercase}
+    .fz-locked{text-align:center;background:linear-gradient(160deg,var(--card),#0c0c0c);border:1px dashed var(--border);border-radius:14px;padding:34px 24px}
+    .fz-locked__ic{font-size:34px;margin-bottom:10px}
+    .fz-locked__t{font-family:var(--font-d);font-size:26px;letter-spacing:.03em;color:#fff;margin-bottom:8px}
+    .fz-locked__p{font-family:var(--font-b);font-size:14px;color:var(--grey);line-height:1.6;max-width:380px;margin:0 auto 18px}
   </style>
 </head>
 <body>
@@ -104,6 +134,9 @@
 
 <div class="fz-wrap">
 
+  <!-- ACCOUNT BAR (sign in / out) -->
+  <div id="fz-account"></div>
+
   <!-- BY THE NUMBERS (social proof) -->
   <section class="fz-sec" id="nums-sec" style="display:none">
     <div class="fz-nums" id="fz-nums"></div>
@@ -113,6 +146,12 @@
   <section class="fz-sec" id="card-sec">
     <div class="fz-sec__head"><span class="label">Your Membership</span><h2>Your <span>Lane Card</span></h2></div>
     <div id="fancard-mount"></div>
+  </section>
+
+  <!-- MEMBERS AREA — vouchers, promos & member news -->
+  <section class="fz-sec" id="members-sec">
+    <div class="fz-sec__head"><span class="label">Members Only</span><h2>Your <span>Member Perks</span></h2></div>
+    <div id="fz-members"></div>
   </section>
 
   <!-- PERKS LADDER -->

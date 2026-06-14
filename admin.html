@@ -252,7 +252,10 @@
         <div class="hq-eyebrow">Rayners Lane FC &middot; Staff HQ</div>
         <div class="hq-greet" id="hq-greet">Welcome to The Lane</div>
         <div class="hq-sub">Update the site from your pocket. Everything you change goes live in ~30 seconds.</div>
-        <div class="hq-live" id="hq-live"><span class="dot"></span><span id="hq-live-txt">Scoreboard off</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <div class="hq-live" id="hq-live"><span class="dot"></span><span id="hq-live-txt">Scoreboard off</span></div>
+          <button class="hq-live" id="hq-fans" onclick="openPanel('fanclub')" style="cursor:pointer;border-color:rgba(255,209,0,.4)"><span style="color:var(--y)">&#128153;</span><span id="hq-fans-txt">Fans —</span></button>
+        </div>
       </div>
 
       <div class="sect-lbl">Match Day</div>
@@ -333,6 +336,11 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.2-9A4.6 4.6 0 0 1 12 6.5 4.6 4.6 0 0 1 21.2 12C19 16.4 12 21 12 21z"/></svg></span>
           <div class="tile-name">Fan Club</div><div class="tile-desc">Champion your patrons</div>
+        </button>
+        <button class="tile" style="--accent:#FBBF24" onclick="openPanel('perks')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
+          <div class="tile-name">Member Perks</div><div class="tile-desc">Vouchers, promos &amp; news</div>
         </button>
         <button class="tile" style="--accent:#60A5FA" onclick="openPanel('mail')">
           <span class="tile-arrow">&#8594;</span>
@@ -549,8 +557,14 @@
       <div class="field"><label class="fl">Company Name</label><input type="text" id="sp-name" placeholder="Hanlon Dry Lining"></div>
       <div class="field"><label class="fl">Tier</label><select id="sp-tier"><option>Principal Partner</option><option>Kit Sponsor</option><option>Training Kit Sponsor</option><option>Programme Sponsor</option><option>Club Partner</option></select></div>
       <div class="field"><label class="fl">Role / Package</label><input type="text" id="sp-role" placeholder="Home Shirt Sponsor"></div>
-      <div class="field"><label class="fl">Logo file name (optional)</label><input type="text" id="sp-logo" placeholder="img/sponsors/hanlon-dry-lining.png"></div>
+      <div class="field">
+        <label class="fl">Sponsor Logo <span style="color:var(--gr);font-weight:400">— upload a JPG or PNG (transparent PNG looks best)</span></label>
+        <div class="iup-wrap" id="sp-iw"><input type="file" accept="image/png,image/jpeg,image/webp" onchange="prevImg('sp',this)"><div class="iup-icon">&#127912;</div><div class="iup-lbl">Tap to upload logo</div><div class="iup-sub">JPG, PNG or WebP — max 4MB</div></div>
+        <div class="iup-prev" id="sp-ip"><img id="sp-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('sp')">&#10005; Remove</button></div>
+      </div>
+      <div class="field"><label class="fl">…or paste an existing logo path (optional)</label><input type="text" id="sp-logo" placeholder="img/sponsors/hanlon-dry-lining.png"></div>
       <div class="field"><label class="fl">Website (optional)</label><input type="text" id="sp-url" placeholder="https://"></div>
+      <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="sp-feature" style="width:16px;height:16px;accent-color:var(--y)"> This logo is dark — show it on a light chip so it stays visible</label>
       <div class="field"><label class="fl">Note (optional)</label><input type="text" id="sp-note" placeholder="Extra info"></div>
       <button class="save sec" onclick="addSponsor()">+ Add Sponsor</button>
       <div class="div"></div>
@@ -973,6 +987,37 @@
       <div id="fansignups"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap "Refresh list" to load your sign-ups.</div></div>
     </div>
 
+    <!-- MEMBER PERKS (vouchers, promos & member news) -->
+    <div class="panel" id="panel-perks">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#127942; Member Perks</div></div>
+      <div class="snote" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)"><p>These show in the <strong style="color:var(--w)">Members area of the Fan Zone</strong> — only fans with an account see them. Add vouchers, promos &amp; members-only news. Updates the live site in ~30s.</p></div>
+
+      <div class="slbl">Add a Voucher / Promo</div>
+      <div class="field"><label class="fl">Title</label><input type="text" id="pk-title" placeholder="10% off at McCafferty's"></div>
+      <div class="field"><label class="fl">Details</label><textarea id="pk-detail" rows="2" placeholder="Show your Lane Card at the bar on any matchday."></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Voucher Code (optional)</label><input type="text" id="pk-code" placeholder="LANE10"></div>
+        <div class="field"><label class="fl">Sponsor (optional)</label><input type="text" id="pk-sponsor" placeholder="McCafferty's"></div>
+      </div>
+      <div class="field"><label class="fl">Expiry / Terms (optional)</label><input type="text" id="pk-expiry" placeholder="End of 2026-27 season"></div>
+      <button class="save sec" onclick="addPerk()">+ Add Voucher</button>
+      <div class="div"></div>
+      <div class="slbl" id="pk-cnt">Live Vouchers</div>
+      <div id="pk-list"></div>
+
+      <div class="div"></div>
+      <div class="slbl">Add Members-Only News</div>
+      <div class="field"><label class="fl">Headline</label><input type="text" id="mn-title" placeholder="Members get first dibs on season tickets"></div>
+      <div class="field"><label class="fl">Message</label><textarea id="mn-body" rows="2" placeholder="Early access window before general sale…"></textarea></div>
+      <button class="save sec" onclick="addMemberNews()">+ Add Member News</button>
+      <div class="div"></div>
+      <div class="slbl" id="mn-cnt">Member News</div>
+      <div id="mn-list"></div>
+
+      <button class="save" style="margin-top:14px" onclick="savePerks()">&#10003; Save Perks to Site</button>
+      <div class="dep" id="dep-perks"></div>
+    </div>
+
     <!-- STAFF & MANAGEMENT (private profiles) -->
     <div class="panel" id="panel-staff">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128100; Staff &amp; Management</div></div>
@@ -1378,6 +1423,7 @@ function openPanel(name) {
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
+  if (name === 'perks')     loadPerks();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -1410,7 +1456,20 @@ function initDash() {
     if (isLive) { pill.classList.add('on'); txt.textContent = 'Scoreboard is LIVE'; }
     else { pill.classList.remove('on'); txt.textContent = 'Scoreboard off'; }
   }
+  loadDashFanCount();
   refreshNotifs();
+}
+// Fan sign-up count on the dashboard (private — via list-fans). Falls back to
+// the public patrons count if the Netlify token isn't set yet.
+function loadDashFanCount() {
+  var el = document.getElementById('hq-fans-txt'); if (!el) return;
+  fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.ok && typeof d.count === 'number') { el.textContent = d.count + ' fan' + (d.count === 1 ? '' : 's') + ' signed up'; }
+      else { el.textContent = 'Fan sign-ups'; }
+    })
+    .catch(function () { el.textContent = 'Fan sign-ups'; });
 }
 
 // ── NOTIFICATION CENTRE ──
@@ -1814,6 +1873,54 @@ function saveOfficials() {
   pushToGitHub('officials', data, 'dep-officials');
   toast('Policy names updated ✓');
 }
+
+// ── MEMBER PERKS (vouchers / promos / member news → data/perks.json) ──
+var perks = [], memberNews = [];
+function loadPerks() {
+  fetchJSON('perks', function (d) {
+    perks = (d && d.perks) || [];
+    memberNews = (d && d.news) || [];
+    renderPerks();
+  });
+}
+function renderPerks() {
+  var pc = document.getElementById('pk-cnt'); if (pc) pc.textContent = 'Live Vouchers (' + perks.length + ')';
+  var pl = document.getElementById('pk-list');
+  if (pl) pl.innerHTML = perks.length
+    ? perks.map(function (p, i) {
+        return '<div class="li"><span class="li-num">🎟️</span><div class="li-main"><div class="li-name">' + esc(p.title) + '</div><div class="li-sub">' + (p.sponsor ? esc(p.sponsor) + ' &middot; ' : '') + (p.code ? esc(p.code) + ' &middot; ' : '') + esc(p.detail || '') + '</div></div><button class="li-del" onclick="removePerk(' + i + ')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No vouchers yet</div>';
+  var mc = document.getElementById('mn-cnt'); if (mc) mc.textContent = 'Member News (' + memberNews.length + ')';
+  var ml = document.getElementById('mn-list');
+  if (ml) ml.innerHTML = memberNews.length
+    ? memberNews.map(function (n, i) {
+        return '<div class="li"><span class="li-num">📣</span><div class="li-main"><div class="li-name">' + esc(n.title) + '</div><div class="li-sub">' + esc(n.body || '') + '</div></div><button class="li-del" onclick="removeMemberNews(' + i + ')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No member news yet</div>';
+}
+function addPerk() {
+  var title = gv('pk-title');
+  if (!title) { toast('Enter a voucher title', true); return; }
+  perks.unshift({ title: title, detail: gv('pk-detail'), code: gv('pk-code'), sponsor: gv('pk-sponsor'), expiry: gv('pk-expiry') });
+  renderPerks();
+  setVal('pk-title',''); setVal('pk-detail',''); setVal('pk-code',''); setVal('pk-sponsor',''); setVal('pk-expiry','');
+  toast('Voucher added ✓ — press Save');
+}
+function removePerk(i) { if (!confirm('Remove this voucher?')) return; perks.splice(i, 1); renderPerks(); }
+function addMemberNews() {
+  var title = gv('mn-title');
+  if (!title) { toast('Enter a headline', true); return; }
+  memberNews.unshift({ title: title, body: gv('mn-body'), date: new Date().toISOString().slice(0, 10) });
+  renderPerks();
+  setVal('mn-title',''); setVal('mn-body','');
+  toast('Member news added ✓ — press Save');
+}
+function removeMemberNews(i) { if (!confirm('Remove this news item?')) return; memberNews.splice(i, 1); renderPerks(); }
+function savePerks() {
+  pushToGitHub('perks', { perks: perks, news: memberNews, updatedAt: new Date().toISOString() }, 'dep-perks');
+  toast('Perks saved ✓');
+}
 function renderCommittee() {
   document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';
   document.getElementById('cm-list').innerHTML = committee.length
@@ -1827,11 +1934,18 @@ function renderCommittee() {
 function addSponsor() {
   var name = gv('sp-name'); var role = gv('sp-role');
   if (!name || !role) { toast('Enter name and role', true); return; }
-  sponsors = sponsors.filter(function(s) { return s.name !== name; });
-  sponsors.push({name:name, tier:gv('sp-tier'), role:role, logo:gv('sp-logo'), url:gv('sp-url'), note:gv('sp-note')});
-  renderSponsors();
-  setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note',''); setVal('sp-logo','');
-  toast(name + ' added ✓');
+  var feature = document.getElementById('sp-feature').checked;
+  function finish(logoPath) {
+    sponsors = sponsors.filter(function(s) { return s.name !== name; });
+    sponsors.push({name:name, tier:gv('sp-tier'), role:role, logo:logoPath || gv('sp-logo'), url:gv('sp-url'), note:gv('sp-note'), feature:feature});
+    renderSponsors();
+    setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note',''); setVal('sp-logo','');
+    document.getElementById('sp-feature').checked = false;
+    if (imgStore['sp']) rmImg('sp');
+    toast(name + ' added ✓ — press Save to publish');
+  }
+  if (imgStore['sp']) { toast('Uploading logo…'); uploadImg('sp', '', function(path){ finish(path || imgStore['sp'].dataUrl); }); }
+  else finish('');
 }
 function removeSponsor(name) {
   if (!confirm('Remove ' + name + '?')) return;
@@ -1847,7 +1961,10 @@ function renderSponsors() {
   document.getElementById('sp-cnt').textContent = 'Sponsors (' + sponsors.length + ')';
   document.getElementById('sp-list').innerHTML = sponsors.length
     ? sponsors.map(function(s) {
-        return '<div class="li"><div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
+        var thumb = s.logo
+          ? '<span style="width:40px;height:40px;border-radius:8px;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="' + esc(s.logo) + '" alt="" style="max-width:34px;max-height:34px;object-fit:contain"></span>'
+          : '<span class="li-num">&#129309;</span>';
+        return '<div class="li">' + thumb + '<div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
 }
