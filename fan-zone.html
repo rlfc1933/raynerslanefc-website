@@ -84,6 +84,10 @@
     .fz-give h3 span{color:var(--yellow)}
     .fz-give p{font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.75);max-width:560px;margin:0 auto 20px;line-height:1.7}
     .hidden{display:none}
+    .fz-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:2px;background:var(--border);border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+    .fz-num{background:linear-gradient(160deg,var(--card),#0c0c0c);padding:22px 12px;text-align:center}
+    .fz-num b{display:block;font-family:var(--font-d);font-size:clamp(30px,6vw,40px);color:var(--yellow);line-height:1}
+    .fz-num span{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:6px;display:block}
   </style>
 </head>
 <body>
@@ -99,6 +103,11 @@
 </section>
 
 <div class="fz-wrap">
+
+  <!-- BY THE NUMBERS (social proof) -->
+  <section class="fz-sec" id="nums-sec" style="display:none">
+    <div class="fz-nums" id="fz-nums"></div>
+  </section>
 
   <!-- FAN CARD -->
   <section class="fz-sec" id="card-sec">

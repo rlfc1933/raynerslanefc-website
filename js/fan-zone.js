@@ -17,6 +17,11 @@ var TIERS = [
 ];
 function tierFor(games) { for (var i = 0; i < TIERS.length; i++) if (games >= TIERS[i].min) return TIERS[i]; return TIERS[TIERS.length - 1]; }
 
+// Founding Laner — anyone who joins during the club's launch season gets a
+// permanent badge. Scarcity by time (the window closes), belonging forever.
+var FOUNDING_CUTOFF = '2027-06-01';
+function isFounding(f) { return f && f.joined && f.joined < FOUNDING_CUTOFF; }
+
 // ── REWARDS by HOME games (mostly free / sponsor-funded) ──
 var REWARDS = [
   { home: 5,  title: '6th home game FREE',        note: 'Your next home match is on us. Show this at the gate.', sponsor: '' },
@@ -57,7 +62,8 @@ function prevRewardThreshold(home) { var p = 0; REWARDS.forEach(function (r) { i
 // Each member gets a permanent unique Lane number (kept on their device + given
 // to the club when they register, so the turnstile can match them).
 function ensureLaneNo(f) {
-  if (f.laneNo) return f.laneNo;
+  if (!f.joined) f.joined = new Date().toISOString().slice(0, 10); // founding-season stamp
+  if (f.laneNo) { setFan(f); return f.laneNo; }
   var s = (f.username || '') + (f.since || '') + new Date().getTime() + Math.floor(Math.random() * 9999);
   var hash = 0; for (var i = 0; i < s.length; i++) { hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0; }
   f.laneNo = String(Math.abs(hash) % 9000 + 1000);
@@ -80,6 +86,22 @@ async function initFanZone() {
   renderLadder(getFan());
   renderFanCard();
   renderWall();
+  renderByNumbers();
+}
+
+// Social proof — adaptive: only shows numbers that are real, so it never looks
+// empty at launch (heritage stats always show; community stats appear as they grow).
+async function renderByNumbers() {
+  var el = document.getElementById('fz-nums'); if (!el) return;
+  var hearts = 0;
+  (fanAttendance || []).forEach(function (m) { hearts += (m.lanes || []).length; });
+  var patrons = 0;
+  try { var p = await (await fetch('data/patrons.json?t=' + Date.now())).json(); patrons = (p.patrons || []).length; } catch (e) {}
+  var stats = [{ b: '1933', s: 'Founded' }, { b: '90+', s: 'Years a Family' }];
+  if (hearts > 0)  stats.push({ b: hearts.toLocaleString('en-GB'), s: 'Hearts Awarded' });
+  if (patrons > 0) stats.push({ b: patrons, s: 'Patrons Championed' });
+  el.innerHTML = stats.map(function (x) { return '<div class="fz-num"><b>' + x.b + '</b><span>' + x.s + '</span></div>'; }).join('');
+  document.getElementById('nums-sec').style.display = 'block';
 }
 
 /* ---------- FAN CARD ---------- */
@@ -159,6 +181,7 @@ function renderFanCard() {
         '<div class="fancard__id">' +
           '<div class="fancard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
           '<div class="fancard__since">' + (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '') + '</div>' +
+          (isFounding(f) ? '<div style="display:inline-block;margin-top:7px;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0d0d0d;background:linear-gradient(90deg,#fff3bf,var(--yellow));border-radius:4px;padding:3px 9px">⭐ Founding Laner</div>' : '') +
         '</div>' +
       '</div>' +
       heartsRow +
