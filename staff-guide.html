@@ -75,8 +75,12 @@
         <li><a href="#golden">The golden rule</a></li>
         <li><a href="#sections">Updating each section</a></li>
         <li><a href="#analytics">Match Day Analytics</a></li>
-        <li><a href="#fans">Fan cards &amp; hearts</a></li>
         <li><a href="#social">Social media</a></li>
+        <li><a href="#fans">Fan cards &amp; hearts</a></li>
+        <li><a href="#signups">Fan sign-ups &amp; where data goes</a></li>
+        <li><a href="#perks">Member perks &amp; messaging</a></li>
+        <li><a href="#sponsorhub">Sponsor Hub</a></li>
+        <li><a href="#clubstats">Club Analytics</a></li>
         <li><a href="#email">Email on your phone</a></li>
         <li><a href="#trouble">If something looks wrong</a></li>
       </ol>
@@ -195,12 +199,68 @@
       </div>
       <div class="card">
         <h4>Champion patrons &amp; birthdays</h4>
-        <p>Add your most loyal fans to the public <strong>Patrons Wall</strong> (Fan Club tab) and pick a Fan of the Month. Birthdays &amp; emails come in privately via <strong>Netlify → Forms</strong> — use them to send a treat or a free ticket.</p>
+        <p>Add your most loyal fans to the public <strong>Patrons Wall</strong> (Fan Club tab) and pick a Fan of the Month.</p>
+      </div>
+    </section>
+
+    <section id="signups">
+      <h2><span class="n">7</span> Fan Sign-Ups &amp; Where the Data Goes</h2>
+      <div class="card">
+        <h4>What happens when a fan joins</h4>
+        <p>When a fan fills in <strong>"Join the Family List"</strong> on the Fan Zone, two things happen: (1) their details (name, email, birthday, town) go <strong>privately</strong> into the club's records, and (2) a Lane membership card is created on their phone so they instantly get their number, hearts and perks.</p>
+      </div>
+      <div class="card go">
+        <h4>Where you read them</h4>
+        <p>Open <strong>Fan Club → Fan Sign-Ups</strong> in the admin and tap <strong>Refresh</strong>. Every fan who's joined is listed — name, email, birthday, town, message — newest first. The dashboard also shows a running <strong>"X fans signed up"</strong> count.</p>
+      </div>
+      <div class="card warn">
+        <h4>This data is private — never public</h4>
+        <p>Fan emails &amp; birthdays are <strong>never shown on the website</strong>. They're held securely off the public site (in Netlify) and only appear inside the PIN-locked admin. <em>One-time setup:</em> the chairman needs to add a <code>NETLIFY_API_TOKEN</code> in Netlify for the list to appear in the portal — until then it shows a setup note.</p>
+      </div>
+    </section>
+
+    <section id="perks">
+      <h2><span class="n">8</span> Member Perks &amp; Messaging</h2>
+      <div class="card">
+        <h4>Vouchers &amp; promos</h4>
+        <p>Open the <strong>Member Perks</strong> tile. Add a voucher (title, details, code, sponsor, expiry) and press Save. It appears in the <strong>Members area of the Fan Zone</strong> for every fan with an account — a real reason to sign up.</p>
+      </div>
+      <div class="card go">
+        <h4>Message everyone, or one fan</h4>
+        <p><strong>Everyone:</strong> in Member Perks, use <strong>"Message All Members"</strong> — your headline + message lands instantly in every signed-in member's Fan Zone. <strong>One fan:</strong> go to Fan Club → Fan Sign-Ups and tap their email to write to them directly.</p>
+      </div>
+    </section>
+
+    <section id="sponsorhub">
+      <h2><span class="n">9</span> Sponsor Hub</h2>
+      <div class="card">
+        <h4>How a sponsor comes in</h4>
+        <p>Businesses apply on the <strong>Sponsorships page</strong> (the "Apply to Back The Lane" form). Their application emails <strong>info@raynerslanefc.co.uk</strong> and lands in <strong>Sponsor Hub</strong> in the admin.</p>
+      </div>
+      <div class="card go">
+        <h4>Working a deal — enquiry to paid</h4>
+        <p>In Sponsor Hub: set your <strong>Payment Details</strong> once (saved on your device). For each application, move it through the stages (New → In discussion → Quote sent → Invoiced → Paid), add the agreed amount and notes, and tap <strong>"Build &amp; send quote"</strong> — it writes a full proposal email with your bank details and opens it in your mail app. Press <strong>Save Pipeline</strong> to keep the progress.</p>
+      </div>
+      <div class="card">
+        <h4>Then make them live</h4>
+        <p>Once they've paid, add their logo in the <strong>Sponsors</strong> tab (upload a JPG/PNG) and they appear on the website partner wall.</p>
+      </div>
+    </section>
+
+    <section id="clubstats">
+      <h2><span class="n">10</span> Club Analytics</h2>
+      <div class="card">
+        <h4>Open to all staff</h4>
+        <p>The <strong>Club Analytics</strong> tile gives every staff member a live read-out: fan sign-ups, hearts awarded, patrons, sponsorship pipeline &amp; paid, and matchday income — with charts. It fills in automatically as you log takings (Match Day Analytics) and award hearts (Fan Club).</p>
+      </div>
+      <div class="card warn">
+        <h4>The chairman's own view</h4>
+        <p>The detailed match-by-match financials stay in the separate <strong>Match Day Analytics</strong> tab, which is password-protected for the chairman.</p>
       </div>
     </section>
 
     <section id="email">
-      <h2><span class="n">7</span> Your Club Email on Your Phone</h2>
+      <h2><span class="n">11</span> Your Club Email on Your Phone</h2>
       <p class="lead">Set up your <strong>@raynerslanefc.co.uk</strong> address (hosted by one.com) in your phone's Mail app.</p>
       <div class="card warn"><h4>You'll need</h4><p>Your full club email (e.g. <code>you@raynerslanefc.co.uk</code>) and the password you were given. If you don't have these, ask the chairman.</p></div>
 
@@ -242,7 +302,7 @@
     </section>
 
     <section id="trouble">
-      <h2><span class="n">8</span> "I Saved It But Don't See It"</h2>
+      <h2><span class="n">12</span> "I Saved It But Don't See It"</h2>
       <div class="card">
         <ol class="steps">
           <li><strong>Wait 60 seconds.</strong> The site rebuilds itself after each save — give it a moment.</li>
