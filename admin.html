@@ -313,7 +313,7 @@
         <button class="tile" style="--accent:#14B8A6" onclick="openPanel('committee')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5M20.5 20a5.5 5.5 0 0 0-4-5.3"/></svg></span>
-          <div class="tile-name">Committee</div><div class="tile-desc">Club officials</div>
+          <div class="tile-name">Club Roles &amp; Staff</div><div class="tile-desc">Board, committee, management, coaches, medical</div>
         </button>
       </div>
 
@@ -507,14 +507,27 @@
 
     <!-- COMMITTEE -->
     <div class="panel" id="panel-committee">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Committee</div></div>
-      <div class="slbl">Add Member</div>
-      <div class="field"><label class="fl">Full Name</label><input type="text" id="cm-name" placeholder="John Smith"></div>
-      <div class="field"><label class="fl">Role</label><input type="text" id="cm-role" placeholder="Club Secretary — Jenny Pitt"></div>
-      <div class="field"><label class="fl">Note (optional)</label><input type="text" id="cm-note" placeholder="sponsor, contact, etc."></div>
-      <button class="save sec" onclick="addMember()">+ Add Member</button>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Club Roles &amp; Staff</div></div>
+      <div class="snote" style="border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.06)"><p>Anyone the club lists publicly — <strong style="color:var(--w)">board, committee, management, coaches, medical</strong>. Change a name or title here and the <strong>About page</strong> updates in ~30 seconds. (Private emergency &amp; medical details live in the separate "Staff &amp; Management" tab.)</p></div>
+      <div class="slbl">Add or Update a Role</div>
+      <div class="field"><label class="fl">Full Name</label><input type="text" id="cm-name" placeholder="Jenny Pitt"></div>
+      <div class="field"><label class="fl">Role / Title</label>
+        <input type="text" id="cm-role" list="cm-roles" placeholder="Start typing a role…">
+        <datalist id="cm-roles">
+          <option>Club Chairman</option><option>Vice Chairman</option><option>Club President</option>
+          <option>Club Secretary</option><option>Treasurer</option><option>Club Welfare Officer</option>
+          <option>First Team Manager</option><option>Assistant Manager</option><option>Coach</option>
+          <option>Goalkeeping Coach</option><option>Fitness Coach</option><option>Physio</option>
+          <option>Club Doctor</option><option>Medical / First Aid</option><option>Kit Manager</option>
+          <option>Committee</option><option>Hospitality</option><option>Groundsperson</option>
+          <option>Media &amp; Communications</option><option>Commercial</option>
+        </datalist>
+      </div>
+      <div class="field"><label class="fl">Note (optional)</label><input type="text" id="cm-note" placeholder="e.g. sponsor link, department"></div>
+      <button class="save sec" onclick="addMember()">+ Add / Update</button>
+      <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px">Tip: to update someone, enter the <strong style="color:var(--w)">same name</strong> with their new title — it replaces the old entry.</p>
       <div class="div"></div>
-      <div class="slbl" id="cm-cnt">Committee</div>
+      <div class="slbl" id="cm-cnt">Current Roles</div>
       <div id="cm-list"></div>
       <button class="save" style="margin-top:10px" onclick="saveCommittee()">&#10003; Save to Site</button>
       <div class="dep" id="dep-committee"></div>
@@ -1404,6 +1417,7 @@ var WHATS_NEW = [
   { id:'nf-guides',    i:'📚', t:'Site Guide & The Lane Lowdown', d:'Every section explained + club facts and talking points.' },
   { id:'nf-swot',      i:'📊', t:'SWOT & Risk', d:'A boardroom view of where the club stands.' },
   { id:'nf-install',   i:'📲', t:'Install as an App', d:'Add the admin (and the public site) to your home screen.' },
+  { id:'nf-roles',     i:'👥', t:'Club Roles & Staff editor', d:'Change any role, title or name (board, management, coaches, medical) → updates the About page.' },
 ];
 function newsSeen()      { try { return JSON.parse(localStorage.getItem('rlfc_news_seen') || '[]'); } catch (e) { return []; } }
 function newsDismissed() { try { return JSON.parse(localStorage.getItem('rlfc_news_dismissed') || '[]'); } catch (e) { return []; } }
