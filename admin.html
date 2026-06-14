@@ -217,9 +217,11 @@
     .pb-mission__o b{color:#4ade80;font-family:var(--fc);font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;padding-top:1px}
     /* Committee Meetings */
     .mt-snap{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-    .mt-snap .s{flex:1;min-width:84px;background:linear-gradient(165deg,var(--c),var(--dk));border:1px solid var(--br);border-radius:11px;padding:12px 6px;text-align:center}
+    .mt-snap .s{flex:1;min-width:96px;background:linear-gradient(165deg,var(--c),var(--dk));border:1px solid var(--br);border-radius:11px;padding:12px 7px;text-align:center;cursor:pointer;transition:border-color .15s,transform .15s;-webkit-tap-highlight-color:transparent}
+    .mt-snap .s:hover{border-color:var(--y);transform:translateY(-2px)}
     .mt-snap .s b{display:block;font-family:var(--fd);font-size:22px;color:var(--y);line-height:1}
     .mt-snap .s span{font-family:var(--fc);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gr);margin-top:5px;display:block}
+    .mt-snap .s small{display:block;font-family:var(--fc);font-size:8px;letter-spacing:.02em;color:#6f6f6f;margin-top:4px}
     .mt-card{border:1px solid var(--br);border-radius:11px;background:var(--c);margin-bottom:9px;overflow:hidden}
     .mt-card>summary{list-style:none;cursor:pointer;padding:14px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
     .mt-card>summary::-webkit-details-marker{display:none}
@@ -232,6 +234,13 @@
     .mt-blk h5{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin:0 0 5px}
     .mt-blk p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0;white-space:pre-wrap}
     .mt-del{background:none;border:none;color:#ef6b6b;font-family:var(--fc);font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:12px;padding:0}
+    /* Tile info (i) badges + popover */
+    .tile-i{position:absolute;top:11px;right:12px;width:20px;height:20px;border-radius:50%;border:1px solid var(--br);background:rgba(255,255,255,.05);color:var(--gr);font-family:Georgia,serif;font-size:12px;font-style:italic;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:4;transition:.15s;-webkit-tap-highlight-color:transparent}
+    .tile-i:hover{border-color:var(--y);color:var(--y);background:rgba(255,209,0,.12)}
+    .tile-info-pop{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);width:90vw;max-width:360px;background:linear-gradient(180deg,var(--c),var(--dk));border:1px solid var(--br);border-top:3px solid var(--y);border-radius:13px;padding:15px 17px 16px;z-index:100002;box-shadow:0 22px 54px -20px rgba(0,0,0,.92);display:none}
+    .tile-info-pop b{color:var(--y);display:block;font-family:var(--fd);font-size:17px;letter-spacing:.02em;margin-bottom:6px}
+    .tile-info-pop p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0}
+    .tile-info-pop .x{position:absolute;top:9px;right:12px;color:var(--gr);font-family:var(--fc);font-size:16px;cursor:pointer;line-height:1}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -1476,9 +1485,10 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <!-- COMMITTEE MEETINGS -->
     <div class="panel" id="panel-meetings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128221; Committee Meetings</div></div>
-      <div class="snote" style="border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)"><p>The club's <strong style="color:var(--w)">minute book</strong>, shared with every staff member. Write up each meeting — who came, what was discussed, what was decided, and who's doing what next. Open a meeting with the live numbers below so everyone sees where we stand.</p></div>
+      <div class="snote" style="border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)"><p>The club's <strong style="color:var(--w)">minute book</strong>. Fill in the form, press <strong style="color:var(--w)">Save</strong>, and it's kept in the club's shared records — every staff member can open this tab and read it back under <strong style="color:var(--w)">"Saved meetings"</strong> at the bottom. Nothing is lost and nothing is on the public website. <em>Tip: keep anything truly sensitive (personal, financial or disciplinary detail) out of here and handled in person.</em></p></div>
 
       <div class="slbl">📊 Where we stand right now <button onclick="loadMeetingSnapshot()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh ↻</button></div>
+      <p style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.5;margin:0 2px 10px">These aren't typed in here — they fill in <strong style="color:#fff">automatically</strong> from across the admin (the Wins Board, Fan sign-ups, Match Day Analytics). They read zero right now because it's pre-season with no data yet. <strong style="color:var(--y)">Tap any number</strong> to jump to where it's updated.</p>
       <div class="mt-snap" id="mt-snap"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">Loading…</div></div>
 
       <div class="div"></div>
@@ -1492,11 +1502,12 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="field"><label class="fl">Decisions / outcomes</label><textarea id="mt-out" rows="3" placeholder="What did we agree? e.g.&#10;Agreed to print 15 advertising boards&#10;Quiz night booked for 12 July"></textarea></div>
       <div class="field"><label class="fl">Next steps — who does what</label><textarea id="mt-next" rows="3" placeholder="e.g.&#10;Nigel — approach 5 firms for boards by next meeting&#10;Jenny — start Football Foundation grant"></textarea></div>
       <button class="save sec" onclick="addMeeting()">+ Save this meeting</button>
+      <p style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:8px 2px 0">✅ Saves to the club's shared records (live in ~30s) and appears under "Saved meetings" below — every staff member can read it.</p>
       <div class="dep" id="dep-meetings"></div>
 
       <div class="div"></div>
-      <div class="slbl" id="mt-cnt">Past meetings</div>
-      <div id="mt-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">No meetings written up yet.</div></div>
+      <div class="slbl" id="mt-cnt">📚 Saved meetings — tap any to read it back</div>
+      <div id="mt-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">No meetings written up yet — your first one will appear here.</div></div>
     </div>
 
     <!-- THE LANE BUSINESS PLAYBOOK -->
@@ -1944,7 +1955,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <div class="dmap-item"><b>💼 Sponsor CRM</b><span>Applications → private in Netlify · pipeline (stage, £, notes) → <code>sponsor-crm.json</code> · read in <em>Sponsor Hub</em>. Bank details stay on your device only.</span></div>
         <div class="dmap-item"><b>🎟️ Members &amp; perks</b><span>Vouchers, promos &amp; member broadcasts → <code>perks.json</code> · shown in the Fan Zone members area.</span></div>
         <div class="dmap-item"><b>🔒 Private staff records</b><span>Staff profiles (emergency &amp; medical) → private in Netlify · never on the website.</span></div>
-        <div class="dmap-item"><b>📋 Club content</b><span>Squad, news, committee, sponsors, programme, match day, MOTM, signings, patrons, officials, gallery, social plan, analytics → <code>data/*.json</code> in the club's GitHub, auto-deployed.</span></div>
+        <div class="dmap-item"><b>📝 Committee &amp; boardroom</b><span>Meeting minutes → <code>meetings.json</code> · the Wins Board → <code>committee-wins.json</code> · the saved income plan → <code>committee-plan.json</code>. Shared with all staff, read in the Committee Meetings &amp; Business Playbook tabs.</span></div>
+        <div class="dmap-item"><b>📋 Club content</b><span>Squad, news, committee, sponsors, programme, match day, MOTM, signings, patrons, officials, gallery, social plan, perks, analytics → <code>data/*.json</code> in the club's GitHub, auto-deployed.</span></div>
       </div>
 
       <div class="div"></div>
@@ -2076,6 +2088,66 @@ function enterApp() {
   document.getElementById('app').style.display = 'block';
   loadAll();
   initDash();
+  addTileInfos();
+}
+
+// ── TILE INFO (i) — tap the little i on any tile to see what it's for ──
+var TILE_INFO = {
+  playbook:   ['The Lane Business Playbook', 'The big one — how the club grows its income. Real examples, an income calculator, a pitch generator, the Wins Board and every role\'s job. Start here.'],
+  matchday:   ['Match Day', 'Turn the live scoreboard on/off and tap the score during a game — fans see it within seconds on the home page.'],
+  programme:  ['Programme', 'Set the match-day programme notes & preview that appear on the Programme page.'],
+  matchreport:['Match Report', 'Write the post-match report that goes to the News page.'],
+  gallery:    ['Gallery', 'Upload match-day and squad photos to the public Gallery.'],
+  motm:       ['Man of the Match', 'Feature your star man — shows as a card on the home page.'],
+  signing:    ['New Signing', 'Announce a new signing — shows as a card on the home page.'],
+  squad:      ['Squad', 'Manage the first-team squad list shown on the Squad page.'],
+  players:    ['Player Profiles', 'Add player photos, positions, stats & bios for the pop-up profiles on the Squad page.'],
+  news:       ['Club News', 'Publish news articles to the News page and home page.'],
+  committee:  ['Club Roles & Staff', 'Change any committee/management name, role or title — updates the About page. Also sets the Welfare Officer, Chairman & Secretary used across the Policies page.'],
+  sponsors:   ['Sponsors', 'Add sponsor logos (upload a JPG/PNG) — they appear on the website partner wall.'],
+  sponsorhub: ['Sponsor Hub', 'Your commercial pipeline: businesses apply on the Sponsorships page and land here. Track each from enquiry to paid and build a quote.'],
+  social:     ['Social Media', 'The full social playbook — ready-to-copy captions, a platform guide, best posting times, and a post planner.'],
+  fanclub:    ['Fan Club', 'See everyone who signed up, award yellow hearts at the gate, and champion patrons on the public wall.'],
+  perks:      ['Member Perks', 'Add vouchers, promos and members-only news that fans see in the Fan Zone. Also "Message All Members".'],
+  mail:       ['Club Email', 'Quick links to log in to the club email inboxes.'],
+  siteguide:  ['Site Guide', 'Plain-English guide to what every part of the website is for.'],
+  lowdown:    ['The Lane Lowdown', 'Club facts, history and talking points — handy with fans, sponsors and new faces.'],
+  clubstats:  ['Club Analytics', 'A live read-out for all staff: fan sign-ups, sponsorship, income & hearts, with charts. Fills in as the season runs.'],
+  analytics:  ['Match Day Analytics', 'Chairman-only (password). Log attendance & takings per game and see the detailed financial charts.'],
+  meetings:   ['Committee Meetings', 'The club\'s shared minute book — write up who attended, what was decided and next steps. Opens with the live numbers.'],
+  staff:      ['Staff & Management', 'Private profiles (emergency & medical info). Strictly off the public website.'],
+  swot:       ['SWOT & Risk', 'A boardroom view of where the club stands and what to watch.'],
+  settings:   ['Settings', 'System status (is everything wired?), a map of where all your data is saved, and a Republish button.'],
+};
+function addTileInfos() {
+  document.querySelectorAll('#dash-home .tile').forEach(function (tile) {
+    if (tile.querySelector('.tile-i')) return;
+    var oc = tile.getAttribute('onclick') || '';
+    var m = oc.match(/openPanel\('([^']+)'\)/);
+    var key = m ? m[1] : (/staff-guide/.test(oc) ? '_guide' : '');
+    var info = TILE_INFO[key];
+    if (!info && key !== '_guide') return;
+    var arrow = tile.querySelector('.tile-arrow'); if (arrow) arrow.style.display = 'none';
+    var i = document.createElement('span');
+    i.className = 'tile-i'; i.textContent = 'i';
+    i.title = info ? info[0] + ' — ' + info[1] : 'The plain-English how-to guide for staff.';
+    i.onclick = function (e) {
+      e.stopPropagation(); e.preventDefault();
+      if (key === '_guide') { tileInfoShow('How To Guide', 'Opens the plain-English staff how-to — how to use every part of the admin, step by step.'); }
+      else tileInfoShow(info[0], info[1]);
+    };
+    tile.appendChild(i);
+  });
+}
+function tileInfoShow(title, body) {
+  var pop = document.getElementById('tile-info-pop');
+  if (!pop) {
+    pop = document.createElement('div'); pop.id = 'tile-info-pop'; pop.className = 'tile-info-pop';
+    document.body.appendChild(pop);
+    document.addEventListener('click', function (e) { if (pop.style.display === 'block' && !pop.contains(e.target) && !(e.target.classList && e.target.classList.contains('tile-i'))) pop.style.display = 'none'; });
+  }
+  pop.innerHTML = '<span class="x" onclick="document.getElementById(\'tile-info-pop\').style.display=\'none\'">&times;</span><b>' + escH(title) + '</b><p>' + escH(body) + '</p>';
+  pop.style.display = 'block';
 }
 function checkPin() {
   if (pinVal === PIN) {
@@ -2603,14 +2675,14 @@ function renderPerks() {
   var pl = document.getElementById('pk-list');
   if (pl) pl.innerHTML = perks.length
     ? perks.map(function (p, i) {
-        return '<div class="li"><span class="li-num">🎟️</span><div class="li-main"><div class="li-name">' + esc(p.title) + '</div><div class="li-sub">' + (p.sponsor ? esc(p.sponsor) + ' &middot; ' : '') + (p.code ? esc(p.code) + ' &middot; ' : '') + esc(p.detail || '') + '</div></div><button class="li-del" onclick="removePerk(' + i + ')">Remove</button></div>';
+        return '<div class="li"><span class="li-num">🎟️</span><div class="li-main"><div class="li-name">' + escH(p.title) + '</div><div class="li-sub">' + (p.sponsor ? escH(p.sponsor) + ' &middot; ' : '') + (p.code ? escH(p.code) + ' &middot; ' : '') + escH(p.detail || '') + '</div></div><button class="li-del" onclick="removePerk(' + i + ')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No vouchers yet</div>';
   var mc = document.getElementById('mn-cnt'); if (mc) mc.textContent = 'Member News (' + memberNews.length + ')';
   var ml = document.getElementById('mn-list');
   if (ml) ml.innerHTML = memberNews.length
     ? memberNews.map(function (n, i) {
-        return '<div class="li"><span class="li-num">📣</span><div class="li-main"><div class="li-name">' + esc(n.title) + '</div><div class="li-sub">' + esc(n.body || '') + '</div></div><button class="li-del" onclick="removeMemberNews(' + i + ')">Remove</button></div>';
+        return '<div class="li"><span class="li-num">📣</span><div class="li-main"><div class="li-name">' + escH(n.title) + '</div><div class="li-sub">' + escH(n.body || '') + '</div></div><button class="li-del" onclick="removeMemberNews(' + i + ')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No member news yet</div>';
 }
@@ -2685,7 +2757,7 @@ function renderSponsorHub() {
       '</div>' +
       '<div class="li-sub" style="margin:2px 0 10px">' + esc(s.contact || '') + (s.email ? ' &middot; <a href="mailto:' + esc(s.email) + '" style="color:var(--y)">' + esc(s.email) + '</a>' : '') + (s.phone ? ' &middot; ' + esc(s.phone) : '') + '</div>' +
       (s.package || s.budget ? '<div class="li-sub" style="margin-bottom:8px">📦 ' + esc(s.package || '—') + (s.budget ? ' &middot; budget ' + esc(s.budget) : '') + '</div>' : '') +
-      (s.message ? '<div class="li-sub" style="font-style:italic;margin-bottom:10px">"' + esc(s.message) + '"</div>' : '') +
+      (s.message ? '<div class="li-sub" style="font-style:italic;margin-bottom:10px">"' + escH(s.message) + '"</div>' : '') +
       '<div class="row2" style="margin-bottom:8px">' +
         '<div class="field" style="margin:0"><label class="fl">Stage</label><select onchange="setDeal(\'' + s.id + '\',\'status\',this.value)">' + opts + '</select></div>' +
         '<div class="field" style="margin:0"><label class="fl">Agreed £</label><input type="text" value="' + esc(deal.amount || '') + '" placeholder="500" onchange="setDeal(\'' + s.id + '\',\'amount\',this.value)"></div>' +
@@ -2802,7 +2874,7 @@ function generatePitch() {
       "We'd welcome a conversation. Contact: info@raynerslanefc.co.uk"
   };
   var out = document.getElementById('pg-out');
-  if (out) out.innerHTML = '<div class="soc-cap">' + esc(pitches[aud] || pitches.local) + '</div>';
+  if (out) out.innerHTML = '<div class="soc-cap">' + escH(pitches[aud] || pitches.local) + '</div>';
 }
 
 // ── PLAYBOOK navigation (jump pills) ──
@@ -2837,8 +2909,8 @@ function renderWins() {
   list.innerHTML = wins.length
     ? wins.map(function (w) {
         var when = w.date ? new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-        return '<div class="wb-win"><span class="wb-ic">💛</span><div class="wb-m"><div class="wb-w">' + esc(w.what || '') + '</div>' +
-          '<div class="wb-who">' + esc(w.who || 'Someone') + (when ? ' &middot; ' + when : '') + '</div></div>' +
+        return '<div class="wb-win"><span class="wb-ic">💛</span><div class="wb-m"><div class="wb-w">' + escH(w.what || '') + '</div>' +
+          '<div class="wb-who">' + escH(w.who || 'Someone') + (when ? ' &middot; ' + when : '') + '</div></div>' +
           (w.amt ? '<span class="wb-v">£' + Math.round(w.amt).toLocaleString('en-GB') + '</span>' : '') + '</div>';
       }).join('')
     : '<div class="wb-empty">The board\'s empty. Be the <b style="color:var(--y)">first name</b> on it — even a small one counts.</div>';
@@ -2889,15 +2961,15 @@ var meetings = [];
 function loadMeetings() { fetchJSON('meetings', function (d) { meetings = (d && d.meetings) || []; renderMeetings(); }); }
 function mtBlock(title, text) {
   if (!text || !String(text).trim()) return '';
-  return '<div class="mt-blk"><h5>' + title + '</h5><p>' + esc(text) + '</p></div>';
+  return '<div class="mt-blk"><h5>' + title + '</h5><p>' + escH(text) + '</p></div>';
 }
 function renderMeetings() {
   var el = document.getElementById('mt-list'); if (!el) return;
-  var cnt = document.getElementById('mt-cnt'); if (cnt) cnt.textContent = 'Past meetings (' + meetings.length + ')';
+  var cnt = document.getElementById('mt-cnt'); if (cnt) cnt.innerHTML = '📚 Saved meetings (' + meetings.length + ') — tap any to read it back';
   if (!meetings.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">No meetings written up yet.</div>'; return; }
   el.innerHTML = meetings.map(function (m) {
     var d = m.date ? new Date(m.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-    return '<details class="mt-card"><summary><div><div class="mt-card__t">' + esc(m.title || 'Meeting') + '</div><div class="mt-card__d">' + d + (m.attendees ? ' &middot; ' + esc(m.attendees) : '') + '</div></div></summary>' +
+    return '<details class="mt-card"><summary><div><div class="mt-card__t">' + escH(m.title || 'Meeting') + '</div><div class="mt-card__d">' + d + (m.attendees ? ' &middot; ' + escH(m.attendees) : '') + '</div></div></summary>' +
       '<div class="mt-card__b">' +
         mtBlock('Who attended', m.attendees) +
         mtBlock('Subjects covered', m.subjects) +
@@ -2919,7 +2991,7 @@ function addMeeting() {
   renderMeetings();
   setVal('mt-title', ''); setVal('mt-att', ''); setVal('mt-subj', ''); setVal('mt-out', ''); setVal('mt-next', ''); setVal('mt-date', '');
   pushToGitHub('meetings', { meetings: meetings, updatedAt: new Date().toISOString() }, 'dep-meetings');
-  toast('Meeting saved ✓');
+  toast('Meeting saved to the club records ✓ — see it under "Saved meetings"');
 }
 function deleteMeeting(id) {
   if (!confirm('Delete this meeting record? This cannot be undone.')) return;
@@ -2938,13 +3010,13 @@ async function loadMeetingSnapshot() {
   var fans = '—';
   try { var fr = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) }); var fd = await fr.json(); if (fd && fd.ok && typeof fd.count === 'number') fans = fd.count; } catch (e) {}
   var cards = [
-    { n: winsArr.length, l: 'Wins logged' },
-    { n: '£' + Math.round(brought).toLocaleString('en-GB'), l: 'Brought in' },
-    { n: fans, l: 'Fans signed up' },
-    { n: '£' + Math.round(income).toLocaleString('en-GB'), l: 'Matchday income' },
-    { n: hearts, l: 'Hearts awarded' },
+    { n: winsArr.length, l: 'Wins logged', src: 'Wins Board', go: 'playbook' },
+    { n: '£' + Math.round(brought).toLocaleString('en-GB'), l: 'Brought in', src: 'Wins Board', go: 'playbook' },
+    { n: fans, l: 'Fans signed up', src: 'Fan Club', go: 'fanclub' },
+    { n: '£' + Math.round(income).toLocaleString('en-GB'), l: 'Matchday income', src: 'Match Day Analytics', go: 'clubstats' },
+    { n: hearts, l: 'Hearts awarded', src: 'Fan Club', go: 'fanclub' },
   ];
-  el.innerHTML = cards.map(function (c) { return '<div class="s"><b>' + c.n + '</b><span>' + c.l + '</span></div>'; }).join('');
+  el.innerHTML = cards.map(function (c) { return '<button class="s" onclick="openPanel(\'' + c.go + '\')"><b>' + c.n + '</b><span>' + c.l + '</span><small>from ' + c.src + ' &rsaquo;</small></button>'; }).join('');
 }
 
 // Tap any caption template to copy it to the clipboard.
@@ -3511,7 +3583,7 @@ async function loadFanSignups() {
       return '<div class="li"><span class="li-num">🔒</span><div class="li-main">' +
         '<div class="li-name">' + esc(f.name || '—') + '</div>' +
         '<div class="li-sub"><a href="mailto:' + esc(f.email) + '" style="color:var(--y)">' + esc(f.email || '') + '</a>' + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div>' +
-        (f.meaning ? '<div class="li-sub" style="font-style:italic;margin-top:3px">"' + esc(f.meaning) + '"</div>' : '') +
+        (f.meaning ? '<div class="li-sub" style="font-style:italic;margin-top:3px">"' + escH(f.meaning) + '"</div>' : '') +
         '</div><span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
     }).join('');
     el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' sign-up' + (d.count === 1 ? '' : 's') + ' &middot; newest first</div>' + rows;
@@ -3732,6 +3804,8 @@ function showDep(el, type, msg) {
 // ── HELPERS ──
 function gv(id) { var el=document.getElementById(id); return el ? el.value.trim() : ''; }
 function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+// HTML-escape for TEXT content (esc above is for JS-string/onclick contexts only).
+function escH(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function toast(msg, err) {
   var t = document.getElementById('toast');
   t.textContent = msg;
