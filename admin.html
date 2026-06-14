@@ -3554,6 +3554,7 @@ function saveSigning() { pushToGitHub('signing', { entries: signings, updatedAt:
 var patrons = [];
 // ── FAN SIGN-UPS (private — pulled from Netlify Forms via list-fans function) ──
 var _fansLoading = false;
+var _memberList = [];
 async function loadFanSignups() {
   var el = document.getElementById('fansignups');
   if (!el || _fansLoading) return;
@@ -3566,18 +3567,18 @@ async function loadFanSignups() {
       var md = await mr.json();
       if (md && md.ok) {
         var mem = md.members || [];
+        _memberList = mem;
         if (!mem.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No members yet — they appear here the moment a fan creates an account in the Fan Zone.</div>'; _fansLoading = false; return; }
-        el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + mem.length + ' member account' + (mem.length === 1 ? '' : 's') + ' &middot; newest first</div>' +
-          mem.map(function (f) {
+        el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + mem.length + ' member account' + (mem.length === 1 ? '' : 's') + ' &middot; tap to open a profile</div>' +
+          mem.map(function (f, i) {
             var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
             var sub = [];
             if (f.username) sub.push('@' + escH(f.username));
             if (f.town) sub.push(escH(f.town));
-            if (f.since) sub.push('since ' + escH(String(f.since)));
             if (f.lane_no) sub.push('Lane #' + escH(String(f.lane_no)));
-            return '<div class="li"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + escH(f.name || f.username || '—') + '</div>' +
-              '<div class="li-sub">' + (f.email ? '<a href="mailto:' + escH(f.email) + '" style="color:var(--y)">' + escH(f.email) + '</a>' : '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div></div>' +
-              '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
+            return '<div class="li" style="cursor:pointer" onclick="openMemberProfile(' + i + ')"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + escH(f.name || f.username || '—') + '</div>' +
+              '<div class="li-sub">' + escH(f.email || '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div></div>' +
+              '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + ' &rsaquo;</span></div>';
           }).join('');
         _fansLoading = false; return;
       }
@@ -3595,26 +3596,55 @@ async function loadFanSignups() {
     if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load sign-ups (' + esc(d.error || 'error') + '). Try Refresh.</div>'; return; }
     if (!d.fans || !d.fans.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No sign-ups yet — they\'ll appear here the moment a fan joins.</div>'; return; }
 
-    document.getElementById('fp-cnt'); // noop keep
-    var rows = d.fans.map(function (f) {
+    _memberList = d.fans;
+    var rows = d.fans.map(function (f, i) {
       var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
       var sub = [];
-      if (f.town) sub.push(esc(f.town));
-      if (f.birthday) sub.push('🎂 ' + esc(f.birthday));
-      if (f.since) sub.push('fan since ' + esc(String(f.since)));
-      if (f.lane_number) sub.push('Lane #' + esc(String(f.lane_number)));
-      return '<div class="li"><span class="li-num">🔒</span><div class="li-main">' +
-        '<div class="li-name">' + esc(f.name || '—') + '</div>' +
-        '<div class="li-sub"><a href="mailto:' + esc(f.email) + '" style="color:var(--y)">' + esc(f.email || '') + '</a>' + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div>' +
-        (f.meaning ? '<div class="li-sub" style="font-style:italic;margin-top:3px">"' + escH(f.meaning) + '"</div>' : '') +
-        '</div><span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
+      if (f.town) sub.push(escH(f.town));
+      if (f.lane_number) sub.push('Lane #' + escH(String(f.lane_number)));
+      return '<div class="li" style="cursor:pointer" onclick="openMemberProfile(' + i + ')"><span class="li-num">🔒</span><div class="li-main">' +
+        '<div class="li-name">' + escH(f.name || '—') + '</div>' +
+        '<div class="li-sub">' + escH(f.email || '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div>' +
+        '</div><span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + ' &rsaquo;</span></div>';
     }).join('');
-    el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' sign-up' + (d.count === 1 ? '' : 's') + ' &middot; newest first</div>' + rows;
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' sign-up' + (d.count === 1 ? '' : 's') + ' &middot; tap to open a profile</div>' + rows;
   } catch (e) {
     el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server. Check your connection and tap Refresh.</div>';
   } finally {
     _fansLoading = false;
   }
+}
+
+// Open a fan's full profile from the list.
+function openMemberProfile(i) {
+  var f = _memberList[i]; if (!f) return;
+  var name = f.name || f.username || 'Lane Fan';
+  var initials = name.trim().slice(0, 2).toUpperCase();
+  var lane = f.lane_no || f.lane_number || '';
+  var rows = [
+    ['Email', f.email ? '<a href="mailto:' + escH(f.email) + '" style="color:var(--y)">' + escH(f.email) + '</a>' : ''],
+    ['Username', f.username ? '@' + escH(f.username) : ''],
+    ['Lane number', lane ? '#' + escH(String(lane)) : ''],
+    ['Town', escH(f.town || '')],
+    ['Fan since', escH(String(f.since || ''))],
+    ['Birthday', escH(String(f.birthday || ''))],
+    ['Joined', f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''],
+    ['Message', f.meaning ? '<em>"' + escH(f.meaning) + '"</em>' : '']
+  ].filter(function (r) { return r[1]; })
+    .map(function (r) { return '<div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--br)"><div style="flex:0 0 92px;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);padding-top:2px">' + r[0] + '</div><div style="flex:1;font-family:var(--fb);font-size:14px;color:#fff;line-height:1.5">' + r[1] + '</div></div>'; })
+    .join('');
+  var ov = document.getElementById('mem-modal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'mem-modal'; ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(6,6,6,.85);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px'; ov.onclick = function (e) { if (e.target === ov) ov.style.display = 'none'; }; document.body.appendChild(ov); }
+  ov.innerHTML = '<div style="width:100%;max-width:420px;max-height:90vh;overflow:auto;background:linear-gradient(180deg,var(--c),var(--dk));border:1px solid var(--br);border-top:3px solid var(--y);border-radius:18px;padding:24px 22px;position:relative">' +
+    '<button onclick="document.getElementById(\'mem-modal\').style.display=\'none\'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--gr);font-size:22px;line-height:1;cursor:pointer">&times;</button>' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">' +
+      '<div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(160deg,#1f1f1f,#0c0c0c);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:19px;color:#fff;flex-shrink:0">' + escH(initials) + '</div>' +
+      '<div><div style="font-family:var(--fd);font-size:24px;letter-spacing:.02em;color:#fff;line-height:1.05">' + escH(name) + '</div>' +
+        (lane ? '<div style="font-family:var(--fc);font-size:11px;color:var(--y);letter-spacing:.06em;margin-top:3px">LANE #' + escH(String(lane)) + '</div>' : '') + '</div>' +
+    '</div>' + rows +
+    (f.email ? '<a href="mailto:' + escH(f.email) + '" class="save sec" style="display:block;text-align:center;text-decoration:none;margin-top:16px">✉️ Email ' + escH(name.split(' ')[0]) + '</a>' : '') +
+    '</div>';
+  ov.style.display = 'flex';
 }
 
 var fanOfMonth = '';
