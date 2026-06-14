@@ -50,7 +50,7 @@ async function loadMatchDay() {
   var defaults = {
     homeTeam:'Rayners Lane FC',
     awayTeam:'TBC — Fixtures Releasing Soon',
-    date:'2026-08-15T15:00:00',
+    date:'2026-08-01T15:00:00',
     competition:'Combined Counties Premier Div North',
     venue:'Tithe Farm Social Club',
     isHome:true,
