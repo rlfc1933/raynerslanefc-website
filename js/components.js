@@ -463,9 +463,16 @@ function initComponents(currentPage) {
     }
   });
 
-  // Register service worker
+  // Register service worker + auto-reload once when a new version takes over,
+  // so an updated site is never stuck behind a stale cache.
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(){});
+    var _swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (_swRefreshing) return;
+      _swRefreshing = true;
+      window.location.reload();
+    });
   }
 
   // ── ONE-TAP INSTALL ("Add to Home Screen") ──

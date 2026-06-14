@@ -131,6 +131,7 @@
 <!-- ══════════ HERO ══════════ -->
 <section class="hero">
   <div class="hero__left">
+    <div class="hero__shirts" id="hero-shirts"></div>
     <div class="hero__eyebrow">
       <div class="hero__eyebrow-line"></div>
       <span class="label">Harrow, London &middot; Est. 1933</span>
@@ -261,6 +262,12 @@
 
 <!-- ══════════ OFFICIAL PARTNERS ══════════ -->
 <style>
+  /* shirt sponsors above the hero title, aligned with the hero text */
+  .hero__shirts{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:22px;min-height:38px}
+  .hero__shirts .hs-lbl{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42);align-self:center}
+  .hero__shirts a{display:inline-flex;align-items:center}
+  .hero__shirts img{height:38px;width:auto;max-width:140px;object-fit:contain;filter:drop-shadow(0 1px 7px rgba(255,255,255,.14))}
+  @media(max-width:600px){.hero__shirts{gap:16px;margin-bottom:16px}.hero__shirts img{height:30px;max-width:108px}}
   .partners{padding:22px 0 20px;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
   .partners__eyebrow{text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:16px}
   .ptr-strip{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 44px}
@@ -532,6 +539,17 @@
       var list = d.sponsors || [];
       var principal = list.filter(function(s){ return /principal|main/i.test(s.tier||''); });
       var others = list.filter(function(s){ return !/principal|main/i.test(s.tier||''); });
+      // Shirt sponsors above the hero title (principal partners, logos only)
+      var hs = document.getElementById('hero-shirts');
+      if (hs) {
+        var withLogo = principal.filter(function(s){ return s.logo; });
+        hs.innerHTML = withLogo.length
+          ? '<span class="hs-lbl">Shirt Partners</span>' + withLogo.map(function(s){
+              var img = '<img src="'+ptrEsc(s.logo)+'" alt="'+ptrEsc(s.name)+'">';
+              return s.url ? '<a href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener" title="'+ptrEsc(s.name)+'">'+img+'</a>' : img;
+            }).join('')
+          : '';
+      }
       strip.innerHTML =
         principal.map(function(s){ return ptrLogo(s,'ptr--principal'); }).join('') +
         others.map(function(s){ return ptrLogo(s,'ptr--mid'); }).join('') +
