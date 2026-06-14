@@ -102,6 +102,13 @@
       padding:24px 28px; background:var(--card); border:1px solid var(--border);
       margin-top:48px;
     }
+    /* Sponsor application form */
+    .spon-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
+    .spon-l{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin:12px 0 6px}
+    .spon-form input,.spon-form select,.spon-form textarea{width:100%;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.16);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s}
+    .spon-form input:focus,.spon-form select:focus,.spon-form textarea:focus{border-color:var(--yellow)}
+    .spon-form select{appearance:none;-webkit-appearance:none}
+    @media(max-width:560px){.spon-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -303,20 +310,48 @@
       </div>
     </div>
 
-    <!-- CTA -->
-    <div style="margin-top:48px;text-align:center;padding:64px 32px;background:linear-gradient(135deg,var(--green),#060E06);position:relative;overflow:hidden">
+    <!-- SPONSOR APPLICATION FORM -->
+    <div id="apply" style="margin-top:48px;padding:56px 32px;background:linear-gradient(135deg,var(--green),#060E06);position:relative;overflow:hidden;border-radius:4px">
       <div style="font-family:var(--font-d);font-size:160px;color:rgba(255,255,255,.03);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none">RLFC</div>
-      <div style="position:relative;z-index:1">
-        <h2 style="font-family:var(--font-d);font-size:clamp(36px,5vw,64px);letter-spacing:.03em;color:var(--white);margin-bottom:16px">
-          Ready to Back the Lane?
-        </h2>
-        <p style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.6);letter-spacing:.04em;max-width:480px;margin:0 auto 32px;line-height:1.7">
-          All enquiries to Pete Singh and the commercial team. We'll get back to you within 48 hours.
-        </p>
-        <a class="btn btn-primary" href="mailto:info@raynerslanefc.co.uk?subject=Sponsorship%20Enquiry" style="font-size:15px;padding:16px 36px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          info@raynerslanefc.co.uk
-        </a>
+      <div style="position:relative;z-index:1;max-width:640px;margin:0 auto">
+        <div style="text-align:center;margin-bottom:30px">
+          <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow)">Become a Partner</span>
+          <h2 style="font-family:var(--font-d);font-size:clamp(34px,5vw,60px);letter-spacing:.03em;color:var(--white);margin:8px 0 12px">Apply to Back The Lane</h2>
+          <p style="font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.62);line-height:1.7;max-width:480px;margin:0 auto">
+            Tell us about your business and what you're interested in. The commercial team reviews every application and replies within 48 hours with a tailored proposal.
+          </p>
+        </div>
+        <form name="sponsor-enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sponsorApply(this)" class="spon-form">
+          <input type="hidden" name="form-name" value="sponsor-enquiry">
+          <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
+          <div class="spon-row">
+            <div><label class="spon-l">Company / Business name *</label><input type="text" name="company" required></div>
+            <div><label class="spon-l">Your name *</label><input type="text" name="contact" required></div>
+          </div>
+          <div class="spon-row">
+            <div><label class="spon-l">Email *</label><input type="email" name="email" required></div>
+            <div><label class="spon-l">Phone</label><input type="tel" name="phone"></div>
+          </div>
+          <div class="spon-row">
+            <div><label class="spon-l">Package you're interested in</label>
+              <select name="package">
+                <option>Not sure yet — advise me</option>
+                <option>Shirt Sponsor</option>
+                <option>Match Sponsor</option>
+                <option>Player Sponsor</option>
+                <option>Pitch-side Board</option>
+                <option>Programme Advert</option>
+                <option>Bespoke Partnership</option>
+              </select>
+            </div>
+            <div><label class="spon-l">Indicative budget (optional)</label><input type="text" name="budget" placeholder="e.g. £500"></div>
+          </div>
+          <label class="spon-l">Company website (optional)</label><input type="text" name="website" placeholder="https://">
+          <label class="spon-l">Tell us about your business &amp; what you'd like</label>
+          <textarea name="message" rows="3" placeholder="A bit about you and what you're hoping to get from partnering with The Lane."></textarea>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:15px;margin-top:18px">Submit Application</button>
+          <p style="font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.03em;text-align:center;margin-top:12px">🔒 Goes privately to the commercial team at info@raynerslanefc.co.uk. No obligation.</p>
+        </form>
       </div>
     </div>
 
@@ -326,6 +361,28 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
-<script>document.addEventListener("DOMContentLoaded", () => initComponents("investment.html"));</script>
+<script>
+  (function () {
+    function inv() { try { initComponents("investment.html"); } catch (e) {} }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inv); else inv();
+  })();
+  // Sponsor application — submits privately to Netlify Forms (sponsor-enquiry),
+  // stays on the page, and shows a confirmation. submission-created.js emails
+  // info@raynerslanefc.co.uk so the commercial team is notified instantly.
+  function sponsorApply(form) {
+    var data = new FormData(form);
+    var body = new URLSearchParams();
+    data.forEach(function (v, k) { body.append(k, v); });
+    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() })
+      .then(function () { sponsorThanks(form); })
+      .catch(function () { sponsorThanks(form); });
+    return false;
+  }
+  function sponsorThanks(form) {
+    form.innerHTML = '<div style="text-align:center;padding:24px">' +
+      '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:10px">Application received 💛</div>' +
+      '<p style="font-family:var(--font-b);color:rgba(255,255,255,.7);line-height:1.7;max-width:420px;margin:0 auto">Thank you for wanting to back The Lane. The commercial team will review it and get back to you within 48 hours with a tailored proposal.</p></div>';
+  }
+</script>
 </body>
 </html>

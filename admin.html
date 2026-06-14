@@ -325,7 +325,12 @@
         <button class="tile" style="--accent:#EC4899" onclick="openPanel('sponsors')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg></span>
-          <div class="tile-name">Sponsors</div><div class="tile-desc">Commercial partners</div>
+          <div class="tile-name">Sponsors</div><div class="tile-desc">Logos &amp; partners</div>
+        </button>
+        <button class="tile" style="--accent:#10B981" onclick="openPanel('sponsorhub')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 7h18v12H3zM3 7l3-4h12l3 4M9 13h6"/></svg></span>
+          <div class="tile-name">Sponsor Hub</div><div class="tile-desc">Applications, quotes &amp; payments</div>
         </button>
         <button class="tile" style="--accent:#06B6D4" onclick="openPanel('social')">
           <span class="tile-arrow">&#8594;</span>
@@ -1018,6 +1023,29 @@
       <div class="dep" id="dep-perks"></div>
     </div>
 
+    <!-- SPONSOR HUB — applications, pipeline, quotes & payments -->
+    <div class="panel" id="panel-sponsorhub">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128188; Sponsor Hub</div></div>
+      <div class="snote" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06)"><p>Your commercial pipeline. Businesses apply on the <strong style="color:var(--w)">Sponsorships page</strong>; they land here. Track each one from enquiry → quote → paid, build a quote with your bank details, and confirm payment.</p></div>
+
+      <div class="slbl">🏦 Your Payment Details <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— saved on this device only, used in quotes</span></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Account Name</label><input type="text" id="bk-name" placeholder="Tithe Farm Sports &amp; Social Club Ltd"></div>
+        <div class="field"><label class="fl">Sort Code</label><input type="text" id="bk-sort" placeholder="00-00-00"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Account Number</label><input type="text" id="bk-acc" placeholder="00000000"></div>
+        <div class="field"><label class="fl">Payment Reference format</label><input type="text" id="bk-ref" placeholder="RLFC-[Company]"></div>
+      </div>
+      <button class="save sec" onclick="saveBank()">&#10003; Save Payment Details</button>
+
+      <div class="div"></div>
+      <div class="slbl">Applications <button onclick="loadSponsorHub()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh ↻</button></div>
+      <div id="sh-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap Refresh to load applications.</div></div>
+      <button class="save" style="margin-top:12px" onclick="saveSponsorCrm()">&#10003; Save Pipeline to Site</button>
+      <div class="dep" id="dep-sponsorcrm"></div>
+    </div>
+
     <!-- STAFF & MANAGEMENT (private profiles) -->
     <div class="panel" id="panel-staff">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128100; Staff &amp; Management</div></div>
@@ -1424,6 +1452,7 @@ function openPanel(name) {
   if (name === 'signing')   renderSigning();
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
   if (name === 'perks')     loadPerks();
+  if (name === 'sponsorhub') loadSponsorHub();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -1924,6 +1953,98 @@ function removeMemberNews(i) { if (!confirm('Remove this news item?')) return; m
 function savePerks() {
   pushToGitHub('perks', { perks: perks, news: memberNews, updatedAt: new Date().toISOString() }, 'dep-perks');
   toast('Perks saved ✓');
+}
+
+// ── SPONSOR HUB (applications → pipeline → quote → paid) ──
+var STAGES = ['New', 'In discussion', 'Quote sent', 'Invoiced', 'Paid'];
+var sponsorCrm = {};          // keyed by application id → {status, amount, notes}
+var sponsorApps = [];         // applications from list-sponsors
+function bankGet() { try { return JSON.parse(localStorage.getItem('rlfc_bank')) || {}; } catch (e) { return {}; } }
+function loadBank() {
+  var b = bankGet();
+  setVal('bk-name', b.name || ''); setVal('bk-sort', b.sort || ''); setVal('bk-acc', b.acc || ''); setVal('bk-ref', b.ref || 'RLFC-[Company]');
+}
+function saveBank() {
+  localStorage.setItem('rlfc_bank', JSON.stringify({ name: gv('bk-name'), sort: gv('bk-sort'), acc: gv('bk-acc'), ref: gv('bk-ref') }));
+  toast('Payment details saved on this device ✓');
+}
+async function loadSponsorHub() {
+  loadBank();
+  // pipeline (status/amount/notes) from the repo
+  await new Promise(function (res) { fetchJSON('sponsor-crm', function (d) { sponsorCrm = (d && d.deals) || {}; res(); }); });
+  var el = document.getElementById('sh-list');
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading applications…</div>';
+  try {
+    var r = await fetch('/.netlify/functions/list-sponsors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var d = await r.json();
+    if (!d.ok && d.error === 'no-token') {
+      el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">One-time setup.</strong> Add a <strong>NETLIFY_API_TOKEN</strong> in Netlify env vars to pull applications in here (same token as fan sign-ups). Meanwhile applications also email info@.</p></div>';
+      return;
+    }
+    if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load (' + esc(d.error || 'error') + ').</div>'; return; }
+    sponsorApps = d.sponsors || [];
+    renderSponsorHub();
+  } catch (e) {
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server.</div>';
+  }
+}
+function renderSponsorHub() {
+  var el = document.getElementById('sh-list');
+  if (!sponsorApps.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No applications yet — they appear the moment a business applies on the Sponsorships page.</div>'; return; }
+  el.innerHTML = sponsorApps.map(function (s) {
+    var deal = sponsorCrm[s.id] || {};
+    var when = s.created ? new Date(s.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+    var opts = STAGES.map(function (st) { return '<option' + ((deal.status || 'New') === st ? ' selected' : '') + '>' + st + '</option>'; }).join('');
+    var paid = (deal.status === 'Paid');
+    return '<div class="li" style="display:block;padding:14px">' +
+      '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">' +
+        '<div class="li-name">' + esc(s.company || '—') + (paid ? ' <span style="color:#22C55E;font-size:11px">✓ PAID</span>' : '') + '</div>' +
+        '<div style="font-family:var(--fc);font-size:10px;color:var(--gr)">' + when + '</div>' +
+      '</div>' +
+      '<div class="li-sub" style="margin:2px 0 10px">' + esc(s.contact || '') + (s.email ? ' &middot; <a href="mailto:' + esc(s.email) + '" style="color:var(--y)">' + esc(s.email) + '</a>' : '') + (s.phone ? ' &middot; ' + esc(s.phone) : '') + '</div>' +
+      (s.package || s.budget ? '<div class="li-sub" style="margin-bottom:8px">📦 ' + esc(s.package || '—') + (s.budget ? ' &middot; budget ' + esc(s.budget) : '') + '</div>' : '') +
+      (s.message ? '<div class="li-sub" style="font-style:italic;margin-bottom:10px">"' + esc(s.message) + '"</div>' : '') +
+      '<div class="row2" style="margin-bottom:8px">' +
+        '<div class="field" style="margin:0"><label class="fl">Stage</label><select onchange="setDeal(\'' + s.id + '\',\'status\',this.value)">' + opts + '</select></div>' +
+        '<div class="field" style="margin:0"><label class="fl">Agreed £</label><input type="text" value="' + esc(deal.amount || '') + '" placeholder="500" onchange="setDeal(\'' + s.id + '\',\'amount\',this.value)"></div>' +
+      '</div>' +
+      '<div class="field" style="margin:0 0 8px"><label class="fl">Notes</label><input type="text" value="' + esc(deal.notes || '') + '" placeholder="Sent proposal, awaiting sign-off…" onchange="setDeal(\'' + s.id + '\',\'notes\',this.value)"></div>' +
+      '<button class="save sec" style="margin:0" onclick="buildQuote(\'' + s.id + '\')">✉️ Build &amp; send quote</button>' +
+    '</div>';
+  }).join('');
+}
+function setDeal(id, field, val) { sponsorCrm[id] = sponsorCrm[id] || {}; sponsorCrm[id][field] = val; if (field === 'status') renderSponsorHub(); }
+function buildQuote(id) {
+  var s = sponsorApps.filter(function (x) { return x.id === id; })[0]; if (!s) return;
+  var deal = sponsorCrm[id] || {}, b = bankGet();
+  if (!b.acc) { toast('Add your Payment Details first (top of this tab)', true); return; }
+  var ref = (b.ref || 'RLFC-[Company]').replace(/\[company\]/i, (s.company || '').replace(/\s+/g, ''));
+  var amount = deal.amount ? '£' + deal.amount : '[amount]';
+  var pkg = s.package && s.package.indexOf('Not sure') === -1 ? s.package : 'partnership';
+  var body =
+    'Hi ' + (s.contact || 'there') + ',\n\n' +
+    'Thank you for your interest in backing Rayners Lane FC. We\'d love to have ' + (s.company || 'you') + ' on board as a ' + pkg + ' for the 2026-27 season.\n\n' +
+    'Package: ' + pkg + '\n' +
+    'Investment: ' + amount + ' for the season\n\n' +
+    'What you get:\n' +
+    '• Your brand on our website partner wall and across matchday\n' +
+    '• Social media features to our supporters\n' +
+    '• Our genuine thanks and a real community connection\n\n' +
+    'To confirm, payment can be made by bank transfer:\n' +
+    'Account name: ' + (b.name || '') + '\n' +
+    'Sort code: ' + (b.sort || '') + '\n' +
+    'Account number: ' + (b.acc || '') + '\n' +
+    'Reference: ' + ref + '\n\n' +
+    'Once payment is received we\'ll get your branding live within 48 hours. Any questions, just reply to this email.\n\n' +
+    'Up The Lane,\nRayners Lane FC Commercial Team\ninfo@raynerslanefc.co.uk';
+  var url = 'mailto:' + encodeURIComponent(s.email || '') + '?subject=' + encodeURIComponent('Your Rayners Lane FC partnership — ' + (s.company || '')) + '&body=' + encodeURIComponent(body);
+  if (deal.status === 'New' || !deal.status) setDeal(id, 'status', 'Quote sent');
+  window.location.href = url;
+  toast('Quote opened in your email — press Save Pipeline after');
+}
+function saveSponsorCrm() {
+  pushToGitHub('sponsor-crm', { deals: sponsorCrm, updatedAt: new Date().toISOString() }, 'dep-sponsorcrm');
+  toast('Pipeline saved ✓');
 }
 function renderCommittee() {
   document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';

@@ -19,13 +19,39 @@ exports.handler = async function (event) {
     var sub = body.payload || {};
     var data = sub.data || {};
     var formName = sub.form_name || data['form-name'] || '';
+    var key = process.env.RESEND_API_KEY;
+    if (!key) return { statusCode: 200, body: 'not configured' };
+    var from = process.env.WELCOME_FROM || 'Rayners Lane FC <info@raynerslanefc.co.uk>';
+    var club = process.env.CLUB_INBOX || 'info@raynerslanefc.co.uk';
+
+    // ── SPONSOR APPLICATION → alert the commercial team at info@ ──
+    if (formName === 'sponsor-enquiry') {
+      var rows = [
+        ['Company', data.company], ['Contact', data.contact], ['Email', data.email],
+        ['Phone', data.phone], ['Package', data.package], ['Budget', data.budget],
+        ['Website', data.website], ['Message', data.message],
+      ].filter(function (r) { return r[1]; })
+        .map(function (r) { return '<tr><td style="padding:6px 14px 6px 0;color:#888;font-size:13px;vertical-align:top">' + r[0] + '</td><td style="padding:6px 0;color:#eee;font-size:14px">' + escapeHtml(r[1]) + '</td></tr>'; })
+        .join('');
+      var sHtml = '<div style="background:#080808;padding:24px;font-family:Arial,Helvetica,sans-serif">' +
+        '<div style="max-width:560px;margin:0 auto;background:#111;border:1px solid #2a2a2a;border-radius:14px;padding:24px 26px">' +
+          '<div style="color:#FFD100;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">New Sponsor Application</div>' +
+          '<h1 style="color:#fff;font-size:22px;margin:0 0 16px">' + escapeHtml(data.company || 'A business') + ' wants to back The Lane</h1>' +
+          '<table style="width:100%;border-collapse:collapse">' + rows + '</table>' +
+          '<p style="font-size:13px;color:#888;margin-top:18px">Reply to this email to reach ' + escapeHtml(data.contact || 'them') + ' directly, or open the Sponsor Hub in the admin to track it.</p>' +
+        '</div></div>';
+      var sRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: from, to: [club], reply_to: (data.email || club), subject: '💼 Sponsor application — ' + (data.company || 'New enquiry'), html: sHtml }),
+      });
+      return { statusCode: 200, body: sRes.ok ? 'sponsor alert sent' : 'resend error ' + sRes.status };
+    }
+
     if (formName !== 'fan-signup') return { statusCode: 200, body: 'ignored' };
 
     var to = (data.email || '').trim();
-    var key = process.env.RESEND_API_KEY;
-    if (!to || !key) return { statusCode: 200, body: 'not configured / no email' };
-
-    var from = process.env.WELCOME_FROM || 'Rayners Lane FC <info@raynerslanefc.co.uk>';
+    if (!to) return { statusCode: 200, body: 'no email' };
     var name = (data.name || 'Lane fan').split(' ')[0];
 
     var html =
