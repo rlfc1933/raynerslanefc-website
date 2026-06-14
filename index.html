@@ -272,34 +272,53 @@
   .hero__shirts a{display:inline-flex;align-items:center}
   .hero__shirts img{height:38px;width:auto;max-width:140px;object-fit:contain;filter:drop-shadow(0 1px 7px rgba(255,255,255,.14))}
   @media(max-width:600px){.hero__shirts{gap:16px;margin-bottom:16px}.hero__shirts img{height:30px;max-width:108px}}
-  .partners{padding:22px 0 20px;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
-  .partners__eyebrow{text-align:center;font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:16px}
-  .ptr-strip{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:26px 44px}
-  .ptr{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;opacity:.9;transition:transform .2s,opacity .2s}
-  .ptr:hover{transform:translateY(-2px);opacity:1}
-  .ptr img{display:block;width:auto;object-fit:contain;filter:drop-shadow(0 1px 7px rgba(255,255,255,.12))}
-  .ptr--principal img{height:50px;max-width:158px}
-  .ptr--mid img{height:38px;max-width:120px}
-  /* a dark logo (e.g. The King Denham) genuinely needs a light backing to be
-     seen — give it ONE clean, bigger plaque so the sponsor is showcased */
-  .ptr--glow{background:#fff;border-radius:13px;padding:14px 22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.75)}
-  .ptr--glow img{height:62px!important;max-width:200px!important;filter:none!important}
-  @media(max-width:600px){.ptr--glow{padding:11px 16px}.ptr--glow img{height:50px!important;max-width:160px!important}}
-  .ptr .txt{font-family:var(--font-d);color:#fff;letter-spacing:.03em;font-size:22px;line-height:1}
-  .ptr-cta{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;text-decoration:none;padding-left:18px;margin-left:6px;border-left:1px solid rgba(255,255,255,.14)}
-  .ptr-cta b{font-family:var(--font-d);font-size:17px;letter-spacing:.03em;color:var(--yellow);line-height:1}
-  .ptr-cta span{font-family:var(--font-c);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}
-  .ptr-aff{margin-top:16px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 20px}
-  .ptr-aff__lbl{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3)}
-  .ptr-aff img{height:30px;width:auto;max-width:120px;object-fit:contain;opacity:.85;filter:drop-shadow(0 1px 6px rgba(255,255,255,.16));transition:opacity .2s}
-  .ptr-aff a:hover img{opacity:1}
-  .ptr-aff .txt{font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.5)}
-  @media(max-width:600px){.ptr--principal img{height:44px}.ptr--mid img{height:34px}.ptr-strip{gap:20px 28px}.ptr-cta{border-left:none;padding-left:0;margin-left:0;align-items:center}}
+  /* ── OFFICIAL PARTNERS — premium uniform partner wall ── */
+  .partners{padding:56px 0 50px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(0,0,0,0) 60%)}
+  .partners__eyebrow{text-align:center;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px}
+  .partners__sub{text-align:center;font-family:var(--font-c);font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.32);margin-bottom:30px}
+  .ptr-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:960px;margin:0 auto}
+  .ptr-card{position:relative;flex:0 1 210px;min-height:138px;background:linear-gradient(165deg,#10220F 0%,#0A140A 100%);border:1px solid rgba(255,209,0,.16);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-decoration:none;box-shadow:0 18px 44px -26px rgba(0,0,0,.9);transition:transform .22s cubic-bezier(.2,.7,.2,1),border-color .22s,box-shadow .22s}
+  .ptr-card:hover{transform:translateY(-5px);border-color:var(--yellow);box-shadow:0 26px 54px -24px rgba(255,209,0,.22)}
+  .ptr-card img{height:62px;width:auto;max-width:90%;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
+  .ptr-card .ptr-txt{font-family:var(--font-d);font-size:27px;line-height:.95;letter-spacing:.02em;color:#fff;text-align:center}
+  .ptr-card .ptr-role{font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);text-align:center}
+  /* one genuinely dark logo (King Denham) needs a light chip to read — just
+     a tidy white chip around the mark, not the whole tile */
+  .ptr-chip{background:#fff;border-radius:10px;padding:11px 18px;display:inline-flex;align-items:center;justify-content:center}
+  .ptr-chip img{filter:none}
+  /* principal partners — the shirt sponsors — get pride of place: bigger tile */
+  .ptr-card--principal{flex:0 1 290px;min-height:164px;border-color:rgba(255,209,0,.32);background:linear-gradient(165deg,#16300F 0%,#0B160A 100%)}
+  .ptr-card--principal::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;border-radius:16px 16px 0 0;background:var(--yellow)}
+  .ptr-card--principal img{height:82px}
+  .ptr-card--principal .ptr-txt{font-size:34px}
+  .ptr-card--principal .ptr-role{color:var(--yellow);opacity:.85}
+  /* become-a-partner call to action, same footprint as a tile */
+  .ptr-card--cta{background:rgba(255,209,0,.05);border:1.5px dashed rgba(255,209,0,.4);box-shadow:none}
+  .ptr-card--cta:hover{border-color:var(--yellow);background:rgba(255,209,0,.1);transform:translateY(-5px)}
+  .ptr-card--cta .ptr-txt{color:var(--yellow);font-size:21px}
+  .ptr-card--cta .ptr-role{color:rgba(255,255,255,.55)}
+  .ptr-aff{margin:32px auto 0;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;max-width:760px}
+  .ptr-aff__lbl{width:100%;text-align:center;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.34);margin-bottom:4px}
+  .ptr-affcard{display:inline-flex;align-items:center;gap:11px;background:linear-gradient(165deg,#10220F,#0A140A);border:1px solid rgba(255,209,0,.16);border-radius:12px;padding:11px 18px;text-decoration:none;transition:border-color .2s,transform .2s}
+  .ptr-affcard:hover{border-color:var(--yellow);transform:translateY(-2px)}
+  .ptr-affcard img{height:40px;width:auto;max-width:150px;object-fit:contain}
+  .ptr-affcard .txt{font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.62)}
+  @media(max-width:600px){
+    .partners{padding:40px 0 36px}
+    .ptr-card{flex:1 1 140px;min-height:112px;padding:16px 12px;gap:10px}
+    .ptr-card img{height:46px}
+    .ptr-card .ptr-txt{font-size:21px}
+    .ptr-card--principal{flex:1 1 100%;min-height:132px}
+    .ptr-card--principal img{height:64px}
+    .ptr-card--principal .ptr-txt{font-size:30px}
+    .ptr-affcard img{height:32px}
+  }
 </style>
 <section class="partners">
   <div class="container">
     <div class="partners__eyebrow">Official Partners 2026&ndash;27</div>
-    <div class="ptr-strip" id="partners-strip"></div>
+    <div class="partners__sub">Proud to be backed by businesses who believe in The Lane</div>
+    <div class="ptr-grid" id="partners-strip"></div>
     <div class="ptr-aff" id="partners-aff" style="display:none"></div>
   </div>
 </section>
@@ -579,15 +598,17 @@
   // brand (no boxes), live from data/sponsors.json. Falls back to the name as
   // text only if a logo file is missing.
   function ptrEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function ptrLogo(s, cls) {
+  function ptrCard(s, cls) {
+    var img = '<img src="'+ptrEsc(s.logo)+'" alt="'+ptrEsc(s.name)+'" loading="lazy" onerror="var c=this.closest(\'.ptr-card\');var t=c&&c.querySelector(\'.ptr-txt\');if(t)t.style.display=\'block\';this.remove()">';
+    if (s.feature && s.logo) img = '<span class="ptr-chip">'+img+'</span>';
     var inner = s.logo
-      ? '<img src="'+ptrEsc(s.logo)+'" alt="'+ptrEsc(s.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(s.name).replace(/'/g,'')+'</span>\'">'
-      : '<span class="txt">'+ptrEsc(s.name)+'</span>';
+      ? img + '<span class="ptr-txt" style="display:none">'+ptrEsc(s.name)+'</span>'
+      : '<span class="ptr-txt">'+ptrEsc(s.name)+'</span>';
+    var role = s.role ? '<span class="ptr-role">'+ptrEsc(s.role)+'</span>' : (s.tier ? '<span class="ptr-role">'+ptrEsc(s.tier)+'</span>' : '');
     var title = ptrEsc(s.name) + (s.role ? ' — ' + ptrEsc(s.role) : '');
-    if (s.feature) cls += ' ptr--glow';
     return s.url
-      ? '<a class="ptr '+cls+'" href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener" title="'+title+'">'+inner+'</a>'
-      : '<div class="ptr '+cls+'" title="'+title+'">'+inner+'</div>';
+      ? '<a class="ptr-card '+cls+'" href="'+ptrEsc(s.url)+'" target="_blank" rel="noopener" title="'+title+'">'+inner+role+'</a>'
+      : '<div class="ptr-card '+cls+'" title="'+title+'">'+inner+role+'</div>';
   }
   async function renderPartners() {
     var strip = document.getElementById('partners-strip');
@@ -609,18 +630,18 @@
           : '';
       }
       strip.innerHTML =
-        principal.map(function(s){ return ptrLogo(s,'ptr--principal'); }).join('') +
-        others.map(function(s){ return ptrLogo(s,'ptr--mid'); }).join('') +
-        '<a class="ptr-cta" href="investment.html"><b>Your Brand Here</b><span>Partner with us &rarr;</span></a>';
+        principal.map(function(s){ return ptrCard(s,'ptr-card--principal'); }).join('') +
+        others.map(function(s){ return ptrCard(s,''); }).join('') +
+        '<a class="ptr-card ptr-card--cta" href="investment.html"><span class="ptr-txt">Your Brand Here</span><span class="ptr-role">Partner with us &rarr;</span></a>';
       var aff = d.affiliations || [];
       if (aff.length) {
         var a = document.getElementById('partners-aff');
         a.style.display = 'flex';
-        a.innerHTML = '<span class="ptr-aff__lbl">Proudly part of</span>' + aff.map(function(x){
+        a.innerHTML = '<span class="ptr-aff__lbl">Proudly affiliated</span>' + aff.map(function(x){
           var inner = x.logo
             ? '<img src="'+ptrEsc(x.logo)+'" alt="'+ptrEsc(x.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=&quot;txt&quot;>'+ptrEsc(x.name).replace(/'/g,'')+'</span>\'">'
             : '<span class="txt">'+ptrEsc(x.name)+'</span>';
-          return x.url ? '<a href="'+ptrEsc(x.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<span>'+inner+'</span>';
+          return x.url ? '<a class="ptr-affcard" href="'+ptrEsc(x.url)+'" target="_blank" rel="noopener">'+inner+'</a>' : '<span class="ptr-affcard">'+inner+'</span>';
         }).join('');
       }
     } catch (e) {}
