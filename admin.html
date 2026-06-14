@@ -150,6 +150,34 @@
     .pb-area__e.q{background:#22C55E}.pb-area__e.m{background:var(--y)}.pb-area__e.h{background:#fb923c}
     .pb-area p{font-family:var(--fb);font-size:13.5px;color:#cfcfcf;line-height:1.7;margin:0}
     .pb-area b{color:#fff}
+    /* Playbook v3 — collapsible sections (navigation) + tools */
+    .pb-sec{border:1px solid var(--br);border-radius:12px;background:var(--c);margin-bottom:10px;overflow:hidden}
+    .pb-sec[open]{border-color:rgba(255,209,0,.35)}
+    .pb-sec>summary{list-style:none;cursor:pointer;padding:16px;font-family:var(--fd);font-size:18px;letter-spacing:.02em;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .pb-sec>summary::-webkit-details-marker{display:none}
+    .pb-sec>summary::after{content:"+";font-size:25px;color:var(--y);font-weight:300;line-height:1;flex-shrink:0}
+    .pb-sec[open]>summary::after{content:"\2212"}
+    .pb-sec>summary:hover{color:var(--y)}
+    .pb-sec__b{padding:2px 15px 15px}
+    .pb-sec__lead{font-family:var(--fb);font-size:13.5px;color:#cfcfcf;line-height:1.7;margin:0 2px 12px}
+    .pb-sec__lead b{color:#fff}
+    /* Income Builder tool */
+    .ib{background:var(--dk);border:1px solid var(--br);border-radius:10px;padding:6px 14px 14px}
+    .ib-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--br)}
+    .ib-row:last-of-type{border-bottom:none}
+    .ib-row label{flex:1;font-family:var(--fb);font-size:13px;color:#ddd;line-height:1.3}
+    .ib-row label .ib-u{display:block;font-family:var(--fc);font-size:10px;color:var(--gr);letter-spacing:.03em;margin-top:1px}
+    .ib-row input{width:72px;background:var(--c);border:1px solid var(--br);border-radius:6px;color:#fff;font-family:var(--fc);font-size:14px;padding:8px;text-align:right;-moz-appearance:textfield}
+    .ib-row input:focus{border-color:var(--y);outline:none}
+    .ib-amt{width:82px;text-align:right;font-family:var(--fd);font-size:15px;color:var(--y);white-space:nowrap}
+    .ib-tot{display:flex;justify-content:space-between;align-items:center;background:rgba(255,209,0,.08);border:1px solid var(--y);border-radius:11px;padding:14px 16px;margin-top:13px}
+    .ib-tot .l{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1.4}
+    .ib-tot .l small{display:block;color:var(--gr);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;margin-top:2px}
+    .ib-tot .v{font-family:var(--fd);font-size:30px;color:var(--y);line-height:1;text-align:right}
+    .ib-tot .v small{display:block;font-size:12px;color:var(--gr);margin-top:3px}
+    /* Pitch generator */
+    .pg-ctl{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .pg-ctl select{flex:1;min-width:160px;background:var(--c);border:1px solid var(--br);border-radius:8px;color:#fff;font-family:var(--fb);font-size:14px;padding:11px}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -1393,90 +1421,150 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <!-- INTRO -->
       <div class="pb-intro">
         <div class="pb-intro__h">From one matchday to a club that pays its own way</div>
-        <p>Let's be honest with each other. Almost everything the club earns comes through the turnstile on a Saturday — and because we don't own Tithe Farm, that single gate is carrying the whole club on its back. A wet afternoon, a rough run of results, or a change behind the scenes, and the money dries up. That's why every year can feel like starting again with an empty tin.</p>
-        <p>This playbook isn't about chasing a magic figure. It's about something steadier: building a club that earns in <b>five or six different ways</b>, so no single bad week sinks us — and so the people who give up their evenings stop forever firefighting. None of it is luck, and none of it is quick. But clubs no bigger than us have done exactly this. Here's how they did it, where we could grow, and the honest graft each part takes.</p>
+        <p>Let's be honest with each other. Almost everything the club earns comes through the turnstile on a Saturday — and because we don't own Tithe Farm, that single gate is carrying the whole club on its back. A wet afternoon, a rough run, or a change behind the scenes, and the money dries up. That's why every year can feel like starting again with an empty tin.</p>
+        <p>This isn't about a magic figure. It's about building a club that earns in <b>several different ways</b>, so no single bad week sinks us — and so the volunteers stop forever firefighting. None of it is luck or quick. But clubs no bigger than us have done it. Tap any section below to open it.</p>
       </div>
 
-      <div class="slbl">Why bother? (the case for growing)</div>
-      <div class="soc-card"><p>Growing the income isn't about greed — it's about <b style="color:#fff">breathing room</b>. A club with money coming from several places can hold on to its better players instead of losing them every summer, can plan a season instead of surviving one, and becomes a place sponsors and young families <b style="color:#fff">want</b> to be part of. It also looks after the volunteers: when the club isn't skint, nobody's begging for raffle prizes the night before a game. Stability is the prize. Everything below is just how you buy it.</p></div>
+      <!-- 1. WHY GROW -->
+      <details class="pb-sec"><summary>Why bother? The case for growing</summary><div class="pb-sec__b">
+        <div class="soc-card"><p>Growing the income isn't greed — it's <b style="color:#fff">breathing room</b>. A club earning from several places can keep its better players instead of losing them every summer, plan a season instead of surviving one, and becomes somewhere sponsors and young families <b style="color:#fff">want</b> to be. It looks after the volunteers too: when the club isn't skint, nobody's begging for raffle prizes the night before a game. Stability is the prize — everything else here is just how you buy it.</p></div>
+      </div></details>
 
-      <div class="slbl">Clubs no bigger than us who worked it out</div>
-      <div class="snote"><p>Real examples, not theory. Some had advantages we don't — so we've pulled out the part <b style="color:var(--w)">we can actually copy.</b></p></div>
+      <!-- 2. WHY RAYNERS LANE (investment case) + PITCH GENERATOR -->
+      <details class="pb-sec"><summary>⭐ Why Rayners Lane? (your pitch)</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">Before anyone hands money over — a sponsor, a local firm, a serious backer — they need to know <b>why this club</b>. Here's the case. It's a strong one.</p>
+        <div class="pb-area">
+          <div class="pb-area__h"><div class="pb-area__n">A club with pedigree &amp; ambition</div></div>
+          <p>The Lane has competed at <b>Step 4 — two levels above where we sit today.</b> That isn't a wound to pick at; it's proof of what this club is capable of. The mission is simple and it sells: <b>climb back, and this time build the business underneath it so we stay there.</b> People back ambition with a track record. We have both.</p>
+        </div>
+        <div class="pb-area">
+          <div class="pb-area__h"><div class="pb-area__n">90+ years &amp; a town on the doorstep</div></div>
+          <p>Founded in <b>1933</b> — over nine decades serving Harrow, a London borough of around <b>a quarter of a million people</b>, one of the most diverse in the country. An FA Charter Standard community club with deep roots. That's real, local, loyal reach — exactly what a local business is paying to sit next to.</p>
+        </div>
+        <div class="pb-area">
+          <div class="pb-area__h"><div class="pb-area__n">A head start nobody else at this level has</div></div>
+          <p>This portal. A Fan Zone with member cards, numbers and rewards. Live data, a sponsor hub, a ready-made social plan. Most clubs three divisions <em>above</em> us don't have this. It tells a sponsor you're <b>professional and serious</b> — and it gives you the audience and the numbers to prove your value.</p>
+        </div>
+        <div class="slbl" style="margin-top:14px">🛠️ Tool — Generate your pitch</div>
+        <p class="pb-sec__lead">Pick who you're approaching and we'll write a ready-to-send pitch using the club's story. Tweak it, then copy.</p>
+        <div class="pg-ctl">
+          <select id="pg-aud">
+            <option value="local">A local business (board / programme ad)</option>
+            <option value="match">A match, matchball or shirt sponsor</option>
+            <option value="investor">A serious backer / investor</option>
+          </select>
+          <button class="save sec" style="flex:0 0 auto;margin:0" onclick="generatePitch()">✍️ Generate</button>
+        </div>
+        <div id="pg-out"></div>
+      </div></details>
 
-      <div class="pb-case">
-        <div class="pb-case__name">⚽ Dulwich Hamlet — won on price &amp; atmosphere</div>
-        <p>A seventh-tier club in south London that regularly draws crowds of <b>over 3,000</b> — more than a thousand a game clear of anyone else in their division. No fortune behind them. They won on three things: keeping it genuinely <b>affordable</b> (some of the widest concessions in football, even a "pay your age" season ticket), getting loud on <b>social media</b> early, and turning matchday into an <b>experience</b> — proper food, a good bar, even comedy nights at the ground.</p>
-        <div class="pb-lesson"><b>What we copy:</b> people will turn up, and bring friends, for a warm, affordable, fun afternoon out. The football is only half of it.</div>
-      </div>
+      <!-- 3. CASE STUDIES -->
+      <details class="pb-sec"><summary>Clubs no bigger than us who worked it out</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">Real examples, not theory. Some had advantages we don't — so here's the part <b>we can actually copy.</b></p>
+        <div class="pb-case">
+          <div class="pb-case__name">⚽ Dulwich Hamlet — won on price &amp; atmosphere</div>
+          <p>A seventh-tier club in south London that regularly draws crowds of <b>over 3,000</b> — a thousand a game clear of anyone in their division. No fortune behind them. They won on keeping it genuinely <b>affordable</b> (some of the widest concessions in football, even a "pay your age" season ticket), getting loud on <b>social media</b> early, and making matchday an <b>experience</b> — proper food, a good bar, comedy nights.</p>
+          <div class="pb-lesson"><b>What we copy:</b> people turn up, and bring friends, for a warm, affordable, fun afternoon. The football is only half of it.</div>
+        </div>
+        <div class="pb-case">
+          <div class="pb-case__name">👕 Clapton CFC — an identity people wanted to wear</div>
+          <p>A small London non-league club that sold <b>2,500 shirts before they'd even played a competitive match</b> — then 5,400+ pre-orders from around the world, 20,000+ kits since. They'd budgeted for 250. The trick: a shirt with a <b>real story</b>, sold on <b>pre-order</b> — made to order, so they never gambled on stock they hadn't sold.</p>
+          <div class="pb-lesson"><b>What we copy:</b> identity sells merch far beyond your own town — and pre-orders mean zero risk. We never buy a batch we haven't already sold.</div>
+        </div>
+        <div class="pb-case">
+          <div class="pb-case__name">📱 Hashtag United — built the audience first</div>
+          <p>Started online and grew to <b>over 2 million followers and half a billion views</b> — without owning a ground for years. That audience <em>is</em> the business: it brought deals with the likes of Adidas. They proved a non-league club's <b>following is an asset</b> sponsors pay real money to reach.</p>
+          <div class="pb-lesson"><b>What we copy:</b> we'll never have their millions, but the principle holds — a good, regular content following is something sponsors want. (See the social roadmap below.)</div>
+        </div>
+        <div class="pb-case">
+          <div class="pb-case__name">🤝 Worthing &amp; South Shields — the town came back</div>
+          <p>Both reconnected a whole town with its club and now pull <b>2,000–3,000+</b>. They went deep into the <b>community</b> — disability teams, walking football, dementia-friendly groups, youth foundations — and chased <b>grants</b> (Worthing raised close to £500,000 for pitch and floodlight upgrades).</p>
+          <div class="pb-lesson"><b>What we copy:</b> community work gives the town a reason to care <em>and</em> unlocks grant money that only exists for clubs doing good locally.</div>
+        </div>
+      </div></details>
 
-      <div class="pb-case">
-        <div class="pb-case__name">👕 Clapton CFC — an identity people wanted to wear</div>
-        <p>A small London non-league club that sold <b>2,500 shirts before they'd even played a competitive match</b> — then over 5,400 pre-orders flooded in from around the world, and 20,000+ kits since. They'd budgeted for 250. How? A shirt with a <b>real story and identity</b> behind it, sold on <b>pre-order</b> — made to order, so the club never gambled on stock it hadn't already sold.</p>
-        <div class="pb-lesson"><b>What we copy:</b> a strong identity sells merch far beyond your own town — and pre-orders mean zero risk. We never have to buy a batch we haven't already sold.</div>
-      </div>
+      <!-- 4. EVERY WAY TO BRING MONEY IN -->
+      <details class="pb-sec"><summary>Every way to bring money in</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">The full menu. You won't do all of it — pick what fits your people. The tag shows roughly how hard each is to start.</p>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">The matchday machine</div><span class="pb-area__e m">Ongoing</span></div><p>The engine we own. More people through the gate beats squeezing the few who come. Keep it affordable, then add a <b>50/50 draw</b>, <b>hot food</b>, music and a proper welcome. Together a good matchday earns far more than the gate alone.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">The 100 Club (recurring lottery)</div><span class="pb-area__e q">Quick win</span></div><p>Members pay a few pounds a month for a monthly cash prize. Through a provider the club typically keeps around <b>£6 of every £10</b> — a hundred members is roughly £600 a month, rain or shine. The steadiest money there is.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Sponsorship — the full menu</div><span class="pb-area__e m">Legwork</span></div><p>Not just the shirt (and be loud about HDL &amp; McCafferty's, who already back us). Offer a clear menu: <b>match sponsor</b> (a named game, ~£100–250), <b>matchball sponsor</b> (cheaper entry point, great for small firms), <b>player sponsor</b> (~£50–100 a player), <b>kit / equipment sponsor</b> (training wear, balls, bibs, the warm-up tops), <b>programme ads</b>, and <b>pitch-side boards</b> (~£350–500 a season each, our commercial workhorse). Sell it as marketing, not charity.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Investors &amp; serious backers</div><span class="pb-area__e h">Patient</span></div><p>A bigger ask with a bigger story — see "Approaching investors" below. The honest version: a local benefactor or business partner who buys into the climb back up. The ambition (Step 4 again) is what makes it an investment, not just a donation.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Merch — without the cashflow risk</div><span class="pb-area__e m">Slow burn</span></div><p>Run <b>pre-order drops</b> (collect the money, then order) or <b>print-on-demand</b> — never buy stock you haven't sold. A "1933" retro shirt or a Yellow Army hoodie, opened for two weeks. Clapton turned this into their biggest single line.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Social media income (TikTok / YouTube)</div><span class="pb-area__e h">Slow burn, real upside</span></div><p>Your content can earn directly — platform creator payments once you hit the thresholds, plus brand deals and merch driven by the audience. It's a long game, but it's free to start and compounds. <b>Full roadmap in the next section.</b></p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Events</div><span class="pb-area__e m">Bursts of cash</span></div><p>Quiz nights, race nights, a summer family fun day, a sportsman's dinner / presentation evening. Each pulls in money <em>and</em> new faces, and the bar wins too.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Community &amp; grants</div><span class="pb-area__e h">Paperwork</span></div><p>Honest truth: grants are applications and patience, not a button you press — and you won't win them all. But they're real and big. Football Foundation, the FA, Middlesex FA, the council and National Lottery back clubs <b>doing good locally</b>. Needs one organised person to own the forms.</p></div>
+      </div></details>
 
-      <div class="pb-case">
-        <div class="pb-case__name">📱 Hashtag United — built the audience first</div>
-        <p>A club that started online and grew to <b>over 2 million followers and half a billion views</b> — without even owning a ground for years. That audience <em>is</em> the business: it brought deals with the likes of Adidas. They proved a non-league club's <b>following is an asset</b> that sponsors will pay real money to reach.</p>
-        <div class="pb-lesson"><b>What we copy:</b> we'll never have their millions — but the principle holds. Build an audience with good, regular content and you've built something sponsors want. We already have the tools for it.</div>
-      </div>
+      <!-- 5. SOCIAL MEDIA ROADMAP -->
+      <details class="pb-sec"><summary>📲 The social media money roadmap</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">Why this matters: an audience is an <b>asset</b>. It earns directly through the platforms, and it's what makes sponsors and merch work. It costs nothing but consistency — and a non-league club's honesty and characters are exactly what does well online.</p>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Step 1 — Pick one flagship &amp; post every week</div></div><p>Choose <b>TikTok or YouTube</b> as your main push (Instagram stays the shop window). Shoot vertical clips on a phone — goals, tunnel walk-outs, dressing room, fan chants, the gaffer's reaction. The Social tab has captions and 20 ready ideas. <b>Consistency beats quality</b> — one decent clip a week, every week, for months.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Step 2 — Hit the monetisation thresholds</div></div><p>Roughly (platforms change the rules, so check current ones): <b>YouTube</b> pays you once you reach about <b>1,000 subscribers and 4,000 watch hours</b> (or ~10M Shorts views). <b>TikTok's</b> creator rewards need a few thousand followers and steady views. Getting there takes months of regular posting — treat it as a season-long project, not a quick flip.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">Step 3 — Turn the audience into real money</div></div><p>Platform payouts are small at first — the real money is what the audience <b>unlocks</b>: a local business paying to sponsor your match-highlights series, merch drops to engaged followers, and a stronger number to wave at every sponsor ("we reach X thousand people a week"). That's the Hashtag United lesson at our scale.</p></div>
+        <div class="pb-lesson"><b>The honest timeline:</b> months, not weeks. But it's free, it compounds, and every follower makes every other money-stream on this page easier.</div>
+      </div></details>
 
-      <div class="pb-case">
-        <div class="pb-case__name">🤝 Worthing &amp; South Shields — the town came back</div>
-        <p>Both reconnected a whole town with its club and now pull crowds of <b>2,000–3,000+</b>. They did it by going deep into the <b>community</b> — disability teams, walking football for older supporters, dementia-friendly groups, youth foundations with hundreds of kids — and by chasing <b>grants</b>. Worthing raised close to £500,000 in funding and community money for pitch and floodlight upgrades.</p>
-        <div class="pb-lesson"><b>What we copy:</b> community programmes do two jobs at once — they give the town a reason to care, and they unlock grant money that only exists for clubs doing good locally.</div>
-      </div>
+      <!-- 6. APPROACHING INVESTORS -->
+      <details class="pb-sec"><summary>🏦 Approaching investors &amp; sponsors — how to</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">"Investment" at our level rarely means a takeover. Realistically it's one of these — and each is achievable:</p>
+        <div class="soc-card"><ul>
+          <li><b style="color:#fff">A local benefactor / patron</b> — someone who loves the club and backs a specific goal (the climb, a facility, a season's playing budget).</li>
+          <li><b style="color:#fff">A commercial partner</b> — a bigger business that goes beyond a board: a season-long headline partnership with their name on everything.</li>
+          <li><b style="color:#fff">Community shares / crowdfunding</b> — many fans putting in a little for a cause they own (clubs like Lewes and FC United built this way).</li>
+          <li><b style="color:#fff">A short-term loan for one project</b> — repaid from the income it creates.</li>
+        </ul></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">What they need to see</div></div><p><b>A plan</b> (this playbook). <b>Clean books</b> they can trust (the Treasurer + Club Analytics — money in, money out, no mystery). <b>A story</b> (1933, Step 4 pedigree, the climb back). And <b>their reason</b> — a return, real exposure to a quarter-million-strong community, or a cause they're proud to put their name to.</p></div>
+        <div class="pb-area"><div class="pb-area__h"><div class="pb-area__n">How to actually do it</div></div><p>Warm introductions first — who do we already know? Lead with the <b>one-page pitch</b> (generate it above). Make the ask <b>specific</b>: "£X for Y, and here's exactly what you get." Meet in person, bring the chairman for the big ones, and <b>follow up</b> — most deals are won on the second conversation, not the first.</p></div>
+      </div></details>
 
-      <div class="slbl">Where we could grow — and the honest graft each takes</div>
-      <div class="snote"><p>You don't do all of these. Pick the ones that fit the people you've got. The tag tells you roughly how hard each is to get going.</p></div>
+      <!-- 7. INCOME BUILDER TOOL -->
+      <details class="pb-sec"><summary>🧮 Income Builder — model your own year</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">Don't take a number from us — build your own. Change any figure to match what's realistic for the people and effort you've actually got. The total updates live. This is the plan, in numbers you chose.</p>
+        <div class="ib" id="ib">
+          <div class="ib-row"><label>100 Club members<span class="ib-u">~£4/month kept each = £48/yr</span></label><input type="number" min="0" data-unit="48" value="80" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Pitch-side advertising boards<span class="ib-u">£350 / season each</span></label><input type="number" min="0" data-unit="350" value="10" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Home games with a match / ball sponsor<span class="ib-u">£150 each</span></label><input type="number" min="0" data-unit="150" value="10" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Extra paying fans per home game<span class="ib-u">× £6 × ~19 games</span></label><input type="number" min="0" data-unit="114" value="30" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Avg 50/50 draw profit per game (£)<span class="ib-u">× ~19 games</span></label><input type="number" min="0" data-unit="19" value="80" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Avg food profit per home game (£)<span class="ib-u">× ~19 games</span></label><input type="number" min="0" data-unit="19" value="120" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Lane Patrons / supporter members<span class="ib-u">~£60/yr each</span></label><input type="number" min="0" data-unit="60" value="25" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Merch profit per year (£)<span class="ib-u">pre-order drops</span></label><input type="number" min="0" data-unit="1" value="1500" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Events profit per year (£)<span class="ib-u">quiz / fun day / dinner</span></label><input type="number" min="0" data-unit="1" value="2000" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Social / content income per year (£)<span class="ib-u">payouts + content sponsor</span></label><input type="number" min="0" data-unit="1" value="0" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-row"><label>Grants won per year (£)<span class="ib-u">lumpy — don't bank on it</span></label><input type="number" min="0" data-unit="1" value="0" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
+          <div class="ib-tot"><div class="l">Your projected income<small>You choose the figures — make them honest</small></div><div class="v"><span id="ib-year">£0</span><small><span id="ib-month">£0</span> / month</small></div></div>
+        </div>
+      </div></details>
 
-      <div class="pb-area">
-        <div class="pb-area__h"><div class="pb-area__n">The matchday itself</div><span class="pb-area__e m">Ongoing effort</span></div>
-        <p>This is the engine we already own. The lesson from Dulwich is that <b>more people through the gate</b> beats squeezing the few who already come. Keep entry affordable and be generous with concessions, then make the day worth coming for — a 50/50 draw, hot food on a cold day, music, a proper welcome at the turnstile. Each is small money on its own, but together a good matchday should earn far more than the gate alone. It needs people willing to run each part, every game.</p>
-      </div>
+      <!-- 8. WHERE TO START -->
+      <details class="pb-sec"><summary>Where to start — pick two, do them properly</summary><div class="pb-sec__b">
+        <div class="soc-card"><p>Trying everything at once is how clubs end up doing nothing well. Before the season, choose <b style="color:#fff">two</b> and get them genuinely going:</p>
+        <ul>
+          <li><b style="color:#fff">One recurring stream</b> — get the 100 Club live and sell it to 50–100 people. Steadiest money, quickest to start.</li>
+          <li><b style="color:#fff">One commercial push</b> — sell a handful of advertising boards to local firms (track every lead in the Sponsor Hub).</li>
+        </ul>
+        <p style="margin-top:8px">Get those two breathing, then add a matchday improvement, the social push, or a first event. Slow and solid beats a grand plan that fizzles by October.</p></div>
+      </div></details>
 
-      <div class="pb-area">
-        <div class="pb-area__h"><div class="pb-area__n">Recurring income — the safety net</div><span class="pb-area__e q">Quicker win</span></div>
-        <p>The money that turns up whether we play well or not. A <b>club lottery / "100 Club"</b> is the classic: members pay a few pounds a month for a monthly cash prize. Run through a provider (Pitchero and others handle the admin), the club typically keeps around <b>£6 of every £10</b> — so a hundred members is roughly £600 a month, rain or shine. Add <b>supporter memberships</b> through the Fan Zone we've built. The work is selling it to people once; after that it largely runs itself.</p>
-      </div>
+      <!-- 9. EVERYONE'S PART -->
+      <details class="pb-sec"><summary>Everyone has a part</summary><div class="pb-sec__b">
+        <p class="pb-sec__lead">No one here takes a wage, so nobody can carry this alone. It works when each person owns one corner.</p>
+        <div class="dmap-item"><b>Chairman</b><span>Holds the vision and the relationships money can't buy. Walks in the door for the bigger asks and the investors.</span></div>
+        <div class="dmap-item"><b>Vice Chairman / Commercial</b><span>Owns local business — boards, match sponsors, the Sponsor Hub. Target: fill the boards before game one.</span></div>
+        <div class="dmap-item"><b>Treasurer</b><span>Watches the money in Club Analytics and tells everyone plainly how we're doing. Clean books win investors.</span></div>
+        <div class="dmap-item"><b>Secretary</b><span>Owns the grant applications and admin. Free money is a paperwork job — give it to someone organised.</span></div>
+        <div class="dmap-item"><b>Marketing / Social</b><span>Drives the fans and the following, and runs the social-media roadmap. A loud club gets sponsors.</span></div>
+        <div class="dmap-item"><b>Matchday team</b><span>Gate, programme, 50/50, food — each needs a named person every home game. That's what makes the day earn.</span></div>
+        <div class="dmap-item"><b>Everyone on the committee</b><span>Bring one thing. One board. Ten lottery members. One event. If everybody brings one, the whole club changes.</span></div>
+      </div></details>
 
-      <div class="pb-area">
-        <div class="pb-area__h"><div class="pb-area__n">Local businesses</div><span class="pb-area__e m">Legwork, then steady</span></div>
-        <p>Beyond the shirt — and we're genuinely grateful HDL and McCafferty's already back us, so be loud about them. <b>Pitch-side advertising boards</b> are the workhorse of clubs at our level: realistically <b>£350–£500 a season</b> each, and a board costs us very little to make. Sell them as <b>marketing, not charity</b> — their name in every match photo, every stream, every programme, plus real local goodwill. Match sponsorship and programme ads work the same way. This is shoe-leather, walking the high street with a clear one-page offer — but once a business is in, they tend to renew year after year.</p>
-      </div>
+      <!-- 10. WHY DIFFERENT -->
+      <details class="pb-sec"><summary>Why The Lane can be different</summary><div class="pb-sec__b">
+        <div class="soc-card"><p>We start with something most clubs at this level — and plenty above it — don't have: <b style="color:#fff">this</b>. A proper portal, a Fan Zone with cards and rewards, live data, a sponsor hub, a ready-made social plan. That's a genuine selling point in front of a business and a real reason for a fan to feel part of something. Add ninety years since 1933, Step 4 pedigree, the yellow and green, and a town of a quarter of a million on the doorstep — the raw materials are all here. The only thing missing is the doing — together, a bit at a time, starting now while it's pre-season.</p></div>
+      </div></details>
 
-      <div class="pb-area">
-        <div class="pb-area__h"><div class="pb-area__n">Brand, content &amp; merch</div><span class="pb-area__e m">Slow burn, big upside</span></div>
-        <p>Our real edge. Clapton showed a club's <b>identity</b> can sell merch worldwide; Hashtag showed an <b>audience</b> becomes income. We don't copy their scale — we copy the idea. Post well and regularly (the Social tab has the whole plan ready), build a following, and sell merch on <b>pre-order drops</b> so there's never any stock risk. A "1933" retro shirt or a Yellow Army hoodie, opened for two weeks, ordered only after the money's in.</p>
-      </div>
-
-      <div class="pb-area">
-        <div class="pb-area__h"><div class="pb-area__n">Community &amp; grants</div><span class="pb-area__e h">Patient, paperwork</span></div>
-        <p>The honest truth: grants aren't free money you claim with a click — they're <b>applications, patience and paperwork</b>, and you won't win them all. But they're real and they're big. The Football Foundation, the FA, Middlesex FA, the council and National Lottery community funds all back clubs that <b>do good locally</b> — youth teams, walking football, disability sessions. Worthing built half a million pounds of facilities this way. It needs one organised person willing to own the forms and keep at it.</p>
-      </div>
-
-      <div class="slbl">Where to start — pick two, do them properly</div>
-      <div class="soc-card"><p>Trying everything at once is how clubs end up doing nothing well. Before the season starts, choose <b style="color:#fff">two</b> and get them genuinely going:</p>
-      <ul>
-        <li><b style="color:#fff">One recurring stream</b> — get the 100 Club live and sell it to 50–100 people. Steadiest money, quickest to start.</li>
-        <li><b style="color:#fff">One commercial push</b> — get a handful of advertising boards sold to local firms (track every lead in the Sponsor Hub).</li>
-      </ul>
-      <p style="margin-top:8px">Get those two breathing, then add a matchday improvement or a first event. Slow and solid beats a grand plan that fizzles out by October.</p></div>
-
-      <div class="slbl">Everyone has a part</div>
-      <div class="snote"><p>No one here takes a wage, so nobody can carry this alone. It works when each person owns one corner of it.</p></div>
-      <div class="dmap-item"><b>Chairman</b><span>Holds the vision and the relationships money can't buy. Walks in the door for the bigger asks and keeps everyone pointed the same way.</span></div>
-      <div class="dmap-item"><b>Vice Chairman / Commercial</b><span>Owns local business — the boards, match sponsors and the Sponsor Hub pipeline. One clear target: fill the boards before game one.</span></div>
-      <div class="dmap-item"><b>Treasurer</b><span>Watches the money in Club Analytics and tells everyone, plainly, how we're doing. Protects what comes in.</span></div>
-      <div class="dmap-item"><b>Secretary</b><span>Owns the grant applications and the admin. Free money is a paperwork job — give it to someone organised who'll keep at it.</span></div>
-      <div class="dmap-item"><b>Marketing / Social</b><span>Drives the fans and the following using the Social tab. A quiet club gets forgotten; a loud one gets sponsors.</span></div>
-      <div class="dmap-item"><b>Matchday team</b><span>Gate, programme, 50/50, food. Each needs a named person every single home game — that's what makes the day actually earn.</span></div>
-      <div class="dmap-item"><b>Everyone on the committee</b><span>Bring one thing. One advertising board. Ten lottery members. One event. If everybody brings one, the whole club changes.</span></div>
-
-      <div class="slbl">Why The Lane can be different</div>
-      <div class="soc-card"><p>We start with something most clubs at this level — and plenty above it — simply don't have: <b style="color:#fff">this</b>. A proper portal, a Fan Zone with member cards and rewards, live data, a sponsor hub, a ready-made social plan. That isn't vanity — it's a genuine selling point when you sit across from a local business, and a real reason for a fan to feel part of something. Add ninety years of history since 1933, the yellow and green, and a town on the doorstep, and the raw materials are all here. The only thing missing is the doing — together, a bit at a time, starting now while it's still pre-season.</p></div>
-
-      <div class="snote" style="margin-top:14px;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">The whole thing in a sentence:</strong> stop relying on one Saturday gate — build a few steady streams (a lottery, some boards, a louder matchday), lean into the community for grants and goodwill, use the head start this portal already gives us, and let everyone carry one corner. That's how a Step 5 club stops surviving and starts growing.</p></div>
+      <div class="snote" style="margin-top:6px;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">The whole thing in a sentence:</strong> stop relying on one Saturday gate — build a few steady streams, tell the club's story to win sponsors and backers, grow an audience online, lean on the community for grants and goodwill, and let everyone carry one corner. That's how a Step 5 club stops surviving and starts climbing.</p></div>
     </div>
 
     <!-- STAFF & MANAGEMENT (private profiles) -->
@@ -1909,6 +1997,7 @@ function openPanel(name) {
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'clubstats') loadClubStats();
   if (name === 'settings')  runSystemCheck();
+  if (name === 'playbook')  calcIncome();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -2535,6 +2624,49 @@ async function runSystemCheck() {
 function republish() {
   if (!confirm('Trigger a fresh deploy of the whole site?')) return;
   fetch(BUILD_HOOK, { method: 'POST' }).then(function () { toast('Republish triggered — live in ~1 min ✓'); }).catch(function () { toast('Could not trigger', true); });
+}
+
+// ── PLAYBOOK TOOLS — Income Builder + Pitch Generator ──
+function gbp(n) { return '£' + Math.round(n).toLocaleString('en-GB'); }
+function calcIncome() {
+  var rows = document.querySelectorAll('#ib .ib-row');
+  var total = 0;
+  rows.forEach(function (r) {
+    var inp = r.querySelector('input'); if (!inp) return;
+    var unit = parseFloat(inp.getAttribute('data-unit')) || 0;
+    var v = parseFloat(inp.value) || 0;
+    var amt = v * unit; total += amt;
+    var cell = r.querySelector('[data-amt]'); if (cell) cell.textContent = gbp(amt);
+  });
+  var y = document.getElementById('ib-year'), m = document.getElementById('ib-month');
+  if (y) y.textContent = gbp(total);
+  if (m) m.textContent = gbp(total / 12);
+}
+function generatePitch() {
+  var sel = document.getElementById('pg-aud');
+  var aud = sel ? sel.value : 'local';
+  var pitches = {
+    local:
+      "Hi [their name],\n\n" +
+      "I'm getting in touch from Rayners Lane FC — Harrow's community football club since 1933. We're looking for a handful of local businesses to back the club for the 2026-27 season, and I think [your business] would be a great fit.\n\n" +
+      "For around £350 a season your business gets a pitch-side advertising board seen by every supporter at every home game — and in the photos, videos and matchday posts we share across Harrow and beyond. You'll also get a mention in our programme and a thank-you across our socials.\n\n" +
+      "It's affordable, it's local, and it puts your name in front of a community of a quarter of a million people on your doorstep while backing a real club. Could I drop in for ten minutes to show you the options?\n\n" +
+      "Up The Lane,\n[your name] — Rayners Lane FC\ninfo@raynerslanefc.co.uk",
+    match:
+      "Hi [their name],\n\n" +
+      "Rayners Lane FC — Harrow's club since 1933 — is offering local businesses the chance to sponsor a matchday for the 2026-27 season.\n\n" +
+      "As a match sponsor, your business is the named backer of a chosen home game: your name on our line-up graphic, shout-outs before, during and after across our social channels, a mention in the programme, and our genuine thanks in front of the crowd. We also offer matchball sponsorship as a smaller package, or your brand on our kit and training wear.\n\n" +
+      "We're a club with real ambition — we've competed at Step 4 and we're building to climb back — with a loyal, growing local audience. It's a friendly, visible way to put [your business] in front of the community. Shall I send the packages over?\n\n" +
+      "Up The Lane,\n[your name] — Rayners Lane FC\ninfo@raynerslanefc.co.uk",
+    investor:
+      "RAYNERS LANE FC — PARTNERSHIP & INVESTMENT SUMMARY\n\n" +
+      "Founded in 1933, Rayners Lane FC is Harrow's community football club. We have competed at Step 4 of the English pyramid — two levels above our current Step 5 — and our goal is a sustainable climb back, building the commercial side of the club so we stay there.\n\n" +
+      "Why us: 90+ years of heritage; a Harrow catchment of around a quarter of a million people; FA Charter Standard status; and — unusually for this level — a modern digital operation: a supporter Fan Zone with membership and rewards, live data, a sponsor pipeline and an active social presence.\n\n" +
+      "The ask: a partner to back the next phase — as a headline commercial sponsor, a benefactor behind a defined goal, or through a community share offer. The books are transparent and the plan is clear.\n\n" +
+      "We'd welcome a conversation. Contact: info@raynerslanefc.co.uk"
+  };
+  var out = document.getElementById('pg-out');
+  if (out) out.innerHTML = '<div class="soc-cap">' + esc(pitches[aud] || pitches.local) + '</div>';
 }
 
 // Tap any caption template to copy it to the clipboard.
