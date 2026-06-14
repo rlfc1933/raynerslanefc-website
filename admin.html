@@ -531,6 +531,15 @@
       <div id="cm-list"></div>
       <button class="save" style="margin-top:10px" onclick="saveCommittee()">&#10003; Save to Site</button>
       <div class="dep" id="dep-committee"></div>
+
+      <div class="div"></div>
+      <div class="slbl">⚖️ Key Officials <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— auto-named across the Policies page</span></div>
+      <div class="snote"><p>These three names are <strong style="color:var(--w)">legally important</strong> (safeguarding &amp; complaints). Set them once and every mention on the <strong>Policies page</strong> updates automatically — Welfare Officer, Chairman &amp; Secretary.</p></div>
+      <div class="field"><label class="fl">Club Welfare Officer (Safeguarding)</label><input type="text" id="of-welfare" placeholder="Jenny Pitt"></div>
+      <div class="field"><label class="fl">Club Chairman</label><input type="text" id="of-chairman" placeholder="Pete Singh"></div>
+      <div class="field"><label class="fl">Club Secretary</label><input type="text" id="of-secretary" placeholder="Emma Galloway"></div>
+      <button class="save" style="margin-top:6px" onclick="saveOfficials()">&#10003; Update Policy Names</button>
+      <div class="dep" id="dep-officials"></div>
     </div>
 
     <!-- SPONSORS -->
@@ -1360,7 +1369,7 @@ function openPanel(name) {
   // button) returns to the dashboard instead of leaving the admin entirely.
   try { if (!(history.state && history.state.panel === name)) history.pushState({ panel: name }, '', '#' + name); } catch (e) {}
   if (name === 'squad')     renderSquad();
-  if (name === 'committee') renderCommittee();
+  if (name === 'committee') { renderCommittee(); loadOfficials(); }
   if (name === 'sponsors')  renderSponsors();
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
@@ -1785,6 +1794,25 @@ function removeMember(name) {
 function saveCommittee() {
   pushToGitHub('committee', {members:committee, updatedAt:new Date().toISOString()}, 'dep-committee');
   toast('Committee saved ✓');
+}
+// Key officials — named automatically across the Policies page.
+function loadOfficials() {
+  fetchJSON('officials', function (o) {
+    o = o || {};
+    setVal('of-welfare', o.welfareOfficer || '');
+    setVal('of-chairman', o.chairman || '');
+    setVal('of-secretary', o.secretary || '');
+  });
+}
+function saveOfficials() {
+  var data = {
+    welfareOfficer: gv('of-welfare') || 'Jenny Pitt',
+    chairman: gv('of-chairman') || 'Pete Singh',
+    secretary: gv('of-secretary') || 'Emma Galloway',
+    updatedAt: new Date().toISOString()
+  };
+  pushToGitHub('officials', data, 'dep-officials');
+  toast('Policy names updated ✓');
 }
 function renderCommittee() {
   document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';

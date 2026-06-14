@@ -606,6 +606,41 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
-<script>document.addEventListener("DOMContentLoaded", () => initComponents("policies.html"));</script>
+<script>
+// Live policy officials — the safeguarding-critical names (Welfare Officer,
+// Chairman, Secretary) are editable from the admin "Club Roles & Staff" tab and
+// applied here, so the policies always name the right people without a code
+// change. Baseline names are baked into the HTML above (good for SEO / no-JS);
+// this only swaps them in when the admin has set something different.
+(function () {
+  function polInit() {
+    try { initComponents("policies.html"); } catch (e) {}
+    var BASE = { welfareOfficer: "Jenny Pitt", chairman: "Pete Singh", secretary: "Emma Galloway" };
+    fetch("data/officials.json?t=" + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (o) {
+        if (!o) return;
+        var swaps = [];
+        Object.keys(BASE).forEach(function (k) {
+          if (o[k] && String(o[k]).trim() && String(o[k]).trim() !== BASE[k]) swaps.push([BASE[k], String(o[k]).trim()]);
+        });
+        if (!swaps.length) return;
+        document.querySelectorAll(".policy-section").forEach(function (sec) {
+          var walker = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT, null);
+          var nodes = [];
+          while (walker.nextNode()) nodes.push(walker.currentNode);
+          nodes.forEach(function (n) {
+            var t = n.nodeValue;
+            swaps.forEach(function (s) { if (t.indexOf(s[0]) > -1) t = t.split(s[0]).join(s[1]); });
+            if (t !== n.nodeValue) n.nodeValue = t;
+          });
+        });
+      })
+      .catch(function () {});
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", polInit);
+  else polInit();
+})();
+</script>
 </body>
 </html>
