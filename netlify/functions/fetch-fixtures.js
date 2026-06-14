@@ -14,6 +14,12 @@ const SDB = 'https://www.thesportsdb.com/api/v1/json/3';
 const TEAM = process.env.SDB_TEAM_ID || '148927';
 const RLFC = /rayners\s*lane/i;
 
+// Only show fixtures/results from the current season. TheSportsDB's "last
+// events" feed returns recent matches regardless of season, which would leak
+// last season's games (e.g. the 17 Apr 2026 Stotfold result) onto the page.
+// 2026-27 season kicks off 1 Aug 2026 — anything before that is filtered out.
+const SEASON_START = process.env.SEASON_START || '2026-08-01';
+
 function resp(code, obj) {
   return {
     statusCode: code,
@@ -53,12 +59,14 @@ exports.handler = async function () {
     const now = Date.now();
     const upcoming = (nextRes.events || [])
       .map(mapEvent).filter(Boolean)
+      .filter(m => m.date && m.date >= SEASON_START)
       .filter(m => m.date && new Date(m.date + 'T' + m.kickoff + ':00').getTime() > now - 6 * 3600000)
       .sort((a, b) => a.date.localeCompare(b.date));
     const next = upcoming[0] || null;
 
     const results = (lastRes.results || [])
       .map(mapEvent).filter(m => m && m.us !== null)
+      .filter(m => m.date && m.date >= SEASON_START)
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 6);
 
