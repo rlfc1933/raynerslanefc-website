@@ -63,7 +63,7 @@
   <div class="container">
     <div class="page-header__eyebrow"><span class="label">Combined Counties Premier Division North &middot; Step 5</span></div>
     <h1 class="page-header__h">Fixtures <span>&amp; Results</span></h1>
-    <p class="page-header__meta">2026-27 Season &middot; Live data via Football Web Pages &amp; FA Full-Time</p>
+    <p class="page-header__meta">2026-27 Season &middot; Fixtures, results &amp; table update automatically</p>
   </div>
     <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px">&#9993; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
 </div>
@@ -126,10 +126,10 @@
         <h2 style="font-family:var(--font-d);font-size:clamp(36px,4vw,60px);letter-spacing:.03em">
           Fixtures, Results <span style="color:var(--yellow)">&amp; Table</span>
         </h2>
-        <a href="https://www.footballwebpages.co.uk/rayners-lane" target="_blank" rel="noopener"
+        <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" rel="noopener"
            style="font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s"
            onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--grey)'">
-          Data via Football Web Pages &rarr;
+          Updates automatically &rarr;
         </a>
       </div>
     </div>
@@ -143,24 +143,20 @@
 
     <!-- Fixtures & Results tab -->
     <div class="tab-panel active" id="tab-fixtures">
-      <div class="fwp-embed-container">
-        <div class="fwp-embed" data-url="rayners-lane/fixtures-results"></div>
-        <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
-      </div>
+      <div id="fx-next"></div>
+      <div id="fx-results"><div class="fx-loading">Loading results…</div></div>
+      <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
     </div>
 
     <!-- League Table tab -->
     <div class="tab-panel" id="tab-table">
-      <div class="fwp-embed-container">
-        <div class="fwp-embed" data-url="combined-counties-premier-north/league-table"></div>
-      </div>
+      <div id="fx-table"><div class="fx-loading">Loading table…</div></div>
+      <div class="fx-attr">League table via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA)</div>
     </div>
 
     <!-- Form Guide tab -->
     <div class="tab-panel" id="tab-form">
-      <div class="fwp-embed-container">
-        <div class="fwp-embed" data-url="rayners-lane/form-guide"></div>
-      </div>
+      <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
     </div>
 
     <!-- ═══ PITCHERO LINK ═══ -->
@@ -196,7 +192,102 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("tab-" + target).classList.add("active");
     });
   });
+
+  loadFixturesData();
 });
+
+function fxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function loadFixturesData() {
+  // Fixtures, results & form (TheSportsDB)
+  try {
+    var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
+    renderFxResults(fx);
+    renderFxForm(fx);
+  } catch (e) {
+    document.getElementById('fx-results').innerHTML = '<div class="fx-empty">Results unavailable right now. Follow us <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank">on Pitchero</a>.</div>';
+    document.getElementById('fx-form').innerHTML = '';
+  }
+  // League table (Wikipedia)
+  try {
+    var t = await (await fetch('/.netlify/functions/fetch-table')).json();
+    renderFxTable(t.table || []);
+  } catch (e) {
+    document.getElementById('fx-table').innerHTML = '<div class="fx-empty">Table unavailable right now.</div>';
+  }
+}
+
+function renderFxResults(fx) {
+  var nextEl = document.getElementById('fx-next'), resEl = document.getElementById('fx-results');
+  if (fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
+    var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
+    var ds = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
+    nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
+      '<div class="fx-next__teams">Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + fxEsc(fx.next.opponent) + '</div>' +
+      '<div class="fx-next__meta">' + ds + ' &middot; ' + (fx.next.kickoff || '15:00') + (fx.next.isHome ? ' &middot; Tithe Farm' : '') + '</div></div>';
+  }
+  if (!fx.results || !fx.results.length) {
+    resEl.innerHTML = '<div class="fx-empty">No results yet this season — the 2026-27 fixtures are released soon.</div>';
+    return;
+  }
+  resEl.innerHTML = '<div class="fx-rlbl">Recent Results</div>' + fx.results.map(function(r){
+    var win = r.us > r.them, draw = r.us === r.them;
+    var cls = win ? 'w' : (draw ? 'd' : 'l');
+    var rd = r.date ? new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+    return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (r.isHome?'vs ':'@ ') + fxEsc(r.opponent) +
+      ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s ' + cls + '">' + r.us + '–' + r.them + '</div></div>';
+  }).join('');
+}
+
+function renderFxForm(fx) {
+  var el = document.getElementById('fx-form');
+  if (!fx.results || !fx.results.length) { el.innerHTML = '<div class="fx-empty">Form appears once results come in.</div>'; return; }
+  var last5 = fx.results.slice(0, 5);
+  var dots = last5.map(function(r){
+    var v = r.us > r.them ? 'W' : (r.us === r.them ? 'D' : 'L');
+    var cls = v === 'W' ? 'w' : (v === 'D' ? 'd' : 'l');
+    return '<span class="fx-form__dot ' + cls + '">' + v + '</span>';
+  }).join('');
+  el.innerHTML = '<div class="fx-rlbl">Last ' + last5.length + ' (newest first)</div><div class="fx-form">' + dots + '</div>';
+}
+
+function renderFxTable(rows) {
+  var el = document.getElementById('fx-table');
+  if (!rows.length) { el.innerHTML = '<div class="fx-empty">The 2026-27 table appears once the season kicks off.</div>'; return; }
+  var head = '<tr><th>#</th><th class="l">Team</th><th>P</th><th class="hide">W</th><th class="hide">D</th><th class="hide">L</th><th>GD</th><th>Pts</th></tr>';
+  var body = rows.map(function(t){
+    return '<tr class="' + (t.rlfc ? 'me' : '') + '"><td>' + t.pos + '</td><td class="l">' + fxEsc(t.team) + '</td>' +
+      '<td>' + t.pld + '</td><td class="hide">' + t.w + '</td><td class="hide">' + t.d + '</td><td class="hide">' + t.l + '</td>' +
+      '<td>' + fxEsc(t.gd) + '</td><td class="pts">' + t.pts + '</td></tr>';
+  }).join('');
+  el.innerHTML = '<table class="fx-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+}
 </script>
+<style>
+  .fx-loading,.fx-empty{font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em;padding:28px 4px;text-align:center}
+  .fx-attr{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.05em;margin-top:14px}
+  .fx-attr a{color:var(--yellow)}
+  .fx-next{background:linear-gradient(135deg,var(--green),#06120a);border:1px solid #21402b;border-radius:14px;padding:22px 24px;margin-bottom:18px}
+  .fx-next__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
+  .fx-next__teams{font-family:var(--font-d);font-size:clamp(26px,4.5vw,38px);letter-spacing:.03em;color:#fff;line-height:1;margin-top:6px}
+  .fx-next__meta{font-family:var(--font-c);font-size:13px;letter-spacing:.06em;color:rgba(255,255,255,.7);margin-top:8px}
+  .fx-rlbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin:6px 0 10px}
+  .fx-res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 4px;border-bottom:1px solid var(--border)}
+  .fx-res__m{font-family:var(--font-c);font-size:15px;color:#fff;letter-spacing:.02em}
+  .fx-res__d{color:var(--grey);font-size:12px;margin-left:4px}
+  .fx-res__s{font-family:var(--font-d);font-size:22px;letter-spacing:.06em;padding:2px 10px;border-radius:6px}
+  .fx-res__s.w{color:#22C55E;background:rgba(34,197,94,.1)} .fx-res__s.d{color:#FBBF24;background:rgba(251,191,36,.1)} .fx-res__s.l{color:#EF4444;background:rgba(239,68,68,.1)}
+  .fx-form{display:flex;gap:8px}
+  .fx-form__dot{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff}
+  .fx-form__dot.w{background:#22C55E} .fx-form__dot.d{background:#FBBF24;color:#0d0d0d} .fx-form__dot.l{background:#EF4444}
+  .fx-table{width:100%;border-collapse:collapse;font-family:var(--font-c)}
+  .fx-table th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:center;padding:10px 6px;border-bottom:1px solid var(--border)}
+  .fx-table th.l,.fx-table td.l{text-align:left}
+  .fx-table td{font-size:14px;color:var(--lgrey);text-align:center;padding:11px 6px;border-bottom:1px solid var(--border)}
+  .fx-table td.pts{font-weight:800;color:#fff}
+  .fx-table tr.me td{background:rgba(255,209,0,.1);color:#fff}
+  .fx-table tr.me td.l{color:var(--yellow);font-weight:700}
+  @media(max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}}
+</style>
 </body>
 </html>
