@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fan Zone | Join The Lane Family | Rayners Lane FC</title>
+  <meta name="description" content="Join the Rayners Lane FC fan family. Build your free Lane fan card, check in at matches, climb the loyalty ladder and get championed as a patron of The Lane.">
+  <link rel="canonical" href="https://raynerslanefc.co.uk/fan-zone.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Rayners Lane FC">
+  <meta property="og:url" content="https://raynerslanefc.co.uk/fan-zone.html">
+  <meta property="og:title" content="Join The Lane Family — Fan Zone">
+  <meta property="og:description" content="Build your free Lane fan card, check in at matches and get championed as a patron of The Lane.">
+  <meta property="og:image" content="https://raynerslanefc.co.uk/img/badge.png">
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .fz-hero{position:relative;overflow:hidden;padding:64px 0 48px;background:linear-gradient(160deg,var(--green) 0%,#06120a 70%);text-align:center}
+    .fz-hero::after{content:"THE LANE FAMILY";position:absolute;right:-10px;bottom:-24px;font-family:var(--font-d);font-size:90px;color:rgba(255,255,255,.04);white-space:nowrap;pointer-events:none}
+    .fz-hero .label{color:var(--yellow)}
+    .fz-hero h1{font-family:var(--font-d);font-size:clamp(44px,8vw,84px);letter-spacing:.03em;line-height:.92;margin:10px 0 14px;position:relative;z-index:1}
+    .fz-hero h1 span{color:var(--yellow)}
+    .fz-hero p{font-family:var(--font-b);font-size:16px;color:rgba(255,255,255,.7);max-width:560px;margin:0 auto;position:relative;z-index:1}
+    .fz-wrap{max-width:1000px;margin:0 auto;padding:48px 20px}
+    .fz-sec{margin-bottom:56px}
+    .fz-sec__head{text-align:center;margin-bottom:26px}
+    .fz-sec__head .label{display:block;margin-bottom:8px}
+    .fz-sec__head h2{font-family:var(--font-d);font-size:clamp(30px,5vw,52px);letter-spacing:.03em}
+    .fz-sec__head h2 span{color:var(--yellow)}
+    /* fan card */
+    .fancard{max-width:420px;margin:0 auto;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#13160d,#0a0a0a);border:1px solid var(--border);box-shadow:0 30px 70px -34px rgba(0,0,0,.9)}
+    .fancard__top{background:linear-gradient(135deg,var(--green),#06120a);padding:22px 22px 18px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
+    .fancard__top::after{content:"";position:absolute;right:-26px;top:-26px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(255,209,0,.2),transparent 70%)}
+    .fancard__photo{width:78px;height:78px;border-radius:16px;object-fit:cover;background:#000;border:2px solid rgba(255,255,255,.16);flex-shrink:0;position:relative;z-index:1}
+    .fancard__id{position:relative;z-index:1;min-width:0}
+    .fancard__tier{display:inline-block;font-family:var(--font-c);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0d0d0d;background:var(--yellow);padding:3px 9px;border-radius:4px;margin-bottom:6px}
+    .fancard__name{font-family:var(--font-d);font-size:28px;letter-spacing:.03em;color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .fancard__since{font-family:var(--font-c);font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.6);margin-top:4px}
+    .fancard__stats{display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;border-top:1px solid var(--border)}
+    .fancard__stat{padding:16px 6px;border-right:1px solid var(--border)}
+    .fancard__stat:last-child{border-right:none}
+    .fancard__num{font-family:var(--font-d);font-size:32px;color:var(--yellow);line-height:1}
+    .fancard__lbl{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
+    .fancard__foot{padding:16px 18px;display:flex;gap:8px;flex-wrap:wrap}
+    .fz-btn{flex:1;min-width:130px;text-align:center;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:13px;border-radius:8px;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent;text-decoration:none}
+    .fz-btn--y{background:var(--yellow);color:#0d0d0d}
+    .fz-btn--g{background:var(--card);color:#fff;border:1px solid var(--border)}
+    .fz-btn:active{opacity:.85}
+    .fancard__meaning{padding:0 18px 18px;font-family:var(--font-b);font-style:italic;font-size:14px;color:var(--lgrey);line-height:1.6}
+    /* form */
+    .fz-form{max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px}
+    .fz-form .fl{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:14px 0 6px}
+    .fz-form input,.fz-form textarea{width:100%;background:var(--dark,#0f0f0f);border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:12px 14px}
+    .fz-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .fz-private{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.04em;margin-top:14px;display:flex;gap:8px;align-items:flex-start}
+    /* perks ladder */
+    .fz-ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+    .fz-rung{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--border);border-radius:10px;padding:18px 14px;text-align:center}
+    .fz-rung.on{border-top-color:var(--yellow);background:rgba(255,209,0,.05)}
+    .fz-rung__g{font-family:var(--font-d);font-size:30px;color:var(--yellow);line-height:1}
+    .fz-rung__t{font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-top:6px}
+    .fz-rung__d{font-family:var(--font-b);font-size:12px;color:var(--grey);margin-top:4px;line-height:1.5}
+    /* patrons wall */
+    .fz-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .patron{background:linear-gradient(160deg,var(--card),var(--dark,#0f0f0f));border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;position:relative}
+    .patron--featured{border-color:var(--yellow);box-shadow:0 0 0 1px rgba(255,209,0,.3)}
+    .patron__crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--yellow);color:#0d0d0d;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+    .patron__photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--green);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:26px;color:#fff}
+    .patron__name{font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:#fff;line-height:1}
+    .patron__meta{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin-top:6px}
+    .patron__quote{font-family:var(--font-b);font-style:italic;font-size:12.5px;color:var(--lgrey);line-height:1.5;margin-top:10px}
+    .patron__badges{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:10px}
+    .patron__badge{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border:1px solid rgba(255,209,0,.25);border-radius:999px;padding:3px 8px}
+    .fz-give{background:linear-gradient(135deg,var(--green),#06120a);border-radius:18px;padding:34px 26px;text-align:center;position:relative;overflow:hidden}
+    .fz-give h3{font-family:var(--font-d);font-size:clamp(28px,5vw,44px);letter-spacing:.03em;margin-bottom:10px}
+    .fz-give h3 span{color:var(--yellow)}
+    .fz-give p{font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.75);max-width:560px;margin:0 auto 20px;line-height:1.7}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- HERO -->
+<section class="fz-hero">
+  <div class="container">
+    <span class="label">The Lane Family &middot; Est. 1933</span>
+    <h1>This Is <span>Your</span> Club Too.</h1>
+    <p>We love our fans. So let's prove it. Build your free Lane fan card, check in at every match, climb the loyalty ladder — and get championed as a patron of The Lane.</p>
+  </div>
+</section>
+
+<div class="fz-wrap">
+
+  <!-- FAN CARD -->
+  <section class="fz-sec" id="card-sec">
+    <div class="fz-sec__head"><span class="label">Your Membership</span><h2>Your <span>Lane Card</span></h2></div>
+    <div id="fancard-mount"></div>
+  </section>
+
+  <!-- PERKS LADDER -->
+  <section class="fz-sec">
+    <div class="fz-sec__head"><span class="label">Give to Get Back</span><h2>The Loyalty <span>Ladder</span></h2></div>
+    <div class="fz-ladder" id="fz-ladder"></div>
+    <p style="text-align:center;font-family:var(--font-b);color:var(--grey);font-size:13px;margin-top:16px">Every match you check in to moves you up. Hit the top tiers and you're a <strong style="color:var(--yellow)">Patron of The Lane</strong> — featured on our wall and first in line for matchday rewards.</p>
+  </section>
+
+  <!-- OFFICIAL SIGN-UP -->
+  <section class="fz-sec">
+    <div class="fz-sec__head"><span class="label">Make It Official</span><h2>Join the <span>Family List</span></h2></div>
+    <form class="fz-form" name="fan-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return fanSignup(this)">
+      <input type="hidden" name="form-name" value="fan-signup">
+      <p class="hidden"><label>Don't fill this in: <input name="bot-field"></label></p>
+      <div class="fz-row">
+        <div><label class="fl">Your Name</label><input type="text" name="name" required></div>
+        <div><label class="fl">Town</label><input type="text" name="town" placeholder="Harrow"></div>
+      </div>
+      <label class="fl">Email</label><input type="email" name="email" required>
+      <div class="fz-row">
+        <div><label class="fl">Birthday (dd/mm)</label><input type="text" name="birthday" placeholder="14/03"></div>
+        <div><label class="fl">Fan since (year)</label><input type="number" name="since" placeholder="2011" min="1933" max="2026"></div>
+      </div>
+      <label class="fl">What does The Lane mean to you?</label>
+      <textarea name="meaning" rows="2" placeholder="Optional — we might feature it!"></textarea>
+      <button type="submit" class="fz-btn fz-btn--y" style="margin-top:18px;width:100%">Join the Lane Family</button>
+      <div class="fz-private">🔒 <span>Your details go <strong>privately</strong> to the club only — never shown on the site. We use your birthday to send you a little something, and to invite you to fan events. Unsubscribe any time.</span></div>
+    </form>
+  </section>
+
+  <!-- PATRONS WALL -->
+  <section class="fz-sec">
+    <div class="fz-sec__head"><span class="label">Hall of The Lane</span><h2>Our <span>Patrons</span></h2></div>
+    <div class="fz-wall" id="fz-wall"></div>
+  </section>
+
+  <!-- GIVE TO GIVE BACK -->
+  <section class="fz-sec">
+    <div class="fz-give">
+      <h3>Sponsor a <span>Matchday</span></h3>
+      <p>Love The Lane? Put your name on the day. Sponsor a matchball, back a matchday, or buy the team a post-match meal. We'll champion you on the wall, in the programme and across our socials — because when our fans give, we give back louder.</p>
+      <a href="investment.html" class="fz-btn fz-btn--y" style="display:inline-block;max-width:280px">See Patron &amp; Sponsor Options</a>
+    </div>
+  </section>
+
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script src="js/fan-zone.js"></script>
+<script>
+  (function(){
+    function go(){ try { initComponents("fan-zone.html"); } catch(e){} initFanZone(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+    else go();
+  })();
+</script>
+</body>
+</html>

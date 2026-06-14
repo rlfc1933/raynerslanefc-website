@@ -303,6 +303,11 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
           <div class="tile-name">Social Media</div><div class="tile-desc">Strategy &amp; planner</div>
         </button>
+        <button class="tile" style="--accent:#F43F5E" onclick="openPanel('fanclub')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.2-9A4.6 4.6 0 0 1 12 6.5 4.6 4.6 0 0 1 21.2 12C19 16.4 12 21 12 21z"/></svg></span>
+          <div class="tile-name">Fan Club</div><div class="tile-desc">Champion your patrons</div>
+        </button>
         <button class="tile" style="--accent:#60A5FA" onclick="openPanel('mail')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
@@ -852,6 +857,35 @@
       <div class="dep" id="dep-analytics"></div>
     </div>
 
+    <!-- FAN CLUB -->
+    <div class="panel" id="panel-fanclub">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#10084;&#65039; Fan Club</div></div>
+      <div class="snote" style="border-color:rgba(244,63,94,.3);background:rgba(244,63,94,.06)">
+        <p><strong style="color:var(--w)">Champion your patrons.</strong> Add the fans who show up &amp; give back — they appear on the public <strong>Fan Zone</strong> wall. Birthdays &amp; emails from sign-ups stay private (see below).</p>
+      </div>
+      <div class="slbl">Add / Feature a Patron</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Display Name</label><input type="text" id="fp-name" placeholder="YellowArmyJoe"></div>
+        <div class="field"><label class="fl">Town</label><input type="text" id="fp-town" placeholder="Harrow"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Fan Since (year)</label><input type="number" id="fp-since" placeholder="2011" min="1933" max="2026"></div>
+        <div class="field"><label class="fl">Games Attended</label><input type="number" id="fp-games" placeholder="0" min="0"></div>
+      </div>
+      <div class="field"><label class="fl">Their Quote (optional)</label><input type="text" id="fp-quote" placeholder="The Lane is my Saturday religion."></div>
+      <div class="field"><label class="fl">Badges (comma separated)</label><input type="text" id="fp-badges" placeholder="Matchball Sponsor, 10+ Years"></div>
+      <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="fp-fom" style="width:16px;height:16px;accent-color:var(--y)"> Make this the Fan of the Month &#11088;</label>
+      <button class="save sec" onclick="addPatron()">+ Add to Wall</button>
+      <div class="div"></div>
+      <div class="slbl" id="fp-cnt">Patrons</div>
+      <div id="fp-list"></div>
+      <button class="save" style="margin-top:10px" onclick="savePatrons()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-fanclub"></div>
+      <div class="div"></div>
+      <div class="slbl">Private Sign-Ups (birthdays, emails)</div>
+      <div class="snote"><p>When fans "Join the Family List" on the Fan Zone, their name, email &amp; birthday arrive <strong style="color:var(--w)">privately</strong> in Netlify. Read them at <strong>Netlify &rarr; your site &rarr; Forms &rarr; "fan-signup"</strong>. Never shown on the website. Use them to send birthday treats, free tickets &amp; event invites.</p></div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
@@ -994,6 +1028,7 @@ function openPanel(name) {
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
+  if (name === 'fanclub')   renderPatrons();
 }
 function back() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
@@ -1034,6 +1069,7 @@ function loadAll() {
   fetchJSON('social',    function(d) { if (d && d.posts) { socialPosts = d.posts; } });
   fetchJSON('motm',      function(d) { if (d && d.entries) { motms = d.entries; } });
   fetchJSON('signing',   function(d) { if (d && d.entries) { signings = d.entries; } });
+  fetchJSON('patrons',   function(d) { if (d) { if (d.patrons) patrons = d.patrons; if (d.fanOfMonth) fanOfMonth = d.fanOfMonth; } });
   fetchJSON('matchday',  function(d) {
     if (!d) return;
     isLive = d.isLive || false;
@@ -1747,6 +1783,46 @@ function addSigning() {
 }
 function removeSigning(id) { if (!confirm('Remove this signing?')) return; signings = signings.filter(function(s){return s.id!==id;}); renderSigning(); }
 function saveSigning() { pushToGitHub('signing', { entries: signings, updatedAt: new Date().toISOString() }, 'dep-signing'); toast('Signing saved ✓'); }
+
+// ── FAN CLUB / PATRONS ──
+var patrons = [];
+var fanOfMonth = '';
+function renderPatrons() {
+  var el = document.getElementById('fp-list');
+  document.getElementById('fp-cnt').textContent = 'Patrons (' + patrons.length + ')';
+  el.innerHTML = patrons.length
+    ? patrons.map(function(p){
+        var crown = (p.id === fanOfMonth) ? ' <span style="color:var(--y);font-size:10px">★ FOTM</span>' : '';
+        return '<div class="li"><span class="li-num">&#10084;</span><div class="li-main"><div class="li-name">' + esc(p.username||'') + crown + '</div>' +
+          '<div class="li-sub">' + (p.town?esc(p.town)+' &middot; ':'') + (p.since?'since '+p.since:'') + (p.games?' &middot; '+p.games+' games':'') + '</div></div>' +
+          '<button class="li-del" onclick="removePatron(\''+p.id+'\')">Remove</button></div>';
+      }).join('')
+    : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No patrons yet</div>';
+}
+function addPatron() {
+  var name = gv('fp-name');
+  if (!name) { toast('Enter a display name', true); return; }
+  var id = 'patron-' + Date.now();
+  var badges = gv('fp-badges').split(',').map(function(b){return b.trim();}).filter(Boolean);
+  patrons.unshift({ id:id, username:name, town:gv('fp-town'),
+    since:parseInt(gv('fp-since'))||'', games:parseInt(gv('fp-games'))||0,
+    quote:gv('fp-quote'), badges:badges, photo:'' });
+  if (document.getElementById('fp-fom').checked) fanOfMonth = id;
+  renderPatrons();
+  setVal('fp-name',''); setVal('fp-town',''); setVal('fp-since',''); setVal('fp-games',''); setVal('fp-quote',''); setVal('fp-badges','');
+  document.getElementById('fp-fom').checked = false;
+  toast(name + ' added ✓ — press Save');
+}
+function removePatron(id) {
+  if (!confirm('Remove this patron?')) return;
+  patrons = patrons.filter(function(p){return p.id!==id;});
+  if (fanOfMonth === id) fanOfMonth = '';
+  renderPatrons();
+}
+function savePatrons() {
+  pushToGitHub('patrons', { patrons: patrons, fanOfMonth: fanOfMonth, updatedAt: new Date().toISOString() }, 'dep-fanclub');
+  toast('Fan Club saved ✓');
+}
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
 

@@ -85,6 +85,7 @@ function buildNav(currentPage) {
     { label:'Gallery',     href:'gallery.html'    },
     { label:'History',     href:'history.html'    },
     { label:'Membership',  href:'membership.html' },
+    { label:'Fan Zone',    href:'fan-zone.html'   },
     { label:'Volunteer',   href:'volunteer.html'  },
     { label:'The Club',    href:'about.html'      },
     { label:'Contact',     href:'contact.html'    },
