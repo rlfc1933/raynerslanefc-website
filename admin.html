@@ -137,7 +137,15 @@
     .notif__ic{font-size:18px;flex-shrink:0;line-height:1.3}
     .notif__txt{font-family:var(--fb);font-size:13.5px;line-height:1.45;color:var(--w)}
     .notif__item.info .notif__txt{color:var(--gr)}
-    .notif__empty{padding:26px 16px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)}
+    .notif__empty{padding:18px 16px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)}
+    .notif__sub{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--y)}
+    .notif__clear{background:none;border:none;color:var(--gr);font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-decoration:underline}
+    .notif__item.news{align-items:flex-start}
+    .notif__item.news.seen{opacity:.5}
+    .notif__chk{flex-shrink:0;width:22px;height:22px;border-radius:6px;border:2px solid var(--br);background:var(--dk);color:#000;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;-webkit-tap-highlight-color:transparent}
+    .notif__chk.on{background:var(--su);border-color:var(--su)}
+    .notif__x{flex-shrink:0;background:none;border:none;color:var(--gr);font-size:20px;line-height:1;cursor:pointer;padding:0 2px;-webkit-tap-highlight-color:transparent}
+    .notif__x:hover{color:var(--re)}
     .dash{padding:18px 16px 60px;max-width:640px;margin:0 auto}
 
     .hq-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 20px;margin-bottom:18px;background:linear-gradient(135deg,var(--g) 0%,#0a1c10 60%,#06120a 100%);border:1px solid #21402b}
@@ -1384,19 +1392,69 @@ async function buildNotifs() {
   info.push({ i:'💛', t:'New fan & staff sign-ups land in Netlify → Forms — check for birthdays to celebrate.' });
   return { todos: todos, info: info };
 }
+// ── WHAT'S NEW (feature announcements; seen/dismissed kept per device) ──
+var WHATS_NEW = [
+  { id:'nf-livescore', i:'🔴', t:'Live Scoreboard', d:'Tap the score live during games — fans see it in ~20s. (Match Day tab)' },
+  { id:'nf-spotlight', i:'⭐', t:'Man of the Match & New Signing', d:'Feature your star or announce a signing on the home page.' },
+  { id:'nf-fanzone',   i:'💛', t:'Fan Zone & Lane Membership Cards', d:'Fans get a card, Lane number & loyalty hearts. New Fan Zone page.' },
+  { id:'nf-hearts',    i:'📷', t:'Award Hearts + QR Scanner', d:'Scan members\' cards at the gate to award yellow hearts. (Fan Club tab)' },
+  { id:'nf-fanclub',   i:'🏅', t:'Patrons Wall & Fan of the Month', d:'Champion your most loyal fans on the public wall.' },
+  { id:'nf-staff',     i:'👤', t:'Private Staff Profiles', d:'Emergency & medical details, stored privately for the club only.' },
+  { id:'nf-notif',     i:'🔔', t:'Notification Centre', d:'This bell — your match-day to-dos and new features.' },
+  { id:'nf-guides',    i:'📚', t:'Site Guide & The Lane Lowdown', d:'Every section explained + club facts and talking points.' },
+  { id:'nf-swot',      i:'📊', t:'SWOT & Risk', d:'A boardroom view of where the club stands.' },
+  { id:'nf-install',   i:'📲', t:'Install as an App', d:'Add the admin (and the public site) to your home screen.' },
+];
+function newsSeen()      { try { return JSON.parse(localStorage.getItem('rlfc_news_seen') || '[]'); } catch (e) { return []; } }
+function newsDismissed() { try { return JSON.parse(localStorage.getItem('rlfc_news_dismissed') || '[]'); } catch (e) { return []; } }
+function activeNews()    { var d = newsDismissed(); return WHATS_NEW.filter(function (n) { return d.indexOf(n.id) === -1; }); }
+function unseenNews()    { var s = newsSeen(), d = newsDismissed(); return WHATS_NEW.filter(function (n) { return d.indexOf(n.id) === -1 && s.indexOf(n.id) === -1; }); }
+function toggleNewsSeen(id) {
+  var s = newsSeen(), i = s.indexOf(id);
+  if (i === -1) s.push(id); else s.splice(i, 1);
+  localStorage.setItem('rlfc_news_seen', JSON.stringify(s));
+  refreshNotifs();
+}
+function dismissNews(id) {
+  var d = newsDismissed(); if (d.indexOf(id) === -1) d.push(id);
+  localStorage.setItem('rlfc_news_dismissed', JSON.stringify(d));
+  refreshNotifs();
+}
+function clearAllNews() {
+  localStorage.setItem('rlfc_news_dismissed', JSON.stringify(WHATS_NEW.map(function (n) { return n.id; })));
+  refreshNotifs();
+}
+
 async function refreshNotifs() {
   var data = await buildNotifs();
   var badge = document.getElementById('bell-badge');
+  var count = data.todos.length + unseenNews().length;
   if (badge) {
-    if (data.todos.length) { badge.style.display = 'flex'; badge.textContent = data.todos.length; }
+    if (count) { badge.style.display = 'flex'; badge.textContent = count; }
     else { badge.style.display = 'none'; }
   }
   var list = document.getElementById('notif-list');
   if (!list) return;
+  var seen = newsSeen();
+  // To-dos
   var html = data.todos.map(function(n){
     return '<button class="notif__item" onclick="toggleNotifs();openPanel(\''+n.a+'\')"><span class="notif__ic">'+n.i+'</span><span class="notif__txt">'+n.t+'</span></button>';
   }).join('');
-  if (!data.todos.length) html = '<div class="notif__empty">All caught up. Nice one. 💛</div>';
+  if (!data.todos.length) html += '<div class="notif__empty">No jobs to do right now. 💛</div>';
+  // What's New
+  var news = activeNews();
+  if (news.length) {
+    html += '<div class="notif__sub">✨ What\'s New <button class="notif__clear" onclick="clearAllNews()">Clear all</button></div>';
+    html += news.map(function(n){
+      var isSeen = seen.indexOf(n.id) > -1;
+      return '<div class="notif__item news' + (isSeen ? ' seen' : '') + '">' +
+        '<button class="notif__chk' + (isSeen ? ' on' : '') + '" title="Mark as seen" onclick="toggleNewsSeen(\''+n.id+'\')">' + (isSeen ? '✓' : '') + '</button>' +
+        '<span class="notif__txt"><strong>'+n.i+' '+n.t+'</strong><br><span style="color:var(--gr);font-size:12.5px">'+n.d+'</span></span>' +
+        '<button class="notif__x" title="Delete" onclick="dismissNews(\''+n.id+'\')">&times;</button>' +
+      '</div>';
+    }).join('');
+  }
+  // Standing info
   html += data.info.map(function(n){
     return '<div class="notif__item info"><span class="notif__ic">'+n.i+'</span><span class="notif__txt">'+n.t+'</span></div>';
   }).join('');
