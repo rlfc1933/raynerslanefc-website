@@ -1,15 +1,9 @@
 {
   "members": [
     {
-      "name": "Pete Singh",
-      "role": "Club Chairman",
-      "featured": true,
-      "photo": "img/committee/pete-singh.jpg"
-    },
-    {
       "name": "Nigel Hanlon",
       "role": "Vice Chairman",
-      "note": "Hanlon Dry Lining \u2014 Home Shirt Sponsor",
+      "note": "Hanlon Dry Lining — Home Shirt Sponsor",
       "photo": "img/committee/nigel-hanlon.jpg"
     },
     {
@@ -17,28 +11,39 @@
       "role": "Club President"
     },
     {
-      "name": "Jenny Pitt",
-      "role": "Club Secretary"
-    },
-    {
       "name": "Gary Pitt",
       "role": "First Team Manager"
     },
     {
+      "name": "Jenny Pitt",
+      "role": "Matchday Secretary",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Emma Galloway",
+      "role": "Club Secretary",
+      "note": "",
+      "featured": false
+    },
+    {
       "name": "Russell Nugent",
-      "role": "Committee"
+      "role": "Programme Editor",
+      "note": "",
+      "featured": false
     },
     {
-      "name": "Darren Nugent",
-      "role": "Committee"
+      "name": "Tony  Pratt",
+      "role": "Club Treasurer",
+      "note": "",
+      "featured": false
     },
     {
-      "name": "Tony Pratt",
-      "role": "Hospitality"
-    },
-    {
-      "name": "Pete Singh",
-      "role": "Club Welfare Officer"
+      "name": "DARREN NUGENT",
+      "role": "PROGRAMME EDITOR",
+      "note": "",
+      "featured": false
     }
-  ]
+  ],
+  "updatedAt": "2026-06-14T19:59:22.529Z"
 }
