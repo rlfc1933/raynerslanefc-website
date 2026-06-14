@@ -375,32 +375,47 @@ function renderFanCard() {
         '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--lgrey,#bbb)">🔒 ' + esc(r.title) + '</div>' +
         '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey)">' + (r.home - home) + ' more home game' + ((r.home - home) > 1 ? 's' : '') + ' to unlock</div>' + powered + '</div>';
     }).join('') + '</div>';
+  var avatar = f.photo
+    ? '<img class="vipcard__av" src="' + f.photo + '" alt="">'
+    : '<div class="vipcard__av">' + esc(initials) + '</div>';
+  var metaLine = (f.handle ? '@' + esc(f.handle) + ' &middot; ' : '') +
+    (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '');
   mount.innerHTML =
-    '<div class="fancard" id="lane-card">' +
-      '<div class="memcard__bar">' +
-        '<img class="memcard__badge" src="img/badge.png" alt="RLFC">' +
-        '<div style="flex:1"><div class="memcard__title">The Lane Membership</div><div class="memcard__no">No. ' + esc(laneNo) + '</div></div>' +
-        '<span class="fancard__tier">' + (tier.icon ? tier.icon + ' ' : '') + esc(tier.name) + '</span>' +
+    // ── the card itself (this is what "Save to Phone" captures) ──
+    '<div class="vipcard" id="lane-card">' +
+      '<div class="vipcard__crestbg"></div><div class="vipcard__sheen"></div>' +
+      '<div class="vipcard__head">' +
+        '<img class="vipcard__crest" src="img/badge.png" alt="Rayners Lane FC">' +
+        '<div class="vipcard__brand"><div class="vipcard__club">Rayners Lane FC</div><div class="vipcard__estd">Official Member &middot; Est. 1933</div></div>' +
+        '<span class="vipcard__tier">' + (tier.icon ? tier.icon + ' ' : '') + esc(tier.name) + '</span>' +
       '</div>' +
-      '<div class="fancard__top">' + photo +
-        '<div class="fancard__id">' +
-          '<div class="fancard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
-          '<div class="fancard__since">' + (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '') + '</div>' +
-          (isFounding(f) ? '<div style="display:inline-block;margin-top:7px;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0d0d0d;background:linear-gradient(90deg,#fff3bf,var(--yellow));border-radius:4px;padding:3px 9px">⭐ Founding Laner</div>' : '') +
+      '<div class="vipcard__body">' + avatar +
+        '<div class="vipcard__who">' +
+          '<div class="vipcard__vlabel">Valued Member</div>' +
+          '<div class="vipcard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
+          '<div class="vipcard__meta">' + metaLine + '</div>' +
+          (isFounding(f) ? '<div class="vipcard__founding">⭐ Founding Laner</div>' : '') +
         '</div>' +
       '</div>' +
+      '<div class="vipcard__strip">' +
+        '<div class="vipcard__no"><span>Lane No.</span><b>' + esc(laneNo) + '</b></div>' +
+        '<div class="vipcard__qr"><img id="memcard-qr" alt="Membership QR"></div>' +
+      '</div>' +
+      '<div class="vipcard__foot">Show at the turnstile &middot; raynerslanefc.co.uk</div>' +
+    '</div>' +
+    // ── everything else lives below the card, not on it ──
+    '<div class="fz-extras">' +
       heartsRow +
-      '<div class="fancard__stats">' +
+      '<div class="fancard__stats" style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);margin-top:8px">' +
         '<div class="fancard__stat"><div class="fancard__num">' + games + '</div><div class="fancard__lbl">Hearts</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + home + '</div><div class="fancard__lbl">At Home</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + nextMilestone(games) + '</div><div class="fancard__lbl">To Next Tier</div></div>' +
       '</div>' +
-      (f.meaning ? '<div class="fancard__meaning">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
-      nextHtml + rewardsHtml +
-      '<div class="memcard__qr"><img id="memcard-qr" alt="Membership QR code"><div class="memcard__qrnote">Show at the turnstile to collect your 💛</div></div>' +
-      '<div class="fancard__foot">' +
+      (f.meaning ? '<div class="fancard__meaning" style="padding:14px 2px 4px">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
+      '<div style="margin-top:10px">' + nextHtml + rewardsHtml + '</div>' +
+      '<div class="fancard__foot" style="padding:6px 0 0">' +
         '<button class="fz-btn fz-btn--y" onclick="saveToPhone()">📲 Save to Phone</button>' +
-        '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Card</button>' +
+        '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Profile</button>' +
       '</div>' +
     '</div>';
   renderQR('memcard-qr', 'RLFC LANE-' + laneNo + ' ' + (f.username || ''));
