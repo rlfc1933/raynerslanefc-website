@@ -13,6 +13,7 @@
   <link rel="apple-touch-icon" href="img/badge.png">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -334,6 +335,16 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M5 4a2 2 0 0 1 2-2h12v18H7a2 2 0 0 0-2 2z"/><path d="M9 6h7M9 10h5"/></svg></span>
           <div class="tile-name">How To Guide</div><div class="tile-desc">Run the whole site</div>
+        </button>
+        <button class="tile" style="--accent:#0EA5E9" onclick="openPanel('siteguide')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.6 1.3c0 1.7-2.1 2-2.1 3.7"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></span>
+          <div class="tile-name">Site Guide</div><div class="tile-desc">Every section explained</div>
+        </button>
+        <button class="tile" style="--accent:#FBBF24" onclick="openPanel('lowdown')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5"/><path d="M8 13h7M8 16h5"/></svg></span>
+          <div class="tile-name">The Lane Lowdown</div><div class="tile-desc">Facts, history &amp; talking points</div>
         </button>
       </div>
 
@@ -913,6 +924,7 @@
       </div>
       <div class="field"><label class="fl">Home or Away</label><select id="at-ha"><option value="home">Home</option><option value="away">Away</option></select></div>
       <div class="field"><label class="fl">Lane Numbers attended (one per line or comma-separated)</label><textarea id="at-lanes" rows="3" placeholder="0427&#10;1183&#10;3902"></textarea></div>
+      <button class="save sec" onclick="openScanner()" style="background:var(--g);color:#fff;border:none">📷 Scan Member Cards at the Gate</button>
       <button class="save sec" onclick="addAttendance()">+ Award Hearts for this Match</button>
       <div class="div"></div>
       <div class="slbl" id="at-cnt">Matches Logged</div>
@@ -954,6 +966,130 @@
       <div class="snote"><p>Profiles arrive <strong style="color:var(--w)">privately</strong> at <strong>Netlify &rarr; your site &rarr; Forms &rarr; "staff-profile"</strong>. Only people with Netlify access can see them. Nothing here ever appears on the public website.</p></div>
     </div>
 
+    <!-- SITE GUIDE -->
+    <style>
+      .sg-card{background:var(--c);border:1px solid var(--br);border-left:3px solid var(--bl);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+      .sg-card h4{font-family:var(--fd);font-size:20px;letter-spacing:.03em;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+      .sg-w{display:grid;grid-template-columns:64px 1fr;gap:4px 10px;font-family:var(--fb);font-size:13px;line-height:1.5}
+      .sg-w b{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--bl);padding-top:2px}
+      .sg-w span{color:var(--lgrey,#bbb)}
+      .ld-card{background:linear-gradient(160deg,var(--c),var(--dk));border:1px solid var(--br);border-radius:12px;padding:16px 18px;margin-bottom:10px}
+      .ld-card h4{font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--y);margin-bottom:10px}
+      .ld-fact{display:flex;gap:10px;font-family:var(--fb);font-size:13.5px;color:#ccc;line-height:1.5;padding:5px 0}
+      .ld-fact b{color:#fff}
+      .ld-q{font-family:var(--fb);font-style:italic;font-size:13.5px;color:var(--lgrey,#bbb);line-height:1.5;padding:6px 0 6px 14px;border-left:2px solid rgba(255,209,0,.4);margin-bottom:6px}
+    </style>
+    <div class="panel" id="panel-siteguide">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128218; Site Guide</div></div>
+      <div class="snote" style="border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.06)"><p>What every part of the website is — in plain English. The <strong style="color:var(--w)">who / what / why / when / where / how</strong> of each section.</p></div>
+
+      <div class="sg-card"><h4>🔴 Match Day &amp; Live Scoreboard</h4><div class="sg-w">
+        <b>What</b><span>Sets the next fixture and the live score on the home page.</span>
+        <b>Who</b><span>Pete / Russell — whoever's at the ground.</span>
+        <b>When</b><span>Before every game; tap the score live during the match.</span>
+        <b>Where</b><span>Shows top of the home page + the "Next Match" badge.</span>
+        <b>Why</b><span>Fans follow the score on their phone from the terrace.</span>
+        <b>How</b><span>Set opponent + home/away, Activate, then +/- the score.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>📰 Programme</h4><div class="sg-w">
+        <b>What</b><span>The matchday programme notes &amp; preview.</span>
+        <b>Who</b><span>Russell, the night before a home game.</span>
+        <b>When</b><span>Before each home match.</span>
+        <b>Where</b><span>The Programme page.</span>
+        <b>Why</b><span>A proper programme makes us look the part.</span>
+        <b>How</b><span>Fill the notes boxes, Save.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>⚽ Squad &amp; Player Profiles</h4><div class="sg-w">
+        <b>What</b><span>The team list + each player's photo, bio &amp; stats.</span>
+        <b>Who</b><span>Gary (manager) for the squad; staff for profiles.</span>
+        <b>When</b><span>Pre-season and whenever the squad changes.</span>
+        <b>Where</b><span>Squad page; tapping a player opens their profile.</span>
+        <b>Why</b><span>Fans support people — give them someone to cheer.</span>
+        <b>How</b><span>Add players &amp; positions, then add full profiles.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>📢 Club News &amp; Match Reports</h4><div class="sg-w">
+        <b>What</b><span>Articles and post-match write-ups.</span>
+        <b>Who</b><span>Russell / anyone with news.</span>
+        <b>When</b><span>Whenever something happens; after every game.</span>
+        <b>Where</b><span>News page + the home page.</span>
+        <b>Why</b><span>A live, updated club looks alive and ambitious.</span>
+        <b>How</b><span>Write a headline + article, Publish.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>⭐ Spotlight — MOTM &amp; New Signing</h4><div class="sg-w">
+        <b>What</b><span>Floating cards near the home hero.</span>
+        <b>Who</b><span>Any staff member.</span>
+        <b>When</b><span>After each game (MOTM); when you sign someone.</span>
+        <b>Where</b><span>Top of the home page.</span>
+        <b>Why</b><span>Instant "wow" content fans love to share.</span>
+        <b>How</b><span>Add a name (+ photo), Save. Newest shows.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>🤝 Sponsors &amp; 📸 Gallery</h4><div class="sg-w">
+        <b>What</b><span>Partner logos and match photos.</span>
+        <b>Who</b><span>Commercial / media staff.</span>
+        <b>When</b><span>When partners change; after games for photos.</span>
+        <b>Where</b><span>Home page partners band; Gallery page.</span>
+        <b>Why</b><span>Showcasing sponsors keeps them happy &amp; paying.</span>
+        <b>How</b><span>Add the sponsor / upload photos, Save.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>💛 Fan Zone, Membership &amp; Hearts</h4><div class="sg-w">
+        <b>What</b><span>Free fan membership cards, loyalty hearts &amp; the patrons wall.</span>
+        <b>Who</b><span>Fans build their own card; staff award hearts &amp; champion patrons.</span>
+        <b>When</b><span>Award hearts after every game from the turnstile list.</span>
+        <b>Where</b><span>Fan Zone page (public); Fan Club tab (admin).</span>
+        <b>Why</b><span>Fans who feel valued come back — and sponsor us.</span>
+        <b>How</b><span>Scan / enter Lane numbers, Award Hearts, Save.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>📊 Analytics &amp; 📅 Social Media</h4><div class="sg-w">
+        <b>What</b><span>Attendance/takings charts (chairman) + the social playbook.</span>
+        <b>Who</b><span>Chairman for analytics; all staff for social.</span>
+        <b>When</b><span>Log analytics after each game; post to socials weekly.</span>
+        <b>Where</b><span>Admin only (internal tools).</span>
+        <b>Why</b><span>Run the club like a business; grow the audience.</span>
+        <b>How</b><span>Enter the match numbers / follow the social plan.</span>
+      </div></div>
+    </div>
+
+    <!-- THE LANE LOWDOWN -->
+    <div class="panel" id="panel-lowdown">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9917; The Lane Lowdown</div></div>
+      <div class="snote" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)"><p>Know what you're representing. A few facts &amp; talking points about Rayners Lane FC — handy with fans, sponsors and new faces.</p></div>
+
+      <div class="ld-card"><h4>The Basics</h4>
+        <div class="ld-fact">🗓️ <span><b>Founded 1933</b> — over 90 years a part of Harrow.</span></div>
+        <div class="ld-fact">🏟️ <span>Home is <b>Tithe Farm Social Club</b>, 151 Rayners Lane, Harrow HA2 0XH — minutes from Rayners Lane Underground (Piccadilly &amp; Metropolitan lines).</span></div>
+        <div class="ld-fact">🏆 <span>2026-27: <b>Combined Counties Premier Division North</b>, Step 5 of the football pyramid.</span></div>
+        <div class="ld-fact">💛 <span>Colours: <b>yellow &amp; green</b>. Nickname: <b>"The Lane"</b>.</span></div>
+        <div class="ld-fact">🛡️ <span><b>FA Charter Standard</b> Community Club, affiliated to Middlesex FA &amp; The FA. A members' section of Tithe Farm Sports &amp; Social Club Ltd.</span></div>
+      </div>
+
+      <div class="ld-card"><h4>The People</h4>
+        <div class="ld-fact">👑 <span><b>Pete Singh</b> — Chairman, driving the new era.</span></div>
+        <div class="ld-fact">📋 <span><b>Gary Pitt</b> — First Team Manager, building the 2026-27 squad.</span></div>
+        <div class="ld-fact">🤝 <span><b>Nigel Hanlon</b> — Vice Chairman (Hanlon Dry Lining, home shirt sponsor).</span></div>
+        <div class="ld-fact">📝 <span><b>Jenny Pitt</b> — Club Secretary &amp; Welfare Officer.</span></div>
+      </div>
+
+      <div class="ld-card"><h4>Conversation Starters</h4>
+        <div class="ld-q">"Did you know The Lane's been going since 1933? That's over 90 years in Harrow."</div>
+        <div class="ld-q">"We're a proper community club — a members' section of Tithe Farm, run by volunteers who love it."</div>
+        <div class="ld-q">"New chairman, new manager, new era — and a website that's levels above where we play."</div>
+        <div class="ld-q">"Grab a free Lane membership card — every game you come to, you collect a yellow heart and earn rewards."</div>
+        <div class="ld-q">"Fancy backing us? Sponsor a matchball or a matchday — we'll shout you out everywhere."</div>
+      </div>
+
+      <div class="ld-card"><h4>The Vision</h4>
+        <div class="ld-fact">🚀 <span>Run a Step 5 club with the polish of a professional one — and if The Lane ever grows, everything's already built to grow with it.</span></div>
+        <div class="ld-fact">💬 <span><b>Yellow first. The Lane always. Community built, Harrow proud.</b></span></div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
@@ -980,6 +1116,20 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- QR SCANNER (turnstile) -->
+<div class="lock-screen" id="scan-screen">
+  <div class="lock-card" style="max-width:380px">
+    <div style="font-family:var(--fd);font-size:24px;letter-spacing:.03em;margin-bottom:4px">📷 Scan Member Cards</div>
+    <p style="font-family:var(--fc);font-size:12.5px;color:var(--gr);margin-bottom:14px">Point the camera at each member's QR code. Hearts are queued — press Done when finished.</p>
+    <div id="qr-reader" style="width:100%;border-radius:10px;overflow:hidden;background:#000"></div>
+    <div id="scan-count" style="font-family:var(--fd);font-size:22px;color:var(--y);margin:12px 0 4px">0 scanned</div>
+    <div id="scan-list" style="font-family:var(--fc);font-size:12px;color:var(--w);max-height:80px;overflow:auto;margin-bottom:12px"></div>
+    <button class="save" onclick="finishScanner()">✓ Done — Add to Match</button>
+    <button class="save sec" style="margin-top:8px" onclick="closeScanner()">Cancel</button>
+    <div id="scan-err" class="lock-err"></div>
   </div>
 </div>
 
@@ -1995,6 +2145,47 @@ function removeAttendance(id) {
 function saveAttendance() {
   pushToGitHub('attendance', { matches: attendance, updatedAt: new Date().toISOString() }, 'dep-attendance');
   toast('Hearts saved ✓');
+}
+
+// ── QR SCANNER (turnstile) — reads member cards, queues Lane numbers ──
+var _scanner = null, _scanned = [];
+function openScanner() {
+  if (typeof Html5Qrcode === 'undefined') { toast('Scanner still loading — try again in a second', true); return; }
+  _scanned = [];
+  document.getElementById('scan-screen').classList.add('on');
+  document.getElementById('scan-count').textContent = '0 scanned';
+  document.getElementById('scan-list').innerHTML = '';
+  document.getElementById('scan-err').textContent = '';
+  _scanner = new Html5Qrcode('qr-reader');
+  _scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 220 }, onScan, function(){})
+    .catch(function(e){ document.getElementById('scan-err').textContent = 'Camera unavailable: ' + e + '. Type the numbers in instead.'; });
+}
+function onScan(text) {
+  var m = String(text).match(/LANE-?(\d+)/i);
+  var lane = m ? m[1] : (/^\d+$/.test(text.trim()) ? text.trim() : '');
+  if (!lane || _scanned.indexOf(lane) > -1) return;
+  _scanned.push(lane);
+  document.getElementById('scan-count').textContent = _scanned.length + ' scanned';
+  document.getElementById('scan-list').innerHTML = _scanned.map(function(l){ return '💛 ' + l; }).join('&nbsp;&nbsp;');
+  if (navigator.vibrate) navigator.vibrate(60);
+  toast('Lane ' + lane + ' ✓');
+}
+function stopScanner(cb) {
+  if (_scanner) { _scanner.stop().then(function(){ _scanner.clear(); _scanner = null; if (cb) cb(); }).catch(function(){ _scanner = null; if (cb) cb(); }); }
+  else if (cb) cb();
+}
+function closeScanner() { stopScanner(function(){ document.getElementById('scan-screen').classList.remove('on'); }); }
+function finishScanner() {
+  var add = _scanned.slice();
+  stopScanner(function(){
+    document.getElementById('scan-screen').classList.remove('on');
+    if (!add.length) return;
+    var ex = gv('at-lanes');
+    var existing = ex ? ex.split(/[\s,]+/).filter(Boolean) : [];
+    add.forEach(function(l){ if (existing.indexOf(l) === -1) existing.push(l); });
+    setVal('at-lanes', existing.join('\n'));
+    toast(add.length + ' card' + (add.length>1?'s':'') + ' added ✓');
+  });
 }
 
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
