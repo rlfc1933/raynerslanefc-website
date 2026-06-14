@@ -959,8 +959,9 @@
       <div class="dep" id="dep-attendance"></div>
 
       <div class="div"></div>
-      <div class="slbl">Private Sign-Ups (birthdays, emails)</div>
-      <div class="snote"><p>When fans "Join the Family List" on the Fan Zone, their name, email &amp; birthday arrive <strong style="color:var(--w)">privately</strong> in Netlify. Read them at <strong>Netlify &rarr; your site &rarr; Forms &rarr; "fan-signup"</strong>. Never shown on the website. Use them to send birthday treats, free tickets &amp; event invites.</p></div>
+      <div class="slbl">🔒 Fan Sign-Ups <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— private: names, emails, birthdays</span></div>
+      <div class="snote"><p>Everyone who "Joins the Family List" on the Fan Zone lands here <strong style="color:var(--w)">privately</strong> — never shown on the public site. Use it for birthday treats, free tickets &amp; event invites. <button onclick="loadFanSignups()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0">Refresh list ↻</button></p></div>
+      <div id="fansignups"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap "Refresh list" to load your sign-ups.</div></div>
     </div>
 
     <!-- STAFF & MANAGEMENT (private profiles) -->
@@ -1313,12 +1314,18 @@ function pd() {
   document.getElementById('perr').textContent = '';
   renderDots();
 }
+function enterApp() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadAll();
+  initDash();
+}
 function checkPin() {
   if (pinVal === PIN) {
-    document.getElementById('pin-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadAll();
-    initDash();
+    // Stay signed in across reloads + the device back button for this browser
+    // session (clears when the tab/app is closed). Fixes "back logs me out".
+    try { sessionStorage.setItem('rlfc_admin_ok', '1'); } catch (e) {}
+    enterApp();
   } else {
     document.getElementById('perr').textContent = 'Wrong PIN — try again';
     pinVal = '';
@@ -1327,12 +1334,19 @@ function checkPin() {
   }
 }
 function lock() {
+  try { sessionStorage.removeItem('rlfc_admin_ok'); } catch (e) {}
   document.getElementById('app').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
   pinVal = '';
   renderDots();
-  back();
+  showDash();
 }
+// Already signed in this session? Skip the PIN screen on reload / back-forward.
+(function () {
+  function boot() { try { if (sessionStorage.getItem('rlfc_admin_ok') === '1') enterApp(); } catch (e) {} }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
 
 // ── NAVIGATION ──
 function openPanel(name) {
@@ -1342,6 +1356,9 @@ function openPanel(name) {
   var p = document.getElementById('panel-' + name);
   if (p) p.classList.add('on');
   window.scrollTo(0, 0);
+  // Push a history entry so the phone's back gesture (and the browser back
+  // button) returns to the dashboard instead of leaving the admin entirely.
+  try { if (!(history.state && history.state.panel === name)) history.pushState({ panel: name }, '', '#' + name); } catch (e) {}
   if (name === 'squad')     renderSquad();
   if (name === 'committee') renderCommittee();
   if (name === 'sponsors')  renderSponsors();
@@ -1351,13 +1368,26 @@ function openPanel(name) {
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
-  if (name === 'fanclub')   { renderPatrons(); renderAttendance(); }
+  if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
 }
-function back() {
+// Show the dashboard without touching history (used by popstate + lock).
+function showDash() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
-  document.getElementById('dash-home').style.display = 'block';
+  var dh = document.getElementById('dash-home');
+  if (dh) dh.style.display = 'block';
   initDash();
 }
+// The in-app "← Back" button: pop the history entry so the device back button
+// stays in sync; fall back to just showing the dashboard.
+function back() {
+  if (history.state && history.state.panel) { history.back(); return; }
+  showDash();
+}
+// Device / browser back button → return to dashboard while inside the app.
+window.addEventListener('popstate', function () {
+  var app = document.getElementById('app');
+  if (app && app.style.display !== 'none') showDash();
+});
 // Greeting + live status on the dashboard hero
 function initDash() {
   var g = document.getElementById('hq-greet');
@@ -2212,6 +2242,48 @@ function saveSigning() { pushToGitHub('signing', { entries: signings, updatedAt:
 
 // ── FAN CLUB / PATRONS ──
 var patrons = [];
+// ── FAN SIGN-UPS (private — pulled from Netlify Forms via list-fans function) ──
+var _fansLoading = false;
+async function loadFanSignups() {
+  var el = document.getElementById('fansignups');
+  if (!el || _fansLoading) return;
+  _fansLoading = true;
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading sign-ups…</div>';
+  try {
+    var r = await fetch('/.netlify/functions/list-fans', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN })
+    });
+    var d = await r.json();
+    if (!d.ok && d.error === 'no-token') {
+      el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">One-time setup needed.</strong> To show sign-ups here, add a <strong>NETLIFY_API_TOKEN</strong> in Netlify → Site configuration → Environment variables. Create the token at Netlify → User settings → Applications → Personal access tokens. Until then, find sign-ups at Netlify → Forms → "fan-signup".</p></div>';
+      return;
+    }
+    if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load sign-ups (' + esc(d.error || 'error') + '). Try Refresh.</div>'; return; }
+    if (!d.fans || !d.fans.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No sign-ups yet — they\'ll appear here the moment a fan joins.</div>'; return; }
+
+    document.getElementById('fp-cnt'); // noop keep
+    var rows = d.fans.map(function (f) {
+      var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      var sub = [];
+      if (f.town) sub.push(esc(f.town));
+      if (f.birthday) sub.push('🎂 ' + esc(f.birthday));
+      if (f.since) sub.push('fan since ' + esc(String(f.since)));
+      if (f.lane_number) sub.push('Lane #' + esc(String(f.lane_number)));
+      return '<div class="li"><span class="li-num">🔒</span><div class="li-main">' +
+        '<div class="li-name">' + esc(f.name || '—') + '</div>' +
+        '<div class="li-sub"><a href="mailto:' + esc(f.email) + '" style="color:var(--y)">' + esc(f.email || '') + '</a>' + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div>' +
+        (f.meaning ? '<div class="li-sub" style="font-style:italic;margin-top:3px">"' + esc(f.meaning) + '"</div>' : '') +
+        '</div><span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
+    }).join('');
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' sign-up' + (d.count === 1 ? '' : 's') + ' &middot; newest first</div>' + rows;
+  } catch (e) {
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server. Check your connection and tap Refresh.</div>';
+  } finally {
+    _fansLoading = false;
+  }
+}
+
 var fanOfMonth = '';
 function renderPatrons() {
   var el = document.getElementById('fp-list');
