@@ -213,6 +213,25 @@
     .pb-mission__d{font-family:var(--fb);font-size:13px;color:#cfcfcf;line-height:1.6;margin-bottom:9px}
     .pb-mission__a{display:flex;gap:9px;align-items:flex-start;background:rgba(255,209,0,.07);border-radius:8px;padding:9px 11px;font-family:var(--fb);font-size:12.5px;color:#f1e7c2;line-height:1.5}
     .pb-mission__a b{color:var(--y);font-family:var(--fc);font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;padding-top:1px}
+    .pb-mission__o{display:flex;gap:9px;align-items:flex-start;background:rgba(34,197,94,.08);border-radius:8px;padding:9px 11px;margin-top:7px;font-family:var(--fb);font-size:12.5px;color:#cfe9d6;line-height:1.5}
+    .pb-mission__o b{color:#4ade80;font-family:var(--fc);font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;padding-top:1px}
+    /* Committee Meetings */
+    .mt-snap{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    .mt-snap .s{flex:1;min-width:84px;background:linear-gradient(165deg,var(--c),var(--dk));border:1px solid var(--br);border-radius:11px;padding:12px 6px;text-align:center}
+    .mt-snap .s b{display:block;font-family:var(--fd);font-size:22px;color:var(--y);line-height:1}
+    .mt-snap .s span{font-family:var(--fc);font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gr);margin-top:5px;display:block}
+    .mt-card{border:1px solid var(--br);border-radius:11px;background:var(--c);margin-bottom:9px;overflow:hidden}
+    .mt-card>summary{list-style:none;cursor:pointer;padding:14px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .mt-card>summary::-webkit-details-marker{display:none}
+    .mt-card>summary::after{content:"+";color:var(--y);font-size:23px;font-weight:300;flex-shrink:0;line-height:1}
+    .mt-card[open]>summary::after{content:"\2212"}
+    .mt-card__t{font-family:var(--fd);font-size:17px;color:#fff;letter-spacing:.02em}
+    .mt-card__d{font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:2px}
+    .mt-card__b{padding:0 15px 15px}
+    .mt-blk{margin-top:12px}
+    .mt-blk h5{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin:0 0 5px}
+    .mt-blk p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0;white-space:pre-wrap}
+    .mt-del{background:none;border:none;color:#ef6b6b;font-family:var(--fc);font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:12px;padding:0}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -525,6 +544,11 @@
         <button class="tile tile-wide" style="--accent:#34D399" onclick="openPanel('clubstats')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-6"/><circle cx="7" cy="15" r="1"/><circle cx="10" cy="12" r="1"/><circle cx="13" cy="14" r="1"/></svg></span>
           <div class="tile-body"><div class="tile-name">Club Analytics</div><div class="tile-desc">Fan Zone, sponsorship, income &amp; programmes — open to all staff</div></div>
+          <span class="tile-badge">All Staff</span>
+        </button>
+        <button class="tile tile-wide" style="--accent:#A78BFA" onclick="openPanel('meetings')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H7l-3 3z"/><path d="M8 9h8M8 13h5"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Committee Meetings</div><div class="tile-desc">Minutes, decisions &amp; next steps — write one up, opens with the live numbers</div></div>
           <span class="tile-badge">All Staff</span>
         </button>
         <button class="tile tile-wide" style="--accent:#FFD100" onclick="openPanel('analytics')">
@@ -1449,6 +1473,32 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);text-align:center;margin-top:14px">Updates as the season runs — log match takings in Match Day Analytics, award hearts in Fan Club.</p>
     </div>
 
+    <!-- COMMITTEE MEETINGS -->
+    <div class="panel" id="panel-meetings">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128221; Committee Meetings</div></div>
+      <div class="snote" style="border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)"><p>The club's <strong style="color:var(--w)">minute book</strong>, shared with every staff member. Write up each meeting — who came, what was discussed, what was decided, and who's doing what next. Open a meeting with the live numbers below so everyone sees where we stand.</p></div>
+
+      <div class="slbl">📊 Where we stand right now <button onclick="loadMeetingSnapshot()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh ↻</button></div>
+      <div class="mt-snap" id="mt-snap"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">Loading…</div></div>
+
+      <div class="div"></div>
+      <div class="slbl">➕ Write up a meeting</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="mt-date"></div>
+        <div class="field"><label class="fl">Title</label><input type="text" id="mt-title" placeholder="June Committee Meeting"></div>
+      </div>
+      <div class="field"><label class="fl">Who attended</label><input type="text" id="mt-att" placeholder="Pete, Nigel, Jenny, Gary…"></div>
+      <div class="field"><label class="fl">Subjects covered</label><textarea id="mt-subj" rows="3" placeholder="One per line — e.g.&#10;Pre-season sponsorship push&#10;100 Club launch&#10;Matchday roles for game one"></textarea></div>
+      <div class="field"><label class="fl">Decisions / outcomes</label><textarea id="mt-out" rows="3" placeholder="What did we agree? e.g.&#10;Agreed to print 15 advertising boards&#10;Quiz night booked for 12 July"></textarea></div>
+      <div class="field"><label class="fl">Next steps — who does what</label><textarea id="mt-next" rows="3" placeholder="e.g.&#10;Nigel — approach 5 firms for boards by next meeting&#10;Jenny — start Football Foundation grant"></textarea></div>
+      <button class="save sec" onclick="addMeeting()">+ Save this meeting</button>
+      <div class="dep" id="dep-meetings"></div>
+
+      <div class="div"></div>
+      <div class="slbl" id="mt-cnt">Past meetings</div>
+      <div id="mt-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">No meetings written up yet.</div></div>
+    </div>
+
     <!-- THE LANE BUSINESS PLAYBOOK -->
     <div class="panel" id="panel-playbook">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128176; Business Playbook</div></div>
@@ -1615,6 +1665,9 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
           <div class="ib-row"><label>Grants won per year (£)<span class="ib-u">lumpy — don't bank on it</span></label><input type="number" min="0" data-unit="1" value="0" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
           <div class="ib-tot"><div class="l">Your projected income<small>You choose the figures — make them honest</small></div><div class="v"><span id="ib-year">£0</span><small><span id="ib-month">£0</span> / month</small></div></div>
         </div>
+        <button class="save" style="margin-top:12px" onclick="saveIncomePlan()">💾 Save this plan (shared with the committee)</button>
+        <p style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:8px 2px 0">Saved plans load for everyone and show in the Committee Meetings tab — perfect for talking through the target together.</p>
+        <div class="dep" id="dep-plan"></div>
       </div></details>
 
       <!-- 8. WHERE TO START -->
@@ -1630,13 +1683,13 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <!-- 9. EVERYONE'S PART -->
       <details class="pb-sec"><summary>🎯 Your mission — pick your corner</summary><div class="pb-sec__b">
         <p class="pb-sec__lead">No one here takes a wage, so nobody can carry this alone — and nobody should sit on the bench either. Find your role, own it, and put your wins on the board above. This is where you matter.</p>
-        <div class="pb-mission"><div class="pb-mission__r">Chairman</div><div class="pb-mission__d">You hold the vision and the relationships money can't buy. The big asks and the serious backers are yours.</div><div class="pb-mission__a"><b>This week</b><span>Line up one face-to-face with a local business owner you already know — and bring the pitch from above.</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Vice Chairman / Commercial</div><div class="pb-mission__d">You own local business — boards, match sponsors, the Sponsor Hub pipeline. You're the one who fills the perimeter.</div><div class="pb-mission__a"><b>This week</b><span>Make the one-page board offer and target 5 firms. Log every "yes" on the Wins Board.</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Treasurer</div><div class="pb-mission__d">You watch the money and tell everyone, plainly, how we're doing. Clean books are what win an investor's trust.</div><div class="pb-mission__a"><b>This week</b><span>Open Club Analytics and set the simple monthly figure everyone reports to.</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Secretary</div><div class="pb-mission__d">You own the grant applications and the admin. Free money is a paperwork job for someone organised — that's you.</div><div class="pb-mission__a"><b>This week</b><span>Find and start <em>one</em> grant application (Football Foundation or Middlesex FA).</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Marketing / Social</div><div class="pb-mission__d">You drive the fans and the following and run the social roadmap. A loud club gets sponsors; a quiet one gets forgotten.</div><div class="pb-mission__a"><b>This week</b><span>Post three times using the captions in the Social tab. Pick the flagship channel and commit.</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Matchday team</div><div class="pb-mission__d">Gate, programme, 50/50, food — each needs a named owner every single home game. That's what turns a fixture into income.</div><div class="pb-mission__a"><b>This week</b><span>Put a name against each matchday job for game one. No gaps.</span></div></div>
-        <div class="pb-mission"><div class="pb-mission__r">Everyone on the committee</div><div class="pb-mission__d">Whatever your title, you can bring <b>one thing</b>. One board. Ten lottery members. One event. One business through the door.</div><div class="pb-mission__a"><b>This week</b><span>Decide your one thing — then log it on the Wins Board when it's done.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Chairman</div><div class="pb-mission__d">You hold the vision and the relationships money can't buy. The big asks and the serious backers are yours.</div><div class="pb-mission__a"><b>This week</b><span>Line up one face-to-face with a local business owner you already know — and bring the pitch from above.</span></div><div class="pb-mission__o"><b>All season</b><span>Chair the monthly meeting, hold everyone to the plan, own the headline-sponsor &amp; investor conversations, and keep morale high when results dip.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Vice Chairman / Commercial</div><div class="pb-mission__d">You own local business — boards, match sponsors, the Sponsor Hub pipeline. You're the one who fills the perimeter.</div><div class="pb-mission__a"><b>This week</b><span>Make the one-page board offer and target 5 firms. Log every "yes" on the Wins Board.</span></div><div class="pb-mission__o"><b>All season</b><span>Keep the Sponsor Hub moving every week, line up a match/ball sponsor for each home game, and renew every board before it lapses.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Treasurer</div><div class="pb-mission__d">You watch the money and tell everyone, plainly, how we're doing. Clean books are what win an investor's trust.</div><div class="pb-mission__a"><b>This week</b><span>Open Club Analytics and set the simple monthly figure everyone reports to.</span></div><div class="pb-mission__o"><b>All season</b><span>Bring the numbers to every meeting, log takings after each game, watch the spend, and build a small reserve so a bad month never sinks us.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Secretary</div><div class="pb-mission__d">You own the grant applications and the admin. Free money is a paperwork job for someone organised — that's you.</div><div class="pb-mission__a"><b>This week</b><span>Find and start <em>one</em> grant application (Football Foundation or Middlesex FA).</span></div><div class="pb-mission__o"><b>All season</b><span>Keep grant applications rolling, handle FA/league admin, and write up every committee meeting in the Meetings tab so nothing slips.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Marketing / Social</div><div class="pb-mission__d">You drive the fans and the following and run the social roadmap. A loud club gets sponsors; a quiet one gets forgotten.</div><div class="pb-mission__a"><b>This week</b><span>Post three times using the captions in the Social tab. Pick the flagship channel and commit.</span></div><div class="pb-mission__o"><b>All season</b><span>Post to the weekly rhythm without fail, grow the following, and promote every event, the 100 Club and each matchday.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Matchday team</div><div class="pb-mission__d">Gate, programme, 50/50, food — each needs a named owner every single home game. That's what turns a fixture into income.</div><div class="pb-mission__a"><b>This week</b><span>Put a name against each matchday job for game one. No gaps.</span></div><div class="pb-mission__o"><b>All season</b><span>Run the gate, 50/50, food &amp; programme at every home game, count the takings, and make each matchday warmer and busier than the last.</span></div></div>
+        <div class="pb-mission"><div class="pb-mission__r">Everyone on the committee</div><div class="pb-mission__d">Whatever your title, you can bring <b>one thing</b>. One board. Ten lottery members. One event. One business through the door.</div><div class="pb-mission__a"><b>This week</b><span>Decide your one thing — then log it on the Wins Board when it's done.</span></div><div class="pb-mission__o"><b>All season</b><span>Keep selling the lottery, sharing the posts and inviting locals — and put every win, big or small, on the board.</span></div></div>
       </div></details>
 
       <!-- 10. WHY DIFFERENT -->
@@ -2077,7 +2130,8 @@ function openPanel(name) {
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'clubstats') loadClubStats();
   if (name === 'settings')  runSystemCheck();
-  if (name === 'playbook')  { buildJumpNav(); calcIncome(); loadWins(); }
+  if (name === 'playbook')  { buildJumpNav(); loadIncomePlan(); loadWins(); }
+  if (name === 'meetings')  { loadMeetings(); loadMeetingSnapshot(); }
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -2176,6 +2230,7 @@ var WHATS_NEW = [
   { id:'nf-officials', i:'⚖️', t:'Editable policy names', d:'Change the Welfare Officer, Chairman or Secretary once → every mention on the Policies page updates. (Club Roles tab)' },
   { id:'nf-playbook',  i:'💰', t:'The Lane Business Playbook', d:'How to grow the club\'s income — real examples from clubs like us, honest revenue ideas, grants & every role\'s part. Pinned at the top: Start Here.' },
   { id:'nf-winsboard', i:'🏆', t:'The Wins Board is live', d:'Landed something for The Lane — a board, lottery members, a sponsor\'s yes? Put your name on the Wins Board (top of the Business Playbook). Watch it grow.' },
+  { id:'nf-meetings',  i:'📝', t:'Committee Meetings tab', d:'The club\'s shared minute book — write up who attended, what was discussed, decisions & next steps. Opens with the live numbers. (Boardroom)' },
 ];
 function newsSeen()      { try { return JSON.parse(localStorage.getItem('rlfc_news_seen') || '[]'); } catch (e) { return []; } }
 function newsDismissed() { try { return JSON.parse(localStorage.getItem('rlfc_news_dismissed') || '[]'); } catch (e) { return []; } }
@@ -2810,6 +2865,86 @@ function pbCelebrate() {
       setTimeout(function () { s.remove(); }, dur);
     })(i);
   }
+}
+
+// ── INCOME PLAN — save/load the calculator so it persists & shows in meetings ──
+function ibInputs() { return [].slice.call(document.querySelectorAll('#ib .ib-row input')); }
+function saveIncomePlan() {
+  var vals = ibInputs().map(function (i) { return i.value; });
+  pushToGitHub('committee-plan', { ib: vals, updatedAt: new Date().toISOString() }, 'dep-plan');
+  toast('Plan saved &amp; shared ✓');
+}
+function loadIncomePlan() {
+  fetchJSON('committee-plan', function (d) {
+    if (d && d.ib && d.ib.length) {
+      var ins = ibInputs();
+      d.ib.forEach(function (v, i) { if (ins[i] != null && v !== '' && v != null) ins[i].value = v; });
+    }
+    calcIncome();
+  });
+}
+
+// ── COMMITTEE MEETINGS (data/meetings.json, shared) ──
+var meetings = [];
+function loadMeetings() { fetchJSON('meetings', function (d) { meetings = (d && d.meetings) || []; renderMeetings(); }); }
+function mtBlock(title, text) {
+  if (!text || !String(text).trim()) return '';
+  return '<div class="mt-blk"><h5>' + title + '</h5><p>' + esc(text) + '</p></div>';
+}
+function renderMeetings() {
+  var el = document.getElementById('mt-list'); if (!el) return;
+  var cnt = document.getElementById('mt-cnt'); if (cnt) cnt.textContent = 'Past meetings (' + meetings.length + ')';
+  if (!meetings.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">No meetings written up yet.</div>'; return; }
+  el.innerHTML = meetings.map(function (m) {
+    var d = m.date ? new Date(m.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    return '<details class="mt-card"><summary><div><div class="mt-card__t">' + esc(m.title || 'Meeting') + '</div><div class="mt-card__d">' + d + (m.attendees ? ' &middot; ' + esc(m.attendees) : '') + '</div></div></summary>' +
+      '<div class="mt-card__b">' +
+        mtBlock('Who attended', m.attendees) +
+        mtBlock('Subjects covered', m.subjects) +
+        mtBlock('Decisions / outcomes', m.outcomes) +
+        mtBlock('Next steps', m.nextSteps) +
+        '<button class="mt-del" onclick="deleteMeeting(\'' + m.id + '\')">Delete this record</button>' +
+      '</div></details>';
+  }).join('');
+}
+function addMeeting() {
+  var title = gv('mt-title');
+  if (!title) { toast('Give the meeting a title', true); return; }
+  meetings.unshift({
+    id: 'm' + Date.now(),
+    date: gv('mt-date') || new Date().toISOString().slice(0, 10),
+    title: title, attendees: gv('mt-att'),
+    subjects: gv('mt-subj'), outcomes: gv('mt-out'), nextSteps: gv('mt-next')
+  });
+  renderMeetings();
+  setVal('mt-title', ''); setVal('mt-att', ''); setVal('mt-subj', ''); setVal('mt-out', ''); setVal('mt-next', ''); setVal('mt-date', '');
+  pushToGitHub('meetings', { meetings: meetings, updatedAt: new Date().toISOString() }, 'dep-meetings');
+  toast('Meeting saved ✓');
+}
+function deleteMeeting(id) {
+  if (!confirm('Delete this meeting record? This cannot be undone.')) return;
+  meetings = meetings.filter(function (m) { return m.id !== id; });
+  renderMeetings();
+  pushToGitHub('meetings', { meetings: meetings, updatedAt: new Date().toISOString() }, 'dep-meetings');
+}
+async function loadMeetingSnapshot() {
+  var el = document.getElementById('mt-snap'); if (!el) return;
+  function jget(name) { return new Promise(function (r) { fetchJSON(name, function (d) { r(d || {}); }); }); }
+  var w = await jget('committee-wins'), an = await jget('analytics'), att = await jget('attendance');
+  var winsArr = w.wins || [];
+  var brought = winsArr.reduce(function (a, x) { return a + (parseFloat(x.amt) || 0); }, 0);
+  var income = (an.matches || []).reduce(function (a, m) { return a + matchTotal(m); }, 0);
+  var hearts = 0; (att.matches || []).forEach(function (m) { hearts += (m.lanes || []).length; });
+  var fans = '—';
+  try { var fr = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) }); var fd = await fr.json(); if (fd && fd.ok && typeof fd.count === 'number') fans = fd.count; } catch (e) {}
+  var cards = [
+    { n: winsArr.length, l: 'Wins logged' },
+    { n: '£' + Math.round(brought).toLocaleString('en-GB'), l: 'Brought in' },
+    { n: fans, l: 'Fans signed up' },
+    { n: '£' + Math.round(income).toLocaleString('en-GB'), l: 'Matchday income' },
+    { n: hearts, l: 'Hearts awarded' },
+  ];
+  el.innerHTML = cards.map(function (c) { return '<div class="s"><b>' + c.n + '</b><span>' + c.l + '</span></div>'; }).join('');
 }
 
 // Tap any caption template to copy it to the clipboard.
