@@ -1,76 +1,71 @@
-// Rayners Lane FC — automatic fixtures from the Football Web Pages API
-// (the data source Combined Counties publishes results through).
+// Rayners Lane FC — live fixtures & results.
+// Primary source: TheSportsDB (free, open, no key, not bot-blocked) — team
+// id 148927. Returns the next fixture (once the league publishes them) plus
+// recent results, so the home page / fixtures page update themselves.
 //
-// Activates when these Netlify environment variables are set:
-//   FWP_API_KEY   – a free RapidAPI key for the "Football Web Pages" API
-//   FWP_TEAM_ID   – Rayners Lane's team id on Football Web Pages
+// Optional upgrade: set FWP_API_KEY + FWP_TEAM_ID (Football Web Pages API) for
+// the league's official data — but TheSportsDB works with zero setup.
 //
-// Until then it returns {configured:false} and the site falls back to the
-// fixture the staff set manually in the admin Match Day tab. Nothing breaks.
-//
-// Returns: { configured, next: {opponent,date,kickoff,isHome,competition},
-//            results: [...], fetchedAt }
+// Returns: { next: {opponent,date,kickoff,isHome,competition} | null,
+//            results: [{date,opponent,isHome,us,them,competition}],
+//            badge, fetchedAt }
 
-const HOST = 'football-web-pages1.p.rapidapi.com';
+const SDB = 'https://www.thesportsdb.com/api/v1/json/3';
+const TEAM = process.env.SDB_TEAM_ID || '148927';
 const RLFC = /rayners\s*lane/i;
 
 function resp(code, obj) {
   return {
     statusCode: code,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=600',     // cache 10 min
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=900', 'Access-Control-Allow-Origin': '*' },
     body: JSON.stringify(obj),
   };
 }
 
+function mapEvent(e) {
+  if (!e) return null;
+  const home = e.strHomeTeam || '', away = e.strAwayTeam || '';
+  const isHome = RLFC.test(home);
+  const opponent = (isHome ? away : home) || 'TBC';
+  const time = (e.strTime || '15:00:00').slice(0, 5);
+  const hs = e.intHomeScore, as = e.intAwayScore;
+  const played = hs !== null && hs !== undefined && hs !== '';
+  return {
+    opponent: opponent,
+    date: e.dateEvent || '',
+    kickoff: time,
+    isHome: isHome,
+    competition: e.strLeague || '',
+    us: played ? Number(isHome ? hs : as) : null,
+    them: played ? Number(isHome ? as : hs) : null,
+  };
+}
+
 exports.handler = async function () {
-  const key = process.env.FWP_API_KEY;
-  const team = process.env.FWP_TEAM_ID;
-  if (!key || !team) {
-    return resp(200, { configured: false, reason: 'Set FWP_API_KEY and FWP_TEAM_ID in Netlify to auto-pull fixtures.' });
-  }
-
   try {
-    const r = await fetch('https://' + HOST + '/fixtures-results.json?team=' + encodeURIComponent(team), {
-      headers: { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': HOST },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) return resp(200, { configured: true, error: 'FWP API ' + r.status });
-    const data = await r.json();
+    const opts = { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'RaynersLaneFC/1.0' } };
+    const [nextRes, lastRes, teamRes] = await Promise.all([
+      fetch(SDB + '/eventsnext.php?id=' + TEAM, opts).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(SDB + '/eventslast.php?id=' + TEAM, opts).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch(SDB + '/lookupteam.php?id=' + TEAM, opts).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+    ]);
 
-    // The API returns fixtures-results.matches[] with home/away teams + status.
-    const matches = (data['fixtures-results'] && data['fixtures-results'].matches) || data.matches || [];
     const now = Date.now();
-    let next = null;
-    const results = [];
+    const upcoming = (nextRes.events || [])
+      .map(mapEvent).filter(Boolean)
+      .filter(m => m.date && new Date(m.date + 'T' + m.kickoff + ':00').getTime() > now - 6 * 3600000)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const next = upcoming[0] || null;
 
-    matches.forEach(function (m) {
-      const home = (m['home-team'] && m['home-team'].name) || m.home || '';
-      const away = (m['away-team'] && m['away-team'].name) || m.away || '';
-      const date = m.date || (m.kickoff && m.kickoff.slice(0, 10)) || '';
-      const time = (m.time || (m.kickoff && m.kickoff.slice(11, 16)) || '15:00');
-      const isHome = RLFC.test(home);
-      const opponent = isHome ? away : home;
-      const status = (m.status && (m.status.full || m.status)) || '';
-      const ts = date ? new Date(date + 'T' + time + ':00').getTime() : 0;
+    const results = (lastRes.results || [])
+      .map(mapEvent).filter(m => m && m.us !== null)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 6);
 
-      const hs = m['home-team'] && m['home-team'].score;
-      const as = m['away-team'] && m['away-team'].score;
-      const played = (hs !== undefined && hs !== null && hs !== '') || /ft|full/i.test(String(status));
+    const badge = (teamRes.teams && teamRes.teams[0] && teamRes.teams[0].strBadge) || '';
 
-      if (played) {
-        results.push({ opponent, isHome, date, homeScore: hs, awayScore: as, competition: m.competition || '' });
-      } else if (ts && ts > now && (!next || ts < next._ts)) {
-        next = { opponent: opponent, date: date, kickoff: time, isHome: isHome, competition: m.competition || '', _ts: ts };
-      }
-    });
-
-    if (next) delete next._ts;
-    return resp(200, { configured: true, next: next, results: results.slice(-5).reverse(), fetchedAt: new Date().toISOString() });
+    return resp(200, { source: 'TheSportsDB', next: next, results: results, badge: badge, fetchedAt: new Date().toISOString() });
   } catch (e) {
-    return resp(200, { configured: true, error: 'Could not reach fixtures API: ' + e.message });
+    return resp(200, { source: 'TheSportsDB', next: null, results: [], error: e.message });
   }
 };

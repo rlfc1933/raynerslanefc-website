@@ -61,13 +61,14 @@ async function loadMatchDay() {
 
   var m = Object.assign({}, defaults, matchday || {});
 
-  // AUTO-FIXTURES: if the Football Web Pages feed is configured, let the real
-  // league fixture set the next match + countdown automatically (overrides the
-  // manual one). A live match the staff have toggled always takes priority.
+  // AUTO-FIXTURES: the live feed (TheSportsDB) sets the next match + countdown
+  // automatically the moment the league publishes fixtures. A live match the
+  // staff have toggled always takes priority; manual matchday.json is fallback.
   if (!m.isLive) {
     try {
       var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
-      if (fx && fx.configured && fx.next && fx.next.opponent) {
+      window._rlfcFixtures = fx; // share with the results renderer
+      if (fx && fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
         m.opponent = fx.next.opponent;
         m.isHome = fx.next.isHome;
         m.competition = fx.next.competition || m.competition;
@@ -105,7 +106,41 @@ async function loadMatchDay() {
 
   // Countdown
   startCountdown(m.date);
+
+  // Live results from the feed (TheSportsDB)
+  renderHomeFixtures(window._rlfcFixtures);
 }
+
+// Render the next fixture + recent results from the live feed into the home
+// fixtures block. Falls back to the static "coming soon" markup if no data.
+function renderHomeFixtures(fx) {
+  var el = document.getElementById('home-fixtures');
+  if (!el || !fx) return;
+  var rows = '';
+  if (fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
+    var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
+    var ds = d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+    rows += '<div class="fixture-row" style="grid-template-columns:1fr auto;align-items:center">' +
+      '<div><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px">Next Match</div>' +
+      '<div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:#fff">Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + fix_esc(fx.next.opponent) + '</div></div>' +
+      '<div style="font-family:var(--font-c);font-size:13px;color:var(--grey);text-align:right">' + ds + '<br>' + (fx.next.kickoff || '15:00') + '</div></div>';
+  }
+  if (fx.results && fx.results.length) {
+    rows += '<div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);padding:14px 0 6px">Recent Results</div>';
+    rows += fx.results.slice(0, 4).map(function (r) {
+      var win = r.us > r.them, draw = r.us === r.them;
+      var col = win ? '#22C55E' : (draw ? '#FBBF24' : '#EF4444');
+      var rd = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+      return '<div class="fixture-row" style="grid-template-columns:1fr auto;align-items:center">' +
+        '<div style="font-family:var(--font-c);font-size:14px;color:#fff;letter-spacing:.03em">Rayners Lane ' + (r.isHome ? 'vs ' : '@ ') + fix_esc(r.opponent) +
+        ' <span style="color:var(--grey);font-size:11px">&middot; ' + rd + '</span></div>' +
+        '<div style="font-family:var(--font-d);font-size:20px;color:' + col + ';letter-spacing:.06em">' + r.us + '–' + r.them + '</div></div>';
+    }).join('');
+    rows += '<div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em;padding-top:8px">Results via TheSportsDB</div>';
+  }
+  if (rows) el.innerHTML = rows;
+}
+function fix_esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function startCountdown(dateStr) {
   var el = document.getElementById('countdown');
