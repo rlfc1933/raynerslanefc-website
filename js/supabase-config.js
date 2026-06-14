@@ -8,6 +8,6 @@
    Paste it into `url` and real accounts go live. Blank `url` = on-device card.
    ───────────────────────────────────────────────────────────────────────── */
 window.RLFC_SUPABASE = {
-  url: '',  // ← paste your Project URL here (e.g. https://xxxx.supabase.co)
+  url: 'https://rewkixywfgsyqinfbggv.supabase.co',
   anonKey: 'sb_publishable_7Iwtr1OlGo-VeysFkLcwcw_JjDU6DWE'
 };

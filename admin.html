@@ -14,6 +14,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script src="js/supabase-config.js"></script>
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -3555,13 +3557,42 @@ var patrons = [];
 // ── FAN SIGN-UPS (private — pulled from Netlify Forms via list-fans function) ──
 var _fansLoading = false;
 var _memberList = [];
+function renderMemberRows(mem, label) {
+  _memberList = mem;
+  if (!mem.length) return '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No members yet — they appear here the moment a fan creates an account in the Fan Zone.</div>';
+  return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + mem.length + ' ' + label + (mem.length === 1 ? '' : 's') + ' &middot; tap to open a profile</div>' +
+    mem.map(function (f, i) {
+      var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      var sub = [];
+      if (f.username) sub.push('@' + escH(f.username));
+      if (f.town) sub.push(escH(f.town));
+      if (f.lane_no) sub.push('Lane #' + escH(String(f.lane_no)));
+      return '<div class="li" style="cursor:pointer" onclick="openMemberProfile(' + i + ')"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + escH(f.name || f.username || '—') + '</div>' +
+        '<div class="li-sub">' + escH(f.email || '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div></div>' +
+        '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + ' &rsaquo;</span></div>';
+    }).join('');
+}
 async function loadFanSignups() {
   var el = document.getElementById('fansignups');
   if (!el || _fansLoading) return;
   _fansLoading = true;
   el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading members…</div>';
   try {
-    // 1) Real Lane accounts (Supabase). If configured, this is the source of truth.
+    // 0) Real Lane accounts via Supabase (direct, PIN-gated RPC — no extra setup).
+    try {
+      var sbc = window.RLFC_SUPABASE || {};
+      if (sbc.url && sbc.anonKey) {
+        var sr = await fetch(sbc.url + '/rest/v1/rpc/admin_members', { method: 'POST', headers: { apikey: sbc.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+        if (sr.ok) {
+          var sd = await sr.json();
+          if (Array.isArray(sd)) {
+            el.innerHTML = renderMemberRows(sd.map(function (m) { return { name: m.name, username: m.username, email: m.email, town: m.town, since: m.since, meaning: m.meaning, lane_no: m.lane_no, created: m.created_at }; }), 'Lane member');
+            _fansLoading = false; return;
+          }
+        }
+      }
+    } catch (e) {}
+    // 1) Real Lane accounts (Supabase via Netlify function, if that route is set up).
     try {
       var mr = await fetch('/.netlify/functions/list-members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
       var md = await mr.json();
@@ -3642,9 +3673,32 @@ function openMemberProfile(i) {
       '<div><div style="font-family:var(--fd);font-size:24px;letter-spacing:.02em;color:#fff;line-height:1.05">' + escH(name) + '</div>' +
         (lane ? '<div style="font-family:var(--fc);font-size:11px;color:var(--y);letter-spacing:.06em;margin-top:3px">LANE #' + escH(String(lane)) + '</div>' : '') + '</div>' +
     '</div>' + rows +
-    (f.email ? '<a href="mailto:' + escH(f.email) + '" class="save sec" style="display:block;text-align:center;text-decoration:none;margin-top:16px">✉️ Email ' + escH(name.split(' ')[0]) + '</a>' : '') +
+    (lane ? '<div style="text-align:center;margin-top:16px"><div style="font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:7px">Membership QR &middot; scan at the gate</div><span style="display:inline-block;background:#fff;padding:9px;border-radius:10px"><img id="mem-qr" width="128" height="128" alt="Membership QR"></span></div>' : '') +
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">' +
+      '<button class="save" onclick="featureMember(' + i + ')">⭐ Feature on the Patrons Wall</button>' +
+      (f.email ? '<a href="mailto:' + escH(f.email) + '" class="save sec" style="display:block;text-align:center;text-decoration:none">✉️ Email ' + escH(name.split(' ')[0]) + '</a>' : '') +
+    '</div>' +
     '</div>';
   ov.style.display = 'flex';
+  if (lane && typeof qrcode !== 'undefined') {
+    try { var qr = qrcode(0, 'M'); qr.addData('RLFC LANE-' + lane + ' ' + name); qr.make(); var img = document.getElementById('mem-qr'); if (img) img.src = qr.createDataURL(5, 6); } catch (e) {}
+  }
+}
+// Champion a member on the public Patrons Wall (safe fields only — no email).
+function featureMember(i) {
+  var f = _memberList[i]; if (!f) return;
+  if (!confirm('Add ' + (f.name || f.username || 'this member') + ' to the public Patrons Wall? Only their name, town & fan-since show — never their email.')) return;
+  patrons.unshift({
+    id: 'patron-' + Date.now(),
+    username: f.name || f.username || 'Lane Fan',
+    town: f.town || '',
+    since: parseInt(f.since) || '',
+    games: 0, quote: f.meaning || '', badges: [], photo: ''
+  });
+  renderPatrons();
+  savePatrons();
+  var ov = document.getElementById('mem-modal'); if (ov) ov.style.display = 'none';
+  toast('Added to the Patrons Wall ✓ — live in ~30s');
 }
 
 var fanOfMonth = '';
