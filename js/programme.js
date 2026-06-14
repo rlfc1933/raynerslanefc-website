@@ -182,7 +182,53 @@ async function loadProgramme() {
   } catch(e) { renderSquad([]); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initComponents('programme.html');
+// ── LIVE LEAGUE TABLE + FIXTURES (own feed — replaces the dead FWP embeds) ──
+function progEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+async function loadProgrammeLiveData() {
+  var tableEl = document.getElementById('prog-table');
+  var fixEl   = document.getElementById('prog-fixtures');
+
+  if (tableEl) {
+    try {
+      var t = await (await fetch('/.netlify/functions/fetch-table')).json();
+      if (t && t.table && t.table.length) {
+        var rows = t.table.map(function (r) {
+          return '<tr class="' + (r.rlfc ? 'me' : '') + '"><td>' + r.pos + '</td><td>' + progEsc(r.team) +
+            '</td><td>' + r.pld + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l +
+            '</td><td>' + r.gd + '</td><td><strong>' + r.pts + '</strong></td></tr>';
+        }).join('');
+        tableEl.innerHTML = '<table><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      }
+    } catch (e) {}
+  }
+
+  if (fixEl) {
+    try {
+      var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
+      var html = '';
+      if (fx && fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
+        var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
+        var ds = d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+        html += '<div class="mag-res"><span style="color:var(--yellow)">Next &middot; Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + progEsc(fx.next.opponent) + '</span><span style="color:var(--grey)">' + ds + ' ' + (fx.next.kickoff || '15:00') + '</span></div>';
+      }
+      if (fx && fx.results && fx.results.length) {
+        html += fx.results.slice(0, 6).map(function (r) {
+          var col = r.us > r.them ? '#22C55E' : (r.us === r.them ? '#FBBF24' : '#EF4444');
+          var rd = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+          return '<div class="mag-res"><span>Rayners Lane ' + (r.isHome ? 'vs ' : '@ ') + progEsc(r.opponent) +
+            ' <span style="color:var(--grey)">&middot; ' + rd + '</span></span><b style="color:' + col + '">' + r.us + '–' + r.them + '</b></div>';
+        }).join('');
+      }
+      if (html) fixEl.innerHTML = html;
+    } catch (e) {}
+  }
+}
+
+function progInit() {
+  try { initComponents('programme.html'); } catch (e) {}
   loadProgramme();
-});
+  loadProgrammeLiveData();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', progInit);
+else progInit();

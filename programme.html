@@ -302,6 +302,35 @@
       display:flex; align-items:center; justify-content:space-between;
     }
 
+    /* Live data (league table + fixtures) — rendered from our own feed */
+    .mag-live { padding:6px 0; }
+    .mag-live-soon {
+      padding:40px 24px; text-align:center;
+      font-family:var(--font-c); font-size:13px; letter-spacing:.04em;
+      color:var(--grey); line-height:1.6;
+    }
+    .mag-live table { width:100%; border-collapse:collapse; }
+    .mag-live th {
+      font-family:var(--font-c); font-size:9px; font-weight:700;
+      letter-spacing:.12em; text-transform:uppercase; color:var(--grey);
+      text-align:right; padding:10px 8px; border-bottom:1px solid var(--border);
+    }
+    .mag-live th:nth-child(2) { text-align:left; }
+    .mag-live td {
+      font-family:var(--font-c); font-size:13px; color:var(--white);
+      text-align:right; padding:9px 8px; border-bottom:1px solid var(--border);
+    }
+    .mag-live td:nth-child(2) { text-align:left; font-weight:600; }
+    .mag-live tr.me td { background:rgba(255,209,0,.1); color:var(--yellow); }
+    .mag-live tr.me td:nth-child(2) { color:var(--yellow); font-weight:800; }
+    .mag-live .mag-res {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:13px 16px; border-bottom:1px solid var(--border);
+      font-family:var(--font-c); font-size:13px; color:var(--white); letter-spacing:.02em;
+    }
+    .mag-live .mag-res:last-child { border-bottom:none; }
+    .mag-live .mag-res b { font-family:var(--font-d); font-size:18px; letter-spacing:.06em; }
+
     /* Chairman block */
     .mag-chairman {
       background:var(--dark); border:1px solid var(--border);
@@ -544,8 +573,7 @@
           <span>Combined Counties Premier Division North</span>
           <span style="color:var(--yellow)">&#x25CF; Live Data</span>
         </div>
-        <div class="fwp-embed" data-url="combined-counties-premier-north/league-table"></div>
-        <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+        <div id="prog-table" class="mag-live"><div class="mag-live-soon">The league table appears here once the 2026-27 season is under way.</div></div>
       </div>
     </div>
   </div>
@@ -561,7 +589,7 @@
           <span>Rayners Lane FC — All Competitions</span>
           <a href="fixtures.html" style="color:var(--yellow);font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sync to Phone &rarr;</a>
         </div>
-        <div class="fwp-embed" data-url="rayners-lane/fixtures-results"></div>
+        <div id="prog-fixtures" class="mag-live"><div class="mag-live-soon">Fixtures &amp; results appear here the moment the league publishes the 2026-27 schedule.</div></div>
       </div>
     </div>
   </div>

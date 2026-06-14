@@ -374,12 +374,27 @@ function initBgImagery() {
   setInterval(next, 7000);
 }
 
-document.addEventListener('DOMContentLoaded', initBgImagery);
+// Resilient: run now if the DOM is already parsed, else wait for it. A bare
+// addEventListener('DOMContentLoaded') silently no-ops if the event already
+// fired (e.g. after a service-worker reload) — which is exactly why the nav
+// used to vanish on some loads.
+function laneOnReady(fn) {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+  else fn();
+}
+
+laneOnReady(initBgImagery);
 
 
 
 
 function initComponents(currentPage) {
+  // Idempotent: whichever caller fires first (the page's own DOMContentLoaded
+  // handler OR the self-healing boot at the bottom of this file) builds the
+  // chrome exactly once. Prevents double nav/banners if both fire.
+  if (window._laneChromeReady) return;
+  window._laneChromeReady = true;
+
   // Google Search Console verification
   if (!document.querySelector('meta[name="google-site-verification"]')) {
     const gsc = document.createElement('meta');
@@ -546,3 +561,23 @@ function initComponents(currentPage) {
     else if (!menu.contains(e.target)) menu.classList.remove('open');
   });
 }
+
+// ── SELF-HEALING CHROME BOOT ────────────────────────────────────────────
+// Single source of truth: the nav + footer ALWAYS render on every page, even
+// if that page forgot to call initComponents (squad.html) or its own
+// DOMContentLoaded handler fired too late to attach. Derives the active page
+// from the URL so the correct tab highlights. initComponents is idempotent,
+// so a page's explicit call and this safety net never double-build.
+(function () {
+  function currentPageFile() {
+    var p = (location.pathname || '').split('/').pop();
+    return p && p.indexOf('.html') > -1 ? p : 'index.html';
+  }
+  function bootChrome() {
+    try {
+      var ph = document.getElementById('nav-placeholder');
+      if (ph && !window._laneChromeReady) initComponents(currentPageFile());
+    } catch (e) {}
+  }
+  laneOnReady(bootChrome);
+})();
