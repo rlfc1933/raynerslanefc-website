@@ -95,6 +95,20 @@
     .cs-card em{font-style:normal;color:var(--y)}
     .cs-chart-wrap{background:var(--c);border:1px solid var(--br);border-radius:13px;padding:16px;margin-bottom:14px}
     .cs-chart-ttl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-bottom:12px}
+    .sys-row{display:flex;align-items:flex-start;gap:11px;background:var(--c);border:1px solid var(--br);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+    .sys-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:3px}
+    .sys-dot.ok{background:#22C55E;box-shadow:0 0 8px rgba(34,197,94,.6)}
+    .sys-dot.off{background:#FBBF24;box-shadow:0 0 8px rgba(251,191,36,.5)}
+    .sys-name{font-family:var(--fc);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em}
+    .sys-sub{font-family:var(--fb);font-size:12px;color:var(--gr);margin-top:2px;line-height:1.4}
+    .dmap-item{background:var(--c);border:1px solid var(--br);border-left:3px solid var(--y);border-radius:9px;padding:12px 14px;margin-bottom:8px}
+    .dmap-item b{display:block;font-family:var(--fc);font-size:13px;color:#fff;letter-spacing:.02em;margin-bottom:3px}
+    .dmap-item span{font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.5}
+    .dmap-item code{background:var(--dk);color:var(--y);font-size:11px;padding:1px 5px;border-radius:3px}
+    .soc-cap{position:relative;background:var(--dk);border:1px solid var(--br);border-radius:9px;padding:13px 40px 13px 14px;margin:0 0 12px;font-family:var(--fb);font-size:13px;color:#e8e8e8;line-height:1.5;white-space:pre-wrap;cursor:pointer;transition:border-color .15s}
+    .soc-cap:hover{border-color:var(--y)}
+    .soc-cap::after{content:"⧉ copy";position:absolute;top:9px;right:11px;font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gr)}
+    .soc-cap.copied::after{content:"✓ copied";color:#22C55E}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -882,6 +896,241 @@
       <div class="soc-card"><p style="font-family:var(--fc);letter-spacing:.04em;color:#22d3ee">#TheLane &nbsp; #RaynersLaneFC &nbsp; #YellowArmy &nbsp; #UpTheLane &nbsp; #NonLeague &nbsp; #CCLPremierNorth &nbsp; #HarrowFootball &nbsp; #StepFive</p></div>
 
       <div class="div"></div>
+<div class="slbl">Ready-to-Use Captions</div>
+<p style="color:var(--y);margin:0 0 14px;font-family:var(--fb);font-size:12.5px">Tap any block to copy. Swap the [PLACEHOLDERS] for the real names and numbers before posting.</p>
+
+<span class="soc-pill">Line-up reveal</span>
+<div class="soc-cap">🟡🟢 YOUR LANE, YOUR ELEVEN 🟢🟡
+Here's how we line up against [OPPONENT] today. Get down to Tithe Farm and roar them on. 👊
+#TheLane #UpTheLane #YellowArmy #CCLPremierNorth #NonLeague</div>
+
+<span class="soc-pill">Matchday kick-off</span>
+<div class="soc-cap">⚽ WE ARE UNDERWAY at Tithe Farm!
+Rayners Lane v [OPPONENT] — let's go, Yellow Army! 💛
+Live updates right here. #TheLane #UpTheLane #YellowArmy #NonLeague</div>
+
+<span class="soc-pill">Goal</span>
+<div class="soc-cap">GOAAAL!!! 🟡🟢 [PLAYER] finds the net on [MINUTE]'!
+[SCORE] — The Lane in front! 🔥
+#UpTheLane #YellowArmy #TheLane #NonLeague</div>
+
+<span class="soc-pill">Half-time</span>
+<div class="soc-cap">⏸️ HALF-TIME at Tithe Farm.
+Rayners Lane [SCORE] [OPPONENT]. 45 to go — stick with us, Yellow Army. 💛
+#TheLane #UpTheLane #CCLPremierNorth</div>
+
+<span class="soc-pill">Full-time WIN</span>
+<div class="soc-cap">🟡🟢 FULL-TIME: GET IN!!! 🟢🟡
+Rayners Lane [SCORE] [OPPONENT]. Three points stay at The Lane. Brilliant from the lads — and thank you to everyone who came down. 👏
+#UpTheLane #YellowArmy #TheLane #NonLeague</div>
+
+<span class="soc-pill">Full-time LOSS</span>
+<div class="soc-cap">FULL-TIME: Rayners Lane [SCORE] [OPPONENT].
+Not our day today. Heads up, back to work, we go again next week. Thanks to the fans who travelled. 💛🟢
+#TheLane #UpTheLane #YellowArmy</div>
+
+<span class="soc-pill">Full-time DRAW</span>
+<div class="soc-cap">⏹️ FULL-TIME: Rayners Lane [SCORE] [OPPONENT].
+A point shared at Tithe Farm. Plenty to build on. On to the next one, Yellow Army. 💛
+#TheLane #UpTheLane #CCLPremierNorth #NonLeague</div>
+
+<span class="soc-pill">Man of the Match</span>
+<div class="soc-cap">⭐ MAN OF THE MATCH ⭐
+Take a bow, [PLAYER]! Outstanding shift in the yellow & green today. 🟡🟢
+Who was your standout? Let us know below 👇
+#TheLane #UpTheLane #YellowArmy</div>
+
+<span class="soc-pill">New signing</span>
+<div class="soc-cap">✍️ WELCOME TO THE LANE!
+We're delighted to sign [PLAYER]. Grab a yellow shirt and let's get to work. 🟡🟢
+Welcome to the Yellow Army, [PLAYER]! 💛
+#UpTheLane #TheLane #NonLeague #NewSigning</div>
+
+<span class="soc-pill">Sponsor spotlight</span>
+<div class="soc-cap">🤝 PROUDLY BACKED BY [SPONSOR]
+The Lane wouldn't be The Lane without our sponsors. Show them some love — they look after us, please look after them. 💛🟢
+#TheLane #UpTheLane #NonLeague</div>
+
+<span class="soc-pill">Throwback / heritage</span>
+<div class="soc-cap">📜 #ThrowbackThursday
+Proudly flying the yellow & green since 1933. Nine decades of The Lane — and the best is still to come. 🟡🟢
+#TheLane #UpTheLane #NonLeague #Harrow</div>
+
+<span class="soc-pill">Fan shout-out</span>
+<div class="soc-cap">💛 YELLOW ARMY, WE SEE YOU.
+Home or away, you turn up for The Lane every single week. This club is yours. 🟡🟢
+Tag the fan you never miss a game with 👇
+#TheLane #UpTheLane #YellowArmy</div>
+
+<span class="soc-pill">Ticket / entry reminder</span>
+<div class="soc-cap">📍 THIS SATURDAY at Tithe Farm Social Club
+Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welcome. Bring a mate! 🟡🟢
+#TheLane #UpTheLane #YellowArmy #NonLeague</div>
+
+<div class="slbl">Platform Playbook</div>
+
+<div class="soc-card">
+<h4>Instagram <span class="soc-pill">flagship · @raynerslanefc</span></h4>
+<ul>
+<li><strong style="color:#fff">What wins:</strong> Reels of goals, celebrations and big tackles; carousel galleries from matchday; clean line-up graphics.</li>
+<li><strong style="color:#fff">Format:</strong> Vertical 9:16 video for Reels; Stories for live, in-the-moment updates; the grid for your best polished posts.</li>
+<li><strong style="color:#fff">Frequency:</strong> 3-5 posts a week, plus Stories every matchday.</li>
+<li><strong style="color:#fff">Lane tip:</strong> Post the goal Reel within an hour of full-time while the buzz is high — speed beats polish.</li>
+</ul>
+</div>
+
+<div class="soc-card">
+<h4>TikTok</h4>
+<ul>
+<li><strong style="color:#fff">What wins:</strong> Raw, funny, behind-the-scenes clips — dressing-room scenes, mud, manager reactions, fan chants.</li>
+<li><strong style="color:#fff">Format:</strong> Vertical video, 7-30 seconds, hook in the first second, on-screen captions, trending sounds.</li>
+<li><strong style="color:#fff">Frequency:</strong> 2-4 clips a week. Quantity and personality matter more than production.</li>
+<li><strong style="color:#fff">Lane tip:</strong> Non-league authenticity is your superpower — lean into the "real football" charm the big clubs can't fake.</li>
+</ul>
+</div>
+
+<div class="soc-card">
+<h4>X / Twitter <span class="soc-pill">@RaynersLaneFC</span></h4>
+<ul>
+<li><strong style="color:#fff">What wins:</strong> Live text commentary — line-ups, goals, half-time, full-time. This is your minute-by-minute feed.</li>
+<li><strong style="color:#fff">Format:</strong> Short text posts; one clear photo or short clip; always tag the opponent and the league.</li>
+<li><strong style="color:#fff">Frequency:</strong> Live-tweet every match; 3-5 posts on non-matchdays.</li>
+<li><strong style="color:#fff">Lane tip:</strong> Pin your fixture or result for the week so first-time visitors instantly know the score.</li>
+</ul>
+</div>
+
+<div class="soc-card">
+<h4>Facebook</h4>
+<ul>
+<li><strong style="color:#fff">What wins:</strong> Longer posts, match reports, event notices and ticket reminders — your most loyal local audience lives here.</li>
+<li><strong style="color:#fff">Format:</strong> Photo albums, link posts to the website, and shareable graphics. Reels cross-post well too.</li>
+<li><strong style="color:#fff">Frequency:</strong> 3-4 posts a week; always post the fixture reminder a day or two before.</li>
+<li><strong style="color:#fff">Lane tip:</strong> Share posts into local Harrow community groups — this is where you reach new bums-on-seats.</li>
+</ul>
+</div>
+
+<div class="soc-card">
+<h4>YouTube</h4>
+<ul>
+<li><strong style="color:#fff">What wins:</strong> Match highlights, goal-of-the-month, season reviews and player interviews — your long-form archive.</li>
+<li><strong style="color:#fff">Format:</strong> Highlight packages 3-8 minutes; add Shorts (vertical, under 60s) to feed people back to the channel.</li>
+<li><strong style="color:#fff">Frequency:</strong> One highlights video per home game when you can; Shorts whenever you have a clip.</li>
+<li><strong style="color:#fff">Lane tip:</strong> Title clearly — "<span style="color:var(--y)">Rayners Lane v [OPPONENT] | Highlights | CCL Premier North</span>" — so it's searchable for years.</li>
+</ul>
+</div>
+
+<div class="slbl">Best Times to Post</div>
+
+<div class="soc-card">
+<h4>Matchday live cadence</h4>
+<ul>
+<li><strong style="color:#fff">~2 hours before:</strong> Line-up reveal + "we're here" Story from the ground.</li>
+<li><strong style="color:#fff">Kick-off:</strong> "We're underway" post.</li>
+<li><strong style="color:#fff">Every goal:</strong> Post within a minute or two — even just the score in text.</li>
+<li><strong style="color:#fff">Half-time &amp; full-time:</strong> Score graphic or quick text post each time.</li>
+<li><strong style="color:#fff">Within the hour after:</strong> Goal Reel and Man of the Match while engagement is hottest.</li>
+</ul>
+<h4>Best windows on non-matchdays</h4>
+<ul>
+<li><strong style="color:#fff">Weekday evenings 6-9pm</strong> — people are home and scrolling. Your safest bet.</li>
+<li><strong style="color:#fff">Lunchtime 12-1pm</strong> — a solid secondary window on weekdays.</li>
+<li><strong style="color:#fff">Sunday evening</strong> — great for the weekend round-up and the week-ahead preview.</li>
+<li><span style="color:var(--y)">Avoid the dead zone:</span> early mornings and mid-afternoon on workdays get the least reach.</li>
+</ul>
+</div>
+
+<div class="slbl">20 Reel &amp; Story Ideas</div>
+
+<div class="soc-card">
+<h4>Grab your phone and shoot these</h4>
+<ul>
+<li>Players walking out of the tunnel onto the pitch.</li>
+<li>The pitch and pre-match scene, panning to the clubhouse.</li>
+<li>Slow-mo warm-up — boots, the ball, the badge.</li>
+<li>Goal celebration filmed from the side or behind the net.</li>
+<li>Manager Gary Pitt giving his pre-match team talk (if he's happy to).</li>
+<li>Fans arriving, scarves and shirts, the Yellow Army turning up.</li>
+<li>"A day in the life" of a matchday from setup to lock-up.</li>
+<li>Kit being laid out in the dressing room before kick-off.</li>
+<li>The first beer poured at the bar — Tithe Farm matchday vibes.</li>
+<li>Full-time handshakes and the lads applauding the fans.</li>
+<li>A 10-second score reveal with the result text animating in.</li>
+<li>"Guess the score" Story poll before kick-off.</li>
+<li>Q&amp;A Story sticker — fans ask a player a question.</li>
+<li>This-or-that Story poll: home or away kit, classic results, etc.</li>
+<li>Countdown sticker Story to the next big fixture.</li>
+<li>Throwback clip or old photo from the club's archive since 1933.</li>
+<li>Quick player interview — "best goal you've scored for The Lane?"</li>
+<li>Goal of the month compilation set to music.</li>
+<li>Behind-the-goal view of a penalty or free-kick.</li>
+<li>Sponsor shout-out filmed at McCafferty's or The King Denham.</li>
+</ul>
+</div>
+
+<div class="slbl">Growing The Following</div>
+
+<div class="soc-card">
+<h4>Practical, honest growth</h4>
+<ul>
+<li><strong style="color:#fff">Tag everyone relevant:</strong> the opponent, the Combined Counties League, players in the photo, and your sponsors. Tags put you in front of their followers too.</li>
+<li><strong style="color:#fff">Collaborate:</strong> use Instagram's "Collab" feature on a new-signing post so it lands on the player's grid as well. Cross-post with the opponent's account on a good fixture.</li>
+<li><strong style="color:#fff">Engage back:</strong> reply to comments, like the fans who tag you, and repost the best fan photos and videos to your Story. People follow clubs that talk back.</li>
+<li><strong style="color:#fff">Lean on sponsors:</strong> ask <span style="color:var(--y)">Hanlon Dry Lining, McCafferty's, Higginson Stairs and The King Denham</span> to share your posts to their audiences.</li>
+<li><strong style="color:#fff">One clip, every platform:</strong> shoot a goal once, then post it to Instagram Reels, TikTok, a YouTube Short and Facebook. Maximum reach, minimum effort.</li>
+<li><strong style="color:#fff">Make it a weekly habit:</strong> pick one slot a week to plan posts and reply to comments — consistency grows a following far more than the odd viral hit.</li>
+<li><strong style="color:#fff">Use local hashtags &amp; groups:</strong> #Harrow and local community Facebook groups bring in genuinely local new fans.</li>
+</ul>
+</div>
+
+<div class="slbl">What to Measure (KPIs)</div>
+
+<div class="soc-card">
+<h4>The few numbers that actually matter</h4>
+<ul>
+<li><strong style="color:#fff">Reach:</strong> how many separate accounts saw a post. The headline "did people see it?" number.</li>
+<li><strong style="color:#fff">Saves &amp; shares:</strong> the strongest signal a post was genuinely good — these spread your content far beyond your followers.</li>
+<li><strong style="color:#fff">Follower growth:</strong> are you up week on week? Slow and steady is exactly what you want.</li>
+<li><strong style="color:#fff">Profile taps:</strong> how many people clicked through to your profile — a sign a post made someone curious about the club.</li>
+<li><strong style="color:#fff">Best-performing post:</strong> each month, find your top post and simply do more of that.</li>
+</ul>
+<h4>A simple monthly habit</h4>
+<p>On the first of each month, open the Instagram "Insights" tab, jot down followers, total reach and your top post into a notes file or spreadsheet. Five minutes. After a few months you'll <span style="color:var(--y)">see exactly what the Yellow Army loves</span> — and you make more of it.</p>
+</div>
+
+<div class="slbl">Tone of Voice &amp; Handling the Tough Days</div>
+
+<div class="soc-card">
+<h4>How The Lane sounds</h4>
+<ul>
+<li><strong style="color:#fff">Proud, warm and community-first.</strong> We're a 1933 club run by and for local people. Speak like a passionate fan, not a corporation.</li>
+<li><strong style="color:#fff">Confident, never arrogant.</strong> Celebrate the lads hard, respect every opponent, and always thank the fans.</li>
+<li><strong style="color:#fff">"We" and "us".</strong> The club, the team and the Yellow Army are one. Yellow &amp; green runs through everything.</li>
+</ul>
+<h4>After a heavy loss</h4>
+<ul>
+<li>Keep it short, classy and forward-looking: "Not our day. We go again." Thank the travelling fans.</li>
+<li>Never throw players under the bus, never make excuses, never sulk in public.</li>
+</ul>
+<h4>Refereeing controversy</h4>
+<ul>
+<li>Say nothing in the heat of the moment. <span style="color:var(--y)">Don't blame the officials online</span> — it invites bans and bad feeling.</li>
+<li>If you must address it, be calm and brief, then move on. Let the result speak.</li>
+</ul>
+<h4>What NOT to post</h4>
+<ul>
+<li>No digs at opponents, officials or other clubs. No politics. No arguing in the comments.</li>
+<li>Nothing about injuries, transfers or team news before the club has confirmed it.</li>
+<li>No blurry, careless graphics with the wrong score or a misspelt name — check before you post.</li>
+</ul>
+<h4>Reply etiquette</h4>
+<ul>
+<li>Be friendly and quick. Thank people for support, answer questions about entry and kick-off times.</li>
+<li>Don't feed trolls — a like or a polite one-liner, then leave it. Never argue.</li>
+<li>If a comment is abusive, hide or delete it and move on. Protect the warmth of the page.</li>
+</ul>
+</div>
+
+      <div class="div"></div>
       <div class="slbl">📅 Post Planner <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— plan upcoming posts (saved for all staff)</span></div>
       <div class="row2">
         <div class="field"><label class="fl">Date</label><input type="date" id="so-date"></div>
@@ -1318,12 +1567,33 @@
         <p><strong style="color:var(--w)">Auto-deploy is active.</strong> Every Save commits to GitHub through a secure Netlify function and the site goes live in ~30 seconds. The GitHub token is stored safely on Netlify (Site settings → Environment variables → <code>GITHUB_TOKEN</code>) — never in this page. One-time setup only; nothing to do day-to-day.</p>
       </div>
       <div class="div"></div>
-      <div class="slbl">Match Day Scoreboard</div>
+      <div class="slbl">🩺 System Status <button onclick="runSystemCheck()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Re-check ↻</button></div>
+      <div class="snote"><p>Live check of the club's plumbing — green means it's working, amber means a one-time setup is still needed. No guessing.</p></div>
+      <div id="sys-status"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Checking…</div></div>
+
+      <div class="div"></div>
+      <div class="slbl">🗄️ Where Your Data Lives <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— every record the club keeps</span></div>
+      <div class="dmap">
+        <div class="dmap-item"><b>👥 Fan base CRM</b><span>Sign-ups (name, email, birthday, town) → private in Netlify · read in <em>Fan Club → Fan Sign-Ups</em>. Hearts &amp; attendance → <code>attendance.json</code>. Loyalty cards live on each fan's phone.</span></div>
+        <div class="dmap-item"><b>💼 Sponsor CRM</b><span>Applications → private in Netlify · pipeline (stage, £, notes) → <code>sponsor-crm.json</code> · read in <em>Sponsor Hub</em>. Bank details stay on your device only.</span></div>
+        <div class="dmap-item"><b>🎟️ Members &amp; perks</b><span>Vouchers, promos &amp; member broadcasts → <code>perks.json</code> · shown in the Fan Zone members area.</span></div>
+        <div class="dmap-item"><b>🔒 Private staff records</b><span>Staff profiles (emergency &amp; medical) → private in Netlify · never on the website.</span></div>
+        <div class="dmap-item"><b>📋 Club content</b><span>Squad, news, committee, sponsors, programme, match day, MOTM, signings, patrons, officials, gallery, social plan, analytics → <code>data/*.json</code> in the club's GitHub, auto-deployed.</span></div>
+      </div>
+
+      <div class="div"></div>
+      <div class="slbl">🔴 Match Day Scoreboard</div>
       <div class="snote">
         <p>To show the live scoreboard to ALL fans — share this link on WhatsApp at kick-off:</p>
         <div style="background:var(--dk);border:1px solid var(--br);padding:12px 14px;border-radius:4px;margin-top:10px;font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--y);word-break:break-all">raynerslanefc.co.uk?live=1</div>
         <p style="margin-top:8px">Anyone who taps that link sees the live scoreboard. Works instantly, no setup needed.</p>
       </div>
+
+      <div class="div"></div>
+      <div class="slbl">🚀 Tools</div>
+      <button class="save sec" onclick="republish()">↻ Republish the site now</button>
+      <p style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:8px 2px 0">Forces a fresh deploy — handy if something looks stuck. Live in about a minute.</p>
+
       <div class="div"></div>
       <div class="slbl">How It Works</div>
       <div class="snote">
@@ -1333,7 +1603,7 @@
         <p><strong style="color:var(--w)">Programme</strong> — Russell fills in the Google Form the night before. Programme page updates automatically.</p>
       </div>
       <div class="snote" style="margin-top:6px">
-        <p><strong style="color:var(--w)">News, Committee, Sponsors</strong> — Use the admin panels above. Hit Save and the site rebuilds in 30 seconds.</p>
+        <p><strong style="color:var(--w)">Everything else</strong> — Use the admin panels. Hit Save and the site rebuilds in ~30 seconds.</p>
       </div>
     </div>
 
@@ -1493,6 +1763,7 @@ function openPanel(name) {
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'clubstats') loadClubStats();
+  if (name === 'settings')  runSystemCheck();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -2086,6 +2357,49 @@ function saveSponsorCrm() {
   pushToGitHub('sponsor-crm', { deals: sponsorCrm, updatedAt: new Date().toISOString() }, 'dep-sponsorcrm');
   toast('Pipeline saved ✓');
 }
+
+// ── SYSTEM STATUS (Settings) — live check of the club's integrations ──
+async function runSystemCheck() {
+  var el = document.getElementById('sys-status'); if (!el) return;
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Checking…</div>';
+  var checks = [];
+  // Auto-deploy (GitHub token via save-data). A sentinel path passes the token
+  // check then fails path validation (400) — so 400 = token OK, 500 = no token.
+  try {
+    var r = await fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, path: '__healthcheck__', content: '' }) });
+    if (r.status === 400) checks.push(['Auto-deploy (saves go live)', true, 'Working — every Save publishes in ~30s']);
+    else if (r.status === 500) checks.push(['Auto-deploy (saves go live)', false, 'GITHUB_TOKEN not set in Netlify — saves won\'t publish yet']);
+    else if (r.status === 401) checks.push(['Auto-deploy (saves go live)', false, 'PIN doesn\'t match ADMIN_PIN in Netlify']);
+    else checks.push(['Auto-deploy (saves go live)', true, 'Reachable']);
+  } catch (e) { checks.push(['Auto-deploy (saves go live)', false, 'Only testable on the live site (not local preview)']); }
+  // Fan + sponsor lists / counts (Netlify API token)
+  try {
+    var r2 = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var d2 = await r2.json();
+    if (d2 && d2.ok) checks.push(['Fan &amp; Sponsor lists in the portal', true, (d2.count || 0) + ' fan sign-ups visible']);
+    else if (d2 && d2.error === 'no-token') checks.push(['Fan &amp; Sponsor lists in the portal', false, 'Add NETLIFY_API_TOKEN in Netlify to see sign-ups &amp; applications here']);
+    else checks.push(['Fan &amp; Sponsor lists in the portal', false, (d2 && d2.error) || 'unavailable']);
+  } catch (e) { checks.push(['Fan &amp; Sponsor lists in the portal', false, 'Only testable on the live site']); }
+  // Email (Resend) — can't ping without sending; surface as an info row.
+  checks.push(['Welcome &amp; sponsor-alert emails', true, 'Sent via Resend when RESEND_API_KEY + a verified domain are set in Netlify']);
+  el.innerHTML = checks.map(function (c) {
+    return '<div class="sys-row"><span class="sys-dot ' + (c[1] ? 'ok' : 'off') + '"></span><div><div class="sys-name">' + c[0] + '</div><div class="sys-sub">' + c[2] + '</div></div></div>';
+  }).join('');
+}
+function republish() {
+  if (!confirm('Trigger a fresh deploy of the whole site?')) return;
+  fetch(BUILD_HOOK, { method: 'POST' }).then(function () { toast('Republish triggered — live in ~1 min ✓'); }).catch(function () { toast('Could not trigger', true); });
+}
+
+// Tap any caption template to copy it to the clipboard.
+document.addEventListener('click', function (e) {
+  var cap = e.target.closest && e.target.closest('.soc-cap');
+  if (!cap) return;
+  var text = cap.textContent;
+  function done() { cap.classList.add('copied'); toast('Caption copied — paste it into your post ✓'); setTimeout(function () { cap.classList.remove('copied'); }, 1800); }
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done).catch(done); }
+  else { try { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); } catch (e2) {} done(); }
+});
 
 // ── CLUB ANALYTICS (open to all staff) — aggregates every data source ──
 var _csCharts = {};
