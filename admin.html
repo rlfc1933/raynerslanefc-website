@@ -15,6 +15,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="js/supabase-config.js"></script>
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
@@ -243,6 +245,21 @@
     .tile-info-pop b{color:var(--y);display:block;font-family:var(--fd);font-size:17px;letter-spacing:.02em;margin-bottom:6px}
     .tile-info-pop p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0}
     .tile-info-pop .x{position:absolute;top:9px;right:12px;color:var(--gr);font-family:var(--fc);font-size:16px;cursor:pointer;line-height:1}
+    /* ── POST STUDIO ── */
+    .ps-types{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+    .ps-type{background:var(--c);border:1px solid var(--br);border-radius:9px;color:#ddd;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 12px;cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent}
+    .ps-type.on{background:var(--y);color:#0d0d0d;border-color:var(--y)}
+    .ps-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .ps-seg{display:inline-flex;background:var(--c);border:1px solid var(--br);border-radius:9px;overflow:hidden}
+    .ps-seg button{background:none;border:none;color:var(--gr);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 12px;cursor:pointer}
+    .ps-seg button.on{background:var(--y);color:#0d0d0d}
+    .ps-seg.green button.on{background:#1A5C32;color:#fff}
+    .ps-fields .field{margin-bottom:9px}
+    .ps-stage{background:repeating-conic-gradient(#1a1a1a 0% 25%,#141414 0% 50%) 0/22px 22px;border:1px solid var(--br);border-radius:12px;padding:16px;display:flex;justify-content:center;overflow:hidden;margin-bottom:12px}
+    #ps-card{transform-origin:top center}
+    .ps-dl{display:flex;gap:8px}
+    .ps-crestrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .ps-thumb{width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px}
     /* ── DESKTOP: a proper company portal (wide, multi-column). Mobile stays app-like.
        #app prefix lifts specificity above the base mobile .dash/.tile-grid rules. ── */
     @media(min-width:900px){
@@ -517,6 +534,11 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
           <div class="tile-name">Social Media</div><div class="tile-desc">Strategy &amp; planner</div>
+        </button>
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('poststudio')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
+          <div class="tile-name">Post Studio</div><div class="tile-desc">Make on-brand IG &amp; X graphics</div>
         </button>
         <button class="tile" style="--accent:#F43F5E" onclick="openPanel('fanclub')">
           <span class="tile-arrow">&#8594;</span>
@@ -1450,6 +1472,44 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="dep" id="dep-perks"></div>
     </div>
 
+    <!-- POST STUDIO — on-brand social graphics generator -->
+    <div class="panel" id="panel-poststudio">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#127912; Post Studio</div></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Make <strong style="color:var(--w)">uniform, on-brand</strong> graphics in seconds — pick a post, fill the fields, choose Instagram or X sizing, and download a ready-to-post PNG. Bebas font, club colours, every time.</p></div>
+
+      <div class="slbl">1 &middot; Choose a post</div>
+      <div class="ps-types" id="ps-types"></div>
+
+      <div class="slbl">2 &middot; Fill it in</div>
+      <div class="ps-opts">
+        <div class="ps-seg" id="ps-theme">
+          <button data-theme="yellow" class="on" onclick="psSetTheme('yellow')">⚫🟡 Black &amp; Yellow</button>
+          <button data-theme="green" onclick="psSetTheme('green')">⚫🟢 Black &amp; Green</button>
+        </div>
+        <div class="ps-seg" id="ps-size">
+          <button data-size="ig" class="on" onclick="psSetSize('ig')">Instagram ▢</button>
+          <button data-size="story" onclick="psSetSize('story')">Story ▯</button>
+          <button data-size="x" onclick="psSetSize('x')">X ▭</button>
+        </div>
+      </div>
+      <div class="ps-fields" id="ps-fields"></div>
+
+      <div class="slbl">3 &middot; Preview &amp; download</div>
+      <div class="ps-stage"><div id="ps-card-wrap"><div id="ps-card"></div></div></div>
+      <button class="save" onclick="psDownload()">⬇️ Download PNG</button>
+
+      <div class="div"></div>
+      <div class="slbl">🛡️ Crest Library <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— upload any missing/updated club crest</span></div>
+      <div class="snote"><p>All Combined Counties North crests are loaded. To add or replace one, upload a transparent PNG and it's saved for every future post.</p></div>
+      <div class="field"><label class="fl">Club name</label><input type="text" id="cr-name" placeholder="e.g. Harefield United"></div>
+      <div class="field">
+        <div class="iup-wrap" id="cr-iw"><input type="file" accept="image/png,image/webp" onchange="prevImg('cr',this)"><div class="iup-icon">🛡️</div><div class="iup-lbl">Tap to upload crest</div><div class="iup-sub">Transparent PNG looks best</div></div>
+        <div class="iup-prev" id="cr-ip"><img id="cr-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('cr')">✕ Remove</button></div>
+      </div>
+      <button class="save sec" onclick="addCrest()">+ Save Crest to Library</button>
+      <div class="dep" id="dep-crests"></div>
+    </div>
+
     <!-- SPONSOR HUB — applications, pipeline, quotes & payments -->
     <div class="panel" id="panel-sponsorhub">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128188; Sponsor Hub</div></div>
@@ -2109,6 +2169,7 @@ var TILE_INFO = {
   sponsors:   ['Sponsors', 'Add sponsor logos (upload a JPG/PNG) — they appear on the website partner wall.'],
   sponsorhub: ['Sponsor Hub', 'Your commercial pipeline: businesses apply on the Sponsorships page and land here. Track each from enquiry to paid and build a quote.'],
   social:     ['Social Media', 'The full social playbook — ready-to-copy captions, a platform guide, best posting times, and a post planner.'],
+  poststudio: ['Post Studio', 'Make uniform, on-brand graphics (match day, goal, cards, scores, festive, announcements & more) in Instagram or X sizing — pick a post, fill it in, download a ready PNG. All league crests are loaded.'],
   fanclub:    ['Fan Club', 'See everyone who signed up, award yellow hearts at the gate, and champion patrons on the public wall.'],
   perks:      ['Member Perks', 'Add vouchers, promos and members-only news that fans see in the Fan Zone. Also "Message All Members".'],
   mail:       ['Club Email', 'Quick links to log in to the club email inboxes.'],
@@ -2202,6 +2263,7 @@ function openPanel(name) {
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
+  if (name === 'poststudio') loadPostStudio();
   if (name === 'clubstats') loadClubStats();
   if (name === 'settings')  runSystemCheck();
   if (name === 'playbook')  { buildJumpNav(); loadIncomePlan(); loadWins(); }
@@ -2709,6 +2771,361 @@ function removeMemberNews(i) { if (!confirm('Remove this news item?')) return; m
 function savePerks() {
   pushToGitHub('perks', { perks: perks, news: memberNews, updatedAt: new Date().toISOString() }, 'dep-perks');
   toast('Perks saved ✓');
+}
+
+/* ════════════════════ POST STUDIO ════════════════════ */
+var PS = { type: 'matchday', theme: 'yellow', size: 'ig', data: {} };
+var psCrests = [], psPlayers = [];
+var PS_SIZES = { ig: { w: 1080, h: 1080 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
+var PS_THEMES = {
+  yellow: { bg: 'radial-gradient(circle at 28% 18%,#1c1c1c,#0a0a0a 62%,#000)', accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' },
+  green:  { bg: 'radial-gradient(circle at 28% 18%,#0f2912,#06120a 60%,#020402)', accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' }
+};
+var FESTIVE = {
+  'Christmas': ['Merry Christmas', 'from everyone at The Lane', '🎄'],
+  'New Year': ['Happy New Year', 'Onwards & upwards, Yellow Army', '🎆'],
+  'Eid Mubarak': ['Eid Mubarak', 'to all our Muslim members & families', '🌙'],
+  'Ramadan': ['Ramadan Kareem', 'to everyone observing the holy month', '🌙'],
+  'Diwali': ['Happy Diwali', 'wishing light & joy to all celebrating', '🪔'],
+  'Vaisakhi': ['Happy Vaisakhi', 'to our Sikh & Punjabi community', '🌾'],
+  'Easter': ['Happy Easter', 'from The Lane family', '🐣'],
+  'Hanukkah': ['Happy Hanukkah', 'to everyone celebrating', '🕎'],
+  'Lunar New Year': ['Happy Lunar New Year', 'health & happiness to all', '🧧'],
+  'Remembrance': ['We Will Remember Them', 'Lest we forget', '🌺']
+};
+var HISTORY_FACTS = [
+  'Founded in 1933 — over 90 years at the heart of Harrow football.',
+  'The Lane plays in yellow & green at Tithe Farm Sports & Social Club.',
+  'A fully integrated members section of Tithe Farm Sports & Social Club Ltd.',
+  'An FA Charter Standard Community Club, affiliated to Middlesex County FA.',
+  'Home is 151 Rayners Lane, Harrow HA2 0XH — the heart of The Lane.',
+  'Nine decades of community, family and football in north-west London.'
+];
+var QUOTES = [
+  ['HARD WORK BEATS TALENT', 'when talent doesn\'t work hard.'],
+  ['THE LANE NEVER STOPS', 'One club. One family. Yellow & green.'],
+  ['TAKE CARE OF THE SMALL GAMES', 'and the big ones take care of themselves.'],
+  ['WE DON\'T DO QUIET', 'Up the Lane, every single week.'],
+  ['BUILT IN 1933', 'Still climbing.'],
+  ['IT\'S NOT WHERE YOU START', 'it\'s where you\'re going.']
+];
+
+// post type registry
+function POST_TYPES() { return [
+  { key: 'matchday',  label: '📅 Match Day' },
+  { key: 'kickoff',   label: '🟢 Kick Off' },
+  { key: 'goal',      label: '⚽ GOAL!' },
+  { key: 'yellow',    label: '🟨 Yellow Card' },
+  { key: 'red',       label: '🟥 Red Card' },
+  { key: 'halftime',  label: '⏸ Half-Time' },
+  { key: 'fulltime',  label: '⏹ Full-Time' },
+  { key: 'motm',      label: '⭐ Man of the Match' },
+  { key: 'signing',   label: '✍️ New Signing' },
+  { key: 'lineup',    label: '📋 Starting XI' },
+  { key: 'countdown', label: '⏳ Countdown' },
+  { key: 'festive',   label: '🎉 Festive' },
+  { key: 'announce',  label: '📢 Announcement' },
+  { key: 'history',   label: '📜 Club History' },
+  { key: 'quote',     label: '💬 Motivation' }
+]; }
+
+var psCrestCache = {};
+// Trim a crest's transparent edges + recentre it on an identical square canvas,
+// so EVERY club crest renders at the same visual size with equal margins.
+function psNormalizeCrest(file, cb) {
+  if (psCrestCache[file]) { cb(psCrestCache[file]); return; }
+  var img = new Image(); img.crossOrigin = 'anonymous';
+  img.onload = function () {
+    try {
+      var c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+      var ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+      var data = ctx.getImageData(0, 0, c.width, c.height).data;
+      var minX = c.width, minY = c.height, maxX = 0, maxY = 0, found = false;
+      for (var y = 0; y < c.height; y++) for (var x = 0; x < c.width; x++) {
+        if (data[(y * c.width + x) * 4 + 3] > 18) { found = true; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+      }
+      if (!found) { psCrestCache[file] = file; cb(file); return; }
+      var bw = maxX - minX + 1, bh = maxY - minY + 1, S = 440, m = 0.9;
+      var scale = Math.min(S * m / bw, S * m / bh);
+      var out = document.createElement('canvas'); out.width = S; out.height = S;
+      out.getContext('2d').drawImage(c, minX, minY, bw, bh, (S - bw * scale) / 2, (S - bh * scale) / 2, bw * scale, bh * scale);
+      var url = out.toDataURL('image/png'); psCrestCache[file] = url; cb(url);
+    } catch (e) { psCrestCache[file] = file; cb(file); }
+  };
+  img.onerror = function () { psCrestCache[file] = file; cb(file); };
+  img.src = file;
+}
+function loadPostStudio() {
+  fetchJSON('crests', function (d) {
+    psCrests = (d && d.crests) || [{ name: 'Rayners Lane', file: 'img/badge.png' }];
+    psBuild();
+    var pending = psCrests.length;
+    psCrests.forEach(function (c) { psNormalizeCrest(c.file, function () { if (--pending <= 0) psRender(); }); });
+  });
+  fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
+}
+function psBuild() {
+  document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + t.label + '</button>'; }).join('');
+  psSetType(PS.type);
+}
+function psSetType(k) {
+  PS.type = k; PS.data = {};
+  document.querySelectorAll('#ps-types .ps-type').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
+  psFields(); psRender();
+}
+function psSetTheme(t) { PS.theme = t; document.querySelectorAll('#ps-theme button').forEach(function (b) { b.classList.toggle('on', b.dataset.theme === t); }); document.getElementById('ps-size'); psRender(); }
+function psSetSize(s) { PS.size = s; document.querySelectorAll('#ps-size button').forEach(function (b) { b.classList.toggle('on', b.dataset.size === s); }); psRender(); }
+
+function psCrestOptions(sel) {
+  return psCrests.map(function (c) { return '<option value="' + escH(c.file) + '"' + (sel === c.file ? ' selected' : '') + '>' + escH(c.name) + '</option>'; }).join('');
+}
+function psPlayerOptions(sel) {
+  return '<option value="">— pick a player —</option>' + psPlayers.map(function (p, i) { return '<option value="' + i + '"' + (String(sel) === String(i) ? ' selected' : '') + '>' + escH(p.name || ('#' + p.number)) + '</option>'; }).join('');
+}
+// field templates per type
+function psFieldDefs() {
+  var T = PS.type, d = PS.data;
+  var homeAway = T === 'matchday' ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">🏠 Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">✈️ Away</button></div>' : '';
+  var crests = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1)
+    ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home crest</label><select onchange="psVal(\'homeCrest\',this.value)">' + psCrestOptions(d.homeCrest || 'img/badge.png') + '</select></div>' +
+      '<div class="field"><label class="fl">Away crest</label><select onchange="psVal(\'awayCrest\',this.value)">' + psCrestOptions(d.awayCrest || (psCrests[1] && psCrests[1].file)) + '</select></div></div>' : '';
+  var score = (['halftime', 'fulltime'].indexOf(T) > -1)
+    ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home score</label><input type="number" min="0" value="' + (d.hs || 0) + '" oninput="psVal(\'hs\',this.value)"></div><div class="field"><label class="fl">Away score</label><input type="number" min="0" value="' + (d.as || 0) + '" oninput="psVal(\'as\',this.value)"></div></div>' : '';
+  var player = (['goal', 'yellow', 'red', 'motm', 'signing'].indexOf(T) > -1)
+    ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
+  switch (T) {
+    case 'matchday': return homeAway + crests +
+      '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psVal(\'comp\',this.value)"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psVal(\'ko\',this.value)"></div><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 15 Aug') + '" oninput="psVal(\'date\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psVal(\'venue\',this.value)"></div>';
+    case 'kickoff': return crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psVal(\'sub\',this.value)"></div>';
+    case 'goal': return player + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psVal(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psVal(\'score\',this.value)"></div></div>';
+    case 'yellow': case 'red': return player + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psVal(\'min\',this.value)"></div>';
+    case 'halftime': case 'fulltime': return crests + score;
+    case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psVal(\'sponsor\',this.value)"></div>';
+    case 'signing': return player + '<div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="New signing name" oninput="psVal(\'manualName\',this.value)"></div>';
+    case 'lineup': return '<div class="field"><label class="fl">Starting XI <span style="color:var(--gr);font-weight:400">— tap a player to add, or type any name (incl. new signings)</span></label>' + psPlayerChips('xi') + '<textarea rows="6" placeholder="One name per line" oninput="psVal(\'xi\',this.value)">' + escH(d.xi || '') + '</textarea></div>' +
+      '<div class="field"><label class="fl">Substitutes</label>' + psPlayerChips('subs') + '<textarea rows="3" placeholder="One name per line" oninput="psVal(\'subs\',this.value)">' + escH(d.subs || '') + '</textarea></div>';
+    case 'countdown': return '<div class="ps-crestrow"><div class="field"><label class="fl">Days to go</label><input type="number" min="0" value="' + (d.days || 3) + '" oninput="psVal(\'days\',this.value)"></div><div class="field"><label class="fl">To what</label><input type="text" value="' + escH(d.what || 'KICK OFF') + '" oninput="psVal(\'what\',this.value)"></div></div>';
+    case 'festive': return '<div class="field"><label class="fl">Occasion</label><select onchange="psVal(\'occ\',this.value)">' + Object.keys(FESTIVE).map(function (o) { return '<option' + (d.occ === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div>';
+    case 'announce': return '<div class="field"><label class="fl">Bold title</label><input type="text" value="' + escH(d.title || 'IMPORTANT UPDATE') + '" oninput="psVal(\'title\',this.value)"></div><div class="field"><label class="fl">Message</label><textarea rows="3" oninput="psVal(\'body\',this.value)">' + escH(d.body || '') + '</textarea></div>';
+    case 'history': return '<div class="field"><label class="fl">Fact <button onclick="psVal(\'fact\',HISTORY_FACTS[Math.floor(Math.random()*HISTORY_FACTS.length)]);" style="background:none;border:none;color:var(--y);cursor:pointer;font-family:var(--fc);font-weight:700;float:right">🎲 Generate</button></label><textarea rows="3" oninput="psVal(\'fact\',this.value)">' + escH(d.fact || HISTORY_FACTS[0]) + '</textarea></div>';
+    case 'quote': var q = d.quote || QUOTES[0]; return '<button class="save sec" style="margin-bottom:10px" onclick="var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];psVal(\'quote\',q)">🎲 Generate a quote</button><div class="field"><label class="fl">Big line</label><input type="text" value="' + escH(q[0]) + '" oninput="psVal2(\'quote\',0,this.value)"></div><div class="field"><label class="fl">Small line</label><input type="text" value="' + escH(q[1]) + '" oninput="psVal2(\'quote\',1,this.value)"></div>';
+  }
+  return '';
+}
+function psFields() { document.getElementById('ps-fields').innerHTML = psFieldDefs(); }
+function psVal(k, v) { PS.data[k] = v; psFields(); psRender(); }
+function psVal2(k, i, v) { if (!Array.isArray(PS.data[k])) PS.data[k] = (k === 'quote' ? QUOTES[0].slice() : []); PS.data[k][i] = v; psRender(); }
+function psPlayerChips(field) {
+  if (!psPlayers.length) return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-bottom:6px">No player profiles yet — add them in Player Profiles, or just type names below.</div>';
+  return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px">' + psPlayers.map(function (p, i) {
+    var nm = (p.name || ('#' + p.number) || '').trim();
+    return '<button onclick="psAddName(\'' + field + '\',\'' + nm.replace(/'/g, '') + '\')" style="background:var(--c);border:1px solid var(--br);border-radius:7px;color:#ddd;font-family:var(--fc);font-size:11px;font-weight:700;padding:5px 9px;cursor:pointer">+ ' + escH(nm) + '</button>';
+  }).join('') + '</div>';
+}
+function psAddName(field, name) {
+  var cur = PS.data[field] || '';
+  PS.data[field] = (cur ? cur.replace(/\s*$/, '') + '\n' : '') + name;
+  psFields(); psRender();
+}
+
+/* ── templates (return inner HTML of #ps-card, sized to s.w × s.h) ── */
+function psImg(file, sz) {
+  return '<img src="' + (psCrestCache[file] || file) + '" crossorigin="anonymous" style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(0,0,0,.55))">';
+}
+function psBrand(t, s) {
+  var pad = s.w < 1200 ? 46 : 56;
+  return '<div style="position:absolute;top:' + pad + 'px;left:' + pad + 'px;display:flex;align-items:center;gap:14px">' +
+    '<img src="img/badge.png" crossorigin="anonymous" style="width:62px;height:62px;object-fit:contain">' +
+    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:34px;letter-spacing:2px;color:#fff;line-height:.86">RAYNERS LANE FC<div style="font-family:Arial;font-size:12px;letter-spacing:3px;color:' + t.accent + ';font-weight:800;margin-top:3px">EST. 1933 · HARROW</div></div></div>';
+}
+function psFooter(t, s) {
+  return '<div style="position:absolute;bottom:0;left:0;right:0;height:14px;background:' + t.accent + (PS.theme === 'green' ? ';background:linear-gradient(90deg,' + t.accent + ',' + t.accent2 + ')' : '') + '"></div>' +
+    '<div style="position:absolute;bottom:38px;left:0;right:0;text-align:center;font-family:Arial;font-size:17px;font-weight:800;letter-spacing:4px;color:rgba(255,255,255,.66)">RAYNERSLANEFC.CO.UK</div>';
+}
+function psWM() { return '<div style="position:absolute;right:-130px;bottom:-110px;width:600px;height:600px;background:url(img/badge.png) center/contain no-repeat;opacity:.05"></div>'; }
+function psEyebrow(txt, t, top) {
+  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center"><span style="display:inline-block;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;color:' + t.ink + ';background:' + t.accent + ';padding:9px 22px;border-radius:6px">' + txt + '</span></div>';
+}
+function psBig(txt, t, size, top) {
+  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:' + size + 'px;letter-spacing:3px;color:#fff;line-height:.9;padding:0 50px">' + txt + '</div>';
+}
+function psPlayerObj() { var i = PS.data.player; return (i !== '' && i != null && psPlayers[i]) ? psPlayers[i] : null; }
+function psSurname(p, fallback) { if (!p) return fallback || ''; var n = (p.name || '').trim().split(' '); return (n[n.length - 1] || p.name || '').toUpperCase(); }
+function psPlayerCard(t, s, p, big, framed) {
+  // framed photo (or initials) centred
+  var cx = s.w / 2;
+  var ph = (p && p.photo)
+    ? '<div style="width:' + framed + 'px;height:' + framed + 'px;border-radius:24px;overflow:hidden;border:6px solid ' + t.accent + ';box-shadow:0 20px 50px -16px rgba(0,0,0,.8);background:#0a0a0a"><img src="' + p.photo + '" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;object-position:top"></div>'
+    : '<div style="width:' + framed + 'px;height:' + framed + 'px;border-radius:24px;border:6px solid ' + t.accent + ';background:linear-gradient(160deg,#222,#000);display:flex;align-items:center;justify-content:center;font-family:\'Bebas Neue\';font-size:' + (framed * 0.4) + 'px;color:#fff">' + ((p && p.number) ? p.number : '#') + '</div>';
+  return '<div style="position:absolute;left:' + (cx - framed / 2) + 'px;top:' + (s.h / 2 - framed / 2 - 30) + 'px">' + ph + '</div>';
+}
+
+function psRender() {
+  var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
+  var X = PS.size === 'x', ST = PS.size === 'story';
+  var card = document.getElementById('ps-card'); if (!card) return;
+  card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + t.bg + ';overflow:hidden;color:#fff';
+  var inner = psWM();
+  // a strong diagonal brand band behind everything (fills "blank" space, on-brand)
+  inner += '<div style="position:absolute;left:-5%;right:-5%;top:' + (midY - (X ? 130 : 200)) + 'px;height:' + (X ? 260 : 400) + 'px;background:linear-gradient(100deg,transparent,' + (PS.theme === 'green' ? 'rgba(42,128,72,.16)' : 'rgba(255,209,0,.10)') + ',transparent);transform:skewY(-7deg)"></div>';
+  function crestName(file) { var c = psCrests.filter(function (x) { return x.file === file; })[0]; return c ? c.name.toUpperCase() : ''; }
+  function ctr(top, html) { return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center">' + html + '</div>'; }
+  function beb(sz, col, ex) { return 'font-family:\'Bebas Neue\',sans-serif;font-size:' + sz + 'px;letter-spacing:2px;color:' + col + ';line-height:.92;' + (ex || ''); }
+  var ebTop = X ? 70 : (ST ? 220 : 158);
+  // crest pair (with club names under) centred on cy
+  function crestPair(cy, cz, withNames) {
+    var home = d.homeCrest || 'img/badge.png', away = d.awayCrest || (psCrests[1] && psCrests[1].file) || 'img/badge.png';
+    var hcx = W * 0.265, acx = W * 0.735, h = '';
+    h += '<div style="position:absolute;top:' + (cy - cz / 2) + 'px;left:' + (hcx - cz / 2) + 'px">' + psImg(home, cz) + '</div>';
+    h += '<div style="position:absolute;top:' + (cy - cz / 2) + 'px;left:' + (acx - cz / 2) + 'px">' + psImg(away, cz) + '</div>';
+    if (withNames) {
+      h += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (hcx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">' + escH(crestName(home)) + '</div>';
+      h += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (acx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">' + escH(crestName(away)) + '</div>';
+    }
+    return h;
+  }
+  // framed player photo (or null if none) — used by goal/motm/signing
+  function playerFrame(p, fr, cx, top) {
+    if (!p || !p.photo) return '';
+    return '<div style="position:absolute;left:' + (cx - fr / 2) + 'px;top:' + top + 'px;width:' + fr + 'px;height:' + fr + 'px;border-radius:26px;overflow:hidden;border:7px solid ' + t.accent + ';box-shadow:0 22px 55px -16px rgba(0,0,0,.85);background:#0a0a0a"><img src="' + p.photo + '" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;object-position:top"></div>';
+  }
+  function pos(p) { return p && p.position ? p.position.toUpperCase() : ''; }
+
+  if (PS.type === 'matchday') {
+    var away = d.ha === 'away';
+    var cz = X ? 200 : 290, cy = X ? midY - 30 : (ST ? 600 : 430);
+    inner += psEyebrow(away ? 'AWAY DAY' : 'MATCH DAY', t, ebTop);
+    inner += crestPair(cy, cz, true);
+    inner += '<div style="position:absolute;top:' + (cy - 52) + 'px;left:0;right:0;text-align:center;' + beb(104, t.accent) + '">VS</div>';
+    var by = X ? H - 150 : (ST ? H - 360 : H - 250);
+    inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
+    inner += ctr(by + 76, '<span style="font-family:Arial;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
+    inner += ctr(by + 116, '<span style="font-family:Arial;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
+  } else if (PS.type === 'kickoff') {
+    var cz2 = X ? 190 : 270, cy2 = X ? midY - 20 : (ST ? 640 : 470);
+    inner += psEyebrow('KICK OFF', t, ebTop);
+    inner += crestPair(cy2, cz2, true);
+    inner += ctr(cy2 - 50, '<span style="' + beb(96, t.accent) + '">VS</span>');
+    inner += ctr(X ? H - 130 : (ST ? H - 320 : H - 210), '<span style="' + beb(70, '#fff') + '">' + escH((d.sub || 'WE ARE UNDERWAY!')).toUpperCase() + '</span>');
+  } else if (PS.type === 'goal') {
+    var p = psPlayerObj(), hasP = p && p.photo;
+    inner += psEyebrow('⚽ GOAL', t, ebTop);
+    if (hasP) {
+      inner += ctr(ebTop + 70, '<span style="' + beb(X ? 130 : 180, '#fff') + '">GOAL!</span>');
+      inner += playerFrame(p, X ? 280 : 380, W / 2, ebTop + (X ? 210 : 280));
+      var gy = X ? H - 150 : (ST ? H - 340 : H - 230);
+      inner += ctr(gy, '<span style="' + beb(96, '#fff') + '">' + psSurname(p, '[PLAYER]') + '</span>');
+      inner += ctr(gy + 96, '<span style="font-family:Arial;font-size:30px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
+    } else {
+      inner += ctr(midY - (X ? 150 : 250), '<span style="' + beb(X ? 180 : 260, t.accent) + '">GOAL!</span>');
+      inner += ctr(midY - (X ? 10 : 10), '<span style="' + beb(X ? 130 : 180, '#fff') + '">' + psSurname(p, '[PLAYER]') + '</span>');
+      inner += ctr(midY + (X ? 130 : 180), '<span style="font-family:Arial;font-size:34px;font-weight:800;letter-spacing:4px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
+    }
+  } else if (PS.type === 'yellow' || PS.type === 'red') {
+    var pc = psPlayerObj(); var col = PS.type === 'red' ? '#E5341F' : '#FFCB05';
+    inner += psEyebrow(PS.type === 'red' ? '🟥 RED CARD' : '🟨 YELLOW CARD', t, ebTop);
+    inner += '<div style="position:absolute;top:' + (midY - (X ? 150 : 220)) + 'px;left:' + (W / 2 - (X ? 110 : 150)) + 'px;width:' + (X ? 220 : 300) + 'px;height:' + (X ? 300 : 420) + 'px;border-radius:22px;background:' + col + ';box-shadow:0 26px 64px -16px rgba(0,0,0,.85)"></div>';
+    var cy3 = X ? H - 150 : (ST ? H - 350 : H - 240);
+    inner += ctr(cy3, '<span style="' + beb(X ? 80 : 100, '#fff') + '">' + psSurname(pc, '[PLAYER]') + '</span>');
+    inner += ctr(cy3 + (X ? 84 : 104), '<span style="font-family:Arial;font-size:28px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '41') + '\'' + (pos(pc) ? ' &middot; ' + pos(pc) : '') + '</span>');
+  } else if (PS.type === 'halftime' || PS.type === 'fulltime') {
+    var cz4 = X ? 170 : 210, cyc = X ? midY - 20 : (ST ? 560 : 420);
+    inner += psEyebrow(PS.type === 'fulltime' ? 'FULL-TIME' : 'HALF-TIME', t, ebTop);
+    inner += '<div style="position:absolute;top:' + (cyc - cz4 / 2) + 'px;left:' + (W * 0.16 - cz4 / 2) + 'px">' + psImg(d.homeCrest || 'img/badge.png', cz4) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cyc - cz4 / 2) + 'px;left:' + (W * 0.84 - cz4 / 2) + 'px">' + psImg(d.awayCrest || (psCrests[1] && psCrests[1].file) || 'img/badge.png', cz4) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cyc - 80) + 'px;left:0;right:0;text-align:center;' + beb(140, t.accent) + '">' + (d.hs || 0) + ' <span style="color:#fff;font-size:80px">-</span> ' + (d.as || 0) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cyc + cz4 / 2 + 14) + 'px;left:' + (W * 0.16 - 170) + 'px;width:340px;text-align:center;' + beb(34, '#fff') + '">' + escH(crestName(d.homeCrest || 'img/badge.png')) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cyc + cz4 / 2 + 14) + 'px;left:' + (W * 0.84 - 170) + 'px;width:340px;text-align:center;' + beb(34, '#fff') + '">' + escH(crestName(d.awayCrest || (psCrests[1] && psCrests[1].file) || '')) + '</div>';
+  } else if (PS.type === 'motm') {
+    var pm = psPlayerObj(), hasM = pm && pm.photo;
+    inner += psEyebrow('⭐ MAN OF THE MATCH', t, ebTop);
+    if (hasM) inner += playerFrame(pm, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
+    var my = X ? H - 150 : (ST ? H - 340 : H - 230);
+    inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
+    inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+  } else if (PS.type === 'signing') {
+    var psn = psPlayerObj(), nm = psn ? psSurname(psn) : (d.manualName || '[NAME]').toUpperCase(), hasS = psn && psn.photo;
+    inner += psEyebrow('✍️ NEW SIGNING', t, ebTop);
+    if (hasS) inner += playerFrame(psn, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
+    inner += ctr(hasS ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(hasS ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
+    inner += ctr(hasS ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(hasS ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
+  } else if (PS.type === 'lineup') {
+    inner += psEyebrow(away ? '📋 YOUR XI' : '📋 STARTING XI', t, ebTop);
+    var xi = (d.xi || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var subs = (d.subs || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var listTop = ebTop + (X ? 70 : 90), lh = X ? 56 : (ST ? 78 : 70), fs = X ? 46 : (ST ? 66 : 58);
+    inner += xi.slice(0, 11).map(function (n, i) {
+      return '<div style="position:absolute;top:' + (listTop + i * lh) + 'px;left:0;right:0;text-align:center;' + beb(fs, '#fff') + '"><span style="color:' + t.accent + '">' + (i + 1) + '</span>&nbsp; ' + escH(n.toUpperCase()) + '</div>';
+    }).join('');
+    if (subs.length) inner += ctr(listTop + 11 * lh + 14, '<span style="font-family:Arial;font-size:' + (X ? 18 : 24) + 'px;font-weight:700;letter-spacing:2px;color:' + t.accent + '">SUBS: <span style="color:#fff">' + subs.map(function (n) { return escH(n); }).join(' · ') + '</span></span>');
+  } else if (PS.type === 'countdown') {
+    inner += psBig((d.days != null ? d.days : 3) + '', t, PS.size === 'x' ? 280 : 420, midY - (PS.size === 'x' ? 150 : 280));
+    inner += '<div style="position:absolute;top:' + (midY + (PS.size === 'x' ? 110 : 170)) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:4px;color:' + t.accent + '">DAYS TO ' + escH((d.what || 'KICK OFF')).toUpperCase() + '</div>';
+  } else if (PS.type === 'festive') {
+    var occ = d.occ || 'Christmas'; var f = FESTIVE[occ];
+    inner += '<div style="position:absolute;top:' + (midY - 240) + 'px;left:0;right:0;text-align:center;font-size:150px">' + f[2] + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY - 30) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:96px;letter-spacing:2px;color:' + t.accent + ';padding:0 50px">' + f[0].toUpperCase() + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 90) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:700;letter-spacing:1px;color:#fff;padding:0 80px">' + escH(f[1]) + '</div>';
+  } else if (PS.type === 'announce') {
+    inner += psEyebrow('📢 CLUB ANNOUNCEMENT', t, PS.size === 'x' ? 60 : 130);
+    inner += '<div style="position:absolute;top:' + (midY - 130) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:104px;letter-spacing:2px;color:' + t.accent + ';line-height:.9;padding:0 50px">' + escH(d.title || 'IMPORTANT UPDATE').toUpperCase() + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
+  } else if (PS.type === 'history') {
+    inner += psEyebrow('📜 ON THE LANE', t, PS.size === 'x' ? 60 : 130);
+    inner += '<div style="position:absolute;top:' + (midY - 120) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:2px;color:#fff;line-height:1.05;padding:0 70px">' + escH(d.fact || HISTORY_FACTS[0]) + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 150) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:22px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">SINCE 1933</div>';
+  } else if (PS.type === 'quote') {
+    var q = Array.isArray(d.quote) ? d.quote : QUOTES[0];
+    inner += '<div style="position:absolute;top:' + (midY - 150) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:110px;letter-spacing:2px;color:' + t.accent + ';line-height:.92;padding:0 60px">' + escH(q[0]).toUpperCase() + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 80) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;font-style:italic;color:#fff;padding:0 90px">' + escH(q[1]) + '</div>';
+  }
+  inner += psBrand(t, s) + psFooter(t, s);
+  card.innerHTML = inner;
+  // scale to fit the stage, reserving the exact scaled footprint so nothing leaks
+  var wrap = document.getElementById('ps-card-wrap');
+  var stage = wrap.parentNode;
+  var avail = (stage.clientWidth || 360) - 32;
+  var k = Math.min(1, avail / W);
+  card.style.position = 'absolute'; card.style.top = '0'; card.style.left = '0';
+  card.style.transformOrigin = 'top left';
+  card.style.transform = 'scale(' + k + ')';
+  wrap.style.cssText = 'position:relative;width:' + (W * k) + 'px;height:' + (H * k) + 'px;margin:0 auto;overflow:hidden';
+}
+
+function psDownload() {
+  var card = document.getElementById('ps-card');
+  if (typeof html2canvas === 'undefined') { toast('Still loading — try again in a second', true); return; }
+  toast('Rendering your post…');
+  var prevT = card.style.transform; card.style.transform = 'scale(1)';
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    html2canvas(card, { backgroundColor: null, useCORS: true, scale: 1, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
+      card.style.transform = prevT;
+      var a = document.createElement('a');
+      a.download = 'rlfc-' + PS.type + '-' + PS.size + '.png';
+      a.href = cv.toDataURL('image/png');
+      a.click();
+      toast('Downloaded ✓ — ready to post 💛');
+    }).catch(function (e) { card.style.transform = prevT; toast('Render failed: ' + e.message, true); });
+  });
+}
+
+// crest library upload
+function addCrest() {
+  var name = gv('cr-name');
+  if (!name) { toast('Enter the club name', true); return; }
+  if (!imgStore['cr']) { toast('Upload a crest image', true); return; }
+  uploadImg('cr', '', function (path) {
+    var file = path || imgStore['cr'].dataUrl;
+    psCrests = psCrests.filter(function (c) { return c.name.toLowerCase() !== name.toLowerCase(); });
+    psCrests.push({ name: name, file: file });
+    psCrests.sort(function (a, b) { return a.name === 'Rayners Lane' ? -1 : a.name.localeCompare(b.name); });
+    pushToGitHub('crests', { crests: psCrests, updatedAt: new Date().toISOString() }, 'dep-crests');
+    rmImg('cr'); setVal('cr-name', '');
+    psFields(); psRender();
+    toast(name + ' crest saved ✓');
+  });
 }
 
 // ── SPONSOR HUB (applications → pipeline → quote → paid) ──

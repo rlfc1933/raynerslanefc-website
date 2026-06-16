@@ -1,0 +1,25 @@
+{
+  "crests": [
+    { "name": "Rayners Lane", "file": "img/badge.png" },
+    { "name": "Abingdon United", "file": "img/crests/abingdon-united.png" },
+    { "name": "Amersham Town", "file": "img/crests/amersham-town.png" },
+    { "name": "Ardley United", "file": "img/crests/ardley-united.png" },
+    { "name": "Bedfont", "file": "img/crests/bedfont.png" },
+    { "name": "Broadfields United", "file": "img/crests/broadfields-united.png" },
+    { "name": "Burnham", "file": "img/crests/burnham.png" },
+    { "name": "Easington Sports", "file": "img/crests/easington-sports.png" },
+    { "name": "Harefield United", "file": "img/crests/harefield-united.png" },
+    { "name": "Hilltop", "file": "img/crests/hilltop.png" },
+    { "name": "Holyport", "file": "img/crests/holyport.png" },
+    { "name": "Kidlington", "file": "img/crests/kidlington.png" },
+    { "name": "North Greenford United", "file": "img/crests/north-greenford-united.png" },
+    { "name": "North Leigh", "file": "img/crests/north-leigh.png" },
+    { "name": "Northwood", "file": "img/crests/northwood.png" },
+    { "name": "Penn & Tylers Green", "file": "img/crests/penn-and-tylers-green.png" },
+    { "name": "Reading City", "file": "img/crests/reading-city.png" },
+    { "name": "Thatcham Town", "file": "img/crests/thatcham-town.png" },
+    { "name": "Wallingford & Crowmarsh", "file": "img/crests/wallingford-and-crowmarsh.png" },
+    { "name": "Wokingham Town", "file": "img/crests/wokingham-town.png" }
+  ],
+  "updatedAt": ""
+}
