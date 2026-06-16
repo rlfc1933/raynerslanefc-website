@@ -2826,7 +2826,7 @@ function psIco(key, px, color) {
   var p = PS_ICONS[key]; if (!p) return '';
   return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
 }
-var PS_TYPE_ICON = { matchday: 'calendar', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', history: 'scroll', quote: 'quote' };
+var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', history: 'scroll', quote: 'quote' };
 var HISTORY_FACTS = [
   'Founded in 1933 — over 90 years at the heart of Harrow football.',
   'The Lane plays in yellow & green at Tithe Farm Sports & Social Club.',
@@ -2847,6 +2847,7 @@ var QUOTES = [
 // post type registry
 function POST_TYPES() { return [
   { key: 'matchday',  label: 'Match Day' },
+  { key: 'preseason', label: 'Pre-Season' },
   { key: 'kickoff',   label: 'Kick Off' },
   { key: 'goal',      label: 'GOAL!' },
   { key: 'yellow',    label: 'Yellow Card' },
@@ -2922,7 +2923,7 @@ function psPlayerOptions(sel) {
 // field templates per type
 function psFieldDefs() {
   var T = PS.type, d = PS.data;
-  var homeAway = T === 'matchday' ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">🏠 Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">✈️ Away</button></div>' : '';
+  var homeAway = (T === 'matchday' || T === 'preseason') ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">Away</button></div>' : '';
   var crests = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1)
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home crest</label><select onchange="psVal(\'homeCrest\',this.value)">' + psCrestOptions(d.homeCrest || 'img/badge.png') + '</select></div>' +
       '<div class="field"><label class="fl">Away crest</label><select onchange="psVal(\'awayCrest\',this.value)">' + psCrestOptions(d.awayCrest || (psCrests[1] && psCrests[1].file)) + '</select></div></div>' : '';
@@ -2934,6 +2935,18 @@ function psFieldDefs() {
     case 'matchday': return homeAway + crests +
       '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psSet(\'comp\',this.value)"></div>' +
       '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 15 Aug') + '" oninput="psSet(\'date\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
+    case 'preseason': return homeAway +
+      '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side we\'re on, then upload the other team\'s crest.</div>' +
+      '<div class="field"><label class="fl">Opponent name <span style="color:var(--gr);font-weight:400">— shown under their crest</span></label><input type="text" value="' + escH(d.oppName || '') + '" placeholder="e.g. Wealdstone FC" oninput="psSet(\'oppName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Opponent crest <span style="color:var(--gr);font-weight:400">— upload from camera roll / downloads</span></label><input type="file" accept="image/*" onchange="psLogoUpload(this)" style="width:100%;color:var(--gr);font-family:var(--fc);font-size:13px"></div>' +
+      (d.logo
+        ? '<div class="field"><label class="fl">Crest size <span id="pslbl-logoScale" style="color:var(--gr);font-weight:400">' + (d.logoScale || 290) + 'px</span></label><input type="range" min="120" max="520" value="' + (d.logoScale || 290) + '" oninput="psSet(\'logoScale\',this.value)" style="width:100%"></div>' +
+          '<div class="ps-crestrow"><div class="field"><label class="fl">Nudge left ↔ right</label><input type="range" min="-40" max="40" value="' + (d.logoNudgeX == null ? 0 : d.logoNudgeX) + '" oninput="psSet(\'logoNudgeX\',this.value)" style="width:100%"></div>' +
+          '<div class="field"><label class="fl">Nudge up ↕ down</label><input type="range" min="-40" max="40" value="' + (d.logoNudgeY == null ? 0 : d.logoNudgeY) + '" oninput="psSet(\'logoNudgeY\',this.value)" style="width:100%"></div></div>'
+        : '<div style="font-family:var(--fc);font-size:11px;color:var(--gr)">Upload the opponent\'s crest, then scale &amp; nudge it to match ours.</div>') +
+      '<div class="field"><label class="fl">Title</label><input type="text" value="' + escH(d.comp || 'PRE-SEASON FRIENDLY') + '" oninput="psSet(\'comp\',this.value)"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 12 Jul') + '" oninput="psSet(\'date\',this.value)"></div><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div></div>' +
       '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
     case 'kickoff': return crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psSet(\'sub\',this.value)"></div>';
     case 'goal': return player + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psSet(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psSet(\'score\',this.value)"></div></div>';
@@ -3076,6 +3089,32 @@ function psRender() {
     inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
     inner += ctr(by + 76, '<span style="font-family:Arial;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
     inner += ctr(by + 116, '<span style="font-family:Arial;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
+  } else if (PS.type === 'preseason') {
+    var awayP = d.ha === 'away';
+    var czp = X ? 200 : 290, cyp = X ? midY - 30 : (ST ? 600 : 430);
+    var hcxp = W * 0.265, acxp = W * 0.735;
+    var rlCx = awayP ? acxp : hcxp, opCx = awayP ? hcxp : acxp;
+    inner += psEyebrow('PRE-SEASON', t, ebTop);
+    // Rayners Lane (pre-loaded badge) on its side
+    inner += '<div style="position:absolute;top:' + (cyp - czp / 2) + 'px;left:' + (rlCx - czp / 2) + 'px">' + psImg('img/badge.png', czp) + '</div>';
+    // opponent crest — uploaded, scaled + nudged (or a placeholder until uploaded)
+    var opSz = +d.logoScale || czp, onx = +d.logoNudgeX || 0, ony = +d.logoNudgeY || 0;
+    if (d.logo) {
+      inner += '<img src="' + d.logo + '" crossorigin="anonymous" style="position:absolute;left:' + (opCx - opSz / 2 + onx) + 'px;top:' + (cyp - opSz / 2 + ony) + 'px;width:' + opSz + 'px;height:' + opSz + 'px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(0,0,0,.55))">';
+    } else {
+      inner += '<div style="position:absolute;top:' + (cyp - czp / 2) + 'px;left:' + (opCx - czp / 2) + 'px;width:' + czp + 'px;height:' + czp + 'px;border-radius:50%;border:4px dashed rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;' + beb(czp * 0.5, 'rgba(255,255,255,.4)') + '">?</div>';
+    }
+    // VS
+    inner += '<div style="position:absolute;top:' + (cyp - 52) + 'px;left:0;right:0;text-align:center;' + beb(104, t.accent) + '">VS</div>';
+    // names under crests
+    var nmYp = cyp + czp / 2 + 12;
+    inner += '<div style="position:absolute;top:' + nmYp + 'px;left:' + (rlCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">RAYNERS LANE</div>';
+    inner += '<div style="position:absolute;top:' + nmYp + 'px;left:' + (opCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">' + escH((d.oppName || 'OPPONENT')).toUpperCase() + '</div>';
+    // date · kick-off / venue / title
+    var byp = X ? H - 150 : (ST ? H - 360 : H - 250);
+    inner += ctr(byp, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 12 JUL')).toUpperCase() + '</span>');
+    inner += ctr(byp + 76, '<span style="font-family:Arial;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
+    inner += ctr(byp + 116, '<span style="font-family:Arial;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'PRE-SEASON FRIENDLY') + '</span>');
   } else if (PS.type === 'kickoff') {
     var cz2 = X ? 190 : 270, cy2 = X ? midY - 20 : (ST ? 640 : 470);
     inner += psEyebrow('KICK OFF', t, ebTop);
