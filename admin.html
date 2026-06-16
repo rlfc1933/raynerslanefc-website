@@ -2924,7 +2924,7 @@ function psPlayerOptions(sel) {
 function psFieldDefs() {
   var T = PS.type, d = PS.data;
   var homeAway = (T === 'matchday' || T === 'preseason') ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">Away</button></div>' : '';
-  var crests = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1)
+  var crests = (['kickoff', 'halftime', 'fulltime'].indexOf(T) > -1)
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home crest</label><select onchange="psVal(\'homeCrest\',this.value)">' + psCrestOptions(d.homeCrest || 'img/badge.png') + '</select></div>' +
       '<div class="field"><label class="fl">Away crest</label><select onchange="psVal(\'awayCrest\',this.value)">' + psCrestOptions(d.awayCrest || (psCrests[1] && psCrests[1].file)) + '</select></div></div>' : '';
   var score = (['halftime', 'fulltime'].indexOf(T) > -1)
@@ -2932,10 +2932,12 @@ function psFieldDefs() {
   var player = (['goal', 'yellow', 'red', 'motm', 'signing', 'potm'].indexOf(T) > -1)
     ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
   switch (T) {
-    case 'matchday': return homeAway + crests +
+    case 'matchday': return homeAway +
+      '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side of the VS we\'re on — Away puts the opponent before the VS.</div>' +
+      '<div class="field"><label class="fl">Opponent <span style="color:var(--gr);font-weight:400">— who we\'re playing</span></label><select onchange="psVal(\'oppCrest\',this.value)">' + psCrestOptions(d.oppCrest || (psCrests[1] && psCrests[1].file)) + '</select></div>' +
       '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psSet(\'comp\',this.value)"></div>' +
-      '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 15 Aug') + '" oninput="psSet(\'date\',this.value)"></div></div>' +
-      '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off time</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div><div class="field"><label class="fl">Date &amp; day</label><input type="text" value="' + escH(d.date || 'Sat 15 Aug') + '" placeholder="Sat 15 Aug" oninput="psSet(\'date\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Location / venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
     case 'preseason': return homeAway +
       '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side we\'re on, then upload the other team\'s crest.</div>' +
       '<div class="field"><label class="fl">Opponent name <span style="color:var(--gr);font-weight:400">— shown under their crest</span></label><input type="text" value="' + escH(d.oppName || '') + '" placeholder="e.g. Wealdstone FC" oninput="psSet(\'oppName\',this.value)"></div>' +
@@ -3083,7 +3085,14 @@ function psRender() {
     var away = d.ha === 'away';
     var cz = X ? 200 : 290, cy = X ? midY - 30 : (ST ? 600 : 430);
     inner += psEyebrow(away ? 'AWAY DAY' : 'MATCH DAY', t, ebTop);
-    inner += crestPair(cy, cz, true);
+    // Rayners Lane (pre-loaded) swaps to the right when it's an away game
+    var mHcx = W * 0.265, mAcx = W * 0.735;
+    var mRlCx = away ? mAcx : mHcx, mOpCx = away ? mHcx : mAcx;
+    var mOpp = d.oppCrest || (psCrests[1] && psCrests[1].file) || 'img/badge.png';
+    inner += '<div style="position:absolute;top:' + (cy - cz / 2) + 'px;left:' + (mRlCx - cz / 2) + 'px">' + psImg('img/badge.png', cz) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cy - cz / 2) + 'px;left:' + (mOpCx - cz / 2) + 'px">' + psImg(mOpp, cz) + '</div>';
+    inner += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (mRlCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">RAYNERS LANE</div>';
+    inner += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (mOpCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">' + escH(crestName(mOpp)) + '</div>';
     inner += '<div style="position:absolute;top:' + (cy - 52) + 'px;left:0;right:0;text-align:center;' + beb(104, t.accent) + '">VS</div>';
     var by = X ? H - 150 : (ST ? H - 360 : H - 250);
     inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
