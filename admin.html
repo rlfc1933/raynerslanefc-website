@@ -2820,8 +2820,11 @@ function POST_TYPES() { return [
   { key: 'halftime',  label: '⏸ Half-Time' },
   { key: 'fulltime',  label: '⏹ Full-Time' },
   { key: 'motm',      label: '⭐ Man of the Match' },
+  { key: 'potm',      label: '🏅 Player of the Month' },
   { key: 'signing',   label: '✍️ New Signing' },
   { key: 'lineup',    label: '📋 Starting XI' },
+  { key: 'sponsorspot', label: '🤝 Sponsor Spotlight' },
+  { key: 'birthday',  label: '🎂 Birthday' },
   { key: 'countdown', label: '⏳ Countdown' },
   { key: 'festive',   label: '🎉 Festive' },
   { key: 'announce',  label: '📢 Announcement' },
@@ -2891,7 +2894,7 @@ function psFieldDefs() {
       '<div class="field"><label class="fl">Away crest</label><select onchange="psVal(\'awayCrest\',this.value)">' + psCrestOptions(d.awayCrest || (psCrests[1] && psCrests[1].file)) + '</select></div></div>' : '';
   var score = (['halftime', 'fulltime'].indexOf(T) > -1)
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home score</label><input type="number" min="0" value="' + (d.hs || 0) + '" oninput="psVal(\'hs\',this.value)"></div><div class="field"><label class="fl">Away score</label><input type="number" min="0" value="' + (d.as || 0) + '" oninput="psVal(\'as\',this.value)"></div></div>' : '';
-  var player = (['goal', 'yellow', 'red', 'motm', 'signing'].indexOf(T) > -1)
+  var player = (['goal', 'yellow', 'red', 'motm', 'signing', 'potm'].indexOf(T) > -1)
     ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
   switch (T) {
     case 'matchday': return homeAway + crests +
@@ -2903,6 +2906,22 @@ function psFieldDefs() {
     case 'yellow': case 'red': return player + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psVal(\'min\',this.value)"></div>';
     case 'halftime': case 'fulltime': return crests + score;
     case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psVal(\'sponsor\',this.value)"></div>';
+    case 'potm': return player +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psVal(\'manualName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Position (optional)</label><input type="text" value="' + escH(d.manualPos || '') + '" placeholder="Striker" oninput="psVal(\'manualPos\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Month</label><input type="text" value="' + escH(d.month || 'AUGUST') + '" oninput="psVal(\'month\',this.value)"></div>';
+    case 'sponsorspot': return '<div class="field"><label class="fl">Sponsor name</label><input type="text" value="' + escH(d.spName || '') + '" placeholder="Hanlon Dry Lining" oninput="psVal(\'spName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Sub-line (optional)</label><input type="text" value="' + escH(d.spSub || 'Show them some love 💛') + '" oninput="psVal(\'spSub\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Sponsor logo</label><input type="file" accept="image/*" onchange="psLogoUpload(this)" style="width:100%;color:var(--gr);font-family:var(--fc);font-size:13px"></div>' +
+      (d.logo ? '<label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox"' + (d.logoWhite ? ' checked' : '') + ' onchange="psVal(\'logoWhite\',this.checked)" style="width:16px;height:16px;accent-color:var(--y)"> White panel behind the logo (for dark logos)</label>' +
+        '<div class="field"><label class="fl">Logo size <span style="color:var(--gr);font-weight:400">' + (d.logoScale || 360) + 'px</span></label><input type="range" min="120" max="720" value="' + (d.logoScale || 360) + '" oninput="psVal(\'logoScale\',this.value)" style="width:100%"></div>' +
+        '<div class="ps-crestrow"><div class="field"><label class="fl">Move left ↔ right</label><input type="range" min="10" max="90" value="' + (d.logoX == null ? 50 : d.logoX) + '" oninput="psVal(\'logoX\',this.value)" style="width:100%"></div>' +
+        '<div class="field"><label class="fl">Move up ↕ down</label><input type="range" min="18" max="78" value="' + (d.logoY == null ? 44 : d.logoY) + '" oninput="psVal(\'logoY\',this.value)" style="width:100%"></div></div>'
+        : '<div style="font-family:var(--fc);font-size:11px;color:var(--gr)">Upload a logo and you can scale &amp; position it freely.</div>');
+    case 'birthday': return '<div class="field"><label class="fl">Whose birthday? <span style="color:var(--gr);font-weight:400">— pick a player for their photo, or just type a name</span></label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Name (if typing)</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Sukh" oninput="psVal(\'manualName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Age (optional)</label><input type="text" value="' + escH(d.age || '') + '" placeholder="21" oninput="psVal(\'age\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Role / message (optional)</label><input type="text" value="' + escH(d.bmsg || '') + '" placeholder="Have a great day from everyone at The Lane!" oninput="psVal(\'bmsg\',this.value)"></div>';
     case 'signing': return player + '<div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="New signing name" oninput="psVal(\'manualName\',this.value)"></div>';
     case 'lineup': return '<div class="field"><label class="fl">Starting XI <span style="color:var(--gr);font-weight:400">— tap a player to add, or type any name (incl. new signings)</span></label>' + psPlayerChips('xi') + '<textarea rows="6" placeholder="One name per line" oninput="psVal(\'xi\',this.value)">' + escH(d.xi || '') + '</textarea></div>' +
       '<div class="field"><label class="fl">Substitutes</label>' + psPlayerChips('subs') + '<textarea rows="3" placeholder="One name per line" oninput="psVal(\'subs\',this.value)">' + escH(d.subs || '') + '</textarea></div>';
@@ -2928,6 +2947,23 @@ function psAddName(field, name) {
   var cur = PS.data[field] || '';
   PS.data[field] = (cur ? cur.replace(/\s*$/, '') + '\n' : '') + name;
   psFields(); psRender();
+}
+function psLogoUpload(input) {
+  var f = input.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function (e) {
+    var img = new Image();
+    img.onload = function () { var max = 700, w = img.width, h = img.height; if (w > h && w > max) { h = h * max / w; w = max; } else if (h > max) { w = w * max / h; h = max; } var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); PS.data.logo = c.toDataURL('image/png'); psFields(); psRender(); };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+// effective player: a selected profile OR the manually-typed name/position
+function psEff() {
+  var p = psPlayerObj(), d = PS.data;
+  if (p) return { surname: psSurname(p), photo: p.photo, position: p.position, name: p.name };
+  var mn = (d.manualName || '').trim();
+  return { surname: mn ? mn.toUpperCase() : '[NAME]', photo: '', position: d.manualPos || '', name: mn };
 }
 
 /* ── templates (return inner HTML of #ps-card, sized to s.w × s.h) ── */
@@ -3045,6 +3081,34 @@ function psRender() {
     var my = X ? H - 150 : (ST ? H - 340 : H - 230);
     inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
     inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+  } else if (PS.type === 'potm') {
+    var ep = psEff(), hasPp = !!ep.photo;
+    inner += psEyebrow('🏅 PLAYER OF THE MONTH', t, ebTop);
+    inner += ctr(ebTop + (X ? 58 : 76), '<span style="font-family:Arial;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">' + escH((d.month || 'AUGUST')).toUpperCase() + '</span>');
+    if (hasPp) inner += playerFrame({ photo: ep.photo }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
+    var py = X ? H - 150 : (ST ? H - 340 : H - 235);
+    inner += ctr(hasPp ? py : midY - 30, '<span style="' + beb(hasPp ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
+    if (ep.position) inner += ctr(hasPp ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
+  } else if (PS.type === 'sponsorspot') {
+    inner += psEyebrow('🤝 PROUDLY SPONSORED BY', t, ebTop);
+    if (d.logo) {
+      var sc = +d.logoScale || 360, lx = (d.logoX == null ? 50 : +d.logoX) / 100, ly = (d.logoY == null ? 44 : +d.logoY) / 100;
+      var lcx = W * lx, lcy = H * ly;
+      if (d.logoWhite) inner += '<div style="position:absolute;left:' + (lcx - sc / 2 - 26) + 'px;top:' + (lcy - sc / 2 - 26) + 'px;width:' + (sc + 52) + 'px;height:' + (sc + 52) + 'px;background:#fff;border-radius:24px;box-shadow:0 20px 50px -16px rgba(0,0,0,.7)"></div>';
+      inner += '<img src="' + d.logo + '" crossorigin="anonymous" style="position:absolute;left:' + (lcx - sc / 2) + 'px;top:' + (lcy - sc / 2) + 'px;width:' + sc + 'px;height:' + sc + 'px;object-fit:contain">';
+    } else {
+      inner += ctr(midY - 30, '<span style="font-family:Arial;font-size:28px;color:rgba(255,255,255,.5)">⬆ upload the sponsor logo</span>');
+    }
+    inner += ctr(X ? H - 150 : (ST ? H - 340 : H - 230), '<span style="' + beb(X ? 70 : 90, t.accent) + '">' + escH((d.spName || 'YOUR SPONSOR')).toUpperCase() + '</span>');
+    if (d.spSub) inner += ctr(X ? H - 95 : (ST ? H - 265 : H - 158), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff">' + escH(d.spSub) + '</span>');
+  } else if (PS.type === 'birthday') {
+    var eb2 = psEff(), bp = psPlayerObj();
+    inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;font-size:' + (X ? 70 : 96) + 'px">🎂🎉🎈</div>';
+    inner += ctr(ebTop + (X ? 70 : 110), '<span style="' + beb(X ? 110 : 150, t.accent) + '">HAPPY BIRTHDAY</span>');
+    if (bp && bp.photo) inner += playerFrame(bp, X ? 250 : 330, W / 2, ebTop + (X ? 150 : 230));
+    var byy = (bp && bp.photo) ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 10;
+    inner += ctr(byy, '<span style="' + beb(X ? 120 : 160, '#fff') + '">' + escH(eb2.surname || (bp ? psSurname(bp) : '[NAME]')) + (d.age ? ' <span style="color:' + t.accent + '">' + escH(d.age) + '</span>' : '') + '</span>');
+    if (d.bmsg) inner += ctr(byy + (X ? 96 : 130), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.bmsg) + '</span>');
   } else if (PS.type === 'signing') {
     var psn = psPlayerObj(), nm = psn ? psSurname(psn) : (d.manualName || '[NAME]').toUpperCase(), hasS = psn && psn.photo;
     inner += psEyebrow('✍️ NEW SIGNING', t, ebTop);
