@@ -454,6 +454,14 @@
           </div>
           <span class="tile-badge">Start Here</span>
         </button>
+        <button class="tile tile-hero" style="background:linear-gradient(135deg,#1c1c1c,#0a0a0a 60%,#161208);border-color:rgba(255,209,0,.45)" onclick="openPanel('poststudio')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
+          <div class="tile-body">
+            <div class="tile-name">🎨 Post Studio</div>
+            <div class="tile-desc">Make uniform, on-brand Instagram &amp; X graphics in seconds — matchday, goals, scores, signings, festive &amp; more. All league crests loaded.</div>
+          </div>
+          <span class="tile-badge">Social</span>
+        </button>
       </div>
 
       <div class="sect-lbl">Match Day</div>
@@ -534,11 +542,6 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
           <div class="tile-name">Social Media</div><div class="tile-desc">Strategy &amp; planner</div>
-        </button>
-        <button class="tile" style="--accent:#FFD100" onclick="openPanel('poststudio')">
-          <span class="tile-arrow">&#8594;</span>
-          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
-          <div class="tile-name">Post Studio</div><div class="tile-desc">Make on-brand IG &amp; X graphics</div>
         </button>
         <button class="tile" style="--accent:#F43F5E" onclick="openPanel('fanclub')">
           <span class="tile-arrow">&#8594;</span>
@@ -2782,17 +2785,48 @@ var PS_THEMES = {
   green:  { bg: 'radial-gradient(circle at 28% 18%,#0f2912,#06120a 60%,#020402)', accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' }
 };
 var FESTIVE = {
-  'Christmas': ['Merry Christmas', 'from everyone at The Lane', '🎄'],
-  'New Year': ['Happy New Year', 'Onwards & upwards, Yellow Army', '🎆'],
-  'Eid Mubarak': ['Eid Mubarak', 'to all our Muslim members & families', '🌙'],
-  'Ramadan': ['Ramadan Kareem', 'to everyone observing the holy month', '🌙'],
-  'Diwali': ['Happy Diwali', 'wishing light & joy to all celebrating', '🪔'],
-  'Vaisakhi': ['Happy Vaisakhi', 'to our Sikh & Punjabi community', '🌾'],
-  'Easter': ['Happy Easter', 'from The Lane family', '🐣'],
-  'Hanukkah': ['Happy Hanukkah', 'to everyone celebrating', '🕎'],
-  'Lunar New Year': ['Happy Lunar New Year', 'health & happiness to all', '🧧'],
-  'Remembrance': ['We Will Remember Them', 'Lest we forget', '🌺']
+  'Christmas': ['Merry Christmas', 'from everyone at The Lane', 'tree'],
+  'New Year': ['Happy New Year', 'Onwards & upwards, Yellow Army', 'firework'],
+  'Eid Mubarak': ['Eid Mubarak', 'to all our Muslim members & families', 'crescent'],
+  'Ramadan': ['Ramadan Kareem', 'to everyone observing the holy month', 'crescent'],
+  'Diwali': ['Happy Diwali', 'wishing light & joy to all celebrating', 'diya'],
+  'Vaisakhi': ['Happy Vaisakhi', 'to our Sikh & Punjabi community', 'wheat'],
+  'Easter': ['Happy Easter', 'from The Lane family', 'egg'],
+  'Hanukkah': ['Happy Hanukkah', 'to everyone celebrating', 'menorah'],
+  'Lunar New Year': ['Happy Lunar New Year', 'health & happiness to all', 'lantern'],
+  'Remembrance': ['We Will Remember Them', 'Lest we forget', 'poppy']
 };
+// ── on-brand line icons (drawn for currentColor) — no OS emojis ──
+var PS_ICONS = {
+  calendar: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  whistle: '<path d="M3 10h9l3-2v5.5a4.5 4.5 0 1 1-9 0V10H3z"/><path d="M15 8V5h4"/><circle cx="8" cy="14" r="1.1" fill="currentColor" stroke="none"/>',
+  ball: '<circle cx="12" cy="12" r="9"/><path d="M12 7.2l3.6 2.6-1.4 4.3H9.8L8.4 9.8z"/><path d="M12 7.2V3.2M15.6 9.8l3.4-1.4M14.2 14.1l2.4 3M9.8 14.1l-2.4 3M8.4 9.8L5 8.4"/>',
+  card: '<rect x="6.5" y="2.5" width="11" height="16.5" rx="2.2" fill="currentColor" stroke="none"/>',
+  star: '<path d="M12 2.5l2.9 6.2 6.8.7-5.1 4.6 1.4 6.7L12 17.6l-6 3.1 1.4-6.7L2.3 9.4l6.8-.7z" fill="currentColor" stroke="none"/>',
+  medal: '<circle cx="12" cy="15" r="6"/><path d="M9 9.8L6 2.5M15 9.8l3-7.3"/><path d="M12 12.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2L9.1 14.8l2-.3z" fill="currentColor" stroke="none"/>',
+  pen: '<path d="M15.5 3.2l5.3 5.3L8 21.3H2.7v-5.3z"/><path d="M13.5 5.2l5.3 5.3"/>',
+  list: '<circle cx="5" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1.5" fill="currentColor" stroke="none"/><path d="M9.5 6H21M9.5 12H21M9.5 18H21"/>',
+  heart: '<path d="M12 20.5S3.5 15.4 3.5 9.4A4.4 4.4 0 0 1 12 7.2 4.4 4.4 0 0 1 20.5 9.4c0 6-8.5 11.1-8.5 11.1z" fill="currentColor" stroke="none"/>',
+  cake: '<path d="M4 20.5h16v-6.5a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3z"/><path d="M4 16.2c2 1.6 4-1.6 8 0s4 1.6 8 0"/><path d="M8 7.8V5M12 7.8V4.3M16 7.8V5"/><circle cx="8" cy="3.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="3.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="3.9" r="1.1" fill="currentColor" stroke="none"/>',
+  hourglass: '<path d="M6 3h12M6 21h12M7 3c0 5.2 5 6 5 9s-5 3.8-5 9M17 3c0 5.2-5 6-5 9s5 3.8 5 9"/>',
+  megaphone: '<path d="M3 10.5v3a1 1 0 0 0 1 1h2.3l8.7 4.8V4.7L6.3 9.5H4a1 1 0 0 0-1 1z"/><path d="M18.5 8a5.5 5.5 0 0 1 0 8"/>',
+  scroll: '<path d="M6 3h11a2 2 0 0 1 2 2v13a3 3 0 0 1-3 3H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+  quote: '<path d="M7.5 7H4v5.5h3.5L6 17h2.2l1.6-4.5V7zm9 0H13v5.5h3.5L15 17h2.2l1.6-4.5V7z" fill="currentColor" stroke="none"/>',
+  tree: '<path d="M12 2.5l4.8 6.7H14l4 5.6h-3l3.2 4.4H4.8L8 14.8H5l4-5.6H6.2z" fill="currentColor" stroke="none"/><rect x="10.4" y="19.2" width="3.2" height="3" fill="currentColor" stroke="none"/>',
+  firework: '<path d="M12 12V2.6M12 12l6.6-6.6M12 12h9.4M12 12l6.6 6.6M12 12v9.4M12 12l-6.6 6.6M12 12H2.6M12 12L5.4 5.4"/>',
+  crescent: '<path d="M17 3.2A9 9 0 1 0 21 16 7 7 0 0 1 17 3.2z" fill="currentColor" stroke="none"/><path d="M19.4 3.6l.7 1.6 1.7.2-1.3 1.2.4 1.7-1.5-.9-1.5.9.4-1.7-1.3-1.2 1.7-.2z" fill="currentColor" stroke="none"/>',
+  diya: '<path d="M2.5 14.5c2.2 3.2 5.4 4.3 9.5 4.3s7.3-1.1 9.5-4.3c-2.4-1.1-5.4-2-9.5-2s-7.1.9-9.5 2z" fill="currentColor" stroke="none"/><path d="M12 12c0-2.2 2.2-3.2 2.2-5.4 1.2 1.1 1.2 3.2 0 4.3.6-.5 1.1-1.6 1.1-2.7 1.1 2.2-1.1 3.8-3.3 3.8z" fill="currentColor" stroke="none"/>',
+  wheat: '<path d="M12 21V8"/><path d="M12 8c-2.2-1-3.3-3.2-2.2-5.4 2.2 0 3.3 2.2 2.2 5.4zM12 8c2.2-1 3.3-3.2 2.2-5.4-2.2 0-3.3 2.2-2.2 5.4zM12 13.5c-2.2-1-3.3-3.2-2.2-5.4 2.2 0 3.3 2.2 2.2 5.4zM12 13.5c2.2-1 3.3-3.2 2.2-5.4-2.2 0-3.3 2.2-2.2 5.4z"/>',
+  egg: '<path d="M12 2.4c-4 0-7 6.3-7 11.4a7 7 0 0 0 14 0c0-5.1-3-11.4-7-11.4z"/><path d="M5.6 13h12.8M6.3 16.5h11.4"/>',
+  menorah: '<path d="M12 8v11M8 21h8M4 11.2V8M8 11.2V8M16 11.2V8M20 11.2V8M4 11.2a8 8 0 0 0 16 0"/>',
+  lantern: '<path d="M12 2.6v2M12 19.4v2"/><ellipse cx="12" cy="12" rx="6" ry="7.4"/><path d="M7.4 7.6h9.2M7.4 16.4h9.2"/>',
+  poppy: '<circle cx="12" cy="9.5" r="5.2" fill="currentColor" stroke="none"/><circle cx="12" cy="9.5" r="1.7" fill="#0a0a0a" stroke="none"/><path d="M12 14.7c0 3.8-2 6-2 6h4s-2-2.2-2-6z" fill="currentColor" stroke="none"/>'
+};
+function psIco(key, px, color) {
+  var p = PS_ICONS[key]; if (!p) return '';
+  return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
+}
+var PS_TYPE_ICON = { matchday: 'calendar', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', history: 'scroll', quote: 'quote' };
 var HISTORY_FACTS = [
   'Founded in 1933 — over 90 years at the heart of Harrow football.',
   'The Lane plays in yellow & green at Tithe Farm Sports & Social Club.',
@@ -2812,24 +2846,24 @@ var QUOTES = [
 
 // post type registry
 function POST_TYPES() { return [
-  { key: 'matchday',  label: '📅 Match Day' },
-  { key: 'kickoff',   label: '🟢 Kick Off' },
-  { key: 'goal',      label: '⚽ GOAL!' },
-  { key: 'yellow',    label: '🟨 Yellow Card' },
-  { key: 'red',       label: '🟥 Red Card' },
-  { key: 'halftime',  label: '⏸ Half-Time' },
-  { key: 'fulltime',  label: '⏹ Full-Time' },
-  { key: 'motm',      label: '⭐ Man of the Match' },
-  { key: 'potm',      label: '🏅 Player of the Month' },
-  { key: 'signing',   label: '✍️ New Signing' },
-  { key: 'lineup',    label: '📋 Starting XI' },
-  { key: 'sponsorspot', label: '🤝 Sponsor Spotlight' },
-  { key: 'birthday',  label: '🎂 Birthday' },
-  { key: 'countdown', label: '⏳ Countdown' },
-  { key: 'festive',   label: '🎉 Festive' },
-  { key: 'announce',  label: '📢 Announcement' },
-  { key: 'history',   label: '📜 Club History' },
-  { key: 'quote',     label: '💬 Motivation' }
+  { key: 'matchday',  label: 'Match Day' },
+  { key: 'kickoff',   label: 'Kick Off' },
+  { key: 'goal',      label: 'GOAL!' },
+  { key: 'yellow',    label: 'Yellow Card' },
+  { key: 'red',       label: 'Red Card' },
+  { key: 'halftime',  label: 'Half-Time' },
+  { key: 'fulltime',  label: 'Full-Time' },
+  { key: 'motm',      label: 'Man of the Match' },
+  { key: 'potm',      label: 'Player of the Month' },
+  { key: 'signing',   label: 'New Signing' },
+  { key: 'lineup',    label: 'Starting XI' },
+  { key: 'sponsorspot', label: 'Sponsor Spotlight' },
+  { key: 'birthday',  label: 'Birthday' },
+  { key: 'countdown', label: 'Countdown' },
+  { key: 'festive',   label: 'Festive' },
+  { key: 'announce',  label: 'Announcement' },
+  { key: 'history',   label: 'Club History' },
+  { key: 'quote',     label: 'Motivation' }
 ]; }
 
 var psCrestCache = {};
@@ -2868,7 +2902,7 @@ function loadPostStudio() {
   fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
 }
 function psBuild() {
-  document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + t.label + '</button>'; }).join('');
+  document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + psIco(PS_TYPE_ICON[t.key], 15) + ' ' + t.label + '</button>'; }).join('');
   psSetType(PS.type);
 }
 function psSetType(k) {
@@ -2982,7 +3016,8 @@ function psFooter(t, s) {
 }
 function psWM() { return '<div style="position:absolute;right:-130px;bottom:-110px;width:600px;height:600px;background:url(img/badge.png) center/contain no-repeat;opacity:.05"></div>'; }
 function psEyebrow(txt, t, top) {
-  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center"><span style="display:inline-block;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;color:' + t.ink + ';background:' + t.accent + ';padding:9px 22px;border-radius:6px">' + txt + '</span></div>';
+  var ico = psIco(PS_TYPE_ICON[PS.type], 22, t.ink);
+  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center"><span style="display:inline-flex;align-items:center;gap:11px;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;color:' + t.ink + ';background:' + t.accent + ';padding:9px 22px;border-radius:6px">' + ico + '<span>' + txt + '</span></span></div>';
 }
 function psBig(txt, t, size, top) {
   return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:' + size + 'px;letter-spacing:3px;color:#fff;line-height:.9;padding:0 50px">' + txt + '</div>';
@@ -3047,7 +3082,7 @@ function psRender() {
     inner += ctr(X ? H - 130 : (ST ? H - 320 : H - 210), '<span style="' + beb(70, '#fff') + '">' + escH((d.sub || 'WE ARE UNDERWAY!')).toUpperCase() + '</span>');
   } else if (PS.type === 'goal') {
     var p = psPlayerObj(), hasP = p && p.photo;
-    inner += psEyebrow('⚽ GOAL', t, ebTop);
+    inner += psEyebrow('GOAL', t, ebTop);
     if (hasP) {
       inner += ctr(ebTop + 70, '<span style="' + beb(X ? 130 : 180, '#fff') + '">GOAL!</span>');
       inner += playerFrame(p, X ? 280 : 380, W / 2, ebTop + (X ? 210 : 280));
@@ -3061,7 +3096,7 @@ function psRender() {
     }
   } else if (PS.type === 'yellow' || PS.type === 'red') {
     var pc = psPlayerObj(); var col = PS.type === 'red' ? '#E5341F' : '#FFCB05';
-    inner += psEyebrow(PS.type === 'red' ? '🟥 RED CARD' : '🟨 YELLOW CARD', t, ebTop);
+    inner += psEyebrow(PS.type === 'red' ? 'RED CARD' : 'YELLOW CARD', t, ebTop);
     inner += '<div style="position:absolute;top:' + (midY - (X ? 150 : 220)) + 'px;left:' + (W / 2 - (X ? 110 : 150)) + 'px;width:' + (X ? 220 : 300) + 'px;height:' + (X ? 300 : 420) + 'px;border-radius:22px;background:' + col + ';box-shadow:0 26px 64px -16px rgba(0,0,0,.85)"></div>';
     var cy3 = X ? H - 150 : (ST ? H - 350 : H - 240);
     inner += ctr(cy3, '<span style="' + beb(X ? 80 : 100, '#fff') + '">' + psSurname(pc, '[PLAYER]') + '</span>');
@@ -3076,21 +3111,21 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (cyc + cz4 / 2 + 14) + 'px;left:' + (W * 0.84 - 170) + 'px;width:340px;text-align:center;' + beb(34, '#fff') + '">' + escH(crestName(d.awayCrest || (psCrests[1] && psCrests[1].file) || '')) + '</div>';
   } else if (PS.type === 'motm') {
     var pm = psPlayerObj(), hasM = pm && pm.photo;
-    inner += psEyebrow('⭐ MAN OF THE MATCH', t, ebTop);
+    inner += psEyebrow('MAN OF THE MATCH', t, ebTop);
     if (hasM) inner += playerFrame(pm, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
     var my = X ? H - 150 : (ST ? H - 340 : H - 230);
     inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
     inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
   } else if (PS.type === 'potm') {
     var ep = psEff(), hasPp = !!ep.photo;
-    inner += psEyebrow('🏅 PLAYER OF THE MONTH', t, ebTop);
+    inner += psEyebrow('PLAYER OF THE MONTH', t, ebTop);
     inner += ctr(ebTop + (X ? 58 : 76), '<span style="font-family:Arial;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">' + escH((d.month || 'AUGUST')).toUpperCase() + '</span>');
     if (hasPp) inner += playerFrame({ photo: ep.photo }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
     var py = X ? H - 150 : (ST ? H - 340 : H - 235);
     inner += ctr(hasPp ? py : midY - 30, '<span style="' + beb(hasPp ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
     if (ep.position) inner += ctr(hasPp ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
   } else if (PS.type === 'sponsorspot') {
-    inner += psEyebrow('🤝 PROUDLY SPONSORED BY', t, ebTop);
+    inner += psEyebrow('PROUDLY SPONSORED BY', t, ebTop);
     if (d.logo) {
       var sc = +d.logoScale || 360, lx = (d.logoX == null ? 50 : +d.logoX) / 100, ly = (d.logoY == null ? 44 : +d.logoY) / 100;
       var lcx = W * lx, lcy = H * ly;
@@ -3103,7 +3138,7 @@ function psRender() {
     if (d.spSub) inner += ctr(X ? H - 95 : (ST ? H - 265 : H - 158), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff">' + escH(d.spSub) + '</span>');
   } else if (PS.type === 'birthday') {
     var eb2 = psEff(), bp = psPlayerObj();
-    inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;font-size:' + (X ? 70 : 96) + 'px">🎂🎉🎈</div>';
+    inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;">' + psIco('cake', X ? 90 : 140, t.accent) + '</div>';
     inner += ctr(ebTop + (X ? 70 : 110), '<span style="' + beb(X ? 110 : 150, t.accent) + '">HAPPY BIRTHDAY</span>');
     if (bp && bp.photo) inner += playerFrame(bp, X ? 250 : 330, W / 2, ebTop + (X ? 150 : 230));
     var byy = (bp && bp.photo) ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 10;
@@ -3111,12 +3146,12 @@ function psRender() {
     if (d.bmsg) inner += ctr(byy + (X ? 96 : 130), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.bmsg) + '</span>');
   } else if (PS.type === 'signing') {
     var psn = psPlayerObj(), nm = psn ? psSurname(psn) : (d.manualName || '[NAME]').toUpperCase(), hasS = psn && psn.photo;
-    inner += psEyebrow('✍️ NEW SIGNING', t, ebTop);
+    inner += psEyebrow('NEW SIGNING', t, ebTop);
     if (hasS) inner += playerFrame(psn, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
     inner += ctr(hasS ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(hasS ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
     inner += ctr(hasS ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(hasS ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
   } else if (PS.type === 'lineup') {
-    inner += psEyebrow(away ? '📋 YOUR XI' : '📋 STARTING XI', t, ebTop);
+    inner += psEyebrow(away ? 'YOUR XI' : 'STARTING XI', t, ebTop);
     var xi = (d.xi || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
     var subs = (d.subs || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
     var listTop = ebTop + (X ? 70 : 90), lh = X ? 56 : (ST ? 78 : 70), fs = X ? 46 : (ST ? 66 : 58);
@@ -3129,15 +3164,15 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (midY + (PS.size === 'x' ? 110 : 170)) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:4px;color:' + t.accent + '">DAYS TO ' + escH((d.what || 'KICK OFF')).toUpperCase() + '</div>';
   } else if (PS.type === 'festive') {
     var occ = d.occ || 'Christmas'; var f = FESTIVE[occ];
-    inner += '<div style="position:absolute;top:' + (midY - 240) + 'px;left:0;right:0;text-align:center;font-size:150px">' + f[2] + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY - 240) + 'px;left:0;right:0;text-align:center;">' + psIco(f[2], X ? 150 : 230, t.accent) + '</div>';
     inner += '<div style="position:absolute;top:' + (midY - 30) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:96px;letter-spacing:2px;color:' + t.accent + ';padding:0 50px">' + f[0].toUpperCase() + '</div>';
     inner += '<div style="position:absolute;top:' + (midY + 90) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:700;letter-spacing:1px;color:#fff;padding:0 80px">' + escH(f[1]) + '</div>';
   } else if (PS.type === 'announce') {
-    inner += psEyebrow('📢 CLUB ANNOUNCEMENT', t, PS.size === 'x' ? 60 : 130);
+    inner += psEyebrow('CLUB ANNOUNCEMENT', t, PS.size === 'x' ? 60 : 130);
     inner += '<div style="position:absolute;top:' + (midY - 130) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:104px;letter-spacing:2px;color:' + t.accent + ';line-height:.9;padding:0 50px">' + escH(d.title || 'IMPORTANT UPDATE').toUpperCase() + '</div>';
     inner += '<div style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
   } else if (PS.type === 'history') {
-    inner += psEyebrow('📜 ON THE LANE', t, PS.size === 'x' ? 60 : 130);
+    inner += psEyebrow('ON THE LANE', t, PS.size === 'x' ? 60 : 130);
     inner += '<div style="position:absolute;top:' + (midY - 120) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:2px;color:#fff;line-height:1.05;padding:0 70px">' + escH(d.fact || HISTORY_FACTS[0]) + '</div>';
     inner += '<div style="position:absolute;top:' + (midY + 150) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:22px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">SINCE 1933</div>';
   } else if (PS.type === 'quote') {
