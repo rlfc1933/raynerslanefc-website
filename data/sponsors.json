@@ -1,14 +1,67 @@
 {
   "sponsors": [
-    {"name":"Hanlon Dry Lining","tier":"Principal Partner","role":"Home Shirt Sponsor","url":"","logo":"img/sponsors/hanlon-dry-lining.png","note":"Nigel Hanlon — Vice Chairman"},
-    {"name":"McCafferty's","tier":"Principal Partner","role":"Away Shirt Sponsor","url":"https://harrow.mccaffertysbars.com/","logo":"img/sponsors/mccaffertys.png","note":"Harrow"},
-    {"name":"Kit Sponsor","tier":"Kit Sponsor","role":"Match Kit","url":"","logo":"img/sponsors/kit-sponsor.png","note":""},
-    {"name":"The King, Denham","tier":"Training Kit Sponsor","role":"Training Wear","url":"http://www.thekingdenham.co.uk/menu","logo":"img/sponsors/the-king-denham.png","note":"","feature":true},
-    {"name":"Higginson Stairs","tier":"Programme Sponsor","role":"Programme","url":"https://www.higginson.co.uk/","logo":"","note":""}
+    {
+      "name": "Hanlon Dry Lining",
+      "tier": "Principal Partner",
+      "role": "Home Shirt Sponsor",
+      "url": "",
+      "logo": "img/sponsors/hanlon-dry-lining.png",
+      "note": "Nigel Hanlon — Vice Chairman"
+    },
+    {
+      "name": "McCafferty's",
+      "tier": "Principal Partner",
+      "role": "Away Shirt Sponsor",
+      "url": "https://harrow.mccaffertysbars.com/",
+      "logo": "img/sponsors/mccaffertys.png",
+      "note": "Harrow"
+    },
+    {
+      "name": "Kit Sponsor",
+      "tier": "Kit Sponsor",
+      "role": "Match Kit",
+      "url": "",
+      "logo": "img/sponsors/kit-sponsor.png",
+      "note": ""
+    },
+    {
+      "name": "The King, Denham",
+      "tier": "Training Kit Sponsor",
+      "role": "Training Wear",
+      "url": "http://www.thekingdenham.co.uk/menu",
+      "logo": "img/sponsors/the-king-denham.png",
+      "note": "",
+      "feature": true
+    },
+    {
+      "name": "Higginson Stairs",
+      "tier": "Programme Sponsor",
+      "role": "Programme",
+      "url": "https://www.higginson.co.uk/",
+      "logo": "",
+      "note": ""
+    },
+    {
+      "name": "Ashwood Builders Merchants",
+      "tier": "Principal Partner",
+      "role": "Training Kit Sponsor",
+      "logo": "/img/uploads/1781696501761-998412e9-267c-4580-ac6c-1d9e2516584f.jpeg",
+      "url": "www.ashwoodbm.com",
+      "note": "",
+      "feature": false
+    }
   ],
   "affiliations": [
-    {"name":"Combined Counties Football League","logo":"img/sponsors/combined-counties-league.png","url":"https://www.pitchero.com/clubs/raynerslanefc"},
-    {"name":"Middlesex FA · England Football","logo":"img/sponsors/middlesex-fa.png","url":"https://www.middlesexfa.com/"}
+    {
+      "name": "Combined Counties Football League",
+      "logo": "img/sponsors/combined-counties-league.png",
+      "url": "https://www.pitchero.com/clubs/raynerslanefc"
+    },
+    {
+      "name": "Middlesex FA · England Football",
+      "logo": "img/sponsors/middlesex-fa.png",
+      "url": "https://www.middlesexfa.com/"
+    }
   ],
-  "updatedAt": ""
+  "updatedAt": "2026-06-17T11:42:42.083Z"
 }
