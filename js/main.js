@@ -65,16 +65,40 @@ async function loadMatchDay() {
   // automatically the moment the league publishes fixtures. A live match the
   // staff have toggled always takes priority; manual matchday.json is fallback.
   if (!m.isLive) {
+    var usedLocal = false;
+    // PRIMARY: the club's own season schedule (admin → Fixtures).
     try {
-      var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
-      window._rlfcFixtures = fx; // share with the results renderer
-      if (fx && fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
-        m.opponent = fx.next.opponent;
-        m.isHome = fx.next.isHome;
-        m.competition = fx.next.competition || m.competition;
-        m.date = (fx.next.date || '') + 'T' + (fx.next.kickoff || '15:00') + ':00';
+      var lr = await fetch('data/fixtures.json?t=' + Date.now());
+      if (lr.ok) {
+        var ld = await lr.json();
+        var list = (ld && ld.fixtures) || [];
+        if (list.length) {
+          var shaped = rlfcFixturesShape(list);
+          window._rlfcFixtures = shaped;
+          usedLocal = true;
+          if (shaped.next && shaped.next.opponent) {
+            m.opponent = shaped.next.opponent;
+            m.isHome = shaped.next.isHome;
+            m.competition = shaped.next.competition || m.competition;
+            m.date = (shaped.next.date || '') + 'T' + (shaped.next.kickoff || '15:00') + ':00';
+            if (shaped.next.venue) m.venue = shaped.next.venue;
+          }
+        }
       }
     } catch (e) {}
+    // FALLBACK: live feed (TheSportsDB) while the club schedule is still empty.
+    if (!usedLocal) {
+      try {
+        var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
+        window._rlfcFixtures = fx; // share with the results renderer
+        if (fx && fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
+          m.opponent = fx.next.opponent;
+          m.isHome = fx.next.isHome;
+          m.competition = fx.next.competition || m.competition;
+          m.date = (fx.next.date || '') + 'T' + (fx.next.kickoff || '15:00') + ':00';
+        }
+      } catch (e) {}
+    }
   }
 
   // The admin panel saves `opponent` + `isHome`. Build the fixture from those
@@ -130,17 +154,33 @@ function renderHomeFixtures(fx) {
     rows += fx.results.slice(0, 4).map(function (r) {
       var win = r.us > r.them, draw = r.us === r.them;
       var col = win ? '#22C55E' : (draw ? '#FBBF24' : '#EF4444');
-      var rd = r.date ? new Date(r.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+      var rd = r.date ? new Date((String(r.date).length === 10 ? r.date + 'T12:00:00' : r.date)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
       return '<div class="fixture-row" style="grid-template-columns:1fr auto;align-items:center">' +
         '<div style="font-family:var(--font-c);font-size:14px;color:#fff;letter-spacing:.03em">Rayners Lane ' + (r.isHome ? 'vs ' : '@ ') + fix_esc(r.opponent) +
         ' <span style="color:var(--grey);font-size:11px">&middot; ' + rd + '</span></div>' +
         '<div style="font-family:var(--font-d);font-size:20px;color:' + col + ';letter-spacing:.06em">' + r.us + '–' + r.them + '</div></div>';
     }).join('');
-    rows += '<div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em;padding-top:8px">Results via TheSportsDB</div>';
+    rows += '<div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em;padding-top:8px">' + (fx.source === 'club' ? 'Official club results' : 'Results via TheSportsDB') + '</div>';
   }
   if (rows) el.innerHTML = rows;
 }
 function fix_esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// Shape the club's season schedule (data/fixtures.json) into the { next, results }
+// form the home + fixtures renderers already expect.
+function rlfcFixturesShape(list) {
+  var now = Date.now();
+  function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
+  var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
+  var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
+  var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
+  var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
+  return {
+    source: 'club',
+    next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, venue: next.venue } : null,
+    results: played.slice().reverse().map(function (r) { return { opponent: r.opponent, date: r.date, isHome: r.isHome, us: r.us, them: r.them }; })
+  };
+}
 
 function startCountdown(dateStr) {
   var el = document.getElementById('countdown');

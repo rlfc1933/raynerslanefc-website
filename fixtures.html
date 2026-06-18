@@ -198,22 +198,76 @@
 function fxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function loadFixturesData() {
-  // Fixtures, results & form (TheSportsDB)
+  // PRIMARY: the club-controlled season schedule (admin → Fixtures).
+  var usedLocal = false;
   try {
-    var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
-    renderFxResults(fx);
-    renderFxForm(fx);
-  } catch (e) {
-    document.getElementById('fx-results').innerHTML = '<div class="fx-empty">Results unavailable right now. Follow us <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank">on Pitchero</a>.</div>';
-    document.getElementById('fx-form').innerHTML = '';
+    var lr = await fetch('data/fixtures.json?t=' + Date.now());
+    if (lr.ok) {
+      var ld = await lr.json();
+      var list = (ld && ld.fixtures) || [];
+      if (list.length) { renderFxSeason(list); usedLocal = true; }
+    }
+  } catch (e) {}
+  // FALLBACK: live feed (TheSportsDB) while the club schedule is still empty.
+  if (!usedLocal) {
+    try {
+      var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
+      renderFxResults(fx);
+      renderFxForm(fx);
+    } catch (e) {
+      document.getElementById('fx-results').innerHTML = '<div class="fx-empty">Results unavailable right now. Follow us <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank">on Pitchero</a>.</div>';
+      document.getElementById('fx-form').innerHTML = '';
+    }
   }
-  // League table (Wikipedia)
+  // League table (Wikipedia) — unchanged.
   try {
     var t = await (await fetch('/.netlify/functions/fetch-table')).json();
     renderFxTable(t.table || []);
   } catch (e) {
     document.getElementById('fx-table').innerHTML = '<div class="fx-empty">Table unavailable right now.</div>';
   }
+}
+
+// Render the full club season schedule (upcoming + results + form) from
+// data/fixtures.json, reusing the existing next-match / form renderers.
+function renderFxSeason(list) {
+  var now = Date.now();
+  function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
+  var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
+  var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
+  var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
+  var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
+
+  var nextEl = document.getElementById('fx-next');
+  if (next) {
+    var d = new Date(next.date + 'T' + (next.kickoff || '15:00') + ':00');
+    var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
+      '<div class="fx-next__teams">Rayners Lane ' + (next.isHome !== false ? 'vs ' : '@ ') + fxEsc(next.opponent) + '</div>' +
+      '<div class="fx-next__meta">' + ds + ' &middot; ' + (next.kickoff || '15:00') + (next.venue ? ' &middot; ' + fxEsc(next.venue) : '') + '</div></div>';
+  } else { nextEl.innerHTML = ''; }
+
+  var html = '';
+  if (upcoming.length) {
+    html += '<div class="fx-rlbl">Upcoming Fixtures</div>' + upcoming.map(function (f) {
+      var fd = new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00');
+      var rd = fd.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (f.isHome !== false ? 'vs ' : '@ ') + fxEsc(f.opponent) +
+        ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s" style="color:#fff;opacity:.8">' + (f.kickoff || '15:00') + '</div></div>';
+    }).join('');
+  }
+  if (played.length) {
+    var recent = played.slice().reverse();
+    html += '<div class="fx-rlbl" style="margin-top:18px">Recent Results</div>' + recent.map(function (r) {
+      var win = r.us > r.them, draw = r.us === r.them, cls = win ? 'w' : (draw ? 'd' : 'l');
+      var rd = new Date(r.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (r.isHome !== false ? 'vs ' : '@ ') + fxEsc(r.opponent) +
+        ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s ' + cls + '">' + r.us + '–' + r.them + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('fx-results').innerHTML = html || '<div class="fx-empty">Fixtures are released soon — check back.</div>';
+
+  renderFxForm({ results: played.slice().reverse() });
 }
 
 function renderFxResults(fx) {
