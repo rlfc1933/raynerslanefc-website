@@ -2524,18 +2524,25 @@ async function loadUsers() {
 function renderUsersList(custom) {
   var el = document.getElementById('us-list'), cnt = document.getElementById('us-cnt');
   if (!el) return;
+  var byName = {}; (custom || []).forEach(function (u) { byName[u.username] = u; });
+  var defaults = STAFF_ROLES.slice();
   var rows = [];
-  staffDefaultUsers().forEach(function (d) {
-    if (!(custom && custom.some(function (u) { return u.username === d.username; }))) rows.push({ username: d.username, role: d.role, isChairman: d.isChairman, custom: false });
+  // The 7 base roles — each can have its password set (or reset to default).
+  defaults.forEach(function (role) {
+    var c = byName[role];
+    rows.push({ username: role, role: role, isChairman: role === 'Chairman' || (c && !!c.is_chairman), hasCustom: !!c, base: true });
   });
-  (custom || []).forEach(function (u) { rows.push({ username: u.username, role: u.role || u.username, isChairman: !!u.is_chairman || !!u.isChairman, custom: true }); });
+  // Extra named people the chairman added (username isn't one of the 7 roles).
+  (custom || []).forEach(function (u) {
+    if (defaults.indexOf(u.username) === -1) rows.push({ username: u.username, role: u.role || u.username, isChairman: !!u.is_chairman, hasCustom: true, base: false });
+  });
   cnt.textContent = 'Who can sign in (' + rows.length + ')';
   el.innerHTML = rows.map(function (r) {
     var u = r.username.replace(/'/g, '');
-    var tag = r.isChairman ? '<span style="color:var(--y)">★ Chairman</span>' : '<span style="color:var(--gr)">' + esc(r.role) + '</span>';
-    var actions = r.custom
-      ? '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="setUserPassword(\'' + u + '\')">Password</button><button class="li-del" onclick="removeUser(\'' + u + '\')">Remove</button>'
-      : '<span style="font-family:var(--fc);font-size:11px;color:var(--gr)">default pw</span>';
+    var tag = (r.isChairman ? '<span style="color:var(--y)">★ Chairman</span>' : '<span style="color:var(--gr)">' + esc(r.role) + '</span>') +
+      ' <span style="color:' + (r.hasCustom ? 'var(--su)' : 'var(--gr)') + '">&middot; ' + (r.hasCustom ? 'custom password' : 'default password') + '</span>';
+    var actions = '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="setUserPassword(\'' + u + '\')">Set password</button>';
+    if (r.hasCustom) actions += '<button class="li-del" onclick="removeUser(\'' + u + '\')">' + (r.base ? 'Reset' : 'Remove') + '</button>';
     return '<div class="li"><span class="li-num">' + (r.isChairman ? '★' : '&#128100;') + '</span><div class="li-main"><div class="li-name">' + esc(r.username) + '</div><div class="li-sub" style="font-size:11px">' + tag + '</div></div>' + actions + '</div>';
   }).join('');
 }
