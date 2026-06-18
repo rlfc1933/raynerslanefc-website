@@ -761,7 +761,11 @@
 
       <div class="slbl">Match &amp; Fixture Details</div>
       <div class="field"><label class="fl">Opposition</label><input type="text" id="pr-opp" placeholder="Harefield United"></div>
-      <div class="field"><label class="fl">Opposition crest <span style="color:var(--gr);font-weight:400">— shown on the cover (VS)</span></label><select id="pr-oppcrest"><option value="">— pick a crest —</option></select></div>
+      <div class="field"><label class="fl">Opposition crest <span style="color:var(--gr);font-weight:400">— shown on the cover (VS)</span></label><select id="pr-oppcrest" onchange="prClearOppCrestUpload()"><option value="">— pick a crest —</option></select></div>
+      <div class="field"><label class="fl">…or upload a crest <span style="color:var(--gr);font-weight:400">— for pre-season, friendlies &amp; cup ties not on the list</span></label>
+        <div id="pr-oppcrest-up"><label style="display:block;border:1.5px dashed var(--br);border-radius:8px;padding:14px;text-align:center;cursor:pointer;color:var(--gr);font-family:var(--fc);font-size:13px"><input type="file" accept="image/*" onchange="prOppCrestUpload(this)" style="display:none">&#127942; Tap to upload the opponent&rsquo;s crest (PNG/JPG)</label></div>
+        <div id="pr-oppcrest-thumb" style="display:none;align-items:center;gap:12px;margin-top:8px"><span style="width:54px;height:54px;border-radius:8px;background:#fff;display:inline-flex;align-items:center;justify-content:center;overflow:hidden"><img id="pr-oppcrest-thumbimg" src="" style="max-width:46px;max-height:46px;object-fit:contain"></span><span style="flex:1;font-family:var(--fc);font-size:12px;color:var(--gr)">Uploaded crest in use</span><button class="li-del" onclick="prClearOppCrestUpload(true)">Remove</button></div>
+      </div>
       <div class="row2">
         <div class="field"><label class="fl">Date</label><input type="date" id="pr-date"></div>
         <div class="field"><label class="fl">Kick-off</label><input type="time" id="pr-ko" value="15:00"></div>
@@ -3146,7 +3150,11 @@ function applyProgrammeData(d) {
   setVal('pr-oppfounded', d.oppFounded || ''); setVal('pr-oppground', d.oppGround || ''); setVal('pr-oppmanager', d.oppManager || ''); setVal('pr-opponestowatch', d.oppOnesToWatch || '');
   setVal('pr-clubinfo', d.clubInfo || ''); setVal('pr-captainname', d.captainName || ''); setVal('pr-potm', d.potm || ''); setVal('pr-captainnotes', d.captainNotes || '');
   setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
-  var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = d.oppCrest || '';
+  // Opponent crest: an uploaded image (cup/friendly) vs one picked from the list.
+  var oc = document.getElementById('pr-oppcrest');
+  var ocVal = d.oppCrest || '';
+  if (ocVal && /\/uploads\//.test(ocVal)) { prSetOppCrestUpload(ocVal); }
+  else { prOppCrestUpload = ''; prShowOppCrestUploadUI(false); if (oc) oc.value = ocVal; }
   prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
   prCustomPages = Array.isArray(d.customPages) ? d.customPages.map(function (p) { return { title: p.title || '', caption: p.caption || '', image: p.image || '' }; }) : [];
   prRenderThemes(); prRenderPreview(); prRenderPages();
@@ -3181,9 +3189,45 @@ function prProgFromFixture(id) {
   setVal('pr-opp', f.opponent || ''); setVal('pr-date', f.date || ''); setVal('pr-ko', f.kickoff || '15:00');
   if (f.competition) setVal('pr-comp', f.competition);
   if (f.venue) setVal('pr-venue', f.venue);
-  var oc = document.getElementById('pr-oppcrest'); if (oc && f.oppCrest) oc.value = f.oppCrest;
+  var oc = document.getElementById('pr-oppcrest'); if (oc && f.oppCrest) { prClearOppCrestUpload(); oc.value = f.oppCrest; }
   prRenderPreview();
   toast('Match details filled from the fixture ✓');
+}
+
+// ── Opponent crest: upload option (for cup ties / friendlies not on the list) ──
+var prOppCrestUpload = '';
+function prCurrentOppCrest() { return prOppCrestUpload || gv('pr-oppcrest'); }
+function prShowOppCrestUploadUI(on) {
+  var up = document.getElementById('pr-oppcrest-up'), th = document.getElementById('pr-oppcrest-thumb');
+  if (up) up.style.display = on ? 'none' : 'block';
+  if (th) th.style.display = on ? 'flex' : 'none';
+}
+function prSetOppCrestUpload(path) {
+  prOppCrestUpload = path;
+  var img = document.getElementById('pr-oppcrest-thumbimg'); if (img) img.src = path;
+  var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = '';   // uploaded crest wins
+  prShowOppCrestUploadUI(true);
+  prRenderPreview();
+}
+function prClearOppCrestUpload(rerender) {
+  prOppCrestUpload = '';
+  prShowOppCrestUploadUI(false);
+  if (rerender) prRenderPreview();
+}
+function prOppCrestUpload(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 4 * 1024 * 1024) { toast('Crest too large — max 4MB', true); return; }
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var b64 = e.target.result;
+    var fname = 'img/uploads/crest-' + Date.now() + '-' + file.name.replace(/[^a-z0-9.\-]+/gi, '-').toLowerCase();
+    toast('Uploading crest…');
+    fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, path: fname, content: b64.split(',')[1] }) })
+      .then(function (r) { return r.ok; })
+      .then(function (ok) { prSetOppCrestUpload(ok ? ('/' + fname) : b64); toast(ok ? 'Crest added ✓' : 'Crest added (inline)'); })
+      .catch(function () { prSetOppCrestUpload(b64); });
+  };
+  reader.readAsDataURL(file);
 }
 
 // ── COVER COLOUR SCHEMES + LIVE PREVIEW ──
@@ -3218,7 +3262,7 @@ function prRenderPreview() {
   var box = document.getElementById('pr-preview'); if (!box) return;
   var t = COVER_THEMES[prCoverTheme] || COVER_THEMES['black-yellow'];
   var opp = gv('pr-opp') || 'TBC';
-  var ocSel = document.getElementById('pr-oppcrest'); var ocFile = ocSel ? ocSel.value : '';
+  var ocFile = prCurrentOppCrest();
   var oppImg = ocFile || prInitials(opp);
   var comp = gv('pr-comp') || 'Combined Counties Premier Division North';
   var venue = gv('pr-venue') || 'Tithe Farm';
@@ -3301,7 +3345,7 @@ function saveProgramme() {
     oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
     clubHistory: gv('pr-clubhistory'), community: gv('pr-community'), academy: gv('pr-academy'), womens: gv('pr-womens'), supporters: gv('pr-supporters'), groundInfo: gv('pr-groundinfo'),
-    oppCrest: gv('pr-oppcrest'), coverTheme: prCoverTheme,
+    oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme,
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
