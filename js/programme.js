@@ -178,11 +178,19 @@ function renderSquad(players) {
 async function loadProgramme() {
   let data = {};
 
-  // 1. Try data/programme.json (set by admin panel)
+  // 1. Try a specific archived programme (?id=) or data/programme.json (latest)
   try {
-    const r = await fetch('data/programme.json?t='+Date.now());
-    if (r.ok) {
-      const d = await r.json();
+    const idm = location.search.match(/[?&]id=([^&]+)/);
+    let d = null;
+    if (idm) {
+      const ar = await fetch('data/programmes.json?t='+Date.now());
+      if (ar.ok) { const aj = await ar.json(); d = ((aj && aj.items) || []).filter(it => it.id === decodeURIComponent(idm[1]))[0] || null; }
+    }
+    if (!d) {
+      const r = await fetch('data/programme.json?t='+Date.now());
+      if (r.ok) d = await r.json();
+    }
+    {
       if (d && d.opponent) {
         data = d;
         data.opposition = d.opponent;

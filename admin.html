@@ -820,6 +820,11 @@
 
       <button class="save" onclick="saveProgramme()">&#10003; Publish Programme</button>
       <div class="dep" id="dep-programme"></div>
+      <div class="row2" style="margin-top:8px">
+        <button class="save sec" onclick="prNewProgramme()">+ Start a new one</button>
+        <button class="save sec" onclick="window.open('programmes.html','_blank')">&#128218; View archive</button>
+      </div>
+      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:8px">Every Publish is kept in the <b style="color:var(--w)">archive library</b> on the site — fans can browse and read any past programme, and you can re-print any of them.</div>
 
       <div class="div"></div>
       <div class="slbl">&#128424;&#65039; Print Edition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— a printer-ready A4 PDF</span></div>
@@ -3193,8 +3198,25 @@ function saveProgramme() {
     oppCrest: gv('pr-oppcrest'), coverTheme: prCoverTheme,
     updatedAt: new Date().toISOString(),
   };
-  pushToGitHub('programme', data, 'dep-programme');
-  toast('Programme published ✓');
+  // Stable id so re-publishing the same match updates its archive entry.
+  data.id = (data.date || 'undated') + '-' + (data.opponent || 'tbc').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  pushToGitHub('programme', data, 'dep-programme');           // latest (for the live digital programme)
+  // …and add/update it in the archive library.
+  fetchJSON('programmes', function (arch) {
+    var items = (arch && arch.items) || [];
+    items = items.filter(function (it) { return it.id !== data.id; });
+    items.unshift(data);
+    items.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+    setTimeout(function () { pushToGitHub('programmes', { items: items, updatedAt: new Date().toISOString() }, 'dep-programme'); }, 1500);
+  });
+  toast('Programme published ✓ — saved to the archive');
+}
+function prNewProgramme() {
+  if (!confirm('Start a fresh programme? This clears the form (your published/archived ones are safe).')) return;
+  applyProgrammeData({});
+  setVal('pr-fixture', ''); var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = '';
+  prCoverTheme = 'black-yellow'; prRenderThemes(); prRenderPreview();
+  toast('Fresh programme — fill it in and Publish');
 }
 
 // ── SQUAD ──

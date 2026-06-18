@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Programmes — Archive | Rayners Lane FC</title>
+<meta name="description" content="The Rayners Lane FC match-day programme archive — read any programme from the season. Combined Counties Premier Division North.">
+<link rel="canonical" href="https://raynerslanefc.co.uk/programmes.html">
+<meta property="og:title" content="Match Programmes — Archive | Rayners Lane FC">
+<meta property="og:description" content="Read any Rayners Lane FC match-day programme from the season.">
+<meta property="og:image" content="https://raynerslanefc.co.uk/img/badge.png">
+<link rel="icon" type="image/png" href="img/badge.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .pa-head{ text-align:center; padding:48px 16px 8px; }
+  .pa-head .label{ font-family:var(--font-c); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--yellow); }
+  .pa-head h1{ font-family:var(--font-d); font-size:clamp(40px,8vw,72px); letter-spacing:.02em; color:#fff; line-height:.95; margin:6px 0; }
+  .pa-head p{ font-family:var(--font-b); font-size:15px; color:var(--grey); max-width:560px; margin:0 auto; }
+  .pa-grid{ max-width:1080px; margin:24px auto 60px; padding:0 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px; }
+  .pa-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
+  .pa-cover{ aspect-ratio:210/297; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18px 14px; color:#fff; }
+  .pa-cover .ko{ font-family:var(--font-c); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
+  .pa-cover .ttl{ font-family:var(--font-d); font-size:24px; line-height:.95; margin:4px 0; }
+  .pa-cover .vs{ display:flex; align-items:center; gap:8px; margin:10px 0; }
+  .pa-cover .vs img{ width:44px; height:44px; object-fit:contain; }
+  .pa-cover .vs span{ font-family:var(--font-d); font-size:20px; }
+  .pa-cover .opp{ font-family:var(--font-d); font-size:18px; letter-spacing:.02em; }
+  .pa-cover .meta{ font-family:var(--font-c); font-size:10px; letter-spacing:.06em; margin-top:auto; opacity:.85; }
+  .pa-body{ padding:12px 14px 14px; }
+  .pa-body .d{ font-family:var(--font-c); font-size:12px; color:var(--grey); letter-spacing:.05em; text-transform:uppercase; }
+  .pa-body .o{ font-family:var(--font-d); font-size:22px; color:#fff; letter-spacing:.02em; margin:2px 0 10px; }
+  .pa-actions{ display:flex; gap:8px; }
+  .pa-actions a{ flex:1; text-align:center; font-family:var(--font-c); font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; padding:9px; border-radius:8px; text-decoration:none; }
+  .pa-read{ background:var(--yellow); color:#0d0d0d; }
+  .pa-print{ background:transparent; color:var(--yellow); border:1px solid rgba(255,209,0,.45); }
+  .pa-empty{ text-align:center; font-family:var(--font-b); color:var(--grey); padding:60px 16px; }
+</style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="pa-head">
+  <span class="label">Read it any time</span>
+  <h1>Programme <span style="color:var(--yellow)">Archive</span></h1>
+  <p>Every Rayners Lane FC match-day programme, kept here to read on your phone or print. Pick a game.</p>
+</div>
+
+<div id="pa-grid" class="pa-grid"><div class="pa-empty">Loading the archive…</div></div>
+
+<div id="footer-placeholder"></div>
+<script src="js/components.js"></script>
+<script>
+(function(){
+  var THEMES = {
+    'black-yellow':{bg:'#0d0d0d',ink:'#fff',accent:'#FFD100'},'yellow-black':{bg:'#FFD100',ink:'#0d0d0d',accent:'#0d0d0d'},
+    'black-green':{bg:'#0d0d0d',ink:'#fff',accent:'#2E8B57'},'green-black':{bg:'#14532d',ink:'#fff',accent:'#FFD100'},
+    'yellow-green':{bg:'#FFD100',ink:'#14532d',accent:'#14532d'},'green-yellow':{bg:'#14532d',ink:'#FFD100',accent:'#FFD100'},
+    'festive':{bg:'#0b2a1a',ink:'#fff',accent:'#FFD100'},'remembrance':{bg:'#0d0d0d',ink:'#fff',accent:'#C8102E'}
+  };
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function shortDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+  function initials(name){ var w=String(name||'').replace(/F\.?C\.?/gi,'').trim().split(/\s+/); var i=w.slice(0,3).map(function(x){return (x[0]||'').toUpperCase();}).join(''); return 'data:image/svg+xml,'+encodeURIComponent('<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="58" fill="%230d0d0d" stroke="%23ffffff" stroke-width="3"/><text x="60" y="72" text-anchor="middle" font-family="Arial Black" font-size="34" font-weight="900" fill="white">'+i+'</text></svg>'); }
+
+  function render(items, crests){
+    var grid=document.getElementById('pa-grid');
+    if(!items.length){ grid.innerHTML='<div class="pa-empty">No programmes published yet — they’ll appear here through the season.</div>'; return; }
+    function crestFor(p){ if(p.oppCrest) return p.oppCrest; var c=crests.filter(function(x){return x.name && p.opponent && x.name.toLowerCase()===p.opponent.toLowerCase();})[0]; return (c&&c.file)||initials(p.opponent); }
+    grid.innerHTML=items.map(function(p){
+      var t=THEMES[p.coverTheme]||THEMES['black-yellow'];
+      return '<div class="pa-card">'+
+        '<a href="programme.html?id='+encodeURIComponent(p.id)+'" style="text-decoration:none"><div class="pa-cover" style="background:'+t.bg+';color:'+t.ink+'">'+
+          '<div class="ko" style="color:'+t.accent+'">Official Programme</div>'+
+          '<div class="ttl" style="color:'+t.ink+'">Rayners Lane FC</div>'+
+          '<div class="vs"><img src="img/badge.png" alt=""><span style="color:'+t.accent+'">VS</span><img src="'+esc(crestFor(p))+'" alt=""></div>'+
+          '<div class="opp" style="color:'+t.ink+'">'+esc(p.opponent||'TBC')+'</div>'+
+          '<div class="meta" style="color:'+t.ink+'">'+esc(shortDate(p.date))+'</div>'+
+        '</div></a>'+
+        '<div class="pa-body"><div class="d">'+esc(shortDate(p.date))+'</div><div class="o">vs '+esc(p.opponent||'TBC')+'</div>'+
+          '<div class="pa-actions"><a class="pa-read" href="programme.html?id='+encodeURIComponent(p.id)+'">Read</a>'+
+          '<a class="pa-print" href="programme-print.html?id='+encodeURIComponent(p.id)+'" target="_blank">Print</a></div>'+
+        '</div></div>';
+    }).join('');
+  }
+
+  Promise.all([
+    fetch('data/programmes.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('data/crests.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]).then(function(res){
+    var items=(res[0]&&res[0].items)||[]; var crests=(res[1]&&res[1].crests)||[];
+    render(items, crests);
+  });
+
+  try { initComponents('programmes.html'); } catch(e){}
+})();
+</script>
+</body>
+</html>

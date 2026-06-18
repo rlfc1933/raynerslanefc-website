@@ -144,8 +144,32 @@
   function qr(text){
     try{ var q=qrcode(0,'M'); q.addData(text); q.make(); return q.createImgTag(4,0); }catch(e){ return ''; }
   }
+  function paramId(){ var m=location.search.match(/[?&]id=([^&]+)/); return m?decodeURIComponent(m[1]):''; }
+  // Season so far — built live from the club fixtures (results, form, top scorers).
+  function seasonStats(fixtures){
+    var played = (fixtures||[]).filter(function(f){ return f.us!=null && f.them!=null; })
+      .sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    var w=0,dd=0,l=0,gf=0,ga=0,form=[],scorers={};
+    played.forEach(function(f){
+      gf+=Number(f.us); ga+=Number(f.them);
+      if(f.us>f.them) w++; else if(f.us===f.them) dd++; else l++;
+      form.push(f.us>f.them?'W':(f.us===f.them?'D':'L'));
+      String(f.scorers||'').split(',').forEach(function(s){
+        var name=s.replace(/\([^)]*\)/g,'').replace(/\d.*$/,'').replace(/\b(pen|og|p)\b/gi,'').trim();
+        if(name && name.length>1){ scorers[name]=(scorers[name]||0)+1; }
+      });
+    });
+    var top=Object.keys(scorers).map(function(n){return {name:n,goals:scorers[n]};}).sort(function(a,b){return b.goals-a.goals;}).slice(0,12);
+    return { played:played.length, w:w, d:dd, l:l, gf:gf, ga:ga, pts:(w*3+dd), form:form.slice(-6), scorers:top, results:played.slice().reverse() };
+  }
+  // Load a specific archived programme (?id=) or the latest (programme.json).
+  function loadProgrammeDoc(){
+    var id = paramId();
+    if (!id) return getJSON('programme');
+    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; return items.filter(function(it){return it.id===id;})[0] || getJSON('programme'); });
+  }
 
-  Promise.all([ getJSON('programme'), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
+  Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
     fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
   ]).then(function (res) {
     var d = res[0]||{}, crests=(res[1]&&res[1].crests)||[], sponsors=(res[2]&&res[2].sponsors)||[], fixtures=(res[3]&&res[3].fixtures)||[], table=(res[4]&&res[4].table)||[];
@@ -266,6 +290,23 @@
       '<h2 class="sec" style="margin-top:18px">League Table</h2><div class="eyebrow" style="margin-bottom:8px">'+esc(comp)+'</div>'+tableHTML +
       foot() + '</div>');
 
+    // 5b — SEASON SO FAR (auto: results, form, top scorers — updates every week)
+    var S = seasonStats(fixtures);
+    if (S.played) {
+      var formHTML = S.form.map(function(v){ var c=v==='W'?'#22C55E':(v==='D'?'#C9A200':'#EF4444'); return '<span style="display:inline-flex;width:22px;height:22px;border-radius:5px;background:'+c+';color:#fff;font-family:var(--fc);font-weight:700;align-items:center;justify-content:center;font-size:12px;margin-right:4px">'+v+'</span>'; }).join('');
+      var resHTML = S.results.slice(0,8).map(function(r){ var win=r.us>r.them,draw=r.us===r.them,c=win?'#1a7a3a':(draw?'#9a7d00':'#b3231a'); return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(r.date))+' &middot; Rayners Lane '+(r.isHome===false?'@ ':'vs ')+esc(r.opponent||'')+'</span><b style="color:'+c+'">'+r.us+'–'+r.them+'</b></div>'; }).join('');
+      var scoreHTML = S.scorers.length ? '<table class="lt"><thead><tr><th class="l">Top Scorer</th><th>Goals</th></tr></thead><tbody>'+S.scorers.map(function(s){return '<tr><td class="l">'+esc(s.name)+'</td><td><b>'+s.goals+'</b></td></tr>';}).join('')+'</tbody></table>' : '<div class="muted body">Goal scorers appear as results come in.</div>';
+      P.push('<div class="page">' +
+        '<h2 class="sec">Season So Far</h2>' +
+        '<div class="todays" style="grid-template-columns:repeat(4,1fr)"><div class="today"><div class="k">Played</div><div class="v">'+S.played+'</div></div><div class="today"><div class="k">W-D-L</div><div class="v">'+S.w+'-'+S.d+'-'+S.l+'</div></div><div class="today"><div class="k">Goals</div><div class="v">'+S.gf+'-'+S.ga+'</div></div><div class="today"><div class="k">Points</div><div class="v">'+S.pts+'</div></div></div>' +
+        '<div class="eyebrow" style="margin:16px 0 6px">Recent Form</div><div>'+formHTML+'</div>' +
+        '<div class="twocol" style="margin-top:16px">' +
+          '<div><div class="eyebrow" style="margin-bottom:6px">Recent Results</div>'+resHTML+'</div>' +
+          '<div><div class="eyebrow" style="margin-bottom:6px">Top Scorers</div>'+scoreHTML+'</div>' +
+        '</div>' +
+        foot() + '</div>');
+    }
+
     // 6 — SPONSORS (today's match sponsors highlighted + the club wall)
     var todays = [ d.matchSponsor?['Match Sponsor',d.matchSponsor]:null, d.ballSponsor?['Match Ball Sponsor',d.ballSponsor]:null, d.matchdaySponsor?['Matchday Sponsor',d.matchdaySponsor]:null ].filter(Boolean);
     var todayHTML = todays.length ? '<div class="todays">'+todays.map(function(t){ return '<div class="today"><div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>'; }).join('')+'</div>' : '';
@@ -289,6 +330,18 @@
       '<div class="cta-card" style="margin-top:16px;border-left-color:var(--g)"><div class="cta-text" style="width:100%">' +
         '<div class="cta-h" style="color:var(--g)">Sponsor The Lane</div>' +
         '<div class="body">Put your business in front of the Yellow Army every matchday — shirt &amp; kit, match &amp; matchball sponsorship, pitch-side boards and programme ads. It’s marketing that backs grassroots football. To get involved, email <b>info@raynerslanefc.co.uk</b>.</div></div></div>' +
+      foot() + '</div>');
+
+    // 7b — FA: REPORT IT / EQUALITY (compulsory)
+    P.push('<div class="page">' +
+      '<h2 class="sec">Report It. Kick It Out of Football.</h2>' +
+      '<div class="body" style="font-size:13px"><p>Rayners Lane FC and The FA are committed to football for everyone. Discrimination of any kind — based on age, disability, gender reassignment, marriage &amp; civil partnership, pregnancy &amp; maternity, race, religion or belief, sex or sexual orientation — is against the law and has no place at The Lane.</p>' +
+      '<p>If you see or experience discrimination at a match, please report it:</p></div>' +
+      '<div class="panel"><div class="k">At the ground</div><div class="t">Speak to any committee member or match official straight away — we will act.</div></div>' +
+      '<div class="panel"><div class="k">Kick It Out</div><div class="t">Report online at <b>kickitout.org</b>, email <b>report@kickitout.org</b>, or use the free Kick It Out app.</div></div>' +
+      '<div class="panel"><div class="k">The FA</div><div class="t">Report discrimination at <b>thefa.com/football-rules-governance/equality</b>.</div></div>' +
+      '<div class="panel"><div class="k">Club Welfare</div><div class="t">For any safeguarding or welfare concern, contact our Club Welfare Officer via <b>info@raynerslanefc.co.uk</b>.</div></div>' +
+      '<div class="body muted" style="margin-top:10px">Rayners Lane FC is affiliated to Middlesex County FA — an FA Charter Standard Community Club. #UpTheLane, together.</div>' +
       foot() + '</div>');
 
     // 8 — BACK PAGE: fixtures + statements + digital QR
