@@ -1039,57 +1039,20 @@
       <div class="slbl">Staff Email Accounts</div>
       <p style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:0 0 16px;line-height:1.6">Tap any account below to open the inbox in a new tab. Log in with the full email address and your password.</p>
 
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
-        <a href="https://mail.one.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
-          <span style="font-size:24px">👑</span>
-          <div style="flex:1">
-            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Chairman</div>
-            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">chairman@raynerslanefc.co.uk</div>
-          </div>
-          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
-        </a>
+      <div id="mail-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px"></div>
 
-        <a href="https://mail.one.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
-          <span style="font-size:24px">📬</span>
-          <div style="flex:1">
-            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Club Info</div>
-            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">info@raynerslanefc.co.uk</div>
-          </div>
-          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
-        </a>
-
-        <a href="https://mail.one.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
-          <span style="font-size:24px">⚽</span>
-          <div style="flex:1">
-            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Match Day</div>
-            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">matchday@raynerslanefc.co.uk</div>
-          </div>
-          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
-        </a>
-
-        <a href="https://mail.one.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
-          <span style="font-size:24px">📱</span>
-          <div style="flex:1">
-            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Media</div>
-            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">media@raynerslanefc.co.uk</div>
-          </div>
-          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
-        </a>
-
-        <a href="https://mail.one.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">
-          <span style="font-size:24px">📋</span>
-          <div style="flex:1">
-            <div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">Secretary — Jenny Pitt</div>
-            <div style="font-family:var(--fc);font-size:12px;color:var(--gr)">secretary@raynerslanefc.co.uk</div>
-          </div>
-          <span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span>
-        </a>
+      <div class="div"></div>
+      <div class="slbl">Manage Accounts <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— add, rename or remove (chairman)</span></div>
+      <div class="field"><label class="fl">Role / label</label><input type="text" id="em-label" placeholder="e.g. Treasurer"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Person&rsquo;s name (optional)</label><input type="text" id="em-name" placeholder="e.g. Pete Singh"></div>
+        <div class="field"><label class="fl">Email address</label><input type="text" id="em-email" placeholder="treasurer@raynerslanefc.co.uk"></div>
       </div>
+      <button class="save sec" onclick="addEmailAccount()">+ Add / update account</button>
+      <div id="em-list" style="margin-top:10px"></div>
+      <button class="save" style="margin-top:10px" onclick="saveEmails()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-emails"></div>
+      <div class="div"></div>
 
       <div style="background:var(--c2);border:1px solid var(--br);border-left:3px solid var(--gr);padding:16px">
         <div style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:8px">Login Details</div>
@@ -2633,6 +2596,66 @@ async function submitRoleLogin() {
   else boot();
 })();
 
+// ── CLUB EMAIL ACCOUNTS (editable inbox list) ──
+var emailAccounts = [];
+var EMAIL_DEFAULTS = [
+  { icon: '👑', label: 'Chairman', name: '', email: 'chairman@raynerslanefc.co.uk' },
+  { icon: '📬', label: 'Club Info', name: '', email: 'info@raynerslanefc.co.uk' },
+  { icon: '⚽', label: 'Match Day', name: '', email: 'matchday@raynerslanefc.co.uk' },
+  { icon: '📱', label: 'Media', name: '', email: 'media@raynerslanefc.co.uk' },
+  { icon: '📋', label: 'Secretary', name: '', email: 'secretary@raynerslanefc.co.uk' }
+];
+function initMail() {
+  fetchJSON('emails', function (d) {
+    emailAccounts = (d && d.accounts && d.accounts.length) ? d.accounts : EMAIL_DEFAULTS.slice();
+    renderMailList(); renderEmailEditor();
+  });
+}
+function renderMailList() {
+  var el = document.getElementById('mail-list'); if (!el) return;
+  el.innerHTML = emailAccounts.map(function (a) {
+    var title = esc(a.label || 'Inbox') + (a.name ? ' — ' + esc(a.name) : '');
+    return '<a href="https://mail.one.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;background:var(--c2);border:1px solid var(--br);padding:16px;text-decoration:none;border-left:3px solid var(--y)">' +
+      '<span style="font-size:24px">' + (a.icon || '📬') + '</span>' +
+      '<div style="flex:1"><div style="font-family:var(--fc);font-size:14px;font-weight:700;color:var(--w)">' + title + '</div>' +
+      '<div style="font-family:var(--fc);font-size:12px;color:var(--gr)">' + esc(a.email || '') + '</div></div>' +
+      '<span style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em">OPEN →</span></a>';
+  }).join('');
+}
+function renderEmailEditor() {
+  var el = document.getElementById('em-list'); if (!el) return;
+  if (!emailAccounts.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No accounts — add one above.</div>'; return; }
+  el.innerHTML = emailAccounts.map(function (a, i) {
+    return '<div class="li"><span class="li-num">' + (a.icon || '📬') + '</span><div class="li-main"><div class="li-name">' + esc(a.label || '') + (a.name ? ' — ' + esc(a.name) : '') + '</div><div class="li-sub">' + esc(a.email || '') + '</div></div>' +
+      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="editEmailAccount(' + i + ')">Edit</button>' +
+      '<button class="li-del" onclick="removeEmailAccount(' + i + ')">Remove</button></div>';
+  }).join('');
+}
+function addEmailAccount() {
+  var label = gv('em-label'), email = gv('em-email');
+  if (!label || !email) { toast('Add a label and an email', true); return; }
+  // Update if the email already exists, else add.
+  var found = emailAccounts.filter(function (a) { return a.email.toLowerCase() === email.toLowerCase(); })[0];
+  if (found) { found.label = label; found.name = gv('em-name'); }
+  else { emailAccounts.push({ icon: '📬', label: label, name: gv('em-name'), email: email }); }
+  setVal('em-label', ''); setVal('em-name', ''); setVal('em-email', '');
+  renderMailList(); renderEmailEditor(); toast('Saved to the list ✓ — press Save to Site');
+}
+function editEmailAccount(i) {
+  var a = emailAccounts[i]; if (!a) return;
+  setVal('em-label', a.label || ''); setVal('em-name', a.name || ''); setVal('em-email', a.email || '');
+  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor();
+  toast('Editing — change the boxes above and tap Add / update');
+}
+function removeEmailAccount(i) {
+  if (!confirm('Remove this email account from the list?')) return;
+  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor();
+}
+function saveEmails() {
+  pushToGitHub('emails', { accounts: emailAccounts, updatedAt: new Date().toISOString() }, 'dep-emails');
+  toast('Email accounts saved ✓');
+}
+
 // ── MANAGE USERS (Chairman) ──
 function initUsers() {
   var rsel = document.getElementById('us-role');
@@ -2740,6 +2763,7 @@ function openPanel(name) {
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
   if (name === 'programme') initProgramme();
+  if (name === 'mail')      initMail();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();

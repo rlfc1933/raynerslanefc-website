@@ -1,0 +1,10 @@
+{
+  "accounts": [
+    { "icon": "👑", "label": "Chairman", "name": "", "email": "chairman@raynerslanefc.co.uk" },
+    { "icon": "📬", "label": "Club Info", "name": "", "email": "info@raynerslanefc.co.uk" },
+    { "icon": "⚽", "label": "Match Day", "name": "", "email": "matchday@raynerslanefc.co.uk" },
+    { "icon": "📱", "label": "Media", "name": "", "email": "media@raynerslanefc.co.uk" },
+    { "icon": "📋", "label": "Secretary", "name": "", "email": "secretary@raynerslanefc.co.uk" }
+  ],
+  "updatedAt": ""
+}
