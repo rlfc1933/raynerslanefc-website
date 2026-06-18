@@ -2679,7 +2679,7 @@ function editEmailAccount(i) {
 }
 function removeEmailAccount(i) {
   if (!confirm('Remove this email account from the list?')) return;
-  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor();
+  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor(); saveEmails();
 }
 function saveEmails() {
   pushToGitHub('emails', { accounts: emailAccounts, updatedAt: new Date().toISOString() }, 'dep-emails');
@@ -3389,6 +3389,7 @@ function removePlayer(name) {
   if (!confirm('Remove ' + name + '?')) return;
   squad = squad.filter(function(p) { return p.name !== name; });
   renderSquad();
+  saveSquad();
   toast(name + ' removed');
 }
 function saveSquad() {
@@ -3456,10 +3457,18 @@ function publishArticle() {
   }
 }
 function deleteArticle(id) {
-  if (!confirm('Delete this article?')) return;
-  articles = articles.filter(function(a) { return a.id !== id; });
-  renderNews();
-  toast('Deleted');
+  if (!confirm('Delete this article? It will be removed from the website.')) return;
+  // BUGFIX: deletion must be SAVED. Previously this only updated the in-memory
+  // list, so the article vanished from the admin but stayed live on the site.
+  // Mirror commitArticle: remove from the LATEST live list, then push.
+  fetchJSON('news', function (d) {
+    var list = (d && d.articles) ? d.articles : articles;
+    list = list.filter(function (a) { return a.id !== id; });
+    articles = list;
+    renderNews();
+    pushToGitHub('news', { articles: articles, updatedAt: new Date().toISOString() }, 'dep-news');
+    toast('Deleted — removing from the site (live in ~30s)');
+  });
 }
 function renderNews() {
   document.getElementById('nw-cnt').textContent = 'Published (' + articles.length + ')';
@@ -3484,6 +3493,7 @@ function removeMember(name) {
   if (!confirm('Remove ' + name + '?')) return;
   committee = committee.filter(function(m) { return m.name !== name; });
   renderCommittee();
+  saveCommittee();
 }
 function saveCommittee() {
   pushToGitHub('committee', {members:committee, updatedAt:new Date().toISOString()}, 'dep-committee');
@@ -3542,7 +3552,7 @@ function addPerk() {
   setVal('pk-title',''); setVal('pk-detail',''); setVal('pk-code',''); setVal('pk-sponsor',''); setVal('pk-expiry','');
   toast('Voucher added ✓ — press Save');
 }
-function removePerk(i) { if (!confirm('Remove this voucher?')) return; perks.splice(i, 1); renderPerks(); }
+function removePerk(i) { if (!confirm('Remove this voucher?')) return; perks.splice(i, 1); renderPerks(); savePerks(); }
 function addMemberNews() {
   var title = gv('mn-title');
   if (!title) { toast('Enter a headline', true); return; }
@@ -4537,6 +4547,7 @@ function removeSponsor(name) {
   if (!confirm('Remove ' + name + '?')) return;
   sponsors = sponsors.filter(function(s) { return s.name !== name; });
   renderSponsors();
+  saveSponsors();
 }
 function saveSponsors() {
   // Preserve the affiliations block (league / FA) so saving sponsors never wipes it.
@@ -4619,6 +4630,7 @@ function removeFixture(id) {
   if (!confirm('Remove this fixture?')) return;
   fixtures = fixtures.filter(function (f) { return f.id !== id; });
   renderFixtures();
+  saveFixtures();
 }
 function renderFixtures() {
   var cnt = document.getElementById('fx-cnt'), el = document.getElementById('fx-list');
@@ -4675,6 +4687,7 @@ function addPlayerProfile() {
 function removePlayerProfile(id) {
   playerProfiles = playerProfiles.filter(function(p){ return p.id!==id; });
   renderPlayerList();
+  savePlayerProfiles();
 }
 function renderPlayerList() {
   var POS = ['Goalkeeper','Defender','Midfielder','Forward'];
@@ -4724,7 +4737,7 @@ function addGalleryPhoto() {
   if (imgStore['gl']) rmImg('gl');
   toast('Photo added ✓');
 }
-function removeGalleryItem(id) { gallery=gallery.filter(g=>g.id!==id); renderGalleryList(); }
+function removeGalleryItem(id) { gallery=gallery.filter(g=>g.id!==id); renderGalleryList(); saveGallery(); }
 function renderGalleryList() {
   document.getElementById('gl-cnt').textContent='Gallery ('+gallery.length+')';
   document.getElementById('gl-list').innerHTML = gallery.length
@@ -4875,6 +4888,7 @@ function removeMatchRecord(id) {
   if (!confirm('Remove this match from the log?')) return;
   analytics = analytics.filter(function(m){ return m.id !== id; });
   renderAnalytics();
+  saveAnalytics();
 }
 
 function matchTotal(m) { var t = m.takings || {}; return (t.entry||0)+(t.programmes||0)+(t.merch||0)+(t.other||0); }
@@ -4990,6 +5004,7 @@ function addSocialPost() {
 function removeSocialPost(id) {
   socialPosts = socialPosts.filter(function(p){ return p.id !== id; });
   renderSocial();
+  saveSocial();
 }
 function saveSocial() {
   pushToGitHub('social', { posts: socialPosts, updatedAt: new Date().toISOString() }, 'dep-social');
@@ -5245,6 +5260,7 @@ function removePatron(id) {
   patrons = patrons.filter(function(p){return p.id!==id;});
   if (fanOfMonth === id) fanOfMonth = '';
   renderPatrons();
+  savePatrons();
 }
 function savePatrons() {
   pushToGitHub('patrons', { patrons: patrons, fanOfMonth: fanOfMonth, updatedAt: new Date().toISOString() }, 'dep-fanclub');
@@ -5292,6 +5308,7 @@ function removeAttendance(id) {
   if (!confirm('Remove this match\'s hearts?')) return;
   attendance = attendance.filter(function(m){return m.id!==id;});
   renderAttendance();
+  saveAttendance();
 }
 function saveAttendance() {
   pushToGitHub('attendance', { matches: attendance, updatedAt: new Date().toISOString() }, 'dep-attendance');
