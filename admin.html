@@ -466,6 +466,11 @@
 
       <div class="sect-lbl">Match Day</div>
       <div class="tile-grid">
+        <button class="tile" style="--accent:#F59E0B" onclick="openPanel('fixtures')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/></svg></span>
+          <div class="tile-name">Fixtures</div><div class="tile-desc">Season schedule &amp; results</div>
+        </button>
         <button class="tile" style="--accent:#EF4444" onclick="openPanel('matchday')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/></svg></span>
@@ -657,6 +662,38 @@
       </div>
       <button class="save" style="margin-top:12px" onclick="pushLiveScore()">&#9889; Push Score Live</button>
       <div class="dep" id="dep-livescore"></div>
+    </div>
+
+    <!-- FIXTURES (Season Schedule — the Match Engine spine) -->
+    <div class="panel" id="panel-fixtures">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128197; Fixtures</div></div>
+      <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5;margin-bottom:14px">One season schedule that powers the <b style="color:var(--w)">Fixtures page</b>, the <b style="color:var(--w)">home countdown</b>, the <b style="color:var(--w)">calendar feed</b> and <b style="color:var(--w)">Post Studio</b>. Add a fixture, then add the score once it&rsquo;s played.</div>
+      <div class="slbl">Add / Edit Fixture</div>
+      <div class="ha">
+        <button class="ha-btn on" id="fx-h" onclick="fxSetHA(true)">&#127968; Home</button>
+        <button class="ha-btn" id="fx-a" onclick="fxSetHA(false)">&#128652; Away</button>
+      </div>
+      <div class="field"><label class="fl">Opponent</label><select id="fx-opp"></select></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Date</label><input type="date" id="fx-date"></div>
+        <div class="field"><label class="fl">Kick-off</label><input type="time" id="fx-ko" value="15:00"></div>
+      </div>
+      <div class="field"><label class="fl">Venue / location</label><input type="text" id="fx-venue" value="Tithe Farm, Harrow"></div>
+      <div class="field"><label class="fl">Competition</label><input type="text" id="fx-comp" value="Combined Counties Premier Division North"></div>
+      <div class="slbl">Result <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank until it&rsquo;s played</span></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Our score</label><input type="number" min="0" id="fx-us" placeholder="&mdash;"></div>
+        <div class="field"><label class="fl">Their score</label><input type="number" min="0" id="fx-them" placeholder="&mdash;"></div>
+      </div>
+      <div class="field"><label class="fl">Scorers (optional)</label><input type="text" id="fx-scorers" placeholder="Hill 23', Cole 67'"></div>
+      <input type="hidden" id="fx-id">
+      <button class="save sec" onclick="addFixture()">+ Add / Update Fixture</button>
+      <button class="save" style="background:var(--c2);color:var(--gr);margin-top:8px" onclick="fxClearForm()">Clear form</button>
+      <div class="div"></div>
+      <div class="slbl" id="fx-cnt">Season Schedule</div>
+      <div id="fx-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveFixtures()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-fixtures"></div>
     </div>
 
     <!-- PROGRAMME -->
@@ -2259,6 +2296,7 @@ function openPanel(name) {
   if (name === 'sponsors')  renderSponsors();
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
+  if (name === 'fixtures')  fxInit();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
@@ -3700,6 +3738,99 @@ function renderSponsors() {
         return '<div class="li">' + thumb + '<div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+
+// ── FIXTURES (Season Schedule — the Match Engine spine) ──
+var fixtures = [];
+var fxCrests = [];
+var fxHome = true;
+function fxInit() {
+  fetchJSON('crests', function (d) { fxCrests = (d && d.crests) || []; fxFillOpp(); });
+  fetchJSON('fixtures', function (d) { fixtures = (d && d.fixtures) || []; renderFixtures(); });
+  fxClearForm();
+}
+function fxFillOpp() {
+  var sel = document.getElementById('fx-opp'); if (!sel) return;
+  var opts = fxCrests.filter(function (c) { return !/rayners\s*lane/i.test(c.name); });
+  sel.innerHTML = opts.length
+    ? opts.map(function (c) { return '<option value="' + esc(c.file) + '">' + esc(c.name) + '</option>'; }).join('')
+    : '<option value="">— add crests in Post Studio first —</option>';
+}
+function fxSetHA(h) {
+  fxHome = h;
+  document.getElementById('fx-h').classList.toggle('on', h);
+  document.getElementById('fx-a').classList.toggle('on', !h);
+}
+function fxClearForm() {
+  setVal('fx-id', ''); setVal('fx-date', ''); setVal('fx-ko', '15:00');
+  setVal('fx-venue', 'Tithe Farm, Harrow'); setVal('fx-comp', 'Combined Counties Premier Division North');
+  setVal('fx-us', ''); setVal('fx-them', ''); setVal('fx-scorers', '');
+  fxSetHA(true);
+}
+function addFixture() {
+  var date = gv('fx-date'); if (!date) { toast('Pick a date', true); return; }
+  var sel = document.getElementById('fx-opp');
+  var oppFile = sel.value;
+  var oppName = (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].text) || '';
+  if (!oppName) { toast('Pick an opponent', true); return; }
+  var us = gv('fx-us'), them = gv('fx-them');
+  var played = us !== '' && them !== '';
+  var id = gv('fx-id') || ('f' + Date.now());
+  var fx = {
+    id: id, date: date, kickoff: gv('fx-ko') || '15:00',
+    opponent: oppName, oppCrest: oppFile, isHome: fxHome,
+    venue: gv('fx-venue'), competition: gv('fx-comp'),
+    status: played ? 'ft' : 'scheduled',
+    us: played ? Number(us) : null, them: played ? Number(them) : null,
+    scorers: gv('fx-scorers')
+  };
+  fixtures = fixtures.filter(function (f) { return f.id !== id; });
+  fixtures.push(fx);
+  fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
+  renderFixtures(); fxClearForm();
+  toast('Fixture saved ✓ — press Save to publish');
+}
+function fxEdit(id) {
+  var f = fixtures.filter(function (x) { return x.id === id; })[0]; if (!f) return;
+  setVal('fx-id', f.id); setVal('fx-date', f.date); setVal('fx-ko', f.kickoff || '15:00');
+  setVal('fx-venue', f.venue || ''); setVal('fx-comp', f.competition || '');
+  setVal('fx-us', f.us == null ? '' : f.us); setVal('fx-them', f.them == null ? '' : f.them);
+  setVal('fx-scorers', f.scorers || '');
+  fxSetHA(f.isHome !== false);
+  var sel = document.getElementById('fx-opp'); if (sel) sel.value = f.oppCrest || '';
+  var panel = document.getElementById('panel-fixtures'); if (panel) panel.scrollIntoView({ block: 'start' });
+}
+function removeFixture(id) {
+  if (!confirm('Remove this fixture?')) return;
+  fixtures = fixtures.filter(function (f) { return f.id !== id; });
+  renderFixtures();
+}
+function renderFixtures() {
+  var cnt = document.getElementById('fx-cnt'), el = document.getElementById('fx-list');
+  if (!el) return;
+  cnt.textContent = 'Season Schedule (' + fixtures.length + ')';
+  if (!fixtures.length) { el.innerHTML = '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No fixtures yet — add your first above.</div>'; return; }
+  el.innerHTML = fixtures.map(function (f) {
+    var d = new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00');
+    var ds = isNaN(d.getTime()) ? f.date : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    var ha = (f.isHome === false ? '@ ' : 'vs ') + esc(f.opponent || '');
+    var played = f.us != null && f.them != null;
+    var right = played
+      ? '<span style="font-family:var(--fd);font-size:18px;color:' + (f.us > f.them ? 'var(--su)' : (f.us < f.them ? 'var(--re)' : 'var(--y)')) + '">' + f.us + '&ndash;' + f.them + '</span>'
+      : '<span style="font-family:var(--fc);color:var(--gr)">' + esc(f.kickoff || '15:00') + '</span>';
+    var thumb = f.oppCrest
+      ? '<span style="width:40px;height:40px;border-radius:8px;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="' + esc(f.oppCrest) + '" alt="" style="max-width:34px;max-height:34px;object-fit:contain"></span>'
+      : '<span class="li-num">&#9917;</span>';
+    return '<div class="li">' + thumb +
+      '<div class="li-main"><div class="li-name">' + ds + ' &middot; ' + ha + '</div>' +
+      '<div class="li-sub">' + right + ' &middot; ' + esc(f.competition || '') + '</div></div>' +
+      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="fxEdit(\'' + f.id + '\')">Edit</button>' +
+      '<button class="li-del" onclick="removeFixture(\'' + f.id + '\')">Remove</button></div>';
+  }).join('');
+}
+function saveFixtures() {
+  pushToGitHub('fixtures', { fixtures: fixtures, updatedAt: new Date().toISOString() }, 'dep-fixtures');
+  toast('Fixtures saved ✓');
 }
 
 // ── PLAYER PROFILES ──
