@@ -2816,7 +2816,7 @@ function savePerks() {
 
 /* ════════════════════ POST STUDIO ════════════════════ */
 var PS = { type: 'matchday', theme: 'yellow', size: 'ig', data: {} };
-var psCrests = [], psPlayers = [];
+var psCrests = [], psPlayers = [], psFixtures = [];
 var PS_SIZES = { ig: { w: 1080, h: 1080 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
 var PS_THEMES = {
   yellow: { bg: 'radial-gradient(circle at 28% 18%,#1c1c1c,#0a0a0a 62%,#000)', accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' },
@@ -2939,6 +2939,33 @@ function loadPostStudio() {
     psCrests.forEach(function (c) { psNormalizeCrest(c.file, function () { if (--pending <= 0) psRender(); }); });
   });
   fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
+  fetchJSON('fixtures', function (d) { psFixtures = (d && d.fixtures) || []; psFields(); });
+}
+// Pretty short date for cards/labels, e.g. "Sat 15 Aug"
+function fxFmtDate(iso) {
+  if (!iso) return '';
+  var d = new Date(iso + 'T12:00:00');
+  return isNaN(d.getTime()) ? iso : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+// Auto-fill a match-type card from a saved fixture (the fixture→content pipeline)
+function psApplyFixture(id) {
+  if (!id) return;
+  var f = psFixtures.filter(function (x) { return x.id === id; })[0]; if (!f) return;
+  var d = PS.data, T = PS.type, RL = 'img/badge.png', away = f.isHome === false;
+  d.date = fxFmtDate(f.date); d.ko = f.kickoff || '15:00';
+  if (f.venue) d.venue = f.venue; if (f.competition) d.comp = f.competition;
+  if (T === 'matchday') {
+    d.ha = away ? 'away' : 'home';
+    if (f.oppCrest) d.oppCrest = f.oppCrest;
+  } else {
+    d.homeCrest = away ? (f.oppCrest || RL) : RL;
+    d.awayCrest = away ? RL : (f.oppCrest || RL);
+    if ((T === 'halftime' || T === 'fulltime') && f.us != null && f.them != null) {
+      d.hs = away ? f.them : f.us;
+      d.as = away ? f.us : f.them;
+    }
+  }
+  psFields(); psRender();
 }
 function psBuild() {
   document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + psIco(PS_TYPE_ICON[t.key], 15) + ' ' + t.label + '</button>'; }).join('');
@@ -2969,8 +2996,14 @@ function psFieldDefs() {
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home score</label><input type="number" min="0" value="' + (d.hs || 0) + '" oninput="psSet(\'hs\',this.value)"></div><div class="field"><label class="fl">Away score</label><input type="number" min="0" value="' + (d.as || 0) + '" oninput="psSet(\'as\',this.value)"></div></div>' : '';
   var player = (['goal', 'yellow', 'red', 'motm', 'signing', 'potm'].indexOf(T) > -1)
     ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
+  // Fixture picker — auto-fills the card from the season schedule (Fixtures manager)
+  var fxPick = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1 && psFixtures.length)
+    ? '<div class="field"><label class="fl">&#9889; Load from fixture <span style="color:var(--gr);font-weight:400">— auto-fills opponent, date, time, venue' + (['halftime', 'fulltime'].indexOf(T) > -1 ? ' &amp; score' : '') + '</span></label><select onchange="psApplyFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option>' +
+      psFixtures.map(function (f) { return '<option value="' + escH(f.id) + '">' + escH(fxFmtDate(f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>'; }).join('') +
+      '</select></div>'
+    : '';
   switch (T) {
-    case 'matchday': return homeAway +
+    case 'matchday': return fxPick + homeAway +
       '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side of the VS we\'re on — Away puts the opponent before the VS.</div>' +
       '<div class="field"><label class="fl">Opponent <span style="color:var(--gr);font-weight:400">— who we\'re playing</span></label><select onchange="psVal(\'oppCrest\',this.value)">' + psCrestOptions(d.oppCrest || (psCrests[1] && psCrests[1].file)) + '</select></div>' +
       '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psSet(\'comp\',this.value)"></div>' +
@@ -2988,10 +3021,10 @@ function psFieldDefs() {
       '<div class="field"><label class="fl">Title</label><input type="text" value="' + escH(d.comp || 'PRE-SEASON FRIENDLY') + '" oninput="psSet(\'comp\',this.value)"></div>' +
       '<div class="ps-crestrow"><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 12 Jul') + '" oninput="psSet(\'date\',this.value)"></div><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div></div>' +
       '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
-    case 'kickoff': return crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psSet(\'sub\',this.value)"></div>';
+    case 'kickoff': return fxPick + crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psSet(\'sub\',this.value)"></div>';
     case 'goal': return player + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psSet(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psSet(\'score\',this.value)"></div></div>';
     case 'yellow': case 'red': return player + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psSet(\'min\',this.value)"></div>';
-    case 'halftime': case 'fulltime': return crests + score;
+    case 'halftime': case 'fulltime': return fxPick + crests + score;
     case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>';
     case 'potm': return player +
       '<div class="ps-crestrow"><div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>' +
