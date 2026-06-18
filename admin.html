@@ -415,11 +415,25 @@
   </div>
 </div>
 
+<!-- ROLE LOGIN (after the PIN — recognises who's signing in) -->
+<div id="role-screen" style="display:none;position:fixed;inset:0;z-index:60;background:var(--bk);flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px">
+  <img src="img/badge.png" class="pin-logo" alt="RLFC">
+  <div style="text-align:center"><div class="pin-title">WHO'S SIGNING IN?</div><div class="pin-sub">Choose your role &amp; enter your password</div></div>
+  <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px">
+    <select id="role-user" style="width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fc);font-size:16px;padding:14px 12px"></select>
+    <input type="password" id="role-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')submitRoleLogin()" style="width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fb);font-size:16px;padding:14px 12px">
+    <div id="role-err" style="font-family:var(--fc);font-size:13px;color:var(--re);min-height:16px;text-align:center"></div>
+    <button onclick="submitRoleLogin()" style="width:100%;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;font-size:16px;letter-spacing:.04em;padding:15px;border:none;border-radius:10px;cursor:pointer">Sign in &#8594;</button>
+    <button onclick="lock()" style="width:100%;background:none;color:var(--gr);font-family:var(--fc);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:8px;border:none;cursor:pointer">&#8592; Back to PIN</button>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app">
   <div class="app-hdr">
     <img src="img/badge.png" alt="RLFC">
     <div class="app-ttl">Admin Panel</div>
+    <span id="staff-who" style="display:none;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--y);background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.3);padding:5px 10px;border-radius:20px;white-space:nowrap"></span>
     <button class="bell-btn" id="bell-btn" onclick="toggleNotifs()" title="Things to do">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
       <span class="bell-badge" id="bell-badge" style="display:none">0</span>
@@ -610,6 +624,16 @@
         <button class="tile tile-wide" style="--accent:#888" onclick="openPanel('settings')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>
           <div class="tile-body"><div class="tile-name">Settings</div><div class="tile-desc">How everything works &amp; admin options</div></div>
+        </button>
+        <button class="tile tile-wide chair-only" style="--accent:#F59E0B;display:none" onclick="openPanel('users')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M17 7l2 2 3-3.5"/><path d="M16 14h5M16 17.5h5"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Manage Users</div><div class="tile-desc">Add or remove logins, set passwords &amp; see who signed in</div></div>
+          <span class="tile-badge">Chairman</span>
+        </button>
+        <button class="tile tile-wide chair-only" style="--accent:#22D3EE;display:none" onclick="openPanel('developer')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M8 9l-3 3 3 3M16 9l3 3-3 3M13 6l-2 12"/></svg></span>
+          <div class="tile-body"><div class="tile-name">Developer</div><div class="tile-desc">How the whole site is built — repos, APIs, wiring &amp; handover</div></div>
+          <span class="tile-badge">Chairman</span>
         </button>
       </div>
     </div>
@@ -2078,6 +2102,85 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     </div>
 
     <!-- SETTINGS -->
+    <!-- MANAGE USERS (Chairman only) -->
+    <div class="panel" id="panel-users">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Manage Users</div></div>
+      <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> The default password for everyone is <code>20raynerslanefc26</code> until you change it here.</p></div>
+      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Saving needs the one-time login sync.</strong> Right now the default password works for everyone but changes here won&rsquo;t stick or sync. Turn on sync (see the Developer tab → Login sync setup) and this becomes fully live.</p></div>
+      <div class="slbl">Add a user</div>
+      <div class="field"><label class="fl">Name (what they pick at login)</label><input type="text" id="us-name" placeholder="e.g. Pete Singh"></div>
+      <div class="field"><label class="fl">Role</label><select id="us-role"></select></div>
+      <div class="field"><label class="fl">Password</label><input type="text" id="us-pass" value="20raynerslanefc26"></div>
+      <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="us-chair" style="width:16px;height:16px;accent-color:var(--y)"> Chairman powers (can manage users &amp; see the Developer tab)</label>
+      <button class="save sec" onclick="addUser()">+ Add user</button>
+      <div class="dep" id="dep-users"></div>
+      <div class="div"></div>
+      <div class="slbl" id="us-cnt">Who can sign in</div>
+      <div id="us-list"></div>
+      <div class="div"></div>
+      <div class="slbl">Recent sign-ins <button onclick="loadStaffLogins()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh &#8635;</button></div>
+      <div id="us-logins"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading…</div></div>
+    </div>
+
+    <!-- DEVELOPER (Chairman only) — full handover documentation -->
+    <div class="panel" id="panel-developer">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128187; Developer</div></div>
+      <div class="snote" style="border-color:rgba(34,211,238,.3);background:rgba(34,211,238,.06)"><p>Everything a web developer needs to take this site over — how it&rsquo;s built, where things live, and how it&rsquo;s wired together. Hand this to anyone who maintains the site.</p></div>
+
+      <div class="sg-card"><h4>🏗️ The stack (no framework, no build)</h4><div class="sg-w">
+        <b>Site</b><span>Plain static <strong style="color:var(--w)">HTML + CSS + vanilla JS</strong>. No React/Next, no build step — edit a file, commit, it&rsquo;s live. Pages are individual <code>*.html</code> files; shared JS in <code>js/</code>; styles in <code>css/style.css</code>.</span>
+        <b>Host</b><span><strong style="color:var(--w)">Netlify</strong>, auto-deploying from GitHub <code>rlfc1933/raynerslanefc-website</code>. Push to <code>main</code> → live in ~30s. <code>netlify.toml</code> sets the functions dir + cache headers.</span>
+        <b>PWA</b><span><code>manifest.json</code> (+ <code>admin-manifest.json</code>) and <code>sw.js</code> (network-first service worker, also handles Web Push).</span>
+      </div></div>
+
+      <div class="sg-card"><h4>🗂️ Content / CMS = <code>data/*.json</code></h4><div class="sg-w">
+        <b>How it works</b><span>This admin (<code>admin.html</code>) is a single PIN-gated page. Every &ldquo;Save&rdquo; calls <code>pushToGitHub(name,obj,depId)</code> → <code>/.netlify/functions/save-data</code> → commits <code>data/&lt;name&gt;.json</code> → Netlify rebuilds. Public pages <code>fetch()</code> those JSON files and render them.</span>
+        <b>Key files</b><span><code>fixtures.json</code> (the Match Engine spine), <code>matchday.json</code> (live scoreboard), <code>squad/players/news/sponsors/committee/crests/...json</code>. One file per feature.</span>
+        <b>Single source of truth</b><span><code>data/fixtures.json</code> feeds the Fixtures page, home countdown, the ICS calendar feed, Post Studio auto-fill, and SEO/AEO <code>SportsEvent</code> JSON-LD.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>⚙️ Netlify functions (<code>netlify/functions/</code>)</h4><div class="sg-w">
+        <b>save-data</b><span>Commits a data file to GitHub (PIN-gated, uses <code>GITHUB_TOKEN</code>). The backbone of every Save.</span>
+        <b>fetch-fixtures / fetch-table</b><span>Fallback live data: TheSportsDB (fixtures) + Wikipedia (Combined Counties table). Used only until <code>fixtures.json</code> is populated.</span>
+        <b>fixtures-ics</b><span>Turns <code>fixtures.json</code> into a subscribable calendar feed (text/calendar).</span>
+        <b>list-fans / list-members / list-sponsors / submission-created</b><span>Read fan sign-ups (Netlify Forms) + real fan accounts (Supabase) for the admin.</span>
+        <b>push-key / push-subscribe / push-send</b><span>Web Push match alerts (VAPID + Supabase + <code>web-push</code> from <code>package.json</code>).</span>
+        <b>staff-login / staff-users / staff-logins</b><span>This role-login layer — verify password, manage users, login history (Supabase).</span>
+      </div></div>
+
+      <div class="sg-card"><h4>🔌 APIs &amp; integrations</h4><div class="map">
+        <div class="k">TheSportsDB</div><div>Free, no key — fallback fixtures/results (team id in <code>SDB_TEAM_ID</code>).</div>
+        <div class="k">Wikipedia</div><div>League table parsed in <code>fetch-table.js</code> (page set in <code>WIKI_TABLE_PAGE</code>).</div>
+        <div class="k">Supabase</div><div>Project <code>rewkixywfgsyqinfbggv</code> — fan auth/accounts, push subscriptions, staff users + login log.</div>
+        <div class="k">Netlify Forms</div><div>Fan/sponsor sign-ups (no DB) — read back via the Netlify API.</div>
+        <div class="k">html2canvas</div><div>Post Studio renders the card to PNG (CDN, in <code>admin.html</code> head).</div>
+        <div class="k">web-push</div><div>Sends VAPID push notifications (npm dep in <code>package.json</code>).</div>
+      </div></div>
+
+      <div class="sg-card warn" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>🔑 Netlify environment variables (secrets)</h4><div class="sg-w">
+        <b>Required</b><span><code>GITHUB_TOKEN</code> (saves), <code>ADMIN_PIN</code> (=19332026), <code>NETLIFY_API_TOKEN</code> (fan list).</span>
+        <b>Supabase</b><span><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_KEY</code> (accounts, push, staff logins).</span>
+        <b>Push</b><span><code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code> (see <code>PUSH-SETUP.md</code>).</span>
+        <b>Optional</b><span><code>SDB_TEAM_ID</code>, <code>SEASON_START</code>, <code>WIKI_TABLE_PAGE</code>, <code>WIKI_TABLE_SECTION</code>.</span>
+        <b>Where</b><span>Netlify → Site configuration → Environment variables. Never in the repo.</span>
+      </div></div>
+
+      <div class="sg-card go" style="border-left-color:var(--su);background:rgba(34,197,94,.05)"><h4>🗄️ Login sync setup (Supabase SQL)</h4><div class="sg-w">
+        <b>One-time</b><span>In Supabase → SQL Editor, run the two table creates below to switch on custom passwords + the sign-in history. Until then the default password works and the committee is never locked out.</span>
+        <b>SQL</b><span style="font-family:monospace;font-size:11px;color:#9fe;line-height:1.6;white-space:pre-wrap">create table if not exists staff_users (id uuid primary key default gen_random_uuid(), username text unique not null, role text, pass_hash text not null, is_chairman boolean default false, active boolean default true, created_at timestamptz default now());
+create table if not exists staff_logins (id uuid primary key default gen_random_uuid(), username text, role text, at timestamptz default now(), user_agent text);</span>
+        <b>Then</b><span>Manage Users → add/remove people and set passwords; sign-ins appear under &ldquo;Recent sign-ins&rdquo;.</span>
+      </div></div>
+
+      <div class="sg-card"><h4>🚀 Day-to-day for a developer</h4><div class="sg-w">
+        <b>Edit</b><span>Clone the repo (or edit on github.com). Any text editor. No <code>npm install</code> needed for the site itself.</span>
+        <b>Deploy</b><span><code>git push origin main</code> → Netlify builds &amp; deploys automatically (~30s). Roll back from the Netlify Deploys tab.</span>
+        <b>Dashboards</b><span>Netlify (hosting, env vars, functions, forms), Supabase (database/auth), GitHub (code). Domain: <code>raynerslanefc.co.uk</code>.</span>
+        <b>Docs</b><span><code>PUSH-SETUP.md</code> (notifications) and this tab. The in-app <strong style="color:var(--w)">Site Guide</strong> explains each feature for non-technical staff.</span>
+        <b>Contact</b><span><code>info@raynerslanefc.co.uk</code>.</span>
+      </div></div>
+    </div>
+
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#9881;&#65039; Settings</div></div>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
@@ -2225,10 +2328,23 @@ function pd() {
 }
 function enterApp() {
   document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('role-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  applyStaffIdentity();
   loadAll();
   initDash();
   addTileInfos();
+}
+// Show who's logged in + reveal chairman-only tiles for the chairman.
+function applyStaffIdentity() {
+  var s = staffSession();
+  var who = document.getElementById('staff-who');
+  if (who) {
+    if (s) { who.style.display = ''; who.textContent = '● ' + (s.username || s.role); }
+    else { who.style.display = 'none'; }
+  }
+  var chair = staffIsChairman();
+  document.querySelectorAll('.chair-only').forEach(function (el) { el.style.display = chair ? '' : 'none'; });
 }
 
 // ── TILE INFO (i) — tap the little i on any tile to see what it's for ──
@@ -2295,7 +2411,7 @@ function checkPin() {
     // Stay signed in across reloads + the device back button for this browser
     // session (clears when the tab/app is closed). Fixes "back logs me out".
     try { sessionStorage.setItem('rlfc_admin_ok', '1'); } catch (e) {}
-    enterApp();
+    showRoleLogin();
   } else {
     document.getElementById('perr').textContent = 'Wrong PIN — try again';
     pinVal = '';
@@ -2304,22 +2420,175 @@ function checkPin() {
   }
 }
 function lock() {
-  try { sessionStorage.removeItem('rlfc_admin_ok'); } catch (e) {}
+  try { sessionStorage.removeItem('rlfc_admin_ok'); sessionStorage.removeItem('rlfc_staff'); } catch (e) {}
   document.getElementById('app').style.display = 'none';
+  document.getElementById('role-screen').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
   pinVal = '';
   renderDots();
   showDash();
 }
-// Already signed in this session? Skip the PIN screen on reload / back-forward.
+
+// ── STAFF ROLE LOGIN (identity layer on top of the PIN) ──
+// The PIN is the gate; this recognises WHO is using the portal so logins can be
+// attributed (and the chairman can see the history). Default password works
+// instantly; custom passwords + the login log sync via Supabase once set up.
+var STAFF_ROLES = ['Club Management', 'Chairman', 'V Chairman', 'Committee', 'Club Secretary', 'Match Day Secretary', 'Marketing/Media'];
+var STAFF_DEFAULT_PW = '20raynerslanefc26';
+var staffUsers = []; // [{username, role, isChairman}] merged defaults + custom
+
+function staffSession() { try { return JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null'); } catch (e) { return null; } }
+function staffIsChairman() { var s = staffSession(); return !!(s && s.isChairman); }
+function staffDefaultUsers() {
+  return STAFF_ROLES.map(function (r) { return { username: r, role: r, isChairman: r === 'Chairman' }; });
+}
+function showRoleLogin() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  var rs = document.getElementById('role-screen'); rs.style.display = 'flex';
+  // Default roles immediately; merge any custom users from Supabase if available.
+  staffUsers = staffDefaultUsers();
+  renderRoleOptions();
+  fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN)).then(function (r) { return r.json(); }).then(function (j) {
+    if (j && j.ok && j.users) {
+      var merged = staffDefaultUsers().filter(function (d) { return !j.users.some(function (u) { return u.username === d.username; }); });
+      staffUsers = j.users.map(function (u) { return { username: u.username, role: u.role || u.username, isChairman: !!u.isChairman || u.role === 'Chairman' }; }).concat(merged);
+      renderRoleOptions();
+    }
+  }).catch(function () {});
+  setVal('role-pass', ''); document.getElementById('role-err').textContent = '';
+  setTimeout(function () { var i = document.getElementById('role-user'); if (i) i.focus(); }, 120);
+}
+function renderRoleOptions() {
+  var sel = document.getElementById('role-user'); if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = staffUsers.map(function (u) { return '<option value="' + esc(u.username) + '">' + esc(u.username) + (u.role && u.role !== u.username ? ' · ' + esc(u.role) : '') + '</option>'; }).join('');
+  if (cur) sel.value = cur;
+}
+async function submitRoleLogin() {
+  var username = gv('role-user'), pass = gv('role-pass');
+  if (!username) { document.getElementById('role-err').textContent = 'Choose your role'; return; }
+  if (!pass) { document.getElementById('role-err').textContent = 'Enter your password'; return; }
+  document.getElementById('role-err').textContent = 'Checking…';
+  var picked = staffUsers.filter(function (u) { return u.username === username; })[0] || { username: username, role: username, isChairman: username === 'Chairman' };
+  // 1) Try the server (custom passwords + login logging). 2) Fall back to the
+  // shared default password so the committee is never locked out.
+  // Server outcomes: ok:true → in; ok:false + 'wrong-password' → a CUSTOM
+  // password was set and missed (block the default). Anything else (no
+  // function, no-supabase, not-found, junk, offline) → fall back to the shared
+  // default password so the committee is never locked out.
+  var ok = false, role = picked.role, isChair = picked.isChairman, serverRejected = false;
+  try {
+    var res = await (await fetch('/.netlify/functions/staff-login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, username: username, password: pass })
+    })).json();
+    if (res && typeof res === 'object' && res.ok === true) { ok = true; role = res.role || role; isChair = !!res.isChairman; }
+    else if (res && typeof res === 'object' && res.ok === false && res.error === 'wrong-password') { serverRejected = true; }
+  } catch (e) {}
+  if (!ok && !serverRejected) ok = (pass === STAFF_DEFAULT_PW);
+  if (!ok) { document.getElementById('role-err').textContent = 'Wrong password — try again'; setVal('role-pass', ''); return; }
+  try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, at: Date.now() })); } catch (e) {}
+  document.getElementById('role-screen').style.display = 'none';
+  enterApp();
+}
+
+// Already signed in this session? Skip straight back to where they were.
 (function () {
-  function boot() { try { if (sessionStorage.getItem('rlfc_admin_ok') === '1') enterApp(); } catch (e) {} }
+  function boot() {
+    try {
+      if (sessionStorage.getItem('rlfc_admin_ok') !== '1') return;
+      if (staffSession()) enterApp(); else showRoleLogin();
+    } catch (e) {}
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
 
+// ── MANAGE USERS (Chairman) ──
+function initUsers() {
+  var rsel = document.getElementById('us-role');
+  if (rsel) rsel.innerHTML = STAFF_ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('');
+  loadUsers();
+  loadStaffLogins();
+}
+async function loadUsers() {
+  var note = document.getElementById('us-syncnote');
+  try {
+    var j = await (await fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN))).json();
+    if (j && j.ok) { if (note) note.style.display = 'none'; renderUsersList(j.users || []); return; }
+    if (note) note.style.display = '';
+  } catch (e) { if (note) note.style.display = ''; }
+  renderUsersList(null); // fallback: defaults, read-only
+}
+function renderUsersList(custom) {
+  var el = document.getElementById('us-list'), cnt = document.getElementById('us-cnt');
+  if (!el) return;
+  var rows = [];
+  staffDefaultUsers().forEach(function (d) {
+    if (!(custom && custom.some(function (u) { return u.username === d.username; }))) rows.push({ username: d.username, role: d.role, isChairman: d.isChairman, custom: false });
+  });
+  (custom || []).forEach(function (u) { rows.push({ username: u.username, role: u.role || u.username, isChairman: !!u.is_chairman || !!u.isChairman, custom: true }); });
+  cnt.textContent = 'Who can sign in (' + rows.length + ')';
+  el.innerHTML = rows.map(function (r) {
+    var u = r.username.replace(/'/g, '');
+    var tag = r.isChairman ? '<span style="color:var(--y)">★ Chairman</span>' : '<span style="color:var(--gr)">' + esc(r.role) + '</span>';
+    var actions = r.custom
+      ? '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="setUserPassword(\'' + u + '\')">Password</button><button class="li-del" onclick="removeUser(\'' + u + '\')">Remove</button>'
+      : '<span style="font-family:var(--fc);font-size:11px;color:var(--gr)">default pw</span>';
+    return '<div class="li"><span class="li-num">' + (r.isChairman ? '★' : '&#128100;') + '</span><div class="li-main"><div class="li-name">' + esc(r.username) + '</div><div class="li-sub" style="font-size:11px">' + tag + '</div></div>' + actions + '</div>';
+  }).join('');
+}
+async function addUser() {
+  var name = gv('us-name'), role = gv('us-role'), pass = gv('us-pass'), chair = document.getElementById('us-chair').checked;
+  if (!name) { toast('Enter a name', true); return; }
+  if (!pass || pass.length < 6) { toast('Password too short (min 6)', true); return; }
+  var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Saving…');
+  try {
+    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: role, password: pass, isChairman: chair }) })).json();
+    if (j.ok) { showDep(el, 'ok', name + ' can now sign in ✓'); setVal('us-name', ''); setVal('us-pass', '20raynerslanefc26'); document.getElementById('us-chair').checked = false; loadUsers(); }
+    else if (j.error === 'no-supabase') showDep(el, 'err', 'Turn on login sync first (Developer tab → Login sync setup).');
+    else showDep(el, 'err', j.error || 'Failed');
+  } catch (e) { showDep(el, 'err', 'Network error'); }
+}
+async function removeUser(username) {
+  if (!confirm('Remove ' + username + '? They won\'t be able to sign in.')) return;
+  var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Removing…');
+  try {
+    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'remove', username: username }) })).json();
+    if (j.ok) { showDep(el, 'ok', 'Removed'); loadUsers(); } else showDep(el, 'err', j.error || 'Failed');
+  } catch (e) { showDep(el, 'err', 'Network error'); }
+}
+async function setUserPassword(username) {
+  var np = prompt('New password for ' + username + ' (min 6 characters):');
+  if (np === null) return;
+  if (np.length < 6) { toast('Too short', true); return; }
+  var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Updating…');
+  try {
+    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'setpassword', username: username, password: np }) })).json();
+    if (j.ok) showDep(el, 'ok', 'Password updated ✓'); else showDep(el, 'err', j.error || 'Failed');
+  } catch (e) { showDep(el, 'err', 'Network error'); }
+}
+async function loadStaffLogins() {
+  var el = document.getElementById('us-logins'); if (!el) return;
+  try {
+    var j = await (await fetch('/.netlify/functions/staff-logins?pin=' + encodeURIComponent(PIN))).json();
+    if (j && j.ok && j.logins) {
+      if (!j.logins.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No sign-ins logged yet.</div>'; return; }
+      el.innerHTML = j.logins.map(function (l) {
+        var d = new Date(l.at); var ds = isNaN(d.getTime()) ? l.at : d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        return '<div class="li"><span class="li-num">&#9679;</span><div class="li-main"><div class="li-name">' + esc(l.username || '?') + '</div><div class="li-sub">' + esc(l.role || '') + ' &middot; ' + ds + '</div></div></div>';
+      }).join('');
+      return;
+    }
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Sign-in history turns on with login sync (Developer tab).</div>';
+  } catch (e) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Sign-in history unavailable.</div>'; }
+}
+
 // ── NAVIGATION ──
 function openPanel(name) {
+  if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
+  if (name === 'users') initUsers();
   if (name === 'analytics' && !analyticsUnlocked) { showAnalyticsGate(); return; }
   document.getElementById('dash-home').style.display = 'none';
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
