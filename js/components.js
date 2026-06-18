@@ -518,6 +518,51 @@ function initComponents(currentPage) {
       : 'To install The Lane app:\n\nOpen your browser menu (⋮) and choose "Install app" or "Add to Home screen".');
   };
 
+  // ── MATCH ALERTS (Web Push) ──
+  // Opt-in: ask permission, subscribe with the club's VAPID key, store the
+  // subscription server-side. Degrades gracefully everywhere it can't run.
+  function urlB64ToUint8(base64) {
+    var pad = '='.repeat((4 - base64.length % 4) % 4);
+    var b64 = (base64 + pad).replace(/-/g, '+').replace(/_/g, '/');
+    var raw = atob(b64), arr = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return arr;
+  }
+  window.laneEnableAlerts = async function (btn) {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      alert(iOS
+        ? 'Match alerts need the app installed first.\n\nTap Share → "Add to Home Screen", open The Lane from your home screen, then tap "Enable Match Alerts" again.'
+        : 'Your browser doesn\'t support push alerts. Try Chrome, Edge or install the app from your browser menu.');
+      return;
+    }
+    try {
+      if (btn) { btn.disabled = true; btn.dataset.lbl = btn.textContent; btn.textContent = 'Turning on…'; }
+      var cfg = await (await fetch('/.netlify/functions/push-key')).json();
+      if (!cfg.enabled || !cfg.key) { alert('Match alerts aren\'t switched on by the club yet — check back soon. 💛'); return; }
+      var perm = await Notification.requestPermission();
+      if (perm !== 'granted') { alert('No problem — you can enable match alerts any time from this button.'); return; }
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(cfg.key) });
+      var res = await (await fetch('/.netlify/functions/push-subscribe', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub })
+      })).json();
+      if (res.ok) {
+        alert('You\'re in! 💛 We\'ll send a notification for kick-offs, goals and big club news.');
+        if (btn) { btn.textContent = '✓ Match Alerts On'; return; }
+      } else { alert('Couldn\'t save that just now — please try again in a moment.'); }
+    } catch (e) {
+      alert('Couldn\'t turn on alerts: ' + (e && e.message ? e.message : 'unknown error'));
+    } finally {
+      if (btn && btn.dataset.lbl && btn.textContent === 'Turning on…') { btn.textContent = btn.dataset.lbl; }
+      if (btn) btn.disabled = false;
+    }
+  };
+  var _notifyBtn = document.getElementById('notify-btn');
+  if (_notifyBtn) _notifyBtn.addEventListener('click', function () { window.laneEnableAlerts(_notifyBtn); });
+
 
   // ── PWA INSTALL PROMPT ──
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;

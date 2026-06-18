@@ -662,6 +662,15 @@
       </div>
       <button class="save" style="margin-top:12px" onclick="pushLiveScore()">&#9889; Push Score Live</button>
       <div class="dep" id="dep-livescore"></div>
+
+      <div class="div"></div>
+      <div class="slbl">&#128226; Send a Match Alert <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— a push notification to fans who turned on alerts</span></div>
+      <div class="field"><label class="fl">Headline</label><input type="text" id="pn-title" placeholder="GOAL! Rayners Lane 1-0" maxlength="80"></div>
+      <div class="field"><label class="fl">Message</label><input type="text" id="pn-body" placeholder="Hill fires The Lane ahead on 23'" maxlength="180"></div>
+      <div class="field"><label class="fl">Opens which page? (optional)</label><input type="text" id="pn-url" value="/" placeholder="/"></div>
+      <button class="save sec" onclick="sendPushAlert()">&#128276; Send to all app users</button>
+      <div class="dep" id="dep-push"></div>
+      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:8px">Goes to phones that installed The Lane app and tapped &ldquo;Enable Match Alerts&rdquo;. Needs the one-time push setup (see Site Guide). Use it sparingly — kick-off, goals, full-time and big news only.</div>
     </div>
 
     <!-- FIXTURES (Season Schedule — the Match Engine spine) -->
@@ -1880,6 +1889,13 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <b>Safe to explore</b><span>Open any tab and look around — you can't break anything by reading. Changes only publish when you choose to Save.</span>
       </div></div>
 
+      <div class="sg-card" style="border-left-color:#A855F7"><h4>📣 Match Alerts (push notifications) <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">NEW</span></h4><div class="sg-w">
+        <b>What</b><span>Send a buzz to fans' phones — kick-off, goals, full-time, big news. They get it even with the app closed.</span>
+        <b>Who gets it</b><span>Fans who installed The Lane app and tapped <strong style="color:var(--w)">Enable Match Alerts</strong> on the home page.</span>
+        <b>How to send</b><span>Match Day tab → <strong style="color:var(--w)">Send a Match Alert</strong> → headline + message → Send. Keep it rare so it stays special.</span>
+        <b>One-time setup</b><span>This needs the club's push keys added once (≈5 mins). The how-to is in <strong style="color:var(--w)">PUSH-SETUP.md</strong> in the website files. Until then the button says "not set up yet" — nothing breaks.</span>
+      </div></div>
+
       <div class="sg-card"><h4>🔴 Match Day &amp; Live Scoreboard</h4><div class="sg-w">
         <b>What</b><span>Sets the next fixture and the live score on the home page.</span>
         <b>Who</b><span>Pete / Russell — whoever's at the ground.</span>
@@ -2628,6 +2644,30 @@ function pushLiveScore() {
   applyScores(data);
   pushToGitHub('matchday', data, 'dep-livescore');
   toast('Score pushed live ⚡ ' + lsHome + '–' + lsAway);
+}
+
+// Send a Web Push match alert to all subscribed fans.
+function sendPushAlert() {
+  var title = gv('pn-title');
+  if (!title) { toast('Add a headline first', true); return; }
+  var el = document.getElementById('dep-push');
+  showDep(el, 'loading', 'Sending…');
+  fetch('/.netlify/functions/push-send', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, title: title, body: gv('pn-body'), url: gv('pn-url') || '/' })
+  })
+    .then(function (r) { return r.json().catch(function () { return {}; }); })
+    .then(function (j) {
+      if (j.ok) {
+        showDep(el, 'ok', 'Sent to ' + j.sent + ' device' + (j.sent === 1 ? '' : 's') + (j.failed ? ' (' + j.failed + ' unreachable)' : ''));
+        setVal('pn-title', ''); setVal('pn-body', '');
+      } else if (j.error === 'no-vapid' || j.error === 'no-supabase') {
+        showDep(el, 'err', 'Push isn\'t set up yet — see the one-time setup in the Site Guide.');
+      } else {
+        showDep(el, 'err', j.error || 'Send failed');
+      }
+    })
+    .catch(function (err) { showDep(el, 'err', 'Network error: ' + err.message); });
 }
 
 // ── PROGRAMME ──
