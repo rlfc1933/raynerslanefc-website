@@ -9,8 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<link rel="stylesheet" href="brand/tokens.css">
 <style>
-  :root{ --y:#FFD100; --g:#1A5C32; --ink:#111; --soft:#555; --line:#e2e2e2; --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
+  /* All brand values derive from the single source of truth (brand/tokens.css) */
+  :root{ --y:var(--rl-yellow); --g:var(--rl-green); --ink:var(--rl-print-ink); --soft:var(--rl-print-soft); --line:var(--rl-print-line); --fd:var(--rl-font-head); --fc:var(--rl-font-cond); --fb:var(--rl-font-body); }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:#888; font-family:var(--fb); color:var(--ink); }
 

@@ -2202,6 +2202,13 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <b>PWA</b><span><code>manifest.json</code> (+ <code>admin-manifest.json</code>) and <code>sw.js</code> (network-first service worker, also handles Web Push).</span>
       </div></div>
 
+      <div class="sg-card" style="border-left-color:var(--y)"><h4>🎨 Brand system (single source of truth)</h4><div class="sg-w">
+        <b>One source</b><span>All brand colours, fonts, spacing &amp; radius live in <code>brand/tokens.css</code> + <code>brand/tokens.json</code> (mirrored by <code>css/style.css :root</code>). Rules + the locked palette are in <code>brand/BRAND.md</code>.</span>
+        <b>Colours</b><span>Yellow <code>#FFD100</code>, green <code>#1A5C32</code> + the dark UI surfaces. Win/loss <code>#22C55E</code>/<code>#EF4444</code> and card yellow/red are <strong style="color:var(--w)">match-event only</strong> — never for chrome.</span>
+        <b>Fonts</b><span>Bebas Neue (headings/scores), Barlow (body), Barlow Condensed (labels/tables). No other fonts.</span>
+        <b>Rule</b><span>Web, digital programme, print edition &amp; admin all pull from these tokens — the print page (<code>programme-print.html</code>) imports <code>brand/tokens.css</code> directly. If a new colour/font is ever needed, add it to the tokens file first — never inline in a page.</span>
+      </div></div>
+
       <div class="sg-card"><h4>🗂️ Content / CMS = <code>data/*.json</code></h4><div class="sg-w">
         <b>How it works</b><span>This admin (<code>admin.html</code>) is a single PIN-gated page. Every &ldquo;Save&rdquo; calls <code>pushToGitHub(name,obj,depId)</code> → <code>/.netlify/functions/save-data</code> → commits <code>data/&lt;name&gt;.json</code> → Netlify rebuilds. Public pages <code>fetch()</code> those JSON files and render them.</span>
         <b>Key files</b><span><code>fixtures.json</code> (the Match Engine spine), <code>matchday.json</code> (live scoreboard), <code>squad/players/news/sponsors/committee/crests/...json</code>. One file per feature.</span>

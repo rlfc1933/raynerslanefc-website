@@ -1,0 +1,54 @@
+/* ──────────────────────────────────────────────────────────────
+   RAYNERS LANE FC — BRAND TOKENS (SINGLE SOURCE OF TRUTH)
+   The one place brand colours, fonts, spacing & radius are defined.
+   Every surface (site, digital programme, print edition, admin)
+   MUST use these values. Do not introduce colours/fonts outside this
+   file. See brand/BRAND.md for the rules + sanctioned exceptions.
+   Mirror of css/style.css :root — keep the two in step.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  /* Brand colours */
+  --rl-yellow:      #FFD100;   /* primary / accent — "The Lane" yellow */
+  --rl-yellow-dim:  #C9A200;
+  --rl-green:       #1A5C32;   /* secondary — club green */
+  --rl-green-mid:   #236B3C;
+
+  /* Surfaces (dark UI) */
+  --rl-black:       #080808;   /* background */
+  --rl-dark:        #0E0E0E;
+  --rl-card:        #141414;
+  --rl-border:      #242424;
+
+  /* Text */
+  --rl-text:        #F5F3ED;   /* textPrimary */
+  --rl-text-dim:    #AAAAAA;   /* textSecondary */
+  --rl-grey:        #777777;
+
+  /* Match-event colours ONLY (results, cards, form) — never for chrome */
+  --rl-win:         #22C55E;   /* success / win */
+  --rl-loss:        #EF4444;   /* danger / loss */
+  --rl-card-yellow: #FFCB05;   /* a referee's yellow card (object colour) */
+  --rl-card-red:    #E5341F;   /* a referee's red card (object colour) */
+
+  /* Print edition — light pages */
+  --rl-print-ink:   #111111;
+  --rl-print-soft:  #555555;
+  --rl-print-line:  #E2E2E2;
+
+  /* Typography */
+  --rl-font-head:   'Bebas Neue', sans-serif;     /* headings + big stats/scores */
+  --rl-font-body:   'Barlow', sans-serif;         /* body copy */
+  --rl-font-cond:   'Barlow Condensed', sans-serif;/* labels / eyebrows / tables */
+
+  /* Spacing scale */
+  --rl-space-xs: 4px;
+  --rl-space-sm: 8px;
+  --rl-space-md: 16px;
+  --rl-space-lg: 32px;
+  --rl-space-xl: 64px;
+
+  /* Radius */
+  --rl-radius-sm: 6px;
+  --rl-radius-md: 10px;
+  --rl-radius-lg: 14px;
+}

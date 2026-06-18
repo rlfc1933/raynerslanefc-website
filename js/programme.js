@@ -153,7 +153,9 @@ function renderSquad(players) {
   const el = document.getElementById('prog-squad-grid');
   if (!el) return;
   const POS = ['Goalkeeper','Defender','Midfielder','Forward'];
-  const COLOUR = { Goalkeeper:'#1A5C32', Defender:'#1A3A6E', Midfielder:'#6B3A1F', Forward:'#6B1A1A' };
+  // Brand-consistent position accents: club green → Lane yellow down the spine
+  // (tokens only — see brand/tokens.css).
+  const COLOUR = { Goalkeeper:'#1A5C32', Defender:'#236B3C', Midfielder:'#C9A200', Forward:'#FFD100' };
   let html = '';
   POS.forEach(pos => {
     const group = players.filter(p=>p.pos===pos).sort((a,b)=>(a.no||99)-(b.no||99));
