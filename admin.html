@@ -732,29 +732,66 @@
     <!-- PROGRAMME -->
     <div class="panel" id="panel-programme">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128240; Programme</div></div>
-      <div class="slbl">Match Info</div>
+      <div class="snote"><p>The official match-day programme — built to the <strong style="color:var(--w)">Step 5 standard</strong>. Tip: pick the game under &ldquo;Load from fixture&rdquo; and the match details fill themselves. The club statements are pre-written; fill the rest before kick-off.</p></div>
+
+      <div class="slbl">&#9889; Load from fixture <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— auto-fills opponent, date, time &amp; venue</span></div>
+      <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
+
+      <div class="slbl">Match &amp; Fixture Details</div>
       <div class="field"><label class="fl">Opposition</label><input type="text" id="pr-opp" placeholder="Harefield United"></div>
       <div class="row2">
         <div class="field"><label class="fl">Date</label><input type="date" id="pr-date"></div>
-        <div class="field"><label class="fl">Competition</label><input type="text" id="pr-comp" value="CCL Premier Div North"></div>
+        <div class="field"><label class="fl">Kick-off</label><input type="time" id="pr-ko" value="15:00"></div>
       </div>
+      <div class="field"><label class="fl">Competition</label><input type="text" id="pr-comp" value="Combined Counties Premier Division North"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Venue</label><input type="text" id="pr-venue" value="Tithe Farm Sports &amp; Social Club"></div>
+        <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
+      </div>
+      <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
       <div class="field">
         <label class="fl">Cover Image (optional)</label>
         <div class="iup-wrap" id="pr-iw"><input type="file" accept="image/*" onchange="prevImg('pr',this)"><div class="iup-icon">📸</div><div class="iup-lbl">Tap to upload match photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
         <div class="iup-prev" id="pr-ip"><img id="pr-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('pr')">✕ Remove</button></div>
       </div>
+
       <div class="div"></div>
-      <div class="slbl">Manager's Notes</div>
-      <div class="field"><textarea id="pr-mgr" rows="5" placeholder="Pre-match notes from the manager..."></textarea></div>
+      <div class="slbl">Match Officials</div>
+      <div class="field"><label class="fl">Referee</label><input type="text" id="pr-ref" placeholder="Referee name"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Assistant 1</label><input type="text" id="pr-ar1" placeholder="Linesman"></div>
+        <div class="field"><label class="fl">Assistant 2</label><input type="text" id="pr-ar2" placeholder="Linesman"></div>
+      </div>
+      <div class="field"><label class="fl">4th Official (if assigned)</label><input type="text" id="pr-4th" placeholder="Optional"></div>
+
       <div class="div"></div>
-      <div class="slbl">Welcome to Our Guests</div>
-      <div class="field"><textarea id="pr-wel" rows="4" placeholder="Welcome message for the opposition..."></textarea></div>
+      <div class="slbl">Team Sheets <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— one name per line</span></div>
+      <div class="field"><label class="fl">Rayners Lane — Starting XI</label><textarea id="pr-xi" rows="6" placeholder="1. Keeper&#10;2. Right back&#10;..."></textarea></div>
+      <div class="field"><label class="fl">Rayners Lane — Substitutes</label><textarea id="pr-subs" rows="3" placeholder="Subs..."></textarea></div>
+      <div class="field"><label class="fl">Manager &amp; coaching staff</label><input type="text" id="pr-staff" placeholder="Manager: Gary Pitt · Assistant: …"></div>
+      <div class="field"><label class="fl">Opposition line-up (if known)</label><textarea id="pr-away" rows="4" placeholder="Away XI / subs — optional"></textarea></div>
+
       <div class="div"></div>
-      <div class="slbl">What We're Looking Forward To</div>
-      <div class="field"><textarea id="pr-lf" rows="4" placeholder="Match preview..."></textarea></div>
+      <div class="slbl">Notes &amp; Preview</div>
+      <div class="field"><label class="fl">Manager's Notes</label><textarea id="pr-mgr" rows="5" placeholder="Pre-match notes from the manager..."></textarea></div>
+      <div class="field"><label class="fl">Welcome to Our Guests</label><textarea id="pr-wel" rows="4" placeholder="Welcome message for the opposition..."></textarea></div>
+      <div class="field"><label class="fl">What We're Looking Forward To</label><textarea id="pr-lf" rows="4" placeholder="Match preview..."></textarea></div>
+      <div class="field"><label class="fl">Opposition summary (scouting)</label><textarea id="pr-oppsum" rows="3" placeholder="Their form, where they sit, danger men..."></textarea></div>
+      <div class="field"><label class="fl">Head to Head / History</label><textarea id="pr-h2h" rows="3" placeholder="Any history between the clubs..."></textarea></div>
+
       <div class="div"></div>
-      <div class="slbl">Head to Head / History</div>
-      <div class="field"><textarea id="pr-h2h" rows="4" placeholder="Any history between the clubs..."></textarea></div>
+      <div class="slbl">Matchday Info</div>
+      <div class="field"><label class="fl">Admission</label><input type="text" id="pr-admission" value="Adults £5 · Concessions £3 · Under 16s free"></div>
+      <div class="field"><label class="fl">Ground rules</label><input type="text" id="pr-rules" value="No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers"></div>
+      <div class="field"><label class="fl">First aid / emergency</label><input type="text" id="pr-firstaid" value="First aid is available at the clubhouse — ask any committee member."></div>
+
+      <div class="div"></div>
+      <div class="slbl">Club Statements <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— FA standard, pre-written (edit if needed)</span></div>
+      <div class="field"><label class="fl">Respect / Fair Play</label><textarea id="pr-respect" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Safeguarding</label><textarea id="pr-safe" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Equality &amp; Inclusion</label><textarea id="pr-equality" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Affiliation</label><textarea id="pr-affil" rows="2"></textarea></div>
+
       <button class="save" onclick="saveProgramme()">&#10003; Publish Programme</button>
       <div class="dep" id="dep-programme"></div>
     </div>
@@ -2631,6 +2668,7 @@ function openPanel(name) {
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
+  if (name === 'programme') initProgramme();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
@@ -2829,16 +2867,7 @@ function loadAll() {
     isLive = d.isLive || false;
     isHome = d.isHome !== false;
   });
-  fetchJSON('programme', function(d) {
-    if (!d) return;
-    setVal('pr-opp', d.opponent || '');
-    setVal('pr-date', d.date || '');
-    setVal('pr-comp', d.competition || 'CCL Premier Div North');
-    setVal('pr-mgr', d.managerNotes || '');
-    setVal('pr-wel', d.welcomeNotes || '');
-    setVal('pr-lf', d.lookingForward || '');
-    setVal('pr-h2h', d.headToHead || '');
-  });
+  fetchJSON('programme', applyProgrammeData);
 }
 function fetchJSON(name, cb) {
   fetch('data/' + name + '.json?t=' + Date.now())
@@ -2968,13 +2997,60 @@ function sendPushAlert() {
 }
 
 // ── PROGRAMME ──
+// FA Step 5 standard club statements — pre-written, editable per programme.
+var PR_DEFAULTS = {
+  admission: 'Adults £5 · Concessions £3 · Under 16s free',
+  rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
+  firstaid: 'First aid is available at the clubhouse — ask any committee member.',
+  respect: "Rayners Lane FC proudly supports The FA's Respect programme. We ask every player, coach, supporter and official to back positive, respectful football — win, lose or draw.",
+  safe: 'The wellbeing of children and young people is paramount. Rayners Lane FC is committed to safeguarding; concerns can be raised in confidence with our Club Welfare Officer via info@raynerslanefc.co.uk.',
+  equality: 'Football is for everyone. Rayners Lane FC opposes discrimination of every kind and welcomes players, supporters and volunteers of all backgrounds, abilities, ages, faiths, genders, sexualities and ethnicities.',
+  affil: 'Rayners Lane FC is affiliated to Middlesex County FA and plays in the Combined Counties Football League, Premier Division North — Step 5 of the National League System. An FA Charter Standard Community Club, est. 1933.'
+};
+function applyProgrammeData(d) {
+  d = d || {};
+  setVal('pr-opp', d.opponent || ''); setVal('pr-date', d.date || ''); setVal('pr-ko', d.kickoff || '15:00');
+  setVal('pr-comp', d.competition || 'Combined Counties Premier Division North');
+  setVal('pr-venue', d.venue || 'Tithe Farm Sports & Social Club'); setVal('pr-pitch', d.pitch || '');
+  setVal('pr-address', d.address || '151 Rayners Lane, Harrow HA2 0XH');
+  setVal('pr-ref', d.referee || ''); setVal('pr-ar1', d.assistant1 || ''); setVal('pr-ar2', d.assistant2 || ''); setVal('pr-4th', d.fourthOfficial || '');
+  setVal('pr-xi', d.homeXI || ''); setVal('pr-subs', d.homeSubs || ''); setVal('pr-staff', d.staff || ''); setVal('pr-away', d.awayLineup || '');
+  setVal('pr-mgr', d.managerNotes || ''); setVal('pr-wel', d.welcomeNotes || ''); setVal('pr-lf', d.lookingForward || '');
+  setVal('pr-oppsum', d.oppSummary || ''); setVal('pr-h2h', d.headToHead || '');
+  setVal('pr-admission', d.admission || PR_DEFAULTS.admission); setVal('pr-rules', d.groundRules || PR_DEFAULTS.rules); setVal('pr-firstaid', d.firstAid || PR_DEFAULTS.firstaid);
+  setVal('pr-respect', d.respect || PR_DEFAULTS.respect); setVal('pr-safe', d.safeguarding || PR_DEFAULTS.safe);
+  setVal('pr-equality', d.equality || PR_DEFAULTS.equality); setVal('pr-affil', d.affiliation || PR_DEFAULTS.affil);
+}
+function initProgramme() {
+  fetchJSON('fixtures', function (d) {
+    var list = (d && d.fixtures) || []; window._prFixtures = list;
+    var sel = document.getElementById('pr-fixture'); if (!sel) return;
+    sel.innerHTML = '<option value="">— pick a fixture —</option>' + list.map(function (f) {
+      return '<option value="' + esc(f.id) + '">' + esc((typeof fxFmtDate === 'function' ? fxFmtDate(f.date) : f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>';
+    }).join('');
+  });
+  fetchJSON('programme', applyProgrammeData);
+}
+function prProgFromFixture(id) {
+  if (!id) return;
+  var f = (window._prFixtures || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
+  setVal('pr-opp', f.opponent || ''); setVal('pr-date', f.date || ''); setVal('pr-ko', f.kickoff || '15:00');
+  if (f.competition) setVal('pr-comp', f.competition);
+  if (f.venue) setVal('pr-venue', f.venue);
+  toast('Match details filled from the fixture ✓');
+}
 function saveProgramme() {
   var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   var data = {
-    opponent: gv('pr-opp'), date: gv('pr-date'),
-    competition: gv('pr-comp'), managerNotes: gv('pr-mgr'),
-    welcomeNotes: gv('pr-wel'), lookingForward: gv('pr-lf'),
-    headToHead: gv('pr-h2h'), coverImage: '',
+    opponent: gv('pr-opp'), date: gv('pr-date'), kickoff: gv('pr-ko'),
+    competition: gv('pr-comp'), venue: gv('pr-venue'), pitch: gv('pr-pitch'), address: gv('pr-address'),
+    referee: gv('pr-ref'), assistant1: gv('pr-ar1'), assistant2: gv('pr-ar2'), fourthOfficial: gv('pr-4th'),
+    homeXI: gv('pr-xi'), homeSubs: gv('pr-subs'), staff: gv('pr-staff'), awayLineup: gv('pr-away'),
+    managerNotes: gv('pr-mgr'), welcomeNotes: gv('pr-wel'), lookingForward: gv('pr-lf'),
+    oppSummary: gv('pr-oppsum'), headToHead: gv('pr-h2h'),
+    admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
+    respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
+    coverImage: '',
     updatedAt: new Date().toISOString(),
   };
   if (imgStore['pr']) {

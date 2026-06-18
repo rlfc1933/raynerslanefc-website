@@ -90,6 +90,64 @@ function formatNotes(text, fallback) {
     .map(l=>`<p class="prog-body-text">${l}</p>`).join('');
 }
 
+// ── FA STEP 5 PROGRAMME EXTRAS ───────────
+const PROG_DEFAULTS = {
+  admission: 'Adults £5 · Concessions £3 · Under 16s free',
+  rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
+  firstaid: 'First aid is available at the clubhouse — ask any committee member.',
+  respect: "Rayners Lane FC proudly supports The FA's Respect programme. We ask every player, coach, supporter and official to back positive, respectful football — win, lose or draw.",
+  safe: 'The wellbeing of children and young people is paramount. Rayners Lane FC is committed to safeguarding; concerns can be raised in confidence with our Club Welfare Officer via info@raynerslanefc.co.uk.',
+  equality: 'Football is for everyone. Rayners Lane FC opposes discrimination of every kind and welcomes players, supporters and volunteers of all backgrounds, abilities, ages, faiths, genders, sexualities and ethnicities.',
+  affil: 'Rayners Lane FC is affiliated to Middlesex County FA and plays in the Combined Counties Football League, Premier Division North — Step 5 of the National League System. An FA Charter Standard Community Club, est. 1933.'
+};
+function prog12to(t) { // "15:00" → "3:00 PM"
+  if (!t || !/^\d{1,2}:\d{2}/.test(t)) return t || '';
+  const p = t.split(':'); let h = parseInt(p[0], 10); const m = p[1].slice(0, 2);
+  const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12;
+  return h + ':' + m + ' ' + ap;
+}
+function progEscX(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function progLineList(text) {
+  const lines = String(text || '').split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return '';
+  return lines.map(l => '<div style="font-family:var(--font-b);font-size:14px;color:#ddd;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">' + progEscX(l) + '</div>').join('');
+}
+function populateProgrammeExtras(d) {
+  d = d || {};
+  // Cover datebar
+  if (d.venue) setText('prog-venue', d.venue);
+  if (d.kickoff) setText('prog-kickoff', prog12to(d.kickoff));
+  // Team sheets
+  const xi = progLineList(d.homeXI), subs = progLineList(d.homeSubs), away = progLineList(d.awayLineup);
+  const hasTeams = !!(xi || subs || away || (d.staff || '').trim());
+  const sec = document.getElementById('prog-teamsheets-sec');
+  if (sec) sec.style.display = hasTeams ? '' : 'none';
+  if (hasTeams) {
+    setHTML('prog-home-xi', xi || '<span class="prog-placeholder">Line-up confirmed at kick-off.</span>');
+    if (subs) { setHTML('prog-home-subs', subs); const w = document.getElementById('prog-home-subs-wrap'); if (w) w.style.display = ''; }
+    setHTML('prog-staff', d.staff ? progEscX(d.staff) : '');
+    if (d.opponent) setText('prog-away-label', d.opponent);
+    setHTML('prog-away-lineup', away || '<span class="prog-placeholder">To be confirmed.</span>');
+    // Officials
+    const offs = [];
+    if (d.referee) offs.push('<b style="color:#fff">Referee:</b> ' + progEscX(d.referee));
+    if (d.assistant1) offs.push('<b style="color:#fff">Assistants:</b> ' + progEscX(d.assistant1) + (d.assistant2 ? ' &amp; ' + progEscX(d.assistant2) : ''));
+    else if (d.assistant2) offs.push('<b style="color:#fff">Assistant:</b> ' + progEscX(d.assistant2));
+    if (d.fourthOfficial) offs.push('<b style="color:#fff">4th Official:</b> ' + progEscX(d.fourthOfficial));
+    const offEl = document.getElementById('prog-officials');
+    if (offEl) { if (offs.length) { offEl.innerHTML = '<span style="font-family:var(--font-c);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Match Officials</span>' + offs.join(' &nbsp;·&nbsp; '); offEl.style.display = ''; } else offEl.style.display = 'none'; }
+  }
+  // Matchday info (defaults if blank)
+  setText('prog-admission', d.admission || PROG_DEFAULTS.admission);
+  setText('prog-rules', d.groundRules || PROG_DEFAULTS.rules);
+  setText('prog-firstaid', d.firstAid || PROG_DEFAULTS.firstaid);
+  // Club statements (FA standard — defaults if blank)
+  setText('prog-respect', d.respect || PROG_DEFAULTS.respect);
+  setText('prog-safe', d.safeguarding || PROG_DEFAULTS.safe);
+  setText('prog-equality', d.equality || PROG_DEFAULTS.equality);
+  setText('prog-affil', d.affiliation || PROG_DEFAULTS.affil);
+}
+
 // ── SQUAD RENDER ─────────────────────────
 function renderSquad(players) {
   const el = document.getElementById('prog-squad-grid');
@@ -174,6 +232,9 @@ async function loadProgramme() {
   setHTML('prog-welcome-notes', formatNotes(welcome, `Welcome to Tithe Farm. Notes about ${opp||'our guests'} will appear here.`));
   setHTML('prog-looking-forward', formatNotes(lookFwd, 'The preview will appear here before match day.'));
   setHTML('prog-h2h-notes', formatNotes(h2h, 'Head to head history will appear here.'));
+
+  // 5b. FA Step 5 extras — match details, team sheets, officials, info & statements
+  populateProgrammeExtras(data);
 
   // 6. Load squad
   try {

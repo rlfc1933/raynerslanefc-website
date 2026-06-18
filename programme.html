@@ -414,7 +414,7 @@
       <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
       <div class="prog-cover-detail">
         <span class="prog-cover-detail-label">Venue</span>
-        <span class="prog-cover-detail-val">Tithe Farm Social Club</span>
+        <span class="prog-cover-detail-val" id="prog-venue">Tithe Farm Social Club</span>
       </div>
       <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
       <div class="prog-cover-detail">
@@ -424,7 +424,7 @@
       <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
       <div class="prog-cover-detail">
         <span class="prog-cover-detail-label">Kick-off</span>
-        <span class="prog-cover-detail-val">3:00 PM</span>
+        <span class="prog-cover-detail-val" id="prog-kickoff">3:00 PM</span>
       </div>
     </div>
 
@@ -562,6 +562,28 @@
     </div>
   </div>
 
+  <!-- ── TEAM SHEETS & OFFICIALS ── -->
+  <div class="mag-section" id="prog-teamsheets-sec" style="display:none">
+    <div class="mag-section-inner">
+      <span class="mag-label">Today's Teams</span>
+      <div class="mag-title">Team <span>Sheets</span></div>
+      <div class="mag-rule"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start">
+        <div>
+          <div style="font-family:var(--font-c);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);font-size:13px;margin-bottom:12px">Rayners Lane</div>
+          <div id="prog-home-xi"></div>
+          <div id="prog-home-subs-wrap" style="margin-top:16px;display:none"><div style="font-family:var(--font-c);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Substitutes</div><div id="prog-home-subs"></div></div>
+          <div id="prog-staff" style="margin-top:16px;font-family:var(--font-b);font-size:13px;color:var(--grey)"></div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-c);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9aa;font-size:13px;margin-bottom:12px" id="prog-away-label">Opposition</div>
+          <div id="prog-away-lineup"></div>
+        </div>
+      </div>
+      <div id="prog-officials" style="margin-top:26px;padding-top:18px;border-top:1px solid var(--border);font-family:var(--font-b);font-size:14px;color:var(--grey);display:none"></div>
+    </div>
+  </div>
+
   <!-- ── LEAGUE TABLE ── -->
   <div class="mag-section">
     <div class="mag-section-inner">
@@ -590,6 +612,28 @@
           <a href="fixtures.html" style="color:var(--yellow);font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sync to Phone &rarr;</a>
         </div>
         <div id="prog-fixtures" class="mag-live"><div class="mag-live-soon">Fixtures &amp; results appear here the moment the league publishes the 2026-27 schedule.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MATCHDAY INFO & CLUB STATEMENTS ── -->
+  <div class="mag-section">
+    <div class="mag-section-inner">
+      <span class="mag-label">Good to Know</span>
+      <div class="mag-title">Matchday <span>Information</span></div>
+      <div class="mag-rule"></div>
+      <div style="display:grid;gap:12px">
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">Admission</b><span id="prog-admission" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">Ground rules</b><span id="prog-rules" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">First aid</b><span id="prog-firstaid" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
+      </div>
+      <div class="mag-rule" style="margin-top:28px"></div>
+      <span class="mag-label">The Club Stands For</span>
+      <div style="display:grid;gap:14px;margin-top:10px">
+        <div id="prog-respect" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
+        <div id="prog-safe" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
+        <div id="prog-equality" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
+        <div id="prog-affil" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
       </div>
     </div>
   </div>
