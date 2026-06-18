@@ -818,7 +818,13 @@
       <div class="field"><label class="fl">Equality &amp; Inclusion</label><textarea id="pr-equality" rows="2"></textarea></div>
       <div class="field"><label class="fl">Affiliation</label><textarea id="pr-affil" rows="2"></textarea></div>
 
-      <button class="save" onclick="saveProgramme()">&#10003; Publish Programme</button>
+      <div class="div"></div>
+      <div class="slbl">&#10133; Your Own Pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— add a page, drop in any artwork</span></div>
+      <div class="snote"><p>Add as many extra pages as you like — a sponsor advert, a player feature, a poster, a chart, a photo collage. Upload it as an <strong style="color:var(--w)">image</strong> (PNG/JPG — export anything, even a PDF page, as an image) and it drops onto a ready-branded RLFC page. Drag-free reorder with the arrows; remove any time.</p></div>
+      <div id="pr-pages-list"></div>
+      <button class="save sec" onclick="prAddPage()">+ Add a page</button>
+
+      <button class="save" style="margin-top:14px" onclick="saveProgramme()">&#10003; Publish Programme</button>
       <div class="dep" id="dep-programme"></div>
       <div class="row2" style="margin-top:8px">
         <button class="save sec" onclick="prNewProgramme()">+ Start a new one</button>
@@ -3088,7 +3094,8 @@ function applyProgrammeData(d) {
   setVal('pr-matchsponsor', d.matchSponsor || ''); setVal('pr-ballsponsor', d.ballSponsor || ''); setVal('pr-matchdaysponsor', d.matchdaySponsor || '');
   var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = d.oppCrest || '';
   prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
-  prRenderThemes(); prRenderPreview();
+  prCustomPages = Array.isArray(d.customPages) ? d.customPages.map(function (p) { return { title: p.title || '', caption: p.caption || '', image: p.image || '' }; }) : [];
+  prRenderThemes(); prRenderPreview(); prRenderPages();
 }
 function prFillCrests() {
   var sel = document.getElementById('pr-oppcrest'); if (!sel) return;
@@ -3183,6 +3190,47 @@ function prRenderPreview() {
       '<div style="background:' + t.accent + ';color:' + t.accentInk + ';display:flex;justify-content:space-between;padding:5px 10px;font-family:var(--fc);font-weight:700;font-size:7px;letter-spacing:.06em"><span>THE LANE · EST. 1933</span><span>RAYNERSLANEFC.CO.UK</span></div>' +
     '</div>';
 }
+
+// ── CUSTOM PAGES — editor adds/removes branded pages with their own artwork ──
+var prCustomPages = [];
+function prRenderPages() {
+  var el = document.getElementById('pr-pages-list'); if (!el) return;
+  if (!prCustomPages.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:12px;color:var(--gr);padding:6px 0">No extra pages yet — add one below.</div>'; return; }
+  el.innerHTML = prCustomPages.map(function (p, i) {
+    var thumb = p.image
+      ? '<img src="' + esc(p.image) + '" style="width:100%;max-height:150px;object-fit:contain;background:#0d0d0d;border-radius:8px;border:1px solid var(--br)">'
+      : '<label style="display:block;border:1.5px dashed var(--br);border-radius:8px;padding:22px;text-align:center;cursor:pointer;color:var(--gr);font-family:var(--fc);font-size:13px"><input type="file" accept="image/*" onchange="prPageImg(' + i + ',this)" style="display:none">&#128247; Tap to upload artwork (PNG/JPG)</label>';
+    return '<div style="border:1px solid var(--br);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--c)">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-family:var(--fc);font-weight:700;color:var(--y);font-size:13px">Page ' + (i + 1) + '</span>' +
+      '<span style="flex:1"></span>' +
+      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="prMovePage(' + i + ',-1)" ' + (i === 0 ? 'disabled style="opacity:.3"' : '') + '>&#8593;</button>' +
+      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="prMovePage(' + i + ',1)" ' + (i === prCustomPages.length - 1 ? 'disabled style="opacity:.3"' : '') + '>&#8595;</button>' +
+      '<button class="li-del" onclick="prRemovePage(' + i + ')">Remove</button></div>' +
+      '<div class="field"><input type="text" value="' + escH(p.title || '') + '" placeholder="Page title (optional) — e.g. Sponsor Spotlight" oninput="prCustomPages[' + i + '].title=this.value"></div>' +
+      thumb +
+      (p.image ? '<button class="li-del" style="margin-top:8px;background:var(--c2);color:var(--w)" onclick="prCustomPages[' + i + '].image=\'\';prRenderPages()">Change image</button>' : '') +
+      '<div class="field" style="margin-top:8px"><input type="text" value="' + escH(p.caption || '') + '" placeholder="Caption under the image (optional)" oninput="prCustomPages[' + i + '].caption=this.value"></div>' +
+      '</div>';
+  }).join('');
+}
+function prAddPage() { prCustomPages.push({ title: '', caption: '', image: '' }); prRenderPages(); }
+function prRemovePage(i) { if (!confirm('Remove this page?')) return; prCustomPages.splice(i, 1); prRenderPages(); }
+function prMovePage(i, dir) { var j = i + dir; if (j < 0 || j >= prCustomPages.length) return; var t = prCustomPages[i]; prCustomPages[i] = prCustomPages[j]; prCustomPages[j] = t; prRenderPages(); }
+function prPageImg(i, input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 6 * 1024 * 1024) { toast('File too large — max 6MB', true); return; }
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var b64 = e.target.result;
+    var fname = 'img/uploads/' + Date.now() + '-' + file.name.replace(/[^a-z0-9.\-]+/gi, '-').toLowerCase();
+    toast('Uploading…');
+    fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, path: fname, content: b64.split(',')[1] }) })
+      .then(function (r) { return r.ok; })
+      .then(function (ok) { prCustomPages[i].image = ok ? ('/' + fname) : b64; prRenderPages(); toast(ok ? 'Page artwork added ✓' : 'Added (inline)'); })
+      .catch(function () { prCustomPages[i].image = b64; prRenderPages(); });
+  };
+  reader.readAsDataURL(file);
+}
 function saveProgramme() {
   var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   var data = {
@@ -3196,6 +3244,7 @@ function saveProgramme() {
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
     oppCrest: gv('pr-oppcrest'), coverTheme: prCoverTheme,
+    customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
   // Stable id so re-publishing the same match updates its archive entry.

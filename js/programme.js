@@ -251,6 +251,23 @@ async function loadProgramme() {
     const res = await fetch(SQUAD_SHEET + '&t=' + Date.now(), { cache:'no-cache' });
     renderSquad(parseSquad(await res.text()));
   } catch(e) { renderSquad([]); }
+
+  // 7. The editor's own pages (custom artwork)
+  renderCustomPages(data.customPages || data.custom_pages || []);
+}
+
+function renderCustomPages(pages) {
+  const el = document.getElementById('prog-custom');
+  if (!el) return;
+  const list = (pages || []).filter(p => p && (p.image || p.title || p.caption));
+  if (!list.length) { el.innerHTML = ''; return; }
+  el.innerHTML = list.map(p =>
+    '<div class="mag-section"><div class="mag-section-inner">' +
+      (p.title ? '<span class="mag-label">Rayners Lane FC</span><div class="mag-title">' + (p.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div><div class="mag-rule"></div>' : '') +
+      (p.image ? '<img src="' + (p.image||'').replace(/"/g,'') + '" alt="' + (p.title||'Programme page').replace(/"/g,'') + '" style="width:100%;border-radius:10px;display:block">' : '') +
+      (p.caption ? '<div class="prog-body-text" style="text-align:center;margin-top:12px">' + (p.caption||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>' : '') +
+    '</div></div>'
+  ).join('');
 }
 
 // ── LIVE LEAGUE TABLE + FIXTURES (own feed — replaces the dead FWP embeds) ──

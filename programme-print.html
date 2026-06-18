@@ -344,6 +344,17 @@
       '<div class="body muted" style="margin-top:10px">Rayners Lane FC is affiliated to Middlesex County FA — an FA Charter Standard Community Club. #UpTheLane, together.</div>' +
       foot() + '</div>');
 
+    // 7c — THE EDITOR'S OWN PAGES (custom artwork on a branded RLFC page)
+    (d.customPages || []).forEach(function (cp) {
+      if (!cp.image && !cp.title && !cp.caption) return;
+      P.push('<div class="page">' +
+        (cp.title ? '<h2 class="sec">' + esc(cp.title) + '</h2>'
+          : '<div style="display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--y);padding-bottom:8px;margin-bottom:14px"><img src="img/badge.png" style="width:34px;height:34px;object-fit:contain"><span style="font-family:var(--fd);font-size:24px;letter-spacing:.5px;color:var(--ink)">Rayners Lane FC</span></div>') +
+        (cp.image ? '<div style="text-align:center"><img src="' + esc(cp.image) + '" style="max-width:100%;max-height:225mm;object-fit:contain;border-radius:6px"></div>' : '') +
+        (cp.caption ? '<div class="body muted" style="text-align:center;margin-top:12px">' + esc(cp.caption) + '</div>' : '') +
+        foot() + '</div>');
+    });
+
     // 8 — BACK PAGE: fixtures + statements + digital QR
     var now2 = 0;
     function dt(f){ return new Date(f.date+'T'+(f.kickoff||'15:00')+':00').getTime(); }
