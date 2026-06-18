@@ -1893,6 +1893,18 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128218; Site Guide</div></div>
       <div class="snote" style="border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.06)"><p>What every part of the website is — in plain English. The <strong style="color:var(--w)">who / what / why / when / where / how</strong> of each section.</p></div>
 
+      <div class="sg-card" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>👋 Welcome to the Lane Staff Portal <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">START HERE</span></h4>
+        <p style="font-family:var(--fb);font-size:14px;color:var(--lw,#ddd);line-height:1.6;margin:2px 0 12px">This is the club&rsquo;s back office in your pocket — run the website, fixtures, social graphics and fan alerts from your phone. No tech skills needed. Have a look around; you can&rsquo;t break anything by reading.</p>
+        <div class="sg-w">
+          <b>Get in</b><span>Go to <strong style="color:var(--w)">raynerslanefc.co.uk/admin.html</strong> → PIN <code>19332026</code> → choose your role → password <code>20raynerslanefc26</code>. Tap <strong style="color:var(--w)">Install</strong> to keep it on your home screen like an app.</span>
+          <b>Your roles</b><span>Club Management · Chairman · V Chairman · Committee · Club Secretary · Match Day Secretary · Marketing/Media. The portal shows who&rsquo;s signed in.</span>
+          <b>What you&rsquo;ll use most</b><span><strong style="color:var(--w)">Fixtures</strong> (add the season once — it feeds the whole site), <strong style="color:var(--w)">Post Studio</strong> (pro graphics → Save/Share to WhatsApp/Insta), <strong style="color:var(--w)">Match Day</strong> (live score + alerts), plus News, Squad &amp; Sponsors.</span>
+          <b>Golden rule</b><span>Typing only changes <em>your screen</em>. Nothing reaches fans until you press <strong style="color:var(--w)">Save</strong> — then it&rsquo;s live in ~30 seconds.</span>
+          <b>Keep it safe</b><span>The PIN &amp; password are staff-only — please don&rsquo;t post them in big group chats. The Chairman can change passwords any time in Manage Users.</span>
+          <b>Why it matters</b><span>The more we all put in — fixtures, results, posts, sponsor shout-outs — the more professional The Lane looks online. That brings fans, sponsors and momentum. 💛</span>
+        </div>
+      </div>
+
       <div class="sg-card" style="border-left-color:var(--y)"><h4>📅 Fixtures — the Match Engine <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">NEW</span></h4><div class="sg-w">
         <b>What</b><span>The club's <strong style="color:var(--w)">single season schedule</strong>. You add every game once here (opponent, date, kick-off, venue, and the score once it's played).</span>
         <b>Who</b><span>Anyone on the committee — it's the easiest tab. Pick the opponent from the dropdown (the crest links itself).</span>
@@ -2106,7 +2118,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <div class="panel" id="panel-users">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Manage Users</div></div>
       <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> The default password for everyone is <code>20raynerslanefc26</code> until you change it here.</p></div>
-      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Saving needs the one-time login sync.</strong> Right now the default password works for everyone but changes here won&rsquo;t stick or sync. Turn on sync (see the Developer tab → Login sync setup) and this becomes fully live.</p></div>
+      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The default password <code>20raynerslanefc26</code> always works in the meantime, so nobody&rsquo;s locked out.</p></div>
       <div class="slbl">Add a user</div>
       <div class="field"><label class="fl">Name (what they pick at login)</label><input type="text" id="us-name" placeholder="e.g. Pete Singh"></div>
       <div class="field"><label class="fl">Role</label><select id="us-role"></select></div>
@@ -2145,13 +2157,14 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <b>fixtures-ics</b><span>Turns <code>fixtures.json</code> into a subscribable calendar feed (text/calendar).</span>
         <b>list-fans / list-members / list-sponsors / submission-created</b><span>Read fan sign-ups (Netlify Forms) + real fan accounts (Supabase) for the admin.</span>
         <b>push-key / push-subscribe / push-send</b><span>Web Push match alerts (VAPID + Supabase + <code>web-push</code> from <code>package.json</code>).</span>
-        <b>staff-login / staff-users / staff-logins</b><span>This role-login layer — verify password, manage users, login history (Supabase).</span>
+        <b>staff-login / staff-users / staff-logins</b><span>This role-login layer — verify password, manage users, login history (Netlify Blobs — no setup).</span>
       </div></div>
 
       <div class="sg-card"><h4>🔌 APIs &amp; integrations</h4><div class="map">
         <div class="k">TheSportsDB</div><div>Free, no key — fallback fixtures/results (team id in <code>SDB_TEAM_ID</code>).</div>
         <div class="k">Wikipedia</div><div>League table parsed in <code>fetch-table.js</code> (page set in <code>WIKI_TABLE_PAGE</code>).</div>
-        <div class="k">Supabase</div><div>Project <code>rewkixywfgsyqinfbggv</code> — fan auth/accounts, push subscriptions, staff users + login log.</div>
+        <div class="k">Supabase</div><div>Project <code>rewkixywfgsyqinfbggv</code> — fan auth/accounts + push subscriptions.</div>
+        <div class="k">Netlify Blobs</div><div>Built-in key/value store — staff users &amp; the login history (no setup).</div>
         <div class="k">Netlify Forms</div><div>Fan/sponsor sign-ups (no DB) — read back via the Netlify API.</div>
         <div class="k">html2canvas</div><div>Post Studio renders the card to PNG (CDN, in <code>admin.html</code> head).</div>
         <div class="k">web-push</div><div>Sends VAPID push notifications (npm dep in <code>package.json</code>).</div>
@@ -2159,17 +2172,16 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="sg-card warn" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>🔑 Netlify environment variables (secrets)</h4><div class="sg-w">
         <b>Required</b><span><code>GITHUB_TOKEN</code> (saves), <code>ADMIN_PIN</code> (=19332026), <code>NETLIFY_API_TOKEN</code> (fan list).</span>
-        <b>Supabase</b><span><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_KEY</code> (accounts, push, staff logins).</span>
+        <b>Supabase</b><span><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_KEY</code> (fan accounts + push). Staff logins use Netlify Blobs — no env vars.</span>
         <b>Push</b><span><code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code> (see <code>PUSH-SETUP.md</code>).</span>
         <b>Optional</b><span><code>SDB_TEAM_ID</code>, <code>SEASON_START</code>, <code>WIKI_TABLE_PAGE</code>, <code>WIKI_TABLE_SECTION</code>.</span>
         <b>Where</b><span>Netlify → Site configuration → Environment variables. Never in the repo.</span>
       </div></div>
 
-      <div class="sg-card go" style="border-left-color:var(--su);background:rgba(34,197,94,.05)"><h4>🗄️ Login sync setup (Supabase SQL)</h4><div class="sg-w">
-        <b>One-time</b><span>In Supabase → SQL Editor, run the two table creates below to switch on custom passwords + the sign-in history. Until then the default password works and the committee is never locked out.</span>
-        <b>SQL</b><span style="font-family:monospace;font-size:11px;color:#9fe;line-height:1.6;white-space:pre-wrap">create table if not exists staff_users (id uuid primary key default gen_random_uuid(), username text unique not null, role text, pass_hash text not null, is_chairman boolean default false, active boolean default true, created_at timestamptz default now());
-create table if not exists staff_logins (id uuid primary key default gen_random_uuid(), username text, role text, at timestamptz default now(), user_agent text);</span>
-        <b>Then</b><span>Manage Users → add/remove people and set passwords; sign-ins appear under &ldquo;Recent sign-ins&rdquo;.</span>
+      <div class="sg-card go" style="border-left-color:var(--su);background:rgba(34,197,94,.05)"><h4>🗄️ Staff logins — automatic, no setup</h4><div class="sg-w">
+        <b>Store</b><span>Custom passwords + the sign-in history live in <strong style="color:var(--w)">Netlify Blobs</strong> (built in — no database, no SQL, no extra env vars). It just works once deployed.</span>
+        <b>Functions</b><span><code>staff-login</code> (verify salted SHA-256), <code>staff-users</code> (chairman add/remove/set-password), <code>staff-logins</code> (history; the client posts on every login so default sign-ins count too).</span>
+        <b>Safety</b><span>If the store is ever unreachable, login falls back to the shared default password so the committee is never locked out.</span>
       </div></div>
 
       <div class="sg-card"><h4>🚀 Day-to-day for a developer</h4><div class="sg-w">
@@ -2489,6 +2501,14 @@ async function submitRoleLogin() {
   if (!ok && !serverRejected) ok = (pass === STAFF_DEFAULT_PW);
   if (!ok) { document.getElementById('role-err').textContent = 'Wrong password — try again'; setVal('role-pass', ''); return; }
   try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, at: Date.now() })); } catch (e) {}
+  // Record the sign-in (every login, including the default password) so the
+  // chairman sees the full history. Best-effort — never blocks getting in.
+  try {
+    fetch('/.netlify/functions/staff-logins', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, username: username, role: role })
+    });
+  } catch (e) {}
   document.getElementById('role-screen').style.display = 'none';
   enterApp();
 }
@@ -2554,7 +2574,7 @@ async function addUser() {
   try {
     var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: role, password: pass, isChairman: chair }) })).json();
     if (j.ok) { showDep(el, 'ok', name + ' can now sign in ✓'); setVal('us-name', ''); setVal('us-pass', '20raynerslanefc26'); document.getElementById('us-chair').checked = false; loadUsers(); }
-    else if (j.error === 'no-supabase') showDep(el, 'err', 'Turn on login sync first (Developer tab → Login sync setup).');
+    else if (j.error === 'no-store') showDep(el, 'err', 'Login store not ready yet — try again in a moment.');
     else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
@@ -2588,7 +2608,7 @@ async function loadStaffLogins() {
       }).join('');
       return;
     }
-    el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Sign-in history turns on with login sync (Developer tab).</div>';
+    el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No sign-ins recorded yet — they\'ll appear here as people log in.</div>';
   } catch (e) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Sign-in history unavailable.</div>'; }
 }
 

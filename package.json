@@ -4,6 +4,7 @@
   "private": true,
   "description": "Rayners Lane FC — static site + Netlify functions. No build step; this file only provides function dependencies (web-push for match-alert notifications).",
   "dependencies": {
+    "@netlify/blobs": "^8.1.0",
     "web-push": "^3.6.7"
   }
 }
