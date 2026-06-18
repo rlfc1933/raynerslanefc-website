@@ -819,6 +819,32 @@
       <div class="field"><label class="fl">Affiliation</label><textarea id="pr-affil" rows="2"></textarea></div>
 
       <div class="div"></div>
+      <div class="slbl">Match Preview &amp; Opposition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— blank pages are skipped</span></div>
+      <div class="field"><label class="fl">Match preview / storylines</label><textarea id="pr-storylines" rows="4" placeholder="The narrative of today's game — what's at stake, recent form, the talking points."></textarea></div>
+      <div class="field"><label class="fl">Our key players to watch</label><textarea id="pr-keyplayers" rows="3" placeholder="One per line — the Lane men to keep an eye on."></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Opposition founded</label><input type="text" id="pr-oppfounded" placeholder="e.g. 1890"></div>
+        <div class="field"><label class="fl">Opposition ground</label><input type="text" id="pr-oppground" placeholder="Their home ground"></div>
+      </div>
+      <div class="field"><label class="fl">Opposition manager</label><input type="text" id="pr-oppmanager" placeholder="Their manager"></div>
+      <div class="field"><label class="fl">Opposition ones to watch</label><textarea id="pr-opponestowatch" rows="3" placeholder="Their danger men."></textarea></div>
+
+      <div class="div"></div>
+      <div class="slbl">Feature Pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— optional; each only prints if you write something</span></div>
+      <div class="field"><label class="fl">Club information / about the club</label><textarea id="pr-clubinfo" rows="3" placeholder="Leave blank for the default club intro, or write your own."></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Captain's name</label><input type="text" id="pr-captainname" placeholder="e.g. Smith"></div>
+        <div class="field"><label class="fl">Player of the Month</label><input type="text" id="pr-potm" placeholder="Optional"></div>
+      </div>
+      <div class="field"><label class="fl">Captain's notes</label><textarea id="pr-captainnotes" rows="3" placeholder="A word from the skipper."></textarea></div>
+      <div class="field"><label class="fl">Heritage / club history feature</label><textarea id="pr-clubhistory" rows="3" placeholder="A history feature — legends, historic matches."></textarea></div>
+      <div class="field"><label class="fl">In the community</label><textarea id="pr-community" rows="2" placeholder="School visits, charity, volunteers."></textarea></div>
+      <div class="field"><label class="fl">Academy / youth</label><textarea id="pr-academy" rows="2" placeholder="Youth pathway, development squads."></textarea></div>
+      <div class="field"><label class="fl">Women's team</label><textarea id="pr-womens" rows="2" placeholder="Women's results, fixtures, news."></textarea></div>
+      <div class="field"><label class="fl">Supporters</label><textarea id="pr-supporters" rows="2" placeholder="Travel, supporters' club, fan shout-outs."></textarea></div>
+      <div class="field"><label class="fl">Ground information note (extra)</label><textarea id="pr-groundinfo" rows="2" placeholder="Anything extra for the Ground Info page."></textarea></div>
+
+      <div class="div"></div>
       <div class="slbl">&#10133; Your Own Pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— add a page, drop in any artwork</span></div>
       <div class="snote"><p>Add as many extra pages as you like — a sponsor advert, a player feature, a poster, a chart, a photo collage. Upload it as an <strong style="color:var(--w)">image</strong> (PNG/JPG — export anything, even a PDF page, as an image) and it drops onto a ready-branded RLFC page. Drag-free reorder with the arrows; remove any time.</p></div>
       <div id="pr-pages-list"></div>
@@ -3116,6 +3142,10 @@ function applyProgrammeData(d) {
   setVal('pr-respect', d.respect || PR_DEFAULTS.respect); setVal('pr-safe', d.safeguarding || PR_DEFAULTS.safe);
   setVal('pr-equality', d.equality || PR_DEFAULTS.equality); setVal('pr-affil', d.affiliation || PR_DEFAULTS.affil);
   setVal('pr-matchsponsor', d.matchSponsor || ''); setVal('pr-ballsponsor', d.ballSponsor || ''); setVal('pr-matchdaysponsor', d.matchdaySponsor || '');
+  setVal('pr-storylines', d.storylines || ''); setVal('pr-keyplayers', d.keyPlayers || '');
+  setVal('pr-oppfounded', d.oppFounded || ''); setVal('pr-oppground', d.oppGround || ''); setVal('pr-oppmanager', d.oppManager || ''); setVal('pr-opponestowatch', d.oppOnesToWatch || '');
+  setVal('pr-clubinfo', d.clubInfo || ''); setVal('pr-captainname', d.captainName || ''); setVal('pr-potm', d.potm || ''); setVal('pr-captainnotes', d.captainNotes || '');
+  setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
   var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = d.oppCrest || '';
   prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
   prCustomPages = Array.isArray(d.customPages) ? d.customPages.map(function (p) { return { title: p.title || '', caption: p.caption || '', image: p.image || '' }; }) : [];
@@ -3267,6 +3297,10 @@ function saveProgramme() {
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
+    storylines: gv('pr-storylines'), keyPlayers: gv('pr-keyplayers'),
+    oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
+    clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
+    clubHistory: gv('pr-clubhistory'), community: gv('pr-community'), academy: gv('pr-academy'), womens: gv('pr-womens'), supporters: gv('pr-supporters'), groundInfo: gv('pr-groundinfo'),
     oppCrest: gv('pr-oppcrest'), coverTheme: prCoverTheme,
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),

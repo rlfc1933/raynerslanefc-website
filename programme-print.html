@@ -130,6 +130,48 @@
   .pcta span:nth-child(2){ flex:1; text-align:center; }
   .pcta .pg{ color:#999; }
 
+  /* player cards */
+  .pcards{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pcard{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
+  .pcard .ph{ height:96px; background:linear-gradient(160deg,#14532d,#0b2a1a); display:flex; align-items:center; justify-content:center; position:relative; }
+  .pcard .ph img{ width:100%; height:100%; object-fit:cover; object-position:top; }
+  .pcard .no{ position:absolute; top:6px; left:8px; font-family:var(--fd); font-size:28px; color:var(--y); line-height:1; }
+  .pcard .nm{ font-family:var(--fd); font-size:17px; letter-spacing:.4px; color:var(--ink); padding:7px 9px 0; line-height:1; }
+  .pcard .po{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--g); padding:1px 9px 6px; }
+  .pcard .st{ display:flex; border-top:1px solid var(--line); }
+  .pcard .st div{ flex:1; text-align:center; padding:5px 2px; border-right:1px solid var(--line); }
+  .pcard .st div:last-child{ border-right:none; }
+  .pcard .st .v{ font-family:var(--fm); font-size:14px; font-weight:700; color:var(--ink); }
+  .pcard .st .k{ font-family:var(--fc); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
+
+  /* directory */
+  .dir{ display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
+  .dir-row{ display:flex; justify-content:space-between; gap:10px; border-bottom:1px dotted var(--line); padding:6px 0; }
+  .dir-row .r{ font-family:var(--fc); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--g); }
+  .dir-row .n{ font-family:var(--fb); font-size:13px; color:var(--ink); font-weight:600; }
+
+  /* tiered sponsor directory */
+  .tier-block{ margin-bottom:12px; }
+  .tier-head{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:var(--g); padding:4px 12px; border-radius:6px; display:inline-block; }
+  .tier-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .tier-chip{ border:1px solid var(--line); border-left:3px solid var(--y); border-radius:6px; padding:7px 12px; font-family:var(--fb); font-size:12.5px; }
+  .tier-chip b{ font-family:var(--fc); font-weight:700; }
+
+  /* match preview / opposition cards */
+  .pv-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .pv-vs{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px; }
+  .pv-vs .t{ text-align:center; }
+  .pv-vs img{ width:64px; height:64px; object-fit:contain; }
+  .pv-vs .nm{ font-family:var(--fd); font-size:18px; letter-spacing:.3px; }
+  .pv-vs .vs{ font-family:var(--fd); font-size:30px; color:var(--g); }
+
+  /* next-match advert / back cover */
+  .advert{ background:linear-gradient(160deg,#0b1d11,#15532e); color:#fff; border-radius:14px; padding:26px 22px; text-align:center; position:relative; overflow:hidden; }
+  .advert::after{ content:''; position:absolute; right:-40px; bottom:-50px; width:240px; height:240px; background:url(img/badge.png) center/contain no-repeat; opacity:.08; }
+  .advert .k{ font-family:var(--fc); font-size:13px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--y); }
+  .advert .big{ font-family:var(--fd); font-size:46px; line-height:.95; letter-spacing:1px; margin:6px 0; }
+  .advert .meta{ font-family:var(--fc); font-size:15px; letter-spacing:.06em; }
+
   @media print{
     @page{ size:A4 portrait; margin:0; }
     body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -196,17 +238,23 @@
   }
 
   Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
-    fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad')
   ]).then(function (res) {
     var d = res[0]||{}, crests=(res[1]&&res[1].crests)||[], sponsors=(res[2]&&res[2].sponsors)||[], fixtures=(res[3]&&res[3].fixtures)||[], table=(res[4]&&res[4].table)||[];
-    render(d, crests, sponsors, fixtures, table);
+    var club = {
+      committee:(res[5]&&res[5].members)||[], officials:res[6]||{}, emails:(res[7]&&res[7].accounts)||[],
+      players:((res[8]&&res[8].players)||(res[9]&&res[9].players)||[])
+    };
+    render(d, crests, sponsors, fixtures, table, club);
     if (/[?&](print|auto)=1/.test(location.search)) {
       window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 900); });
       setTimeout(function(){ window.print(); }, 1400);
     }
   });
 
-  function render(d, crests, sponsors, fixtures, table) {
+  function render(d, crests, sponsors, fixtures, table, club) {
+    club = club || { committee:[], officials:{}, emails:[], players:[] };
     var opp = d.opponent || 'TBC';
     var crestRow = crests.filter(function(c){ return c.name && opp && c.name.toLowerCase()===opp.toLowerCase(); })[0];
     var oppCrest = d.oppCrest || (crestRow && crestRow.file) || initialsBadge(opp);
@@ -265,6 +313,21 @@
       '<div class="cover-bottom" style="background:'+TH.accent+';color:'+TH.accentInk+'"><span>The Lane · Yellow Army · Est. 1933</span><span>raynerslanefc.co.uk</span></div>'+
     '</div>');
 
+    // Editorial page — renders only if the editor wrote something (never half-filled).
+    function edPage(kick,title,text,extra){ if(!lines(text).length) return; P.push('<div class="page">'+banner(kick,title)+(extra||'')+'<div class="body">'+notes(text)+'</div>'+foot()+'</div>'); }
+
+    /* CLUB INFORMATION */
+    var OFF = club.officials||{};
+    P.push('<div class="page">'+ banner('The Club','Rayners Lane FC')+
+      '<div class="tiles" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px"><div class="tile"><div class="n">1933</div><div class="l">Founded</div></div><div class="tile"><div class="n">5</div><div class="l">Our Step</div></div><div class="tile"><div class="n">Harrow</div><div class="l">Middlesex</div></div><div class="tile"><div class="n">3G</div><div class="l">Yellow Army</div></div></div>'+
+      (lines(d.clubInfo).length ? '<div class="body">'+notes(d.clubInfo)+'</div>' : '<div class="body"><p>Rayners Lane FC has been at the heart of Harrow since 1933. A fully integrated members’ section of Tithe Farm Sports &amp; Social Club, the club plays in yellow and green and is proudly known as “The Lane.” We are an FA Charter Standard Community Club, affiliated to Middlesex County FA, competing in the Combined Counties Premier Division North at Step 5 of the National League System.</p></div>')+
+      '<div class="grid2" style="margin-top:6px">'+
+        '<div class="card g"><div class="k">Our Ground</div><div class="t">'+esc(venue)+'<br>'+esc(d.address||'151 Rayners Lane, Harrow HA2 0XH')+'</div></div>'+
+        '<div class="card y"><div class="k">Online</div><div class="t">raynerslanefc.co.uk<br>@RaynersLaneFC &middot; @raynerslanefc</div></div>'+
+        '<div class="card g"><div class="k">Contact</div><div class="t">info@raynerslanefc.co.uk</div></div>'+
+        '<div class="card y"><div class="k">Safeguarding &amp; Welfare</div><div class="t">Club Welfare Officer: <b>'+esc(OFF.welfareOfficer||'see Club Directory')+'</b><br>Concerns: info@raynerslanefc.co.uk &middot; NSPCC 0808 800 5000 &middot; Emergency 999</div></div>'+
+      '</div>'+ foot()+'</div>');
+
     /* 2 — WELCOME & MANAGER'S NOTES */
     if (lines(d.welcomeNotes).length || lines(d.managerNotes).length || lines(d.lookingForward).length) {
       P.push('<div class="page">'+ banner('From The Lane','Welcome to Tithe Farm')+
@@ -285,6 +348,22 @@
         foot()+'</div>');
     }
 
+    /* OPPOSITION FOCUS (scouting) */
+    var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
+    if (oppFacts.length || lines(d.oppOnesToWatch).length) {
+      P.push('<div class="page">'+ banner('Scouting Report', opp)+
+        (oppFacts.length?'<div class="grid2" style="grid-template-columns:repeat('+Math.min(oppFacts.length,3)+',1fr);margin-bottom:14px">'+oppFacts.map(function(f){return '<div class="card g"><div class="k">'+f[0]+'</div><div class="t">'+esc(f[1])+'</div></div>';}).join('')+'</div>':'')+
+        (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">Ones to Watch</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
+        foot()+'</div>');
+    }
+    /* MATCH PREVIEW (storylines + key players) */
+    if (lines(d.storylines).length || lines(d.keyPlayers).length) {
+      P.push('<div class="page">'+ banner('Today’s Match','The Preview')+
+        (lines(d.storylines).length?'<div class="body">'+notes(d.storylines)+'</div>':'')+
+        (lines(d.keyPlayers).length?'<div class="divider"><span class="lbl">Lane Players to Watch</span></div><div class="body">'+notes(d.keyPlayers)+'</div>':'')+
+        foot()+'</div>');
+    }
+
     /* 4 — TEAM SHEETS */
     function tsList(text){ var L=lines(text); if(!L.length) return ''; return '<div class="ts-list">'+L.map(function(l){ var m=l.match(/^\s*(\d+)[\.\)]?\s+(.*)$/); return '<div class="ts-row">'+(m?'<span class="n">'+m[1]+'</span><span>'+esc(m[2])+'</span>':'<span>'+esc(l)+'</span>')+'</div>'; }).join('')+'</div>'; }
     if (lines(d.homeXI).length || lines(d.homeSubs).length || lines(d.awayLineup).length || (d.staff||'').trim()) {
@@ -296,6 +375,17 @@
           '<div><div class="ts-team away">'+esc(opp)+'</div>'+(tsList(d.awayLineup)||'<div class="ts-list"><div class="ts-row muted">Confirmed at kick-off.</div></div>')+'</div>'+
         '</div>'+ foot()+'</div>');
     }
+
+    /* SQUAD PROFILES (player cards) */
+    if (club.players && club.players.length) {
+      var pc = club.players.slice(0,15).map(function(p){
+        var no=p.number||p.no||'', ph=p.photo||p.image||'';
+        return '<div class="pcard"><div class="ph">'+(ph?'<img src="'+esc(ph)+'">':'')+'<div class="no">'+esc(no)+'</div></div><div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div><div class="st"><div><div class="v">'+(p.apps!=null?p.apps:'–')+'</div><div class="k">Apps</div></div><div><div class="v">'+(p.goals!=null?p.goals:'–')+'</div><div class="k">Goals</div></div><div><div class="v">'+(p.assists!=null?p.assists:'–')+'</div><div class="k">Assists</div></div></div></div>';
+      }).join('');
+      P.push('<div class="page">'+ banner('First Team','Squad Profiles')+'<div class="pcards">'+pc+'</div>'+ foot()+'</div>');
+    }
+    /* CAPTAIN'S NOTES */
+    edPage('From the Skipper', (d.captainName?esc(d.captainName)+'’s':'Captain’s')+' Notes', d.captainNotes);
 
     /* 5 — MATCHDAY INFO & OFFICIALS */
     var offBits = [ d.referee?'Referee: '+esc(d.referee):'', (d.assistant1||d.assistant2)?'Assistants: '+esc([d.assistant1,d.assistant2].filter(Boolean).join(' & ')):'', d.fourthOfficial?'4th Official: '+esc(d.fourthOfficial):'' ].filter(Boolean);
@@ -352,6 +442,23 @@
         foot()+'</div>');
     }
 
+    /* STATISTICS CENTRE (player leaders — when player stats exist) */
+    if (club.players && club.players.some(function(p){return p.goals||p.assists||p.apps;})) {
+      function topBy(k){ return club.players.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
+      var tg=topBy('goals'), ta=topBy('assists'), tap=topBy('apps');
+      P.push('<div class="page">'+ banner('By The Numbers','Statistics Centre')+
+        '<div class="grid2">'+
+          '<div class="card g"><div class="k">Top Scorer</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tg.name||'–')+' <span style="color:var(--g)">'+(tg.goals||0)+'</span></div></div>'+
+          '<div class="card y"><div class="k">Most Assists</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(ta.name||'–')+' <span style="color:var(--g)">'+(ta.assists||0)+'</span></div></div>'+
+          '<div class="card g"><div class="k">Most Appearances</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tap.name||'–')+' <span style="color:var(--g)">'+(tap.apps||0)+'</span></div></div>'+
+          '<div class="card y"><div class="k">Player of the Month</div><div class="t">'+esc(d.potm||'Announced on matchday')+'</div></div>'+
+        '</div>'+
+        '<div class="divider"><span class="lbl">Squad Stats</span></div>'+
+        '<table class="lt"><thead><tr><th class="l">Player</th><th>Pos</th><th>Apps</th><th>Goals</th><th>Assists</th></tr></thead><tbody>'+
+          club.players.slice(0,18).map(function(p){return '<tr><td class="l">'+esc(p.name||'')+'</td><td>'+esc(p.position||p.pos||'')+'</td><td class="num">'+(p.apps||0)+'</td><td class="num">'+(p.goals||0)+'</td><td class="num">'+(p.assists||0)+'</td></tr>';}).join('')+
+        '</tbody></table>'+ foot()+'</div>');
+    }
+
     /* 9 — SPONSORS (premium showcase) */
     var feat = sponsors.slice(0,2), restS = sponsors.slice(2);
     function featCard(s){ return '<div class="spon-feat">'+(s.logo?'<img src="'+esc(s.logo)+'">':'')+'<div class="tier">'+esc(s.tier||'Club Partner')+'</div><div class="nm">'+esc(s.name||'')+'</div>'+(s.role?'<div class="role">'+esc(s.role)+'</div>':'')+'</div>'; }
@@ -363,6 +470,31 @@
       '<div class="card y" style="margin-top:14px"><div class="k">Sponsor The Lane</div><div class="t">Shirt &amp; kit, match &amp; matchball sponsorship, pitch-side boards and programme ads — marketing that backs grassroots football. Email <b>info@raynerslanefc.co.uk</b>.</div></div>'+
       foot()+'</div>');
 
+    /* COMMERCIAL OPPORTUNITIES */
+    P.push('<div class="page">'+ banner('Back The Lane','Commercial Opportunities')+
+      '<div class="lead">Reach the Yellow Army every matchday — marketing that backs grassroots football.</div>'+
+      '<div class="grid2">'+
+        '<div class="card y"><div class="k">Match Sponsorship</div><div class="t">Named backer of a game — line-up graphic, social shout-outs &amp; a programme mention. From £250.</div></div>'+
+        '<div class="card g"><div class="k">Match Ball Sponsor</div><div class="t">A great-value entry point for local businesses. From £25.</div></div>'+
+        '<div class="card y"><div class="k">Player Sponsorship</div><div class="t">Sponsor a player for the season — your name beside theirs. From £75.</div></div>'+
+        '<div class="card g"><div class="k">Pitch-side Boards</div><div class="t">Seen at every home game and across our matchday content. From £350 per season.</div></div>'+
+        '<div class="card y"><div class="k">Programme Advertising</div><div class="t">A full or half page in this programme — print &amp; digital.</div></div>'+
+        '<div class="card g"><div class="k">Kit &amp; Training Wear</div><div class="t">Shirt, away kit and training-wear packages available.</div></div>'+
+      '</div>'+
+      '<div class="cta-card" style="margin-top:14px"><div class="cta-qr">'+qr(SITE+'/investment.html')+'</div><div><div class="cta-h">Get involved</div><div class="body">Scan for our sponsorship page, or email <b>info@raynerslanefc.co.uk</b> — we’ll find the right fit for your business.</div></div></div>'+
+      foot()+'</div>');
+
+    /* SPONSOR DIRECTORY (tiered) */
+    if (sponsors.length) {
+      var tiers={}; sponsors.forEach(function(s){ var t=s.tier||'Club Partner'; (tiers[t]=tiers[t]||[]).push(s); });
+      var order=['Principal Partner','Kit Sponsor','Training Kit Sponsor','Programme Sponsor','Club Partner'];
+      var tkeys=Object.keys(tiers).sort(function(a,b){ var ia=order.indexOf(a),ib=order.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+      P.push('<div class="page">'+ banner('With Thanks','Our Sponsor Directory')+
+        tkeys.map(function(t){ return '<div class="tier-block"><span class="tier-head">'+esc(t)+'</span><div class="tier-row">'+tiers[t].map(function(s){return '<span class="tier-chip"><b>'+esc(s.name)+'</b>'+(s.role?' — '+esc(s.role):'')+'</span>';}).join('')+'</div></div>'; }).join('')+
+        '<div class="card y" style="margin-top:10px"><div class="t">Please support the businesses who support your club. To join them, email info@raynerslanefc.co.uk.</div></div>'+
+        foot()+'</div>');
+    }
+
     /* 10 — THE EDITOR'S OWN PAGES (custom artwork, branded) */
     (d.customPages||[]).forEach(function(cp){
       if(!cp.image && !cp.title && !cp.caption) return;
@@ -372,6 +504,33 @@
         (cp.caption ? '<div class="body muted" style="text-align:center;margin-top:12px">'+esc(cp.caption)+'</div>' : '')+
         foot()+'</div>');
     });
+
+    /* EDITORIAL FEATURE PAGES (each renders only if written) */
+    edPage('Heritage','Since 1933', d.clubHistory);
+    edPage('In The Community','Out in the Community', d.community);
+    edPage('The Future','Academy &amp; Youth', d.academy);
+    edPage('The Lane','Women’s Team', d.womens);
+    edPage('The 12th Man','Our Supporters', d.supporters);
+
+    /* CLUB DIRECTORY */
+    if (club.committee && club.committee.length) {
+      P.push('<div class="page">'+ banner('Who’s Who','Club Directory')+
+        '<div class="dir">'+club.committee.map(function(m){ return '<div class="dir-row"><span class="r">'+esc(m.role||'')+'</span><span class="n">'+esc(m.name||'')+'</span></div>'; }).join('')+'</div>'+
+        '<div class="card g" style="margin-top:14px"><div class="k">Safeguarding &amp; Officers</div><div class="t">Welfare Officer: <b>'+esc(OFF.welfareOfficer||'')+'</b> &middot; Chairman: <b>'+esc(OFF.chairman||'')+'</b> &middot; Secretary: <b>'+esc(OFF.secretary||'')+'</b></div></div>'+
+        (club.emails && club.emails.length ? '<div class="divider"><span class="lbl">Contact</span></div><div class="dir">'+club.emails.map(function(a){return '<div class="dir-row"><span class="r">'+esc(a.label||'')+(a.name?' ('+esc(a.name)+')':'')+'</span><span class="n" style="font-weight:500;font-size:11.5px">'+esc(a.email)+'</span></div>';}).join('')+'</div>' : '')+
+        foot()+'</div>');
+    }
+
+    /* GROUND INFORMATION */
+    P.push('<div class="page">'+ banner('Matchday','Ground Information')+
+      '<div class="grid2">'+
+        '<div class="card g"><div class="k">The Ground</div><div class="t">'+esc(venue)+'<br>'+esc(d.address||'151 Rayners Lane, Harrow HA2 0XH')+'</div></div>'+
+        '<div class="card y"><div class="k">Getting Here</div><div class="t">'+esc(d.groundTravel||'Rayners Lane Underground (Metropolitan &amp; Piccadilly lines) is a short walk away. Street parking nearby.')+'</div></div>'+
+        '<div class="card g"><div class="k">Facilities</div><div class="t">'+esc(d.groundFacilities||'Licensed clubhouse bar, hot food, toilets and accessible viewing. Families and well-behaved dogs welcome.')+'</div></div>'+
+        '<div class="card y"><div class="k">Safety</div><div class="t">First aid at the clubhouse. Please note the emergency exits and follow steward instructions.</div></div>'+
+      '</div>'+
+      (lines(d.groundInfo).length?'<div class="body" style="margin-top:10px">'+notes(d.groundInfo)+'</div>':'')+
+      foot()+'</div>');
 
     /* 11 — BECOME PART OF THE LANE */
     P.push('<div class="page">'+ banner('Join us','Become Part of The Lane')+
@@ -395,6 +554,17 @@
       '<div class="card g" style="margin-top:6px"><div class="t">Rayners Lane FC is affiliated to Middlesex County FA — an FA Charter Standard Community Club. #UpTheLane, together.</div></div>'+
       foot()+'</div>');
 
+    /* LAWS & REGULATIONS (compliance notices) */
+    P.push('<div class="page">'+ banner('Notices','Laws &amp; Regulations')+
+      '<div class="grid2">'+
+        '<div class="card g"><div class="k">Affiliation</div><div class="t">'+esc(d.affiliation||DEF.affil)+'</div></div>'+
+        '<div class="card y"><div class="k">Ground Regulations</div><div class="t">'+esc(d.groundRules||DEF.rules)+'. Entry is subject to the club’s ground regulations.</div></div>'+
+        '<div class="card g"><div class="k">Photography Policy</div><div class="t">'+esc(d.photographyPolicy||'Photography and filming take place at this fixture for club media. By entering you may appear in club content. Concerns? Speak to a committee member.')+'</div></div>'+
+        '<div class="card y"><div class="k">Spectator Conduct</div><div class="t">Zero tolerance to abuse and discrimination. Support your team positively and respect players, officials and visiting supporters.</div></div>'+
+        '<div class="card g"><div class="k">Data Protection</div><div class="t">'+esc(d.dataProtection||'Personal data the club collects (e.g. memberships) is used only to run those services and never sold. See our Policies page at raynerslanefc.co.uk.')+'</div></div>'+
+        '<div class="card y"><div class="k">Programme</div><div class="t">Produced by Rayners Lane FC. © Rayners Lane FC. Line-ups subject to late change. Images © the club &amp; contributors.</div></div>'+
+      '</div>'+ foot()+'</div>');
+
     /* 13 — BACK PAGE: fixtures + statements + QR */
     function dt(f){ return new Date(f.date+'T'+(f.kickoff||'15:00')+':00').getTime(); }
     var upcoming = fixtures.slice().filter(function(f){ return f.us==null||f.them==null; }).sort(function(a,b){return dt(a)-dt(b);}).slice(0,6);
@@ -411,6 +581,29 @@
         '<div class="body"><div class="eyebrow">Read it on your phone</div><p>Scan for the live digital programme — line-ups, table &amp; live score updates.</p>'+
         '<p><b>@RaynersLaneFC</b> on X &middot; <b>@raynerslanefc</b> on Instagram</p></div></div>'+
       foot()+'</div>');
+
+    /* NEXT MATCH ADVERT (inside back cover) */
+    var nextHome = fixtures.slice().filter(function(f){ return (f.us==null||f.them==null) && f.isHome!==false; }).sort(function(a,b){return dt(a)-dt(b);})[0];
+    if (nextHome) {
+      P.push('<div class="page">'+ banner('Don’t Miss It','Next at The Lane')+
+        '<div class="advert"><div class="k">Next Home Fixture</div><div class="big">Rayners Lane<br>vs '+esc(nextHome.opponent||'TBC')+'</div>'+
+        '<div class="meta">'+esc(shortDate(nextHome.date))+' &middot; '+esc(to12(nextHome.kickoff))+' &middot; '+esc(nextHome.venue||venue)+'</div>'+
+        '<div style="margin-top:14px;display:inline-block;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;letter-spacing:.06em;padding:9px 18px;border-radius:8px">PAY ON THE GATE · BAR OPEN · ALL WELCOME</div></div>'+
+        '<div class="cta-card" style="margin-top:16px"><div class="cta-qr">'+qr(SITE+'/fixtures.html')+'</div><div><div class="cta-h">Never miss a game</div><div class="body">Scan to add the whole season to your phone calendar. #UpTheLane</div></div></div>'+
+        foot()+'</div>');
+    }
+
+    /* BACK COVER */
+    P.push('<div class="page cover" style="background:linear-gradient(160deg,#14532d,#0b2a1a)">'+
+      '<div class="cover-top" style="justify-content:center;align-items:center">'+
+        '<img class="cover-badge" src="img/badge.png">'+
+        '<div class="cover-kicker">Join the Yellow Army</div>'+
+        '<div class="cover-title" style="font-size:52px">BE PART OF<br>THE LANE</div>'+
+        '<div class="body" style="color:rgba(255,255,255,.85);max-width:380px;margin:14px auto 0;text-align:center">Free Lane membership, yellow hearts every game and rewards all season. Scan to join in a minute.</div>'+
+        '<div style="margin:18px auto 0;background:#fff;padding:11px;border-radius:12px;width:150px;height:150px">'+qr(SITE+'/fan-zone.html')+'</div>'+
+      '</div>'+
+      '<div class="cover-bottom"><span>raynerslanefc.co.uk</span><span>@RaynersLaneFC · #UpTheLane</span></div>'+
+    '</div>');
 
     document.getElementById('pages').innerHTML = P.join('');
   }
