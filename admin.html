@@ -1543,9 +1543,10 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div>
       <div class="ps-fields" id="ps-fields"></div>
 
-      <div class="slbl">3 &middot; Preview &amp; download</div>
+      <div class="slbl">3 &middot; Save or share</div>
       <div class="ps-stage"><div id="ps-card-wrap"><div id="ps-card"></div></div></div>
-      <button class="save" onclick="psDownload()">⬇️ Download PNG</button>
+      <button class="save" onclick="psDownload()">📲 Save / Share Post</button>
+      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:7px">On your phone this opens your share menu — tap <strong style="color:var(--w)">Save Image</strong> for the camera roll, or send straight to <strong style="color:var(--w)">WhatsApp / Instagram</strong>. On a computer it downloads the PNG.</div>
 
       <div class="div"></div>
       <div class="slbl">🛡️ Crest Library <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— upload any missing/updated club crest</span></div>
@@ -3382,18 +3383,36 @@ function psRender() {
 function psDownload() {
   var card = document.getElementById('ps-card');
   if (typeof html2canvas === 'undefined') { toast('Still loading — try again in a second', true); return; }
-  toast('Rendering your post…');
+  toast('Building your post…');
   var prevT = card.style.transform; card.style.transform = 'scale(1)';
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
     html2canvas(card, { backgroundColor: null, useCORS: true, scale: 1, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
       card.style.transform = prevT;
-      var a = document.createElement('a');
-      a.download = 'rlfc-' + PS.type + '-' + PS.size + '.png';
-      a.href = cv.toDataURL('image/png');
-      a.click();
-      toast('Downloaded ✓ — ready to post 💛');
+      var fname = 'rayners-lane-' + PS.type + '-' + PS.size + '.png';
+      cv.toBlob(function (blob) {
+        if (!blob) { toast('Could not build the image — try again', true); return; }
+        var file = (typeof File !== 'undefined') ? new File([blob], fname, { type: 'image/png' }) : null;
+        // PHONE: hand the PNG to the native share sheet — Save to Photos /
+        // camera roll, WhatsApp, Instagram, Messages — all one tap, no preview tab.
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: 'Rayners Lane FC' })
+            .then(function () { toast('Done 💛'); })
+            .catch(function (err) {
+              if (err && err.name === 'AbortError') return; // they closed the sheet
+              psSaveBlob(blob, fname);                       // anything else → just save it
+            });
+        } else {
+          psSaveBlob(blob, fname); // desktop / older browser → normal download
+        }
+      }, 'image/png');
     }).catch(function (e) { card.style.transform = prevT; toast('Render failed: ' + e.message, true); });
   });
+}
+function psSaveBlob(blob, fname) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.download = fname; a.href = url; a.click();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  toast('Saved ✓ — ready to post 💛');
 }
 
 // crest library upload
