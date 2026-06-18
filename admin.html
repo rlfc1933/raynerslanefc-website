@@ -61,6 +61,23 @@
     input:focus,select:focus,textarea:focus{border-color:var(--y)}
     select option{background:var(--dk)}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    /* PROGRAMME — two-column form + live preview */
+    .pr-layout{display:flex;gap:22px;align-items:flex-start}
+    .pr-form{flex:1;min-width:0}
+    .pr-side{width:300px;flex-shrink:0;position:sticky;top:74px}
+    .pr-side-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gr);margin-bottom:8px}
+    .pr-side-hint{font-family:var(--fb);font-size:11px;color:var(--gr);margin-top:8px;text-align:center}
+    .pr-preview{width:100%;aspect-ratio:210/297;background:#0d0d0d;border:1px solid var(--br);border-radius:8px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.5)}
+    .pr-themes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+    .pr-sw{width:46px;height:34px;border-radius:7px;border:2px solid transparent;cursor:pointer;position:relative;overflow:hidden;padding:0}
+    .pr-sw.on{border-color:var(--y);box-shadow:0 0 0 2px rgba(255,209,0,.3)}
+    .pr-sw span{position:absolute;inset:0}
+    @media (max-width:1000px){
+      .pr-layout{flex-direction:column}
+      .pr-side{width:100%;position:sticky;top:54px;z-index:4;order:-1;background:var(--bk);padding:8px 0 10px;border-bottom:1px solid var(--br)}
+      .pr-preview{max-width:240px;margin:0 auto}
+      .pr-side-lbl{text-align:center}
+    }
     /* TOGGLE */
     .tog-wrap{display:flex;align-items:center;justify-content:space-between;background:var(--c);border:1px solid var(--br);padding:14px;border-radius:4px;margin-bottom:12px}
     .tog-lbl{font-family:var(--fc);font-size:15px;font-weight:700;color:var(--w)}
@@ -732,7 +749,12 @@
     <!-- PROGRAMME -->
     <div class="panel" id="panel-programme">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128240; Programme</div></div>
+      <div class="pr-layout">
+      <div class="pr-form">
       <div class="snote"><p>The official match-day programme — built to the <strong style="color:var(--w)">Step 5 standard</strong>. Tip: pick the game under &ldquo;Load from fixture&rdquo; and the match details fill themselves. The club statements are pre-written; fill the rest before kick-off.</p></div>
+
+      <div class="slbl">&#127912; Cover colour scheme <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the front-page look</span></div>
+      <div id="pr-themes" class="pr-themes"></div>
 
       <div class="slbl">&#9889; Load from fixture <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— auto-fills opponent, date, time &amp; venue</span></div>
       <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
@@ -804,6 +826,13 @@
       <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Press Publish first</strong> (above), then tap the button below. A full A4 programme opens and your phone/computer&rsquo;s print box appears. Choose <strong style="color:var(--w)">Save as PDF</strong>, make sure paper is <strong style="color:var(--w)">A4</strong>, then email that PDF to your printer. That&rsquo;s it.</p></div>
       <button class="save sec" onclick="window.open('programme-print.html?print=1','_blank')">&#128438; Make the Print Edition (PDF)</button>
       <a href="programme-print.html" target="_blank" style="display:block;text-align:center;font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:8px;text-decoration:underline">Just preview it first (no print box)</a>
+      </div><!-- /pr-form -->
+      <aside class="pr-side">
+        <div class="pr-side-lbl">Live cover preview</div>
+        <div id="pr-preview" class="pr-preview"></div>
+        <div class="pr-side-hint">Updates as you type — this is your front page.</div>
+      </aside>
+      </div><!-- /pr-layout -->
     </div>
 
     <!-- SQUAD -->
@@ -3053,6 +3082,8 @@ function applyProgrammeData(d) {
   setVal('pr-equality', d.equality || PR_DEFAULTS.equality); setVal('pr-affil', d.affiliation || PR_DEFAULTS.affil);
   setVal('pr-matchsponsor', d.matchSponsor || ''); setVal('pr-ballsponsor', d.ballSponsor || ''); setVal('pr-matchdaysponsor', d.matchdaySponsor || '');
   var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = d.oppCrest || '';
+  prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
+  prRenderThemes(); prRenderPreview();
 }
 function prFillCrests() {
   var sel = document.getElementById('pr-oppcrest'); if (!sel) return;
@@ -3071,6 +3102,12 @@ function initProgramme() {
     }).join('');
   });
   fetchJSON('programme', applyProgrammeData);
+  // Live preview updates as the cover-affecting fields change.
+  ['pr-opp', 'pr-comp', 'pr-venue', 'pr-date', 'pr-ko', 'pr-matchsponsor'].forEach(function (id) {
+    var e = document.getElementById(id); if (e && !e._prBound) { e._prBound = 1; e.addEventListener('input', prRenderPreview); }
+  });
+  var ocb = document.getElementById('pr-oppcrest'); if (ocb && !ocb._prBound) { ocb._prBound = 1; ocb.addEventListener('change', prRenderPreview); }
+  prRenderThemes(); prRenderPreview();
 }
 function prProgFromFixture(id) {
   if (!id) return;
@@ -3079,7 +3116,67 @@ function prProgFromFixture(id) {
   if (f.competition) setVal('pr-comp', f.competition);
   if (f.venue) setVal('pr-venue', f.venue);
   var oc = document.getElementById('pr-oppcrest'); if (oc && f.oppCrest) oc.value = f.oppCrest;
+  prRenderPreview();
   toast('Match details filled from the fixture ✓');
+}
+
+// ── COVER COLOUR SCHEMES + LIVE PREVIEW ──
+// All built from brand tokens (yellow/green/black) + two sanctioned occasion
+// themes. The COVER only changes scheme; inside pages stay uniform.
+var COVER_THEMES = {
+  'black-yellow': { name: 'Black & Yellow', bg: '#0d0d0d', ink: '#ffffff', accent: '#FFD100', accentInk: '#0d0d0d', soft: 'rgba(255,255,255,.72)' },
+  'yellow-black': { name: 'Yellow & Black', bg: '#FFD100', ink: '#0d0d0d', accent: '#0d0d0d', accentInk: '#FFD100', soft: 'rgba(0,0,0,.62)' },
+  'black-green':  { name: 'Black & Green', bg: '#0d0d0d', ink: '#ffffff', accent: '#2E8B57', accentInk: '#ffffff', soft: 'rgba(255,255,255,.72)' },
+  'green-black':  { name: 'Green & Black', bg: '#14532d', ink: '#ffffff', accent: '#0d0d0d', accentInk: '#FFD100', soft: 'rgba(255,255,255,.8)' },
+  'yellow-green': { name: 'Yellow & Green', bg: '#FFD100', ink: '#14532d', accent: '#14532d', accentInk: '#FFD100', soft: 'rgba(20,83,45,.78)' },
+  'green-yellow': { name: 'Green & Yellow', bg: '#14532d', ink: '#FFD100', accent: '#FFD100', accentInk: '#14532d', soft: 'rgba(255,209,0,.85)' },
+  'festive':      { name: 'Festive', bg: '#0b2a1a', ink: '#ffffff', accent: '#FFD100', accentInk: '#0d0d0d', soft: 'rgba(255,255,255,.8)' },
+  'remembrance':  { name: 'Remembrance', bg: '#0d0d0d', ink: '#ffffff', accent: '#C8102E', accentInk: '#ffffff', soft: 'rgba(255,255,255,.72)' }
+};
+var prCoverTheme = 'black-yellow';
+function prSetTheme(k) { if (!COVER_THEMES[k]) return; prCoverTheme = k; prRenderThemes(); prRenderPreview(); }
+function prRenderThemes() {
+  var el = document.getElementById('pr-themes'); if (!el) return;
+  el.innerHTML = Object.keys(COVER_THEMES).map(function (k) {
+    var t = COVER_THEMES[k];
+    return '<button class="pr-sw' + (k === prCoverTheme ? ' on' : '') + '" title="' + esc(t.name) + '" onclick="prSetTheme(\'' + k + '\')"><span style="background:' + t.bg + '"></span><span style="left:auto;width:38%;background:' + t.accent + '"></span></button>';
+  }).join('');
+}
+function prTo12(t) { if (!t || !/^\d{1,2}:\d{2}/.test(t)) return t || '3:00 PM'; var p = t.split(':'), h = parseInt(p[0], 10), m = p[1].slice(0, 2), ap = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12; return h + ':' + m + ' ' + ap; }
+function prInitials(name) {
+  var w = String(name || '').replace(/F\.?C\.?/gi, '').trim().split(/\s+/);
+  var ini = w.slice(0, 3).map(function (x) { return (x[0] || '').toUpperCase(); }).join('');
+  return 'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="58" fill="%230d0d0d" stroke="%23ffffff" stroke-width="3"/><text x="60" y="72" text-anchor="middle" font-family="Arial Black" font-size="' + (ini.length > 2 ? '30' : '38') + '" font-weight="900" fill="white">' + ini + '</text></svg>');
+}
+function prRenderPreview() {
+  var box = document.getElementById('pr-preview'); if (!box) return;
+  var t = COVER_THEMES[prCoverTheme] || COVER_THEMES['black-yellow'];
+  var opp = gv('pr-opp') || 'TBC';
+  var ocSel = document.getElementById('pr-oppcrest'); var ocFile = ocSel ? ocSel.value : '';
+  var oppImg = ocFile || prInitials(opp);
+  var comp = gv('pr-comp') || 'Combined Counties Premier Division North';
+  var venue = gv('pr-venue') || 'Tithe Farm';
+  var date = (typeof fxFmtDate === 'function' && gv('pr-date')) ? fxFmtDate(gv('pr-date')) : (gv('pr-date') || 'TBC');
+  var ms = gv('pr-matchsponsor');
+  function meta(l, v) { return '<div style="text-align:center;min-width:0"><div style="font-family:var(--fc);font-size:6px;font-weight:700;letter-spacing:.1em;color:' + t.accent + '">' + l + '</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:11px;color:' + t.ink + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px">' + esc(v) + '</div></div>'; }
+  box.innerHTML =
+    '<div style="width:100%;height:100%;display:flex;flex-direction:column;background:' + t.bg + ';color:' + t.ink + '">' +
+      (ms ? '<div style="background:' + t.accent + ';color:' + t.accentInk + ';text-align:center;font-family:var(--fc);font-weight:700;font-size:7.5px;letter-spacing:.03em;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">SPONSORED BY ' + esc(ms).toUpperCase() + '</div>' : '') +
+      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 12px 10px;position:relative;overflow:hidden">' +
+        '<div style="position:absolute;right:-26px;bottom:-26px;width:160px;height:160px;background:url(img/badge.png) center/contain no-repeat;opacity:.06"></div>' +
+        '<img src="img/badge.png" style="width:40px;height:40px;object-fit:contain">' +
+        '<div style="font-family:var(--fc);font-weight:700;font-size:6.5px;letter-spacing:.26em;color:' + t.accent + ';margin-top:6px">OFFICIAL MATCHDAY PROGRAMME</div>' +
+        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:23px;letter-spacing:1px;line-height:.95;margin-top:1px;color:' + t.ink + '">RAYNERS LANE FC</div>' +
+        '<div style="font-family:var(--fc);font-size:6.5px;letter-spacing:.08em;color:' + t.soft + ';margin-top:1px">' + esc(comp) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:9px;margin:auto 0;position:relative;z-index:1">' +
+          '<div style="text-align:center"><img src="img/badge.png" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + '">RAYNERS LANE</div></div>' +
+          '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:25px;color:' + t.accent + '">VS</div>' +
+          '<div style="text-align:center"><img src="' + esc(oppImg) + '" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + ';max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(opp).toUpperCase() + '</div></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:auto;position:relative;z-index:1">' + meta('DATE', date) + meta('K.O.', prTo12(gv('pr-ko'))) + meta('VENUE', venue) + '</div>' +
+      '</div>' +
+      '<div style="background:' + t.accent + ';color:' + t.accentInk + ';display:flex;justify-content:space-between;padding:5px 10px;font-family:var(--fc);font-weight:700;font-size:7px;letter-spacing:.06em"><span>THE LANE · EST. 1933</span><span>RAYNERSLANEFC.CO.UK</span></div>' +
+    '</div>';
 }
 function saveProgramme() {
   var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
@@ -3093,7 +3190,7 @@ function saveProgramme() {
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
-    oppCrest: gv('pr-oppcrest'),
+    oppCrest: gv('pr-oppcrest'), coverTheme: prCoverTheme,
     updatedAt: new Date().toISOString(),
   };
   pushToGitHub('programme', data, 'dep-programme');

@@ -164,6 +164,18 @@
     var oppCrest = d.oppCrest || (crestRow && crestRow.file) || initialsBadge(opp);
     var comp = d.competition || 'Combined Counties Premier Division North';
     var venue = d.venue || 'Tithe Farm Sports & Social Club';
+    // Cover colour scheme (front page only — inside pages stay uniform).
+    var COVER_THEMES = {
+      'black-yellow': { bg: '#0d0d0d', ink: '#ffffff', accent: '#FFD100', accentInk: '#0d0d0d', soft: 'rgba(255,255,255,.72)' },
+      'yellow-black': { bg: '#FFD100', ink: '#0d0d0d', accent: '#0d0d0d', accentInk: '#FFD100', soft: 'rgba(0,0,0,.62)' },
+      'black-green':  { bg: '#0d0d0d', ink: '#ffffff', accent: '#2E8B57', accentInk: '#ffffff', soft: 'rgba(255,255,255,.72)' },
+      'green-black':  { bg: '#14532d', ink: '#ffffff', accent: '#0d0d0d', accentInk: '#FFD100', soft: 'rgba(255,255,255,.8)' },
+      'yellow-green': { bg: '#FFD100', ink: '#14532d', accent: '#14532d', accentInk: '#FFD100', soft: 'rgba(20,83,45,.78)' },
+      'green-yellow': { bg: '#14532d', ink: '#FFD100', accent: '#FFD100', accentInk: '#14532d', soft: 'rgba(255,209,0,.85)' },
+      'festive':      { bg: '#0b2a1a', ink: '#ffffff', accent: '#FFD100', accentInk: '#0d0d0d', soft: 'rgba(255,255,255,.8)' },
+      'remembrance':  { bg: '#0d0d0d', ink: '#ffffff', accent: '#C8102E', accentInk: '#ffffff', soft: 'rgba(255,255,255,.72)' }
+    };
+    var TH = COVER_THEMES[d.coverTheme] || COVER_THEMES['black-yellow'];
     var DEF = {
       admission:'Adults £5 · Concessions £3 · Under 16s free',
       rules:'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
@@ -184,26 +196,27 @@
     function foot(){ pn++; return '<div class="pcta"><span>RAYNERSLANEFC.CO.UK</span><span>'+CTAS[(pn-1)%CTAS.length]+'</span><span class="pg">'+pn+'</span></div>'; }
     var P = [];
 
-    // 1 — COVER
-    P.push('<div class="page cover">' +
-      (d.matchSponsor ? '<div class="cover-sponsor">This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></div>' : '') +
-      '<div class="cover-top">' +
+    // 1 — COVER  (themed; only the cover changes colour scheme)
+    P.push('<div class="page cover" style="background:' + TH.bg + ';color:' + TH.ink + '">' +
+      (d.matchSponsor ? '<div class="cover-sponsor" style="background:' + TH.accent + ';color:' + TH.accentInk + '">This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></div>' : '') +
+      '<div class="cover-top" style="position:relative">' +
+        '<div style="position:absolute;right:-120px;bottom:-110px;width:520px;height:520px;background:url(img/badge.png) center/contain no-repeat;opacity:.05;pointer-events:none"></div>' +
         '<img class="cover-badge" src="img/badge.png" alt="RLFC">' +
-        '<div class="cover-kicker">Official Matchday Programme</div>' +
-        '<div class="cover-title">RAYNERS LANE FC</div>' +
-        '<div class="cover-comp">'+esc(comp)+'</div>' +
-        '<div class="vs">' +
-          '<div class="side"><img class="crest" src="img/badge.png"><div class="tn">Rayners Lane</div></div>' +
-          '<div class="vstxt">VS</div>' +
-          '<div class="side"><img class="crest" src="'+esc(oppCrest)+'"><div class="tn">'+esc(opp)+'</div></div>' +
+        '<div class="cover-kicker" style="color:' + TH.accent + '">Official Matchday Programme</div>' +
+        '<div class="cover-title" style="color:' + TH.ink + '">RAYNERS LANE FC</div>' +
+        '<div class="cover-comp" style="color:' + TH.soft + '">'+esc(comp)+'</div>' +
+        '<div class="vs" style="position:relative;z-index:1">' +
+          '<div class="side"><img class="crest" src="img/badge.png"><div class="tn" style="color:' + TH.ink + '">Rayners Lane</div></div>' +
+          '<div class="vstxt" style="color:' + TH.accent + '">VS</div>' +
+          '<div class="side"><img class="crest" src="'+esc(oppCrest)+'"><div class="tn" style="color:' + TH.ink + '">'+esc(opp)+'</div></div>' +
         '</div>' +
-        '<div class="cover-meta">' +
-          '<div class="m"><div class="l">Date</div><div class="v">'+esc(shortDate(d.date)||'2026-27')+'</div></div>' +
-          '<div class="m"><div class="l">Kick-off</div><div class="v">'+esc(to12(d.kickoff))+'</div></div>' +
-          '<div class="m"><div class="l">Venue</div><div class="v" style="font-size:20px">'+esc(venue)+'</div></div>' +
+        '<div class="cover-meta" style="position:relative;z-index:1">' +
+          '<div class="m"><div class="l" style="color:' + TH.accent + '">Date</div><div class="v" style="color:' + TH.ink + '">'+esc(shortDate(d.date)||'2026-27')+'</div></div>' +
+          '<div class="m"><div class="l" style="color:' + TH.accent + '">Kick-off</div><div class="v" style="color:' + TH.ink + '">'+esc(to12(d.kickoff))+'</div></div>' +
+          '<div class="m"><div class="l" style="color:' + TH.accent + '">Venue</div><div class="v" style="font-size:20px;color:' + TH.ink + '">'+esc(venue)+'</div></div>' +
         '</div>' +
       '</div>' +
-      '<div class="cover-bottom"><span>The Lane · Yellow Army · Est. 1933</span><span>raynerslanefc.co.uk</span></div>' +
+      '<div class="cover-bottom" style="background:' + TH.accent + ';color:' + TH.accentInk + '"><span>The Lane · Yellow Army · Est. 1933</span><span>raynerslanefc.co.uk</span></div>' +
     '</div>');
 
     // 2 — WELCOME & MANAGER'S NOTES  (only if the editor wrote something)
