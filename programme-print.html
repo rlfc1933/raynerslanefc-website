@@ -81,6 +81,27 @@
   .pgnum{ position:absolute; bottom:8mm; right:15mm; font-family:var(--fc); font-size:10px; letter-spacing:.1em; color:#aaa; }
   .foot{ position:absolute; bottom:8mm; left:15mm; font-family:var(--fc); font-size:10px; letter-spacing:.1em; color:#aaa; }
 
+  /* cover: "this match sponsored by" band */
+  .cover-sponsor{ background:var(--y); color:#0d0d0d; text-align:center; font-family:var(--fc); font-weight:700; font-size:14px; letter-spacing:.04em; padding:9px 12px; }
+  .cover-sponsor b{ text-transform:uppercase; }
+
+  /* per-page footer call-to-action band */
+  .pcta{ position:absolute; left:15mm; right:15mm; bottom:7mm; display:flex; align-items:center; gap:12px; border-top:2px solid var(--y); padding-top:7px; font-family:var(--fc); font-size:10.5px; letter-spacing:.05em; color:var(--soft); }
+  .pcta span:first-child{ font-weight:700; color:var(--g); }
+  .pcta span:nth-child(2){ flex:1; text-align:center; }
+  .pcta .pg{ color:#aaa; }
+
+  /* today's match sponsors highlight */
+  .todays{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .today{ border:2px solid var(--y); border-radius:8px; padding:10px 12px; text-align:center; background:rgba(255,209,0,.06); }
+  .today .k{ font-family:var(--fc); font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--g); }
+  .today .v{ font-family:var(--fd); font-size:22px; letter-spacing:.5px; color:var(--ink); line-height:1.05; margin-top:3px; }
+
+  /* CTA cards (Become Part of The Lane) */
+  .cta-card{ display:flex; gap:18px; align-items:center; border:1px solid var(--line); border-left:4px solid var(--y); border-radius:8px; padding:16px 18px; }
+  .cta-qr img, .cta-qr canvas, .cta-qr table{ width:120px; height:120px; }
+  .cta-h{ font-family:var(--fd); font-size:24px; letter-spacing:.5px; color:var(--ink); margin-bottom:6px; }
+
   @media print{
     @page{ size:A4 portrait; margin:0; }
     body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -138,8 +159,9 @@
 
   function render(d, crests, sponsors, fixtures, table) {
     var opp = d.opponent || 'TBC';
+    // Opponent crest: editor's chosen crest → name lookup → initials badge.
     var crestRow = crests.filter(function(c){ return c.name && opp && c.name.toLowerCase()===opp.toLowerCase(); })[0];
-    var oppCrest = (crestRow && crestRow.file) || initialsBadge(opp);
+    var oppCrest = d.oppCrest || (crestRow && crestRow.file) || initialsBadge(opp);
     var comp = d.competition || 'Combined Counties Premier Division North';
     var venue = d.venue || 'Tithe Farm Sports & Social Club';
     var DEF = {
@@ -151,11 +173,20 @@
       equality:'Football is for everyone. Rayners Lane FC opposes discrimination of every kind and welcomes players, supporters and volunteers of all backgrounds, abilities, ages, faiths, genders, sexualities and ethnicities.',
       affil:'Rayners Lane FC is affiliated to Middlesex County FA and plays in the Combined Counties Football League, Premier Division North — Step 5 of the National League System. An FA Charter Standard Community Club, est. 1933.'
     };
-    function foot(n){ return '<div class="foot">RAYNERSLANEFC.CO.UK</div><div class="pgnum">'+n+'</div>'; }
+    // Rotating call-to-action printed at the foot of every page.
+    var CTAS = [
+      'Join the Yellow Army — free Lane membership at raynerslanefc.co.uk/fan-zone.html',
+      'Sponsor The Lane — info@raynerslanefc.co.uk',
+      'Follow @RaynersLaneFC for live match updates',
+      '#UpTheLane — raynerslanefc.co.uk'
+    ];
+    var pn = 0;
+    function foot(){ pn++; return '<div class="pcta"><span>RAYNERSLANEFC.CO.UK</span><span>'+CTAS[(pn-1)%CTAS.length]+'</span><span class="pg">'+pn+'</span></div>'; }
     var P = [];
 
     // 1 — COVER
     P.push('<div class="page cover">' +
+      (d.matchSponsor ? '<div class="cover-sponsor">This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></div>' : '') +
       '<div class="cover-top">' +
         '<img class="cover-badge" src="img/badge.png" alt="RLFC">' +
         '<div class="cover-kicker">Official Matchday Programme</div>' +
@@ -175,61 +206,80 @@
       '<div class="cover-bottom"><span>The Lane · Yellow Army · Est. 1933</span><span>raynerslanefc.co.uk</span></div>' +
     '</div>');
 
-    // 2 — WELCOME & MANAGER'S NOTES
-    P.push('<div class="page">' +
-      '<h2 class="sec">Welcome to The Lane</h2>' +
-      '<div class="eyebrow">'+esc(niceDate(d.date))+' · '+esc(to12(d.kickoff))+' · '+esc(venue)+'</div>' +
-      '<div class="body" style="margin-top:10px">'+ (notes(d.welcomeNotes) || '<p>A warm welcome to '+esc(opp)+', the match officials, and every supporter joining us at Tithe Farm today. Enjoy the game.</p>') +'</div>' +
-      '<h2 class="sec" style="margin-top:22px">From the Dugout</h2>' +
-      '<div class="body">'+ (notes(d.managerNotes) || '<p class="muted">The manager’s notes appear here.</p>') +'</div>' +
-      (d.lookingForward ? '<h2 class="sec" style="margin-top:22px">Looking Forward</h2><div class="body">'+notes(d.lookingForward)+'</div>' : '') +
-      foot('2') + '</div>');
+    // 2 — WELCOME & MANAGER'S NOTES  (only if the editor wrote something)
+    if (lines(d.welcomeNotes).length || lines(d.managerNotes).length || lines(d.lookingForward).length) {
+      P.push('<div class="page">' +
+        (lines(d.welcomeNotes).length ? '<h2 class="sec">Welcome to The Lane</h2><div class="eyebrow">'+esc(niceDate(d.date))+' · '+esc(to12(d.kickoff))+' · '+esc(venue)+'</div><div class="body" style="margin-top:10px">'+notes(d.welcomeNotes)+'</div>' : '') +
+        (lines(d.managerNotes).length ? '<h2 class="sec" style="margin-top:22px">From the Dugout</h2><div class="body">'+notes(d.managerNotes)+'</div>' : '') +
+        (lines(d.lookingForward).length ? '<h2 class="sec" style="margin-top:22px">Looking Forward</h2><div class="body">'+notes(d.lookingForward)+'</div>' : '') +
+        foot() + '</div>');
+    }
 
-    // 3 — TEAM SHEETS + OFFICIALS + INFO
-    function tsList(text){ var L=lines(text); if(!L.length) return '<div class="muted body">To be confirmed.</div>'; return L.map(function(l){ var m=l.match(/^\s*(\d+)[\.\)]?\s+(.*)$/); return '<div class="ts-row">'+(m?'<span class="n">'+m[1]+'</span><span>'+esc(m[2])+'</span>':'<span>'+esc(l)+'</span>')+'</div>'; }).join(''); }
+    // 3 — TEAM SHEETS  (only if any team content)
+    function tsList(text){ var L=lines(text); if(!L.length) return ''; return L.map(function(l){ var m=l.match(/^\s*(\d+)[\.\)]?\s+(.*)$/); return '<div class="ts-row">'+(m?'<span class="n">'+m[1]+'</span><span>'+esc(m[2])+'</span>':'<span>'+esc(l)+'</span>')+'</div>'; }).join(''); }
+    if (lines(d.homeXI).length || lines(d.homeSubs).length || lines(d.awayLineup).length || (d.staff||'').trim()) {
+      P.push('<div class="page">' +
+        '<h2 class="sec">Team Sheets</h2>' +
+        '<div class="twocol">' +
+          '<div><div class="ts-team">Rayners Lane</div>'+(tsList(d.homeXI)||'<div class="muted body">Confirmed at kick-off.</div>')+
+            (lines(d.homeSubs).length?'<div class="eyebrow" style="margin:10px 0 4px">Substitutes</div>'+tsList(d.homeSubs):'')+
+            ((d.staff||'').trim()?'<div class="body" style="margin-top:10px"><b>'+esc(d.staff)+'</b></div>':'')+'</div>' +
+          '<div><div class="ts-team" style="color:#333">'+esc(opp)+'</div>'+(tsList(d.awayLineup)||'<div class="muted body">Confirmed at kick-off.</div>')+'</div>' +
+        '</div>' +
+        foot() + '</div>');
+    }
+
+    // 4 — MATCH INFO  (compulsory uniform: officials if given, + matchday info)
+    var offBits = [ d.referee?'Referee: '+esc(d.referee):'', (d.assistant1||d.assistant2)?'Assistants: '+esc([d.assistant1,d.assistant2].filter(Boolean).join(' & ')):'', d.fourthOfficial?'4th Official: '+esc(d.fourthOfficial):'' ].filter(Boolean);
     P.push('<div class="page">' +
-      '<h2 class="sec">Team Sheets</h2>' +
-      '<div class="twocol">' +
-        '<div><div class="ts-team">Rayners Lane</div>'+tsList(d.homeXI)+
-          (lines(d.homeSubs).length?'<div class="eyebrow" style="margin:10px 0 4px">Substitutes</div>'+tsList(d.homeSubs):'')+
-          (d.staff?'<div class="body" style="margin-top:10px"><b>'+esc(d.staff)+'</b></div>':'')+'</div>' +
-        '<div><div class="ts-team" style="color:#333">'+esc(opp)+'</div>'+tsList(d.awayLineup)+'</div>' +
-      '</div>' +
-      '<h2 class="sec" style="margin-top:22px">Officials &amp; Matchday Info</h2>' +
-      (d.referee||d.assistant1||d.assistant2||d.fourthOfficial ? '<div class="panel"><div class="k">Match Officials</div><div class="t">'+
-        [ d.referee?'Referee: '+esc(d.referee):'', (d.assistant1||d.assistant2)?'Assistants: '+esc([d.assistant1,d.assistant2].filter(Boolean).join(' & ')):'', d.fourthOfficial?'4th Official: '+esc(d.fourthOfficial):'' ].filter(Boolean).join(' &nbsp;·&nbsp; ')
-        +'</div></div>' : '') +
+      '<h2 class="sec">Matchday Information</h2>' +
+      (offBits.length ? '<div class="panel"><div class="k">Match Officials</div><div class="t">'+offBits.join(' &nbsp;·&nbsp; ')+'</div></div>' : '') +
       '<div class="panel"><div class="k">Admission</div><div class="t">'+esc(d.admission||DEF.admission)+'</div></div>' +
       '<div class="panel"><div class="k">Ground rules</div><div class="t">'+esc(d.groundRules||DEF.rules)+'</div></div>' +
       '<div class="panel"><div class="k">First aid</div><div class="t">'+esc(d.firstAid||DEF.firstaid)+'</div></div>' +
-      foot('3') + '</div>');
+      '<div class="panel"><div class="k">Find us</div><div class="t">'+esc(venue)+(d.address?' — '+esc(d.address):'')+'</div></div>' +
+      foot() + '</div>');
 
-    // 4 — OPPOSITION + LEAGUE TABLE
+    // 5 — OPPOSITION + LEAGUE TABLE
     var tableHTML = table.length
       ? '<table class="lt"><thead><tr><th>#</th><th class="l">Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>'+
         table.map(function(r){ return '<tr class="'+(r.rlfc?'me':'')+'"><td>'+r.pos+'</td><td class="l">'+esc(r.team)+'</td><td>'+r.pld+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+r.gd+'</td><td><b>'+r.pts+'</b></td></tr>'; }).join('')+
         '</tbody></table>'
-      : '<div class="muted body">The league table will appear here once the season is under way.</div>';
+      : '<div class="muted body">The league table appears here once the season is under way.</div>';
     P.push('<div class="page">' +
-      (d.oppSummary||d.headToHead ? '<h2 class="sec">Today’s Visitors — '+esc(opp)+'</h2>'+
-        (d.oppSummary?'<div class="body">'+notes(d.oppSummary)+'</div>':'')+
-        (d.headToHead?'<div class="eyebrow" style="margin-top:10px">Head to Head</div><div class="body">'+notes(d.headToHead)+'</div>':'') : '') +
+      (lines(d.oppSummary).length||lines(d.headToHead).length ? '<h2 class="sec">Today’s Visitors — '+esc(opp)+'</h2>'+
+        (lines(d.oppSummary).length?'<div class="body">'+notes(d.oppSummary)+'</div>':'')+
+        (lines(d.headToHead).length?'<div class="eyebrow" style="margin-top:10px">Head to Head</div><div class="body">'+notes(d.headToHead)+'</div>':'') : '') +
       '<h2 class="sec" style="margin-top:18px">League Table</h2><div class="eyebrow" style="margin-bottom:8px">'+esc(comp)+'</div>'+tableHTML +
-      foot('4') + '</div>');
+      foot() + '</div>');
 
-    // 5 — SPONSORS
+    // 6 — SPONSORS (today's match sponsors highlighted + the club wall)
+    var todays = [ d.matchSponsor?['Match Sponsor',d.matchSponsor]:null, d.ballSponsor?['Match Ball Sponsor',d.ballSponsor]:null, d.matchdaySponsor?['Matchday Sponsor',d.matchdaySponsor]:null ].filter(Boolean);
+    var todayHTML = todays.length ? '<div class="todays">'+todays.map(function(t){ return '<div class="today"><div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>'; }).join('')+'</div>' : '';
     var sponCells = sponsors.length
       ? sponsors.map(function(s){ return '<div class="spon">'+(s.logo?'<img src="'+esc(s.logo)+'" alt="'+esc(s.name)+'">':'<span class="nm">'+esc(s.name)+'</span>')+'</div>'; }).join('')
       : '<div class="spon"><span class="nm">Your business here — sponsor The Lane</span></div>';
     P.push('<div class="page">' +
-      '<h2 class="sec">Our Partners</h2>' +
-      '<div class="body muted" style="margin-bottom:12px">The Lane is powered by the businesses who back us. Please support those who support your club.</div>' +
+      '<h2 class="sec">Our Sponsors</h2>' +
+      todayHTML +
+      '<div class="eyebrow" style="margin:'+(todays.length?'18px':'2px')+' 0 10px">Our Partners</div>' +
       '<div class="spon-grid">'+sponCells+'</div>' +
-      '<div class="body muted" style="margin-top:16px">Interested in sponsoring Rayners Lane FC? Email <b>info@raynerslanefc.co.uk</b>.</div>' +
-      foot('5') + '</div>');
+      '<div class="body muted" style="margin-top:16px">Please support the businesses who support your club.</div>' +
+      foot() + '</div>');
 
-    // 6 — BACK PAGE: fixtures + statements + QR
-    var now = Date.now();
+    // 7 — BECOME PART OF THE LANE  (compulsory CTA page)
+    P.push('<div class="page">' +
+      '<h2 class="sec">Become Part of The Lane</h2>' +
+      '<div class="cta-card"><div class="cta-qr">'+qr(SITE+'/fan-zone.html')+'</div>' +
+        '<div class="cta-text"><div class="cta-h">Join the Yellow Army — it’s free</div>' +
+        '<div class="body">Become a free <b>Lane loyalty member</b>: get your own membership card, collect yellow hearts every time you come, and unlock rewards through the season. Scan the code or visit <b>raynerslanefc.co.uk/fan-zone.html</b> to register in a minute.</div></div></div>' +
+      '<div class="cta-card" style="margin-top:16px;border-left-color:var(--g)"><div class="cta-text" style="width:100%">' +
+        '<div class="cta-h" style="color:var(--g)">Sponsor The Lane</div>' +
+        '<div class="body">Put your business in front of the Yellow Army every matchday — shirt &amp; kit, match &amp; matchball sponsorship, pitch-side boards and programme ads. It’s marketing that backs grassroots football. To get involved, email <b>info@raynerslanefc.co.uk</b>.</div></div></div>' +
+      foot() + '</div>');
+
+    // 8 — BACK PAGE: fixtures + statements + digital QR
+    var now2 = 0;
     function dt(f){ return new Date(f.date+'T'+(f.kickoff||'15:00')+':00').getTime(); }
     var upcoming = fixtures.slice().filter(function(f){ return f.us==null||f.them==null; }).sort(function(a,b){return dt(a)-dt(b);}).slice(0,6);
     var fixHTML = upcoming.length
@@ -245,7 +295,7 @@
       '<div class="backqr"><div class="qr">'+qr(SITE+'/programme.html')+'</div>' +
         '<div class="body"><div class="eyebrow">Read it on your phone</div><p>Scan for the live digital programme — line-ups, table &amp; live score updates.</p>' +
         '<p><b>@RaynersLaneFC</b> on X &middot; <b>@raynerslanefc</b> on Instagram</p></div></div>' +
-      foot('6') + '</div>');
+      foot() + '</div>');
 
     document.getElementById('pages').innerHTML = P.join('');
   }

@@ -739,6 +739,7 @@
 
       <div class="slbl">Match &amp; Fixture Details</div>
       <div class="field"><label class="fl">Opposition</label><input type="text" id="pr-opp" placeholder="Harefield United"></div>
+      <div class="field"><label class="fl">Opposition crest <span style="color:var(--gr);font-weight:400">— shown on the cover (VS)</span></label><select id="pr-oppcrest"><option value="">— pick a crest —</option></select></div>
       <div class="row2">
         <div class="field"><label class="fl">Date</label><input type="date" id="pr-date"></div>
         <div class="field"><label class="fl">Kick-off</label><input type="time" id="pr-ko" value="15:00"></div>
@@ -749,10 +750,13 @@
         <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
       </div>
       <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
-      <div class="field">
-        <label class="fl">Cover Image (optional)</label>
-        <div class="iup-wrap" id="pr-iw"><input type="file" accept="image/*" onchange="prevImg('pr',this)"><div class="iup-icon">📸</div><div class="iup-lbl">Tap to upload match photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
-        <div class="iup-prev" id="pr-ip"><img id="pr-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('pr')">✕ Remove</button></div>
+
+      <div class="div"></div>
+      <div class="slbl">Front Page &amp; Match Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing shows</span></div>
+      <div class="field"><label class="fl">This match is sponsored by <span style="color:var(--gr);font-weight:400">— printed across the top of the cover</span></label><input type="text" id="pr-matchsponsor" placeholder="e.g. Hanlon Dry Lining"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Match ball sponsor</label><input type="text" id="pr-ballsponsor" placeholder="Optional"></div>
+        <div class="field"><label class="fl">Matchday sponsor</label><input type="text" id="pr-matchdaysponsor" placeholder="Optional"></div>
       </div>
 
       <div class="div"></div>
@@ -3047,8 +3051,18 @@ function applyProgrammeData(d) {
   setVal('pr-admission', d.admission || PR_DEFAULTS.admission); setVal('pr-rules', d.groundRules || PR_DEFAULTS.rules); setVal('pr-firstaid', d.firstAid || PR_DEFAULTS.firstaid);
   setVal('pr-respect', d.respect || PR_DEFAULTS.respect); setVal('pr-safe', d.safeguarding || PR_DEFAULTS.safe);
   setVal('pr-equality', d.equality || PR_DEFAULTS.equality); setVal('pr-affil', d.affiliation || PR_DEFAULTS.affil);
+  setVal('pr-matchsponsor', d.matchSponsor || ''); setVal('pr-ballsponsor', d.ballSponsor || ''); setVal('pr-matchdaysponsor', d.matchdaySponsor || '');
+  var oc = document.getElementById('pr-oppcrest'); if (oc) oc.value = d.oppCrest || '';
+}
+function prFillCrests() {
+  var sel = document.getElementById('pr-oppcrest'); if (!sel) return;
+  var opts = (window._prCrests || []).filter(function (c) { return !/rayners\s*lane/i.test(c.name); });
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— pick a crest —</option>' + opts.map(function (c) { return '<option value="' + esc(c.file) + '">' + esc(c.name) + '</option>'; }).join('');
+  if (cur) sel.value = cur;
 }
 function initProgramme() {
+  fetchJSON('crests', function (d) { window._prCrests = (d && d.crests) || []; prFillCrests(); });
   fetchJSON('fixtures', function (d) {
     var list = (d && d.fixtures) || []; window._prFixtures = list;
     var sel = document.getElementById('pr-fixture'); if (!sel) return;
@@ -3064,6 +3078,7 @@ function prProgFromFixture(id) {
   setVal('pr-opp', f.opponent || ''); setVal('pr-date', f.date || ''); setVal('pr-ko', f.kickoff || '15:00');
   if (f.competition) setVal('pr-comp', f.competition);
   if (f.venue) setVal('pr-venue', f.venue);
+  var oc = document.getElementById('pr-oppcrest'); if (oc && f.oppCrest) oc.value = f.oppCrest;
   toast('Match details filled from the fixture ✓');
 }
 function saveProgramme() {
@@ -3077,19 +3092,12 @@ function saveProgramme() {
     oppSummary: gv('pr-oppsum'), headToHead: gv('pr-h2h'),
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
-    coverImage: '',
+    matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
+    oppCrest: gv('pr-oppcrest'),
     updatedAt: new Date().toISOString(),
   };
-  if (imgStore['pr']) {
-    uploadImg('pr', tok, function(path) {
-      data.coverImage = path || '';
-      pushToGitHub('programme', data, 'dep-programme');
-      toast('Programme published ✓');
-    });
-  } else {
-    pushToGitHub('programme', data, 'dep-programme');
-    toast('Programme published ✓');
-  }
+  pushToGitHub('programme', data, 'dep-programme');
+  toast('Programme published ✓');
 }
 
 // ── SQUAD ──
