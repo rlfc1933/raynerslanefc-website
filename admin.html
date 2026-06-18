@@ -3518,8 +3518,11 @@ var PS = { type: 'matchday', theme: 'yellow', size: 'ig', data: {} };
 var psCrests = [], psPlayers = [], psFixtures = [];
 var PS_SIZES = { ig: { w: 1080, h: 1080 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
 var PS_THEMES = {
-  yellow: { bg: 'radial-gradient(circle at 28% 18%,#1c1c1c,#0a0a0a 62%,#000)', accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' },
-  green:  { bg: 'radial-gradient(circle at 28% 18%,#0f2912,#06120a 60%,#020402)', accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' }
+  // NB: keep backgrounds as simple linear-gradients — html2canvas 1.4.1 throws
+  // ("addColorStop non-finite") on radial-gradient(circle at X% Y%, …), which
+  // aborts the PNG export and can drop elements like the top banner.
+  yellow: { bg: 'linear-gradient(145deg,#1f1f1f,#0a0a0a 60%,#000)', accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' },
+  green:  { bg: 'linear-gradient(145deg,#11301a,#06120a 60%,#020402)', accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' }
 };
 var FESTIVE = {
   'Christmas': ['Merry Christmas', 'from everyone at The Lane', 'tree'],
@@ -3803,8 +3806,14 @@ function psFooter(t, s) {
 }
 function psWM() { return '<div style="position:absolute;right:-130px;bottom:-110px;width:600px;height:600px;background:url(img/badge.png) center/contain no-repeat;opacity:.05"></div>'; }
 function psEyebrow(txt, t, top) {
-  var ico = psIco(PS_TYPE_ICON[PS.type], 22, t.ink);
-  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center"><span style="display:inline-flex;align-items:center;gap:11px;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;color:' + t.ink + ';background:' + t.accent + ';padding:9px 22px;border-radius:6px">' + ico + '<span>' + txt + '</span></span></div>';
+  // inline-block + vertical-align (NOT inline-flex/gap) — html2canvas collapses
+  // flex children, which dropped the banner text from the exported PNG.
+  var ico = psIco(PS_TYPE_ICON[PS.type], 20, t.ink);
+  return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center">' +
+    '<span style="display:inline-block;background:' + t.accent + ';color:' + t.ink + ';padding:9px 22px;border-radius:6px;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;white-space:nowrap">' +
+    '<span style="display:inline-block;vertical-align:middle;margin-right:10px">' + ico + '</span>' +
+    '<span style="display:inline-block;vertical-align:middle">' + txt + '</span>' +
+    '</span></div>';
 }
 function psBig(txt, t, size, top) {
   return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:' + size + 'px;letter-spacing:3px;color:#fff;line-height:.9;padding:0 50px">' + txt + '</div>';
@@ -3820,14 +3829,26 @@ function psPlayerCard(t, s, p, big, framed) {
   return '<div style="position:absolute;left:' + (cx - framed / 2) + 'px;top:' + (s.h / 2 - framed / 2 - 30) + 'px">' + ph + '</div>';
 }
 
+// Card background as an SVG-image vignette. html2canvas can't render CSS
+// radial/linear gradients (it throws "addColorStop non-finite" and drops
+// elements like the top banner), but it rasterises an SVG image fine.
+function psCardBg(theme) {
+  var stops = theme === 'green'
+    ? '<stop offset="0%" stop-color="#11301a"/><stop offset="60%" stop-color="#06120a"/><stop offset="100%" stop-color="#020402"/>'
+    : '<stop offset="0%" stop-color="#1f1f1f"/><stop offset="60%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#000000"/>';
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><defs><radialGradient id="g" cx="28%" cy="18%" r="100%">' + stops + '</radialGradient></defs><rect width="300" height="300" fill="url(#g)"/></svg>';
+  return '#000 url("data:image/svg+xml,' + encodeURIComponent(svg) + '") center / cover no-repeat';
+}
 function psRender() {
   var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
   var X = PS.size === 'x', ST = PS.size === 'story';
   var card = document.getElementById('ps-card'); if (!card) return;
-  card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + t.bg + ';overflow:hidden;color:#fff';
+  card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + psCardBg(PS.theme) + ';background-size:cover;overflow:hidden;color:#fff';
   var inner = psWM();
   // a strong diagonal brand band behind everything (fills "blank" space, on-brand)
-  inner += '<div style="position:absolute;left:-5%;right:-5%;top:' + (midY - (X ? 130 : 200)) + 'px;height:' + (X ? 260 : 400) + 'px;background:linear-gradient(100deg,transparent,' + (PS.theme === 'green' ? 'rgba(42,128,72,.16)' : 'rgba(255,209,0,.10)') + ',transparent);transform:skewY(-7deg)"></div>';
+  // Solid tint (not a CSS gradient) so html2canvas can rasterise it.
+  var bandTint = PS.theme === 'green' ? 'rgba(42,128,72,.12)' : 'rgba(255,209,0,.07)';
+  inner += '<div style="position:absolute;left:-5%;right:-5%;top:' + (midY - (X ? 130 : 200)) + 'px;height:' + (X ? 260 : 400) + 'px;background:' + bandTint + ';transform:skewY(-7deg)"></div>';
   function crestName(file) { var c = psCrests.filter(function (x) { return x.file === file; })[0]; return c ? c.name.toUpperCase() : ''; }
   function ctr(top, html) { return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center">' + html + '</div>'; }
   function beb(sz, col, ex) { return 'font-family:\'Bebas Neue\',sans-serif;font-size:' + sz + 'px;letter-spacing:2px;color:' + col + ';line-height:.92;' + (ex || ''); }
