@@ -133,6 +133,27 @@ async function loadMatchDay() {
 
   // Live results from the feed (TheSportsDB)
   renderHomeFixtures(window._rlfcFixtures);
+
+  // SEO / AEO: emit the next fixture as schema.org SportsEvent so search + AI
+  // answer engines can answer "Rayners Lane next match".
+  if (m.opponent && m.opponent !== 'TBC' && m.date) {
+    try {
+      var ev = {
+        '@context': 'https://schema.org', '@type': 'SportsEvent',
+        'name': m.homeTeam + ' vs ' + m.awayTeam,
+        'startDate': m.date,
+        'eventStatus': 'https://schema.org/EventScheduled',
+        'sport': 'Association football',
+        'homeTeam': { '@type': 'SportsTeam', 'name': m.homeTeam },
+        'awayTeam': { '@type': 'SportsTeam', 'name': m.awayTeam },
+        'location': { '@type': 'Place', 'name': m.venue || 'Tithe Farm Social Club' },
+        'organizer': { '@type': 'SportsOrganization', 'name': m.competition }
+      };
+      var tag = document.getElementById('next-event-schema');
+      if (!tag) { tag = document.createElement('script'); tag.type = 'application/ld+json'; tag.id = 'next-event-schema'; document.head.appendChild(tag); }
+      tag.textContent = JSON.stringify(ev);
+    } catch (e) {}
+  }
 }
 
 // Render the next fixture + recent results from the live feed into the home

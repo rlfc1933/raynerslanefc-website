@@ -271,6 +271,41 @@ function renderFxSeason(list) {
 
   var attr = document.querySelector('#tab-fixtures .fx-attr');
   if (attr) attr.textContent = 'Official Rayners Lane FC fixtures & results';
+
+  fxInjectSchema(sorted);
+}
+
+// SEO / AEO: emit schema.org SportsEvent data so Google rich results and AI
+// answer engines (SGE / ChatGPT / Perplexity) can answer "Rayners Lane next
+// match", "who did Rayners Lane play", etc. Built from the club schedule.
+function fxInjectSchema(list) {
+  var RL = 'Rayners Lane FC';
+  var events = list.filter(function (f) { return f.date; }).map(function (f) {
+    var away = f.isHome === false;
+    var home = away ? (f.opponent || 'TBC') : RL;
+    var awayT = away ? RL : (f.opponent || 'TBC');
+    var played = f.us != null && f.them != null;
+    var e = {
+      '@type': 'SportsEvent',
+      'name': home + ' vs ' + awayT,
+      'startDate': f.date + 'T' + (f.kickoff || '15:00') + ':00',
+      'eventStatus': 'https://schema.org/EventScheduled',
+      'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+      'sport': 'Association football',
+      'homeTeam': { '@type': 'SportsTeam', 'name': home },
+      'awayTeam': { '@type': 'SportsTeam', 'name': awayT },
+      'competitor': [{ '@type': 'SportsTeam', 'name': home }, { '@type': 'SportsTeam', 'name': awayT }],
+      'organizer': { '@type': 'SportsOrganization', 'name': f.competition || 'Combined Counties Football League' }
+    };
+    if (f.venue) e.location = { '@type': 'Place', 'name': f.venue, 'address': f.venue };
+    if (played) { e.eventStatus = 'https://schema.org/EventScheduled'; e.description = 'Full time: ' + (away ? f.them + '-' + f.us : f.us + '-' + f.them) + (f.scorers ? ' (' + f.scorers + ')' : ''); }
+    return e;
+  });
+  if (!events.length) return;
+  var graph = { '@context': 'https://schema.org', '@graph': events };
+  var tag = document.getElementById('fx-schema');
+  if (!tag) { tag = document.createElement('script'); tag.type = 'application/ld+json'; tag.id = 'fx-schema'; document.head.appendChild(tag); }
+  tag.textContent = JSON.stringify(graph);
 }
 
 function renderFxResults(fx) {

@@ -1859,6 +1859,27 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128218; Site Guide</div></div>
       <div class="snote" style="border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.06)"><p>What every part of the website is — in plain English. The <strong style="color:var(--w)">who / what / why / when / where / how</strong> of each section.</p></div>
 
+      <div class="sg-card" style="border-left-color:var(--y)"><h4>📅 Fixtures — the Match Engine <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">NEW</span></h4><div class="sg-w">
+        <b>What</b><span>The club's <strong style="color:var(--w)">single season schedule</strong>. You add every game once here (opponent, date, kick-off, venue, and the score once it's played).</span>
+        <b>Who</b><span>Anyone on the committee — it's the easiest tab. Pick the opponent from the dropdown (the crest links itself).</span>
+        <b>When</b><span>Add the season when the fixtures are released; add the score after each game.</span>
+        <b>Where it shows</b><span>One entry feeds <strong style="color:var(--w)">five places at once</strong>: the Fixtures page, the home-page Next Match + countdown, the fans' phone calendar, the SEO/Google data, and Post Studio graphics.</span>
+        <b>Why</b><span>No more updating the same match in four places. Update it once → everything stays in sync.</span>
+        <b>How</b><span>Fixtures tab → fill the form → <strong style="color:var(--w)">+ Add / Update Fixture</strong> → then <strong style="color:var(--w)">✓ Save to Site</strong>. Edit any game later with the Edit button.</span>
+      </div></div>
+
+      <div class="sg-card go" style="border-left-color:var(--su);background:rgba(34,197,94,.05)"><h4>📲 Phone calendar &amp; 🔎 Google / AI <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">NEW</span></h4><div class="sg-w">
+        <b>Calendar</b><span>On the Fixtures page, fans tap <strong style="color:var(--w)">Subscribe to fixtures</strong> and the whole season drops into their Apple/Google calendar — and <strong style="color:var(--w)">auto-updates</strong> every time you edit a fixture here. Nothing for you to maintain.</span>
+        <b>Google &amp; AI</b><span>Every fixture you save is published as structured data, so Google and AI assistants (ChatGPT, Google AI) can answer "<em>Rayners Lane next match</em>" and "<em>league position</em>". The more up to date Fixtures is, the better the club appears online.</span>
+        <b>Post Studio</b><span>On Match Day / Kick Off / Half-Time / Full-Time cards, the <strong style="color:var(--w)">Load from fixture</strong> dropdown builds the graphic for you — crest, home/away, time, venue, score.</span>
+      </div></div>
+
+      <div class="sg-card warn" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>💾 Does it go live? (the golden rule)</h4><div class="sg-w">
+        <b>Draft vs live</b><span>Typing in a form only changes <strong style="color:var(--w)">your screen</strong>. Nothing reaches fans until you press the <strong style="color:var(--w)">Save to Site</strong> (or Activate / Publish) button at the bottom of a tab.</span>
+        <b>Going live</b><span>After you Save, you'll see "<em>Saved to site — live in ~30 seconds</em>". That's the website rebuilding. Wait ~30s, refresh the public page, and it's there.</span>
+        <b>Safe to explore</b><span>Open any tab and look around — you can't break anything by reading. Changes only publish when you choose to Save.</span>
+      </div></div>
+
       <div class="sg-card"><h4>🔴 Match Day &amp; Live Scoreboard</h4><div class="sg-w">
         <b>What</b><span>Sets the next fixture and the live score on the home page.</span>
         <b>Who</b><span>Pete / Russell — whoever's at the ground.</span>
@@ -2390,6 +2411,10 @@ async function buildNotifs() {
 }
 // ── WHAT'S NEW (feature announcements; seen/dismissed kept per device) ──
 var WHATS_NEW = [
+  { id:'nf-fixtures-2606', i:'📅', t:'NEW: Fixtures — one season schedule', d:'Add every game once in the new Fixtures tab (opponent, date, kick-off, venue, score). It powers the Fixtures page, the home countdown, the calendar feed AND Post Studio — all from one place. (Match Day → Fixtures)' },
+  { id:'nf-calendar-2606', i:'🗓️', t:'NEW: Add-to-Calendar feed is live', d:'Fans can tap "Subscribe to fixtures" on the Fixtures page and the whole season lands in their phone calendar — and auto-updates every time you edit a fixture. Nothing to maintain.' },
+  { id:'nf-psfixture-2606', i:'⚡', t:'NEW: Post Studio fills itself from a fixture', d:'On Match Day / Kick Off / Half-Time / Full-Time, pick "Load from fixture" and the graphic builds itself — opponent crest, home/away swap, date, time, venue & score. Plus a new Pre-Season card.' },
+  { id:'nf-seo-2606', i:'🔎', t:'NEW: Google & AI can now read your fixtures', d:'Every fixture is published as structured data, so Google and AI assistants (ChatGPT, Google AI) can answer "Rayners Lane next match" and "league position". The more you keep Fixtures updated, the better the club shows up online.' },
   { id:'nf-livescore', i:'🔴', t:'Live Scoreboard', d:'Tap the score live during games — fans see it in ~20s. (Match Day tab)' },
   { id:'nf-spotlight', i:'⭐', t:'Man of the Match & New Signing', d:'Feature your star or announce a signing on the home page.' },
   { id:'nf-fanzone',   i:'💛', t:'Fan Zone & Lane Membership Cards', d:'Fans get a card, Lane number & loyalty hearts. New Fan Zone page.' },
