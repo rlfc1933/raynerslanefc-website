@@ -92,7 +92,7 @@
       <p style="font-family:var(--font-c);font-size:15px;color:var(--grey);letter-spacing:.04em;text-align:center;margin-bottom:32px">
         Fill in the form below and we'll be in touch. All volunteers are welcome.
       </p>
-      <form name="volunteer" method="POST" data-netlify="true" style="display:flex;flex-direction:column;gap:14px">
+      <form name="volunteer" method="POST" data-netlify="true" onsubmit="return volunteerApply(this)" style="display:flex;flex-direction:column;gap:14px">
         <input type="hidden" name="form-name" value="volunteer">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div>
@@ -132,6 +132,25 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
-<script>document.addEventListener("DOMContentLoaded",()=>initComponents("volunteer.html"));</script>
+<script>
+  document.addEventListener("DOMContentLoaded",()=>initComponents("volunteer.html"));
+  function volunteerApply(form){
+    var data=new FormData(form), body=new URLSearchParams();
+    data.forEach(function(v,k){ body.append(k,v); });
+    // 1) private record via Netlify Forms
+    fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: body.toString() })
+      .then(function(){ vThanks(form); }).catch(function(){ vThanks(form); });
+    // 2) HubSpot contact tagged volunteer (fire-and-forget; no-ops if HubSpot off)
+    var payload={ lead_source:'volunteer' }; data.forEach(function(v,k){ payload[k]=v; });
+    if(payload.role) payload.lead_type=payload.role;
+    try{ fetch('/.netlify/functions/hs-lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){}); }catch(e){}
+    if(window.gtag){ try{ gtag('event','generate_lead',{ lead_type:'volunteer' }); }catch(e){} }
+    return false;
+  }
+  function vThanks(form){
+    form.innerHTML='<div style="text-align:center;padding:24px"><div style="font-family:var(--font-d);font-size:30px;color:var(--yellow);margin-bottom:10px">Thank you 💛</div>'+
+      '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.7;max-width:420px;margin:0 auto">We\'ve got your details — someone from the club will be in touch about getting you involved at The Lane.</p></div>';
+  }
+</script>
 </body>
 </html>

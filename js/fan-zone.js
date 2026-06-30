@@ -142,6 +142,10 @@ async function sbSignUp(d) {
     return { error: ins.error.message };
   }
   await sbLoadProfile();
+  // THE ONE BRIDGE: also create/update them in HubSpot tagged Fan so marketing
+  // has a single list. Fire-and-forget; no-ops if HubSpot isn't set up.
+  try { fetch('/.netlify/functions/hs-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_source: 'fan', lead_type: 'member', name: name, email: email }) }).catch(function () {}); } catch (e) {}
+  if (window.gtag) { try { gtag('event', 'sign_up', { method: 'fan_account' }); } catch (e) {} }
   return { ok: true };
 }
 async function sbLogin(email, pass) {

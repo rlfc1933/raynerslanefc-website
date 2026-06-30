@@ -1589,6 +1589,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="slbl">💛 Award Yellow Hearts <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— after each game</span></div>
       <a href="scan.html" target="_blank" class="save" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:linear-gradient(135deg,#FFE27A,var(--y));color:#0d0d0d;margin-bottom:10px">⚡ Open Live Scanner</a>
       <div class="snote"><p><strong style="color:var(--w)">Best on match day:</strong> open the <strong style="color:var(--w)">Live Scanner</strong> on your phone, scan each member's QR at the gate, and their heart lands <strong style="color:var(--w)">instantly</strong> (needs Supabase set up — see SETUP-GUIDE). The manual list below still works as a fallback.</p></div>
+      <div id="live-attendance"></div>
       <div class="row2">
         <div class="field"><label class="fl">Match Date</label><input type="date" id="at-date"></div>
         <div class="field"><label class="fl">Opponent</label><input type="text" id="at-opp" placeholder="Harefield United"></div>
@@ -2820,7 +2821,7 @@ function openPanel(name) {
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
-  if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); }
+  if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); loadLiveAttendance(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'trialists')  loadLeads();
@@ -4321,6 +4322,32 @@ function saveBank() {
   localStorage.setItem('rlfc_bank', JSON.stringify({ name: gv('bk-name'), sort: gv('bk-sort'), acc: gv('bk-acc'), ref: gv('bk-ref') }));
   toast('Payment details saved on this device ✓');
 }
+// Live attendance (Phase 1.5) — reads the Supabase attendance table (scanned at
+// the gate) per match, alongside the manual JSON editor below. Anon read; no-op
+// until Supabase is set up.
+async function loadLiveAttendance() {
+  var el = document.getElementById('live-attendance'); if (!el) return;
+  var sb = window.RLFC_SUPABASE || {};
+  if (!sb.url || !sb.anonKey) { el.innerHTML = ''; return; }
+  try {
+    var r = await fetch(sb.url + '/rest/v1/attendance?select=match_date,home,lane_no&order=match_date.desc', { headers: { apikey: sb.anonKey } });
+    if (!r.ok) { el.innerHTML = ''; return; } // table not set up yet → stay quiet, manual editor still shown
+    var rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) {
+      el.innerHTML = '<div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Live scans:</strong> none yet — checks-in from the Live Scanner appear here instantly.</p></div>';
+      return;
+    }
+    var byDate = {};
+    rows.forEach(function (x) { (byDate[x.match_date] = byDate[x.match_date] || []).push(x); });
+    var dates = Object.keys(byDate).sort().reverse();
+    el.innerHTML = '<div class="slbl" style="color:var(--su)">⚡ Live scans (Supabase) — ' + rows.length + ' total</div>' +
+      dates.map(function (d) {
+        var c = byDate[d].length, ds = isNaN(new Date(d).getTime()) ? d : new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        return '<div class="li"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + ds + '</div><div class="li-sub">' + c + ' fan' + (c === 1 ? '' : 's') + ' checked in at the gate</div></div></div>';
+      }).join('') + '<div class="div"></div>';
+  } catch (e) { el.innerHTML = ''; }
+}
+
 // ── TRIALISTS (Phase 3) — open Player-Trials deals from HubSpot via list-leads ──
 async function loadLeads() {
   var el = document.getElementById('trialists-list'); if (!el) return;

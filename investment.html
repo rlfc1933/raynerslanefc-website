@@ -384,6 +384,7 @@
     data.forEach(function (v, k) { payload[k] = v; });
     if (!payload.name && payload.contact) payload.name = payload.contact;
     try { fetch('/.netlify/functions/hs-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function () {}); } catch (e) {}
+    if (window.gtag) { try { gtag('event', 'generate_lead', { lead_type: 'sponsor' }); } catch (e) {} }
     return false;
   }
   function sponsorThanks(form) {
