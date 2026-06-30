@@ -427,10 +427,10 @@ function initComponents(currentPage) {
   const ogTags = [
     ['og:site_name',    'Rayners Lane FC'],
     ['og:type',         'website'],
-    ['og:image',        'https://raynerslanefc.co.uk/img/badge.png'],
-    ['twitter:card',    'summary'],
+    ['og:image',        'https://raynerslanefc.co.uk/img/og-card.jpg'],
+    ['twitter:card',    'summary_large_image'],
     ['twitter:site',    '@RaynersLaneFC'],
-    ['twitter:image',   'https://raynerslanefc.co.uk/img/badge.png'],
+    ['twitter:image',   'https://raynerslanefc.co.uk/img/og-card.jpg'],
   ];
   ogTags.forEach(([prop, content]) => {
     if (!document.querySelector(`meta[property="${prop}"],meta[name="${prop}"]`)) {
