@@ -582,6 +582,9 @@
 <!-- Cinematic WebGL hero (progressive enhancement; degrades to the static hero). -->
 <script type="module" src="js/hero-webgl.js"></script>
 <script src="js/pitchero.js"></script>
+<!-- Supabase config (public anon key) so the live scoreboard can read the
+     real-time live_match row. Falls back to matchday.json if absent. -->
+<script src="js/supabase-config.js"></script>
 <script src="js/main.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {

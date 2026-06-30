@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Match-Day Scanner | Rayners Lane FC</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="img/badge.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{ --y:#FFD100; --g:#1A5C32; --bg:#080808; --card:#141414; --bd:#242424; --w:#F5F3ED; --gr:#888; --su:#22C55E; --re:#EF4444;
+    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--w);font-family:var(--fb);min-height:100vh}
+  .wrap{max-width:520px;margin:0 auto;padding:16px 16px 60px}
+  .top{display:flex;align-items:center;gap:12px;padding:8px 0 16px}
+  .top img{width:40px;height:40px;border-radius:50%}
+  .top h1{font-family:var(--fd);font-size:24px;letter-spacing:1px;font-weight:400;line-height:1}
+  .top span{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--y)}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
+  label{display:block;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:5px}
+  input,select{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--w);font-family:var(--fb);font-size:16px;padding:11px 13px;outline:none}
+  input:focus,select:focus{border-color:var(--y)}
+  .row{display:flex;gap:10px}.row>div{flex:1}
+  .btn{display:block;width:100%;background:var(--y);color:#0d0d0d;border:none;border-radius:10px;font-family:var(--fc);font-size:16px;font-weight:800;letter-spacing:.04em;padding:13px;cursor:pointer;margin-top:10px;-webkit-tap-highlight-color:transparent}
+  .btn.sec{background:transparent;color:var(--w);border:1px solid var(--bd)}
+  .btn.red{background:var(--re);color:#fff}
+  #reader{width:100%;border-radius:12px;overflow:hidden;margin-top:6px}
+  .count{font-family:var(--fd);font-size:46px;color:var(--y);line-height:1;text-align:center}
+  .count-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);text-align:center;margin-top:2px}
+  #feed{min-height:64px}
+  .fb{border-radius:10px;padding:12px 14px;margin-top:8px;font-family:var(--fc);font-weight:700;letter-spacing:.02em;font-size:16px;animation:pop .25s ease}
+  .fb.ok{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);color:#86efac}
+  .fb.dup{background:rgba(255,209,0,.12);border:1px solid rgba(255,209,0,.4);color:var(--y)}
+  .fb.err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#fca5a5}
+  @keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+  .gate{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+  .gate .card{width:100%;max-width:340px;text-align:center}
+  .muted{font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5}
+  a.home{display:inline-block;margin-top:18px;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--gr);text-decoration:none}
+</style>
+</head>
+<body>
+
+<!-- PIN gate -->
+<div class="gate" id="gate">
+  <div class="card">
+    <img src="img/badge.png" style="width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:block">
+    <h1 style="font-family:var(--fd);font-size:26px;letter-spacing:1px;margin-bottom:4px">Match-Day Scanner</h1>
+    <p class="muted" style="margin-bottom:16px">Staff only — enter the club PIN.</p>
+    <input type="password" inputmode="numeric" id="pin" placeholder="PIN" autocomplete="off">
+    <button class="btn" onclick="unlock()">Unlock</button>
+    <div id="gate-err" style="color:var(--re);font-family:var(--fc);font-size:13px;font-weight:700;margin-top:10px;min-height:18px"></div>
+    <a class="home" href="admin.html">&larr; Back to admin</a>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <div class="top">
+    <img src="img/badge.png" alt="">
+    <div><span>Rayners Lane FC</span><h1>Match-Day Scanner</h1></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div><label>Opponent</label><input type="text" id="opp" placeholder="e.g. Harefield United"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Match date</label><input type="date" id="date"></div>
+      <div><label>Venue</label><select id="ha"><option value="home">Home 🏠</option><option value="away">Away ✈️</option></select></div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <div class="count" id="count">0</div>
+    <div class="count-lbl">Fans checked in this match</div>
+  </div>
+
+  <div class="card">
+    <label>Scan a membership QR</label>
+    <div id="reader"></div>
+    <button class="btn" id="scanbtn" onclick="toggleScan()">📷 Start Camera</button>
+    <div class="muted" style="margin-top:8px">Point at the fan's Lane QR. It scans automatically.</div>
+  </div>
+
+  <div class="card">
+    <label>Or type a Lane number</label>
+    <div class="row">
+      <div><input type="text" inputmode="numeric" id="manual" placeholder="e.g. 1234" onkeydown="if(event.key==='Enter')addManual()"></div>
+      <div style="flex:0 0 96px"><button class="btn" style="margin-top:0" onclick="addManual()">Add</button></div>
+    </div>
+  </div>
+
+  <div id="feed"></div>
+  <a class="home" href="admin.html">&larr; Back to admin</a>
+</div>
+
+<script>
+  var PIN = '';
+  var checkedThisMatch = {}; // lane → true, for the session count (avoids double feedback)
+
+  function unlock() {
+    var p = document.getElementById('pin').value.trim();
+    if (!p) { gateErr('Enter the PIN'); return; }
+    PIN = p;
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    prefill();
+  }
+  function gateErr(m) { document.getElementById('gate-err').textContent = m; }
+  document.getElementById('pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+
+  // Prefill opponent/date/home from the current Match Day setting.
+  function prefill() {
+    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+    fetch('data/matchday.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (m) {
+      if (m.opponent) document.getElementById('opp').value = m.opponent;
+      if (m.date) document.getElementById('date').value = String(m.date).slice(0, 10);
+      document.getElementById('ha').value = (m.isHome === false) ? 'away' : 'home';
+    }).catch(function () {});
+  }
+
+  function feedback(type, html) {
+    var f = document.getElementById('feed');
+    f.innerHTML = '<div class="fb ' + type + '">' + html + '</div>' + f.innerHTML;
+    if (navigator.vibrate) { try { navigator.vibrate(type === 'err' ? [60, 40, 60] : 40); } catch (e) {} }
+  }
+
+  function submitLane(lane) {
+    lane = String(lane || '').replace(/[^0-9]/g, '');
+    if (!lane) { feedback('err', 'No Lane number found'); return; }
+    var body = {
+      pin: PIN, lane_no: lane,
+      match_date: document.getElementById('date').value || new Date().toISOString().slice(0, 10),
+      home: document.getElementById('ha').value !== 'away'
+    };
+    fetch('/.netlify/functions/check-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
+      .then(function (res) {
+        var j = res.j || {};
+        if (res.status === 401) { feedback('err', 'PIN rejected — reload and re-enter'); return; }
+        if (!j.ok) {
+          if (j.error === 'no-supabase') feedback('err', 'Not set up yet — add SUPABASE_URL + SUPABASE_SERVICE_KEY in Netlify');
+          else feedback('err', 'Couldn\'t save (' + (j.error || 'error') + ')');
+          return;
+        }
+        if (j.duplicate) { feedback('dup', '⚠️ Lane #' + j.lane_no + ' already scanned today — ' + j.total + ' total'); return; }
+        if (!checkedThisMatch[j.lane_no]) { checkedThisMatch[j.lane_no] = true; bumpCount(); }
+        feedback('ok', '✓ Lane #' + j.lane_no + ' — heart #' + j.total + (j.home ? ' · ' + j.home + ' home' : ''));
+      })
+      .catch(function () { feedback('err', 'Network error — try again'); });
+  }
+
+  function addManual() {
+    var v = document.getElementById('manual').value;
+    document.getElementById('manual').value = '';
+    submitLane(v);
+  }
+  function bumpCount() { var c = document.getElementById('count'); c.textContent = (parseInt(c.textContent, 10) || 0) + 1; }
+
+  // ── Camera scanning (html5-qrcode) ──
+  var scanner = null, scanning = false, lastText = '', lastAt = 0;
+  function toggleScan() {
+    if (scanning) { stopScan(); return; }
+    if (typeof Html5Qrcode === 'undefined') { feedback('err', 'Scanner still loading — try again in a second'); return; }
+    scanner = new Html5Qrcode('reader');
+    scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 230, height: 230 } }, onScan, function () {})
+      .then(function () { scanning = true; var b = document.getElementById('scanbtn'); b.textContent = '■ Stop Camera'; b.classList.add('red'); })
+      .catch(function (e) { feedback('err', 'Camera blocked — allow camera access, or type the number'); });
+  }
+  function stopScan() {
+    if (!scanner) return;
+    scanner.stop().then(function () { scanner.clear(); }).catch(function () {});
+    scanning = false; var b = document.getElementById('scanbtn'); b.textContent = '📷 Start Camera'; b.classList.remove('red');
+  }
+  function onScan(text) {
+    var now = Date.now();
+    if (text === lastText && now - lastAt < 2500) return; // debounce repeat reads of the same card
+    lastText = text; lastAt = now;
+    submitLane(text);
+  }
+</script>
+</body>
+</html>

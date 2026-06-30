@@ -37,6 +37,24 @@ async function loadAttendance() {
   try { var d = await (await fetch('data/attendance.json?t=' + Date.now())).json(); fanAttendance = d.matches || []; }
   catch (e) { fanAttendance = []; }
 }
+// Phase 1: live hearts from the Supabase `attendance` table for the signed-in
+// fan's Lane number (updated the instant a staffer scans their QR). Falls back
+// to data/attendance.json when Supabase/the table isn't set up. Cached per lane.
+var fanHearts = null; // { lane, total, home }
+async function loadFanHearts(laneNo) {
+  var sb = window.RLFC_SUPABASE || {};
+  if (!sb.url || !sb.anonKey || !laneNo) return null;
+  try {
+    var opt = { headers: { apikey: sb.anonKey } };
+    if (window.AbortSignal && AbortSignal.timeout) opt.signal = AbortSignal.timeout(4000);
+    var r = await fetch(sb.url + '/rest/v1/attendance?lane_no=eq.' + encodeURIComponent(laneNo) + '&select=home', opt);
+    if (r.ok) {
+      var rows = await r.json();
+      if (Array.isArray(rows)) return { lane: String(laneNo), total: rows.length, home: rows.filter(function (x) { return x.home; }).length };
+    }
+  } catch (e) {}
+  return null;
+}
 function officialFor(laneNo) {
   var t = 0, h = 0;
   if (laneNo) fanAttendance.forEach(function (m) {
@@ -44,8 +62,8 @@ function officialFor(laneNo) {
   });
   return { total: t, home: h };
 }
-function homeGames(f)  { return officialFor(f && f.laneNo).home; }
-function totalGames(f) { return officialFor(f && f.laneNo).total; }
+function homeGames(f)  { return (fanHearts && f && String(f.laneNo) === fanHearts.lane) ? fanHearts.home  : officialFor(f && f.laneNo).home; }
+function totalGames(f) { return (fanHearts && f && String(f.laneNo) === fanHearts.lane) ? fanHearts.total : officialFor(f && f.laneNo).total; }
 // Consecutive most-recent matches attended (a streak breaks the moment one is missed)
 function attendStreak(f) {
   if (!f || !f.laneNo) return 0;
@@ -271,6 +289,8 @@ async function renderMembers() {
 async function initFanZone() {
   await loadAttendance();
   if (SB) await sbRestore();
+  var _f0 = getFan();
+  if (_f0 && _f0.laneNo) fanHearts = await loadFanHearts(_f0.laneNo); // live hearts (Supabase) → falls back to JSON
   renderAccountBar();
   renderLadder(getFan());
   renderFanCard();

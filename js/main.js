@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadMatchDay();
   initBgCrossfade();
   liveScoreboard();
-  setInterval(liveScoreboard, 20000); // auto-refresh the live score every 20s
+  setInterval(liveScoreboard, 12000); // auto-refresh the live score every 12s (real-time feel)
 });
 
 // ── LIVE SCOREBOARD ──────────────────────────
@@ -17,7 +17,8 @@ async function liveScoreboard() {
   var bar = document.getElementById('rlfc-livebar');
   if (!bar) return;
   try {
-    var m = await (await fetch('data/matchday.json?t=' + Date.now())).json();
+    var m = await readLiveMatch();
+    if (!m) { bar.style.display = 'none'; return; }
     var live = m.isLive || new URLSearchParams(location.search).get('live') === '1';
     if (!live) { bar.style.display = 'none'; return; }
     var RLFC = 'Rayners Lane', opp = m.opponent || 'Opposition';
@@ -38,6 +39,30 @@ async function liveScoreboard() {
       '</div>';
     bar.style.display = 'block';
   } catch (e) {}
+}
+
+// Real-time score source (Fix A part 2): read the live_match row from Supabase
+// (updated instantly by the admin via live-score.js — no rebuild). Falls back to
+// data/matchday.json so the bar behaves exactly as before until Supabase is set
+// up. Returns the normalised { isLive, isHome, opponent, homeScore, awayScore,
+// status, scorers } shape liveScoreboard() expects.
+async function readLiveMatch() {
+  var sb = window.RLFC_SUPABASE || {};
+  if (sb.url && sb.anonKey) {
+    try {
+      var opt = { headers: { apikey: sb.anonKey } };
+      if (window.AbortSignal && AbortSignal.timeout) opt.signal = AbortSignal.timeout(4000);
+      var r = await fetch(sb.url + '/rest/v1/live_match?id=eq.1&select=*', opt);
+      if (r.ok) {
+        var rows = await r.json();
+        if (Array.isArray(rows) && rows.length) {
+          var x = rows[0];
+          return { isLive: !!x.is_live, isHome: x.is_home, opponent: x.opponent, homeScore: x.home_score, awayScore: x.away_score, status: x.status, scorers: x.scorers };
+        }
+      }
+    } catch (e) {}
+  }
+  try { return await (await fetch('data/matchday.json?t=' + Date.now())).json(); } catch (e) { return null; }
 }
 
 async function loadMatchDay() {

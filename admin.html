@@ -1582,7 +1582,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="div"></div>
       <div class="slbl">💛 Award Yellow Hearts <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— after each game</span></div>
-      <div class="snote"><p>At the turnstile, jot the <strong style="color:var(--w)">Lane numbers</strong> from members' cards. Enter them here after the game and each fan gets a yellow heart on their profile.</p></div>
+      <a href="scan.html" target="_blank" class="save" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:linear-gradient(135deg,#FFE27A,var(--y));color:#0d0d0d;margin-bottom:10px">⚡ Open Live Scanner</a>
+      <div class="snote"><p><strong style="color:var(--w)">Best on match day:</strong> open the <strong style="color:var(--w)">Live Scanner</strong> on your phone, scan each member's QR at the gate, and their heart lands <strong style="color:var(--w)">instantly</strong> (needs Supabase set up — see SETUP-GUIDE). The manual list below still works as a fallback.</p></div>
       <div class="row2">
         <div class="field"><label class="fl">Match Date</label><input type="date" id="at-date"></div>
         <div class="field"><label class="fl">Opponent</label><input type="text" id="at-opp" placeholder="Harefield United"></div>
@@ -3120,6 +3121,23 @@ function applyScores(data) {
   data.status = lsStatus;
 }
 
+// Fix A part 2: push the live score to Supabase INSTANTLY (no GitHub commit, no
+// rebuild) so fans see it in ~12s. Fire-and-forget — matchday.json is still
+// committed as the durable copy + fallback. No-op until live-score/Supabase is
+// set up (then it just starts working).
+function pushLiveMatch(data) {
+  try {
+    fetch('/.netlify/functions/live-score', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pin: PIN, opponent: data.opponent || '', is_home: data.isHome,
+        home_score: data.homeScore || 0, away_score: data.awayScore || 0,
+        status: data.status || '', scorers: data.scorers || '', is_live: !!data.isLive
+      })
+    }).catch(function () {});
+  } catch (e) {}
+}
+
 function saveMatchDay(activate) {
   isLive = activate;
   updateLiveUI();
@@ -3132,6 +3150,7 @@ function saveMatchDay(activate) {
     competition: gv('md-comp'),
   };
   applyScores(data);
+  pushLiveMatch(data);
   pushToGitHub('matchday', data, 'dep-matchday');
   // Item 4: the homepage "next match" badge is driven by data/fixtures.json
   // (the single source of truth). So that the opponent/date set here is also
@@ -3160,7 +3179,8 @@ function pushLiveScore() {
     competition: gv('md-comp'),
   };
   applyScores(data);
-  pushToGitHub('matchday', data, 'dep-livescore');
+  pushLiveMatch(data);                                  // instant (Supabase)
+  pushToGitHub('matchday', data, 'dep-livescore');      // durable copy + fallback
   toast('Score pushed live ⚡ ' + lsHome + '–' + lsAway);
 }
 
