@@ -375,9 +375,15 @@
     var data = new FormData(form);
     var body = new URLSearchParams();
     data.forEach(function (v, k) { body.append(k, v); });
+    // 1) private record + email alert via Netlify Forms (submission-created.js)
     fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() })
       .then(function () { sponsorThanks(form); })
       .catch(function () { sponsorThanks(form); });
+    // 2) HubSpot contact + Sponsor deal (fire-and-forget; no-ops if HubSpot isn't set up)
+    var payload = { lead_source: 'sponsor' };
+    data.forEach(function (v, k) { payload[k] = v; });
+    if (!payload.name && payload.contact) payload.name = payload.contact;
+    try { fetch('/.netlify/functions/hs-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function () {}); } catch (e) {}
     return false;
   }
   function sponsorThanks(form) {

@@ -308,10 +308,31 @@ All secrets live here — **never** in the website code. Set them in Netlify and
 | `SUPABASE_SERVICE_KEY` | `list-members.js`, `check-in.js` | The Supabase **service_role** secret (Settings → API). SECRET — gives full read access | **Yes** (same as above) |
 | `ADMIN_PIN` | every PIN-gated function | Replaces the repo default `19332026` as the real gate. Set a new one and use it to log in | **Strongly recommended** |
 | `GITHUB_TOKEN` | `save-data.js` | Lets admin saves commit `data/*.json` to GitHub (auto-deploy) | Yes (already set) |
-| `RESEND_API_KEY` | `submission-created.js` | Fan welcome email + sponsor alert email | Optional |
-| `HUBSPOT_TOKEN` | `hs-lead.js`, `list-leads.js` | HubSpot private-app token for lead/deal CRM | Phases 2–4 |
+| `RESEND_API_KEY` | `submission-created.js` | Fan welcome email + sponsor/trial alert emails | Optional |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | `push-*.js` | Web Push match alerts (run `npx web-push generate-vapid-keys`). Until set, the "Enable Match Alerts" button stays hidden | Optional |
+| `HUBSPOT_TOKEN` | `hs-lead.js`, `list-leads.js` | HubSpot private-app token (CRM scopes) for lead/deal CRM | Phases 2–4 |
+| `HUBSPOT_SPONSOR_PIPELINE` / `HUBSPOT_SPONSOR_STAGE` | `hs-lead.js` | Deal pipeline + first-stage ("New") ids for sponsors. Without them, sponsors still create a HubSpot **contact** (no deal) | Optional |
+| `HUBSPOT_PLAYER_PIPELINE` / `HUBSPOT_PLAYER_STAGE` | `hs-lead.js`, `list-leads.js` | Deal pipeline + first-stage ("Enquiry") ids for player trials. Needed for the admin **Trialists** view | Optional |
 
 > The Supabase **anon (publishable) key** in `js/supabase-config.js` is a *public* browser key — safe to ship. It is NOT the service key. Only the service key is secret.
+
+---
+
+## 12. HUBSPOT (Free) — lead & deal CRM (sponsors, players)
+
+One-time setup. Everything below is **inert until done** — forms keep working and emailing regardless.
+
+1. **Create a free HubSpot account** (one portal).
+2. **Private app token:** HubSpot → Settings → Integrations → Private Apps → Create. Scopes: `crm.objects.contacts.read/write`, `crm.objects.deals.read/write`. Copy the token → set as `HUBSPOT_TOKEN` in Netlify.
+3. **Custom contact properties** (Settings → Properties → Contact → Create): `lead_source`, `lead_type`, `age_group` (all single-line text). *(If you skip these, contacts are still created with the standard fields.)*
+4. **Two deal pipelines** (Settings → Objects → Deals → Pipelines):
+   - **Sponsor Deals:** New → Contacted → Proposal Sent → Negotiation → Won / Lost
+   - **Player Trials:** Enquiry → Invited to Trial → Trialed → Signed / Released
+   - For each, copy the **pipeline id** and the **first-stage id** (pipeline "⋯" menu → copy id) → set `HUBSPOT_SPONSOR_PIPELINE` / `HUBSPOT_SPONSOR_STAGE` and `HUBSPOT_PLAYER_PIPELINE` / `HUBSPOT_PLAYER_STAGE`.
+5. **Live chat (optional):** HubSpot → Settings → Tracking code → copy the loader `src` → paste into `LANE_HS_CHAT` at the top of `js/components.js`.
+6. **Follow-up emails:** set up a single simple follow-up per pipeline inside HubSpot's free email (≈2,000 marketing emails/month free). Fan welcome emails stay on Resend — don't duplicate.
+
+**WhatsApp button:** set `LANE_WHATSAPP` at the top of `js/components.js` to your number (international, digits only, e.g. `447700900000`). Blank = hidden.
 
 ---
 

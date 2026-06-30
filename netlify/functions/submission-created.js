@@ -48,6 +48,31 @@ exports.handler = async function (event) {
       return { statusCode: 200, body: sRes.ok ? 'sponsor alert sent' : 'resend error ' + sRes.status };
     }
 
+    // ── PLAYER TRIAL APPLICATION → alert the management team at info@ ──
+    if (formName === 'player-trial') {
+      var prows = [
+        ['Name', data.name], ['Date of birth', data.dob], ['Age group', data.age_group],
+        ['Position', data.position], ['Current club', data.current_club],
+        ['Email', data.email], ['Phone', data.phone], ['Availability', data.availability],
+        ['Parent/guardian', data.guardian], ['Guardian contact', data.guardian_contact],
+      ].filter(function (r) { return r[1]; })
+        .map(function (r) { return '<tr><td style="padding:6px 14px 6px 0;color:#888;font-size:13px;vertical-align:top">' + r[0] + '</td><td style="padding:6px 0;color:#eee;font-size:14px">' + escapeHtml(r[1]) + '</td></tr>'; })
+        .join('');
+      var pHtml = '<div style="background:#080808;padding:24px;font-family:Arial,Helvetica,sans-serif">' +
+        '<div style="max-width:560px;margin:0 auto;background:#111;border:1px solid #2a2a2a;border-radius:14px;padding:24px 26px">' +
+          '<div style="color:#FFD100;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">New Trial Registration</div>' +
+          '<h1 style="color:#fff;font-size:22px;margin:0 0 16px">' + escapeHtml(data.name || 'A player') + ' wants to trial for The Lane</h1>' +
+          '<table style="width:100%;border-collapse:collapse">' + prows + '</table>' +
+          '<p style="font-size:13px;color:#888;margin-top:18px">Reply to reach them directly, or open the Trialists view in the admin to track it.</p>' +
+        '</div></div>';
+      var pRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: from, to: [club], reply_to: (data.email || club), subject: '⚽ Trial registration — ' + (data.name || 'New applicant'), html: pHtml }),
+      });
+      return { statusCode: 200, body: pRes.ok ? 'trial alert sent' : 'resend error ' + pRes.status };
+    }
+
     if (formName !== 'fan-signup') return { statusCode: 200, body: 'ignored' };
 
     var to = (data.email || '').trim();
