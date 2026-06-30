@@ -66,8 +66,8 @@ import * as THREE from 'three';
   camera.lookAt(0, 0, 0);
 
   /* ── video plane (club footage, behind the particles) ──────────────── */
-  var videoMesh = null, videoEl = null;
-  if (!isMobile) setupVideo();
+  var videoMesh = null, videoEl = null, VID_Z = -2.0;
+  setupVideo(); // desktop AND mobile (mobile uses a lighter file for smooth GPU upload)
 
   /* ── particle formations ───────────────────────────────────────────── */
   var aPitch = pitchFormation(N);
@@ -306,29 +306,46 @@ import * as THREE from 'three';
   function setupVideo() {
     videoEl = document.getElementById('hero-video-src');
     if (!videoEl) return;
-    var saveData = navigator.connection && navigator.connection.saveData;
-    if (saveData) { videoEl = null; return; }
-    var src = videoEl.getAttribute('data-src');
+    // mobile loads the lighter encode (faster per-frame GPU upload = smoother)
+    var src = (isMobile && videoEl.getAttribute('data-src-mobile')) || videoEl.getAttribute('data-src');
     if (src && !videoEl.src) videoEl.src = src;
-    videoEl.muted = true; videoEl.load();
+    videoEl.muted = true; videoEl.playsInline = true; videoEl.load();
 
     var tex = new THREE.VideoTexture(videoEl);
     tex.colorSpace = THREE.SRGBColorSpace; tex.minFilter = THREE.LinearFilter;
-    // plane sized to fill the view at its depth, with a left-weighted dark scrim
-    var planeZ = -2.0, dist = camera.position.z - planeZ;
-    var h = 2 * Math.tan((46 * Math.PI / 180) / 2) * dist, w = h * (W / H);
     var mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 1, depthWrite: false });
-    videoMesh = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.1, h * 1.1), mat);
-    videoMesh.position.z = planeZ;
-    scene.add(videoMesh);
+    // unit planes scaled in sizeVideo() so they always COVER the viewport
+    videoMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+    videoMesh.position.z = VID_Z; scene.add(videoMesh);
+    var scrim = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x080808, transparent: true, opacity: 0.45, depthWrite: false }));
+    scrim.position.z = VID_Z + 0.01; scene.add(scrim);
+    videoMesh.userData.scrim = scrim; videoMesh.userData.tex = tex;
 
-    // a dark scrim plane in front of the video (still behind particles) for text legibility
-    var scrim = new THREE.Mesh(
-      new THREE.PlaneGeometry(w * 1.1, h * 1.1),
-      new THREE.MeshBasicMaterial({ color: 0x080808, transparent: true, opacity: 0.45, depthWrite: false })
-    );
-    scrim.position.z = planeZ + 0.01; scene.add(scrim);
-    videoMesh.userData.scrim = scrim;
+    videoEl.addEventListener('loadedmetadata', sizeVideo);
+    sizeVideo();
+
+    // iOS Safari sometimes won't autoplay a muted inline video into a WebGL
+    // texture until the first user gesture — kick it on the first touch/scroll.
+    var kick = function () { playVideo(); };
+    window.addEventListener('touchstart', kick, { once: true, passive: true });
+    window.addEventListener('pointerdown', kick, { once: true, passive: true });
+    window.addEventListener('scroll', kick, { once: true, passive: true });
+  }
+  // Scale the video plane to COVER the viewport and crop the texture to the
+  // video's aspect (no squish on portrait phones).
+  function sizeVideo() {
+    if (!videoMesh) return;
+    var dist = 4.2 - VID_Z; // size at the hero (where the footage is visible)
+    var vh = 2 * Math.tan((46 * Math.PI / 180) / 2) * dist, vw = vh * (W / H);
+    videoMesh.scale.set(vw * 1.12, vh * 1.12, 1);
+    if (videoMesh.userData.scrim) videoMesh.userData.scrim.scale.set(vw * 1.12, vh * 1.12, 1);
+    var tex = videoMesh.userData.tex;
+    var tw = (videoEl && videoEl.videoWidth) || 16, th = (videoEl && videoEl.videoHeight) || 9;
+    var imgA = tw / th, planeA = vw / vh;
+    if (imgA > planeA) { tex.repeat.set(planeA / imgA, 1); tex.offset.set((1 - planeA / imgA) / 2, 0); }
+    else { tex.repeat.set(1, imgA / planeA); tex.offset.set(0, (1 - imgA / planeA) / 2); }
+    tex.needsUpdate = true;
   }
   function playVideo() { if (videoEl) { var p = videoEl.play(); if (p && p.catch) p.catch(function () {}); } }
 
@@ -355,6 +372,7 @@ import * as THREE from 'three';
   function resize() {
     W = window.innerWidth; H = window.innerHeight;
     renderer.setSize(W, H, false); camera.aspect = W / H; camera.updateProjectionMatrix();
+    sizeVideo();
   }
   function dispose() {
     stop();
