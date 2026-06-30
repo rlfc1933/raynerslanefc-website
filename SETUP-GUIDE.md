@@ -304,8 +304,8 @@ All secrets live here — **never** in the website code. Set them in Netlify and
 
 | Variable | Used by | Purpose | Required? |
 |----------|---------|---------|-----------|
-| `SUPABASE_URL` | `list-members.js`, `check-in.js` | Your Supabase project URL (`https://xxxx.supabase.co`) so admin/scanner can read fan members + attendance server-side | **Yes** — admin Fan Club shows "Supabase not configured" without it |
-| `SUPABASE_SERVICE_KEY` | `list-members.js`, `check-in.js` | The Supabase **service_role** secret (Settings → API). SECRET — gives full read access | **Yes** (same as above) |
+| `SUPABASE_URL` | `list-members.js`, `check-in.js`, `live-score.js` | Your Supabase project URL (`https://xxxx.supabase.co`) for server-side reads/writes | **Yes** for the gate scanner + instant score push |
+| `SUPABASE_SECRET_KEY` | `list-members.js`, `check-in.js`, `live-score.js`, `push-*` | The Supabase **secret** key (`sb_secret_…`). SECRET. *(Code also accepts the classic `SUPABASE_SERVICE_KEY` — either name works.)* | **Yes** for writes; reads use the public key |
 | `ADMIN_PIN` | every PIN-gated function | Replaces the repo default `19332026` as the real gate. Set a new one and use it to log in | **Strongly recommended** |
 | `GITHUB_TOKEN` | `save-data.js` | Lets admin saves commit `data/*.json` to GitHub (auto-deploy) | Yes (already set) |
 | `RESEND_API_KEY` | `submission-created.js` | Fan welcome email + sponsor/trial alert emails | Optional |

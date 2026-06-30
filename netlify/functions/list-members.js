@@ -11,7 +11,7 @@
 //   ADMIN_PIN             – optional (defaults 19332026)
 
 const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SERVICE_KEY;
+const KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY;  // accept either name
 
 function resp(code, obj) {
   return {

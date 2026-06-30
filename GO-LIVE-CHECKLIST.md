@@ -14,9 +14,16 @@ nothing breaks if you skip one.
 - [ ] **Supabase → SQL Editor → New query →** paste **all of `supabase-schema.sql`** → **Run**. (Creates `live_match` + `attendance`.)
 - [ ] **Netlify env vars → Add:**
   - [ ] `SUPABASE_URL` = `https://rewkixywfgsyqinfbggv.supabase.co`
-  - [ ] `SUPABASE_SERVICE_KEY` = Supabase → Settings → API → **service_role** secret
+  - [ ] `SUPABASE_SECRET_KEY` = your Supabase **secret** key (`sb_secret_…`). *(The code also accepts `SUPABASE_SERVICE_KEY` if you ever use the classic key — either name works.)*
 - [ ] Trigger deploy.
 - [ ] **Test:** admin → Fan Club shows members (not the "not configured" banner); set a match live + tap +1 → homepage scoreboard updates in ~12s; open `scan.html` on a phone, scan a member card → heart appears.
+
+> **What works WITHOUT another deploy** (just run the SQL above): the admin fan
+> list, the homepage scoreboard display, fan hearts and the admin live-attendance
+> read — these use the public key that's already deployed. Only the **writes**
+> (the gate scanner + instant score push) need `SUPABASE_SECRET_KEY`, which takes
+> one Netlify build. So spend your last build setting `SUPABASE_SECRET_KEY` +
+> `ADMIN_PIN` together.
 
 ## C. Email (Resend, optional, ~10 min)
 - [ ] Create a free **Resend** account; **verify the raynerslanefc.co.uk domain** (add the SPF/DKIM/DMARC DNS records it gives you).
@@ -27,8 +34,15 @@ nothing breaks if you skip one.
 - [ ] `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` in Netlify; create the `push_subscriptions` table (see `PUSH-SETUP.md`).
 - [ ] The hidden "Enable Match Alerts" button appears automatically once keys are set.
 
-## E. HubSpot lead CRM (sponsors / players / volunteers / fans, ~20 min)
-Full steps in **SETUP-GUIDE.md §12**. Short version:
+## E. CRM — OPTIONAL / SKIP (you've decided to forget HubSpot)
+**You don't need this to go live.** Every lead form (sponsor, trials, volunteer)
+already captures to the club **by email** (Resend) + Netlify Forms — no CRM
+required. The HubSpot code is dormant (no token) and harmless. A self-hosted
+open-source CRM (Twenty / EspoCRM / etc.) is a **separate project** — those are
+full apps that run on their own server (Docker/VPS + Postgres); they can't live
+inside this static site, so that's a future build, not part of go-live.
+
+_If you ever do want HubSpot instead, the steps are in **SETUP-GUIDE.md §12**:_
 - [ ] Free HubSpot account → **Private App** (scopes: contacts + deals read/write) → `HUBSPOT_TOKEN` in Netlify.
 - [ ] *(Optional)* Create contact properties `lead_source`, `lead_type`, `age_group`.
 - [ ] Create **two pipelines** (Sponsor Deals; Player Trials) → copy pipeline + first-stage ids → set `HUBSPOT_SPONSOR_PIPELINE/STAGE` + `HUBSPOT_PLAYER_PIPELINE/STAGE`.
@@ -51,7 +65,7 @@ Admin shows a **🚦 Season Setup** card listing what's empty. In priority order
 |---|---|
 | `ADMIN_PIN` | admin + scanner + all functions (set a new one) |
 | `GITHUB_TOKEN` | admin saves → site (already set) |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | fans, scoreboard, attendance |
+| `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | fans, scoreboard, attendance (writes). Reads use the public key already in the site |
 | `RESEND_API_KEY` | welcome + alert emails |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | push alerts |
 | `HUBSPOT_TOKEN` | lead CRM |

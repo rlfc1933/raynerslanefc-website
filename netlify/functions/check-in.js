@@ -17,7 +17,7 @@
 //   create policy "attendance public read" on public.attendance for select using (true);
 
 const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SERVICE_KEY;
+const KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY;  // accept either name
 
 function resp(code, obj) {
   return {
