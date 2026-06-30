@@ -109,18 +109,10 @@ async function loadMatchDay() {
     else                    { m.homeTeam = RLFC;       m.awayTeam = m.opponent; }
   }
 
-  // Live scoreboard
-  var liveBar = document.getElementById('live-bar');
-  var isLive = m.isLive || new URLSearchParams(window.location.search).get('live')==='1';
-  if (liveBar) liveBar.style.display = isLive ? 'flex' : 'none';
-  if (isLive) {
-    var homeScoreEl = document.getElementById('home-score');
-    var awayScoreEl = document.getElementById('away-score');
-    var liveOpp     = document.getElementById('live-opp');
-    if (homeScoreEl) homeScoreEl.textContent = m.homeScore || 0;
-    if (awayScoreEl) awayScoreEl.textContent = m.awayScore || 0;
-    if (liveOpp) liveOpp.textContent = m.opponent || 'Opposition';
-  }
+  // (Fix A) The live scoreboard is driven solely by liveScoreboard() →
+  // #rlfc-livebar. The old block here updated #live-bar / #home-score /
+  // #away-score / #live-opp — none of which exist in index.html — so it was dead
+  // code. Removed to leave ONE live-bar implementation.
 
   // Next match badge
   var teamsEl = document.getElementById('match-teams');

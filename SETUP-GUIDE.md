@@ -298,6 +298,23 @@ Replace the "RL" text crest in `components.js` with:
 
 ---
 
+## 11. ENVIRONMENT VARIABLES (Netlify → Site configuration → Environment variables)
+
+All secrets live here — **never** in the website code. Set them in Netlify and redeploy.
+
+| Variable | Used by | Purpose | Required? |
+|----------|---------|---------|-----------|
+| `SUPABASE_URL` | `list-members.js`, `check-in.js` | Your Supabase project URL (`https://xxxx.supabase.co`) so admin/scanner can read fan members + attendance server-side | **Yes** — admin Fan Club shows "Supabase not configured" without it |
+| `SUPABASE_SERVICE_KEY` | `list-members.js`, `check-in.js` | The Supabase **service_role** secret (Settings → API). SECRET — gives full read access | **Yes** (same as above) |
+| `ADMIN_PIN` | every PIN-gated function | Replaces the repo default `19332026` as the real gate. Set a new one and use it to log in | **Strongly recommended** |
+| `GITHUB_TOKEN` | `save-data.js` | Lets admin saves commit `data/*.json` to GitHub (auto-deploy) | Yes (already set) |
+| `RESEND_API_KEY` | `submission-created.js` | Fan welcome email + sponsor alert email | Optional |
+| `HUBSPOT_TOKEN` | `hs-lead.js`, `list-leads.js` | HubSpot private-app token for lead/deal CRM | Phases 2–4 |
+
+> The Supabase **anon (publishable) key** in `js/supabase-config.js` is a *public* browser key — safe to ship. It is NOT the service key. Only the service key is secret.
+
+---
+
 ## Support
 
 Any issues with the site, contact your developer.

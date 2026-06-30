@@ -185,28 +185,8 @@
     <p style="text-align:center;font-family:var(--font-b);color:var(--grey);font-size:13px;margin-top:16px">Every match you check in to moves you up. Hit the top tiers and you're a <strong style="color:var(--yellow)">Patron of The Lane</strong> — featured on our wall and first in line for matchday rewards.</p>
   </section>
 
-  <!-- OFFICIAL SIGN-UP -->
-  <section class="fz-sec">
-    <div class="fz-sec__head"><span class="label">Make It Official</span><h2>Join the <span>Family List</span></h2></div>
-    <form class="fz-form" name="fan-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return fanSignup(this)">
-      <input type="hidden" name="form-name" value="fan-signup">
-      <input type="hidden" name="lane_number" id="sg-lane">
-      <p class="hidden"><label>Don't fill this in: <input name="bot-field"></label></p>
-      <div class="fz-row">
-        <div><label class="fl">Your Name</label><input type="text" name="name" required></div>
-        <div><label class="fl">Town</label><input type="text" name="town" placeholder="Harrow"></div>
-      </div>
-      <label class="fl">Email</label><input type="email" name="email" required>
-      <div class="fz-row">
-        <div><label class="fl">Birthday (dd/mm)</label><input type="text" name="birthday" placeholder="14/03"></div>
-        <div><label class="fl">Fan since (year)</label><input type="number" name="since" placeholder="2011" min="1933" max="2026"></div>
-      </div>
-      <label class="fl">What does The Lane mean to you?</label>
-      <textarea name="meaning" rows="2" placeholder="Optional — we might feature it!"></textarea>
-      <button type="submit" class="fz-btn fz-btn--y" style="margin-top:18px;width:100%">Join the Lane Family</button>
-      <div class="fz-private">🔒 <span>Your details go <strong>privately</strong> to the club only — never shown on the site. We use your birthday to send you a little something, and to invite you to fan events. Unsubscribe any time.</span></div>
-    </form>
-  </section>
+  <!-- OFFICIAL SIGN-UP removed (Phase 0): joining is now a single Supabase
+       account via the "Create My Account" button on the membership card above. -->
 
   <!-- PATRONS WALL -->
   <section class="fz-sec">

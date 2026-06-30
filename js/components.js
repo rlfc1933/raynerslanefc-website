@@ -523,7 +523,17 @@ function initComponents(currentPage) {
     }
   };
   var _notifyBtn = document.getElementById('notify-btn');
-  if (_notifyBtn) _notifyBtn.addEventListener('click', function () { window.laneEnableAlerts(_notifyBtn); });
+  if (_notifyBtn) {
+    _notifyBtn.addEventListener('click', function () { window.laneEnableAlerts(_notifyBtn); });
+    // (Fix B) Don't show a dead control. Hide "Enable Match Alerts" until the
+    // club has actually configured Web Push (VAPID keys set → push-key reports
+    // enabled). It reappears automatically the moment keys are added in Netlify.
+    _notifyBtn.style.display = 'none';
+    fetch('/.netlify/functions/push-key')
+      .then(function (r) { return r.json(); })
+      .then(function (cfg) { if (cfg && cfg.enabled && cfg.key) _notifyBtn.style.display = ''; })
+      .catch(function () {});
+  }
 
 
   // ── PWA INSTALL PROMPT ──

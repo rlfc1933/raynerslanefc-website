@@ -476,6 +476,10 @@
         </div>
       </div>
 
+      <!-- (Fix C) Season Setup — shows which data is still empty so the public
+           stops seeing "Coming Soon". Auto-hides once everything's filled. -->
+      <div id="season-setup"></div>
+
       <div class="tile-grid" style="margin-bottom:4px">
         <button class="tile tile-hero" onclick="openPanel('playbook')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/><circle cx="12" cy="12" r="4" fill="rgba(255,209,0,.2)"/></svg></span>
@@ -2262,7 +2266,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <b>save-data</b><span>Commits a data file to GitHub (PIN-gated, uses <code>GITHUB_TOKEN</code>). The backbone of every Save.</span>
         <b>fetch-fixtures / fetch-table</b><span>Fallback live data: TheSportsDB (fixtures) + Wikipedia (Combined Counties table). Used only until <code>fixtures.json</code> is populated.</span>
         <b>fixtures-ics</b><span>Turns <code>fixtures.json</code> into a subscribable calendar feed (text/calendar).</span>
-        <b>list-fans / list-members / list-sponsors / submission-created</b><span>Read fan sign-ups (Netlify Forms) + real fan accounts (Supabase) for the admin.</span>
+        <b>list-members / list-sponsors / submission-created</b><span>Read real fan accounts (Supabase, the single fan source) + sponsor applications for the admin.</span>
         <b>push-key / push-subscribe / push-send</b><span>Web Push match alerts (VAPID + Supabase + <code>web-push</code> from <code>package.json</code>).</span>
         <b>staff-login / staff-users / staff-logins</b><span>This role-login layer — verify password, manage users, login history (Netlify Blobs — no setup).</span>
       </div></div>
@@ -2845,16 +2849,57 @@ function initDash() {
     else { pill.classList.remove('on'); txt.textContent = 'Scoreboard off'; }
   }
   loadDashFanCount();
+  renderSeasonSetup();
   refreshNotifs();
 }
-// Fan sign-up count on the dashboard (private — via list-fans). Falls back to
-// the public patrons count if the Netlify token isn't set yet.
+
+// (Fix C) Season Setup — a one-screen checklist of the data that still needs
+// filling so the public stops seeing "Coming Soon". Reads each data file and
+// links straight to its editor. Auto-hides once everything is filled.
+var SEASON_SETUP = [
+  { label: 'Fixtures',                file: 'fixtures', panel: 'fixtures', test: function (d) { return (d.fixtures || []).length > 0; }, why: 'Homepage next match, countdown & results' },
+  { label: 'Squad & player profiles', file: 'players',  panel: 'squad',    test: function (d) { return (d.players || []).length > 0; },  why: 'Squad page + programme team-sheets' },
+  { label: 'Matchday programme',      file: 'programmes',panel: 'programme',test: function (d) { return (d.programmes || []).length > 0; }, why: 'Publish your first programme' },
+  { label: 'Gallery photos',          file: 'gallery',  panel: 'gallery',  test: function (d) { return (d.items || []).length > 0; },    why: 'Replace the placeholder gallery' },
+  { label: 'Club news',               file: 'news',     panel: 'news',     test: function (d) { return (d.articles || []).length > 0; },  why: 'Keep the homepage fresh' },
+  { label: 'Sponsors',                file: 'sponsors', panel: 'sponsors', test: function (d) { return (d.sponsors || []).length > 0; }, why: 'Show partners across the site' }
+];
+function renderSeasonSetup() {
+  var el = document.getElementById('season-setup'); if (!el) return;
+  Promise.all(SEASON_SETUP.map(function (it) {
+    return new Promise(function (res) { fetchJSON(it.file, function (d) { res({ it: it, done: !!(d && it.test(d)) }); }); });
+  })).then(function (rows) {
+    var done = rows.filter(function (r) { return r.done; }).length, total = rows.length;
+    if (done === total) { el.innerHTML = ''; return; } // all set → nothing to nag about
+    var pct = Math.round(done / total * 100);
+    el.innerHTML =
+      '<div style="background:linear-gradient(135deg,#1c1c1c,#0c0c0c);border:1px solid var(--border);border-left:4px solid var(--y);border-radius:14px;padding:16px 18px;margin-bottom:14px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px">' +
+          '<div style="font-family:var(--fd);font-size:19px;letter-spacing:.03em;color:#fff">🚦 Season Setup</div>' +
+          '<div style="font-family:var(--fc);font-size:12px;font-weight:700;color:var(--y)">' + done + ' of ' + total + ' ready</div>' +
+        '</div>' +
+        '<div style="height:6px;background:var(--c2);border-radius:99px;overflow:hidden;margin:6px 0 12px"><div style="height:100%;width:' + pct + '%;background:var(--y)"></div></div>' +
+        '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);margin-bottom:12px">Fill these so visitors see a finished club, not “Coming Soon”.</div>' +
+        rows.map(function (r) {
+          if (r.done) {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)"><span style="color:var(--su);font-size:15px">✓</span>' +
+              '<div style="flex:1;font-family:var(--fc);font-size:13px;color:var(--gr);text-decoration:line-through">' + escH(r.it.label) + '</div></div>';
+          }
+          return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)"><span style="color:var(--gr);font-size:15px">○</span>' +
+            '<div style="flex:1;min-width:0"><div style="font-family:var(--fc);font-size:13px;font-weight:700;color:#fff">' + escH(r.it.label) + '</div>' +
+            '<div style="font-family:var(--fb);font-size:11px;color:var(--gr)">' + escH(r.it.why) + '</div></div>' +
+            '<button onclick="openPanel(\'' + r.it.panel + '\')" style="flex-shrink:0;background:var(--y);color:#0d0d0d;border:none;border-radius:8px;font-family:var(--fc);font-size:12px;font-weight:800;letter-spacing:.04em;padding:7px 13px;cursor:pointer">Add &rsaquo;</button></div>';
+        }).join('') +
+      '</div>';
+  }).catch(function () { el.innerHTML = ''; });
+}
+// Fan member count on the dashboard (Supabase via loadMembers). Shows a neutral
+// label if Supabase isn't configured yet.
 function loadDashFanCount() {
   var el = document.getElementById('hq-fans-txt'); if (!el) return;
-  fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) })
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (d && d.ok && typeof d.count === 'number') { el.textContent = d.count + ' fan' + (d.count === 1 ? '' : 's') + ' signed up'; }
+  loadMembers()
+    .then(function (res) {
+      if (res.configured) { var n = res.members.length; el.textContent = n + ' fan' + (n === 1 ? '' : 's') + ' signed up'; }
       else { el.textContent = 'Fan sign-ups'; }
     })
     .catch(function () { el.textContent = 'Fan sign-ups'; });
@@ -4337,14 +4382,12 @@ async function runSystemCheck() {
     else if (r.status === 401) checks.push(['Auto-deploy (saves go live)', false, 'PIN doesn\'t match ADMIN_PIN in Netlify']);
     else checks.push(['Auto-deploy (saves go live)', true, 'Reachable']);
   } catch (e) { checks.push(['Auto-deploy (saves go live)', false, 'Only testable on the live site (not local preview)']); }
-  // Fan + sponsor lists / counts (Netlify API token)
+  // Fan members (Supabase)
   try {
-    var r2 = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
-    var d2 = await r2.json();
-    if (d2 && d2.ok) checks.push(['Fan &amp; Sponsor lists in the portal', true, (d2.count || 0) + ' fan sign-ups visible']);
-    else if (d2 && d2.error === 'no-token') checks.push(['Fan &amp; Sponsor lists in the portal', false, 'Add NETLIFY_API_TOKEN in Netlify to see sign-ups &amp; applications here']);
-    else checks.push(['Fan &amp; Sponsor lists in the portal', false, (d2 && d2.error) || 'unavailable']);
-  } catch (e) { checks.push(['Fan &amp; Sponsor lists in the portal', false, 'Only testable on the live site']); }
+    var fres = await loadMembers();
+    if (fres.configured) checks.push(['Fan members (Supabase) visible in the portal', true, fres.members.length + ' member account' + (fres.members.length === 1 ? '' : 's') + ' visible']);
+    else checks.push(['Fan members (Supabase) visible in the portal', false, 'Set SUPABASE_URL + SUPABASE_SERVICE_KEY in Netlify (or deploy the admin_members RPC)']);
+  } catch (e) { checks.push(['Fan members (Supabase) visible in the portal', false, 'Only testable on the live site']); }
   // Email (Resend) — can't ping without sending; surface as an info row.
   checks.push(['Welcome &amp; sponsor-alert emails', true, 'Sent via Resend when RESEND_API_KEY + a verified domain are set in Netlify']);
   el.innerHTML = checks.map(function (c) {
@@ -4530,7 +4573,7 @@ async function loadMeetingSnapshot() {
   var income = (an.matches || []).reduce(function (a, m) { return a + matchTotal(m); }, 0);
   var hearts = 0; (att.matches || []).forEach(function (m) { hearts += (m.lanes || []).length; });
   var fans = '—';
-  try { var fr = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) }); var fd = await fr.json(); if (fd && fd.ok && typeof fd.count === 'number') fans = fd.count; } catch (e) {}
+  try { var fres = await loadMembers(); if (fres.configured) fans = fres.members.length; } catch (e) {}
   var cards = [
     { n: winsArr.length, l: 'Wins logged', src: 'Wins Board', go: 'playbook' },
     { n: '£' + Math.round(brought).toLocaleString('en-GB'), l: 'Brought in', src: 'Wins Board', go: 'playbook' },
@@ -4559,12 +4602,9 @@ async function loadClubStats() {
   var patrons = await jget('patrons');
   var crm = await jget('sponsor-crm');
   var an = await jget('analytics');
-  // fan sign-ups (private, needs token) — graceful if missing
+  // fan members (Supabase) — graceful if not configured
   var fanCount = null;
-  try {
-    var fr = await fetch('/.netlify/functions/list-fans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
-    var fd = await fr.json(); if (fd && fd.ok && typeof fd.count === 'number') fanCount = fd.count;
-  } catch (e) {}
+  try { var fres = await loadMembers(); if (fres.configured) fanCount = fres.members.length; } catch (e) {}
 
   var matches = att.matches || [];
   var hearts = 0; matches.forEach(function (m) { hearts += (m.lanes || []).length; });
@@ -5173,7 +5213,30 @@ function saveSigning(msg) { commitDomain('signing', 'entries', 'id', signings, s
 
 // ── FAN CLUB / PATRONS ──
 var patrons = [];
-// ── FAN SIGN-UPS (private — pulled from Netlify Forms via list-fans function) ──
+// ── FAN MEMBERS (Supabase — the single fan source of truth) ──
+// ONE helper, used for the member list AND every dashboard count, so there is
+// exactly one fan source. Tries the PIN-gated `admin_members` RPC (uses the
+// public anon key — no server env var needed), then the list-members function
+// (needs SUPABASE_SERVICE_KEY). Returns { configured, members }.
+async function loadMembers() {
+  var sbc = window.RLFC_SUPABASE || {};
+  if (sbc.url && sbc.anonKey) {
+    try {
+      var sr = await fetch(sbc.url + '/rest/v1/rpc/admin_members', { method: 'POST', headers: { apikey: sbc.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+      if (sr.ok) {
+        var sd = await sr.json();
+        if (Array.isArray(sd)) return { configured: true, members: sd.map(function (m) { return { name: m.name, username: m.username, email: m.email, town: m.town, since: m.since, meaning: m.meaning, lane_no: m.lane_no, created: m.created_at }; }) };
+      }
+    } catch (e) {}
+  }
+  try {
+    var mr = await fetch('/.netlify/functions/list-members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var md = await mr.json();
+    if (md && md.ok) return { configured: true, members: md.members || [] };
+  } catch (e) {}
+  return { configured: false, members: [] };
+}
+
 var _fansLoading = false;
 var _memberList = [];
 function renderMemberRows(mem, label) {
@@ -5197,67 +5260,12 @@ async function loadFanSignups() {
   _fansLoading = true;
   el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading members…</div>';
   try {
-    // 0) Real Lane accounts via Supabase (direct, PIN-gated RPC — no extra setup).
-    try {
-      var sbc = window.RLFC_SUPABASE || {};
-      if (sbc.url && sbc.anonKey) {
-        var sr = await fetch(sbc.url + '/rest/v1/rpc/admin_members', { method: 'POST', headers: { apikey: sbc.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
-        if (sr.ok) {
-          var sd = await sr.json();
-          if (Array.isArray(sd)) {
-            el.innerHTML = renderMemberRows(sd.map(function (m) { return { name: m.name, username: m.username, email: m.email, town: m.town, since: m.since, meaning: m.meaning, lane_no: m.lane_no, created: m.created_at }; }), 'Lane member');
-            _fansLoading = false; return;
-          }
-        }
-      }
-    } catch (e) {}
-    // 1) Real Lane accounts (Supabase via Netlify function, if that route is set up).
-    try {
-      var mr = await fetch('/.netlify/functions/list-members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
-      var md = await mr.json();
-      if (md && md.ok) {
-        var mem = md.members || [];
-        _memberList = mem;
-        if (!mem.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No members yet — they appear here the moment a fan creates an account in the Fan Zone.</div>'; _fansLoading = false; return; }
-        el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + mem.length + ' member account' + (mem.length === 1 ? '' : 's') + ' &middot; tap to open a profile</div>' +
-          mem.map(function (f, i) {
-            var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-            var sub = [];
-            if (f.username) sub.push('@' + escH(f.username));
-            if (f.town) sub.push(escH(f.town));
-            if (f.lane_no) sub.push('Lane #' + escH(String(f.lane_no)));
-            return '<div class="li" style="cursor:pointer" onclick="openMemberProfile(' + i + ')"><span class="li-num">💛</span><div class="li-main"><div class="li-name">' + escH(f.name || f.username || '—') + '</div>' +
-              '<div class="li-sub">' + escH(f.email || '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div></div>' +
-              '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + ' &rsaquo;</span></div>';
-          }).join('');
-        _fansLoading = false; return;
-      }
-    } catch (e) {}
-    // 2) Fall back to Netlify-Forms sign-ups (before Supabase is set up).
-    var r = await fetch('/.netlify/functions/list-fans', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: PIN })
-    });
-    var d = await r.json();
-    if (!d.ok && d.error === 'no-token') {
-      el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">One-time setup needed.</strong> To show sign-ups here, add a <strong>NETLIFY_API_TOKEN</strong> in Netlify → Site configuration → Environment variables. Create the token at Netlify → User settings → Applications → Personal access tokens. Until then, find sign-ups at Netlify → Forms → "fan-signup".</p></div>';
+    var res = await loadMembers();
+    if (!res.configured) {
+      el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">Supabase not configured.</strong> Members can\'t load until <strong>SUPABASE_URL</strong> + <strong>SUPABASE_SERVICE_KEY</strong> are set in Netlify → Site configuration → Environment variables (or the <code>admin_members</code> RPC is deployed). No sign-ups are lost — they\'re safe in Supabase. <button onclick="loadFanSignups()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0">Try again ↻</button></p></div>';
       return;
     }
-    if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load sign-ups (' + esc(d.error || 'error') + '). Try Refresh.</div>'; return; }
-    if (!d.fans || !d.fans.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No sign-ups yet — they\'ll appear here the moment a fan joins.</div>'; return; }
-
-    _memberList = d.fans;
-    var rows = d.fans.map(function (f, i) {
-      var when = f.created ? new Date(f.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      var sub = [];
-      if (f.town) sub.push(escH(f.town));
-      if (f.lane_number) sub.push('Lane #' + escH(String(f.lane_number)));
-      return '<div class="li" style="cursor:pointer" onclick="openMemberProfile(' + i + ')"><span class="li-num">🔒</span><div class="li-main">' +
-        '<div class="li-name">' + escH(f.name || '—') + '</div>' +
-        '<div class="li-sub">' + escH(f.email || '') + (sub.length ? ' &middot; ' + sub.join(' &middot; ') : '') + '</div>' +
-        '</div><span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + ' &rsaquo;</span></div>';
-    }).join('');
-    el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' sign-up' + (d.count === 1 ? '' : 's') + ' &middot; tap to open a profile</div>' + rows;
+    el.innerHTML = renderMemberRows(res.members, 'Lane member');
   } catch (e) {
     el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server. Check your connection and tap Refresh.</div>';
   } finally {

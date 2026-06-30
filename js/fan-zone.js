@@ -270,13 +270,7 @@ async function renderMembers() {
 
 async function initFanZone() {
   await loadAttendance();
-  if (SB) {
-    await sbRestore();
-    // The old no-password "Join the Family List" form is replaced by real
-    // accounts — hide it so there's one clear way in.
-    var oldForm = document.querySelector('form[name="fan-signup"]');
-    if (oldForm) { var s = oldForm.closest('.fz-sec'); if (s) s.style.display = 'none'; }
-  }
+  if (SB) await sbRestore();
   renderAccountBar();
   renderLadder(getFan());
   renderFanCard();
@@ -430,27 +424,11 @@ function nextMilestone(games) {
   return 0;
 }
 
-/* ---------- CHECK IN ---------- */
-async function checkInToday() {
-  var f = getFan(); if (!f) return;
-  f.attended = f.attended || [];
-  var today = new Date().toISOString().slice(0, 10);
-  if (f.attended.some(function (a) { return a.date === today; })) { toast('Already checked in today — see you next game!'); return; }
-  var opp = '', home = true;
-  try { var m = await (await fetch('data/matchday.json?t=' + Date.now())).json(); opp = m.opponent || ''; home = m.isHome !== false; } catch (e) {}
-  var beforeRewards = unlockedRewards(f).length;
-  f.attended.push({ date: today, opponent: opp, home: home });
-  setFan(f);
-  var games = totalGames(f);
-  renderFanCard(); renderLadder(f);
-  var afterRewards = unlockedRewards(f).length;
-  if (afterRewards > beforeRewards) {
-    var r = unlockedRewards(f)[afterRewards - 1];
-    toast('🎉 REWARD UNLOCKED: ' + r.title + '!');
-  } else {
-    toast('Checked in! 💛 ' + games + ' game' + (games > 1 ? 's' : '') + ' &middot; ' + tierFor(games).name);
-  }
-}
+/* ---------- CHECK IN ----------
+   Removed (Phase 0): the old self check-in wrote f.attended, which nothing ever
+   read — hearts are awarded by the CLUB only, from real attendance, matched on
+   the fan's Lane number. A staffer scanning the Lane QR is the real check-in
+   (Phase 1). Self check-in is gone so fans aren't misled. */
 
 /* ---------- CARD EDITOR ---------- */
 function openCardEditor() {
@@ -587,31 +565,11 @@ async function renderWall() {
   }
 }
 
-/* ---------- OFFICIAL SIGN-UP (private → Netlify Forms) ---------- */
-function fanSignup(form) {
-  var data = new FormData(form);
-  var body = new URLSearchParams();
-  data.forEach(function (v, k) { body.append(k, v); });
-  fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() })
-    .then(function () { fanThanks(form); })
-    .catch(function () { fanThanks(form); });
-  // Joining the Family List also creates an on-device Lane account + signs them
-  // in, so they immediately get their card, Lane number and member perks.
-  var f = getFan() || { attended: [] };
-  if (!f.username) f.username = (data.get('name') || '').trim();
-  if (!f.town)     f.town     = (data.get('town') || '').trim();
-  if (!f.since)    f.since    = (data.get('since') || '').trim();
-  if (!f.meaning)  f.meaning  = (data.get('meaning') || '').trim();
-  setFan(f);
-  ensureLaneNo(f);
-  localStorage.removeItem(SESSION_OUT);
-  refreshFanUI();
-  return false;
-}
-function fanThanks(form) {
-  form.innerHTML = '<div style="text-align:center;padding:20px"><div style="font-family:var(--font-d);font-size:30px;color:var(--yellow);margin-bottom:8px">You\'re in the family! 💛</div>' +
-    '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.6">The Lane has your back. Keep your fan card handy and we\'ll see you at Tithe Farm.</p></div>';
-}
+/* ---------- OFFICIAL SIGN-UP ----------
+   Removed (Phase 0): the old "Join the Family List" Netlify-Forms signup is gone.
+   There is now ONE way to join — a real Supabase account (joinOrCreate('signup'),
+   the "Create My Account" button on the card). Members land in the Supabase
+   `fans` table and show in admin → Fan Club. */
 
 /* ---------- toast ---------- */
 function toast(msg, err) {
