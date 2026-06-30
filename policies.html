@@ -206,10 +206,10 @@
       <div class="policy-body">
         <p>Rayners Lane FC is committed to ensuring the safety and welfare of all children and young people involved in football at our club. As an FA Charter Standard Community Club, we fully endorse and implement The FA's Safeguarding Children Policy and Procedures.</p>
 
-        <h3>Club Welfare Officer: Jenny Pitt</h3>
-        <p>Rayners Lane FC has a designated Club Welfare Officer: Jenny Pitt (CWO) who is responsible for safeguarding matters at the club. The CWO has completed The FA Safeguarding Children Workshop and holds a current FA-Enhanced DBS certificate.</p>
+        <h3>Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span></h3>
+        <p>Rayners Lane FC has a designated Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span> (CWO) who is responsible for safeguarding matters at the club. The CWO has completed The FA Safeguarding Children Workshop and holds a current FA-Enhanced DBS certificate.</p>
         <div class="info-box">
-          <p><strong style="color:var(--yellow)">Club Welfare Officer: Jenny Pitt:</strong> Jenny Pitt (Club Secretary)<br>Contact: <a href="contact.html">club contact page</a> &middot; Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH</p>
+          <p><strong style="color:var(--yellow)">Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span>:</strong> <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span> (Club Secretary)<br>Contact: <a href="contact.html">club contact page</a> &middot; Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH</p>
         </div>
 
         <h3>Key Principles</h3>
@@ -276,11 +276,11 @@
           <li>All forms of bullying will be taken seriously and dealt with promptly</li>
           <li>Players, officials, parents and supporters are expected to treat all individuals with respect</li>
           <li>Bullying will be treated as a disciplinary matter under the club&apos;s complaints procedure</li>
-          <li>Anyone experiencing or witnessing bullying should report it to the Club Welfare Officer: Jenny Pitt or a committee member immediately</li>
+          <li>Anyone experiencing or witnessing bullying should report it to the Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span> or a committee member immediately</li>
           <li>All reports will be handled sensitively and confidentially</li>
         </ul>
 
-        <p>If you are concerned about bullying involving a child, contact the Club Welfare Officer: Jenny Pitt. In an emergency, contact the NSPCC on <strong>0808 800 5000</strong> or call <strong>999</strong>.</p>
+        <p>If you are concerned about bullying involving a child, contact the Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span>. In an emergency, contact the NSPCC on <strong>0808 800 5000</strong> or call <strong>999</strong>.</p>
       </div>
     </div>
 
@@ -464,14 +464,14 @@
         <h3>How to Make a Complaint</h3>
         <ul>
           <li><strong>Step 1 — Informal:</strong> Raise your concern directly with the relevant person or a club official. Many issues can be resolved this way.</li>
-          <li><strong>Step 2 — Formal:</strong> If the matter is not resolved, submit a written complaint to the club via <a href="contact.html">our contact page</a>, addressed to the Club Chairman Pete Singh.</li>
+          <li><strong>Step 2 — Formal:</strong> If the matter is not resolved, submit a written complaint to the club via <a href="contact.html">our contact page</a>, addressed to the Club Chairman <span class="js-official" data-role="chairman">Pete Singh</span>.</li>
           <li><strong>Step 3 — Acknowledgement:</strong> The club will acknowledge your complaint within 5 working days.</li>
           <li><strong>Step 4 — Investigation:</strong> The committee will investigate and respond within 21 days.</li>
           <li><strong>Step 5 — Appeal:</strong> If you are not satisfied with the outcome, you may appeal to Middlesex County FA.</li>
         </ul>
 
         <h3>Safeguarding Complaints</h3>
-        <p>Complaints relating to the welfare or safeguarding of children should be referred immediately to the Club Welfare Officer: Jenny Pitt or directly to Middlesex County FA / The FA Safeguarding Team on <strong>0800 169 1863</strong>. Do not delay.</p>
+        <p>Complaints relating to the welfare or safeguarding of children should be referred immediately to the Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Jenny Pitt</span> or directly to Middlesex County FA / The FA Safeguarding Team on <strong>0800 169 1863</strong>. Do not delay.</p>
 
         <h3>Discrimination Complaints</h3>
         <p>Incidents of discrimination can be reported to the club, to Middlesex County FA, or directly via Kick It Out at <a href="https://www.kickitout.org/report" target="_blank">kickitout.org/report</a>.</p>
@@ -590,7 +590,7 @@
       <div>
         <div class="label" style="margin-bottom:8px">Questions about our policies?</div>
         <p style="font-family:var(--font-b);font-size:15px;color:var(--lgrey);max-width:480px;line-height:1.6">
-          Contact Pete Singh (Chairman) or any committee member via the club contact page.
+          Contact <span class="js-official" data-role="chairman">Pete Singh</span> (Chairman) or any committee member via the club contact page.
           For safeguarding concerns contact Middlesex County FA directly.
         </p>
       </div>
@@ -615,25 +615,14 @@
 (function () {
   function polInit() {
     try { initComponents("policies.html"); } catch (e) {}
-    var BASE = { welfareOfficer: "Jenny Pitt", chairman: "Pete Singh", secretary: "Emma Galloway" };
     fetch("data/officials.json?t=" + Date.now())
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (o) {
         if (!o) return;
-        var swaps = [];
-        Object.keys(BASE).forEach(function (k) {
-          if (o[k] && String(o[k]).trim() && String(o[k]).trim() !== BASE[k]) swaps.push([BASE[k], String(o[k]).trim()]);
-        });
-        if (!swaps.length) return;
-        document.querySelectorAll(".policy-section").forEach(function (sec) {
-          var walker = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT, null);
-          var nodes = [];
-          while (walker.nextNode()) nodes.push(walker.currentNode);
-          nodes.forEach(function (n) {
-            var t = n.nodeValue;
-            swaps.forEach(function (s) { if (t.indexOf(s[0]) > -1) t = t.split(s[0]).join(s[1]); });
-            if (t !== n.nodeValue) n.nodeValue = t;
-          });
+        document.querySelectorAll(".js-official").forEach(function (el) {
+          var role = el.getAttribute("data-role");
+          var name = o[role];
+          if (name && String(name).trim()) el.textContent = String(name).trim();
         });
       })
       .catch(function () {});

@@ -679,6 +679,7 @@
       <button class="save" onclick="saveMatchDay(true)">&#10003; Activate &amp; Go Live</button>
       <button class="save red" onclick="saveMatchDay(false)">Deactivate Scoreboard</button>
       <div class="dep" id="dep-matchday"></div>
+      <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px;line-height:1.6">Saving here sets the home-page <strong style="color:var(--w)">Next Match</strong> badge and countdown too. For your full season schedule, results and the league spine, use the <strong style="color:var(--w)">Fixtures</strong> tile — that's the single source of truth.</p>
 
       <div class="div"></div>
       <div class="slbl">&#9917; Live Score <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— tap during the game, fans see it in seconds</span></div>
@@ -940,6 +941,9 @@
         </datalist>
       </div>
       <div class="field"><label class="fl">Note (optional)</label><input type="text" id="cm-note" placeholder="e.g. sponsor link, department"></div>
+      <div class="field"><label class="fl">Photo (optional)</label>
+        <div class="iup-wrap" id="cm-iw"><input type="file" accept="image/*" onchange="prevImg('cm',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload a photo</div><div class="iup-sub">Head shot — JPG, PNG</div></div></div>
+      <label class="fl" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px"><input type="checkbox" id="cm-featured" style="width:auto"> Feature this person (highlight on the committee page)</label>
       <button class="save sec" onclick="addMember()">+ Add / Update</button>
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px">Tip: to update someone, enter the <strong style="color:var(--w)">same name</strong> with their new title — it replaces the old entry.</p>
       <div class="div"></div>
@@ -1562,6 +1566,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div>
       <div class="field"><label class="fl">Their Quote (optional)</label><input type="text" id="fp-quote" placeholder="The Lane is my Saturday religion."></div>
       <div class="field"><label class="fl">Badges (comma separated)</label><input type="text" id="fp-badges" placeholder="Matchball Sponsor, 10+ Years"></div>
+      <div class="field"><label class="fl">Photo (optional)</label>
+        <div class="iup-wrap" id="fp-iw"><input type="file" accept="image/*" onchange="prevImg('fp',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload a photo</div><div class="iup-sub">Head shot — JPG, PNG</div></div></div>
       <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="fp-fom" style="width:16px;height:16px;accent-color:var(--y)"> Make this the Fan of the Month &#11088;</label>
       <button class="save sec" onclick="addPatron()">+ Add to Wall</button>
       <div class="div"></div>
@@ -1976,7 +1982,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="sg-card" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>👋 Welcome to the Lane Staff Portal <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">START HERE</span></h4>
         <p style="font-family:var(--fb);font-size:14px;color:var(--lw,#ddd);line-height:1.6;margin:2px 0 12px">This is the club&rsquo;s back office in your pocket — run the website, fixtures, social graphics and fan alerts from your phone. No tech skills needed. Have a look around; you can&rsquo;t break anything by reading.</p>
         <div class="sg-w">
-          <b>Get in</b><span>Go to <strong style="color:var(--w)">raynerslanefc.co.uk/admin.html</strong> → PIN <code>19332026</code> → choose your role → password <code>20raynerslanefc26</code>. Tap <strong style="color:var(--w)">Install</strong> to keep it on your home screen like an app.</span>
+          <b>Get in</b><span>Go to <strong style="color:var(--w)">raynerslanefc.co.uk/admin.html</strong> → enter the club <strong style="color:var(--w)">access PIN</strong> → choose your role → enter your <strong style="color:var(--w)">staff password</strong>. The chairman shares these privately — they're deliberately not printed here. Tap <strong style="color:var(--w)">Install</strong> to keep it on your home screen like an app.</span>
           <b>Your roles</b><span>Club Management · Chairman · V Chairman · Committee · Club Secretary · Match Day Secretary · Marketing/Media. The portal shows who&rsquo;s signed in.</span>
           <b>What you&rsquo;ll use most</b><span><strong style="color:var(--w)">Fixtures</strong> (add the season once — it feeds the whole site), <strong style="color:var(--w)">Post Studio</strong> (pro graphics → Save/Share to WhatsApp/Insta), <strong style="color:var(--w)">Match Day</strong> (live score + alerts), plus News, Squad &amp; Sponsors.</span>
           <b>Golden rule</b><span>Typing only changes <em>your screen</em>. Nothing reaches fans until you press <strong style="color:var(--w)">Save</strong> — then it&rsquo;s live in ~30 seconds.</span>
@@ -2211,8 +2217,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <!-- MANAGE USERS (Chairman only) -->
     <div class="panel" id="panel-users">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Manage Users</div></div>
-      <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> The default password for everyone is <code>20raynerslanefc26</code> until you change it here.</p></div>
-      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The default password <code>20raynerslanefc26</code> always works in the meantime, so nobody&rsquo;s locked out.</p></div>
+      <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> Everyone starts on a shared default password (the box below is pre-filled with it) until you change it here.</p></div>
+      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The shared default password always works in the meantime, so nobody&rsquo;s locked out.</p></div>
       <div class="slbl">Add a user</div>
       <div class="field"><label class="fl">Name (what they pick at login)</label><input type="text" id="us-name" placeholder="e.g. Pete Singh"></div>
       <div class="field"><label class="fl">Role</label><select id="us-role"></select></div>
@@ -2272,7 +2278,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div></div>
 
       <div class="sg-card warn" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4>🔑 Netlify environment variables (secrets)</h4><div class="sg-w">
-        <b>Required</b><span><code>GITHUB_TOKEN</code> (saves), <code>ADMIN_PIN</code> (=19332026), <code>NETLIFY_API_TOKEN</code> (fan list).</span>
+        <b>Required</b><span><code>GITHUB_TOKEN</code> (saves), <code>ADMIN_PIN</code> (your chosen access PIN — set it in Netlify, don't print it), <code>NETLIFY_API_TOKEN</code> (fan list).</span>
         <b>Supabase</b><span><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_KEY</code> (fan accounts + push). Staff logins use Netlify Blobs — no env vars.</span>
         <b>Push</b><span><code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code> (see <code>PUSH-SETUP.md</code>).</span>
         <b>Optional</b><span><code>SDB_TEAM_ID</code>, <code>SEASON_START</code>, <code>WIKI_TABLE_PAGE</code>, <code>WIKI_TABLE_SECTION</code>.</span>
@@ -2669,7 +2675,7 @@ function addEmailAccount() {
   if (found) { found.label = label; found.name = gv('em-name'); }
   else { emailAccounts.push({ icon: '📬', label: label, name: gv('em-name'), email: email }); }
   setVal('em-label', ''); setVal('em-name', ''); setVal('em-email', '');
-  renderMailList(); renderEmailEditor(); toast('Saved to the list ✓ — press Save to Site');
+  renderMailList(); renderEmailEditor(); saveEmails('Email account saved ✓ — publishing to the site');
 }
 function editEmailAccount(i) {
   var a = emailAccounts[i]; if (!a) return;
@@ -2679,11 +2685,11 @@ function editEmailAccount(i) {
 }
 function removeEmailAccount(i) {
   if (!confirm('Remove this email account from the list?')) return;
-  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor(); saveEmails();
+  if (emailAccounts[i]) emailsDeleted.push(emailAccounts[i].email);
+  emailAccounts.splice(i, 1); renderMailList(); renderEmailEditor(); saveEmails('Email account removed — publishing to the site');
 }
-function saveEmails() {
-  pushToGitHub('emails', { accounts: emailAccounts, updatedAt: new Date().toISOString() }, 'dep-emails');
-  toast('Email accounts saved ✓');
+function saveEmails(msg) {
+  commitDomain('emails', 'accounts', 'email', emailAccounts, emailsDeleted, null, 'dep-emails', msg || 'Email accounts saved ✓ — live in ~30s');
 }
 
 // ── MANAGE USERS (Chairman) ──
@@ -2979,7 +2985,9 @@ function loadAll() {
   fetchJSON('committee', function(d) { if (d && d.members) committee = d.members; });
   fetchJSON('sponsors',  function(d) { if (d) { if (d.sponsors) sponsors = d.sponsors; if (d.affiliations) sponsorAffiliations = d.affiliations; } });
   fetchJSON('news',      function(d) { if (d && d.articles) articles = d.articles; });
-  fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; } });
+  // players.json is the source of truth; the squad grid is a projection of it
+  // (Item 5). Re-derive the grid once profiles land so both editors stay in sync.
+  fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; if (typeof _refreshSquadViews === 'function') _refreshSquadViews(); } });
   fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
   fetchJSON('config',    function(d) { if (d && d.analyticsHash) { analyticsHash = d.analyticsHash; } });
   fetchJSON('social',    function(d) { if (d && d.posts) { socialPosts = d.posts; } });
@@ -3080,7 +3088,21 @@ function saveMatchDay(activate) {
   };
   applyScores(data);
   pushToGitHub('matchday', data, 'dep-matchday');
-  toast(activate ? 'Scoreboard is LIVE ✓' : 'Scoreboard deactivated');
+  // Item 4: the homepage "next match" badge is driven by data/fixtures.json
+  // (the single source of truth). So that the opponent/date set here is also
+  // authoritative on the homepage — even when the season schedule is empty — we
+  // upsert ONE self-updating fixture (id 'matchday-current') into fixtures.json.
+  // commitDomain merges by id, so every other fixture is left untouched.
+  if (data.opponent && data.date) {
+    var mdFix = {
+      id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
+      opponent: data.opponent, oppCrest: '', isHome: data.isHome,
+      venue: data.venue, competition: data.competition,
+      status: 'scheduled', us: null, them: null, scorers: ''
+    };
+    commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
+  }
+  toast(activate ? 'Scoreboard is LIVE ✓' : 'Next match saved ✓ — live in ~30s');
 }
 
 // One-tap live update during the game (keeps it live, pushes the new score).
@@ -3371,6 +3393,33 @@ function prNewProgramme() {
 }
 
 // ── SQUAD ──
+// ITEM 5: the squad grid (squad.json) and the rich player profiles (players.json)
+// are now ONE thing. Both editors edit `playerProfiles`; the grid is just a
+// projection of it (id + photo carried through), and every save writes BOTH
+// files. The public squad grid links each card to player.html?id=<id>, and that
+// id is derived from the name the same way here — so cards and profiles always
+// line up.
+function _playerId(name) { return 'player-' + String(name || '').toLowerCase().replace(/\s+/g, '-'); }
+function _gridFromProfiles() {
+  return playerProfiles.map(function (p) {
+    return { id: p.id, no: p.number || 0, name: p.name, pos: p.position, apps: p.apps || 0, goals: p.goals || 0, photo: p.photo || '' };
+  });
+}
+function _refreshSquadViews() {
+  squad = _gridFromProfiles();
+  if (document.getElementById('sq-list')) renderSquad();
+  if (document.getElementById('pl-list')) renderPlayerList();
+}
+// Shared writer — publishes players.json (rich) AND squad.json (grid) together.
+function _savePlayersAndGrid(msg) {
+  var profileArr = playerProfiles.map(function (p) {
+    return { id: p.id, number: p.number, name: p.name, position: p.position,
+             nationality: p.nationality, nickname: p.nickname, bio: p.bio,
+             apps: p.apps, goals: p.goals, assists: p.assists, photo: p.photo || '' };
+  });
+  commitDomain('players', 'players', 'id', profileArr, playerProfilesDeleted, null, 'dep-players', null);
+  commitDomain('squad', 'players', 'name', _gridFromProfiles(), squadDeleted, null, 'dep-squad', msg || 'Squad saved ✓ — live in ~30s');
+}
 function addPlayer() {
   var no = parseInt(gv('sq-no')) || 0;
   var name = gv('sq-name');
@@ -3379,23 +3428,26 @@ function addPlayer() {
   var goals= parseInt(gv('sq-goals')) || 0;
   if (!name) { toast('Enter a name', true); return; }
   if (!pos)  { toast('Select a position', true); return; }
-  squad = squad.filter(function(p) { return p.name !== name; });
-  squad.push({no:no,name:name,pos:pos,apps:apps,goals:goals});
-  renderSquad();
+  var id = _playerId(name);
+  var prev = playerProfiles.filter(function (p) { return p.id === id; })[0] || {};
+  playerProfiles = playerProfiles.filter(function (p) { return p.id !== id; });
+  playerProfiles.push({ id: id, number: no, name: name, position: pos,
+    nationality: prev.nationality || '', nickname: prev.nickname || '', bio: prev.bio || '',
+    apps: apps, goals: goals, assists: prev.assists || 0, photo: prev.photo || '' });
+  _refreshSquadViews();
   setVal('sq-no',''); setVal('sq-name','');
-  toast(name + ' added ✓');
+  _savePlayersAndGrid(name + ' added ✓ — publishing to the site');
 }
 function removePlayer(name) {
   if (!confirm('Remove ' + name + '?')) return;
-  squad = squad.filter(function(p) { return p.name !== name; });
-  renderSquad();
-  saveSquad();
-  toast(name + ' removed');
+  var id = _playerId(name);
+  playerProfiles = playerProfiles.filter(function (p) { return p.id !== id; });
+  squadDeleted.push(name);
+  playerProfilesDeleted.push(id);
+  _refreshSquadViews();
+  _savePlayersAndGrid(name + ' removed — publishing to the site');
 }
-function saveSquad() {
-  pushToGitHub('squad', {players:squad, updatedAt:new Date().toISOString()}, 'dep-squad');
-  toast('Squad saved ✓');
-}
+function saveSquad(msg) { _savePlayersAndGrid(msg); }
 function renderSquad() {
   var POS = ['Goalkeeper','Defender','Midfielder','Forward'];
   document.getElementById('sq-cnt').textContent = 'Current Squad (' + squad.length + ')';
@@ -3409,6 +3461,40 @@ function renderSquad() {
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No players yet</div>';
 }
+
+// ── ITEM 1: merge-safe save for every list editor ──
+// Re-fetches the LIVE file, merges this session's adds/edits/deletes onto it,
+// then pushes. Prevents a stale in-memory base from wiping another staffer's
+// concurrent edits, AND makes add/edit/delete persist immediately. Aborts with
+// a clear error if the live file can't be re-read (never pushes a blind base).
+//   name=data file, key=array property, idField=item key ('id'/'name'),
+//   arr=this session's array, deletedIds=ids removed this session,
+//   extra=extra top-level props to preserve (e.g. affiliations), depId, msg.
+function commitDomain(name, key, idField, arr, deletedIds, extra, depId, msg) {
+  var el = depId ? document.getElementById(depId) : null;
+  fetchJSON(name, function (live) {
+    if (live === null || live === undefined) {
+      if (el) showDep(el, 'err', 'NOT saved — could not reach the site. Check your connection and try again.');
+      toast('Not saved — could not reach the site. Try again.', true);
+      return;
+    }
+    var liveArr = (live && Array.isArray(live[key])) ? live[key] : [];
+    var map = {}, order = [];
+    liveArr.forEach(function (it) { if (it && it[idField] != null) { if (!(it[idField] in map)) order.push(it[idField]); map[it[idField]] = it; } });
+    (deletedIds || []).forEach(function (k) { delete map[k]; });
+    arr.forEach(function (it) { if (it && it[idField] != null) { if (!(it[idField] in map)) order.push(it[idField]); map[it[idField]] = it; } });
+    var merged = [], seen = {};
+    order.forEach(function (k) { if ((k in map) && !(k in seen)) { seen[k] = 1; merged.push(map[k]); } });
+    var out = {}; out[key] = merged;
+    if (extra) Object.keys(extra).forEach(function (k) { out[k] = extra[k]; });
+    out.updatedAt = new Date().toISOString();
+    pushToGitHub(name, out, depId);
+    if (msg) toast(msg);
+  });
+}
+
+// Ids/names removed this session, so the merge doesn't re-add them from live.
+var squadDeleted = [], playerProfilesDeleted = [], sponsorsDeleted = [], committeeDeleted = [], fixturesDeleted = [], patronsDeleted = [], galleryDeleted = [], socialDeleted = [], attendanceDeleted = [], meetingsDeleted = [], emailsDeleted = [], analyticsDeleted = [], motmDeleted = [], signingDeleted = [];
 
 // ── NEWS ──
 // Merge a new article into the LATEST live news before saving. Guards against
@@ -3483,21 +3569,26 @@ function renderNews() {
 function addMember() {
   var name = gv('cm-name'); var role = gv('cm-role'); var note = gv('cm-note');
   if (!name || !role) { toast('Enter name and role', true); return; }
+  var prev = committee.filter(function(m){ return m.name === name; })[0] || {};
   committee = committee.filter(function(m) { return m.name !== name; });
-  committee.push({name:name, role:role, note:note, featured:false});
+  committee.push({name:name, role:role, note:note,
+                  photo: (imgStore['cm'] ? imgStore['cm'].dataUrl : (prev.photo || '')),
+                  featured: (document.getElementById('cm-featured') ? document.getElementById('cm-featured').checked : (prev.featured || false))});
   renderCommittee();
   setVal('cm-name',''); setVal('cm-role',''); setVal('cm-note','');
-  toast(name + ' added ✓');
+  if (document.getElementById('cm-featured')) document.getElementById('cm-featured').checked = false;
+  if (imgStore['cm']) rmImg('cm');
+  saveCommittee(name + ' added ✓ — publishing to the site');
 }
 function removeMember(name) {
   if (!confirm('Remove ' + name + '?')) return;
   committee = committee.filter(function(m) { return m.name !== name; });
+  committeeDeleted.push(name);
   renderCommittee();
-  saveCommittee();
+  saveCommittee(name + ' removed — publishing to the site');
 }
-function saveCommittee() {
-  pushToGitHub('committee', {members:committee, updatedAt:new Date().toISOString()}, 'dep-committee');
-  toast('Committee saved ✓');
+function saveCommittee(msg) {
+  commitDomain('committee', 'members', 'name', committee, committeeDeleted, null, 'dep-committee', msg || 'Committee saved ✓ — live in ~30s');
 }
 // Key officials — named automatically across the Policies page.
 function loadOfficials() {
@@ -3550,21 +3641,22 @@ function addPerk() {
   perks.unshift({ title: title, detail: gv('pk-detail'), code: gv('pk-code'), sponsor: gv('pk-sponsor'), expiry: gv('pk-expiry') });
   renderPerks();
   setVal('pk-title',''); setVal('pk-detail',''); setVal('pk-code',''); setVal('pk-sponsor',''); setVal('pk-expiry','');
-  toast('Voucher added ✓ — press Save');
+  savePerks('Voucher added ✓ — publishing to the site');
 }
-function removePerk(i) { if (!confirm('Remove this voucher?')) return; perks.splice(i, 1); renderPerks(); savePerks(); }
+function removePerk(i) { if (!confirm('Remove this voucher?')) return; perks.splice(i, 1); renderPerks(); savePerks('Voucher removed — publishing to the site'); }
 function addMemberNews() {
   var title = gv('mn-title');
   if (!title) { toast('Enter a headline', true); return; }
   memberNews.unshift({ title: title, body: gv('mn-body'), date: new Date().toISOString().slice(0, 10) });
   renderPerks();
   setVal('mn-title',''); setVal('mn-body','');
-  toast('Member news added ✓ — press Save');
+  savePerks('Member news added ✓ — publishing to the site');
 }
-function removeMemberNews(i) { if (!confirm('Remove this news item?')) return; memberNews.splice(i, 1); renderPerks(); }
-function savePerks() {
+function removeMemberNews(i) { if (!confirm('Remove this news item?')) return; memberNews.splice(i, 1); renderPerks(); savePerks('Member news removed — publishing to the site'); }
+// perks/news are positional (no stable id), so this saves the current list as-is.
+function savePerks(msg) {
   pushToGitHub('perks', { perks: perks, news: memberNews, updatedAt: new Date().toISOString() }, 'dep-perks');
-  toast('Perks saved ✓');
+  toast(msg || 'Perks saved ✓');
 }
 
 /* ════════════════════ POST STUDIO ════════════════════ */
@@ -4133,10 +4225,9 @@ function addCrest() {
     psCrests = psCrests.filter(function (c) { return c.name.toLowerCase() !== name.toLowerCase(); });
     psCrests.push({ name: name, file: file });
     psCrests.sort(function (a, b) { return a.name === 'Rayners Lane' ? -1 : a.name.localeCompare(b.name); });
-    pushToGitHub('crests', { crests: psCrests, updatedAt: new Date().toISOString() }, 'dep-crests');
+    commitDomain('crests', 'crests', 'name', psCrests, [], null, 'dep-crests', name + ' crest saved ✓ — live in ~30s');
     rmImg('cr'); setVal('cr-name', '');
     psFields(); psRender();
-    toast(name + ' crest saved ✓');
   });
 }
 
@@ -4421,14 +4512,14 @@ function addMeeting() {
   });
   renderMeetings();
   setVal('mt-title', ''); setVal('mt-att', ''); setVal('mt-subj', ''); setVal('mt-out', ''); setVal('mt-next', ''); setVal('mt-date', '');
-  pushToGitHub('meetings', { meetings: meetings, updatedAt: new Date().toISOString() }, 'dep-meetings');
-  toast('Meeting saved to the club records ✓ — see it under "Saved meetings"');
+  commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting saved to the club records ✓ — see it under "Saved meetings"');
 }
 function deleteMeeting(id) {
   if (!confirm('Delete this meeting record? This cannot be undone.')) return;
   meetings = meetings.filter(function (m) { return m.id !== id; });
+  meetingsDeleted.push(id);
   renderMeetings();
-  pushToGitHub('meetings', { meetings: meetings, updatedAt: new Date().toISOString() }, 'dep-meetings');
+  commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting deleted');
 }
 async function loadMeetingSnapshot() {
   var el = document.getElementById('mt-snap'); if (!el) return;
@@ -4538,7 +4629,7 @@ function addSponsor() {
     setVal('sp-name',''); setVal('sp-role',''); setVal('sp-url',''); setVal('sp-note',''); setVal('sp-logo','');
     document.getElementById('sp-feature').checked = false;
     if (imgStore['sp']) rmImg('sp');
-    toast(name + ' added ✓ — press Save to publish');
+    saveSponsors(name + ' added ✓ — publishing to the site');
   }
   if (imgStore['sp']) { toast('Uploading logo…'); uploadImg('sp', '', function(path){ finish(path || imgStore['sp'].dataUrl); }); }
   else finish('');
@@ -4546,13 +4637,13 @@ function addSponsor() {
 function removeSponsor(name) {
   if (!confirm('Remove ' + name + '?')) return;
   sponsors = sponsors.filter(function(s) { return s.name !== name; });
+  sponsorsDeleted.push(name);
   renderSponsors();
-  saveSponsors();
+  saveSponsors(name + ' removed — publishing to the site');
 }
-function saveSponsors() {
+function saveSponsors(msg) {
   // Preserve the affiliations block (league / FA) so saving sponsors never wipes it.
-  pushToGitHub('sponsors', {sponsors:sponsors, affiliations:sponsorAffiliations, updatedAt:new Date().toISOString()}, 'dep-sponsors');
-  toast('Sponsors saved ✓');
+  commitDomain('sponsors', 'sponsors', 'name', sponsors, sponsorsDeleted, {affiliations:sponsorAffiliations}, 'dep-sponsors', msg || 'Sponsors saved ✓ — live in ~30s');
 }
 function renderSponsors() {
   document.getElementById('sp-cnt').textContent = 'Sponsors (' + sponsors.length + ')';
@@ -4614,7 +4705,7 @@ function addFixture() {
   fixtures.push(fx);
   fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
   renderFixtures(); fxClearForm();
-  toast('Fixture saved ✓ — press Save to publish');
+  saveFixtures('Fixture saved ✓ — publishing to the site');
 }
 function fxEdit(id) {
   var f = fixtures.filter(function (x) { return x.id === id; })[0]; if (!f) return;
@@ -4629,8 +4720,9 @@ function fxEdit(id) {
 function removeFixture(id) {
   if (!confirm('Remove this fixture?')) return;
   fixtures = fixtures.filter(function (f) { return f.id !== id; });
+  fixturesDeleted.push(id);
   renderFixtures();
-  saveFixtures();
+  saveFixtures('Fixture removed — publishing to the site');
 }
 function renderFixtures() {
   var cnt = document.getElementById('fx-cnt'), el = document.getElementById('fx-list');
@@ -4655,9 +4747,8 @@ function renderFixtures() {
       '<button class="li-del" onclick="removeFixture(\'' + f.id + '\')">Remove</button></div>';
   }).join('');
 }
-function saveFixtures() {
-  pushToGitHub('fixtures', { fixtures: fixtures, updatedAt: new Date().toISOString() }, 'dep-fixtures');
-  toast('Fixtures saved ✓');
+function saveFixtures(msg) {
+  commitDomain('fixtures', 'fixtures', 'id', fixtures, fixturesDeleted, null, 'dep-fixtures', msg || 'Fixtures saved ✓ — live in ~30s');
 }
 
 // ── PLAYER PROFILES ──
@@ -4668,7 +4759,8 @@ function addPlayerProfile() {
   var name = gv('pl-name');
   var pos  = gv('pl-pos');
   if (!name || !pos) { toast('Enter name and position', true); return; }
-  var id = 'player-' + name.toLowerCase().replace(/\s+/g,'-');
+  var id = _playerId(name);
+  var prev = playerProfiles.filter(function(p){ return p.id === id; })[0] || {};
   playerProfiles = playerProfiles.filter(function(p){ return p.id !== id; });
   playerProfiles.push({
     id:id, number:no, name:name, position:pos,
@@ -4677,17 +4769,20 @@ function addPlayerProfile() {
     apps:parseInt(gv('pl-apps'))||0,
     goals:parseInt(gv('pl-goals'))||0,
     assists:parseInt(gv('pl-assists'))||0,
-    photo: imgStore['pl'] ? imgStore['pl'].dataUrl : '',
+    photo: imgStore['pl'] ? imgStore['pl'].dataUrl : (prev.photo || ''),
   });
-  renderPlayerList();
+  _refreshSquadViews();
   setVal('pl-name',''); setVal('pl-no',''); setVal('pl-bio',''); setVal('pl-nick',''); setVal('pl-nat','');
   if (imgStore['pl']) rmImg('pl');
-  toast(name + ' added ✓');
+  savePlayerProfiles(name + ' added ✓ — publishing to the site');
 }
 function removePlayerProfile(id) {
+  var gone = playerProfiles.filter(function(p){ return p.id===id; })[0];
   playerProfiles = playerProfiles.filter(function(p){ return p.id!==id; });
-  renderPlayerList();
-  savePlayerProfiles();
+  playerProfilesDeleted.push(id);
+  if (gone && gone.name) squadDeleted.push(gone.name); // drop the matching grid card too
+  _refreshSquadViews();
+  savePlayerProfiles('Profile removed — publishing to the site');
 }
 function renderPlayerList() {
   var POS = ['Goalkeeper','Defender','Midfielder','Forward'];
@@ -4706,16 +4801,8 @@ function renderPlayerList() {
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No profiles yet</div>';
 }
-function savePlayerProfiles() {
-  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
-  var data = {players:playerProfiles.map(function(p){
-    return {id:p.id,number:p.number,name:p.name,position:p.position,
-            nationality:p.nationality,nickname:p.nickname,bio:p.bio,
-            apps:p.apps,goals:p.goals,assists:p.assists,
-            photo:p.photo||''};
-  }), updatedAt:new Date().toISOString()};
-  pushToGitHub('players', data, 'dep-players');
-  toast('Player profiles saved ✓');
+function savePlayerProfiles(msg) {
+  _savePlayersAndGrid(msg || 'Player profiles saved ✓ — live in ~30s');
 }
 
 // ── GALLERY ──
@@ -4735,19 +4822,18 @@ function addGalleryPhoto() {
   renderGalleryList();
   setVal('gl-caption','');
   if (imgStore['gl']) rmImg('gl');
-  toast('Photo added ✓');
+  saveGallery('Photo added ✓ — publishing to the site');
 }
-function removeGalleryItem(id) { gallery=gallery.filter(g=>g.id!==id); renderGalleryList(); saveGallery(); }
+function removeGalleryItem(id) { gallery=gallery.filter(g=>g.id!==id); galleryDeleted.push(id); renderGalleryList(); saveGallery('Photo removed — publishing to the site'); }
 function renderGalleryList() {
   document.getElementById('gl-cnt').textContent='Gallery ('+gallery.length+')';
   document.getElementById('gl-list').innerHTML = gallery.length
     ? gallery.map(g=>'<div class="li"><div class="li-main"><div class="li-name">'+(g.label||'Untitled')+'</div><div class="li-sub">'+g.cat+'</div></div><button class="li-del" onclick="removeGalleryItem(&quot;'+g.id+'&quot;)">Remove</button></div>').join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No photos yet</div>';
 }
-function saveGallery() {
-  var data = {items:gallery.map(g=>({id:g.id,src:g.src,label:g.label,cat:g.cat})), updatedAt:new Date().toISOString()};
-  pushToGitHub('gallery', data, 'dep-gallery');
-  toast('Gallery saved ✓');
+function saveGallery(msg) {
+  var arr = gallery.map(g=>({id:g.id,src:g.src,label:g.label,cat:g.cat}));
+  commitDomain('gallery', 'items', 'id', arr, galleryDeleted, null, 'dep-gallery', msg || 'Gallery saved ✓ — live in ~30s');
 }
 
 // ── MATCH REPORT ──
@@ -4833,6 +4919,12 @@ async function submitAnalyticsGate() {
     setVal('an-pass','');
   }
 }
+// SECURITY NOTE (Item 9): this gate is cosmetic, not a real boundary. The hash
+// is stored in PUBLIC data/config.json and data/analytics.json itself ships in
+// the public repo, so anyone can read both. To make analytics genuinely private
+// it must move behind a PIN-gated Netlify function (like list-members) with the
+// data held server-side (Netlify Blobs), not committed to the repo. That's a
+// deploy-time change — see the changelog notes handed to the chairman.
 async function changeAnalyticsPassword() {
   var np = prompt('Enter a NEW analytics password (min 4 characters):');
   if (np === null) return;
@@ -4881,14 +4973,15 @@ function addMatchRecord() {
   setVal('an-opp',''); setVal('an-att',''); setVal('an-us','0'); setVal('an-them','0');
   setVal('an-t-entry','0'); setVal('an-t-prog','0'); setVal('an-t-merch','0'); setVal('an-t-other','0');
   setVal('an-notes','');
-  toast(opp + ' logged ✓ — press Save to publish');
+  saveAnalytics(opp + ' logged ✓ — publishing to the site');
 }
 
 function removeMatchRecord(id) {
   if (!confirm('Remove this match from the log?')) return;
   analytics = analytics.filter(function(m){ return m.id !== id; });
+  analyticsDeleted.push(id);
   renderAnalytics();
-  saveAnalytics();
+  saveAnalytics('Match removed — publishing to the site');
 }
 
 function matchTotal(m) { var t = m.takings || {}; return (t.entry||0)+(t.programmes||0)+(t.merch||0)+(t.other||0); }
@@ -4974,9 +5067,8 @@ function renderAnalyticsCharts() {
   }
 }
 
-function saveAnalytics() {
-  pushToGitHub('analytics', { matches: analytics, updatedAt: new Date().toISOString() }, 'dep-analytics');
-  toast('Analytics saved ✓');
+function saveAnalytics(msg) {
+  commitDomain('analytics', 'matches', 'id', analytics, analyticsDeleted, null, 'dep-analytics', msg || 'Analytics saved ✓ — live in ~30s');
 }
 
 // ── SOCIAL MEDIA PLANNER ──
@@ -4999,16 +5091,16 @@ function addSocialPost() {
   socialPosts.push({ id:'post-'+Date.now(), date:gv('so-date'), platform:gv('so-plat'), idea:idea });
   renderSocial();
   setVal('so-idea','');
-  toast('Added to planner ✓ — press Save');
+  saveSocial('Added to planner ✓ — publishing to the site');
 }
 function removeSocialPost(id) {
   socialPosts = socialPosts.filter(function(p){ return p.id !== id; });
+  socialDeleted.push(id);
   renderSocial();
-  saveSocial();
+  saveSocial('Post removed — publishing to the site');
 }
-function saveSocial() {
-  pushToGitHub('social', { posts: socialPosts, updatedAt: new Date().toISOString() }, 'dep-social');
-  toast('Planner saved ✓');
+function saveSocial(msg) {
+  commitDomain('social', 'posts', 'id', socialPosts, socialDeleted, null, 'dep-social', msg || 'Planner saved ✓ — live in ~30s');
 }
 
 // ── MAN OF THE MATCH ──
@@ -5039,13 +5131,13 @@ function addMotm() {
     motms.unshift(entry); renderMotm();
     setVal('mm-name',''); setVal('mm-pos',''); setVal('mm-opp',''); setVal('mm-goals',''); setVal('mm-desc','');
     if (imgStore['mm']) rmImg('mm');
-    toast(name + ' set as MOTM ✓ — press Save');
+    saveMotm(name + ' set as MOTM ✓ — publishing to the site');
   };
   if (imgStore['mm']) { uploadImg('mm','',function(path){ entry.photo = path || imgStore['mm'].dataUrl; finish(); }); }
   else finish();
 }
-function removeMotm(id) { if (!confirm('Remove this winner?')) return; motms = motms.filter(function(m){return m.id!==id;}); renderMotm(); }
-function saveMotm() { pushToGitHub('motm', { entries: motms, updatedAt: new Date().toISOString() }, 'dep-motm'); toast('Man of the Match saved ✓'); }
+function removeMotm(id) { if (!confirm('Remove this winner?')) return; motms = motms.filter(function(m){return m.id!==id;}); motmDeleted.push(id); renderMotm(); saveMotm('Winner removed — publishing to the site'); }
+function saveMotm(msg) { commitDomain('motm', 'entries', 'id', motms, motmDeleted, null, 'dep-motm', msg || 'Man of the Match saved ✓ — live in ~30s'); }
 
 // ── NEW SIGNING ──
 var signings = [];
@@ -5071,13 +5163,13 @@ function addSigning() {
     signings.unshift(entry); renderSigning();
     setVal('sg-name',''); setVal('sg-pos',''); setVal('sg-from',''); setVal('sg-desc','');
     if (imgStore['sg']) rmImg('sg');
-    toast(name + ' announced ✓ — press Save');
+    saveSigning(name + ' announced ✓ — publishing to the site');
   };
   if (imgStore['sg']) { uploadImg('sg','',function(path){ entry.photo = path || imgStore['sg'].dataUrl; finish(); }); }
   else finish();
 }
-function removeSigning(id) { if (!confirm('Remove this signing?')) return; signings = signings.filter(function(s){return s.id!==id;}); renderSigning(); }
-function saveSigning() { pushToGitHub('signing', { entries: signings, updatedAt: new Date().toISOString() }, 'dep-signing'); toast('Signing saved ✓'); }
+function removeSigning(id) { if (!confirm('Remove this signing?')) return; signings = signings.filter(function(s){return s.id!==id;}); signingDeleted.push(id); renderSigning(); saveSigning('Signing removed — publishing to the site'); }
+function saveSigning(msg) { commitDomain('signing', 'entries', 'id', signings, signingDeleted, null, 'dep-signing', msg || 'Signing saved ✓ — live in ~30s'); }
 
 // ── FAN CLUB / PATRONS ──
 var patrons = [];
@@ -5248,23 +5340,24 @@ function addPatron() {
   var badges = gv('fp-badges').split(',').map(function(b){return b.trim();}).filter(Boolean);
   patrons.unshift({ id:id, username:name, town:gv('fp-town'),
     since:parseInt(gv('fp-since'))||'', games:parseInt(gv('fp-games'))||0,
-    quote:gv('fp-quote'), badges:badges, photo:'' });
+    quote:gv('fp-quote'), badges:badges, photo: (imgStore['fp'] ? imgStore['fp'].dataUrl : '') });
   if (document.getElementById('fp-fom').checked) fanOfMonth = id;
   renderPatrons();
   setVal('fp-name',''); setVal('fp-town',''); setVal('fp-since',''); setVal('fp-games',''); setVal('fp-quote',''); setVal('fp-badges','');
   document.getElementById('fp-fom').checked = false;
-  toast(name + ' added ✓ — press Save');
+  if (imgStore['fp']) rmImg('fp');
+  savePatrons(name + ' added ✓ — publishing to the site');
 }
 function removePatron(id) {
   if (!confirm('Remove this patron?')) return;
   patrons = patrons.filter(function(p){return p.id!==id;});
+  patronsDeleted.push(id);
   if (fanOfMonth === id) fanOfMonth = '';
   renderPatrons();
-  savePatrons();
+  savePatrons('Patron removed — publishing to the site');
 }
-function savePatrons() {
-  pushToGitHub('patrons', { patrons: patrons, fanOfMonth: fanOfMonth, updatedAt: new Date().toISOString() }, 'dep-fanclub');
-  toast('Fan Club saved ✓');
+function savePatrons(msg) {
+  commitDomain('patrons', 'patrons', 'id', patrons, patronsDeleted, {fanOfMonth: fanOfMonth}, 'dep-fanclub', msg || 'Fan Club saved ✓ — live in ~30s');
 }
 
 // ── STAFF PROFILE (private → Netlify Forms, never the public repo) ──
@@ -5302,17 +5395,17 @@ function addAttendance() {
   attendance.push({ id:'att-'+Date.now(), date:date, opponent:opp, home:gv('at-ha')==='home', lanes:lanes });
   renderAttendance();
   setVal('at-opp',''); setVal('at-lanes','');
-  toast(lanes.length + ' heart' + (lanes.length>1?'s':'') + ' ready ✓ — press Save');
+  saveAttendance(lanes.length + ' heart' + (lanes.length>1?'s':'') + ' added ✓ — publishing to the site');
 }
 function removeAttendance(id) {
   if (!confirm('Remove this match\'s hearts?')) return;
   attendance = attendance.filter(function(m){return m.id!==id;});
+  attendanceDeleted.push(id);
   renderAttendance();
-  saveAttendance();
+  saveAttendance('Match removed — publishing to the site');
 }
-function saveAttendance() {
-  pushToGitHub('attendance', { matches: attendance, updatedAt: new Date().toISOString() }, 'dep-attendance');
-  toast('Hearts saved ✓');
+function saveAttendance(msg) {
+  commitDomain('attendance', 'matches', 'id', attendance, attendanceDeleted, null, 'dep-attendance', msg || 'Hearts saved ✓ — live in ~30s');
 }
 
 // ── QR SCANNER (turnstile) — reads member cards, queues Lane numbers ──
@@ -5389,13 +5482,20 @@ function rmImg(prefix) {
 function uploadImg(prefix, tok, cb) {
   var img = imgStore[prefix];
   if (!img) { cb(null); return; }
+  // Item 11: if the image can't be uploaded as a file, we still fall back to
+  // inlining it (so nothing is lost) but SURFACE the problem instead of failing
+  // silently — an inlined base64 image bloats the JSON and won't get a clean URL.
+  function failed(why) {
+    toast('Image couldn\'t upload (' + why + ') — saved inline for now. Re-upload when back online for a clean link.', true);
+    cb(img.dataUrl);
+  }
   fetch('/.netlify/functions/save-data', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pin: PIN, path: img.filename, content: img.base64 })
   })
-    .then(function(r) { return r.ok ? cb('/' + img.filename) : cb(img.dataUrl); })
-    .catch(function() { cb(img.dataUrl); });
+    .then(function(r) { if (r.ok) { cb('/' + img.filename); } else { failed('server ' + r.status); } })
+    .catch(function(err) { failed((err && err.message) ? err.message : 'network'); });
 }
 
 // ── SAVE TO SITE (via secure Netlify function) ──

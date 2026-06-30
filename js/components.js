@@ -1,20 +1,3 @@
-function toggleMobileNav() {
-  var links = document.getElementById('nav-links');
-  var burger = document.getElementById('nav-burger');
-  if (!links) return;
-  var isOpen = links.getAttribute('data-open') === '1';
-  if (isOpen) {
-    links.setAttribute('data-open','0');
-    links.style.display = 'none';
-    if (burger) burger.setAttribute('data-open','0');
-  } else {
-    links.setAttribute('data-open','1');
-    links.style.cssText = 'display:flex !important;position:fixed;top:var(--nav-h);left:0;right:0;flex-direction:column;background:#0A0A0A;border-bottom:3px solid #FFD100;z-index:9999;padding:0;margin:0;box-shadow:0 8px 32px rgba(0,0,0,.9)';
-    if (burger) burger.setAttribute('data-open','1');
-  }
-}
-
-
 function dismissPWA() {
   localStorage.setItem('rlfc_pwa_dismissed', '1');
   var b = document.getElementById('pwa-banner');
@@ -260,6 +243,7 @@ function buildFooter() {
               <li><a href="about.html#manager">Gary Pitt — Manager</a></li>
               <li><a href="about.html#committee">Committee</a></li>
               <li><a href="about.html#ground">Tithe Farm</a></li>
+              <li><a href="media.html">Media</a></li>
             </ul>
           </div>
 
@@ -267,7 +251,7 @@ function buildFooter() {
             <h4>Match Day</h4>
             <ul>
               <li><a href="fixtures.html">All Fixtures</a></li>
-              <li><a href="fixtures.html#results">Results</a></li>
+              <li><a href="fixtures.html#fx-results">Results</a></li>
               <li><a href="fixtures.html#calendar">Sync to Phone</a></li>
               <li><a href="programme.html">Programme</a></li>
               <li><a href="squad.html">The Squad</a></li>
@@ -280,7 +264,7 @@ function buildFooter() {
               <li><a href="investment.html">Sponsorship</a></li>
               <li><a href="shop.html">Club Shop</a></li>
               <li><a href="https://www.easyfundraising.org.uk/causes/raynerslanefc" target="_blank">Easy Fundraising</a></li>
-              <li><a href="contact.html">Sponsorship</a></li>
+              <li><a href="volunteer.html">Volunteer</a></li>
               <li><a href="contact.html">Contact Us</a></li>
               <li><a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow)">info@raynerslanefc.co.uk</a></li>
               <li><a href="policies.html">Club Policies</a></li>
@@ -383,7 +367,11 @@ function laneOnReady(fn) {
   else fn();
 }
 
-laneOnReady(initBgImagery);
+// Background imagery (the rotating cartoon player/mascot SVG illustrations) is
+// DISABLED — replaced by a clean dark void behind the cinematic hero pitch, and
+// soon a club background video. initBgImagery is left defined (unused) so it can
+// be re-enabled in one line if ever wanted. To restore: laneOnReady(initBgImagery);
+// laneOnReady(initBgImagery);
 
 
 
@@ -423,35 +411,9 @@ function initComponents(currentPage) {
   const nav     = document.getElementById('nav-placeholder');
   const footer  = document.getElementById('footer-placeholder');
   const twitter = document.getElementById('twitter-placeholder');
-  if (nav) {
-    nav.innerHTML = buildNav(currentPage);
-    var burger = document.getElementById('nav-burger');
-    var links  = document.getElementById('nav-links');
-    if (burger) {
-      burger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleMobileNav();
-      });
-    }
-    // Close on link click
-    if (links) {
-      links.querySelectorAll('a').forEach(function(a) {
-        a.addEventListener('click', function() {
-          links.style.display = 'none';
-          links.setAttribute('data-open','0');
-        });
-      });
-    }
-    // Close on outside click
-    document.addEventListener('click', function(e) {
-      if (links && links.getAttribute('data-open')==='1') {
-        if (!links.contains(e.target) && burger && !burger.contains(e.target)) {
-          links.style.display = 'none';
-          links.setAttribute('data-open','0');
-        }
-      }
-    });
-  }
+  // Mobile uses the fixed bottom nav (.bnav) built into buildNav — there is no
+  // burger menu, so the nav just renders. (Old #nav-burger toggle code removed.)
+  if (nav) nav.innerHTML = buildNav(currentPage);
   if (twitter) twitter.innerHTML = buildTwitterSection();
   if (footer)  footer.innerHTML  = buildFooter();
 
@@ -566,6 +528,7 @@ function initComponents(currentPage) {
 
   // ── PWA INSTALL PROMPT ──
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if (!isStandalone) {
     var banner = document.createElement('div');
     banner.id = 'pwa-banner';
@@ -598,13 +561,6 @@ function initComponents(currentPage) {
     document.body.appendChild(banner);
   }
 
-  document.addEventListener('click', e => {
-    const btn  = document.getElementById('hamburger');
-    const menu = document.getElementById('mob-menu');
-    if (!btn || !menu) return;
-    if (btn.contains(e.target))       menu.classList.toggle('open');
-    else if (!menu.contains(e.target)) menu.classList.remove('open');
-  });
 }
 
 // ── SELF-HEALING CHROME BOOT ────────────────────────────────────────────
@@ -626,3 +582,73 @@ function initComponents(currentPage) {
   }
   laneOnReady(bootChrome);
 })();
+
+/* ── THE LANE CURSOR ─────────────────────────────────────────────────────
+   A glowing yellow energy orb that trails the pointer, stretches with velocity,
+   and blooms into a ring over anything interactive. It RIDES ALONGSIDE the
+   native cursor (doesn't hide it) so forms, the admin panel and accessibility
+   are never compromised. Desktop fine-pointers only; off under reduced-motion. */
+function initLaneCursor() {
+  if (window._laneCursorReady) return;
+  var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (!fine || reduce) return;
+  window._laneCursorReady = true;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '.lane-cur,.lane-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:2147483600;' +
+    'transform:translate3d(-50%,-50%,0);will-change:transform,opacity;mix-blend-mode:screen}' +
+    '.lane-cur{width:14px;height:14px;border-radius:50%;' +
+    'background:radial-gradient(circle,rgba(255,233,128,.95),rgba(255,209,0,.55) 45%,rgba(255,209,0,0) 70%);' +
+    'filter:blur(1px)}' +
+    '.lane-ring{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(255,209,0,.55);' +
+    'box-shadow:0 0 18px 2px rgba(255,209,0,.18);transition:width .25s cubic-bezier(.2,.8,.2,1),' +
+    'height .25s cubic-bezier(.2,.8,.2,1),border-color .25s,opacity .3s}' +
+    '.lane-ring.is-hot{width:62px;height:62px;border-color:rgba(255,233,128,.9);box-shadow:0 0 28px 6px rgba(255,209,0,.28)}' +
+    '.lane-ring.is-down{width:24px;height:24px}';
+  document.head.appendChild(css);
+
+  var orb = document.createElement('div'); orb.className = 'lane-cur';
+  var ring = document.createElement('div'); ring.className = 'lane-ring';
+  orb.style.opacity = ring.style.opacity = '0';
+  document.body.appendChild(orb); document.body.appendChild(ring);
+
+  var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  var ox = mx, oy = my, rx = mx, ry = my, px = mx, py = my, raf = 0, shown = false;
+  var SEL = 'a,button,input,textarea,select,summary,label,[role=button],.tile,.btn,.li-del';
+
+  window.addEventListener('pointermove', function (e) {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    mx = e.clientX; my = e.clientY;
+    if (!shown) { shown = true; orb.style.opacity = '1'; ring.style.opacity = '1'; }
+  }, { passive: true });
+  document.addEventListener('pointerover', function (e) {
+    if (e.target && e.target.closest && e.target.closest(SEL)) ring.classList.add('is-hot');
+  }, { passive: true });
+  document.addEventListener('pointerout', function (e) {
+    if (e.target && e.target.closest && e.target.closest(SEL) &&
+        !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(SEL))) ring.classList.remove('is-hot');
+  }, { passive: true });
+  document.addEventListener('pointerdown', function () { ring.classList.add('is-down'); }, { passive: true });
+  document.addEventListener('pointerup', function () { ring.classList.remove('is-down'); }, { passive: true });
+  document.addEventListener('mouseleave', function () { orb.style.opacity = ring.style.opacity = '0'; });
+
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    ox += (mx - ox) * 0.85; oy += (my - oy) * 0.85;   // orb tracks tightly
+    rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;   // ring lags → trailing energy
+    var vx = mx - px, vy = my - py; px = mx; py = my;
+    var speed = Math.min(Math.hypot(vx, vy), 60);
+    var stretch = 1 + speed * 0.012, squash = 1 - speed * 0.006;
+    var ang = Math.atan2(vy, vx) * 180 / Math.PI;
+    orb.style.transform = 'translate3d(' + (ox - 7) + 'px,' + (oy - 7) + 'px,0) rotate(' + ang + 'deg) scale(' + stretch + ',' + squash + ')';
+    ring.style.transform = 'translate3d(-50%,-50%,0)';
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  }
+  loop();
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) cancelAnimationFrame(raf); else loop();
+  });
+}
+laneOnReady(initLaneCursor);

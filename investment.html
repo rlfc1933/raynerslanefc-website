@@ -297,7 +297,9 @@
         <span class="label-grey">2026-27 Club Partners</span>
         <div style="font-family:var(--font-d);font-size:24px;letter-spacing:.04em;color:var(--white);margin-top:6px">Our Current Sponsors</div>
       </div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-left:auto">
+      <!-- Live from data/sponsors.json (same source as the homepage strip).
+           The markup below is a no-JS fallback that the script replaces. -->
+      <div id="inv-sponsors" style="display:flex;gap:20px;flex-wrap:wrap;margin-left:auto">
         <div style="background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase">
           Hanlon Dry Lining<br><span style="color:var(--grey);font-weight:400;font-size:10px">Home Shirt Sponsor</span>
         </div>
@@ -383,6 +385,28 @@
       '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:10px">Application received 💛</div>' +
       '<p style="font-family:var(--font-b);color:rgba(255,255,255,.7);line-height:1.7;max-width:420px;margin:0 auto">Thank you for wanting to back The Lane. The commercial team will review it and get back to you within 48 hours with a tailored proposal.</p></div>';
   }
+
+  // Current sponsors — rendered live from data/sponsors.json so this strip stays
+  // in step with the homepage and the admin Sponsors editor. The static boxes in
+  // #inv-sponsors are a no-JS fallback and are only replaced on a successful fetch.
+  (function () {
+    function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function box(s){
+      var inner = esc(s.name) + '<br><span style="color:var(--grey);font-weight:400;font-size:10px">' + esc(s.role || s.tier || 'Club Partner') + '</span>';
+      var st = 'background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase;text-decoration:none;display:block';
+      return s.url
+        ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" style="' + st + '">' + inner + '</a>'
+        : '<div style="' + st + '">' + inner + '</div>';
+    }
+    fetch('data/sponsors.json?t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var list = (d && d.sponsors) || [];
+        var el = document.getElementById('inv-sponsors');
+        if (el && list.length) el.innerHTML = list.map(box).join('');
+      })
+      .catch(function () { /* keep the static fallback */ });
+  })();
 </script>
 </body>
 </html>

@@ -350,30 +350,10 @@ var SOURCES = {
   ccl:       { label:'Combined Counties',colour:'#22C55E', text:'#000' },
 };
 
-var BAKED_ARTICLES = [
-  { source:'club', priority:0, id:'launch-2026',
-    title:'The Lane Goes Digital — A New Era for Rayners Lane FC',
-    excerpt:'Pete Singh commissioned former committee member and creative director Sukh to build something levels above. CXLLAB LDN delivered.',
-    image:'img/news/news-launch.svg', date:'2026-05-22',
-    link:'news-article.html?id=launch-2026', external:false },
-  { source:'club', priority:0,
-    title:'League Allocation 2026-27 Confirmed',
-    excerpt:'Back at Step 5 in the Combined Counties Premier Division North. Gary Pitt leads the charge for the new season.',
-    image:'img/news/news-league.svg', date:'2026-05-14',
-    link:'https://www.pitchero.com/clubs/raynerslanefc/news/league-allocation-20262027-2979103.html', external:true },
-  { source:'club', priority:0,
-    title:'1st Team Summer Trials 2026',
-    excerpt:'Register for 1st team trials at Tithe Farm Social Club. Gary Pitt is building his squad.',
-    image:'img/news/news-trials.svg', date:'2026-05-05',
-    link:'https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html', external:true },
-  { source:'club', priority:0,
-    title:'2026-27 Commercial Sponsorship Guide',
-    excerpt:'Multiple sponsorship packages available for the new season. Get your brand in front of Harrow.',
-    image:'img/news/news-commercial.svg', date:'2026-05-01',
-    link:'https://www.pitchero.com/clubs/raynerslanefc/news/rayners-lane-fc-202627-commercial-sponsorship-2980361.html', external:true },
-];
-
-var allArticles = BAKED_ARTICLES.slice();
+// Club articles (including the legacy Pitchero links) now live in data/news.json
+// as normal records — see loadExtraNews. An article with external:true (or an
+// http(s) link) opens that link directly; otherwise it opens news-article.html.
+var allArticles = [];
 var displayCount = 12;
 var activeSource = 'all';
 var IMG_FALLBACK = 'img/news/news-default.svg';
@@ -393,9 +373,12 @@ async function loadExtraNews() {
       var d = await r.json();
       (d.articles || []).forEach(function(a) {
         if (!allArticles.find(function(x){ return x.title === a.title; })) {
+          var isExt = !!a.external || (a.link && /^https?:/i.test(a.link));
           extra.push({ source:'club', priority:0, id:a.id, title:a.title,
             excerpt:a.excerpt||'', image:a.image||IMG_FALLBACK,
-            date:a.date||'', link:'news-article.html?id='+a.id, external:false });
+            date:a.date||'',
+            link: isExt ? a.link : ('news-article.html?id='+a.id),
+            external: isExt });
         }
       });
     }
