@@ -606,6 +606,27 @@
     '</div>');
 
     document.getElementById('pages').innerHTML = P.join('');
+    // Auto-fit safety net: a page is a fixed A4 sheet (297mm). If a long
+    // manager's note / welcome / scouting write-up makes a page taller than one
+    // sheet, its free-text (.body/.lead) is shrunk a touch until the page fits —
+    // so nothing gets silently cut at the print boundary. Data pages (tables,
+    // squad, tiles) are left alone; only free-text bodies flex. Runs once fonts
+    // are ready so the measurement matches the printed output.
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fitPages);
+  }
+  function fitPages() {
+    var MAXH = 297 / 25.4 * 96 + 2; // one A4 sheet in px @96dpi (+2 tolerance)
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+      var pg = pages[i];
+      var flex = pg.querySelectorAll('.body, .lead');
+      if (!flex.length) continue;              // nothing free-text to shrink
+      var pct = 100, guard = 0;
+      while (pg.offsetHeight > MAXH && pct > 68 && guard < 60) {
+        pct -= 2; guard++;
+        for (var j = 0; j < flex.length; j++) flex[j].style.fontSize = pct + '%';
+      }
+    }
   }
 })();
 </script>

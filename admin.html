@@ -4032,7 +4032,10 @@ function psFieldDefs() {
     case 'kickoff': return fxPick + crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psSet(\'sub\',this.value)"></div>';
     case 'goal': return player + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psSet(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psSet(\'score\',this.value)"></div></div>';
     case 'yellow': case 'red': return player + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psSet(\'min\',this.value)"></div>';
-    case 'halftime': case 'fulltime': return fxPick + crests + score;
+    case 'halftime': return fxPick + crests + score;
+    case 'fulltime': return fxPick + crests + score +
+      '<div class="field"><label class="fl">Goalscorers <span style="color:var(--gr);font-weight:400">— optional, e.g. Hill 23\', Cole 67\'. A long list auto-shrinks.</span></label><input type="text" value="' + escH(d.scorers || '') + '" placeholder="Hill 23\', Cole 67\'" oninput="psSet(\'scorers\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Manager\'s quote <span style="color:var(--gr);font-weight:400">— optional, 1–3 sentences. Auto-shrinks to fit.</span></label><textarea rows="3" placeholder="Delighted with the character the lads showed today…" oninput="psSet(\'mgrQuote\',this.value)">' + escH(d.mgrQuote || '') + '</textarea></div>';
     case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>';
     case 'potm': return player +
       '<div class="ps-crestrow"><div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>' +
@@ -4148,6 +4151,26 @@ function psCardBg(theme) {
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><defs><radialGradient id="g" cx="' + cx + '" cy="' + cy + '" r="100%">' + p.bgStops + '</radialGradient></defs><rect width="300" height="300" fill="url(#g)"/></svg>';
   return '#000 url("data:image/svg+xml,' + encodeURIComponent(svg) + '") center / cover no-repeat';
 }
+// Auto-fit: shrink any element tagged data-fit="MAX:MIN" (px) until its text
+// fits its box — no width/height overflow — floored at MIN. A long goalscorer
+// list or a 3-sentence manager's quote therefore shrinks to fit cleanly instead
+// of overflowing. Runs after innerHTML is set AND again just before export, so
+// html2canvas captures the fitted size (verify in the PNG, not just the preview).
+// (CSS transform on the card doesn't affect scrollWidth/clientHeight, so the
+//  measurement is correct whether the preview is scaled or the export is 1:1.)
+function psAutoFit(root) {
+  if (!root) return;
+  var els = root.querySelectorAll('[data-fit]');
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i], spec = String(el.getAttribute('data-fit') || '').split(':');
+    var max = parseFloat(spec[0]) || 40, min = parseFloat(spec[1]) || 14;
+    var sz = max, guard = 0;
+    el.style.fontSize = sz + 'px';
+    while (sz > min && guard < 300 && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) {
+      sz -= 2; el.style.fontSize = sz + 'px'; guard++;
+    }
+  }
+}
 function psRender() {
   var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
   var X = PS.size === 'x', ST = PS.size === 'story';
@@ -4259,6 +4282,19 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (cyc - 80) + 'px;left:0;right:0;text-align:center;' + beb(140, t.accent) + '">' + (d.hs || 0) + ' <span style="color:#fff;font-size:80px">-</span> ' + (d.as || 0) + '</div>';
     inner += '<div style="position:absolute;top:' + (cyc + cz4 / 2 + 14) + 'px;left:' + (W * 0.16 - 170) + 'px;width:340px;text-align:center;' + beb(34, '#fff') + '">' + escH(crestName(d.homeCrest || 'img/badge.png')) + '</div>';
     inner += '<div style="position:absolute;top:' + (cyc + cz4 / 2 + 14) + 'px;left:' + (W * 0.84 - 170) + 'px;width:340px;text-align:center;' + beb(34, '#fff') + '">' + escH(crestName(d.awayCrest || (psCrests[1] && psCrests[1].file) || '')) + '</div>';
+    if (PS.type === 'fulltime') {
+      // Goalscorers — single line, shrinks (never wraps/overflows) via data-fit.
+      if (d.scorers) {
+        var ftScY = cyc + cz4 / 2 + (X ? 62 : 80);
+        inner += '<div data-fit="' + (X ? 32 : 40) + ':14" style="position:absolute;top:' + ftScY + 'px;left:0;right:0;text-align:center;white-space:nowrap;overflow:hidden;padding:0 44px;font-family:Arial;font-weight:800;letter-spacing:2px;color:' + t.accent + ';font-size:' + (X ? 32 : 40) + 'px">' + escH((d.scorers || '')).toUpperCase() + '</div>';
+      }
+      // Manager's quote — fixed box near the bottom, wraps + shrinks to fit.
+      if (d.mgrQuote) {
+        var qTop = X ? H - 176 : (ST ? H - 430 : H - 302);
+        var qBoxH = X ? 92 : (ST ? 244 : 190);
+        inner += '<div data-fit="' + (X ? 26 : 34) + ':15" style="position:absolute;top:' + qTop + 'px;left:80px;right:80px;height:' + qBoxH + 'px;overflow:hidden;text-align:center;font-family:Arial;font-style:italic;font-weight:600;line-height:1.3;color:#fff;font-size:' + (X ? 26 : 34) + 'px">&ldquo;' + escH(d.mgrQuote) + '&rdquo;</div>';
+      }
+    }
   } else if (PS.type === 'motm') {
     var pm = psPlayerObj(), hasM = pm && pm.photo;
     inner += psEyebrow('MAN OF THE MATCH', t, ebTop);
@@ -4319,8 +4355,8 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (midY + 90) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:700;letter-spacing:1px;color:#fff;padding:0 80px">' + escH(f[1]) + '</div>';
   } else if (PS.type === 'announce') {
     inner += psEyebrow('CLUB ANNOUNCEMENT', t, PS.size === 'x' ? 60 : 130);
-    inner += '<div style="position:absolute;top:' + (midY - 130) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:104px;letter-spacing:2px;color:' + t.accent + ';line-height:.9;padding:0 50px">' + escH(d.title || 'IMPORTANT UPDATE').toUpperCase() + '</div>';
-    inner += '<div style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
+    inner += '<div data-fit="104:46" style="position:absolute;top:' + (midY - 150) + 'px;left:0;right:0;height:190px;overflow:hidden;text-align:center;font-family:\'Bebas Neue\';font-size:104px;letter-spacing:2px;color:' + t.accent + ';line-height:.9;padding:0 50px">' + escH(d.title || 'IMPORTANT UPDATE').toUpperCase() + '</div>';
+    inner += '<div data-fit="30:15" style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;height:' + (H / 2 - 150) + 'px;overflow:hidden;text-align:center;font-family:Arial;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
   } else if (PS.type === 'history') {
     inner += psEyebrow('ON THE LANE', t, PS.size === 'x' ? 60 : 130);
     inner += '<div style="position:absolute;top:' + (midY - 120) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:2px;color:#fff;line-height:1.05;padding:0 70px">' + escH(d.fact || HISTORY_FACTS[0]) + '</div>';
@@ -4347,6 +4383,7 @@ function psRender() {
   // Protected: #ffffff (functional white panels) + rgba(0,0,0,…) shadows.
   inner = inner.replace(/#fff(?![0-9a-fA-F])/g, t.text).replace(/rgba\(255,\s*255,\s*255,[^)]*\)/g, t.soft);
   card.innerHTML = inner;
+  psAutoFit(card); // shrink any long free-text (scorers, manager quote, announce body) to fit
   // scale to fit the stage, reserving the exact scaled footprint so nothing leaks
   var wrap = document.getElementById('ps-card-wrap');
   var stage = wrap.parentNode;
@@ -4364,6 +4401,7 @@ function psDownload() {
   toast('Building your post…');
   var prevT = card.style.transform; card.style.transform = 'scale(1)';
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    psAutoFit(card); // re-fit with real fonts loaded so the exported PNG matches
     html2canvas(card, { backgroundColor: null, useCORS: true, scale: 2, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
       card.style.transform = prevT;
       var fname = 'rayners-lane-' + PS.type + '-' + PS.size + '.png';
