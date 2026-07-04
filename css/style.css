@@ -391,3 +391,25 @@ body > *:not(#bg-imagery) { position:relative; z-index:1; }
 /* PWA banner - desktop hidden, mobile visible */
 #pwa-banner { display:flex !important; }
 @media(min-width:901px){ #pwa-banner { display:none !important; } }
+
+/* ─────────────────────────────────────────────────────────────
+   ACCESSIBILITY (added 2026-07) — keyboard focus, skip link,
+   and reduced-motion support. Additive; changes no existing rule.
+   ───────────────────────────────────────────────────────────── */
+.skip-link{position:fixed;top:-60px;left:12px;z-index:2147483647;background:var(--yellow);color:#0d0d0d;
+  font-family:var(--font-c);font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px;
+  padding:10px 16px;border-radius:8px;text-decoration:none;transition:top .18s ease;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.skip-link:focus{top:12px;outline:3px solid #0d0d0d;outline-offset:2px}
+
+/* Visible focus ring for keyboard users (mouse users are unaffected). */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible,[tabindex]:focus-visible,summary:focus-visible{
+  outline:3px solid var(--yellow);outline-offset:2px;border-radius:3px}
+/* Don't show the focus ring on the programmatic skip-target focus. */
+.hero:focus,.hero__left:focus,section:focus,h1:focus{outline:none}
+
+/* Respect users who ask for less motion: calm animations + transitions. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}

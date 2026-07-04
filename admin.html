@@ -1554,7 +1554,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="an-chart-card"><div class="an-chart-ttl">Total Income Breakdown</div><canvas id="an-chart-pie" height="200"></canvas></div>
 
       <button class="save" style="margin-top:14px" onclick="saveAnalytics()">&#10003; Save Analytics to Site</button>
-      <button class="save sec" style="margin-top:8px" onclick="changeAnalyticsPassword()">&#128273; Change Analytics Password</button>
+      <button class="save sec" style="margin-top:8px" onclick="changeAnalyticsPassword()">&#128273; About the Analytics Password</button>
       <div class="dep" id="dep-analytics"></div>
     </div>
 
@@ -2433,10 +2433,11 @@ var sponsorAffiliations = [];
 var articles = [];
 var analytics = [];
 var imgStore = {};
-// Analytics is chairman-gated. Default password 'petesinghchairman' (SHA-256
-// below); data/config.json overrides the hash if the password is changed.
+// Analytics (match finances) is chairman-gated SERVER-SIDE: the password is the
+// Netlify env var ANALYTICS_PIN (or ADMIN_PIN), and the data lives in Netlify
+// Blobs via analytics-data.js — nothing sensitive in the public repo.
 var analyticsUnlocked = false;
-var analyticsHash = '3d7e6322ad89bfffa774d5656b5d5c25deb21850780ed3c3f618ddca0b06bf63';
+var analyticsPin = ''; // the chairman's analytics password this session (for private reads/writes)
 
 // ── RENDER PIN DOTS ──
 function renderDots() {
@@ -3047,8 +3048,8 @@ function loadAll() {
   // players.json is the source of truth; the squad grid is a projection of it
   // (Item 5). Re-derive the grid once profiles land so both editors stay in sync.
   fetchJSON('players',   function(d) { if (d && d.players) { playerProfiles = d.players; if (typeof _refreshSquadViews === 'function') _refreshSquadViews(); } });
-  fetchJSON('analytics', function(d) { if (d && d.matches) { analytics = d.matches; } });
-  fetchJSON('config',    function(d) { if (d && d.analyticsHash) { analyticsHash = d.analyticsHash; } });
+  // Match finances are private now — loaded from the Blobs function only after the
+  // chairman unlocks the gate (submitAnalyticsGate), never from a public file.
   fetchJSON('social',    function(d) { if (d && d.posts) { socialPosts = d.posts; } });
   fetchJSON('motm',      function(d) { if (d && d.entries) { motms = d.entries; } });
   fetchJSON('signing',   function(d) { if (d && d.entries) { signings = d.entries; } });
@@ -4655,10 +4656,11 @@ function deleteMeeting(id) {
 async function loadMeetingSnapshot() {
   var el = document.getElementById('mt-snap'); if (!el) return;
   function jget(name) { return new Promise(function (r) { fetchJSON(name, function (d) { r(d || {}); }); }); }
-  var w = await jget('committee-wins'), an = await jget('analytics'), att = await jget('attendance');
+  var w = await jget('committee-wins'), att = await jget('attendance');
   var winsArr = w.wins || [];
   var brought = winsArr.reduce(function (a, x) { return a + (parseFloat(x.amt) || 0); }, 0);
-  var income = (an.matches || []).reduce(function (a, m) { return a + matchTotal(m); }, 0);
+  // match income is chairman-private now — only counted if unlocked this session
+  var income = (analyticsUnlocked ? analytics : []).reduce(function (a, m) { return a + matchTotal(m); }, 0);
   var hearts = 0; (att.matches || []).forEach(function (m) { hearts += (m.lanes || []).length; });
   var fans = '—';
   try { var fres = await loadMembers(); if (fres.configured) fans = fres.members.length; } catch (e) {}
@@ -4689,7 +4691,6 @@ async function loadClubStats() {
   var att = await jget('attendance');
   var patrons = await jget('patrons');
   var crm = await jget('sponsor-crm');
-  var an = await jget('analytics');
   // fan members (Supabase) — graceful if not configured
   var fanCount = null;
   try { var fres = await loadMembers(); if (fres.configured) fanCount = fres.members.length; } catch (e) {}
@@ -4701,7 +4702,8 @@ async function loadClubStats() {
   var paid = deals.filter(function (d) { return d.status === 'Paid'; });
   var pipelineValue = deals.reduce(function (a, d) { return a + (parseFloat(d.amount) || 0); }, 0);
   var paidValue = paid.reduce(function (a, d) { return a + (parseFloat(d.amount) || 0); }, 0);
-  var ams = an.matches || [];
+  // match income is chairman-private now — only counted if unlocked this session
+  var ams = analyticsUnlocked ? analytics : [];
   var income = ams.reduce(function (a, m) { return a + matchTotal(m); }, 0);
   var progTotal = ams.reduce(function (a, m) { return a + ((m.takings || {}).programmes || 0); }, 0);
 
@@ -5036,30 +5038,34 @@ function showAnalyticsGate() {
   setVal('an-pass',''); document.getElementById('an-lock-err').textContent = '';
   setTimeout(function(){ var i=document.getElementById('an-pass'); if (i) i.focus(); }, 120);
 }
+// The gate is now REAL: the password is checked server-side by the analytics-data
+// function (Netlify Blobs), and the finances live server-side — nothing sensitive
+// in the public repo. On success we load the private data straight into memory.
 async function submitAnalyticsGate() {
-  var h = await sha256hex(gv('an-pass'));
-  if (h === analyticsHash) {
+  var pass = gv('an-pass');
+  document.getElementById('an-lock-err').textContent = 'Checking…';
+  try {
+    var r = await fetch('/.netlify/functions/analytics-data?pin=' + encodeURIComponent(pass));
+    var d = await r.json().catch(function () { return {}; });
+    if (r.status === 401 || !d.ok) {
+      document.getElementById('an-lock-err').textContent = (d && d.error === 'no-store')
+        ? 'Storage warming up — try again in a moment.'
+        : 'Wrong password — chairman access only';
+      setVal('an-pass', ''); return;
+    }
+    analyticsPin = pass;
+    analytics = d.matches || [];
     analyticsUnlocked = true;
     document.getElementById('an-lock').classList.remove('on');
     openPanel('analytics');
-  } else {
-    document.getElementById('an-lock-err').textContent = 'Wrong password — chairman access only';
-    setVal('an-pass','');
+  } catch (e) {
+    document.getElementById('an-lock-err').textContent = 'Couldn\'t reach the server — try again.';
   }
 }
-// SECURITY NOTE (Item 9): this gate is cosmetic, not a real boundary. The hash
-// is stored in PUBLIC data/config.json and data/analytics.json itself ships in
-// the public repo, so anyone can read both. To make analytics genuinely private
-// it must move behind a PIN-gated Netlify function (like list-members) with the
-// data held server-side (Netlify Blobs), not committed to the repo. That's a
-// deploy-time change — see the changelog notes handed to the chairman.
-async function changeAnalyticsPassword() {
-  var np = prompt('Enter a NEW analytics password (min 4 characters):');
-  if (np === null) return;
-  if (np.length < 4) { toast('Password too short', true); return; }
-  analyticsHash = await sha256hex(np);
-  pushToGitHub('config', { analyticsHash: analyticsHash, updatedAt: new Date().toISOString() }, 'dep-analytics');
-  toast('Analytics password updated ✓');
+// The analytics password is now a Netlify env var (ANALYTICS_PIN, or the ADMIN_PIN
+// if unset) — changed securely in Netlify, never written to a public file.
+function changeAnalyticsPassword() {
+  alert('The match-finances password is now stored securely as a Netlify environment variable (ANALYTICS_PIN).\n\nTo change it: Netlify → Site configuration → Environment variables → ANALYTICS_PIN → Save. If ANALYTICS_PIN is not set, the admin PIN unlocks it.');
 }
 
 function renderCheckList(containerId, items, emptyMsg) {
@@ -5195,8 +5201,20 @@ function renderAnalyticsCharts() {
   }
 }
 
+// Saves match finances to the PRIVATE Blobs store (not the public repo).
 function saveAnalytics(msg) {
-  commitDomain('analytics', 'matches', 'id', analytics, analyticsDeleted, null, 'dep-analytics', msg || 'Analytics saved ✓ — live in ~30s');
+  var el = document.getElementById('dep-analytics');
+  if (el) showDep(el, 'loading', 'Saving privately…');
+  fetch('/.netlify/functions/analytics-data', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: analyticsPin, matches: analytics })
+  })
+    .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok && j.ok, j: j }; }); })
+    .then(function (res) {
+      if (res.ok) { if (el) showDep(el, 'ok', 'Saved privately — off the public repo'); toast(msg || 'Match finances saved ✓'); }
+      else { if (el) showDep(el, 'err', (res.j && res.j.error) || 'Save failed'); toast('Save failed — try again', true); }
+    })
+    .catch(function () { if (el) showDep(el, 'err', 'Network error'); toast('Network error', true); });
 }
 
 // ── SOCIAL MEDIA PLANNER ──

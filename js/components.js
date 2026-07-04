@@ -29,6 +29,22 @@ function initHubSpotChat() {
   document.head.appendChild(s);
 }
 
+// a11y: a "Skip to content" link (first thing a keyboard/screen-reader user hits)
+// that jumps past the nav to the main content. Works on every page without needing
+// per-page ids — it focuses the first meaningful region.
+function initSkipLink() {
+  if (document.getElementById('lane-skip')) return;
+  var a = document.createElement('a');
+  a.id = 'lane-skip'; a.className = 'skip-link'; a.href = '#';
+  a.textContent = 'Skip to content';
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    var main = document.querySelector('main, [role="main"], .hero__left, .hero, section, h1');
+    if (main) { main.setAttribute('tabindex', '-1'); main.focus(); main.scrollIntoView(); }
+  });
+  document.body.insertBefore(a, document.body.firstChild);
+}
+
 function dismissPWA() {
   localStorage.setItem('rlfc_pwa_dismissed', '1');
   var b = document.getElementById('pwa-banner');
@@ -451,6 +467,7 @@ function initComponents(currentPage) {
 
   initWhatsApp();      // floating WhatsApp button (Phase 4) — only if configured
   initHubSpotChat();   // HubSpot live chat (Phase 4) — only if configured
+  initSkipLink();      // a11y: keyboard "skip to content" link
 
 
 
