@@ -1,4 +1,5 @@
 {
+  "_warning": "PUBLIC FILE — this ships in the public GitHub repo. Only club ROLE addresses (info@, chairman@, secretary@ …). NEVER put personal names or personal emails here. Personal contact data belongs in Netlify Forms / Supabase, not this file.",
   "accounts": [
     { "icon": "👑", "label": "Chairman", "name": "", "email": "chairman@raynerslanefc.co.uk" },
     { "icon": "📬", "label": "Club Info", "name": "", "email": "info@raynerslanefc.co.uk" },
