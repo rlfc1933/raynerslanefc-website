@@ -1,4 +1,19 @@
 {
-  "fixtures": [],
-  "updatedAt": ""
+  "fixtures": [
+    {
+      "id": "matchday-current",
+      "date": "2026-07-04",
+      "kickoff": "15:00",
+      "opponent": "Hayes & Yeading",
+      "oppCrest": "",
+      "isHome": true,
+      "venue": "Tithe Farm Social Club",
+      "competition": "Combined Counties Premier Div North",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    }
+  ],
+  "updatedAt": "2026-07-04T15:47:53.170Z"
 }
