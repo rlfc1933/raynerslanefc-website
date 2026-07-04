@@ -1647,15 +1647,21 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#127912; Post Studio</div></div>
       <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Make <strong style="color:var(--w)">uniform, on-brand</strong> graphics in seconds — pick a post, fill the fields, choose Instagram or X sizing, and download a ready-to-post PNG. Bebas font, club colours, every time.</p></div>
 
+      <div class="slbl">✍️ Write &amp; reword for X <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— type a rough note, AI gives you ready tweets to copy + a headline card</span></div>
+      <div class="field"><textarea id="ai-src" rows="3" placeholder="Type your rough tweet / note here… e.g. we beat harefield 3-1 great result, unbeaten in 5"></textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <button class="save" style="flex:1;min-width:150px;margin:0" onclick="aiGenerate('both')">✨ Reword for X</button>
+        <button class="save sec" style="margin:0" onclick="aiGenerate('hook')">Headline only</button>
+      </div>
+      <div id="ai-out"></div>
+      <div class="div"></div>
+
       <div class="slbl">1 &middot; Choose a post</div>
       <div class="ps-types" id="ps-types"></div>
 
       <div class="slbl">2 &middot; Fill it in</div>
       <div class="ps-opts">
-        <div class="ps-seg" id="ps-theme">
-          <button data-theme="yellow" class="on" onclick="psSetTheme('yellow')">⚫🟡 Black &amp; Yellow</button>
-          <button data-theme="green" onclick="psSetTheme('green')">⚫🟢 Black &amp; Green</button>
-        </div>
+        <div class="ps-seg" id="ps-theme" style="flex-wrap:wrap"></div>
         <div class="ps-seg" id="ps-size">
           <button data-size="ig" class="on" onclick="psSetSize('ig')">Instagram ▢</button>
           <button data-size="story" onclick="psSetSize('story')">Story ▯</button>
@@ -3742,13 +3748,26 @@ function savePerks(msg) {
 var PS = { type: 'matchday', theme: 'yellow', size: 'ig', data: {} };
 var psCrests = [], psPlayers = [], psFixtures = [];
 var PS_SIZES = { ig: { w: 1080, h: 1080 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
+// Palette table. `text`/`soft` = text on the background; `ink` = text on the
+// accent; `accent2` (≠ accent) draws a gradient footer bar. psRender recolours
+// every white text token to `text`/`soft`, so ALL card types honour the palette
+// and stay legible on light OR dark. Yellow/Green are unchanged (first two).
 var PS_THEMES = {
-  // NB: keep backgrounds as simple linear-gradients — html2canvas 1.4.1 throws
-  // ("addColorStop non-finite") on radial-gradient(circle at X% Y%, …), which
-  // aborts the PNG export and can drop elements like the top banner.
-  yellow: { bg: 'linear-gradient(145deg,#1f1f1f,#0a0a0a 60%,#000)', accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' },
-  green:  { bg: 'linear-gradient(145deg,#11301a,#06120a 60%,#020402)', accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff', soft: 'rgba(255,255,255,.62)' }
+  yellow:      { accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#fff',     soft: 'rgba(255,255,255,.62)', band: 'rgba(255,209,0,.07)',  bgStops: '<stop offset="0%" stop-color="#1f1f1f"/><stop offset="60%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#000000"/>' },
+  green:       { accent: '#FFD100', accent2: '#2a8048', ink: '#0d0d0d', text: '#fff',     soft: 'rgba(255,255,255,.62)', band: 'rgba(42,128,72,.12)', bgStops: '<stop offset="0%" stop-color="#11301a"/><stop offset="60%" stop-color="#06120a"/><stop offset="100%" stop-color="#020402"/>' },
+  charcoal:    { accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#F5F3ED',  soft: 'rgba(245,243,237,.6)',  band: 'rgba(255,209,0,.06)', bgStops: '<stop offset="0%" stop-color="#262626"/><stop offset="60%" stop-color="#161616"/><stop offset="100%" stop-color="#0c0c0c"/>' },
+  greenflood:  { accent: '#FFD100', accent2: '#FFD100', ink: '#0d0d0d', text: '#F5F3ED',  soft: 'rgba(245,243,237,.72)', band: 'rgba(255,209,0,.1)',  bgStops: '<stop offset="0%" stop-color="#1f6b3c"/><stop offset="55%" stop-color="#1A5C32"/><stop offset="100%" stop-color="#0f3d21"/>' },
+  yellowflood: { accent: '#1A5C32', accent2: '#1A5C32', ink: '#FFD100', text: '#0d0d0d',  soft: 'rgba(13,13,13,.6)',    band: 'rgba(26,92,50,.1)',  bgStops: '<stop offset="0%" stop-color="#FFE375"/><stop offset="55%" stop-color="#FFD100"/><stop offset="100%" stop-color="#E9BE00"/>' },
+  light:       { accent: '#1A5C32', accent2: '#1A5C32', ink: '#F5F3ED', text: '#0F0F0F',  soft: 'rgba(15,15,15,.55)',   band: 'rgba(26,92,50,.08)', bgStops: '<stop offset="0%" stop-color="#FBFAF6"/><stop offset="100%" stop-color="#ECEAE1"/>' }
 };
+var PS_PALETTES = [
+  { key: 'yellow', label: 'Black & Yellow', sw: '#080808', sw2: '#FFD100' },
+  { key: 'green', label: 'Black & Green', sw: '#080808', sw2: '#1A5C32' },
+  { key: 'charcoal', label: 'Charcoal', sw: '#161616', sw2: '#FFD100' },
+  { key: 'greenflood', label: 'Green flood', sw: '#1A5C32', sw2: '#FFD100' },
+  { key: 'yellowflood', label: 'Yellow flood', sw: '#FFD100', sw2: '#1A5C32' },
+  { key: 'light', label: 'Clean light', sw: '#F5F3ED', sw2: '#1A5C32' }
+];
 var FESTIVE = {
   'Christmas': ['Merry Christmas', 'from everyone at The Lane', 'tree'],
   'New Year': ['Happy New Year', 'Onwards & upwards, Yellow Army', 'firework'],
@@ -3791,7 +3810,7 @@ function psIco(key, px, color) {
   var p = PS_ICONS[key]; if (!p) return '';
   return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
 }
-var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', history: 'scroll', quote: 'quote' };
+var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
 var HISTORY_FACTS = [
   'Founded in 1933 — over 90 years at the heart of Harrow football.',
   'The Lane plays in yellow & green at Tithe Farm Sports & Social Club.',
@@ -3828,6 +3847,7 @@ function POST_TYPES() { return [
   { key: 'countdown', label: 'Countdown' },
   { key: 'festive',   label: 'Festive' },
   { key: 'announce',  label: 'Announcement' },
+  { key: 'headline',  label: 'Headline / Hook' },
   { key: 'history',   label: 'Club History' },
   { key: 'quote',     label: 'Motivation' }
 ]; }
@@ -3896,7 +3916,68 @@ function psApplyFixture(id) {
 }
 function psBuild() {
   document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + psIco(PS_TYPE_ICON[t.key], 15) + ' ' + t.label + '</button>'; }).join('');
+  psBuildPalettes();
   psSetType(PS.type);
+}
+// Palette swatch strip (a tappable seg control, like Size). psSetTheme still
+// drives it (PS.theme IS the palette key), so nothing else changes.
+function psBuildPalettes() {
+  var el = document.getElementById('ps-theme'); if (!el) return;
+  el.innerHTML = PS_PALETTES.map(function (p) {
+    return '<button data-theme="' + p.key + '"' + (PS.theme === p.key ? ' class="on"' : '') + ' onclick="psSetTheme(\'' + p.key + '\')" title="' + p.label + '" style="display:inline-flex;align-items:center;gap:7px">' +
+      '<span style="display:inline-block;width:26px;height:16px;border-radius:4px;background:' + p.sw + ';border:1px solid rgba(255,255,255,.25);position:relative;flex-shrink:0"><span style="position:absolute;right:2px;top:2px;width:8px;height:8px;border-radius:50%;background:' + p.sw2 + '"></span></span>' +
+      p.label + '</button>';
+  }).join('');
+}
+function psSetPalette(k) { psSetTheme(k); } // brief alias
+
+/* ── AI copywriter (Post Studio) — reword a rough note into ready X captions +
+   a call-to-action hook, via the PIN-gated gen-post function (Groq or Gemini). */
+function aiGenerate(mode) {
+  var src = (document.getElementById('ai-src').value || '').trim();
+  if (!src) { toast('Type a rough note first', true); return; }
+  var out = document.getElementById('ai-out');
+  out.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">✨ Writing…</div>';
+  toast('Writing…');
+  fetch('/.netlify/functions/gen-post', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, mode: mode, text: src }) })
+    .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, j: j }; }); })
+    .then(function (res) {
+      var j = res.j || {};
+      if (res.status === 401) { out.innerHTML = aiNote('PIN rejected — reload and sign in again.'); return; }
+      if (!j.ok) {
+        if (j.error === 'no-key') out.innerHTML = aiNote('AI isn\'t switched on yet. Add <strong>GROQ_API_KEY</strong> (or <strong>GEMINI_API_KEY</strong>) in Netlify → Environment variables. The rest of Post Studio still works.');
+        else out.innerHTML = aiNote('Couldn\'t generate (' + escH(j.error || 'error') + '). Try again.');
+        toast('AI unavailable — cards still work', true);
+        return;
+      }
+      var html = '';
+      if (j.tweets && j.tweets.length) {
+        html += '<div style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin:10px 0 6px">Tap a caption to copy it to X</div>';
+        html += j.tweets.map(function (tw) {
+          var n = tw.length, cnt = '<span style="font-family:var(--fc);font-size:11px;font-weight:700;color:' + (n <= 280 ? 'var(--su)' : 'var(--re)') + '">' + n + '/280</span>';
+          // The whole .soc-cap textContent is copied by the existing handler, so
+          // it must hold ONLY the tweet — count + hint sit outside it.
+          return '<div class="soc-cap" style="cursor:pointer;background:var(--c);border:1px solid var(--br);border-radius:10px 10px 0 0;padding:12px 14px;font-family:var(--fb);font-size:14px;color:#eee;line-height:1.5;white-space:pre-wrap">' + escH(tw) + '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--c);border:1px solid var(--br);border-top:none;border-radius:0 0 10px 10px;padding:6px 14px 8px;margin-bottom:8px">' + cnt + '<span style="font-family:var(--fc);font-size:11px;font-weight:700;color:var(--y)">tap caption to copy ▸</span></div>';
+        }).join('');
+      }
+      if (j.hook) {
+        html += '<div style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin:12px 0 6px">Headline hook</div>' +
+          '<div style="background:var(--c);border:1px solid rgba(255,209,0,.35);border-radius:10px;padding:14px">' +
+          '<div style="font-family:\'Bebas Neue\',var(--fd);font-size:30px;letter-spacing:1px;color:#fff;line-height:1">' + escH(j.hook.toUpperCase()) + '</div>' +
+          '<button class="save sec" style="margin-top:10px" onclick="aiUseHook(' + JSON.stringify(j.hook).replace(/"/g, '&quot;') + ')">Use as headline card →</button></div>';
+      }
+      out.innerHTML = html || aiNote('No output — try rephrasing your note.');
+    })
+    .catch(function () { out.innerHTML = aiNote('Couldn\'t reach the server. Try again.'); });
+}
+function aiNote(msg) { return '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p>' + msg + '</p></div>'; }
+function aiUseHook(hook) {
+  psSetType('headline');
+  PS.data.headline = String(hook || '').toUpperCase();
+  psFields(); psRender();
+  var el = document.getElementById('ps-card-wrap'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  toast('Headline dropped in — pick a palette & save ✓');
 }
 function psSetType(k) {
   PS.type = k; PS.data = {};
@@ -3975,6 +4056,9 @@ function psFieldDefs() {
     case 'countdown': return '<div class="ps-crestrow"><div class="field"><label class="fl">Days to go</label><input type="number" min="0" value="' + (d.days || 3) + '" oninput="psSet(\'days\',this.value)"></div><div class="field"><label class="fl">To what</label><input type="text" value="' + escH(d.what || 'KICK OFF') + '" oninput="psSet(\'what\',this.value)"></div></div>';
     case 'festive': return '<div class="field"><label class="fl">Occasion</label><select onchange="psVal(\'occ\',this.value)">' + Object.keys(FESTIVE).map(function (o) { return '<option' + (d.occ === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div>';
     case 'announce': return '<div class="field"><label class="fl">Bold title</label><input type="text" value="' + escH(d.title || 'IMPORTANT UPDATE') + '" oninput="psSet(\'title\',this.value)"></div><div class="field"><label class="fl">Message</label><textarea rows="3" oninput="psSet(\'body\',this.value)">' + escH(d.body || '') + '</textarea></div>';
+    case 'headline': return '<div class="field"><label class="fl">Headline <span style="color:var(--gr);font-weight:400">— the big Bebas line. A teaser that makes people read, not the whole story.</span></label><input type="text" value="' + escH(d.headline || 'BIG NEWS DROPS') + '" oninput="psSet(\'headline\',this.value)"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Kicker (small, above)</label><input type="text" value="' + escH(d.kicker == null ? 'RAYNERS LANE FC' : d.kicker) + '" oninput="psSet(\'kicker\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Sub-line (below, optional)</label><input type="text" value="' + escH(d.subline || '') + '" placeholder="e.g. Read the full story" oninput="psSet(\'subline\',this.value)"></div></div>';
     case 'history': return '<div class="field"><label class="fl">Fact <button onclick="psVal(\'fact\',HISTORY_FACTS[Math.floor(Math.random()*HISTORY_FACTS.length)]);" style="background:none;border:none;color:var(--y);cursor:pointer;font-family:var(--fc);font-weight:700;float:right">🎲 Generate</button></label><textarea rows="3" oninput="psSet(\'fact\',this.value)">' + escH(d.fact || HISTORY_FACTS[0]) + '</textarea></div>';
     case 'quote': var q = d.quote || QUOTES[0]; return '<button class="save sec" style="margin-bottom:10px" onclick="var q=QUOTES[Math.floor(Math.random()*QUOTES.length)];psVal(\'quote\',q)">🎲 Generate a quote</button><div class="field"><label class="fl">Big line</label><input type="text" value="' + escH(q[0]) + '" oninput="psVal2(\'quote\',0,this.value)"></div><div class="field"><label class="fl">Small line</label><input type="text" value="' + escH(q[1]) + '" oninput="psVal2(\'quote\',1,this.value)"></div>';
   }
@@ -4026,7 +4110,7 @@ function psBrand(t, s) {
     '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:34px;letter-spacing:2px;color:#fff;line-height:.86">RAYNERS LANE FC<div style="font-family:Arial;font-size:12px;letter-spacing:3px;color:' + t.accent + ';font-weight:800;margin-top:3px">EST. 1933 · HARROW</div></div></div>';
 }
 function psFooter(t, s) {
-  return '<div style="position:absolute;bottom:0;left:0;right:0;height:14px;background:' + t.accent + (PS.theme === 'green' ? ';background:linear-gradient(90deg,' + t.accent + ',' + t.accent2 + ')' : '') + '"></div>' +
+  return '<div style="position:absolute;bottom:0;left:0;right:0;height:14px;background:' + t.accent + (t.accent2 && t.accent2 !== t.accent ? ';background:linear-gradient(90deg,' + t.accent + ',' + t.accent2 + ')' : '') + '"></div>' +
     '<div style="position:absolute;bottom:38px;left:0;right:0;text-align:center;font-family:Arial;font-size:17px;font-weight:800;letter-spacing:4px;color:rgba(255,255,255,.66)">RAYNERSLANEFC.CO.UK</div>';
 }
 function psWM() { return '<div style="position:absolute;right:-130px;bottom:-110px;width:600px;height:600px;background:url(img/badge.png) center/contain no-repeat;opacity:.05"></div>'; }
@@ -4058,21 +4142,21 @@ function psPlayerCard(t, s, p, big, framed) {
 // radial/linear gradients (it throws "addColorStop non-finite" and drops
 // elements like the top banner), but it rasterises an SVG image fine.
 function psCardBg(theme) {
-  var stops = theme === 'green'
-    ? '<stop offset="0%" stop-color="#11301a"/><stop offset="60%" stop-color="#06120a"/><stop offset="100%" stop-color="#020402"/>'
-    : '<stop offset="0%" stop-color="#1f1f1f"/><stop offset="60%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#000000"/>';
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><defs><radialGradient id="g" cx="28%" cy="18%" r="100%">' + stops + '</radialGradient></defs><rect width="300" height="300" fill="url(#g)"/></svg>';
+  var p = PS_THEMES[theme] || PS_THEMES.yellow;
+  var lightish = (theme === 'light' || theme === 'yellowflood');
+  var cx = lightish ? '50%' : '28%', cy = lightish ? '32%' : '18%';
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><defs><radialGradient id="g" cx="' + cx + '" cy="' + cy + '" r="100%">' + p.bgStops + '</radialGradient></defs><rect width="300" height="300" fill="url(#g)"/></svg>';
   return '#000 url("data:image/svg+xml,' + encodeURIComponent(svg) + '") center / cover no-repeat';
 }
 function psRender() {
   var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
   var X = PS.size === 'x', ST = PS.size === 'story';
   var card = document.getElementById('ps-card'); if (!card) return;
-  card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + psCardBg(PS.theme) + ';background-size:cover;overflow:hidden;color:#fff';
+  card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + psCardBg(PS.theme) + ';background-size:cover;overflow:hidden;color:' + t.text;
   var inner = psWM();
   // a strong diagonal brand band behind everything (fills "blank" space, on-brand)
   // Solid tint (not a CSS gradient) so html2canvas can rasterise it.
-  var bandTint = PS.theme === 'green' ? 'rgba(42,128,72,.12)' : 'rgba(255,209,0,.07)';
+  var bandTint = t.band;
   inner += '<div style="position:absolute;left:-5%;right:-5%;top:' + (midY - (X ? 130 : 200)) + 'px;height:' + (X ? 260 : 400) + 'px;background:' + bandTint + ';transform:skewY(-7deg)"></div>';
   function crestName(file) { var c = psCrests.filter(function (x) { return x.file === file; })[0]; return c ? c.name.toUpperCase() : ''; }
   function ctr(top, html) { return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center">' + html + '</div>'; }
@@ -4195,7 +4279,7 @@ function psRender() {
     if (d.logo) {
       var sc = +d.logoScale || 360, lx = (d.logoX == null ? 50 : +d.logoX) / 100, ly = (d.logoY == null ? 44 : +d.logoY) / 100;
       var lcx = W * lx, lcy = H * ly;
-      if (d.logoWhite) inner += '<div style="position:absolute;left:' + (lcx - sc / 2 - 26) + 'px;top:' + (lcy - sc / 2 - 26) + 'px;width:' + (sc + 52) + 'px;height:' + (sc + 52) + 'px;background:#fff;border-radius:24px;box-shadow:0 20px 50px -16px rgba(0,0,0,.7)"></div>';
+      if (d.logoWhite) inner += '<div style="position:absolute;left:' + (lcx - sc / 2 - 26) + 'px;top:' + (lcy - sc / 2 - 26) + 'px;width:' + (sc + 52) + 'px;height:' + (sc + 52) + 'px;background:#ffffff;border-radius:24px;box-shadow:0 20px 50px -16px rgba(0,0,0,.7)"></div>';
       inner += '<img src="' + d.logo + '" crossorigin="anonymous" style="position:absolute;left:' + (lcx - sc / 2) + 'px;top:' + (lcy - sc / 2) + 'px;width:' + sc + 'px;height:' + sc + 'px;object-fit:contain">';
     } else {
       inner += ctr(midY - 30, '<span style="font-family:Arial;font-size:28px;color:rgba(255,255,255,.5)">⬆ upload the sponsor logo</span>');
@@ -4245,8 +4329,23 @@ function psRender() {
     var q = Array.isArray(d.quote) ? d.quote : QUOTES[0];
     inner += '<div style="position:absolute;top:' + (midY - 150) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:110px;letter-spacing:2px;color:' + t.accent + ';line-height:.92;padding:0 60px">' + escH(q[0]).toUpperCase() + '</div>';
     inner += '<div style="position:absolute;top:' + (midY + 80) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;font-style:italic;color:#fff;padding:0 90px">' + escH(q[1]) + '</div>';
+  } else if (PS.type === 'headline') {
+    // Bold teaser title card — the AI hook drops in here. Big Bebas line that
+    // makes people read the caption. Auto-sizes to the headline length.
+    var hl = (d.headline || 'BIG NEWS DROPS').toUpperCase();
+    var kick = (d.kicker == null ? 'RAYNERS LANE FC' : d.kicker);
+    var hlen = hl.length;
+    var hlSize = X ? (hlen > 22 ? 118 : hlen > 13 ? 158 : 208) : (hlen > 22 ? 150 : hlen > 13 ? 208 : 276);
+    if (kick) inner += ctr(midY - (X ? 148 : 232), '<span style="font-family:Arial;font-size:' + (X ? 24 : 30) + 'px;font-weight:800;letter-spacing:6px;color:' + t.accent + '">' + escH(kick).toUpperCase() + '</span>');
+    inner += '<div style="position:absolute;top:' + (midY - (X ? 92 : 148)) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:' + hlSize + 'px;letter-spacing:2px;color:#fff;line-height:.88;padding:0 60px">' + escH(hl) + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + (X ? 66 : 120)) + 'px;left:50%;transform:translateX(-50%);width:' + (X ? 170 : 230) + 'px;height:8px;background:' + t.accent + ';border-radius:4px"></div>';
+    if (d.subline) inner += ctr(midY + (X ? 92 : 158), '<span style="font-family:Arial;font-size:' + (X ? 26 : 32) + 'px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.subline) + '</span>');
   }
   inner += psBrand(t, s) + psFooter(t, s);
+  // Palette recolour, scoped to THIS card's HTML only: every white TEXT token →
+  // the palette ink/soft, so every card type stays legible on light OR dark.
+  // Protected: #ffffff (functional white panels) + rgba(0,0,0,…) shadows.
+  inner = inner.replace(/#fff(?![0-9a-fA-F])/g, t.text).replace(/rgba\(255,\s*255,\s*255,[^)]*\)/g, t.soft);
   card.innerHTML = inner;
   // scale to fit the stage, reserving the exact scaled footprint so nothing leaks
   var wrap = document.getElementById('ps-card-wrap');
@@ -4265,7 +4364,7 @@ function psDownload() {
   toast('Building your post…');
   var prevT = card.style.transform; card.style.transform = 'scale(1)';
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
-    html2canvas(card, { backgroundColor: null, useCORS: true, scale: 1, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
+    html2canvas(card, { backgroundColor: null, useCORS: true, scale: 2, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
       card.style.transform = prevT;
       var fname = 'rayners-lane-' + PS.type + '-' + PS.size + '.png';
       cv.toBlob(function (blob) {
