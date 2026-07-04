@@ -1,13 +1,13 @@
 {
   "isLive": true,
   "isHome": true,
-  "opponent": "Hayes & Yeading",
+  "opponent": "Hayes & Yeading FC",
   "date": "2026-07-04",
   "kickoff": "15:00",
   "venue": "Tithe Farm Social Club",
-  "competition": "Combined Counties Premier Div North",
-  "homeScore": 0,
-  "awayScore": 0,
+  "competition": "Friendly",
+  "homeScore": 1,
+  "awayScore": 3,
   "scorers": "",
-  "status": ""
+  "status": "Full Time"
 }
