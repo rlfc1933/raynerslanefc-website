@@ -1,9 +1,13 @@
 {
-  "isLive": false,
+  "isLive": true,
   "isHome": true,
-  "opponent": "TBC",
+  "opponent": "Hayes & Yeading",
+  "date": "2026-07-04",
+  "kickoff": "15:00",
   "venue": "Tithe Farm Social Club",
   "competition": "Combined Counties Premier Div North",
-  "kickoff": "15:00",
-  "date": "2026-08-01T15:00:00"
+  "homeScore": 0,
+  "awayScore": 0,
+  "scorers": "",
+  "status": ""
 }
