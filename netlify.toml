@@ -1,6 +1,13 @@
 [build]
   functions = "netlify/functions"
 
+# Pin a stable Node LTS so the cloud install is deterministic. Cloud builds
+# started failing (exit 2 in "building site") after edf8e44 while local builds
+# passed — classic floating-toolchain drift. A committed package-lock.json
+# (→ npm ci) plus this pin make the build reproducible.
+[build.environment]
+  NODE_VERSION = "20"
+
 # HTML must always revalidate so staff/fans see updates immediately
 # (no more "I saved it but still see the old version").
 [[headers]]
