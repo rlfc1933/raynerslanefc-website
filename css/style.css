@@ -73,12 +73,9 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .nav__actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .nav__ticket{background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:8px 16px;border-radius:3px;transition:background .2s;white-space:nowrap}
 .nav__ticket:hover{background:var(--yellow-dim)}
-.hamburger{display:none;flex-direction:column;gap:5px;padding:8px;flex-shrink:0}
-.hamburger span{display:block;width:22px;height:2px;background:var(--white);transition:var(--ease)}
-.mob-menu{display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--dark);border-bottom:1px solid var(--border);padding:8px 0 20px;flex-direction:column;z-index:98}
-.mob-menu.open{display:flex}
-.mob-menu a{font-family:var(--font-c);font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lgrey);padding:13px 24px;border-bottom:1px solid var(--border);transition:color .2s}
-.mob-menu a:hover{color:var(--yellow)}
+/* Mobile menu button in the top bar — hidden on desktop, shown ≤900 (see media query) */
+.nav__menu-btn{display:none;align-items:center;justify-content:center;width:42px;height:42px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--white);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.nav__menu-btn:hover{border-color:var(--yellow);color:var(--yellow)}
 
 /* ── HERO ── */
 .hero{min-height:calc(100svh - var(--nav-h) - 34px);display:grid;grid-template-columns:55% 45%;position:relative;overflow:hidden}
@@ -311,12 +308,9 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
   .prog-cover{aspect-ratio:16/7}
 }
 @media(max-width:768px){
-  .nav__links{display:none}
   /* keep the Install button visible at the top on mobile; hide only Fixtures CTA */
   .nav__actions{display:flex;margin-right:8px}
-  .nav__cta{display:none}
   .nav__install{padding:8px 12px;font-size:11px}
-  .hamburger{display:flex}
   .hero__left{padding:40px 24px 56px}
   .hero__h1{font-size:clamp(52px,12vw,80px)}
   .section{padding:64px 0}
@@ -385,8 +379,32 @@ body > *:not(#bg-imagery) { position:relative; z-index:1; }
   .bnav__icon{font-size:20px;line-height:1;margin-bottom:3px;display:flex;align-items:center;justify-content:center;height:22px}
   .bnav__icon svg{width:22px;height:22px}
   .bnav__label{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .bnav__more{background:none;border:none;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .nav__menu-btn{display:inline-flex}
+  /* keep the WhatsApp float clear of the fixed bottom bar */
+  #lane-wa{bottom:calc(80px + env(safe-area-inset-bottom)) !important}
   body{padding-bottom:72px}
 }
+
+/* ── MOBILE FULL MENU SHEET (opened by top ☰ and bottom "More") ── */
+.lane-menu{position:fixed;inset:0;z-index:10000;display:none}
+.lane-menu.open{display:block}
+.lane-menu__scrim{position:absolute;inset:0;background:rgba(0,0,0,.62);opacity:0;transition:opacity .25s ease}
+.lane-menu.open .lane-menu__scrim{opacity:1}
+.lane-menu__panel{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0A0A0A;border-top:3px solid var(--yellow);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+.lane-menu.open .lane-menu__panel{transform:translateY(0)}
+.lane-menu__head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;background:#0A0A0A;border-bottom:1px solid rgba(255,255,255,.06)}
+.lane-menu__title{font-family:var(--font-d);font-size:26px;letter-spacing:.05em;color:var(--white)}
+.lane-menu__close{width:42px;height:42px;border-radius:50%;background:none;border:1px solid var(--border);color:var(--white);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lane-menu__close:hover{border-color:var(--yellow);color:var(--yellow)}
+.lane-menu__group{padding:2px 20px}
+.lane-menu__gh{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin:16px 0 2px}
+.lane-menu__link{display:flex;align-items:center;min-height:48px;font-family:var(--font-c);font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#e8e8e8;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.06)}
+.lane-menu__link:active,.lane-menu__link--active{color:var(--yellow)}
+.lane-menu__link--active::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--yellow);margin-right:11px;flex-shrink:0}
+.lane-menu__foot{padding:18px 20px 0}
+.lane-menu__foot .nav__install{width:100%;justify-content:center}
+@media(min-width:901px){ .lane-menu{display:none !important} }
 
 /* PWA banner - desktop hidden, mobile visible */
 #pwa-banner { display:flex !important; }

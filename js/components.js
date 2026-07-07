@@ -128,24 +128,59 @@ function buildNav(currentPage) {
     squad:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5M20.5 20a5.5 5.5 0 0 0-4-5.3"/></svg>',
     more:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
   };
-  const bottomLinks = [
-    { label:'Home',     href:'index.html',     icon:ico.home },
-    { label:'News',     href:'news.html',      icon:ico.news },
-    { label:'Fixtures', href:'fixtures.html',  icon:ico.fix  },
-    { label:'Squad',    href:'squad.html',     icon:ico.squad },
-    { label:'More',     href:'about.html',     icon:ico.more },
+  const bottomPrimary = [
+    { label:'Home',     href:'index.html',    icon:ico.home  },
+    { label:'News',     href:'news.html',     icon:ico.news  },
+    { label:'Fixtures', href:'fixtures.html', icon:ico.fix   },
+    { label:'Squad',    href:'squad.html',    icon:ico.squad },
   ];
+  // "More" is active whenever we're not on one of the four primary tabs.
+  const moreActive = bottomPrimary.every(function (l) { return l.href !== currentPage; });
+
+  // Full mobile menu sheet — grouped links to EVERY page. Both the top ☰ and the
+  // bottom "More" open this same sheet, so no page is unreachable on a phone.
+  const menuGroups = [
+    { h:'Matchday',     items:[['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
+    { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['News','news.html'],['Contact','contact.html']] },
+    { h:'Get Involved', items:[['Membership','membership.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
+    { h:'Commercial',   items:[['Sponsorship','investment.html'],['Club Shop','shop.html']] },
+  ];
+  const mLink = function (label, href) {
+    var on = currentPage === href;
+    return `<a href="${href}" class="lane-menu__link${on ? ' lane-menu__link--active' : ''}"${on ? ' aria-current="page"' : ''}>${label}</a>`;
+  };
+  const menuSheet = `
+  <div class="lane-menu" id="lane-menu" role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden="true">
+    <div class="lane-menu__scrim" onclick="laneMenuClose()"></div>
+    <div class="lane-menu__panel">
+      <div class="lane-menu__head">
+        <span class="lane-menu__title">Menu</span>
+        <button type="button" class="lane-menu__close" onclick="laneMenuClose()" aria-label="Close menu">&#10005;</button>
+      </div>
+      <div class="lane-menu__group">${mLink('Home', 'index.html')}</div>
+      ${menuGroups.map(function (g) {
+        return `<div class="lane-menu__group"><div class="lane-menu__gh">${g.h}</div>${g.items.map(function (it) { return mLink(it[0], it[1]); }).join('')}</div>`;
+      }).join('')}
+      <div class="lane-menu__foot">
+        <button type="button" class="nav__install" onclick="laneMenuClose();laneInstall()">Install App</button>
+      </div>
+    </div>
+  </div>`;
 
   const navLinks = links.map(l =>
     `<a href="${l.href}" class="nav__link${currentPage===l.href?' nav__link--active':''}">${l.label}</a>`
   ).join('');
 
-  const bottomNav = bottomLinks.map(l =>
+  const bottomNav = bottomPrimary.map(l =>
     `<a href="${l.href}" class="bnav__item${currentPage===l.href?' bnav__item--active':''}">
       <span class="bnav__icon">${l.icon}</span>
       <span class="bnav__label">${l.label}</span>
     </a>`
-  ).join('');
+  ).join('') +
+    `<button type="button" class="bnav__item bnav__more${moreActive?' bnav__item--active':''}" data-menu-btn aria-controls="lane-menu" aria-expanded="false" aria-label="Open menu" onclick="laneMenuToggle()">
+      <span class="bnav__icon">${ico.more}</span>
+      <span class="bnav__label">More</span>
+    </button>`;
 
   return `<nav class="nav" role="navigation">
     <div class="nav__i">
@@ -166,13 +201,62 @@ function buildNav(currentPage) {
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           Fixtures
         </a>
+        <button type="button" class="nav__menu-btn" data-menu-btn aria-controls="lane-menu" aria-expanded="false" aria-label="Open menu" onclick="laneMenuToggle()">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
     </div>
   </nav>
   <nav class="bnav" role="navigation" aria-label="Mobile navigation">
     ${bottomNav}
-  </nav>`;
+  </nav>
+  ${menuSheet}`;
 }
+
+// ── Mobile menu sheet: open/close with a11y (scrim, Esc, back gesture, focus
+//    trap). Both the top ☰ and the bottom "More" call laneMenuToggle(). ──
+var _laneMenuOpener = null;
+function _laneMenuBtns() { return document.querySelectorAll('[data-menu-btn]'); }
+window.laneMenuOpen = function () {
+  var m = document.getElementById('lane-menu');
+  if (!m || m.classList.contains('open')) return;
+  _laneMenuOpener = document.activeElement;
+  m.classList.add('open'); m.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  _laneMenuBtns().forEach(function (b) { b.setAttribute('aria-expanded', 'true'); });
+  var c = m.querySelector('.lane-menu__close'); if (c) c.focus();
+  try { history.pushState({ laneMenu: 1 }, ''); } catch (e) {}
+};
+window.laneMenuClose = function (fromPop) {
+  var m = document.getElementById('lane-menu');
+  if (!m || !m.classList.contains('open')) return;
+  m.classList.remove('open'); m.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  _laneMenuBtns().forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+  if (_laneMenuOpener && _laneMenuOpener.focus) { try { _laneMenuOpener.focus(); } catch (e) {} }
+  // if we opened via a pushed history state, unwind it (unless this close WAS the back)
+  if (!fromPop) { try { if (history.state && history.state.laneMenu) history.back(); } catch (e) {} }
+};
+window.laneMenuToggle = function () {
+  var m = document.getElementById('lane-menu');
+  if (m && m.classList.contains('open')) window.laneMenuClose(); else window.laneMenuOpen();
+};
+window.addEventListener('popstate', function () {
+  var m = document.getElementById('lane-menu');
+  if (m && m.classList.contains('open')) window.laneMenuClose(true); // Android back closes it
+});
+document.addEventListener('keydown', function (e) {
+  var m = document.getElementById('lane-menu');
+  if (!m || !m.classList.contains('open')) return;
+  if (e.key === 'Escape') { window.laneMenuClose(); return; }
+  if (e.key === 'Tab') { // focus trap inside the sheet
+    var f = m.querySelectorAll('a[href],button:not([disabled])');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
 
 
 function buildTwitterSection() {
