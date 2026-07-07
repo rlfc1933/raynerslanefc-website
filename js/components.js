@@ -543,9 +543,14 @@ function initComponents(currentPage) {
   const nav     = document.getElementById('nav-placeholder');
   const footer  = document.getElementById('footer-placeholder');
   const twitter = document.getElementById('twitter-placeholder');
-  // Mobile uses the fixed bottom nav (.bnav) built into buildNav — there is no
-  // burger menu, so the nav just renders. (Old #nav-burger toggle code removed.)
   if (nav) nav.innerHTML = buildNav(currentPage);
+  // Portal the mobile menu sheet OUT of #nav-placeholder onto <body>. Every body
+  // child gets `z-index:1` (see style.css), which is a stacking context that would
+  // otherwise TRAP the sheet's z-index behind later page content — making it look
+  // see-through AND letting clicks fall through to the content. As a direct body
+  // child (excluded from that clamp in CSS) its z-index:10000 finally wins.
+  var _sheet = document.getElementById('lane-menu');
+  if (_sheet && _sheet.parentElement !== document.body) document.body.appendChild(_sheet);
   if (twitter) twitter.innerHTML = buildTwitterSection();
   if (footer)  footer.innerHTML  = buildFooter();
 

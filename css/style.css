@@ -344,7 +344,14 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
   opacity:0; transition:opacity 2.5s ease-in-out;
 }
 .bg-img.visible { opacity:0.055; }
-body > *:not(#bg-imagery) { position:relative; z-index:1; }
+/* Every body child gets its own z-index:1 stacking context, EXCEPT #bg-imagery
+   (behind), #lane-menu (portaled mobile menu, z-index:10000), and #nav-placeholder.
+   #nav-placeholder holds the sticky top bar AND the fixed bottom bar; it sits
+   EARLY in the DOM, so flattening it to z-index:1 let later content (also z-index:1)
+   paint over the nav — making the bottom bar look see-through and swallow taps.
+   Lifting the whole nav shell above content fixes that at the root. */
+body > *:not(#bg-imagery):not(#lane-menu):not(#nav-placeholder) { position:relative; z-index:1; }
+#nav-placeholder { position:relative; z-index:1000; }
 
 .nav__badge{width:42px;height:42px;object-fit:contain;flex-shrink:0}
 
