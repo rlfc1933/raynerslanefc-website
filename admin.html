@@ -4039,11 +4039,11 @@ function psFieldDefs() {
     case 'fulltime': return fxPick + crests + score +
       '<div class="field"><label class="fl">Goalscorers <span style="color:var(--gr);font-weight:400">— optional, e.g. Hill 23\', Cole 67\'. A long list auto-shrinks.</span></label><input type="text" value="' + escH(d.scorers || '') + '" placeholder="Hill 23\', Cole 67\'" oninput="psSet(\'scorers\',this.value)"></div>' +
       '<div class="field"><label class="fl">Manager\'s quote <span style="color:var(--gr);font-weight:400">— optional, 1–3 sentences. Auto-shrinks to fit.</span></label><textarea rows="3" placeholder="Delighted with the character the lads showed today…" oninput="psSet(\'mgrQuote\',this.value)">' + escH(d.mgrQuote || '') + '</textarea></div>';
-    case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>';
+    case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>' + psCutoutControls();
     case 'potm': return player +
       '<div class="ps-crestrow"><div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Position (optional)</label><input type="text" value="' + escH(d.manualPos || '') + '" placeholder="Striker" oninput="psSet(\'manualPos\',this.value)"></div></div>' +
-      '<div class="field"><label class="fl">Month</label><input type="text" value="' + escH(d.month || 'AUGUST') + '" oninput="psSet(\'month\',this.value)"></div>';
+      '<div class="field"><label class="fl">Month</label><input type="text" value="' + escH(d.month || 'AUGUST') + '" oninput="psSet(\'month\',this.value)"></div>' + psCutoutControls();
     case 'sponsorspot': return '<div class="field"><label class="fl">Sponsor name</label><input type="text" value="' + escH(d.spName || '') + '" placeholder="Hanlon Dry Lining" oninput="psSet(\'spName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Sub-line (optional)</label><input type="text" value="' + escH(d.spSub || 'Show them some love 💛') + '" oninput="psSet(\'spSub\',this.value)"></div>' +
       '<div class="field"><label class="fl">Sponsor logo</label><input type="file" accept="image/*" onchange="psLogoUpload(this)" style="width:100%;color:var(--gr);font-family:var(--fc);font-size:13px"></div>' +
@@ -4188,6 +4188,19 @@ function psCutoutImg(W, H, size, mode) {
   var anchor = mode === 'center' ? ('top:50%;transform:translate(-50%,-50%) translate(' + offX + 'px,' + (-offY) + 'px)' + flip)
     : ('bottom:' + (H * 0.02) + 'px;transform:translateX(-50%) translate(' + offX + 'px,' + (-offY) + 'px)' + flip);
   return '<img src="' + d.pCut + '" crossorigin="anonymous" style="position:absolute;left:50%;' + anchor + ';height:' + h + 'px;object-fit:contain;filter:drop-shadow(0 26px 40px rgba(0,0,0,.6));z-index:' + z + ';pointer-events:none">';
+}
+// Shared cinematic knock-out block for hero player cards (signing/motm/potm):
+// faded crest + player cutout bottom-centre + dark scrim + big Bebas name (auto-
+// fit) + optional accent labels above/below. beb() is passed in from psRender.
+function psCutoutHero(W, H, X, ST, t, beb, topLabel, name, subLabel) {
+  var s = '<div style="position:absolute;left:50%;top:' + (X ? '9%' : '13%') + ';transform:translateX(-50%);width:' + (X ? 300 : 470) + 'px;height:' + (X ? 300 : 470) + 'px;background:url(img/badge.png) center/contain no-repeat;opacity:.09"></div>';
+  s += psCutoutImg(W, H, X ? H * 0.74 : (ST ? H * 0.60 : H * 0.68), 'bottom');
+  s += '<div style="position:absolute;left:0;right:0;bottom:0;height:' + Math.round(X ? H * 0.34 : H * 0.30) + 'px;background:rgba(0,0,0,.5);z-index:10"></div>';
+  var yName = X ? H - 116 : (ST ? H - 250 : H - 196);
+  if (topLabel) s += '<div style="position:absolute;top:' + (yName - (X ? 50 : 64)) + 'px;left:0;right:0;text-align:center;z-index:11;' + beb(X ? 38 : 52, t.accent) + '">' + topLabel + '</div>';
+  s += '<div data-fit="' + (X ? 120 : 170) + ':46" style="position:absolute;top:' + yName + 'px;left:0;right:0;height:' + (X ? 86 : 122) + 'px;overflow:hidden;text-align:center;z-index:11;' + beb(X ? 120 : 170, '#fff') + '">' + name + '</div>';
+  if (subLabel) s += '<div style="position:absolute;top:' + (yName + (X ? 80 : 116)) + 'px;left:0;right:0;text-align:center;z-index:11;font-family:Arial;font-size:' + (X ? 20 : 26) + 'px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + subLabel + '</div>';
+  return s;
 }
 // effective player: a selected profile OR the manually-typed name/position
 function psEff() {
@@ -4393,18 +4406,26 @@ function psRender() {
   } else if (PS.type === 'motm') {
     var pm = psPlayerObj(), hasM = pm && pm.photo;
     inner += psEyebrow('MAN OF THE MATCH', t, ebTop);
-    if (hasM) inner += playerFrame(pm, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
-    var my = X ? H - 150 : (ST ? H - 340 : H - 230);
-    inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
-    inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+    if (d.useCut && d.pCut) {
+      inner += psCutoutHero(W, H, X, ST, t, beb, '', psSurname(pm, (d.manualName || '[PLAYER]').toUpperCase()), (pos(pm) || '') + (d.sponsor ? (pos(pm) ? ' · ' : '') + 'SPONSORED BY ' + escH(d.sponsor).toUpperCase() : ''));
+    } else {
+      if (hasM) inner += playerFrame(pm, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
+      var my = X ? H - 150 : (ST ? H - 340 : H - 230);
+      inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
+      inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+    }
   } else if (PS.type === 'potm') {
     var ep = psEff(), hasPp = !!ep.photo;
     inner += psEyebrow('PLAYER OF THE MONTH', t, ebTop);
     inner += ctr(ebTop + (X ? 58 : 76), '<span style="font-family:Arial;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">' + escH((d.month || 'AUGUST')).toUpperCase() + '</span>');
-    if (hasPp) inner += playerFrame({ photo: ep.photo }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
-    var py = X ? H - 150 : (ST ? H - 340 : H - 235);
-    inner += ctr(hasPp ? py : midY - 30, '<span style="' + beb(hasPp ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
-    if (ep.position) inner += ctr(hasPp ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
+    if (d.useCut && d.pCut) {
+      inner += psCutoutHero(W, H, X, ST, t, beb, '', escH(ep.surname), ep.position ? escH(ep.position).toUpperCase() : '');
+    } else {
+      if (hasPp) inner += playerFrame({ photo: ep.photo }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
+      var py = X ? H - 150 : (ST ? H - 340 : H - 235);
+      inner += ctr(hasPp ? py : midY - 30, '<span style="' + beb(hasPp ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
+      if (ep.position) inner += ctr(hasPp ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
+    }
   } else if (PS.type === 'sponsorspot') {
     inner += psEyebrow('PROUDLY SPONSORED BY', t, ebTop);
     if (d.logo) {
