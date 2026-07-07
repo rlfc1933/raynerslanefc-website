@@ -3982,6 +3982,9 @@ function aiUseHook(hook) {
 function psSetType(k) {
   PS.type = k; PS.data = {};
   document.querySelectorAll('#ps-types .ps-type').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
+  // Warm up the background-removal model in the background for player cards so
+  // the first cutout doesn't pay the full download wait.
+  if (['signing', 'motm', 'potm', 'goal', 'birthday'].indexOf(k) > -1) psCutout.preload();
   psFields(); psRender();
 }
 function psSetTheme(t) { PS.theme = t; document.querySelectorAll('#ps-theme button').forEach(function (b) { b.classList.toggle('on', b.dataset.theme === t); }); document.getElementById('ps-size'); psRender(); }
@@ -4053,7 +4056,7 @@ function psFieldDefs() {
       '<div class="ps-crestrow"><div class="field"><label class="fl">Name (if typing)</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Sukh" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Age (optional)</label><input type="text" value="' + escH(d.age || '') + '" placeholder="21" oninput="psSet(\'age\',this.value)"></div></div>' +
       '<div class="field"><label class="fl">Role / message (optional)</label><input type="text" value="' + escH(d.bmsg || '') + '" placeholder="Have a great day from everyone at The Lane!" oninput="psSet(\'bmsg\',this.value)"></div>';
-    case 'signing': return player + '<div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="New signing name" oninput="psSet(\'manualName\',this.value)"></div>';
+    case 'signing': return player + '<div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="New signing name" oninput="psSet(\'manualName\',this.value)"></div>' + psCutoutControls();
     case 'lineup': return '<div class="field"><label class="fl">Starting XI <span style="color:var(--gr);font-weight:400">— tap a player to add, or type any name (incl. new signings)</span></label>' + psPlayerChips('xi') + '<textarea rows="6" placeholder="One name per line" oninput="psSet(\'xi\',this.value)">' + escH(d.xi || '') + '</textarea></div>' +
       '<div class="field"><label class="fl">Substitutes</label>' + psPlayerChips('subs') + '<textarea rows="3" placeholder="One name per line" oninput="psSet(\'subs\',this.value)">' + escH(d.subs || '') + '</textarea></div>';
     case 'countdown': return '<div class="ps-crestrow"><div class="field"><label class="fl">Days to go</label><input type="number" min="0" value="' + (d.days || 3) + '" oninput="psSet(\'days\',this.value)"></div><div class="field"><label class="fl">To what</label><input type="text" value="' + escH(d.what || 'KICK OFF') + '" oninput="psSet(\'what\',this.value)"></div></div>';
@@ -4093,6 +4096,98 @@ function psLogoUpload(input) {
     img.src = e.target.result;
   };
   r.readAsDataURL(f);
+}
+// ── AI BACKGROUND REMOVER (client-side, free, no API key) ────────────────
+// Lazily loads @imgly/background-removal from CDN and caches the model, so the
+// first cutout downloads it (~20-30s) and every one after is fast. The photo
+// never leaves the browser. Turns a headshot into a transparent-PNG cutout that
+// gets knocked out against the branded card. Fails soft to the original photo.
+var psCutout = {
+  _mod: null, _p: null,
+  load: function () { var self = this; if (self._mod) return Promise.resolve(self._mod);
+    if (!self._p) self._p = import('https://esm.sh/@imgly/background-removal@1.5.5').then(function (m) { self._mod = m; return m; });
+    return self._p; },
+  preload: function () { this.load().then(function (m) { try { m.preload(); } catch (e) {} }).catch(function () {}); },
+  run: function (src, onProg) {
+    return this.load().then(function (m) { return m.removeBackground(src, { progress: onProg }); })
+      .then(function (blob) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsDataURL(blob); }); });
+  }
+};
+// upload a player headshot (kept separate from logos) — downscaled to a print-
+// friendly size but bigger than a logo so the cutout stays crisp on export.
+function psPlayerPhotoUpload(input) {
+  var f = input.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function (e) {
+    var img = new Image();
+    img.onload = function () {
+      var max = 1400, w = img.width, h = img.height;
+      if (w > h && w > max) { h = h * max / w; w = max; } else if (h > max) { w = w * max / h; h = max; }
+      var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+      PS.data.pPhoto = c.toDataURL('image/png'); PS.data.pCut = ''; PS.data.useCut = false; psFields(); psRender();
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+// the photo we operate on: an explicit upload wins, else the selected profile photo
+function psPlayerPhotoSrc() { return PS.data.pPhoto || psEff().photo || ''; }
+// run the cutout with live progress + graceful fallback
+function aiCutout() {
+  var src = psPlayerPhotoSrc();
+  if (!src) { toast('Add or pick a player photo first', true); return; }
+  var btn = document.getElementById('cutbtn'), note = document.getElementById('cutnote');
+  function say(m) { if (note) note.textContent = m; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Working…'; }
+  say('Loading the AI model… the first cutout takes ~20-30s, then it’s instant.');
+  psCutout.run(src, function (k, cur, tot) {
+    var pct = tot ? Math.round(100 * cur / tot) : 0;
+    if (k && /fetch|download|model/i.test(k)) say('Downloading AI model… ' + pct + '%');
+    else say('Removing background… ' + pct + '%');
+  }).then(function (dataURL) {
+    PS.data.pCut = dataURL; PS.data.useCut = true;
+    if (PS.data.cutScale == null) PS.data.cutScale = 100;
+    psFields(); psRender(); toast('Background removed ✓');
+  }).catch(function (e) {
+    PS.data.useCut = false;
+    if (btn) { btn.disabled = false; btn.textContent = '✂️ Cut out background'; }
+    say('Couldn’t remove the background on this photo — using the original. Try a clearer headshot.');
+    psRender();
+  });
+}
+// shared field-def block: upload + cutout button + transform controls. Used by
+// every player card so the tool works the same everywhere.
+function psCutoutControls() {
+  var d = PS.data, hasPhoto = !!psPlayerPhotoSrc();
+  var chk = 'width:16px;height:16px;accent-color:var(--y)';
+  var lbl = 'display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:8px';
+  var s = '<div class="field"><label class="fl">Player photo <span style="color:var(--gr);font-weight:400">— upload a headshot (or it uses the profile photo)</span></label><input type="file" accept="image/*" onchange="psPlayerPhotoUpload(this)" style="width:100%;color:var(--gr);font-family:var(--fc);font-size:13px"></div>';
+  if (hasPhoto) {
+    s += '<button id="cutbtn" class="save sec" style="margin-bottom:5px" onclick="aiCutout()">✂️ Cut out background</button>' +
+      '<div id="cutnote" style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-bottom:9px">' +
+      (d.useCut && d.pCut ? '✓ Cutout ready — knocked out on the card below.' : 'Removes the background (free, on-device) so the player is knocked out on the card.') + '</div>';
+  }
+  if (d.useCut && d.pCut) {
+    s += '<label class="ha-lbl" style="' + lbl + '"><input type="checkbox" checked onchange="psVal(\'useCut\',this.checked)" style="' + chk + '"> Use the cutout <span style="color:var(--gr)">(uncheck for the original framed photo)</span></label>' +
+      '<div class="field"><label class="fl">Size <span id="pslbl-cutScale" style="color:var(--gr);font-weight:400">' + (d.cutScale || 100) + '%</span></label><input type="range" min="45" max="185" value="' + (d.cutScale || 100) + '" oninput="psSetPct(\'cutScale\',this.value)" style="width:100%"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Move ↔</label><input type="range" min="-45" max="45" value="' + (d.cutX == null ? 0 : d.cutX) + '" oninput="psSet(\'cutX\',this.value)" style="width:100%"></div>' +
+      '<div class="field"><label class="fl">Move ↕</label><input type="range" min="-45" max="45" value="' + (d.cutY == null ? 0 : d.cutY) + '" oninput="psSet(\'cutY\',this.value)" style="width:100%"></div></div>' +
+      '<div style="display:flex;gap:18px;flex-wrap:wrap"><label class="ha-lbl" style="' + lbl + '"><input type="checkbox"' + (d.cutFlip ? ' checked' : '') + ' onchange="psVal(\'cutFlip\',this.checked)" style="' + chk + '"> Flip</label>' +
+      '<label class="ha-lbl" style="' + lbl + '"><input type="checkbox"' + (d.cutFront ? ' checked' : '') + ' onchange="psVal(\'cutFront\',this.checked)" style="' + chk + '"> Bring in front of text</label></div>';
+  }
+  return s;
+}
+// live % label for the cutout size slider (psSet hard-codes a 'px' suffix)
+function psSetPct(k, v) { PS.data[k] = v; var l = document.getElementById('pslbl-' + k); if (l) l.textContent = v + '%'; psRender(); }
+// render a positioned cutout image with the user's scale/move/flip/z transform
+function psCutoutImg(W, H, size, mode) {
+  var d = PS.data, cs = (d.cutScale || 100) / 100;
+  var h = size * cs, offX = (d.cutX || 0) / 45 * (W * 0.30), offY = (d.cutY || 0) / 45 * (H * 0.16);
+  var flip = d.cutFlip ? ' scaleX(-1)' : '';
+  var z = d.cutFront ? 22 : 0;
+  var anchor = mode === 'center' ? ('top:50%;transform:translate(-50%,-50%) translate(' + offX + 'px,' + (-offY) + 'px)' + flip)
+    : ('bottom:' + (H * 0.02) + 'px;transform:translateX(-50%) translate(' + offX + 'px,' + (-offY) + 'px)' + flip);
+  return '<img src="' + d.pCut + '" crossorigin="anonymous" style="position:absolute;left:50%;' + anchor + ';height:' + h + 'px;object-fit:contain;filter:drop-shadow(0 26px 40px rgba(0,0,0,.6));z-index:' + z + ';pointer-events:none">';
 }
 // effective player: a selected profile OR the manually-typed name/position
 function psEff() {
@@ -4333,9 +4428,20 @@ function psRender() {
   } else if (PS.type === 'signing') {
     var psn = psPlayerObj(), nm = psn ? psSurname(psn) : (d.manualName || '[NAME]').toUpperCase(), hasS = psn && psn.photo;
     inner += psEyebrow('NEW SIGNING', t, ebTop);
-    if (hasS) inner += playerFrame(psn, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
-    inner += ctr(hasS ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(hasS ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
-    inner += ctr(hasS ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(hasS ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
+    if (d.useCut && d.pCut) {
+      // Cinematic unveiling: big faded crest, player knocked out bottom-centre,
+      // dark scrim + name over it. z-order honours "bring in front of text".
+      inner += '<div style="position:absolute;left:50%;top:' + (X ? '9%' : '13%') + ';transform:translateX(-50%);width:' + (X ? 300 : 470) + 'px;height:' + (X ? 300 : 470) + 'px;background:url(img/badge.png) center/contain no-repeat;opacity:.09"></div>';
+      inner += psCutoutImg(W, H, X ? H * 0.74 : (ST ? H * 0.60 : H * 0.68), 'bottom');
+      inner += '<div style="position:absolute;left:0;right:0;bottom:0;height:' + Math.round(X ? H * 0.34 : H * 0.30) + 'px;background:rgba(0,0,0,.5);z-index:10"></div>';
+      var syName = X ? H - 116 : (ST ? H - 250 : H - 196);
+      inner += '<div style="position:absolute;top:' + (syName - (X ? 50 : 64)) + 'px;left:0;right:0;text-align:center;z-index:11;' + beb(X ? 38 : 52, t.accent) + '">WELCOME TO THE LANE</div>';
+      inner += '<div data-fit="' + (X ? 120 : 170) + ':46" style="position:absolute;top:' + syName + 'px;left:0;right:0;height:' + (X ? 86 : 122) + 'px;overflow:hidden;text-align:center;z-index:11;' + beb(X ? 120 : 170, '#fff') + '">' + nm + '</div>';
+    } else {
+      if (hasS) inner += playerFrame(psn, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
+      inner += ctr(hasS ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(hasS ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
+      inner += ctr(hasS ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(hasS ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
+    }
   } else if (PS.type === 'lineup') {
     inner += psEyebrow(away ? 'YOUR XI' : 'STARTING XI', t, ebTop);
     var xi = (d.xi || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
