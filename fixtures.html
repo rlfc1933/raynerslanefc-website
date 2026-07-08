@@ -230,7 +230,38 @@ async function loadFixturesData() {
 
 // Render the full club season schedule (upcoming + results + form) from
 // data/fixtures.json, reusing the existing next-match / form renderers.
+// SEO: emit a SportsEvent per fixture (wins "Rayners Lane vs X" + fixture rich
+// results). Data-driven from data/fixtures.json, so it updates as fixtures change.
+function injectFixtureEvents(list) {
+  if (typeof injectJSONLD !== 'function' || !list || !list.length) return;
+  var TEAM = { '@type': 'SportsTeam', name: 'Rayners Lane FC', '@id': 'https://raynerslanefc.co.uk/#team' };
+  var VENUE = { '@type': 'Place', name: 'Tithe Farm Sports & Social Club',
+    address: { '@type': 'PostalAddress', streetAddress: '151 Rayners Lane', addressLocality: 'Harrow', addressRegion: 'Greater London', postalCode: 'HA2 0XH', addressCountry: 'GB' },
+    geo: { '@type': 'GeoCoordinates', latitude: 51.5699654, longitude: -0.3651601 } };
+  var ST = { scheduled: 'EventScheduled', postponed: 'EventPostponed', cancelled: 'EventCancelled', abandoned: 'EventCancelled' };
+  var events = list.map(function (f) {
+    var home = f.isHome !== false;
+    var opp = { '@type': 'SportsTeam', name: f.opponent || 'TBC' };
+    var ev = {
+      '@type': 'SportsEvent', sport: 'Soccer',
+      name: 'Rayners Lane FC ' + (home ? 'vs ' : '@ ') + (f.opponent || 'TBC'),
+      startDate: f.date + 'T' + (f.kickoff || '15:00') + ':00',
+      eventStatus: 'https://schema.org/' + (ST[f.status] || 'EventScheduled'),
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      homeTeam: home ? TEAM : opp,
+      awayTeam: home ? opp : TEAM,
+      competitor: [TEAM, opp],
+      organizer: { '@type': 'SportsOrganization', name: f.competition || 'Combined Counties Football League' },
+      location: home ? VENUE : { '@type': 'Place', name: f.venue || ('Away at ' + (f.opponent || 'TBC')) },
+      url: 'https://raynerslanefc.co.uk/fixtures.html'
+    };
+    if (home) ev.offers = { '@type': 'Offer', price: '5', priceCurrency: 'GBP', availability: 'https://schema.org/InStock', url: 'https://raynerslanefc.co.uk/fixtures.html', validFrom: f.date };
+    return ev;
+  });
+  injectJSONLD('lane-fixtures', { '@context': 'https://schema.org', '@graph': events });
+}
 function renderFxSeason(list) {
+  injectFixtureEvents(list);
   var now = Date.now();
   function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
