@@ -21,13 +21,25 @@
     Cache-Control = "no-cache"
     Access-Control-Allow-Origin = "*"
 
-# JS/CSS revalidate too (not content-hashed) so design changes show up
+# JS/CSS aren't content-hashed (no build step), so we can't use immutable/1-year
+# caching without risking stale-asset bugs. stale-while-revalidate is the safe
+# win: returning visitors get the cached file INSTANTLY (no blocking round-trip),
+# the browser revalidates in the background, and a deploy is picked up on the
+# next load. Big improvement over max-age=0 (which revalidates on every load)
+# with none of the staleness risk of immutable-without-hashing.
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+
+# Fonts / static images are safe to cache hard — their content is stable and
+# Netlify Image CDN URLs already carry their own long cache.
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
