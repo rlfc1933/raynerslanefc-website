@@ -4090,9 +4090,11 @@ function psAddName(field, name) {
 function psLogoUpload(input) {
   var f = input.files[0]; if (!f) return;
   var r = new FileReader();
+  r.onerror = function () { toast('Could not read that file — try a JPG or PNG.', true); };
   r.onload = function (e) {
     var img = new Image();
-    img.onload = function () { var max = 700, w = img.width, h = img.height; if (w > h && w > max) { h = h * max / w; w = max; } else if (h > max) { w = w * max / h; h = max; } var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); PS.data.logo = c.toDataURL('image/png'); psFields(); psRender(); };
+    img.onerror = function () { toast('That image couldn’t be opened. iPhone “HEIC” photos need converting — pick a JPG or PNG.', true); };
+    img.onload = function () { var max = 700, w = img.width, h = img.height; if (w > h && w > max) { h = h * max / w; w = max; } else if (h > max) { w = w * max / h; h = max; } var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); PS.data.logo = c.toDataURL('image/png'); psFields(); psRender(); toast('Logo added ✓'); };
     img.src = e.target.result;
   };
   r.readAsDataURL(f);
@@ -4117,14 +4119,18 @@ var psCutout = {
 // friendly size but bigger than a logo so the cutout stays crisp on export.
 function psPlayerPhotoUpload(input) {
   var f = input.files[0]; if (!f) return;
+  toast('Reading photo…');
   var r = new FileReader();
+  r.onerror = function () { toast('Could not read that file — try a JPG or PNG.', true); };
   r.onload = function (e) {
     var img = new Image();
+    img.onerror = function () { toast('That image couldn’t be opened. iPhone “HEIC” photos need converting — pick a JPG or PNG.', true); };
     img.onload = function () {
       var max = 1400, w = img.width, h = img.height;
       if (w > h && w > max) { h = h * max / w; w = max; } else if (h > max) { w = w * max / h; h = max; }
       var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
-      PS.data.pPhoto = c.toDataURL('image/png'); PS.data.pCut = ''; PS.data.useCut = false; psFields(); psRender();
+      PS.data.pPhoto = c.toDataURL('image/png'); PS.data.pCut = ''; PS.data.useCut = false;
+      psFields(); psRender(); toast('Photo added ✓ — it’s on the card. Cut out the background for the knockout look.');
     };
     img.src = e.target.result;
   };
@@ -4158,14 +4164,27 @@ function aiCutout() {
 // shared field-def block: upload + cutout button + transform controls. Used by
 // every player card so the tool works the same everywhere.
 function psCutoutControls() {
-  var d = PS.data, hasPhoto = !!psPlayerPhotoSrc();
+  var d = PS.data, src = psPlayerPhotoSrc(), hasPhoto = !!src;
   var chk = 'width:16px;height:16px;accent-color:var(--y)';
   var lbl = 'display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:8px';
-  var s = '<div class="field"><label class="fl">Player photo <span style="color:var(--gr);font-weight:400">— upload a headshot (or it uses the profile photo)</span></label><input type="file" accept="image/*" onchange="psPlayerPhotoUpload(this)" style="width:100%;color:var(--gr);font-family:var(--fc);font-size:13px"></div>';
+  // Styled tap-to-upload (invisible input overlay) — avoids the bare "No file
+  // chosen" control and works on phones. The raw input reverting after a pick
+  // no longer matters because the thumbnail below confirms the photo landed.
+  var s = '<div class="field"><label class="fl">Player photo <span style="color:var(--gr);font-weight:400">— upload a headshot (or it uses the profile photo)</span></label>' +
+    '<div style="position:relative;border:2px dashed var(--br);border-radius:8px;padding:15px;text-align:center;cursor:pointer">' +
+    '<input type="file" accept="image/*" onchange="psPlayerPhotoUpload(this)" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer">' +
+    '<div style="font-size:22px;line-height:1;margin-bottom:5px">📷</div>' +
+    '<div style="font-family:var(--fc);font-size:13px;font-weight:700;color:var(--gr);letter-spacing:.04em">' + (hasPhoto ? 'Change photo' : 'Tap to upload a player photo') + '</div>' +
+    '<div style="font-family:var(--fc);font-size:11px;color:var(--br);margin-top:2px">JPG or PNG</div>' +
+    '</div></div>';
   if (hasPhoto) {
+    s += '<div style="display:flex;align-items:center;gap:10px;margin:-4px 0 10px"><img src="' + src + '" alt="uploaded player photo" style="width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--br)">' +
+      '<div style="font-family:var(--fc);font-size:12px;font-weight:700;color:#54d17a">Photo added &#10003; <span style="color:var(--gr);font-weight:400">' + (d.pPhoto ? '(uploaded — showing on the card)' : '(from profile)') + '</span></div>' +
+      (d.pPhoto ? '<button onclick="PS.data.pPhoto=\'\';PS.data.pCut=\'\';PS.data.useCut=false;psFields();psRender()" style="margin-left:auto;background:none;border:1px solid var(--br);color:var(--gr);font-family:var(--fc);font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;cursor:pointer">Remove</button>' : '') +
+      '</div>';
     s += '<button id="cutbtn" class="save sec" style="margin-bottom:5px" onclick="aiCutout()">✂️ Cut out background</button>' +
       '<div id="cutnote" style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-bottom:9px">' +
-      (d.useCut && d.pCut ? '✓ Cutout ready — knocked out on the card below.' : 'Removes the background (free, on-device) so the player is knocked out on the card.') + '</div>';
+      (d.useCut && d.pCut ? '✓ Cutout ready — knocked out on the card below.' : 'Optional: removes the background (free, on-device) for the knockout look.') + '</div>';
   }
   if (d.useCut && d.pCut) {
     s += '<label class="ha-lbl" style="' + lbl + '"><input type="checkbox" checked onchange="psVal(\'useCut\',this.checked)" style="' + chk + '"> Use the cutout <span style="color:var(--gr)">(uncheck for the original framed photo)</span></label>' +
@@ -4409,10 +4428,11 @@ function psRender() {
     if (d.useCut && d.pCut) {
       inner += psCutoutHero(W, H, X, ST, t, beb, '', psSurname(pm, (d.manualName || '[PLAYER]').toUpperCase()), (pos(pm) || '') + (d.sponsor ? (pos(pm) ? ' · ' : '') + 'SPONSORED BY ' + escH(d.sponsor).toUpperCase() : ''));
     } else {
-      if (hasM) inner += playerFrame(pm, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
+      var mEff = d.pPhoto || (pm && pm.photo);
+      if (mEff) inner += playerFrame({ photo: mEff }, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
       var my = X ? H - 150 : (ST ? H - 340 : H - 230);
-      inner += ctr(hasM ? my : midY - 40, '<span style="' + beb(hasM ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
-      inner += ctr(hasM ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+      inner += ctr(mEff ? my : midY - 40, '<span style="' + beb(mEff ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
+      inner += ctr(mEff ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
     }
   } else if (PS.type === 'potm') {
     var ep = psEff(), hasPp = !!ep.photo;
@@ -4421,10 +4441,11 @@ function psRender() {
     if (d.useCut && d.pCut) {
       inner += psCutoutHero(W, H, X, ST, t, beb, '', escH(ep.surname), ep.position ? escH(ep.position).toUpperCase() : '');
     } else {
-      if (hasPp) inner += playerFrame({ photo: ep.photo }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
+      var pEff = d.pPhoto || ep.photo;
+      if (pEff) inner += playerFrame({ photo: pEff }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
       var py = X ? H - 150 : (ST ? H - 340 : H - 235);
-      inner += ctr(hasPp ? py : midY - 30, '<span style="' + beb(hasPp ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
-      if (ep.position) inner += ctr(hasPp ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
+      inner += ctr(pEff ? py : midY - 30, '<span style="' + beb(pEff ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
+      if (ep.position) inner += ctr(pEff ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
     }
   } else if (PS.type === 'sponsorspot') {
     inner += psEyebrow('PROUDLY SPONSORED BY', t, ebTop);
@@ -4459,9 +4480,10 @@ function psRender() {
       inner += '<div style="position:absolute;top:' + (syName - (X ? 50 : 64)) + 'px;left:0;right:0;text-align:center;z-index:11;' + beb(X ? 38 : 52, t.accent) + '">WELCOME TO THE LANE</div>';
       inner += '<div data-fit="' + (X ? 120 : 170) + ':46" style="position:absolute;top:' + syName + 'px;left:0;right:0;height:' + (X ? 86 : 122) + 'px;overflow:hidden;text-align:center;z-index:11;' + beb(X ? 120 : 170, '#fff') + '">' + nm + '</div>';
     } else {
-      if (hasS) inner += playerFrame(psn, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
-      inner += ctr(hasS ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(hasS ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
-      inner += ctr(hasS ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(hasS ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
+      var effP = d.pPhoto || (psn && psn.photo); // uploaded photo shows immediately (framed), even before cutout
+      if (effP) inner += playerFrame({ photo: effP }, X ? 290 : 390, W / 2, ebTop + (X ? 90 : 130));
+      inner += ctr(effP ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 130, '<span style="' + beb(effP ? 70 : (X ? 130 : 170), t.accent) + '">WELCOME</span>');
+      inner += ctr(effP ? (X ? H - 100 : (ST ? H - 290 : H - 175)) : midY + (X ? 0 : 20), '<span style="' + beb(effP ? 84 : (X ? 150 : 200), '#fff') + '">' + nm + '</span>');
     }
   } else if (PS.type === 'lineup') {
     inner += psEyebrow(away ? 'YOUR XI' : 'STARTING XI', t, ebTop);
