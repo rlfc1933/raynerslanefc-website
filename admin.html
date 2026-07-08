@@ -973,8 +973,10 @@
         </datalist>
       </div>
       <div class="field"><label class="fl">Note (optional)</label><input type="text" id="cm-note" placeholder="e.g. sponsor link, department"></div>
+      <div class="field"><label class="fl">Profile description (optional) <span style="color:var(--gr);font-weight:400">— a short bio shown when someone opens their profile on the About page</span></label><textarea id="cm-bio" rows="3" placeholder="A few sentences about them and their role at the club…"></textarea></div>
       <div class="field"><label class="fl">Photo (optional)</label>
-        <div class="iup-wrap" id="cm-iw"><input type="file" accept="image/*" onchange="prevImg('cm',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload a photo</div><div class="iup-sub">Head shot — JPG, PNG</div></div></div>
+        <div class="iup-wrap" id="cm-iw"><input type="file" accept="image/*" onchange="prevImg('cm',this)"><div class="iup-icon">&#128247;</div><div class="iup-lbl">Tap to upload a photo</div><div class="iup-sub">Head shot — JPG, PNG</div></div>
+        <div class="iup-prev" id="cm-ip"><img id="cm-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('cm')">&#10005; Remove</button></div></div>
       <label class="fl" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px"><input type="checkbox" id="cm-featured" style="width:auto"> Feature this person (highlight on the committee page)</label>
       <button class="save sec" onclick="addMember()">+ Add / Update</button>
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px">Tip: to update someone, enter the <strong style="color:var(--w)">same name</strong> with their new title — it replaces the old entry.</p>
@@ -3675,25 +3677,42 @@ function renderNews() {
 
 // ── COMMITTEE ──
 function addMember() {
-  var name = gv('cm-name'); var role = gv('cm-role'); var note = gv('cm-note');
+  var name = gv('cm-name'); var role = gv('cm-role'); var note = gv('cm-note'); var bio = gv('cm-bio');
   if (!name || !role) { toast('Enter name and role', true); return; }
   var prev = committee.filter(function(m){ return m.name === name; })[0] || {};
-  committee = committee.filter(function(m) { return m.name !== name; });
-  committee.push({name:name, role:role, note:note,
-                  photo: (imgStore['cm'] ? imgStore['cm'].dataUrl : (prev.photo || '')),
-                  featured: (document.getElementById('cm-featured') ? document.getElementById('cm-featured').checked : (prev.featured || false))});
-  renderCommittee();
-  setVal('cm-name',''); setVal('cm-role',''); setVal('cm-note','');
-  if (document.getElementById('cm-featured')) document.getElementById('cm-featured').checked = false;
-  if (imgStore['cm']) rmImg('cm');
-  saveCommittee(name + ' added ✓ — publishing to the site');
+  function finish(photoPath) {
+    committee = committee.filter(function(m) { return m.name !== name; });
+    committee.push({ name: name, role: role, note: note, bio: bio, photo: photoPath || '',
+      featured: (document.getElementById('cm-featured') ? document.getElementById('cm-featured').checked : (prev.featured || false)) });
+    renderCommittee();
+    setVal('cm-name', ''); setVal('cm-role', ''); setVal('cm-note', ''); setVal('cm-bio', '');
+    if (document.getElementById('cm-featured')) document.getElementById('cm-featured').checked = false;
+    if (imgStore['cm']) rmImg('cm');
+    saveCommittee(name + ' saved ✓ — publishing to the site');
+  }
+  // Upload a new photo to a clean file URL (keeps committee.json small — it's
+  // fetched on every About-page load). No new photo → keep the existing one.
+  if (imgStore['cm']) { toast('Uploading photo…'); uploadImg('cm', '', function (path) { finish(path || imgStore['cm'].dataUrl); }); }
+  else finish(prev.photo || '');
 }
-function removeMember(name) {
-  if (!confirm('Remove ' + name + '?')) return;
-  committee = committee.filter(function(m) { return m.name !== name; });
-  committeeDeleted.push(name);
+// Load an existing member back into the form to edit (name/role/note/bio/photo).
+function editMember(i) {
+  var m = committee[i]; if (!m) return;
+  setVal('cm-name', m.name); setVal('cm-role', m.role); setVal('cm-note', m.note || ''); setVal('cm-bio', m.bio || '');
+  if (document.getElementById('cm-featured')) document.getElementById('cm-featured').checked = !!m.featured;
+  if (m.photo) { document.getElementById('cm-pi').src = m.photo; document.getElementById('cm-ip').style.display = 'block'; document.getElementById('cm-iw').style.display = 'none'; }
+  else rmImg('cm');
+  var p = document.getElementById('panel-committee'); if (p) p.scrollTop = 0;
+  document.getElementById('cm-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  toast('Editing ' + m.name + ' — change details, then tap “Add / Update”');
+}
+function removeMember(i) {
+  var m = committee[i]; if (!m) return;
+  if (!confirm('Remove ' + m.name + '?')) return;
+  committee.splice(i, 1);
+  committeeDeleted.push(m.name);
   renderCommittee();
-  saveCommittee(name + ' removed — publishing to the site');
+  saveCommittee(m.name + ' removed — publishing to the site');
 }
 function saveCommittee(msg) {
   commitDomain('committee', 'members', 'name', committee, committeeDeleted, null, 'dep-committee', msg || 'Committee saved ✓ — live in ~30s');
@@ -5050,8 +5069,11 @@ async function loadClubStats() {
 function renderCommittee() {
   document.getElementById('cm-cnt').textContent = 'Committee (' + committee.length + ')';
   document.getElementById('cm-list').innerHTML = committee.length
-    ? committee.map(function(m) {
-        return '<div class="li"><div class="li-main"><div class="li-name">' + m.name + '</div><div class="li-sub">' + m.role + (m.note ? ' &middot; ' + m.note : '') + '</div></div><button class="li-del" onclick="removeMember(\'' + esc(m.name) + '\')">Remove</button></div>';
+    ? committee.map(function(m, i) {
+        var badges = (m.photo ? ' &middot; 📷' : '') + (m.bio ? ' &middot; 📝 profile' : '');
+        return '<div class="li"><div class="li-main"><div class="li-name">' + esc(m.name) + '</div><div class="li-sub">' + esc(m.role) + (m.note ? ' &middot; ' + esc(m.note) : '') + badges + '</div></div>' +
+          '<button onclick="editMember(' + i + ')" style="background:transparent;border:1px solid var(--y);color:var(--y);border-radius:4px;font-family:var(--fc);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;margin-right:6px">Edit</button>' +
+          '<button class="li-del" onclick="removeMember(' + i + ')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
 }
