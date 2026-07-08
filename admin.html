@@ -4,6 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Admin | Rayners Lane FC</title>
+  <script>
+    /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
+       purges on every commit — so the admin's re-fetch/merge (and everything it
+       loads) sees the freshest data instantly, not the stale rebuilt copy. Falls
+       back to the deployed file if the CDN is unreachable. GET data files only;
+       POSTs (save-data), Supabase and function calls are untouched. */
+    (function () {
+      var CDN = 'https://cdn.jsdelivr.net/gh/rlfc1933/raynerslanefc-website@main/';
+      var _fetch = window.fetch.bind(window);
+      window.fetch = function (url, opts) {
+        if (typeof url === 'string' && (!opts || !opts.method || String(opts.method).toUpperCase() === 'GET')) {
+          var m = url.match(/(?:^|\/)(data\/[\w-]+\.json)(\?[^#]*)?$/i);
+          if (m) {
+            var q = m[2] || ('?t=' + Date.now());
+            return _fetch(CDN + m[1] + q, { cache: 'no-store' })
+              .then(function (r) { return (r && r.ok) ? r : _fetch(url, opts); })
+              .catch(function () { return _fetch(url, opts); });
+          }
+        }
+        return _fetch(url, opts);
+      };
+    })();
+  </script>
   <link rel="icon" type="image/png" href="img/badge.png">
   <link rel="manifest" href="/admin-manifest.json">
   <meta name="mobile-web-app-capable" content="yes">

@@ -1,3 +1,27 @@
+/* ── Phase 3: instant content (no rebuild wait) ──────────────────────────────
+   Every `data/<name>.json` fetch is transparently served from the GitHub CDN
+   (jsDelivr), which save-data.js PURGES on every commit — so an admin edit is
+   live in SECONDS without waiting for the Netlify rebuild. If the CDN is ever
+   unreachable, it falls back to the deployed file, so the site behaves exactly
+   as before. Data-plane only; no database, no tables, no keys. ── */
+(function () {
+  if (window.__laneData) return; window.__laneData = true;
+  var CDN = 'https://cdn.jsdelivr.net/gh/rlfc1933/raynerslanefc-website@main/';
+  var _fetch = window.fetch.bind(window);
+  window.fetch = function (url, opts) {
+    if (typeof url === 'string' && (!opts || !opts.method || String(opts.method).toUpperCase() === 'GET')) {
+      var m = url.match(/(?:^|\/)(data\/[\w-]+\.json)(\?[^#]*)?$/i);
+      if (m) {
+        var q = m[2] || ('?t=' + Date.now());
+        return _fetch(CDN + m[1] + q, { cache: 'no-store' })
+          .then(function (r) { return (r && r.ok) ? r : _fetch(url, opts); })
+          .catch(function () { return _fetch(url, opts); });
+      }
+    }
+    return _fetch(url, opts);
+  };
+})();
+
 /* ── Optional integrations (Phase 4) — set these to switch them ON; blank = off.
    Both degrade to nothing when empty, so the site never shows a dead widget. ──
    LANE_WHATSAPP : international number, digits only, no "+" (e.g. '447700900000')

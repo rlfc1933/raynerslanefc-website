@@ -84,7 +84,17 @@ exports.handler = async function (event) {
     if (!put.ok) {
       return resp(put.status, { error: (result && result.message) || 'GitHub rejected the commit' });
     }
-    return resp(200, { ok: true, commit: result.commit && result.commit.sha });
+
+    // Instant propagation: purge the jsDelivr CDN copy of this file so the public
+    // pages (which read data from jsDelivr) see the edit in SECONDS — no waiting
+    // for the Netlify rebuild. Best-effort; a failed purge never fails the save.
+    let purged = false;
+    try {
+      const pg = await fetch('https://purge.jsdelivr.net/gh/' + REPO + '@' + BRANCH + '/' + path, { signal: AbortSignal.timeout(6000) });
+      purged = pg.ok;
+    } catch (e) { /* CDN refreshes on its own TTL; the commit already succeeded */ }
+
+    return resp(200, { ok: true, commit: result.commit && result.commit.sha, purged: purged });
   } catch (err) {
     return resp(502, { error: 'Could not reach GitHub: ' + err.message });
   }
