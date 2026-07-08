@@ -8,6 +8,11 @@
 var LANE_WHATSAPP = '';
 var LANE_HS_CHAT  = '';
 
+// Phase 1 image pipeline: load the Netlify Image CDN optimizer on public pages
+// (components.js runs here but NOT on admin.html, so Post Studio canvas exports
+// are untouched). Self-initialising, progressive, reversible.
+(function () { var s = document.createElement('script'); s.src = 'js/img.js'; s.defer = true; document.head.appendChild(s); })();
+
 // Floating WhatsApp click-to-chat button (only if a number is configured).
 function initWhatsApp() {
   if (!LANE_WHATSAPP || document.getElementById('lane-wa')) return;
