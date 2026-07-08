@@ -1,6 +1,15 @@
 [build]
   functions = "netlify/functions"
 
+# Serve the DYNAMIC sitemap (netlify/functions/sitemap.js) at /sitemap.xml.
+# force=true so it wins over any static file; status 200 so it's a rewrite (the
+# URL stays /sitemap.xml for crawlers).
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+
 # Pin a stable Node LTS so the cloud install is deterministic. Cloud builds
 # started failing (exit 2 in "building site") after edf8e44 while local builds
 # passed — classic floating-toolchain drift. A committed package-lock.json
