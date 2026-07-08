@@ -53,7 +53,18 @@ async function loadPlayer() {
 }
 
 function renderPlayer(p) {
-  document.title = (p.name || 'Player') + ' | Rayners Lane FC';
+  var _pImg = p.photo ? (/^https?:/.test(p.photo) ? p.photo : 'https://raynerslanefc.co.uk/' + p.photo.replace(/^\//, '')) : 'https://raynerslanefc.co.uk/img/og-card.jpg';
+  var _pCanon = 'https://raynerslanefc.co.uk/player.html?id=' + encodeURIComponent(p.id || '');
+  setPageSEO({
+    title: (p.name || 'Player') + (p.position ? ' — ' + p.position : '') + ' | Rayners Lane FC',
+    description: (p.name || 'Player') + (p.position ? ', ' + p.position : '') + ' for Rayners Lane FC — non-league football in Harrow, Combined Counties Premier Division North.',
+    canonical: _pCanon, image: _pImg, ogType: 'profile',
+    jsonld: {
+      '@context': 'https://schema.org', '@type': ['Person', 'Athlete'],
+      name: p.name, jobTitle: p.position || 'Footballer', image: _pImg, url: _pCanon,
+      memberOf: { '@type': 'SportsTeam', name: 'Rayners Lane FC', '@id': 'https://raynerslanefc.co.uk/#team' }
+    }
+  });
   var posColour = {Goalkeeper:'#1A5C32',Defender:'#1A3A6E',Midfielder:'#6B3A1F',Forward:'#EF4444'}[p.position] || '#FFD100';
 
   var html = '<div class="player-hero">' +

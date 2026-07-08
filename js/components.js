@@ -513,6 +513,39 @@ function laneOnReady(fn) {
 
 
 
+// Dynamic per-page SEO for client-rendered pages (news-article, player):
+// unique title/description/canonical + OG/Twitter overrides + optional JSON-LD.
+// (Google renders JS, so these are indexed; for social scrapers that don't run
+// JS, a Netlify Edge meta-inject is the follow-up — see SEO-SETUP.md.)
+function setPageSEO(o) {
+  function upsert(key, keyAttr, val) {
+    if (val == null || val === '') return;
+    var m = document.head.querySelector('meta[' + keyAttr + '="' + key + '"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute(keyAttr, key); document.head.appendChild(m); }
+    m.setAttribute('content', val);
+  }
+  if (o.title) { document.title = o.title; upsert('og:title', 'property', o.title); upsert('twitter:title', 'name', o.title); }
+  if (o.description) { upsert('description', 'name', o.description); upsert('og:description', 'property', o.description); upsert('twitter:description', 'name', o.description); }
+  if (o.image) { upsert('og:image', 'property', o.image); upsert('twitter:image', 'name', o.image); }
+  if (o.canonical) {
+    upsert('og:url', 'property', o.canonical);
+    var l = document.head.querySelector('link[rel="canonical"]');
+    if (!l) { l = document.createElement('link'); l.rel = 'canonical'; document.head.appendChild(l); }
+    l.setAttribute('href', o.canonical);
+  }
+  upsert('og:type', 'property', o.ogType || 'article');
+  if (o.jsonld) injectJSONLD(o.jsonldId || 'lane-page-ld', o.jsonld);
+}
+window.setPageSEO = setPageSEO;
+
+// Inject a JSON-LD <script> once (id-guarded so it never duplicates).
+function injectJSONLD(id, obj) {
+  if (document.getElementById(id)) return;
+  var s = document.createElement('script');
+  s.type = 'application/ld+json'; s.id = id;
+  s.textContent = JSON.stringify(obj);
+  document.head.appendChild(s);
+}
 function initComponents(currentPage) {
   // Idempotent: whichever caller fires first (the page's own DOMContentLoaded
   // handler OR the self-healing boot at the bottom of this file) builds the
@@ -545,10 +578,52 @@ function initComponents(currentPage) {
       document.head.appendChild(m);
     }
   });
+
+  // ── Local SEO: site-wide SportsTeam + LocalBusiness identity (areaServed,
+  //    geo, opening hours, sameAs) + a per-page BreadcrumbList. Data-driven,
+  //    on every page. index.html keeps its own #team + FAQPage; Google merges
+  //    same-@id nodes, so this simply enriches it with local signals. ──
+  injectJSONLD('lane-org', {
+    '@context': 'https://schema.org',
+    '@type': ['SportsTeam', 'LocalBusiness'],
+    '@id': 'https://raynerslanefc.co.uk/#team',
+    name: 'Rayners Lane FC', alternateName: 'The Lane', sport: 'Soccer', foundingDate: '1933',
+    url: 'https://raynerslanefc.co.uk/',
+    logo: 'https://raynerslanefc.co.uk/img/badge.png',
+    image: 'https://raynerslanefc.co.uk/img/og-card.jpg',
+    email: 'info@raynerslanefc.co.uk',
+    description: "Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North.",
+    memberOf: { '@type': 'SportsOrganization', name: 'Combined Counties Football League', url: 'https://www.combinedcountiesleague.co.uk' },
+    address: { '@type': 'PostalAddress', streetAddress: '151 Rayners Lane', addressLocality: 'Harrow', addressRegion: 'Greater London', postalCode: 'HA2 0XH', addressCountry: 'GB' },
+    geo: { '@type': 'GeoCoordinates', latitude: 51.5699654, longitude: -0.3651601 },
+    areaServed: ['Harrow', 'Rayners Lane', 'Pinner', 'South Harrow', 'Ruislip', 'Northwood', 'Wembley'].map(function (n) { return { '@type': 'Place', name: n }; })
+      .concat([{ '@type': 'AdministrativeArea', name: 'London Borough of Harrow' }]),
+    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '14:00', closes: '17:00', description: 'Matchday' }],
+    sameAs: [
+      'https://twitter.com/RaynersLaneFC',
+      'https://instagram.com/raynerslanefc',
+      'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA',
+      'https://www.pitchero.com/clubs/raynerslanefc'
+    ]
+  });
+
   const nav     = document.getElementById('nav-placeholder');
   const footer  = document.getElementById('footer-placeholder');
   const twitter = document.getElementById('twitter-placeholder');
   if (nav) nav.innerHTML = buildNav(currentPage);
+
+  // BreadcrumbList on inner pages (Home › This page) — uses the active nav label.
+  if (currentPage && currentPage !== 'index.html') {
+    var act = document.querySelector('.nav__link--active');
+    var label = (act && act.textContent.trim()) || (document.title || '').split('|')[0].trim() || 'Page';
+    injectJSONLD('lane-breadcrumb', {
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://raynerslanefc.co.uk/' },
+        { '@type': 'ListItem', position: 2, name: label, item: 'https://raynerslanefc.co.uk/' + currentPage }
+      ]
+    });
+  }
   // Portal the mobile menu sheet OUT of #nav-placeholder onto <body>. Every body
   // child gets `z-index:1` (see style.css), which is a stacking context that would
   // otherwise TRAP the sheet's z-index behind later page content — making it look

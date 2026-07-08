@@ -54,7 +54,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const d = await r.json();
     const art = d.articles.find(a => a.id === id);
     if (!art) { window.location.href='index.html'; return; }
-    document.title = art.title+' | Rayners Lane FC';
+    var _aImg = art.image ? (/^https?:/.test(art.image) ? art.image : 'https://raynerslanefc.co.uk/' + art.image.replace(/^\//, '')) : 'https://raynerslanefc.co.uk/img/og-card.jpg';
+    var _aCanon = 'https://raynerslanefc.co.uk/news-article.html?id=' + encodeURIComponent(art.id);
+    setPageSEO({
+      title: art.title + ' | Rayners Lane FC',
+      description: (art.excerpt || (art.body || '').replace(/\s+/g, ' ').trim().slice(0, 155)),
+      canonical: _aCanon, image: _aImg, ogType: 'article',
+      jsonld: {
+        '@context': 'https://schema.org', '@type': 'NewsArticle',
+        headline: art.title, image: [_aImg],
+        datePublished: art.date || undefined, dateModified: art.date || undefined,
+        author: { '@type': art.author ? 'Person' : 'Organization', name: art.author || 'Rayners Lane FC' },
+        publisher: { '@type': 'Organization', name: 'Rayners Lane FC', logo: { '@type': 'ImageObject', url: 'https://raynerslanefc.co.uk/img/badge.png' } },
+        mainEntityOfPage: _aCanon, articleSection: art.category || 'News'
+      }
+    });
     document.getElementById('art-title').textContent = art.title;
     document.getElementById('art-cat').textContent = art.category || 'Club News';
     document.getElementById('art-date').textContent = art.date || '';
