@@ -12,7 +12,11 @@
     },
     {
       "name": "Gary Pitt",
-      "role": "First Team Manager"
+      "role": "First Team Manager",
+      "note": "",
+      "bio": "",
+      "photo": "/img/uploads/1783559009927-hhexmhlwiaa1dtb.jpg",
+      "featured": false
     },
     {
       "name": "Jenny Pitt",
@@ -45,5 +49,5 @@
       "featured": false
     }
   ],
-  "updatedAt": "2026-07-08T23:54:49.923Z"
+  "updatedAt": "2026-07-09T01:03:35.230Z"
 }
