@@ -43,7 +43,15 @@
       "role": "PROGRAMME EDITOR",
       "note": "",
       "featured": false
+    },
+    {
+      "name": "ZZ Live Test",
+      "role": "Coach",
+      "note": "",
+      "bio": "Proving the committee save works.",
+      "photo": "img/uploads/diag-test.png",
+      "featured": false
     }
   ],
-  "updatedAt": "2026-07-08T23:54:49.923Z"
+  "updatedAt": "2026-07-09T00:20:58.864Z"
 }
