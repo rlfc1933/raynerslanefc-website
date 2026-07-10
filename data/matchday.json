@@ -1,13 +1,13 @@
 {
   "isLive": true,
-  "isHome": true,
-  "opponent": "Hayes & Yeading FC",
-  "date": "2026-07-04",
-  "kickoff": "15:00",
-  "venue": "Tithe Farm Social Club",
+  "isHome": false,
+  "opponent": "Pujab Utd FC",
+  "date": "2026-07-11",
+  "kickoff": "13:00",
+  "venue": "The Sports Ground, Dunkirk Cl, Gravesend, DA12 5ND",
   "competition": "Friendly",
-  "homeScore": 1,
-  "awayScore": 3,
+  "homeScore": 3,
+  "awayScore": 1,
   "scorers": "",
   "status": "Full Time"
 }
