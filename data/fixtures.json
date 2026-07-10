@@ -2,18 +2,18 @@
   "fixtures": [
     {
       "id": "matchday-current",
-      "date": "2026-07-04",
-      "kickoff": "15:00",
-      "opponent": "Hayes & Yeading",
+      "date": "2026-07-11",
+      "kickoff": "13:00",
+      "opponent": "Pujab Utd FC",
       "oppCrest": "",
-      "isHome": true,
-      "venue": "Tithe Farm Social Club",
-      "competition": "Combined Counties Premier Div North",
+      "isHome": false,
+      "venue": "The Sports Ground, Dunkirk Cl, Gravesend, DA12 5ND",
+      "competition": "Friendly",
       "status": "scheduled",
       "us": null,
       "them": null,
       "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-05T16:46:40.476Z"
+  "updatedAt": "2026-07-10T11:28:44.007Z"
 }
