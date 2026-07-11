@@ -292,7 +292,7 @@
 
     /* 1 — COVER (themed) */
     P.push('<div class="page cover" style="background:'+TH.bg+';color:'+TH.ink+'">'+
-      (d.matchSponsor?'<div class="cover-sponsor" style="background:'+TH.accent+';color:'+TH.accentInk+'">This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></div>':'')+
+      (d.matchSponsor?'<div class="cover-sponsor" style="background:'+TH.accent+';color:'+TH.accentInk+';display:flex;align-items:center;justify-content:center;gap:10px">'+(d.matchSponsorLogo?'<img src="'+esc(d.matchSponsorLogo)+'" alt="'+esc(d.matchSponsor)+'" style="height:30px;max-width:120px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px">':'')+'<span>This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></span></div>':'')+
       '<div class="cover-top" style="position:relative">'+
         '<div style="position:absolute;right:-120px;bottom:-110px;width:520px;height:520px;background:url(img/badge.png) center/contain no-repeat;opacity:.05;pointer-events:none"></div>'+
         '<img class="cover-badge" src="img/badge.png" alt="RLFC">'+
@@ -462,11 +462,11 @@
     /* 9 — SPONSORS (premium showcase) */
     var feat = sponsors.slice(0,2), restS = sponsors.slice(2);
     function featCard(s){ return '<div class="spon-feat">'+(s.logo?'<img src="'+esc(s.logo)+'">':'')+'<div class="tier">'+esc(s.tier||'Club Partner')+'</div><div class="nm">'+esc(s.name||'')+'</div>'+(s.role?'<div class="role">'+esc(s.role)+'</div>':'')+'</div>'; }
-    var todays=[ d.matchSponsor?['Match Sponsor',d.matchSponsor]:null, d.ballSponsor?['Match Ball Sponsor',d.ballSponsor]:null, d.matchdaySponsor?['Matchday Sponsor',d.matchdaySponsor]:null ].filter(Boolean);
+    var todays=[ d.matchSponsor?['Match Sponsor',d.matchSponsor,d.matchSponsorLogo]:null, d.ballSponsor?['Match Ball Sponsor',d.ballSponsor,d.ballSponsorLogo]:null, d.matchdaySponsor?['Matchday Sponsor',d.matchdaySponsor,d.matchdaySponsorLogo]:null ].filter(Boolean);
     P.push('<div class="page">'+ banner('Powered by our partners','Proud Partners of The Lane')+
       (feat.length ? '<div class="spon-feat-row">'+feat.map(featCard).join('')+'</div>' : '<div class="spon-feat-row"><div class="spon-feat"><div class="tier">Principal Partner</div><div class="nm">Your business here</div><div class="role">Be the name that backs The Lane</div></div></div>')+
       (restS.length ? '<div class="divider"><span class="lbl">Our Partners</span></div><div class="spon-grid">'+restS.map(function(s){ return '<div class="spon">'+(s.logo?'<img src="'+esc(s.logo)+'" alt="'+esc(s.name)+'">':'<span class="nm2">'+esc(s.name)+'</span>')+'</div>'; }).join('')+'</div>' : '')+
-      (todays.length ? '<div class="divider"><span class="lbl">Today’s Sponsors</span></div><div class="todays">'+todays.map(function(t){return '<div class="today"><div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>';}).join('')+'</div>' : '')+
+      (todays.length ? '<div class="divider"><span class="lbl">Today’s Sponsors</span></div><div class="todays">'+todays.map(function(t){return '<div class="today">'+(t[2]?'<img src="'+esc(t[2])+'" alt="'+esc(t[1])+'" style="max-height:36px;max-width:78%;object-fit:contain;background:#fff;border-radius:5px;padding:4px 7px;margin:0 auto 7px;display:block">':'')+'<div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>';}).join('')+'</div>' : '')+
       '<div class="card y" style="margin-top:14px"><div class="k">Sponsor The Lane</div><div class="t">Shirt &amp; kit, match &amp; matchball sponsorship, pitch-side boards and programme ads — marketing that backs grassroots football. Email <b>info@raynerslanefc.co.uk</b>.</div></div>'+
       foot()+'</div>');
 
