@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Fan Zone &amp; Matchday Scanning — The Guide | Rayners Lane FC</title>
+<link rel="icon" type="image/png" href="img/badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --y:#FFD100; --g:#1A5C32; --bk:#0a0a0a; --w:#F5F3ED; --ink:#1a1a1a; --soft:#5a5a5a; --line:#e4e2da;
+    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:#8a8a8a; font-family:var(--fb); color:var(--ink); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  .bar{ position:sticky; top:0; z-index:10; background:#0d0d0d; color:#fff; padding:13px 20px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; font-family:var(--fc); }
+  .bar h1{ font-family:var(--fd); font-size:20px; letter-spacing:1px; font-weight:400; }
+  .bar .sp{ flex:1; }
+  .bar button{ background:var(--y); color:#0d0d0d; border:none; border-radius:8px; font-family:var(--fc); font-weight:700; font-size:15px; letter-spacing:.04em; padding:10px 18px; cursor:pointer; }
+  .bar .hint{ font-size:12.5px; color:#aaa; max-width:520px; line-height:1.4; }
+
+  .pages{ padding:22px 0; }
+  .page{ width:210mm; min-height:297mm; background:#fff; margin:0 auto 18px; padding:13mm 15mm; position:relative; box-shadow:0 6px 30px rgba(0,0,0,.3); display:flex; flex-direction:column; }
+
+  /* ── COVER ── */
+  .cover{ background:linear-gradient(160deg,#0d0d0d 0%,#10331d 100%); color:#fff; padding:0; overflow:hidden; }
+  .cover__in{ flex:1; display:flex; flex-direction:column; padding:26mm 18mm; position:relative; }
+  .cover__wm{ position:absolute; right:-70px; bottom:-70px; width:420px; height:420px; background:url(img/badge.png) center/contain no-repeat; opacity:.06; }
+  .cover__badge{ width:120px; height:120px; object-fit:contain; margin-bottom:26px; }
+  .cover__kick{ font-family:var(--fc); font-size:15px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--y); }
+  .cover__title{ font-family:var(--fd); font-size:88px; line-height:.9; letter-spacing:1px; margin:8px 0 6px; }
+  .cover__sub{ font-family:var(--fb); font-size:18px; color:rgba(255,255,255,.82); max-width:440px; line-height:1.55; margin-top:14px; }
+  .cover__strip{ margin-top:auto; display:flex; gap:0; border-radius:12px; overflow:hidden; }
+  .cover__strip div{ flex:1; padding:18px 20px; }
+  .cover__strip .a{ background:var(--y); color:#0d0d0d; } .cover__strip .b{ background:rgba(255,255,255,.08); }
+  .cover__strip .n{ font-family:var(--fd); font-size:30px; line-height:1; } .cover__strip .l{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-top:5px; }
+
+  /* ── SECTIONS ── */
+  .sec-head{ display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+  .sec-num{ font-family:var(--fd); font-size:52px; line-height:.8; color:var(--y); -webkit-text-stroke:1px #d9b800; }
+  .sec-tag{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--g); }
+  .sec-title{ font-family:var(--fd); font-size:37px; letter-spacing:.5px; line-height:.95; color:var(--ink); }
+  .rule{ height:4px; width:60px; background:var(--y); border-radius:2px; margin:10px 0 15px; }
+  .lead{ font-family:var(--fb); font-size:14.5px; line-height:1.58; color:#333; margin-bottom:15px; max-width:150mm; }
+  .lead b{ color:var(--ink); }
+
+  .step{ display:flex; gap:15px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .step:last-child{ border-bottom:none; }
+  .step__n{ flex-shrink:0; width:40px; height:40px; border-radius:50%; background:var(--g); color:#fff; font-family:var(--fd); font-size:22px; display:flex; align-items:center; justify-content:center; }
+  .step--fan .step__n{ background:var(--y); color:#0d0d0d; }
+  .step__b{ padding-top:2px; }
+  .step__h{ font-family:var(--fc); font-size:18px; font-weight:700; color:var(--ink); letter-spacing:.01em; }
+  .step__t{ font-family:var(--fb); font-size:14px; line-height:1.6; color:#444; margin-top:3px; }
+  .step__t code{ font-family:var(--fc); font-weight:700; background:#f3f1e8; padding:1px 7px; border-radius:4px; color:var(--g); }
+
+  .callout{ margin-top:15px; border:1px solid var(--line); border-left:4px solid var(--y); border-radius:10px; padding:13px 16px; background:#fffdf3; }
+  .callout .k{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--g); margin-bottom:5px; }
+  .callout .t{ font-family:var(--fb); font-size:14px; line-height:1.6; color:#333; }
+
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px; }
+  .card{ border:1px solid var(--line); border-top:3px solid var(--g); border-radius:10px; padding:16px 17px; }
+  .card .h{ font-family:var(--fd); font-size:24px; letter-spacing:.4px; color:var(--ink); line-height:1; margin-bottom:7px; }
+  .card .t{ font-family:var(--fb); font-size:13.5px; line-height:1.6; color:#444; }
+  .card .t b{ color:var(--g); }
+
+  .flow{ display:flex; align-items:stretch; gap:8px; margin:4px 0 20px; }
+  .flow__b{ flex:1; background:#0d0d0d; color:#fff; border-radius:9px; padding:13px 12px; text-align:center; position:relative; }
+  .flow__b .n{ font-family:var(--fd); font-size:15px; color:var(--y); letter-spacing:.5px; }
+  .flow__b .d{ font-family:var(--fb); font-size:11px; color:rgba(255,255,255,.72); margin-top:3px; line-height:1.35; }
+  .flow__arrow{ align-self:center; font-family:var(--fd); color:var(--g); font-size:22px; }
+
+  .foot{ margin-top:auto; padding-top:16px; border-top:2px solid var(--y); display:flex; justify-content:space-between; align-items:center; font-family:var(--fc); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
+  .foot b{ color:var(--g); }
+
+  @media print{
+    @page{ size:A4 portrait; margin:0; }
+    body{ background:#fff; }
+    .bar{ display:none; }
+    .pages{ padding:0; }
+    .page{ margin:0; box-shadow:none; page-break-after:always; }
+    .page:last-child{ page-break-after:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <img src="img/badge.png" alt="RLFC" style="width:30px;height:30px;object-fit:contain">
+  <h1>Fan Zone &amp; Scanning — Guide</h1>
+  <button onclick="window.print()">🖨️ Save as PDF / Print</button>
+  <span class="hint">Click → choose <b>Save as PDF</b> (paper <b>A4</b>, “Background graphics” ON). That’s your shareable PDF.</span>
+  <span class="sp"></span>
+  <a href="fan-zone.html" style="color:#aaa;font-family:var(--fc);font-size:13px">← Fan Zone</a>
+</div>
+
+<div class="pages">
+
+  <!-- COVER -->
+  <div class="page cover">
+    <div class="cover__in">
+      <div class="cover__wm"></div>
+      <img class="cover__badge" src="img/badge.png" alt="Rayners Lane FC">
+      <div class="cover__kick">Rayners Lane FC · Staff &amp; Supporter Guide</div>
+      <div class="cover__title">THE FAN ZONE<br>&amp; MATCHDAY<br>SCANNING</div>
+      <div class="cover__sub">How supporters join The Lane Family, how staff scan them in on matchday, and why it makes the club stronger — front of house and back of house, step by step.</div>
+      <div class="cover__strip">
+        <div class="a"><div class="n">FREE</div><div class="l">Membership</div></div>
+        <div class="b"><div class="n">1 TAP</div><div class="l">To scan a fan</div></div>
+        <div class="b"><div class="n">💛</div><div class="l">A heart every game</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 2 — WHY + FRONT OF HOUSE -->
+  <div class="page">
+    <div class="sec-head"><span class="sec-num">1</span><div><div class="sec-tag">Start here</div><div class="sec-title">What the Fan Zone is</div></div></div>
+    <div class="rule"></div>
+    <p class="lead">The Fan Zone turns everyday supporters into a real, named community — <b>The Lane Family</b>. It’s a <b>free digital membership</b>: each fan gets a personal <b>Lane number</b> and a phone <b>membership card with a QR code</b>. When they come to a game, a steward scans that card and the fan earns a <b>“heart” 💛</b> for attending. Over a season it builds a real picture of who backs the club and how often — the foundation for loyalty rewards, better matchday promotion, and hard numbers to show sponsors.</p>
+
+    <div class="sec-head"><span class="sec-num">2</span><div><div class="sec-tag">Front of house · the supporter</div><div class="sec-title">How a fan joins &amp; gets scanned</div></div></div>
+    <div class="rule"></div>
+
+    <div class="step step--fan"><div class="step__n">1</div><div class="step__b"><div class="step__h">Open the Fan Zone</div><div class="step__t">The fan goes to <code>raynerslanefc.co.uk/fan-zone.html</code> — on their phone is easiest.</div></div></div>
+    <div class="step step--fan"><div class="step__n">2</div><div class="step__b"><div class="step__h">Create their account</div><div class="step__t">They tap <b>“Create My Account”</b> and enter their name, email and a password. Their details are stored privately for the club — never shown publicly.</div></div></div>
+    <div class="step step--fan"><div class="step__n">3</div><div class="step__b"><div class="step__h">Get their Lane card + QR</div><div class="step__t">They’re given a unique <b>Lane number</b> (e.g. <code>LANE-4500</code>) and a digital <b>membership card with a QR code</b>.</div></div></div>
+    <div class="step step--fan"><div class="step__n">4</div><div class="step__b"><div class="step__h">Save it to their phone</div><div class="step__t">Add to home screen or screenshot the card, so it’s ready to show at the gate — no printing needed.</div></div></div>
+    <div class="step step--fan"><div class="step__n">5</div><div class="step__b"><div class="step__h">Show it on matchday</div><div class="step__t">At the game they show the QR to a steward to be scanned. That’s it for the fan.</div></div></div>
+    <div class="step step--fan"><div class="step__n">6</div><div class="step__b"><div class="step__h">Collect their hearts 💛</div><div class="step__t">Every game they’re scanned in, their card gains a heart — building an attendance history they can see grow.</div></div></div>
+
+    <div class="callout"><div class="k">Tell every fan</div><div class="t">“Join The Lane Family free in a minute — get your Lane card, then just show it at every game to collect your hearts.” The more members, the stronger every point below.</div></div>
+
+    <div class="foot"><span>Rayners Lane FC · <b>The Lane Family</b></span><span>raynerslanefc.co.uk · #UpTheLane</span></div>
+  </div>
+
+  <!-- PAGE 3 — BACK OF HOUSE (STAFF) -->
+  <div class="page">
+    <div class="sec-head"><span class="sec-num">3</span><div><div class="sec-tag">Back of house · the staff</div><div class="sec-title">How to scan on matchday</div></div></div>
+    <div class="rule"></div>
+    <p class="lead">Any committee member or steward can scan — all you need is a phone. It’s <b>PIN-protected</b>, so only staff can check people in.</p>
+
+    <div class="step"><div class="step__n">1</div><div class="step__b"><div class="step__h">Open the Scanner</div><div class="step__t">On your phone go to <code>raynerslanefc.co.uk/scan.html</code>.</div></div></div>
+    <div class="step"><div class="step__n">2</div><div class="step__b"><div class="step__h">Enter the club PIN</div><div class="step__t">The scanner is <b>staff-only</b> — type the club PIN to unlock it.</div></div></div>
+    <div class="step"><div class="step__n">3</div><div class="step__b"><div class="step__h">Check the match date</div><div class="step__t">It defaults to <b>today</b>. Only change it if you’re logging a past game.</div></div></div>
+    <div class="step"><div class="step__n">4</div><div class="step__b"><div class="step__h">Start the camera &amp; point</div><div class="step__t">Tap <b>“Start Camera”</b> and point at the fan’s Lane QR. It scans <b>automatically</b> — no button to press per fan.</div></div></div>
+    <div class="step"><div class="step__n">5</div><div class="step__b"><div class="step__h">Watch for the tick</div><div class="step__t">You’ll see <code>✓ Lane #4500 — heart #7</code>. If they’ve already been scanned today you’ll get <code>⚠️ already scanned</code> — so nobody is double-counted.</div></div></div>
+    <div class="step"><div class="step__n">6</div><div class="step__b"><div class="step__h">Keep going</div><div class="step__t">Scan the next fan, and the next. A running count shows how many you’ve checked in. Every scan saves instantly.</div></div></div>
+
+    <div class="sec-head" style="margin-top:16px"><span class="sec-num">4</span><div><div class="sec-tag">Under the bonnet</div><div class="sec-title">How the back end works</div></div></div>
+    <div class="rule"></div>
+    <div class="flow">
+      <div class="flow__b"><div class="n">SCAN QR</div><div class="d">reads the fan’s Lane number</div></div>
+      <div class="flow__arrow">→</div>
+      <div class="flow__b"><div class="n">SECURE CHECK-IN</div><div class="d">sends Lane + date to the club (PIN-gated)</div></div>
+      <div class="flow__arrow">→</div>
+      <div class="flow__b"><div class="n">DATABASE</div><div class="d">records attendance · no duplicates</div></div>
+      <div class="flow__arrow">→</div>
+      <div class="flow__b"><div class="n">HEART 💛</div><div class="d">fan’s card updates instantly</div></div>
+    </div>
+    <p class="lead" style="margin-bottom:0">In plain English: the QR just holds the fan’s <b>Lane number</b>. Scanning sends that number and the match date to a secure club system, which logs the attendance in the club’s database (one check-in per fan per game) and instantly adds the heart to their card. Nothing sensitive is ever shown publicly, and only a staff PIN can record a check-in.</p>
+
+    <div class="foot"><span>Rayners Lane FC · <b>Matchday Scanning</b></span><span>raynerslanefc.co.uk · #UpTheLane</span></div>
+  </div>
+
+  <!-- PAGE 4 — WHY IT MATTERS -->
+  <div class="page">
+    <div class="sec-head"><span class="sec-num">5</span><div><div class="sec-tag">The payoff</div><div class="sec-title">Why it makes The Lane stronger</div></div></div>
+    <div class="rule"></div>
+    <p class="lead">This isn’t just a gimmick — it’s how a non-league club builds a genuine supporter base and turns it into money and momentum.</p>
+
+    <div class="cards">
+      <div class="card"><div class="h">A real supporter list</div><div class="t">Named, contactable members instead of anonymous faces — so the club can promote memberships, events, the 100 Club and sponsors <b>straight to the people who care</b>.</div></div>
+      <div class="card"><div class="h">Numbers that sell</div><div class="t">You’ll know exactly how many turn up and how often. <b>“X members, Y at every home game”</b> is the single most powerful line in any sponsorship pitch — it turns sponsorship from charity into marketing.</div></div>
+      <div class="card"><div class="h">Loyalty &amp; buzz</div><div class="t">The hearts reward turning up. Regulars can be recognised, milestones celebrated, and lapsed fans gently pulled back — <b>a club that feels alive</b>.</div></div>
+      <div class="card"><div class="h">Smoother matchdays</div><div class="t">A clean, instant headcount and check-in — <b>no clipboard, no guesswork</b> — and a growing record of every game’s attendance.</div></div>
+    </div>
+
+    <div class="callout" style="margin-top:24px;border-left-color:var(--g);background:#f3f8f4"><div class="k" style="color:var(--g)">The one-line pitch</div><div class="t"><b>Every scan makes the club’s story bigger.</b> More members and more scanned attendance means more to show sponsors, more people to sell to, and more reasons for the community to feel part of The Lane. Get every fan signed up, and scan every one, every game.</div></div>
+
+    <div class="foot"><span>Rayners Lane FC · Est. 1933 · Harrow</span><span>raynerslanefc.co.uk · <b>Up The Lane</b> 💛💚</span></div>
+  </div>
+
+</div>
+</body>
+</html>
