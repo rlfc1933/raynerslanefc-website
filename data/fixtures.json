@@ -1,6 +1,20 @@
 {
   "fixtures": [
     {
+      "id": "friendly-hayes-yeading-20260704",
+      "date": "2026-07-04",
+      "kickoff": "15:00",
+      "opponent": "Hayes & Yeading United",
+      "oppCrest": "",
+      "isHome": true,
+      "venue": "Tithe Farm Sports & Social Club",
+      "competition": "Pre-Season Friendly",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
       "id": "matchday-current",
       "date": "2026-07-11",
       "kickoff": "13:00",
@@ -13,7 +27,49 @@
       "us": null,
       "them": null,
       "scorers": ""
+    },
+    {
+      "id": "friendly-met-police-20260725",
+      "date": "2026-07-25",
+      "kickoff": "15:00",
+      "opponent": "Metropolitan Police FC",
+      "oppCrest": "",
+      "isHome": false,
+      "venue": "Imber Court, East Molesey",
+      "competition": "Pre-Season Friendly",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
+      "id": "facup-ep-london-lions-20260808",
+      "date": "2026-08-08",
+      "kickoff": "15:00",
+      "opponent": "London Lions",
+      "oppCrest": "",
+      "isHome": false,
+      "venue": "",
+      "competition": "FA Cup",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
+      "id": "favase-1q-new-bradwell-20260815",
+      "date": "2026-08-15",
+      "kickoff": "15:00",
+      "opponent": "New Bradwell St Peter",
+      "oppCrest": "",
+      "isHome": true,
+      "venue": "Tithe Farm Sports & Social Club",
+      "competition": "FA Vase",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-11T13:21:03.494Z"
+  "updatedAt": "2026-07-12T19:58:25.639Z"
 }
