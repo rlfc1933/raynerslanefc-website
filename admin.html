@@ -751,6 +751,13 @@
     <div class="panel" id="panel-fixtures">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128197; Fixtures</div></div>
       <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5;margin-bottom:14px">One season schedule that powers the <b style="color:var(--w)">Fixtures page</b>, the <b style="color:var(--w)">home countdown</b>, the <b style="color:var(--w)">calendar feed</b> and <b style="color:var(--w)">Post Studio</b>. Add a fixture, then add the score once it&rsquo;s played.</div>
+      <!-- One-tap import from Football Web Pages (the club's official fixtures feed) -->
+      <div style="border:1px solid var(--br);border-radius:12px;padding:14px;margin-bottom:16px;background:var(--c2)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">&#128229;</span><b style="font-family:var(--fd);font-size:17px;letter-spacing:.02em;color:var(--w)">Import from Football Web Pages</b></div>
+        <div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin-bottom:12px">Pulls the club&rsquo;s official fixtures straight from Football Web Pages &mdash; date, opponent, home/away, competition and kick-off, all filled in for you. It <b style="color:var(--w)">only ever adds the schedule</b>; your scores and scorers are never touched. Runs a safety check so it can only import this season.</div>
+        <button class="save sec" id="fx-import-btn" onclick="importFromFWP()">&#128229; Import fixtures from Football Web Pages</button>
+        <div id="fx-import-out" style="margin-top:10px"></div>
+      </div>
       <div class="slbl">Add / Edit Fixture</div>
       <div class="ha">
         <button class="ha-btn on" id="fx-h" onclick="fxSetHA(true)">&#127968; Home</button>
@@ -4703,7 +4710,7 @@ async function loadLeads() {
         el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">HubSpot not connected yet.</strong> Set <strong>HUBSPOT_TOKEN</strong>' + (d.error === 'no-pipeline' ? ' + <strong>HUBSPOT_PLAYER_PIPELINE</strong>' : '') + ' in Netlify (see SETUP-GUIDE). Trial registrations still arrive by email in the meantime.</p></div>';
         return;
       }
-      el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load (' + esc(d.error || 'error') + '). Try Refresh.</div>';
+      el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load (' + escH(d.error || 'error') + '). Try Refresh.</div>';
       return;
     }
     if (!d.leads.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No trialists yet — they appear here when someone registers on the Trials page.</div>'; return; }
@@ -4733,7 +4740,7 @@ async function loadSponsorHub() {
       el.innerHTML = '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">One-time setup.</strong> Add a <strong>NETLIFY_API_TOKEN</strong> in Netlify env vars to pull applications in here (same token as fan sign-ups). Meanwhile applications also email info@.</p></div>';
       return;
     }
-    if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load (' + esc(d.error || 'error') + ').</div>'; return; }
+    if (!d.ok) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t load (' + escH(d.error || 'error') + ').</div>'; return; }
     sponsorApps = d.sponsors || [];
     renderSponsorHub();
   } catch (e) {
@@ -5224,6 +5231,72 @@ function renderFixtures() {
 }
 function saveFixtures(msg) {
   commitDomain('fixtures', 'fixtures', 'id', fixtures, fixturesDeleted, null, 'dep-fixtures', msg || 'Fixtures saved ✓ — live in ~30s');
+}
+
+// ── IMPORT FROM FOOTBALL WEB PAGES ──
+// Server (import-fixtures.js) fetches + validates FWP's official feed and returns
+// SCHEDULE only. We stage the merge in memory (never overwriting staff scores),
+// show a plain-English summary, then let the user press Save to publish.
+function _fxNorm(s) { return String(s || '').toLowerCase().replace(/\bf\.?c\.?\b/g, '').replace(/[^a-z0-9]/g, ''); }
+function importFromFWP() {
+  var btn = document.getElementById('fx-import-btn');
+  var out = document.getElementById('fx-import-out');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Checking Football Web Pages…'; }
+  fetch('/.netlify/functions/import-fixtures')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Import fixtures from Football Web Pages'; }
+      if (!d || !d.ok) {
+        out.innerHTML = '<div style="font-family:var(--fb);font-size:12.5px;color:var(--re,#e66);line-height:1.5;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);border-radius:8px;padding:10px">⚠️ ' + escH((d && d.error) || 'Import failed — please try again.') + '</div>';
+        return;
+      }
+      if (!d.fixtures || !d.fixtures.length) {
+        out.innerHTML = '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.5;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:10px">📭 Football Web Pages has <b style="color:var(--w)">no fixtures published yet</b> for this team. Nothing to import right now — try again once the league releases the schedule. (Season checked: ' + escH(d.season || '') + ')</div>';
+        return;
+      }
+      // Stage the merge in memory (nothing is written until Save to Site).
+      var added = 0, updated = 0, unchanged = 0;
+      d.fixtures.forEach(function (imp) {
+        var existing = fixtures.filter(function (f) {
+          return f.date === imp.date && _fxNorm(f.opponent) === _fxNorm(imp.opponent);
+        })[0];
+        if (existing) {
+          var changed = false;
+          if ((existing.kickoff || '') !== imp.kickoff) { existing.kickoff = imp.kickoff; changed = true; }
+          if (existing.isHome !== imp.isHome) { existing.isHome = imp.isHome; changed = true; }
+          if (imp.competition && (existing.competition || '') !== imp.competition) { existing.competition = imp.competition; changed = true; }
+          // Never touch us/them/scorers/status/id — those are the staff's.
+          changed ? updated++ : unchanged++;
+        } else {
+          var crest = fxCrests.filter(function (c) { return _fxNorm(c.name) === _fxNorm(imp.opponent); })[0];
+          fixtures.push({
+            id: 'fwp-' + (imp.fwpId || (imp.date.replace(/-/g, '') + _fxNorm(imp.opponent))),
+            date: imp.date, kickoff: imp.kickoff || '15:00',
+            opponent: imp.opponent, oppCrest: crest ? crest.file : '',
+            isHome: imp.isHome, venue: imp.isHome ? 'Tithe Farm Sports & Social Club' : '',
+            competition: imp.competition || '', status: 'scheduled',
+            us: null, them: null, scorers: ''
+          });
+          added++;
+        }
+      });
+      fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
+      renderFixtures();
+      var parts = [];
+      if (added) parts.push('<b style="color:var(--su,#5c5)">' + added + ' new</b>');
+      if (updated) parts.push('<b style="color:var(--y)">' + updated + ' updated</b>');
+      if (unchanged) parts.push(unchanged + ' already up to date');
+      var msg = added || updated
+        ? 'Staged ' + parts.join(' · ') + ' from Football Web Pages (season ' + escH(d.season) + '). Your scores are untouched. Review the list below, then <b style="color:var(--w)">Save to Site</b> to publish.'
+        : 'Everything already matches Football Web Pages — nothing to change. ✓';
+      out.innerHTML =
+        '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:11px">📥 ' + msg + '</div>' +
+        (added || updated ? '<button class="save" style="margin-top:9px" onclick="saveFixtures(\'Imported fixtures saved ✓ — live in ~30s\')">✓ Save these to the site</button>' : '');
+    })
+    .catch(function (e) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Import fixtures from Football Web Pages'; }
+      out.innerHTML = '<div style="font-family:var(--fb);font-size:12.5px;color:var(--re,#e66);line-height:1.5;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);border-radius:8px;padding:10px">⚠️ Could not reach the import service (' + escH(e.message) + ').</div>';
+    });
 }
 
 // ── PLAYER PROFILES ──
