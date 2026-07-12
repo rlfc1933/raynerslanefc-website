@@ -99,8 +99,22 @@
       <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
     </div>
     <div class="tab-panel" id="tab-table">
-      <div id="fx-table"><div class="fx-loading">Loading table…</div></div>
-      <div class="fx-attr">League table via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA)</div>
+      <!-- Live league table via the Football Web Pages embed (a third-party
+           iframe with its own white styling — can't be recoloured or row-
+           highlighted from here, so we CONTAIN it in a branded frame). -->
+      <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--card2);border-bottom:1px solid var(--border)">
+          <span style="font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--white)">Premier Division North</span>
+          <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)">● Live · Football Web Pages</span>
+        </div>
+        <div style="background:#fff"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
+      </div>
+      <div class="fx-attr" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span>Live table via <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Football Web Pages</a> — updates automatically</span>
+        <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia table →</a>
+      </div>
+      <!-- Kept hidden as a silent fallback source for the programme's fetch-table -->
+      <div id="fx-table" style="display:none"></div>
     </div>
     <div class="tab-panel" id="tab-form">
       <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
@@ -418,6 +432,11 @@ function renderFxTable(rows) {
   .fx-table tr.me td{background:rgba(255,209,0,.1);color:#fff}
   .fx-table tr.me td.l{color:var(--yellow);font-weight:700}
   @media(max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}}
+  /* FWP embed: fit the third-party iframe cleanly into its branded frame */
+  .fwp-embed{min-height:340px}
+  .fwp-embed iframe{width:100%!important;border:0!important;display:block}
 </style>
+<!-- Football Web Pages live embeds (loads once; renders the league-table iframe above) -->
+<script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
 </body>
 </html>
