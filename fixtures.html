@@ -279,6 +279,14 @@ function renderFxSeason(list) {
   } else { nextEl.innerHTML = ''; }
 
   var html = '';
+  // Honest interim state: the league hasn't released the Prem Div North schedule
+  // yet. Show it clearly (data-driven — disappears the moment a league fixture lands).
+  var hasLeague = list.some(function (f) { return /combined counties|premier div|step 5|\bleague\b/i.test(f.competition || ''); });
+  if (!hasLeague) {
+    html += '<div style="border:1px solid var(--border);border-left:4px solid var(--yellow);border-radius:10px;background:rgba(255,209,0,.06);padding:14px 16px;margin-bottom:18px;font-family:var(--font-b);font-size:14px;line-height:1.6;color:var(--lgrey)">' +
+      '<strong style="color:var(--white);font-family:var(--font-c);letter-spacing:.04em">🗓️ League fixtures to be released</strong><br>' +
+      'The Combined Counties Premier Division North schedule isn’t out yet — the season kicks off <strong style="color:var(--white)">Saturday 1 August 2026</strong>. Our confirmed cup ties and pre-season friendlies are below; the full league list will appear here automatically the moment it’s published.</div>';
+  }
   if (upcoming.length) {
     html += '<div class="fx-rlbl">Upcoming Fixtures</div>' + upcoming.map(function (f) {
       var fd = new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00');
