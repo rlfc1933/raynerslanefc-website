@@ -44,7 +44,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-charlie-austin",
+      "no": 0,
+      "name": "Charlie Austin",
+      "pos": "Midfielder",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:35:17.070Z"
+  "updatedAt": "2026-07-13T15:35:34.566Z"
 }
