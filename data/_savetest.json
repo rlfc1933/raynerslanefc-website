@@ -7,7 +7,11 @@
     {
       "id": "p-player-two",
       "name": "Player Two"
+    },
+    {
+      "id": "p-player-three",
+      "name": "Player Three"
     }
   ],
-  "updatedAt": "2026-07-13T15:11:54.015Z"
+  "updatedAt": "2026-07-13T15:11:55.229Z"
 }
