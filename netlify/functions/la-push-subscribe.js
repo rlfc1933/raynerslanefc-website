@@ -15,5 +15,11 @@ exports.handler = async function (event) {
   const up = await L.ins('push_subscriptions', {
     endpoint: sub.endpoint, subscription: sub, role: sess.role, user_id: sess.user_id, player_id: sess.player_id || null,
   }, { upsert: true, onConflict: 'endpoint' });
-  return L.resp(up.ok ? 200 : 500, up.ok ? { ok: true } : { ok: false, error: 'Could not save subscription.' });
+  if (up.ok) return L.resp(200, { ok: true, tagged: true });
+
+  // The role/user_id columns may not be added yet — still save the base
+  // subscription so alerts work; management-targeting turns on once the two
+  // ALTER lines are run and the device re-subscribes.
+  const base = await L.ins('push_subscriptions', { endpoint: sub.endpoint, subscription: sub }, { upsert: true, onConflict: 'endpoint' });
+  return L.resp(base.ok ? 200 : 500, base.ok ? { ok: true, tagged: false } : { ok: false, error: 'Could not save subscription.' });
 };
