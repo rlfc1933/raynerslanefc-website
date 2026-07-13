@@ -626,9 +626,57 @@ function render(){
   if(isStaff() && state.tab==='post' && state.role==='chairman') loadStaff();
 }
 
+/* ═══════ DEMO MODE (guide screenshots only — ?shot=NAME, no backend) ═══════ */
+function demoShot(name){
+  var homeVenue={club_name:'Rayners Lane',ground:'Tithe Farm Sports & Social Club',address:'151 Rayners Lane, Harrow HA2 0XH',lat:51.5754,lng:-0.3705};
+  var ev={id:1,type:'cup',opponent:'Harefield United',is_home:true,competition:'FA Cup · Extra Preliminary',starts_at:'2026-08-08T14:00:00Z',meet_at:'2026-08-08T12:45:00Z',kit:'Yellow / Green',published:false,source:'fwp_import',la_venues:homeVenue};
+  var squad=[
+    {id:1,name:'Sam Okoro',position:'Goalkeeper',squad_no:1,status:'active',availability:'available',selection:'starting',checkedIn:false},
+    {id:2,name:'Jack Rennie',position:'Defender',squad_no:4,status:'active',availability:'available',selection:'starting',checkedIn:false},
+    {id:3,name:'Aaron Clarke',position:'Defender',squad_no:5,status:'active',availability:'available',selection:'sub',checkedIn:false},
+    {id:4,name:'Danny Whitfield',position:'Midfielder',squad_no:7,status:'active',availability:'available',selection:null,checkedIn:false},
+    {id:5,name:'Ollie Grant',position:'Midfielder',squad_no:8,status:'active',availability:'unavailable',selection:null,checkedIn:false},
+    {id:6,name:'Michael Adefolami',position:'Forward',squad_no:9,status:'active',availability:'available',selection:'starting',checkedIn:false},
+    {id:7,name:'Reece Nolan',position:'Forward',squad_no:11,status:'active',availability:null,selection:null,checkedIn:false},
+    {id:8,name:'Tom Beckford',position:'Defender',squad_no:6,status:'injured',availability:null,selection:null,checkedIn:false}
+  ];
+  var pending=[{id:20,name:'Kyle Roberts',position:'Midfielder',phone:'07700 900123'}];
+  var anns=[{title:'FA Cup — let’s pack the ground',body:'First cup tie of the season. Get your families down, get the noise up. Up The Lane.'}];
+  if(name==='choose'){ state.token=''; authMode='choose'; render(); return; }
+  if(name==='signup'){ state.token=''; authMode='signup'; render(); return; }
+  if(name==='staffsignin'){ state.token=''; authMode='staff'; render();
+    var sel=document.getElementById('staff-pick'); if(sel) sel.innerHTML='<option>Pete Singh · Chairman</option><option>Gary Pitt · Manager</option>';
+    pin='1933'; renderPinArea(); return; }
+  if(name==='playerhome'||name==='playercard'){
+    state.token='demo'; state.role='player'; state.activeEvent=1;
+    state.me={role:'player',player:{id:6,name:'Michael Adefolami',position:'Forward',squad_no:9,status:'active',bio:'Striker. Loves a back-post header.',sponsor_name:'McCafferty’s Bar'},
+      events:[Object.assign({},ev,{myAvailability:'available',mySelection:null,myCheckin:false})],announcements:anns,feedback:[]};
+    state.tab=name==='playercard'?'me':'home'; render(); return;
+  }
+  state.token='demo'; state.role=(name==='post')?'chairman':'manager'; state.activeEvent=1;
+  state.board={role:state.role,perms:{can_select_squad:true,can_approve:true,can_broadcast:true,can_manage_users:state.role==='chairman'},activeEvent:1,events:[ev],squad:squad,pending:pending};
+  state.tab=(name==='squad')?'squad':(name==='post')?'post':'home'; render();
+  if(name==='post'){ var el=document.getElementById('staff-list'); if(el) el.innerHTML='<div class="prow"><div class="nm">gary.pitt<small>manager</small></div><button class="pill no" style="border:none">Revoke</button></div>'; }
+  shotTightLayout();
+}
+// For guide screenshots: flow the fixed bottom nav inline so images crop tight
+// (no big black gap between content and the pinned tab bar).
+function shotTightLayout(){
+  try{
+    document.body.style.overflow='visible';
+    var sc=document.querySelector('.screen'); if(sc) sc.style.height='auto';
+    var bd=document.querySelector('.body'); if(bd){ bd.style.paddingBottom='0'; bd.style.overflow='visible'; }
+    var tb=document.querySelector('.tabs'); if(tb){ tb.style.position='static'; tb.style.margin='0 auto'; }
+  }catch(e){}
+}
+
 /* ═══════ BOOT ═══════ */
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw-pm.js').catch(function(){}); }
-(function(){ if(state.token){ refresh(); } else { render(); } flushQueue(); })();
+(function(){
+  var shot=(new URLSearchParams(location.search)).get('shot');
+  if(shot){ try{ demoShot(shot); }catch(e){} return; }
+  if(state.token){ refresh(); } else { render(); } flushQueue();
+})();
 </script>
 </body>
 </html>
