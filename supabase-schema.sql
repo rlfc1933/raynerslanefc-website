@@ -319,9 +319,13 @@ create table if not exists public.push_subscriptions (
   id           uuid primary key default gen_random_uuid(),
   endpoint     text unique not null,
   subscription jsonb not null,
-  player_id    bigint references public.la_players(id),
+  player_id    bigint,
   created_at   timestamptz default now()
 );
+-- Tag each device with its user's role so a player sign-up can push to
+-- MANAGEMENT specifically (not fans). Safe on an existing fan table.
+alter table public.push_subscriptions add column if not exists role    text;
+alter table public.push_subscriptions add column if not exists user_id bigint;
 
 -- ── PUBLIC-SAFE VIEW ── the ONLY player data the browser anon key may read:
 -- no phone/email/pin_hash/DOB/guardian. The base table stays anon-invisible.

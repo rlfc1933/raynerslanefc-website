@@ -3,8 +3,22 @@
 // enforces unique username, and REACTIVATES a former player by email instead
 // of duplicating. Issues a session so they can log in and watch the queue.
 const L = require('./lib/lane');
+let webpush = null;
+try { webpush = require('web-push'); } catch (e) {}
 
 function ip(event) { const h = event.headers || {}; return (h['x-nf-client-connection-ip'] || h['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown'; }
+
+// Best-effort push to management the instant a player signs up.
+async function notifyManagement(name) {
+  try {
+    const pub = process.env.VAPID_PUBLIC_KEY, priv = process.env.VAPID_PRIVATE_KEY;
+    if (!webpush || !pub || !priv) return;
+    webpush.setVapidDetails('mailto:info@raynerslanefc.co.uk', pub, priv);
+    const subs = await L.sel('push_subscriptions?select=subscription&role=in.(chairman,manager,coach,staff)');
+    const msg = JSON.stringify({ title: 'New player sign-up ⚽', body: name + ' wants to join the squad — tap to approve.', url: '/playermanager1933.html' });
+    await Promise.all(subs.map(function (s) { return webpush.sendNotification(s.subscription, msg).catch(function () {}); }));
+  } catch (e) {}
+}
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
@@ -68,6 +82,7 @@ exports.handler = async function (event) {
   const token = L.newToken();
   await L.ins('la_sessions', { token, user_id: userId, expires_at: new Date(Date.now() + 30 * 86400000).toISOString() });
   await L.audit(userId, 'signup', 'player', player.id, null, { name, status: 'pending' });
+  await notifyManagement(name);
 
   return L.resp(200, { ok: true, token, status: 'pending', player: { id: player.id, name, position } });
 };

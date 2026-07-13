@@ -205,13 +205,41 @@ function showIosInstall(){
     '<button class="btn btn-o btn-sm" style="margin-top:12px" onclick="render()">← Back</button></div>';
 }
 
-/* ── notifications: ask AFTER first successful action, and only if installed ── */
+/* ── notifications: register THIS device for push (management gets a buzz the
+   moment a player signs up; players get their squad status). Asked after a
+   first successful action, and only where push can actually work. ── */
+function b64ToU8(base64){ var pad='='.repeat((4-base64.length%4)%4); var s=(base64+pad).replace(/-/g,'+').replace(/_/g,'/'); var raw=atob(s); var out=new Uint8Array(raw.length); for(var i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i); return out; }
+function pushSupported(){ return ('Notification' in window) && ('serviceWorker' in navigator) && ('PushManager' in window); }
+function notifyState(){ if(!pushSupported()) return 'unsupported'; if(isIOS && !isStandalone()) return 'install-first'; return Notification.permission; } // default|granted|denied
+async function enableNotifications(){
+  if(!pushSupported()){ toast('This device can’t do notifications.',1); return; }
+  if(isIOS && !isStandalone()){ showIosInstall(); return; }
+  try{
+    var perm = Notification.permission==='granted' ? 'granted' : await Notification.requestPermission();
+    if(perm!=='granted'){ toast('Notifications are turned off in your settings.',1); render(); return; }
+    var keyRes = await fetch(FN+'/push-key').then(function(r){return r.json();}).catch(function(){return{};});
+    if(!keyRes.enabled || !keyRes.key){ toast('Alerts aren’t switched on by the club yet.',1); return; }
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if(!sub){ sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: b64ToU8(keyRes.key) }); }
+    var r = await api('la-push-subscribe', { subscription: sub.toJSON ? sub.toJSON() : sub });
+    if(r.ok){ LS.setItem('la_notif','on'); toast('🔔 Alerts on — you’ll be notified on this phone.'); render(); }
+    else toast(r.error||'Could not turn on alerts.',1);
+  }catch(e){ toast('Could not turn on alerts.',1); }
+}
 async function maybeAskNotify(){
-  if(!('Notification' in window) || Notification.permission!=='default') return;
-  if(isIOS && !isStandalone()) return;           // iOS: pointless until installed
+  if(notifyState()!=='default') return;            // already granted/denied, or can't
   if(LS.getItem('la_askedNotif')) return;
   LS.setItem('la_askedNotif','1');
-  try{ await Notification.requestPermission(); }catch(e){}
+  enableNotifications();
+}
+/* a tappable banner when alerts aren't on yet (staff especially want this) */
+function notifyBanner(){
+  var st=notifyState();
+  if(st==='granted' && LS.getItem('la_notif')==='on') return '';
+  if(st==='unsupported') return '';
+  if(st==='install-first') return '<div class="install-banner" onclick="showIosInstall()" style="cursor:pointer"><b>🔔 Turn on alerts</b><div class="muted" style="font-size:10.5px;margin-top:2px">Add the app to your home screen first, then enable alerts.</div></div>';
+  return '<div class="install-banner"><div style="font-family:var(--fc);font-weight:800;font-size:14px">🔔 Turn on alerts</div><div class="muted" style="font-size:10.5px;margin:2px 0 9px">'+(isStaff()?'Get a buzz the moment a player signs up or you need to act.':'Get told your squad status and club updates.')+'</div><button class="btn btn-y btn-sm" onclick="enableNotifications()">Enable notifications</button></div>';
 }
 
 /* ═══════ AUTH ═══════ */
@@ -347,7 +375,7 @@ function fixtureCard(){
 
 /* ═══════ PLAYER ═══════ */
 function playerHome(){
-  var e=evt(), me=state.me&&state.me.player, out=fixturePicker();
+  var e=evt(), me=state.me&&state.me.player, out=notifyBanner()+fixturePicker();
   if(!e){ return out + '<div class="card"><div class="muted">No events scheduled yet — the club will add them here.</div></div>'; }
   var a=e.myAvailability, sel=e.mySelection, banner;
   if(!e.published) banner='<div class="status-banner sb-wait"><div class="s">SQUAD NOT PICKED YET</div><div class="d">You’ll be notified the moment it’s announced</div></div>';
@@ -392,7 +420,7 @@ function playerMe(){
 /* ═══════ STAFF ═══════ */
 function staffHome(){
   var b=state.board; if(!b) return '<div class="muted">Loading…</div>';
-  var e=evt(), out='';
+  var e=evt(), out=notifyBanner();
   if(b.pending&&b.pending.length){
     out+='<div class="card" style="border-color:rgba(255,209,0,.5);background:rgba(255,209,0,.07)"><div class="eyebrow">🔔 '+b.pending.length+' signed up — approve to add to the squad</div>'+
       b.pending.map(function(p){ return '<div class="prow" style="background:var(--c2)"><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+' · '+esc(p.phone||'')+'</small></div>'+
