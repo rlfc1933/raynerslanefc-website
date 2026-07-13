@@ -8,14 +8,24 @@
   if (window.__laneData) return; window.__laneData = true;
   var CDN = 'https://cdn.jsdelivr.net/gh/rlfc1933/raynerslanefc-website@main/';
   var _fetch = window.fetch.bind(window);
+  function ts(o) { return (o && o.updatedAt) ? (Date.parse(o.updatedAt) || 0) : 0; }
+  function grab(u) { return _fetch(u, { cache: 'no-store' }).then(function (r) { return (r && r.ok) ? r.json() : null; }).catch(function () { return null; }); }
   window.fetch = function (url, opts) {
     if (typeof url === 'string' && (!opts || !opts.method || String(opts.method).toUpperCase() === 'GET')) {
       var m = url.match(/(?:^|\/)(data\/[\w-]+\.json)(\?[^#]*)?$/i);
       if (m) {
+        // Read BOTH the jsDelivr CDN (instant after a purge) AND the deployed
+        // file (fresh after the Netlify rebuild), and use whichever is NEWER by
+        // updatedAt. This means a stale/throttled CDN can never freeze the site
+        // — the freshest available copy always wins. Falls back to the plain
+        // deployed fetch if both reads fail.
         var q = m[2] || ('?t=' + Date.now());
-        return _fetch(CDN + m[1] + q, { cache: 'no-store' })
-          .then(function (r) { return (r && r.ok) ? r : _fetch(url, opts); })
-          .catch(function () { return _fetch(url, opts); });
+        return Promise.all([ grab(CDN + m[1] + q), grab(url) ]).then(function (r) {
+          var cdn = r[0], dep = r[1];
+          var pick = (cdn && dep) ? (ts(dep) > ts(cdn) ? dep : cdn) : (cdn || dep);
+          if (!pick) return _fetch(url, opts);
+          return new Response(JSON.stringify(pick), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        });
       }
     }
     return _fetch(url, opts);
