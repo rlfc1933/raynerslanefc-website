@@ -356,6 +356,7 @@ function playerMe(){
     '<div class="honest"><b style="color:var(--y)">Stats start 1 August.</b> They count themselves from the games the manager records — nobody types them.</div></div>';
   if(p.sponsor_name) out+='<div class="card" style="text-align:center"><div class="muted" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#7fe0a3">My player sponsor</div><div style="font-family:var(--fd);font-size:20px;margin-top:2px">'+esc(p.sponsor_name.toUpperCase())+'</div></div>';
   out+='<div class="card"><div class="eyebrow">My profile</div><div class="fld"><label>My bio</label><textarea id="bio-in" placeholder="Tell the fans about yourself…">'+esc(p.bio||'')+'</textarea></div><button class="btn btn-o btn-sm" onclick="saveBio()">Save my profile</button></div>';
+  out+=accountCard();
   out+=installButton();
   return out;
 }
@@ -404,7 +405,11 @@ function staffSquad(){
   return out;
 }
 function staffPost(){
-  return '<div class="eyebrow">Broadcast to the squad</div><div class="card"><div class="fld"><label>Title</label><input id="an-t" placeholder="e.g. Meet time moved"></div><div class="fld"><label>Message</label><textarea id="an-m" placeholder="Goes to every player…"></textarea></div><button class="btn btn-g" onclick="sendAnn()">📣 Send to all players</button></div>'+installButton();
+  var out='<div class="eyebrow">Broadcast to the squad</div><div class="card"><div class="fld"><label>Title</label><input id="an-t" placeholder="e.g. Meet time moved"></div><div class="fld"><label>Message</label><textarea id="an-m" placeholder="Goes to every player…"></textarea></div><button class="btn btn-g" onclick="sendAnn()">📣 Send to all players</button></div>';
+  if(state.role==='chairman') out+=manageStaffCard();
+  out+=accountCard();
+  out+=installButton();
+  return out;
 }
 
 /* ═══════ ACTIONS ═══════ */
@@ -441,6 +446,41 @@ async function sendAnn(){ var t=(document.getElementById('an-t')||{}).value||'',
   var r=await api('la-broadcast', {title:t, body:m}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast('📣 Broadcast sent.'); render(); }
 async function ackFb(id){ var r=await api('la-feedback', {ack:id}); if(r.ok){ toast('Acknowledged 👍'); refresh(); } }
 async function saveBio(){ var v=(document.getElementById('bio-in')||{}).value||''; var r=await api('la-profile',{bio:v}); if(r.ok){ toast('Profile updated.'); } else toast(r.error||'Failed.',1); }
+
+/* account: change your own code (players + staff) */
+function accountCard(){
+  return '<div class="card"><div class="eyebrow">Your login</div>'+
+    '<div class="split"><div class="fld"><label>Current code</label><input id="cc-cur" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>'+
+    '<div class="fld"><label>New 6-digit code</label><input id="cc-new" type="password" inputmode="numeric" maxlength="6" placeholder="new code"></div></div>'+
+    '<button class="btn btn-o btn-sm" onclick="changeCode()">Change my code</button></div>';
+}
+async function changeCode(){
+  var cur=(document.getElementById('cc-cur')||{}).value||'', nw=(document.getElementById('cc-new')||{}).value||'';
+  if(!/^\d{6}$/.test(nw)){ toast('New code must be 6 numbers.',1); return; }
+  var r=await api('la-set-code',{current_code:cur.trim(), new_code:nw.trim()});
+  if(r.ok){ toast('✅ Code changed.'); var a=document.getElementById('cc-cur'),b=document.getElementById('cc-new'); if(a)a.value='';if(b)b.value=''; }
+  else toast(r.error||'Could not change code.',1);
+}
+/* chairman: manage staff logins in-app (no shared PIN) */
+function manageStaffCard(){
+  return '<div class="card"><div class="eyebrow">Manage staff logins</div>'+
+    '<div class="muted" style="margin-bottom:8px">Add a manager, coach or committee member. They sign in with this username + starter code, then change it themselves.</div>'+
+    '<div class="fld"><label>Username</label><input id="as-un" placeholder="coach.dave" autocapitalize="none"></div>'+
+    '<div class="split"><div class="fld"><label>Starter code</label><input id="as-code" inputmode="numeric" maxlength="6" placeholder="6 numbers"></div>'+
+    '<div class="fld"><label>Role</label><select id="as-role"><option value="manager">Manager</option><option value="coach" selected>Coach</option><option value="staff">Staff</option><option value="chairman">Chairman</option></select></div></div>'+
+    '<button class="btn btn-y btn-sm" onclick="addStaff()">Add staff member</button>'+
+    '<div id="staff-list" style="margin-top:10px"></div></div>';
+}
+async function addStaff(){
+  var u=(document.getElementById('as-un')||{}).value||'', c=(document.getElementById('as-code')||{}).value||'', role=(document.getElementById('as-role')||{}).value||'coach';
+  if(!u||!/^\d{6}$/.test(c)){ toast('Username + a 6-digit starter code.',1); return; }
+  var r=await api('la-staff-admin',{action:'create', username:u.trim(), code:c.trim(), role:role});
+  if(r.ok){ toast('✅ '+u+' added as '+role+'.'); var a=document.getElementById('as-un'),b=document.getElementById('as-code'); if(a)a.value='';if(b)b.value=''; loadStaff(); }
+  else toast(r.error||'Could not add staff.',1);
+}
+async function loadStaff(){ var r=await api('la-staff-admin',{action:'list'}); var el=document.getElementById('staff-list'); if(!el||!r.ok) return;
+  el.innerHTML=(r.staff||[]).map(function(s){ return '<div class="prow"><div class="nm">'+esc(s.username)+'<small>'+esc(s.role)+(s.status!=='active'?' · revoked':'')+'</small></div>'+(s.status==='active'&&s.username!=='pete.singh'?'<button class="pill no" style="border:none;cursor:pointer" onclick="revokeStaff('+s.id+')">Revoke</button>':'')+'</div>'; }).join(''); }
+async function revokeStaff(id){ if(!confirm('Revoke this staff login?')) return; var r=await api('la-staff-admin',{action:'revoke', id:id}); if(r.ok){ toast('Revoked — they can no longer sign in.'); loadStaff(); } else toast(r.error||'Failed.',1); }
 
 /* add-event form */
 function showAdd(){
@@ -496,8 +536,8 @@ function loginView(){
   }
   return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:18px"><h1>THE LANE<br><span class="y">APP</span></h1><p>Players · Manager · Coaches · Committee</p>'+
     '<button class="btn btn-y" style="margin-bottom:9px" onclick="setAuth(\'signup\')">⚽ I’m a player — sign up</button>'+
-    '<button class="btn btn-o" onclick="setAuth(\'login\')">🔑 Sign in</button>'+ installButton() +
-    '<div class="loginnote">Players sign themselves up — they land in a <b style="color:var(--y)">pending queue</b> and staff approve with one tap. Nobody joins the club by accident.</div></div>';
+    '<button class="btn btn-o" onclick="setAuth(\'login\')">🔑 Sign in (players &amp; staff)</button>'+ installButton() +
+    '<div class="loginnote"><b style="color:#fff">Players</b> tap sign-up and land in a <b style="color:var(--y)">pending queue</b> until staff approve them.<br><br><b style="color:#fff">Manager, coaches &amp; committee</b> use <b>Sign in</b> with the username &amp; code the club gives them — staff can’t self-register (nobody joins as “chairman” off the street). The chairman adds and manages staff from inside the app.</div></div>';
 }
 function render(){
   reflectOffline();
@@ -517,6 +557,7 @@ function render(){
     '<div class="abar"><img src="/img/badge.png" alt=""><span class="t">THE LANE</span><span class="role '+cls+'">'+esc(badge)+'</span><button class="lo" onclick="logout()">Sign out</button></div>'+
     '<div class="body">'+body+'</div>'+
     '<div class="tabs">'+tabs.map(function(t){ return '<button class="'+(state.tab===t[0]?'on':'')+'" onclick="state.tab=\''+t[0]+'\';render()"><span class="ic">'+t[1]+'</span>'+t[2]+'</button>'; }).join('')+'</div>';
+  if(isStaff() && state.tab==='post' && state.role==='chairman') loadStaff();
 }
 
 /* ═══════ BOOT ═══════ */
