@@ -1,5 +1,6 @@
 // Staff approve (or reject) a pending player. One tap → they're in the squad.
 const L = require('./lib/lane');
+let P = null; try { P = require('./la-publish-players'); } catch (e) {}
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
@@ -24,5 +25,7 @@ exports.handler = async function (event) {
   const up = await L.upd('la_players', 'id=eq.' + playerId, patch);
   if (!up.ok) return L.resp(409, { ok: false, error: (up.data && up.data.message) || 'Could not approve (squad number may be taken).' });
   await L.audit(sess.user_id, 'approve', 'player', playerId, cur[0], patch);
+  // an approved player is now active → refresh the public website squad
+  if (P && P.publish) { try { await P.publish(false); } catch (e) {} }
   return L.resp(200, { ok: true, status: 'active', player: (up.data || [])[0] });
 };
