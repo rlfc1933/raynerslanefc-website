@@ -17,7 +17,10 @@ async function notifyManagement(name) {
     webpush.setVapidDetails('mailto:info@raynerslanefc.co.uk', pub, priv);
     const subs = await L.sel('push_subscriptions?select=subscription&role=in.(chairman,manager,coach,staff)');
     const msg = JSON.stringify({ title: 'New player sign-up ⚽', body: name + ' wants to join the squad — tap to approve.', url: '/playermanager1933.html' });
-    await Promise.all(subs.map(function (s) { return webpush.sendNotification(s.subscription, msg).catch(function () {}); }));
+    await Promise.all(subs.map(function (s) {
+      try { return webpush.sendNotification(s.subscription, msg).catch(function () {}); }
+      catch (e) { return Promise.resolve(); }   // a bad/expired subscription can't break the rest
+    }));
     return subs.length;
   } catch (e) { return 0; }
 }
