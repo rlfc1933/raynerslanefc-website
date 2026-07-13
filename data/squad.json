@@ -5,265 +5,265 @@
       "no": 0,
       "name": "Michael Adefolami",
       "pos": "Forward",
+      "role": "Striker",
+      "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Striker",
-      "age": 23
+      "photo": ""
     },
     {
       "id": "player-carl-adiku",
       "no": 0,
       "name": "Carl Adiku",
       "pos": "Midfielder",
+      "role": "Defensive Midfield",
+      "age": 25,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Defensive Midfield",
-      "age": 25
+      "photo": ""
     },
     {
       "id": "player-joshua-andrews",
       "no": 0,
       "name": "Joshua Andrews",
       "pos": "Defender",
+      "role": "Full Back / Wing Back",
+      "age": 20,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Full Back / Wing Back",
-      "age": 20
+      "photo": ""
     },
     {
       "id": "player-temi-animashaun",
       "no": 0,
       "name": "Temi Animashaun",
       "pos": "Midfielder",
+      "role": "Centre Midfield",
+      "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Midfield",
-      "age": 22
+      "photo": ""
     },
     {
       "id": "player-charlie-austin",
       "no": 0,
       "name": "Charlie Austin",
       "pos": "Midfielder",
+      "role": "Defensive Midfield",
+      "age": 19,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Defensive Midfield",
-      "age": 19
+      "photo": ""
     },
     {
       "id": "player-jenyo-balogun",
       "no": 0,
       "name": "Jenyo Balogun",
       "pos": "Midfielder",
+      "role": "Attacking Midfield",
+      "age": 21,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Attacking Midfield",
-      "age": 21
+      "photo": ""
     },
     {
       "id": "player-keiran-barnard-white",
       "no": 0,
       "name": "Keiran Barnard-White",
       "pos": "Midfielder",
+      "role": "Attacking Midfield",
+      "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Attacking Midfield",
-      "age": 23
+      "photo": ""
     },
     {
       "id": "player-alfie-campbell",
       "no": 0,
       "name": "Alfie Campbell",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 24,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 24
+      "photo": ""
     },
     {
       "id": "player-jaycob-campbell",
       "no": 0,
       "name": "Jaycob Campbell",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 18
+      "photo": ""
     },
     {
       "id": "player-le'kai-chevannes",
       "no": 0,
       "name": "Le'Kai Chevannes",
       "pos": "Defender",
+      "role": "Full Back / Wing Back",
+      "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Full Back / Wing Back",
-      "age": 18
+      "photo": ""
     },
     {
       "id": "player-ati-diamond",
       "no": 0,
       "name": "Ati Diamond",
       "pos": "Defender",
+      "role": "Full Back / Wing Back",
+      "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Full Back / Wing Back",
-      "age": 23
+      "photo": ""
     },
     {
       "id": "player-mateo-dos-reis",
       "no": 0,
       "name": "Mateo Dos Reis",
       "pos": "Goalkeeper",
+      "role": "Goalkeeper",
+      "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Goalkeeper",
-      "age": 18
+      "photo": ""
     },
     {
       "id": "player-jevan-el-kaffash",
       "no": 0,
       "name": "Jevan El-Kaffash",
       "pos": "Forward",
+      "role": "Striker",
+      "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Striker",
-      "age": 22
+      "photo": ""
     },
     {
       "id": "player-badou-faye",
       "no": 0,
       "name": "Badou Faye",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 25,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 25
+      "photo": ""
     },
     {
       "id": "player-matthew-forkin",
       "no": 0,
       "name": "Matthew Forkin",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 26,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 26
+      "photo": ""
     },
     {
       "id": "player-micah-haley",
       "no": 0,
       "name": "Micah Haley",
       "pos": "Goalkeeper",
+      "role": "Goalkeeper",
+      "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Goalkeeper",
-      "age": 18
+      "photo": ""
     },
     {
       "id": "player-leon-iluobe",
       "no": 0,
       "name": "Leon Iluobe",
       "pos": "Forward",
+      "role": "Striker",
+      "age": 28,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Striker",
-      "age": 28
+      "photo": ""
     },
     {
       "id": "player-christon-john-ahye",
       "no": 0,
       "name": "Christon John-Ahye",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 22
+      "photo": ""
     },
     {
       "id": "player-jalen-johnson",
       "no": 0,
       "name": "Jalen Johnson",
       "pos": "Midfielder",
+      "role": "Attacking Midfield",
+      "age": 19,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Attacking Midfield",
-      "age": 19
+      "photo": ""
     },
     {
       "id": "player-nathan-kpemou",
       "no": 0,
       "name": "Nathan Kpemou",
       "pos": "Defender",
+      "role": "Centre Back",
+      "age": 24,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Back",
-      "age": 24
+      "photo": ""
     },
     {
       "id": "player-jamie-pitt",
       "no": 0,
       "name": "Jamie Pitt",
       "pos": "Defender",
+      "role": "Full Back / Wing Back",
+      "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Full Back / Wing Back",
-      "age": 22
+      "photo": ""
     },
     {
       "id": "player-ruben-santangelo",
       "no": 0,
       "name": "Ruben Santangelo",
       "pos": "Midfielder",
+      "role": "Centre Midfield",
+      "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Midfield",
-      "age": 18
+      "photo": ""
     },
     {
       "id": "player-alvin-walters",
       "no": 0,
       "name": "Alvin Walters",
       "pos": "Midfielder",
+      "role": "Defensive Midfield",
+      "age": 28,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Defensive Midfield",
-      "age": 28
+      "photo": ""
     },
     {
       "id": "player-casey-yousuff-phillips",
       "no": 0,
       "name": "Casey Yousuff-Phillips",
       "pos": "Midfielder",
+      "role": "Centre Midfield",
+      "age": 24,
       "apps": 0,
       "goals": 0,
-      "photo": "",
-      "role": "Centre Midfield",
-      "age": 24
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:40:39.688Z"
+  "updatedAt": "2026-07-13T19:04:28.370Z"
 }
