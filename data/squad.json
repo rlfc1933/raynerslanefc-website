@@ -125,7 +125,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-badou-faye",
+      "no": 0,
+      "name": "Badou Faye",
+      "pos": "Defender",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:37:49.406Z"
+  "updatedAt": "2026-07-13T15:37:57.214Z"
 }
