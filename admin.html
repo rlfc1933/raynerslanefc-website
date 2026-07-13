@@ -3548,8 +3548,15 @@ function _savePlayersAndGrid(msg) {
              nationality: p.nationality, nickname: p.nickname, bio: p.bio,
              apps: p.apps, goals: p.goals, assists: p.assists, photo: p.photo || '' };
   });
-  commitDomain('players', 'players', 'id', profileArr, playerProfilesDeleted, null, 'dep-players', null);
-  commitDomain('squad', 'players', 'name', _gridFromProfiles(), squadDeleted, null, 'dep-squad', msg || 'Squad saved ✓ — live in ~30s');
+  // Save the rich profiles first; adopt the server's merged truth (so any
+  // players another staffer added, or that an earlier stale reload dropped from
+  // memory, are restored), THEN derive + save the grid from that same truth.
+  return commitDomain('players', 'players', 'id', profileArr, playerProfilesDeleted, null, 'dep-players', null, function (merged) {
+    playerProfiles = merged;
+    _refreshSquadViews();
+  }).then(function () {
+    return commitDomain('squad', 'players', 'name', _gridFromProfiles(), squadDeleted, null, 'dep-squad', msg || 'Squad saved ✓ — live in ~30s');
+  });
 }
 function addPlayer() {
   var no = parseInt(gv('sq-no')) || 0;
@@ -3601,26 +3608,53 @@ function renderSquad() {
 //   name=data file, key=array property, idField=item key ('id'/'name'),
 //   arr=this session's array, deletedIds=ids removed this session,
 //   extra=extra top-level props to preserve (e.g. affiliations), depId, msg.
-function commitDomain(name, key, idField, arr, deletedIds, extra, depId, msg) {
+// The merge now happens SERVER-SIDE against GitHub (the source of truth), not
+// against the deployed site — the site lags GitHub by a full Netlify rebuild
+// (~30–90s), so merging against it made two saves inside that window overwrite
+// each other (last-write-wins data loss). We send only our upserts + deletions;
+// save-data.js reads the current GitHub file, merges atomically (sha + retry on
+// conflict) and returns the merged array so we can trust the server's truth.
+//
+// Saves to the SAME domain are serialised through a per-domain promise queue so
+// rapid clicks / the two-file squad save can never race the same file.
+var _domainSaveQueue = {};
+function commitDomain(name, key, idField, arr, deletedIds, extra, depId, msg, onMerged) {
+  var prev = _domainSaveQueue[name] || Promise.resolve();
+  var next = prev.catch(function () {}).then(function () {
+    return _commitDomainOnce(name, key, idField, arr, deletedIds, extra, depId, msg, onMerged);
+  });
+  _domainSaveQueue[name] = next;
+  return next;
+}
+function _commitDomainOnce(name, key, idField, arr, deletedIds, extra, depId, msg, onMerged) {
   var el = depId ? document.getElementById(depId) : null;
-  fetchJSON(name, function (live) {
-    if (live === null || live === undefined) {
-      if (el) showDep(el, 'err', 'NOT saved — could not reach the site. Check your connection and try again.');
-      toast('Not saved — could not reach the site. Try again.', true);
-      return;
+  if (el) showDep(el, 'loading', 'Saving to site…');
+  return fetch('/.netlify/functions/save-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      pin: PIN, merge: true, domain: name, key: key, idField: idField,
+      upserts: arr || [], deletedIds: deletedIds || [], extra: extra || null
+    })
+  })
+  .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+  .then(function (res) {
+    if (res.ok && res.j && res.j.ok) {
+      if (el) showDep(el, 'ok', 'Saved to site — live in ~30 seconds');
+      if (msg) toast(msg);
+      try { fetch(BUILD_HOOK, { method: 'POST' }); } catch (e) {}
+      if (typeof onMerged === 'function' && Array.isArray(res.j.merged)) {
+        try { onMerged(res.j.merged); } catch (e) {}
+      }
+    } else {
+      var m = (res.j && res.j.error) || 'Save failed — nothing was lost, please try again.';
+      if (el) showDep(el, 'err', m);
+      toast(m, true);
     }
-    var liveArr = (live && Array.isArray(live[key])) ? live[key] : [];
-    var map = {}, order = [];
-    liveArr.forEach(function (it) { if (it && it[idField] != null) { if (!(it[idField] in map)) order.push(it[idField]); map[it[idField]] = it; } });
-    (deletedIds || []).forEach(function (k) { delete map[k]; });
-    arr.forEach(function (it) { if (it && it[idField] != null) { if (!(it[idField] in map)) order.push(it[idField]); map[it[idField]] = it; } });
-    var merged = [], seen = {};
-    order.forEach(function (k) { if ((k in map) && !(k in seen)) { seen[k] = 1; merged.push(map[k]); } });
-    var out = {}; out[key] = merged;
-    if (extra) Object.keys(extra).forEach(function (k) { out[k] = extra[k]; });
-    out.updatedAt = new Date().toISOString();
-    pushToGitHub(name, out, depId);
-    if (msg) toast(msg);
+  })
+  .catch(function (err) {
+    if (el) showDep(el, 'err', 'Save failed — check your connection and try again.');
+    toast('Save failed — check your connection and try again.', true);
   });
 }
 
