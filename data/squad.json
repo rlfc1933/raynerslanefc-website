@@ -98,7 +98,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-ati-diamond",
+      "no": 0,
+      "name": "Ati Diamond",
+      "pos": "Defender",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:37:02.337Z"
+  "updatedAt": "2026-07-13T15:37:18.124Z"
 }
