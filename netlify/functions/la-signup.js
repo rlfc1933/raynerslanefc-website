@@ -8,16 +8,18 @@ try { webpush = require('web-push'); } catch (e) {}
 
 function ip(event) { const h = event.headers || {}; return (h['x-nf-client-connection-ip'] || h['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown'; }
 
-// Best-effort push to management the instant a player signs up.
+// Best-effort push to management the instant a player signs up. Returns the
+// number of management devices targeted (0 if push/subscriptions aren't set up).
 async function notifyManagement(name) {
   try {
     const pub = process.env.VAPID_PUBLIC_KEY, priv = process.env.VAPID_PRIVATE_KEY;
-    if (!webpush || !pub || !priv) return;
+    if (!webpush || !pub || !priv) return 0;
     webpush.setVapidDetails('mailto:info@raynerslanefc.co.uk', pub, priv);
     const subs = await L.sel('push_subscriptions?select=subscription&role=in.(chairman,manager,coach,staff)');
     const msg = JSON.stringify({ title: 'New player sign-up ⚽', body: name + ' wants to join the squad — tap to approve.', url: '/playermanager1933.html' });
     await Promise.all(subs.map(function (s) { return webpush.sendNotification(s.subscription, msg).catch(function () {}); }));
-  } catch (e) {}
+    return subs.length;
+  } catch (e) { return 0; }
 }
 
 exports.handler = async function (event) {
@@ -82,7 +84,7 @@ exports.handler = async function (event) {
   const token = L.newToken();
   await L.ins('la_sessions', { token, user_id: userId, expires_at: new Date(Date.now() + 30 * 86400000).toISOString() });
   await L.audit(userId, 'signup', 'player', player.id, null, { name, status: 'pending' });
-  await notifyManagement(name);
+  const managementAlerted = await notifyManagement(name);
 
-  return L.resp(200, { ok: true, token, status: 'pending', player: { id: player.id, name, position } });
+  return L.resp(200, { ok: true, token, status: 'pending', managementAlerted: managementAlerted, player: { id: player.id, name, position } });
 };

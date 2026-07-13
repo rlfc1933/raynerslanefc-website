@@ -39,6 +39,8 @@ exports.handler = async function (event) {
   if (userIds.length) await L.del('la_app_users', 'id=in.' + inlist(userIds));
   if (testPlayerIds.length) await L.del('la_players', 'id=in.' + inlist(testPlayerIds));
   await L.del('la_venues', 'club_name=eq.Concurrency%20FC');
+  // test push subscriptions (mock endpoints used by the e2e harness)
+  await L.del('push_subscriptions', 'endpoint=like.https://example.com/la-test*');
 
   return L.resp(200, { ok: true, removed: { staff: testStaffIds.length, players: testPlayerIds.length, events: testEventIds.length, linkedAccounts: testLinkedIds.length } });
 };
