@@ -76,6 +76,7 @@ function renderSquad(players) {
 
     var section = document.createElement('div');
     section.className = 'squad-group';
+    section.setAttribute('data-pos', String(pos).toLowerCase()); // for the GK/DEF/MID/FWD filter
 
     var label = document.createElement('div');
     label.className = 'squad-group-label';
@@ -95,6 +96,7 @@ function renderSquad(players) {
       var card = document.createElement('a');
       card.href = 'player.html?id=' + id;
       card.className = 'player-card';
+      card.setAttribute('data-pos', String(pos).toLowerCase()); // for the GK/DEF/MID/FWD filter
       card.style.textDecoration = 'none';
       // Open a profile pop-up instead of navigating (link still works if JS off)
       card.addEventListener('click', function(ev) {

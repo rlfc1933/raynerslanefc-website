@@ -198,17 +198,17 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".filter-tab[data-pos]").forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
       const pos = tab.dataset.pos;
-      document.querySelectorAll(".player-card").forEach(card => {
-        if (pos === "all") {
-          card.style.display = "";
-        } else {
-          const cardPos = card.dataset.pos || "";
-          card.style.display = cardPos.toLowerCase().includes(pos) ? "" : "none";
-        }
+      // Cards are rendered grouped by position (js/squad.js) — hide whole
+      // position groups so the group label goes with its cards. Fall back to
+      // per-card filtering for any card that isn't inside a group.
+      document.querySelectorAll(".squad-group").forEach(group => {
+        const gp = (group.dataset.pos || "").toLowerCase();
+        group.style.display = (pos === "all" || gp.includes(pos)) ? "" : "none";
       });
-      // Show/hide position headers
-      document.querySelectorAll(".squad-pos-header").forEach(h => {
-        h.style.display = pos === "all" ? "" : "none";
+      document.querySelectorAll(".player-card").forEach(card => {
+        if (card.closest(".squad-group")) return; // handled at the group level
+        const cardPos = (card.dataset.pos || "").toLowerCase();
+        card.style.display = (pos === "all" || cardPos.includes(pos)) ? "" : "none";
       });
     });
   });
