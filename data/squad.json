@@ -206,7 +206,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-alvin-walters",
+      "no": 0,
+      "name": "Alvin Walters",
+      "pos": "Midfielder",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:39:55.973Z"
+  "updatedAt": "2026-07-13T15:40:10.920Z"
 }
