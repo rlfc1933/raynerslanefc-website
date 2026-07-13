@@ -127,9 +127,15 @@ create table if not exists public.la_app_users (
   role       text not null default 'player' check (role in ('chairman','manager','coach','staff','player')),
   team_id    bigint references public.la_teams(id),
   status     text default 'active' check (status in ('active','suspended')),
+  -- staff carry their OWN individual login here (players authenticate via
+  -- la_players instead). Set by the ADMIN_PIN-gated bootstrap (la-seed-staff),
+  -- then each staffer signs in with their own code → real audit trail.
+  username   text,
+  pin_hash   text,
   created_at timestamptz default now(),
   unique (auth_uid),
-  unique (player_id)
+  unique (player_id),
+  unique (username)
 );
 
 -- ── PERMISSIONS ── a MATRIX, not hardcoded roles. Grant a coach selection
