@@ -15,7 +15,7 @@ exports.handler = async function (event) {
   const username = String(b.username || '').trim().toLowerCase();
   const code = String(b.code || '').trim();
   const role = String(b.role || 'manager').trim();
-  if (!username || !/^\d{6}$/.test(code)) return L.resp(400, { ok: false, error: 'Need a username and a 6-digit code.' });
+  if (!username || !/^\d{4,10}$/.test(code)) return L.resp(400, { ok: false, error: 'Need a username and a 4–10 digit code.' });
   if (['chairman', 'manager', 'coach', 'staff'].indexOf(role) < 0) return L.resp(400, { ok: false, error: 'Bad role.' });
 
   const teams = await L.sel('la_teams?select=id&order=id&limit=1');

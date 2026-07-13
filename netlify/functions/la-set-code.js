@@ -10,7 +10,7 @@ exports.handler = async function (event) {
   if (!sess) return L.resp(403, { ok: false, error: 'Sign in first.' });
   const cur = String(b.current_code || '').trim();
   const next = String(b.new_code || '').trim();
-  if (!/^\d{6}$/.test(next)) return L.resp(400, { ok: false, error: 'New code must be 6 numbers.' });
+  if (!/^\d{4,10}$/.test(next)) return L.resp(400, { ok: false, error: 'New code must be 4–10 numbers.' });
 
   // Staff creds live on la_app_users; players on la_players.
   if (sess.player_id) {

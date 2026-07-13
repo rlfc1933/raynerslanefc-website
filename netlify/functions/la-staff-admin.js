@@ -28,7 +28,7 @@ exports.handler = async function (event) {
   const code = String(b.code || '').trim();
   const role = String(b.role || 'coach').trim();
   if (!/^[a-z0-9._-]{3,24}$/.test(username)) return L.resp(400, { ok: false, error: 'Username: 3–24 letters/numbers.' });
-  if (!/^\d{6}$/.test(code)) return L.resp(400, { ok: false, error: 'Starter code must be 6 numbers.' });
+  if (!/^\d{4,10}$/.test(code)) return L.resp(400, { ok: false, error: 'Starter code must be 4–10 numbers.' });
   if (['chairman', 'manager', 'coach', 'staff'].indexOf(role) < 0) return L.resp(400, { ok: false, error: 'Bad role.' });
 
   const teams = await L.sel('la_teams?select=id&order=id&limit=1');

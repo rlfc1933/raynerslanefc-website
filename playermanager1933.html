@@ -116,10 +116,13 @@
   .install-banner b{color:var(--y)}
   .spin{width:15px;height:15px;border:2px solid rgba(0,0,0,.25);border-top-color:#0d0d0d;border-radius:50%;display:inline-block;vertical-align:-2px;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
-  .kp{background:var(--c2);border:1px solid var(--br);color:#fff;font-family:var(--fd);font-size:26px;letter-spacing:1px;padding:15px 0;border-radius:14px;cursor:pointer}
-  .kp:active{background:var(--y);color:#0d0d0d;transform:scale(.97)}
-  .pdot{width:13px;height:13px;border-radius:50%;display:inline-block;margin:0 5px;border:2px solid #444}
-  .pdot.on{border-color:var(--y);background:var(--y)}
+  .keypad{display:grid;grid-template-columns:repeat(3,68px);gap:16px;justify-content:center;margin:16px auto 0}
+  .kp{width:68px;height:68px;display:flex;align-items:center;justify-content:center;background:var(--c2);border:1px solid var(--br);color:#fff;font-family:var(--fd);font-size:30px;line-height:1;border-radius:50%;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .07s ease,background .12s ease,color .12s ease}
+  .kp.press{background:var(--y);color:#0d0d0d;transform:scale(.88);border-color:var(--y)}
+  .kp.blank{background:none;border:none;pointer-events:none}
+  .pdots{display:flex;align-items:center;justify-content:center;gap:9px;min-height:16px}
+  .pdot{width:12px;height:12px;border-radius:50%;border:2px solid #4a4a44;transition:all .12s}
+  .pdot.on{border-color:var(--y);background:var(--y);transform:scale(1.12)}
 </style>
 </head>
 <body>
@@ -214,17 +217,24 @@ async function maybeAskNotify(){
 /* ═══════ AUTH ═══════ */
 var authMode='choose', pin='', staffPick='', staffDir=[];
 function setAuth(m){ authMode=m; pin=''; staffPick=''; render(); if(m==='staff') loadStaffDir(); }
-/* numeric keypad (staff + player codes are 6-digit numeric) */
-function pinPress(d){ if(pin.length>=6) return; pin+=d; renderPinArea(); if(pin.length===6){ if(authMode==='staff') doStaffLogin(); else if(authMode==='psignin') doPlayerLogin(); } }
-function pinDel(){ pin=pin.slice(0,-1); renderPinArea(); }
-function pinDots(){ var d=''; for(var i=0;i<6;i++){ d+='<span class="pdot'+(i<pin.length?' on':'')+'"></span>'; } return d; }
+/* numeric keypad (4–10 digit code — players 6, management can be your existing PIN) */
+function flashKey(el){ if(!el) return; el.classList.add('press'); setTimeout(function(){ el.classList.remove('press'); },130); try{ navigator.vibrate && navigator.vibrate(12); }catch(e){} }
+function pinPress(d, el){ if(pin.length>=10) return; pin+=d; renderPinArea(); flashKey(el); }
+function pinDel(el){ pin=pin.slice(0,-1); renderPinArea(); flashKey(el); }
+function pinDots(){ var n=Math.max(pin.length,4), d=''; for(var i=0;i<n;i++){ d+='<span class="pdot'+(i<pin.length?' on':'')+'"></span>'; } return d; }
 function renderPinArea(){ var el=document.getElementById('pin-dots'); if(el) el.innerHTML=pinDots(); }
-function keypad(){ var keys=['1','2','3','4','5','6','7','8','9','','0','del']; return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:14px auto 0">'+keys.map(function(k){ return k===''?'<div></div>':(k==='del'?'<button class="kp" onclick="pinDel()" style="font-size:22px">⌫</button>':'<button class="kp" onclick="pinPress(\''+k+'\')">'+k+'</button>'); }).join('')+'</div>'; }
+function keypad(){ var keys=['1','2','3','4','5','6','7','8','9','','0','del'];
+  return '<div class="keypad">'+keys.map(function(k){
+    if(k==='') return '<div class="kp blank"></div>';
+    if(k==='del') return '<button type="button" class="kp" style="font-size:24px" onclick="pinDel(this)">⌫</button>';
+    return '<button type="button" class="kp" onclick="pinPress(\''+k+'\',this)">'+k+'</button>';
+  }).join('')+'</div>';
+}
 function prettyStaff(s){ var nm=(s.username||'').replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); var role=(s.role||'').charAt(0).toUpperCase()+(s.role||'').slice(1); return nm+' · '+role; }
 async function loadStaffDir(){ var r=await api('la-staff-directory',{}); staffDir=(r&&r.staff)||[]; var sel=document.getElementById('staff-pick'); if(sel){ sel.innerHTML='<option value="">— choose —</option>'+staffDir.map(function(s){ return '<option value="'+esc(s.username)+'">'+esc(prettyStaff(s))+'</option>'; }).join(''); } }
 async function doStaffLogin(){
   if(!staffPick){ toast('Pick who you are.',1); return; }
-  if(pin.length<6){ toast('Enter your 6-digit code.',1); return; }
+  if(pin.length<4){ toast('Enter your code.',1); return; }
   var r=await api('la-login',{username:staffPick, code:pin}); var used=pin; pin='';
   if(!r.ok){ toast(r.error||'Wrong code — try again.',1); renderPinArea(); return; }
   state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role); state.tab='home'; await refresh();
@@ -232,7 +242,7 @@ async function doStaffLogin(){
 async function doPlayerLogin(){
   var un=(document.getElementById('pl-un')||{}).value||'';
   if(!un){ toast('Enter your username.',1); return; }
-  if(pin.length<6){ toast('Enter your 6-digit code.',1); return; }
+  if(pin.length<4){ toast('Enter your code.',1); return; }
   var r=await api('la-login',{username:un.trim(), code:pin}); pin='';
   if(!r.ok){ toast(r.error||'Wrong details — try again.',1); renderPinArea(); return; }
   state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role); state.tab='home'; await refresh();
