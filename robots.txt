@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /staff-guide.html
+Disallow: /playermanager1933.html
 
 Sitemap: https://raynerslanefc.co.uk/sitemap.xml

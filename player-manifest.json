@@ -1,0 +1,19 @@
+{
+  "name": "The Lane App — Players & Staff",
+  "short_name": "The Lane App",
+  "description": "Rayners Lane FC squad app — availability, selection, check-in and club updates for players, manager, coaches and committee.",
+  "id": "/playermanager1933.html",
+  "start_url": "/playermanager1933.html",
+  "scope": "/playermanager1933.html",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#FFD100",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["sports"],
+  "lang": "en-GB"
+}
