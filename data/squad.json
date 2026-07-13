@@ -89,7 +89,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-le'kai-chevannes",
+      "no": 0,
+      "name": "Le'Kai Chevannes",
+      "pos": "Defender",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:36:47.868Z"
+  "updatedAt": "2026-07-13T15:37:02.337Z"
 }
