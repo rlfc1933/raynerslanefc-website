@@ -101,7 +101,7 @@ function renderSquad(players) {
       // Open a profile pop-up instead of navigating (link still works if JS off)
       card.addEventListener('click', function(ev) {
         ev.preventDefault();
-        openPlayerModal(id, { name: name, number: num, position: pos, photo: (p.photo || ''), fallback: img });
+        openPlayerModal(id, { name: name, number: num, position: pos, role: (p.role || ''), age: (p.age || ''), photo: (p.photo || ''), fallback: img });
       });
 
       var imgWrap = document.createElement('div');
@@ -190,7 +190,9 @@ function openPlayerModal(id, basic) {
   var img = photo
     ? '<img class="pm-photo" src="'+pmEsc(photo)+'" alt="'+pmEsc(name)+'">'
     : '<img class="pm-photo" src="'+pmEsc(basic.fallback||'')+'" alt="'+pmEsc(name)+'" onerror="this.style.display=\'none\'">';
-  var hasProfile = !!(p.bio || p.nickname || p.nationality || p.apps || p.goals || p.assists);
+  var role = p.role || basic.role || '';
+  var age  = p.age || basic.age || '';
+  var hasProfile = !!(p.bio || p.nickname || p.nationality || p.role || p.age || p.apps || p.goals || p.assists);
   var stats = hasProfile
     ? '<div class="pm-stats">' +
         '<div class="pm-stat"><b>'+(p.apps||0)+'</b><span>Apps</span></div>' +
@@ -211,6 +213,7 @@ function openPlayerModal(id, basic) {
       '<div class="pm-id">' +
         (pos ? '<span class="pm-pos" style="background:'+colour+'">'+pmEsc(pos)+'</span>' : '') +
         '<div class="pm-name">'+pmEsc(name)+'</div>' +
+        ((role || age) ? '<div class="pm-nat">'+pmEsc([role, age ? 'Age '+age : ''].filter(Boolean).join(' · '))+'</div>' : '') +
         (p.nationality ? '<div class="pm-nat">'+pmEsc(p.nationality)+'</div>' : '') +
       '</div>' +
     '</div>' + body;

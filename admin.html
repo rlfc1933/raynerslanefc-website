@@ -1090,6 +1090,11 @@
         </div>
         <div class="field"><label class="fl">Nationality</label><input type="text" id="pl-nat" placeholder="English"></div>
       </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Detailed role</label><input type="text" id="pl-role" placeholder="Striker, Centre Back, Attacking Midfield…"></div>
+        <div class="field"><label class="fl">Age</label><input type="number" id="pl-age" placeholder="23" min="14" max="60"></div>
+      </div>
+      <input type="hidden" id="pl-id">
       <div class="field"><label class="fl">Nickname (optional)</label><input type="text" id="pl-nick" placeholder="The Wall, Rocket etc."></div>
       <div class="field"><label class="fl">Player Bio</label><textarea id="pl-bio" rows="4" placeholder="A brief description of the player, where they came from, strengths..."></textarea></div>
       <div class="row2">
@@ -3567,7 +3572,7 @@ function prNewProgramme() {
 function _playerId(name) { return 'player-' + String(name || '').toLowerCase().replace(/\s+/g, '-'); }
 function _gridFromProfiles() {
   return playerProfiles.map(function (p) {
-    return { id: p.id, no: p.number || 0, name: p.name, pos: p.position, apps: p.apps || 0, goals: p.goals || 0, photo: p.photo || '' };
+    return { id: p.id, no: p.number || 0, name: p.name, pos: p.position, role: p.role || '', age: p.age || 0, apps: p.apps || 0, goals: p.goals || 0, photo: p.photo || '' };
   });
 }
 function _refreshSquadViews() {
@@ -3579,6 +3584,7 @@ function _refreshSquadViews() {
 function _savePlayersAndGrid(msg) {
   var profileArr = playerProfiles.map(function (p) {
     return { id: p.id, number: p.number, name: p.name, position: p.position,
+             role: p.role || '', age: p.age || 0,
              nationality: p.nationality, nickname: p.nickname, bio: p.bio,
              apps: p.apps, goals: p.goals, assists: p.assists, photo: p.photo || '' };
   });
@@ -3604,6 +3610,7 @@ function addPlayer() {
   var prev = playerProfiles.filter(function (p) { return p.id === id; })[0] || {};
   playerProfiles = playerProfiles.filter(function (p) { return p.id !== id; });
   playerProfiles.push({ id: id, number: no, name: name, position: pos,
+    role: prev.role || '', age: prev.age || 0,
     nationality: prev.nationality || '', nickname: prev.nickname || '', bio: prev.bio || '',
     apps: apps, goals: goals, assists: prev.assists || 0, photo: prev.photo || '' });
   _refreshSquadViews();
@@ -5376,10 +5383,18 @@ function addPlayerProfile() {
   var pos  = gv('pl-pos');
   if (!name || !pos) { toast('Enter name and position', true); return; }
   var id = _playerId(name);
+  var prevId = gv('pl-id');
+  if (prevId && prevId !== id) {                         // name changed while editing → drop the old record + card
+    var old = playerProfiles.filter(function(p){ return p.id === prevId; })[0];
+    playerProfiles = playerProfiles.filter(function(p){ return p.id !== prevId; });
+    playerProfilesDeleted.push(prevId);
+    if (old && old.name) squadDeleted.push(old.name);
+  }
   var prev = playerProfiles.filter(function(p){ return p.id === id; })[0] || {};
   playerProfiles = playerProfiles.filter(function(p){ return p.id !== id; });
   playerProfiles.push({
     id:id, number:no, name:name, position:pos,
+    role:gv('pl-role'), age:parseInt(gv('pl-age'))||0,
     nationality:gv('pl-nat'), nickname:gv('pl-nick'),
     bio:gv('pl-bio'),
     apps:parseInt(gv('pl-apps'))||0,
@@ -5388,9 +5403,24 @@ function addPlayerProfile() {
     photo: imgStore['pl'] ? imgStore['pl'].dataUrl : (prev.photo || ''),
   });
   _refreshSquadViews();
-  setVal('pl-name',''); setVal('pl-no',''); setVal('pl-bio',''); setVal('pl-nick',''); setVal('pl-nat','');
+  plClearForm();
   if (imgStore['pl']) rmImg('pl');
-  savePlayerProfiles(name + ' added ✓ — publishing to the site');
+  savePlayerProfiles(name + ' saved ✓ — publishing to the site');
+}
+function plClearForm() {
+  ['pl-name','pl-no','pl-bio','pl-nick','pl-nat','pl-role','pl-age','pl-id'].forEach(function(f){ setVal(f, ''); });
+  setVal('pl-pos', ''); setVal('pl-apps', '0'); setVal('pl-goals', '0'); setVal('pl-assists', '0');
+  if (imgStore['pl']) rmImg('pl');
+}
+// Load an existing profile back into the form to edit it.
+function plEdit(id) {
+  var p = playerProfiles.filter(function(x){ return x.id === id; })[0]; if (!p) return;
+  setVal('pl-id', p.id); setVal('pl-name', p.name); setVal('pl-no', p.number || '');
+  setVal('pl-pos', p.position || ''); setVal('pl-role', p.role || ''); setVal('pl-age', p.age || '');
+  setVal('pl-nat', p.nationality || ''); setVal('pl-nick', p.nickname || ''); setVal('pl-bio', p.bio || '');
+  setVal('pl-apps', p.apps || 0); setVal('pl-goals', p.goals || 0); setVal('pl-assists', p.assists || 0);
+  var panel = document.getElementById('panel-squad'); if (panel) panel.scrollIntoView({ block: 'start' });
+  toast('Editing ' + p.name + ' — change details then “Add / Update Player”');
 }
 function removePlayerProfile(id) {
   var gone = playerProfiles.filter(function(p){ return p.id===id; })[0];
@@ -5411,8 +5441,8 @@ function renderPlayerList() {
     ? sorted.map(function(p){
         return '<div class="li">' +
           (p.photo ? '<img src="'+p.photo+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<span class="li-num">'+(p.number||'')+'</span>') +
-          '<div class="li-main"><div class="li-name">'+p.name+'</div><div class="li-sub">'+p.position+'</div></div>' +
-          '<a href="player.html?id='+p.id+'" target="_blank" style="font-family:var(--fc);font-size:11px;color:var(--y);font-weight:700;letter-spacing:.08em;text-decoration:none;margin-right:8px">View</a>' +
+          '<div class="li-main"><div class="li-name">'+p.name+'</div><div class="li-sub">'+p.position+(p.role ? ' · '+escH(p.role) : '')+(p.age ? ' · '+p.age : '')+'</div></div>' +
+          '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="plEdit(&quot;'+p.id+'&quot;)">Edit</button>' +
           '<button class="li-del" onclick="removePlayerProfile(&quot;'+p.id+'&quot;)">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No profiles yet</div>';

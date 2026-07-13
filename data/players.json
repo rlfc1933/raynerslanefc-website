@@ -11,7 +11,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Striker",
+      "age": 23
     },
     {
       "id": "player-carl-adiku",
@@ -24,20 +26,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
-    },
-    {
-      "id": "player-carl-adika",
-      "number": 0,
-      "name": "Carl Adika",
-      "position": "Midfielder",
-      "nationality": "",
-      "nickname": "",
-      "bio": "",
-      "apps": 0,
-      "goals": 0,
-      "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Defensive Midfield",
+      "age": 25
     },
     {
       "id": "player-joshua-andrews",
@@ -50,7 +41,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Full Back / Wing Back",
+      "age": 20
     },
     {
       "id": "player-temi-animashaun",
@@ -63,7 +56,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Midfield",
+      "age": 22
     },
     {
       "id": "player-charlie-austin",
@@ -76,7 +71,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Defensive Midfield",
+      "age": 19
     },
     {
       "id": "player-jenyo-balogun",
@@ -89,7 +86,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Attacking Midfield",
+      "age": 21
     },
     {
       "id": "player-keiran-barnard-white",
@@ -102,7 +101,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Attacking Midfield",
+      "age": 23
     },
     {
       "id": "player-alfie-campbell",
@@ -115,7 +116,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 24
     },
     {
       "id": "player-jaycob-campbell",
@@ -128,7 +131,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 18
     },
     {
       "id": "player-le'kai-chevannes",
@@ -141,7 +146,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Full Back / Wing Back",
+      "age": 18
     },
     {
       "id": "player-ati-diamond",
@@ -154,7 +161,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Full Back / Wing Back",
+      "age": 23
     },
     {
       "id": "player-mateo-dos-reis",
@@ -167,7 +176,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Goalkeeper",
+      "age": 18
     },
     {
       "id": "player-jevan-el-kaffash",
@@ -180,7 +191,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Striker",
+      "age": 22
     },
     {
       "id": "player-badou-faye",
@@ -193,7 +206,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 25
     },
     {
       "id": "player-matthew-forkin",
@@ -206,7 +221,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 26
     },
     {
       "id": "player-micah-haley",
@@ -219,7 +236,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Goalkeeper",
+      "age": 18
     },
     {
       "id": "player-leon-iluobe",
@@ -232,7 +251,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Striker",
+      "age": 28
     },
     {
       "id": "player-christon-john-ahye",
@@ -245,7 +266,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 22
     },
     {
       "id": "player-jalen-johnson",
@@ -258,7 +281,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Attacking Midfield",
+      "age": 19
     },
     {
       "id": "player-nathan-kpemou",
@@ -271,7 +296,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Back",
+      "age": 24
     },
     {
       "id": "player-jamie-pitt",
@@ -284,7 +311,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Full Back / Wing Back",
+      "age": 22
     },
     {
       "id": "player-ruben-santangelo",
@@ -297,7 +326,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Midfield",
+      "age": 18
     },
     {
       "id": "player-alvin-walters",
@@ -310,7 +341,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Defensive Midfield",
+      "age": 28
     },
     {
       "id": "player-casey-yousuff-phillips",
@@ -323,7 +356,9 @@
       "apps": 0,
       "goals": 0,
       "assists": 0,
-      "photo": ""
+      "photo": "",
+      "role": "Centre Midfield",
+      "age": 24
     }
   ],
   "updatedAt": "2026-07-13T15:40:38.493Z"
