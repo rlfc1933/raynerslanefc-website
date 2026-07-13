@@ -38,7 +38,20 @@
       "goals": 0,
       "assists": 0,
       "photo": ""
+    },
+    {
+      "id": "player-joshua-andrews",
+      "number": 0,
+      "name": "Joshua Andrews",
+      "position": "Defender",
+      "nationality": "",
+      "nickname": "",
+      "bio": "",
+      "apps": 0,
+      "goals": 0,
+      "assists": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:34:26.254Z"
+  "updatedAt": "2026-07-13T15:34:39.854Z"
 }
