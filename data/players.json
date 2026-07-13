@@ -12,7 +12,20 @@
       "goals": 0,
       "assists": 0,
       "photo": ""
+    },
+    {
+      "id": "player-carl-adiku",
+      "number": 0,
+      "name": "Carl Adiku",
+      "position": "Midfielder",
+      "nationality": "",
+      "nickname": "",
+      "bio": "",
+      "apps": 0,
+      "goals": 0,
+      "assists": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:16:26.623Z"
+  "updatedAt": "2026-07-13T15:29:56.300Z"
 }
