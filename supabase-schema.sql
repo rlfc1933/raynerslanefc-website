@@ -118,6 +118,16 @@ create table if not exists public.la_players (
   unique (team_id, season, squad_no)                -- squad numbers unique per team per season (nulls allowed)
 );
 
+-- Extra squad fields so Supabase can be the single source of truth for the
+-- public website squad too (Stage 2 unify). Safe on an existing table.
+alter table public.la_players add column if not exists role        text;
+alter table public.la_players add column if not exists age         int;
+alter table public.la_players add column if not exists nationality text;
+alter table public.la_players add column if not exists nickname    text;
+alter table public.la_players add column if not exists apps        int default 0;
+alter table public.la_players add column if not exists goals       int default 0;
+alter table public.la_players add column if not exists assists     int default 0;
+
 -- ── APP USERS ── binds an authenticated identity 1:1 to a player_id, and
 -- carries the role. A player can never collide with another's profile.
 create table if not exists public.la_app_users (
