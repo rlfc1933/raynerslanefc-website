@@ -59,20 +59,35 @@ exports.handler = async function (event) {
   const team_id = (teams[0] || {}).id || null;
   const pin_hash = L.hashCode(code);
 
-  // Dedupe on email — reactivate a former player, never duplicate.
-  const existing = await L.sel('la_players?select=id,status&email=eq.' + encodeURIComponent(email));
-  let player;
-  if (existing.length) {
-    const ex = existing[0];
-    if (ex.status === 'active' || ex.status === 'injured' || ex.status === 'pending') {
-      return L.resp(409, { ok: false, error: 'You already have an account — please sign in instead.' });
-    }
-    const up = await L.upd('la_players', 'id=eq.' + ex.id, { name, phone, position, username, pin_hash, status: 'pending', photo_consent: !!b.photo_consent });
+  let player, claimed = false;
+
+  // CLAIM: if the name matches a roster player that has no login yet (imported
+  // from the website squad), attach this login to THAT record — never a
+  // duplicate. Still goes to pending so staff confirm it's really them.
+  const nameNorm = name.trim().toLowerCase();
+  const roster = await L.sel('la_players?select=id,name,username,status&username=is.null');
+  const match = roster.filter(function (p) { return String(p.name || '').trim().toLowerCase() === nameNorm; })[0];
+  if (match) {
+    const up = await L.upd('la_players', 'id=eq.' + match.id, { email, phone, position, username, pin_hash, status: 'pending', photo_consent: !!b.photo_consent });
     player = (up.data || [])[0];
-  } else {
-    const inr = await L.ins('la_players', { team_id, season, name, email, phone, position, username, pin_hash, status: 'pending', photo_consent: !!b.photo_consent });
-    if (!inr.ok) return L.resp(500, { ok: false, error: (inr.data && inr.data.message) || 'Could not create your account.' });
-    player = (inr.data || [])[0];
+    claimed = true;
+  }
+
+  if (!player) {
+    // Dedupe on email — reactivate a former player, never duplicate.
+    const existing = await L.sel('la_players?select=id,status&email=eq.' + encodeURIComponent(email));
+    if (existing.length) {
+      const ex = existing[0];
+      if (ex.status === 'active' || ex.status === 'injured' || ex.status === 'pending') {
+        return L.resp(409, { ok: false, error: 'You already have an account — please sign in instead.' });
+      }
+      const up = await L.upd('la_players', 'id=eq.' + ex.id, { name, phone, position, username, pin_hash, status: 'pending', photo_consent: !!b.photo_consent });
+      player = (up.data || [])[0];
+    } else {
+      const inr = await L.ins('la_players', { team_id, season, name, email, phone, position, username, pin_hash, status: 'pending', photo_consent: !!b.photo_consent });
+      if (!inr.ok) return L.resp(500, { ok: false, error: (inr.data && inr.data.message) || 'Could not create your account.' });
+      player = (inr.data || [])[0];
+    }
   }
   if (!player) return L.resp(500, { ok: false, error: 'Could not create your account.' });
 
@@ -86,8 +101,8 @@ exports.handler = async function (event) {
   }
   const token = L.newToken();
   await L.ins('la_sessions', { token, user_id: userId, expires_at: new Date(Date.now() + 30 * 86400000).toISOString() });
-  await L.audit(userId, 'signup', 'player', player.id, null, { name, status: 'pending' });
-  const managementAlerted = await notifyManagement(name);
+  await L.audit(userId, claimed ? 'claim' : 'signup', 'player', player.id, null, { name, status: 'pending' });
+  const managementAlerted = await notifyManagement(name + (claimed ? ' (claiming their squad profile)' : ''));
 
-  return L.resp(200, { ok: true, token, status: 'pending', managementAlerted: managementAlerted, player: { id: player.id, name, position } });
+  return L.resp(200, { ok: true, token, status: 'pending', claimed: claimed, managementAlerted: managementAlerted, player: { id: player.id, name, position } });
 };
