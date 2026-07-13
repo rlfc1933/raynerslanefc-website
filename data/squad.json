@@ -107,7 +107,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-mateo-dos-reis",
+      "no": 0,
+      "name": "Mateo Dos Reis",
+      "pos": "Goalkeeper",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:37:18.124Z"
+  "updatedAt": "2026-07-13T15:37:29.872Z"
 }
