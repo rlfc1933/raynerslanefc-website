@@ -2,7 +2,7 @@
   "players": [
     {
       "id": "player-michael-adefolami",
-      "no": 7,
+      "no": 0,
       "name": "Michael Adefolami",
       "pos": "Forward",
       "role": "Striker",
@@ -265,5 +265,5 @@
       "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T19:05:54.157Z"
+  "updatedAt": "2026-07-13T19:06:05.826Z"
 }
