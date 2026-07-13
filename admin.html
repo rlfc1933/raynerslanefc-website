@@ -3588,7 +3588,11 @@ function _refreshSquadViews() {
   if (document.getElementById('sq-list')) renderSquad();
   if (document.getElementById('pl-list')) renderPlayerList();
 }
-// Shared writer — publishes players.json (rich) AND squad.json (grid) together.
+// Shared writer — squad now lives in Supabase (single source of truth). This
+// saves the edits there (profile fields only; player logins/claims untouched),
+// which then republishes data/players.json + squad.json for the public site.
+// One writer for those files (la-admin-save-squad → la-publish-players), so the
+// admin and the app can never overwrite each other.
 function _savePlayersAndGrid(msg) {
   var profileArr = playerProfiles.map(function (p) {
     return { id: p.id, number: p.number, name: p.name, position: p.position,
@@ -3596,15 +3600,26 @@ function _savePlayersAndGrid(msg) {
              nationality: p.nationality, nickname: p.nickname, bio: p.bio,
              apps: p.apps, goals: p.goals, assists: p.assists, photo: p.photo || '' };
   });
-  // Save the rich profiles first; adopt the server's merged truth (so any
-  // players another staffer added, or that an earlier stale reload dropped from
-  // memory, are restored), THEN derive + save the grid from that same truth.
-  return commitDomain('players', 'players', 'id', profileArr, playerProfilesDeleted, null, 'dep-players', null, function (merged) {
-    playerProfiles = merged;
-    _refreshSquadViews();
-  }).then(function () {
-    return commitDomain('squad', 'players', 'name', _gridFromProfiles(), squadDeleted, null, 'dep-squad', msg || 'Squad saved ✓ — live in ~30s');
-  });
+  var el = document.getElementById('dep-squad');
+  if (el) showDep(el, 'loading', 'Saving to the squad…');
+  return fetch('/.netlify/functions/la-admin-save-squad', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, players: profileArr, deleted: squadDeleted })
+  })
+  .then(function (r) { return r.json().catch(function () { return {}; }); })
+  .then(function (res) {
+    if (res && res.ok) {
+      if (el) showDep(el, 'ok', 'Saved — squad published to the website');
+      var dp = document.getElementById('dep-players'); if (dp) showDep(dp, 'ok', 'Saved to Supabase ✓');
+      if (msg) toast(msg);
+      try { fetch(BUILD_HOOK, { method: 'POST' }); } catch (e) {}
+      squadDeleted.length = 0; playerProfilesDeleted.length = 0;
+    } else {
+      var m = (res && res.error) || 'Save failed — please try again.';
+      if (el) showDep(el, 'err', m); toast(m, true);
+    }
+  })
+  .catch(function () { if (el) showDep(el, 'err', 'Network error — try again.'); toast('Save failed — check your connection.', true); });
 }
 function addPlayer() {
   var no = parseInt(gv('sq-no')) || 0;
