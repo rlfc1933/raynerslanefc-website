@@ -116,6 +116,10 @@
   .install-banner b{color:var(--y)}
   .spin{width:15px;height:15px;border:2px solid rgba(0,0,0,.25);border-top-color:#0d0d0d;border-radius:50%;display:inline-block;vertical-align:-2px;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
+  .kp{background:var(--c2);border:1px solid var(--br);color:#fff;font-family:var(--fd);font-size:26px;letter-spacing:1px;padding:15px 0;border-radius:14px;cursor:pointer}
+  .kp:active{background:var(--y);color:#0d0d0d;transform:scale(.97)}
+  .pdot{width:13px;height:13px;border-radius:50%;display:inline-block;margin:0 5px;border:2px solid #444}
+  .pdot.on{border-color:var(--y);background:var(--y)}
 </style>
 </head>
 <body>
@@ -208,8 +212,31 @@ async function maybeAskNotify(){
 }
 
 /* ═══════ AUTH ═══════ */
-var authMode='choose';
-function setAuth(m){ authMode=m; render(); }
+var authMode='choose', pin='', staffPick='', staffDir=[];
+function setAuth(m){ authMode=m; pin=''; staffPick=''; render(); if(m==='staff') loadStaffDir(); }
+/* numeric keypad (staff + player codes are 6-digit numeric) */
+function pinPress(d){ if(pin.length>=6) return; pin+=d; renderPinArea(); if(pin.length===6){ if(authMode==='staff') doStaffLogin(); else if(authMode==='psignin') doPlayerLogin(); } }
+function pinDel(){ pin=pin.slice(0,-1); renderPinArea(); }
+function pinDots(){ var d=''; for(var i=0;i<6;i++){ d+='<span class="pdot'+(i<pin.length?' on':'')+'"></span>'; } return d; }
+function renderPinArea(){ var el=document.getElementById('pin-dots'); if(el) el.innerHTML=pinDots(); }
+function keypad(){ var keys=['1','2','3','4','5','6','7','8','9','','0','del']; return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:14px auto 0">'+keys.map(function(k){ return k===''?'<div></div>':(k==='del'?'<button class="kp" onclick="pinDel()" style="font-size:22px">⌫</button>':'<button class="kp" onclick="pinPress(\''+k+'\')">'+k+'</button>'); }).join('')+'</div>'; }
+function prettyStaff(s){ var nm=(s.username||'').replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); var role=(s.role||'').charAt(0).toUpperCase()+(s.role||'').slice(1); return nm+' · '+role; }
+async function loadStaffDir(){ var r=await api('la-staff-directory',{}); staffDir=(r&&r.staff)||[]; var sel=document.getElementById('staff-pick'); if(sel){ sel.innerHTML='<option value="">— choose —</option>'+staffDir.map(function(s){ return '<option value="'+esc(s.username)+'">'+esc(prettyStaff(s))+'</option>'; }).join(''); } }
+async function doStaffLogin(){
+  if(!staffPick){ toast('Pick who you are.',1); return; }
+  if(pin.length<6){ toast('Enter your 6-digit code.',1); return; }
+  var r=await api('la-login',{username:staffPick, code:pin}); var used=pin; pin='';
+  if(!r.ok){ toast(r.error||'Wrong code — try again.',1); renderPinArea(); return; }
+  state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role); state.tab='home'; await refresh();
+}
+async function doPlayerLogin(){
+  var un=(document.getElementById('pl-un')||{}).value||'';
+  if(!un){ toast('Enter your username.',1); return; }
+  if(pin.length<6){ toast('Enter your 6-digit code.',1); return; }
+  var r=await api('la-login',{username:un.trim(), code:pin}); pin='';
+  if(!r.ok){ toast(r.error||'Wrong details — try again.',1); renderPinArea(); return; }
+  state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role); state.tab='home'; await refresh();
+}
 function setBusy(k,v){ state.busy[k]=v; }
 async function doSignup(){
   var g=function(i){ return (document.getElementById(i)||{}).value||''; };
@@ -222,15 +249,6 @@ async function doSignup(){
   if(!r.ok){ toast(r.error||'Sign-up failed.',1); if(btn){btn.disabled=false;btn.textContent='Sign up';} return; }
   state.token=r.token; state.role='player'; LS.setItem('la_token',r.token); LS.setItem('la_role','player');
   authMode='done'; render();
-}
-async function doLogin(){
-  var un=(document.getElementById('li-un')||{}).value||'', pw=(document.getElementById('li-pw')||{}).value||'';
-  if(!un||!pw){ toast('Enter your username and code.',1); return; }
-  var btn=document.getElementById('li-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Signing in…';}
-  var r=await api('la-login', {username:un.trim(), code:pw.trim()});
-  if(!r.ok){ toast(r.error||'Login failed.',1); if(btn){btn.disabled=false;btn.textContent='Sign in';} return; }
-  state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role);
-  state.tab='home'; await refresh();
 }
 function logout(){ state.token=''; state.role=''; state.me=null; state.board=null; LS.removeItem('la_token'); LS.removeItem('la_role'); authMode='choose'; render(); }
 
@@ -527,17 +545,27 @@ function loginView(){
       '<div class="loginnote">🔒 Your code is hashed and locked after 5 wrong tries. You go into a <b style="color:var(--y)">pending</b> queue until staff approve you.</div>'+
       '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
   }
-  if(authMode==='login'){
-    return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px"><h1>SIGN<br><span class="y">IN</span></h1><p>Players &amp; staff</p>'+
-      '<div class="fld"><label>Username</label><input id="li-un" placeholder="username" autocapitalize="none"></div>'+
-      '<div class="fld"><label>6-digit code</label><input id="li-pw" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>'+
-      '<button class="btn btn-y" id="li-go" onclick="doLogin()">Sign in</button>'+
+  if(authMode==='psignin'){
+    return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px"><h1>PLAYER<br><span class="y">SIGN IN</span></h1>'+
+      '<div class="fld"><label>Your username</label><input id="pl-un" placeholder="username" autocapitalize="none"></div>'+
+      '<div class="muted" style="margin:4px 0 2px">Enter your 6-digit code</div>'+
+      '<div id="pin-dots" style="text-align:center;margin:6px 0">'+pinDots()+'</div>'+ keypad() +
+      '<button class="btn btn-y" style="margin-top:14px" onclick="doPlayerLogin()">Sign in</button>'+
+      '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
+  }
+  if(authMode==='staff'){
+    return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px"><h1>MANAGEMENT<br><span class="y">SIGN IN</span></h1><p>Manager · Coach · Committee</p>'+
+      '<div class="fld"><label>Who are you?</label><select id="staff-pick" onchange="staffPick=this.value"><option value="">— choose —</option></select></div>'+
+      '<div class="muted" style="margin:4px 0 2px">Enter your code</div>'+
+      '<div id="pin-dots" style="text-align:center;margin:6px 0">'+pinDots()+'</div>'+ keypad() +
+      '<button class="btn btn-y" style="margin-top:14px" onclick="doStaffLogin()">Sign in</button>'+
       '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
   }
   return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:18px"><h1>THE LANE<br><span class="y">APP</span></h1><p>Players · Manager · Coaches · Committee</p>'+
     '<button class="btn btn-y" style="margin-bottom:9px" onclick="setAuth(\'signup\')">⚽ I’m a player — sign up</button>'+
-    '<button class="btn btn-o" onclick="setAuth(\'login\')">🔑 Sign in (players &amp; staff)</button>'+ installButton() +
-    '<div class="loginnote"><b style="color:#fff">Players</b> tap sign-up and land in a <b style="color:var(--y)">pending queue</b> until staff approve them.<br><br><b style="color:#fff">Manager, coaches &amp; committee</b> use <b>Sign in</b> with the username &amp; code the club gives them — staff can’t self-register (nobody joins as “chairman” off the street). The chairman adds and manages staff from inside the app.</div></div>';
+    '<button class="btn btn-o" style="margin-bottom:9px" onclick="setAuth(\'psignin\')">👤 Player sign in</button>'+
+    '<button class="btn btn-g" onclick="setAuth(\'staff\')">👔 Management sign in</button>'+ installButton() +
+    '<div class="loginnote"><b style="color:#fff">Players</b> sign up and land in a <b style="color:var(--y)">pending queue</b> until staff approve them, then sign in with their username + code.<br><br><b style="color:#fff">Management</b> pick their name from the list and tap in their code on the keypad. Staff can’t self-register — the chairman adds managers, coaches &amp; committee from inside the app.</div></div>';
 }
 function render(){
   reflectOffline();
