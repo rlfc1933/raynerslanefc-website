@@ -143,7 +143,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-micah-haley",
+      "no": 0,
+      "name": "Micah Haley",
+      "pos": "Goalkeeper",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:38:11.085Z"
+  "updatedAt": "2026-07-13T15:38:26.552Z"
 }
