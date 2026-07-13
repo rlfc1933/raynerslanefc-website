@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<title>The Lane App — Players & Staff</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="/player-manifest.json">
+<meta name="theme-color" content="#080808">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Lane App">
+<link rel="apple-touch-icon" href="/img/icon-pm-192.png">
+<link rel="icon" type="image/png" href="/img/icon-pm-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --y:#FFD100; --g:#1A5C32; --bk:#080808; --dk:#0F0F0F; --c:#161616; --c2:#1E1E1E;
+    --br:#2A2A2A; --w:#F5F3ED; --gr:#8A8A82; --re:#EF4444; --su:#22C55E; --am:#F59E0B; --bl:#3B82F6;
+    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:var(--bk);font-family:var(--fb);color:var(--w);overflow:hidden;
+    background-image:radial-gradient(110% 55% at 78% -8%,rgba(255,209,0,.10) 0%,transparent 55%)}
+  .screen{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:520px;margin:0 auto;position:relative}
+  .abar{display:flex;align-items:center;gap:9px;padding:calc(env(safe-area-inset-top) + 14px) 15px 11px;border-bottom:1px solid var(--br);background:rgba(8,8,8,.85);position:relative;z-index:2}
+  .abar img{width:29px;height:29px;object-fit:contain}
+  .abar .t{font-family:var(--fd);font-size:19px;letter-spacing:.06em;flex:1;background:linear-gradient(90deg,#fff,var(--y));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .abar .role{font-family:var(--fc);font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:20px;background:rgba(255,209,0,.15);color:var(--y)}
+  .abar .role.mgr{background:rgba(26,92,50,.35);color:#7fe0a3}
+  .abar .lo{background:none;border:1px solid var(--br);color:var(--gr);font-family:var(--fc);font-size:10px;font-weight:700;padding:5px 8px;border-radius:7px;cursor:pointer}
+  .body{flex:1;overflow-y:auto;padding:13px 15px calc(env(safe-area-inset-bottom) + 96px);position:relative;z-index:1}
+  .body::-webkit-scrollbar{width:0}
+  .tabs{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;background:#0A0A0A;border-top:2px solid var(--y);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+  .tabs button{flex:1;background:none;border:none;color:#7a7a72;padding:10px 3px 14px;cursor:pointer;font-family:var(--fc);font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+  .tabs button .ic{display:block;font-size:19px;margin-bottom:2px}
+  .tabs button.on{color:var(--y)}
+  .eyebrow{font-family:var(--fc);font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--y);margin:2px 0 8px}
+  .card{background:var(--c);border:1px solid var(--br);border-radius:13px;padding:13px;margin-bottom:10px}
+  .card.hero{background:linear-gradient(150deg,#16200f,#0b0b0b 65%);border-color:rgba(255,209,0,.3)}
+  h2.big{font-family:var(--fd);font-size:26px;letter-spacing:1px;line-height:.95}
+  .muted{font-family:var(--fc);font-size:11.5px;color:var(--gr)}
+  .vs{display:flex;align-items:center;justify-content:center;gap:13px;margin:10px 0 6px}
+  .vs img{width:50px;height:50px;object-fit:contain}
+  .vs .sep{font-family:var(--fd);font-size:20px;color:var(--y)}
+  .vs .opp{width:50px;height:50px;border-radius:50%;background:var(--c2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:16px;color:#bbb}
+  .ha{display:inline-block;font-family:var(--fc);font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:6px}
+  .ha.h{background:rgba(255,209,0,.18);color:var(--y)} .ha.a{background:rgba(59,130,246,.2);color:#93c5fd}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+  .meta div{background:rgba(255,255,255,.04);border-radius:8px;padding:7px 9px}
+  .meta .k{font-family:var(--fc);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr)}
+  .meta .v{font-family:var(--fc);font-weight:700;font-size:13px;margin-top:1px}
+  .btn{display:block;width:100%;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:var(--fc);font-weight:800;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+  .btn:active{transform:scale(.98)} .btn:disabled{opacity:.55}
+  .btn-y{background:linear-gradient(135deg,#fff3bf,var(--y));color:#0d0d0d}
+  .btn-g{background:var(--g);color:#fff}
+  .btn-o{background:transparent;border:1px solid var(--br);color:#c9c9c1}
+  .btn-wa{background:#25D366;color:#0b2e18}
+  .btn-sm{padding:9px;font-size:11px;border-radius:8px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .avail-btn{border:2px solid var(--br);background:var(--c2);color:#c9c9c1;border-radius:12px;padding:15px 8px;cursor:pointer;font-family:var(--fc);font-weight:800;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase}
+  .avail-btn .ic{display:block;font-size:22px;margin-bottom:3px}
+  .avail-btn.yes.on{border-color:var(--su);background:rgba(34,197,94,.18);color:#8ff0b4}
+  .avail-btn.no.on{border-color:var(--re);background:rgba(239,68,68,.16);color:#ffa3a3}
+  .status-banner{border-radius:12px;padding:13px;text-align:center;margin-bottom:10px}
+  .status-banner .s{font-family:var(--fd);font-size:24px;letter-spacing:1px;line-height:1}
+  .status-banner .d{font-family:var(--fc);font-size:11.5px;margin-top:3px}
+  .sb-start{background:linear-gradient(135deg,rgba(255,209,0,.22),rgba(255,209,0,.06));border:1px solid rgba(255,209,0,.5)} .sb-start .s{color:var(--y)}
+  .sb-sub{background:rgba(26,92,50,.28);border:1px solid rgba(26,92,50,.7)} .sb-sub .s{color:#7fe0a3}
+  .sb-non{background:rgba(255,255,255,.05);border:1px solid var(--br)} .sb-non .s{color:#9a9a92}
+  .sb-wait{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.45)} .sb-wait .s{color:#ffca6b}
+  .prow{display:flex;align-items:center;gap:9px;background:var(--c);border:1px solid var(--br);border-radius:10px;padding:8px 10px;margin-bottom:5px}
+  .prow .num{font-family:var(--fd);font-size:18px;color:rgba(255,209,0,.5);width:22px;text-align:center;flex-shrink:0}
+  .prow .ph{width:30px;height:30px;border-radius:50%;background:linear-gradient(160deg,#242424,#0d0d0d);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;color:var(--y);flex-shrink:0}
+  .prow .nm{flex:1;font-family:var(--fc);font-weight:700;font-size:13.5px;line-height:1.1}
+  .prow .nm small{display:block;font-weight:600;font-size:9.5px;color:var(--gr);text-transform:uppercase;letter-spacing:.08em}
+  .pill{font-family:var(--fc);font-weight:800;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;padding:4px 7px;border-radius:20px;flex-shrink:0}
+  .pill.yes{background:rgba(34,197,94,.18);color:#8ff0b4} .pill.no{background:rgba(239,68,68,.16);color:#ffa3a3}
+  .pill.wait{background:rgba(245,158,11,.14);color:#ffca6b} .pill.xi{background:var(--y);color:#0d0d0d}
+  .pill.sub{background:rgba(26,92,50,.5);color:#9ff0c0} .pill.in{background:rgba(59,130,246,.22);color:#93c5fd}
+  .selrow{cursor:pointer}
+  .tally{display:flex;gap:6px;margin-bottom:9px}
+  .tally div{flex:1;background:var(--c);border:1px solid var(--br);border-radius:9px;padding:7px;text-align:center}
+  .tally .n{font-family:var(--fd);font-size:22px;line-height:1}
+  .tally .l{font-family:var(--fc);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);margin-top:2px}
+  .tally .yes .n{color:var(--su)} .tally .no .n{color:var(--re)} .tally .wait .n{color:var(--am)} .tally .in .n{color:var(--bl)}
+  .ann{background:var(--c);border-left:3px solid var(--y);border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:8px}
+  .ann .t{font-family:var(--fc);font-weight:800;font-size:12.5px} .ann .m{font-family:var(--fb);font-size:12px;color:#b5b5ad;line-height:1.5;margin-top:3px}
+  .ann .w{font-family:var(--fc);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:5px}
+  .ann.fb{border-left-color:var(--g);background:rgba(26,92,50,.12)}
+  .prof{text-align:center;padding:4px 0 2px}
+  .prof .av{width:84px;height:84px;border-radius:50%;margin:0 auto 9px;background:linear-gradient(160deg,#242424,#0d0d0d);border:3px solid var(--y);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:30px;color:var(--y)}
+  .prof .nm{font-family:var(--fd);font-size:27px;letter-spacing:1px;line-height:1}
+  .prof .po{font-family:var(--fc);font-weight:700;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--y);margin-top:3px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+  .stats div{background:var(--c);border:1px solid var(--br);border-radius:10px;padding:10px 3px;text-align:center}
+  .stats .n{font-family:var(--fd);font-size:22px;color:var(--y);line-height:1} .stats .l{font-family:var(--fc);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--gr);margin-top:2px}
+  .honest{background:rgba(255,209,0,.07);border:1px solid rgba(255,209,0,.25);border-radius:10px;padding:9px 11px;font-family:var(--fb);font-size:11px;color:#cfcfc6;line-height:1.5}
+  .fld{margin-bottom:9px;text-align:left}
+  .fld label{font-family:var(--fc);font-weight:700;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--y);display:block;margin-bottom:4px}
+  .fld input,.fld textarea,.fld select{width:100%;background:var(--c2);border:1px solid var(--br);border-radius:9px;padding:11px;color:#fff;font-family:var(--fb);font-size:16px}
+  .fld textarea{resize:vertical;min-height:60px} .fld input:focus,.fld textarea:focus{outline:none;border-color:var(--y)}
+  .login{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;text-align:center;overflow-y:auto}
+  .login img{width:74px;height:74px;object-fit:contain;margin:0 auto 14px;filter:drop-shadow(0 6px 20px rgba(255,209,0,.4))}
+  .login h1{font-family:var(--fd);font-size:36px;letter-spacing:1.5px;line-height:.92} .login h1 .y{color:var(--y)}
+  .login p{font-family:var(--fc);font-size:12.5px;color:var(--gr);margin:7px 0 18px}
+  .loginnote{font-family:var(--fb);font-size:10.5px;color:var(--gr);line-height:1.5;margin-top:12px;text-align:left}
+  .push{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:12px;right:12px;max-width:496px;margin:0 auto;background:rgba(28,28,28,.98);border:1px solid var(--br);border-left:3px solid var(--y);border-radius:12px;padding:11px 13px;z-index:60;box-shadow:0 14px 40px rgba(0,0,0,.7);transform:translateY(-220%);transition:transform .45s cubic-bezier(.2,.9,.3,1.2)}
+  .push.on{transform:translateY(0)} .push.err{border-left-color:var(--re)}
+  .push .b{font-family:var(--fb);font-size:12.5px;color:#e8e8e0;line-height:1.4}
+  .off{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 64px);left:12px;right:12px;max-width:496px;margin:0 auto;background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.5);border-radius:10px;padding:8px 11px;font-family:var(--fc);font-size:11px;color:#ffca6b;text-align:center;z-index:6;display:none}
+  .off.on{display:block}
+  .install-banner{background:linear-gradient(135deg,rgba(255,209,0,.16),rgba(255,209,0,.05));border:1px solid rgba(255,209,0,.45);border-radius:12px;padding:12px;margin-bottom:10px}
+  .install-banner b{color:var(--y)}
+  .spin{width:15px;height:15px;border:2px solid rgba(0,0,0,.25);border-top-color:#0d0d0d;border-radius:50%;display:inline-block;vertical-align:-2px;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="push" id="push"><div class="b" id="push-body"></div></div>
+<div class="off" id="off">📴 Offline — your taps are saved and will sync when you're back.</div>
+<div class="screen" id="root"></div>
+
+<script>
+/* ═══════ THE LANE APP — real backend (Supabase via Netlify functions) ═══════ */
+var FN = '/.netlify/functions';
+var LS = window.localStorage;
+var state = { token: LS.getItem('la_token')||'', role: LS.getItem('la_role')||'', me:null, board:null, tab:'home', activeEvent:null, sel:null, busy:{} };
+
+/* ── networking + offline write-queue (idempotent) ── */
+function getQueue(){ try{ return JSON.parse(LS.getItem('la_queue')||'[]'); }catch(e){ return []; } }
+function setQueue(q){ LS.setItem('la_queue', JSON.stringify(q)); }
+function enqueue(item){ var q=getQueue(); q.push(item); setQueue(q); reflectOffline(); }
+function uid(){ return 'k'+Math.random().toString(36).slice(2)+(state.token||'').slice(0,4); }
+
+async function api(fn, body, opts){
+  opts = opts||{};
+  body = Object.assign({ token: state.token }, body||{});
+  try{
+    var r = await fetch(FN+'/'+fn, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    var j = await r.json().catch(function(){ return {ok:false,error:'Bad response'}; });
+    return j;
+  }catch(e){
+    // network failure → queue write actions so nothing is lost
+    if(opts.queueable){ enqueue({ fn:fn, body:body }); return { ok:true, queued:true }; }
+    return { ok:false, error:'You appear to be offline.' };
+  }
+}
+async function flushQueue(){
+  var q=getQueue(); if(!q.length) return;
+  var left=[];
+  for(var i=0;i<q.length;i++){
+    try{ var r=await fetch(FN+'/'+q[i].fn,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(q[i].body)}); var j=await r.json().catch(function(){return{ok:false};}); if(!j.ok && !j.queued) { /* drop only on definitive server reject to avoid loops */ } }
+    catch(e){ left.push(q[i]); }
+  }
+  setQueue(left); reflectOffline();
+  if(left.length===0 && q.length){ toast('✅ Synced your offline taps.'); refresh(); }
+}
+function reflectOffline(){ var el=document.getElementById('off'); if(el) el.classList.toggle('on', !navigator.onLine || getQueue().length>0); }
+window.addEventListener('online', function(){ reflectOffline(); flushQueue(); });
+window.addEventListener('offline', reflectOffline);
+
+/* ── toast / push ── */
+function toast(msg, err){ var b=document.getElementById('push-body'), el=document.getElementById('push'); b.textContent=msg; el.classList.toggle('err',!!err); el.classList.add('on'); clearTimeout(window._pt); window._pt=setTimeout(function(){el.classList.remove('on');},3600); }
+
+/* ── install (PWA) — Android/Chrome prompt + iOS walkthrough + install gate ── */
+var deferredPrompt=null, isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; render(); });
+window.addEventListener('appinstalled', function(){ deferredPrompt=null; toast('✅ Installed — open “The Lane App” from your home screen.'); render(); });
+async function installApp(){
+  if(deferredPrompt){ deferredPrompt.prompt(); var c=await deferredPrompt.userChoice; deferredPrompt=null; if(c.outcome==='accepted') toast('Installing…'); render(); return; }
+  if(isIOS){ showIosInstall(); return; }
+  toast('Use your browser menu → “Install app” / “Add to Home Screen”.');
+}
+function canPromptInstall(){ return !!deferredPrompt || (isIOS && !isStandalone()); }
+function installButton(){
+  if(isStandalone()) return '';
+  return '<div class="install-banner"><div style="display:flex;align-items:center;gap:10px">'+
+    '<img src="/img/icon-pm-192.png" style="width:42px;height:42px;border-radius:10px">'+
+    '<div style="flex:1;text-align:left"><div style="font-family:var(--fc);font-weight:800;font-size:14px">Install the app</div>'+
+    '<div class="muted" style="font-size:10.5px">Add to your home screen — needed for match alerts</div></div></div>'+
+    '<button class="btn btn-y btn-sm" style="margin-top:9px" onclick="installApp()">📲 Add to Home Screen</button></div>';
+}
+function showIosInstall(){
+  document.getElementById('root').innerHTML =
+    '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px">'+
+    '<h1>ADD TO<br><span class="y">HOME SCREEN</span></h1>'+
+    '<p>iPhone needs the app installed for notifications to work.</p>'+
+    '<div class="card" style="text-align:left"><ol style="margin:0 0 0 18px;font-family:var(--fb);font-size:13.5px;line-height:1.9;color:#dcdcd4">'+
+    '<li>Tap the <b style="color:var(--y)">Share</b> icon <span style="font-size:15px">􀈂</span> at the bottom of Safari</li>'+
+    '<li>Scroll and tap <b style="color:var(--y)">Add to Home Screen</b></li>'+
+    '<li>Tap <b style="color:var(--y)">Add</b> — then open <b>The Lane App</b> from your home screen</li>'+
+    '</ol></div>'+
+    '<div class="honest">On iPhone, push notifications <b>only work from the installed app</b>, not the Safari tab — so we set this up first.</div>'+
+    '<button class="btn btn-o btn-sm" style="margin-top:12px" onclick="render()">← Back</button></div>';
+}
+
+/* ── notifications: ask AFTER first successful action, and only if installed ── */
+async function maybeAskNotify(){
+  if(!('Notification' in window) || Notification.permission!=='default') return;
+  if(isIOS && !isStandalone()) return;           // iOS: pointless until installed
+  if(LS.getItem('la_askedNotif')) return;
+  LS.setItem('la_askedNotif','1');
+  try{ await Notification.requestPermission(); }catch(e){}
+}
+
+/* ═══════ AUTH ═══════ */
+var authMode='choose';
+function setAuth(m){ authMode=m; render(); }
+function setBusy(k,v){ state.busy[k]=v; }
+async function doSignup(){
+  var g=function(i){ return (document.getElementById(i)||{}).value||''; };
+  var body={ name:g('su-name').trim(), email:g('su-em').trim(), phone:g('su-ph').trim(), position:g('su-pos'), username:g('su-un').trim(), code:g('su-pw').trim(), photo_consent:document.getElementById('su-consent').checked };
+  if(!body.name||!body.email||!body.phone||!body.username||!body.code){ toast('Fill in every field.',1); return; }
+  if(!/^\d{6}$/.test(body.code)){ toast('Your code must be exactly 6 numbers.',1); return; }
+  if(!body.photo_consent){ toast('Please tick photo consent to continue.',1); return; }
+  var btn=document.getElementById('su-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Signing up…';}
+  var r=await api('la-signup', body);
+  if(!r.ok){ toast(r.error||'Sign-up failed.',1); if(btn){btn.disabled=false;btn.textContent='Sign up';} return; }
+  state.token=r.token; state.role='player'; LS.setItem('la_token',r.token); LS.setItem('la_role','player');
+  authMode='done'; render();
+}
+async function doLogin(){
+  var un=(document.getElementById('li-un')||{}).value||'', pw=(document.getElementById('li-pw')||{}).value||'';
+  if(!un||!pw){ toast('Enter your username and code.',1); return; }
+  var btn=document.getElementById('li-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Signing in…';}
+  var r=await api('la-login', {username:un.trim(), code:pw.trim()});
+  if(!r.ok){ toast(r.error||'Login failed.',1); if(btn){btn.disabled=false;btn.textContent='Sign in';} return; }
+  state.token=r.token; state.role=r.role; LS.setItem('la_token',r.token); LS.setItem('la_role',r.role);
+  state.tab='home'; await refresh();
+}
+function logout(){ state.token=''; state.role=''; state.me=null; state.board=null; LS.removeItem('la_token'); LS.removeItem('la_role'); authMode='choose'; render(); }
+
+/* ═══════ LOAD ═══════ */
+function isStaff(){ return ['chairman','manager','coach','staff'].indexOf(state.role)>=0; }
+async function refresh(){
+  if(!state.token){ render(); return; }
+  if(isStaff()){
+    var r=await api('la-board', { event_id: state.activeEvent });
+    if(r.ok){ state.board=r; if(!state.activeEvent) state.activeEvent=r.activeEvent; LS.setItem('la_cache_board', JSON.stringify(r)); }
+    else if(r.error){ if(/sign in|not active|staff/i.test(r.error)) return logout(); loadCache(); }
+  } else {
+    var r=await api('la-me', {});
+    if(r.ok){ state.me=r; if(!state.activeEvent && r.events && r.events[0]) state.activeEvent=r.events[0].id; LS.setItem('la_cache_me', JSON.stringify(r)); }
+    else if(r.error && /sign in/i.test(r.error)) return logout();
+    else loadCache();
+  }
+  render();
+}
+// Offline / failed fetch → render the last-known data so event details, meet
+// time and address are still readable at a ground with no signal.
+function loadCache(){
+  try{
+    if(isStaff()){ var b=JSON.parse(LS.getItem('la_cache_board')||'null'); if(b){ state.board=b; if(!state.activeEvent) state.activeEvent=b.activeEvent; } }
+    else { var m=JSON.parse(LS.getItem('la_cache_me')||'null'); if(m){ state.me=m; if(!state.activeEvent && m.events && m.events[0]) state.activeEvent=m.events[0].id; } }
+  }catch(e){}
+}
+
+/* ═══════ TIME / EVENT HELPERS ═══════ */
+var TYPES={ league:{lbl:'League',ic:'🏆',col:'var(--y)',match:true}, cup:{lbl:'Cup',ic:'🥇',col:'#ffca6b',match:true},
+  charity:{lbl:'Charity',ic:'❤️',col:'#ff9d9d',match:true}, friendly:{lbl:'Friendly',ic:'🤝',col:'#93c5fd',match:true},
+  training:{lbl:'Training',ic:'🏃',col:'#8ff0b4',match:false}, photoshoot:{lbl:'Photoshoot',ic:'📸',col:'#7fe0a3',match:false},
+  club_event:{lbl:'Club Event',ic:'🎟️',col:'#c4b5fd',match:false} };
+function ty(e){ return TYPES[e&&e.type]||TYPES.league; }
+function events(){ return (isStaff()? (state.board&&state.board.events) : (state.me&&state.me.events)) || []; }
+function evt(){ var es=events(); return es.filter(function(e){return e.id===state.activeEvent;})[0] || es[0] || null; }
+function fmtD(iso){ if(!iso) return 'TBC'; try{ return new Date(iso).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'Europe/London'}); }catch(e){ return 'TBC'; } }
+function fmtT(iso){ if(!iso) return 'TBC'; try{ return new Date(iso).toLocaleTimeString('en-GB',{hour:'numeric',minute:'2-digit',timeZone:'Europe/London'}); }catch(e){ return 'TBC'; } }
+function venueOf(e){ return (e&&e.la_venues) || {ground:'TBC',address:'',lat:null,lng:null}; }
+function ini(n){ return (n||'').split(' ').map(function(x){return x[0];}).join('').slice(0,2).toUpperCase(); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function nav(mode){ var v=venueOf(evt()); if(v.lat==null||v.lng==null){ toast('No coordinates saved for this ground yet.',1); return; }
+  var ll=v.lat+','+v.lng;
+  var url = mode==='waze' ? 'https://waze.com/ul?ll='+ll+'&navigate=yes'
+    : mode==='transit' ? 'https://www.google.com/maps/dir/?api=1&destination='+ll+'&travelmode=transit'
+    : 'https://www.google.com/maps/dir/?api=1&destination='+ll+'&travelmode=driving';
+  window.open(url,'_blank');
+}
+function fixturePicker(){
+  var es=events(); if(!es.length) return '';
+  return '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px">'+es.map(function(e){
+    var t=ty(e), on=e.id===state.activeEvent;
+    return '<button onclick="pickEvent('+e.id+')" style="flex:0 0 auto;min-width:98px;background:'+(on?'var(--y)':'var(--c)')+';color:'+(on?'#0d0d0d':'#c9c9c1')+';border:1px solid '+(on?'var(--y)':'var(--br)')+';border-radius:10px;padding:8px 10px;cursor:pointer;font-family:var(--fc);text-align:left">'+
+      '<div style="font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:'+(on?'#0d0d0d':t.col)+'">'+t.ic+' '+t.lbl+'</div>'+
+      '<div style="font-weight:800;font-size:12.5px;margin-top:2px">'+fmtD(e.starts_at)+'</div>'+
+      '<div style="font-size:9.5px;opacity:.75">'+(e.opponent? (e.is_home?'H · ':'A · ')+esc((e.opponent||'').split(' ')[0]) : 'Club')+'</div></button>';
+  }).join('')+'</div>';
+}
+function fixtureCard(){
+  var e=evt(); if(!e) return '<div class="card"><div class="muted">No events yet.</div></div>';
+  var v=venueOf(e), t=ty(e), isMatch=t.match;
+  var head = isMatch
+    ? '<div style="text-align:center"><span class="ha '+(e.is_home?'h':'a')+'">'+(e.is_home?'🏠 Home':'🚌 Away')+'</span></div>'+
+      '<div class="vs"><img src="/img/badge.png" alt="RLFC"><span class="sep">VS</span><div class="opp">'+ini(e.opponent)+'</div></div>'+
+      '<h2 class="big" style="text-align:center">'+esc(e.is_home?'Rayners Lane':(e.opponent||'').toUpperCase())+'<br><span style="color:var(--y);font-size:16px">vs</span><br>'+esc(e.is_home?(e.opponent||'').toUpperCase():'Rayners Lane')+'</h2>'
+    : '<div style="text-align:center;font-size:38px;margin:6px 0 2px">'+t.ic+'</div><h2 class="big" style="text-align:center">'+esc((e.competition||t.lbl).toUpperCase())+'</h2>'+
+      '<div class="muted" style="text-align:center;margin-top:4px">No squad selection — but everyone still gets asked, notified and checked in.</div>';
+  return '<div class="card hero"><div class="eyebrow" style="text-align:center;color:'+t.col+'">'+t.ic+' '+t.lbl+(isMatch&&e.competition?' · '+esc(e.competition):'')+'</div>'+head+
+    '<div class="meta">'+
+      '<div><div class="k">Date</div><div class="v">'+fmtD(e.starts_at)+'</div></div>'+
+      '<div><div class="k">'+(isMatch?'Kick-off':'Starts')+'</div><div class="v">'+fmtT(e.starts_at)+'</div></div>'+
+      '<div><div class="k">Meet</div><div class="v">'+fmtT(e.meet_at)+'</div></div>'+
+      '<div><div class="k">'+(isMatch?'Kit':'Wear')+'</div><div class="v">'+esc(e.kit||'TBC')+'</div></div>'+
+    '</div>'+
+    '<div style="margin-top:9px;background:rgba(255,255,255,.04);border-radius:9px;padding:9px">'+
+      '<div style="font-family:var(--fc);font-weight:800;font-size:12px">📍 '+esc(v.ground||'TBC')+'</div>'+
+      '<div class="muted" style="font-size:10.5px;margin-bottom:8px">'+esc(v.address||'')+'</div>'+
+      '<div style="display:flex;gap:5px">'+
+        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'drive\')">🚗 Drive</button>'+
+        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'waze\')">🛣️ Waze</button>'+
+        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'transit\')">🚇 Transport</button>'+
+      '</div></div>'+
+    '<div class="muted" style="text-align:center;margin-top:7px;font-size:9.5px">Source: '+(e.source==='fwp_import'?'🔄 Football Web Pages':'✍️ added by staff')+'</div></div>';
+}
+
+/* ═══════ PLAYER ═══════ */
+function playerHome(){
+  var e=evt(), me=state.me&&state.me.player, out=fixturePicker();
+  if(!e){ return out + '<div class="card"><div class="muted">No events scheduled yet — the club will add them here.</div></div>'; }
+  var a=e.myAvailability, sel=e.mySelection, banner;
+  if(!e.published) banner='<div class="status-banner sb-wait"><div class="s">SQUAD NOT PICKED YET</div><div class="d">You’ll be notified the moment it’s announced</div></div>';
+  else if(sel==='starting') banner='<div class="status-banner sb-start"><div class="s">YOU’RE STARTING</div><div class="d">Shirt '+(me&&me.squad_no||'')+' · meet '+fmtT(e.meet_at)+'</div></div>';
+  else if(sel==='sub') banner='<div class="status-banner sb-sub"><div class="s">YOU’RE ON THE BENCH</div><div class="d">Be ready · meet '+fmtT(e.meet_at)+'</div></div>';
+  else banner='<div class="status-banner sb-non"><div class="s">NOT IN THE SQUAD</div><div class="d">Not this week — come and back the lads</div></div>';
+  out += banner + fixtureCard();
+  out += '<div class="card"><div class="eyebrow">Are you available?</div><div class="split">'+
+    '<button class="avail-btn yes '+(a==='available'?'on':'')+'" onclick="setAvail(\'available\')"><span class="ic">✅</span>Available</button>'+
+    '<button class="avail-btn no '+(a==='unavailable'?'on':'')+'" onclick="setAvail(\'unavailable\')"><span class="ic">❌</span>Can’t Play</button>'+
+    '</div><div class="muted" style="text-align:center;margin-top:8px">Two taps. The manager sees it instantly.</div></div>';
+  out += '<div class="card"><div class="eyebrow">Match-day check-in</div>'+
+    (e.myCheckin ? '<div class="status-banner sb-sub" style="margin:0"><div class="s">✅ CHECKED IN</div><div class="d">The manager knows you’re here</div></div>'
+      : '<button class="btn btn-g" onclick="checkIn()">📍 I’m here — check in</button>')+'</div>';
+  return out;
+}
+function playerNews(){
+  var out='', fbs=(state.me&&state.me.feedback)||[];
+  if(fbs.length){ out+='<div class="eyebrow">Your feedback from the gaffer</div>';
+    out+=fbs.map(function(f){ return '<div class="ann fb"><div class="t">💬 Feedback</div><div class="m">'+esc(f.body)+'</div>'+
+      (f.acknowledged_at?'<div class="w" style="color:#8ff0b4">✔ You acknowledged this</div>':'<button class="btn btn-o btn-sm" style="margin-top:7px" onclick="ackFb('+f.id+')">👍 Got it</button>')+'</div>'; }).join('');
+  }
+  out+='<div class="eyebrow">From the club</div>';
+  var anns=(state.me&&state.me.announcements)||[];
+  out+= anns.length ? anns.map(function(a){ return '<div class="ann"><div class="t">'+esc(a.title||'')+'</div><div class="m">'+esc(a.body||'')+'</div></div>'; }).join('') : '<div class="muted">No announcements yet.</div>';
+  out+='<div class="honest" style="margin-top:6px">📣 Broadcast + feedback only. There are <b>no private chats</b> here — that’s what keeps it safe for youth teams.</div>';
+  return out;
+}
+function playerMe(){
+  var p=(state.me&&state.me.player)||{};
+  var out='<div class="card"><div class="prof"><div class="av">'+(p.photo_url?'':ini(p.name))+'</div>'+
+    '<div class="nm">'+esc((p.name||'').toUpperCase())+'</div><div class="po">'+esc(p.position||'')+(p.squad_no?' · No. '+p.squad_no:'')+'</div></div>'+
+    '<div class="stats"><div><div class="n">–</div><div class="l">Apps</div></div><div><div class="n">–</div><div class="l">Goals</div></div><div><div class="n">–</div><div class="l">Assists</div></div><div><div class="n">–</div><div class="l">MOTM</div></div></div>'+
+    '<div class="honest"><b style="color:var(--y)">Stats start 1 August.</b> They count themselves from the games the manager records — nobody types them.</div></div>';
+  if(p.sponsor_name) out+='<div class="card" style="text-align:center"><div class="muted" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#7fe0a3">My player sponsor</div><div style="font-family:var(--fd);font-size:20px;margin-top:2px">'+esc(p.sponsor_name.toUpperCase())+'</div></div>';
+  out+='<div class="card"><div class="eyebrow">My profile</div><div class="fld"><label>My bio</label><textarea id="bio-in" placeholder="Tell the fans about yourself…">'+esc(p.bio||'')+'</textarea></div><button class="btn btn-o btn-sm" onclick="saveBio()">Save my profile</button></div>';
+  out+=installButton();
+  return out;
+}
+
+/* ═══════ STAFF ═══════ */
+function staffHome(){
+  var b=state.board; if(!b) return '<div class="muted">Loading…</div>';
+  var e=evt(), out='';
+  if(b.pending&&b.pending.length){
+    out+='<div class="card" style="border-color:rgba(255,209,0,.5);background:rgba(255,209,0,.07)"><div class="eyebrow">🔔 '+b.pending.length+' signed up — approve to add to the squad</div>'+
+      b.pending.map(function(p){ return '<div class="prow" style="background:var(--c2)"><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+' · '+esc(p.phone||'')+'</small></div>'+
+        '<button class="btn btn-y btn-sm" style="width:auto;padding:6px 10px" onclick="approve('+p.id+')">✔</button>'+
+        '<button class="btn btn-o btn-sm" style="width:auto;padding:6px 8px" onclick="approve('+p.id+',1)">✕</button></div>'; }).join('')+'</div>';
+  }
+  out+='<button class="btn btn-o btn-sm" style="margin-bottom:9px" onclick="showAdd()">＋ Add a match, friendly, charity game or event</button>';
+  out+=fixturePicker()+fixtureCard();
+  if(!e) return out;
+  var sq=b.squad||[], c=function(k){return sq.filter(function(p){return p.availability===k;}).length;};
+  var checked=sq.filter(function(p){return p.checkedIn;}).length;
+  out+='<div class="eyebrow">Availability · '+sq.length+' asked</div><div class="tally">'+
+    '<div class="yes"><div class="n">'+c('available')+'</div><div class="l">In</div></div>'+
+    '<div class="no"><div class="n">'+c('unavailable')+'</div><div class="l">Out</div></div>'+
+    '<div class="wait"><div class="n">'+sq.filter(function(p){return !p.availability;}).length+'</div><div class="l">No reply</div></div>'+
+    '<div class="in"><div class="n">'+checked+'</div><div class="l">Here</div></div></div>';
+  out+=sq.map(function(p){
+    var pill = p.status==='injured'?'<span class="pill no">Injured</span>': p.availability==='available'?'<span class="pill yes">In</span>':p.availability==='unavailable'?'<span class="pill no">Out</span>':'<span class="pill wait">No reply</span>';
+    var chk = p.checkedIn?'<span class="pill in">✓ Here</span>':'';
+    return '<div class="prow"><span class="num">'+(p.squad_no||'')+'</span><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+'</small></div>'+chk+pill+'</div>';
+  }).join('');
+  return out;
+}
+function staffSquad(){
+  var b=state.board, e=evt(); if(!b||!e) return '<div class="muted">Loading…</div>';
+  if(!b.perms.can_select_squad) return '<div class="honest">🔒 Squad selection is a <b>permission</b>, not a role. It hasn’t been granted to you — the chairman can switch it on with no code change.</div>';
+  if(!ty(e).match) return '<div class="card hero" style="text-align:center"><div style="font-size:34px">'+ty(e).ic+'</div><h2 class="big" style="margin-top:6px">'+esc((e.competition||ty(e).lbl).toUpperCase())+'</h2><div class="muted" style="margin-top:8px">This isn’t a match — there’s no XI to pick.</div></div><div class="honest">Photoshoots and club nights still need availability, a push and a check-in — just no squad. That’s why the model is <b style="color:var(--y)">events</b>, not fixtures.</div>';
+  var sq=b.squad||[], cS=function(k){return sq.filter(function(p){return p.selection===k;}).length;};
+  var out='<div class="eyebrow">Pick the squad · '+ty(e).ic+' '+esc(e.competition||ty(e).lbl)+'</div>'+
+    '<div class="tally"><div><div class="n" style="color:var(--y)">'+cS('starting')+'<span style="font-size:13px;color:var(--gr)">/11</span></div><div class="l">Starting XI</div></div>'+
+    '<div><div class="n" style="color:#7fe0a3">'+cS('sub')+'</div><div class="l">Subs</div></div></div>';
+  out+=sq.map(function(p){
+    var s=p.selection, a=p.availability;
+    var pill = s==='starting'?'<span class="pill xi">Starting</span>': s==='sub'?'<span class="pill sub">Sub</span>': a!=='available'?'<span class="pill no">Unavailable</span>':'<span class="pill wait">Tap to pick</span>';
+    return '<div class="prow selrow" onclick="cycleSel('+p.id+',\''+(s||'none')+'\','+ (a==='available'?'1':'0') +')" style="'+(a!=='available'?'opacity:.45':'')+'"><span class="num">'+(p.squad_no||'')+'</span><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+'</small></div>'+pill+'</div>';
+  }).join('');
+  out+='<button class="btn btn-y" style="margin-top:9px" onclick="publish()">📣 Publish squad &amp; notify everyone</button>';
+  return out;
+}
+function staffPost(){
+  return '<div class="eyebrow">Broadcast to the squad</div><div class="card"><div class="fld"><label>Title</label><input id="an-t" placeholder="e.g. Meet time moved"></div><div class="fld"><label>Message</label><textarea id="an-m" placeholder="Goes to every player…"></textarea></div><button class="btn btn-g" onclick="sendAnn()">📣 Send to all players</button></div>'+installButton();
+}
+
+/* ═══════ ACTIONS ═══════ */
+function pickEvent(id){ state.activeEvent=id; if(isStaff()) refresh(); else render(); }
+async function setAvail(v){
+  var e=evt(); if(!e) return;
+  e.myAvailability=v; render();                                   // optimistic
+  var r=await api('la-availability', {event_id:e.id, status:v}, {queueable:true});
+  if(r.queued){ toast('Saved offline — will sync.'); }
+  else if(!r.ok){ toast(r.error||'Save failed.',1); refresh(); return; }
+  else { toast(v==='available'?'Saved — you’re AVAILABLE.':'Saved — you’re out.'); }
+  maybeAskNotify();
+}
+async function checkIn(){
+  var e=evt(); if(!e) return;
+  e.myCheckin=true; render();                                     // optimistic
+  var r=await api('la-checkin', {event_id:e.id, idempotency_key:uid()}, {queueable:true});
+  if(r.queued) toast('Check-in saved offline — will sync.');
+  else if(!r.ok){ toast(r.error||'Check-in failed.',1); e.myCheckin=false; render(); return; }
+  else toast('✅ Checked in.');
+  maybeAskNotify();
+}
+async function cycleSel(id, cur, avail){
+  if(!avail){ toast('Can’t pick — not available.',1); return; }
+  var next = cur==='none'||cur==='not_selected'?'starting': cur==='starting'?'sub':'not_selected';
+  var r=await api('la-select', {event_id:state.activeEvent, player_id:id, role:next});
+  if(!r.ok){ toast(r.error||'Could not save.',1); return; }
+  refresh();
+}
+async function publish(){ var r=await api('la-publish', {event_id:state.activeEvent}); if(!r.ok){ toast(r.error||'Failed.',1); return; }
+  toast('Squad published — '+r.starting+' starting, '+r.subs+' subs.'+(r.pushConfigured?' Everyone notified.':' (Push not set up yet.)')); refresh(); }
+async function approve(id, reject){ var r=await api('la-approve', {player_id:id, reject:!!reject}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast(reject?'Rejected.':'✅ Approved — now in the squad.'); refresh(); }
+async function sendAnn(){ var t=(document.getElementById('an-t')||{}).value||'', m=(document.getElementById('an-m')||{}).value||''; if(!t||!m){ toast('Add a title and a message.',1); return; }
+  var r=await api('la-broadcast', {title:t, body:m}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast('📣 Broadcast sent.'); render(); }
+async function ackFb(id){ var r=await api('la-feedback', {ack:id}); if(r.ok){ toast('Acknowledged 👍'); refresh(); } }
+async function saveBio(){ var v=(document.getElementById('bio-in')||{}).value||''; var r=await api('la-profile',{bio:v}); if(r.ok){ toast('Profile updated.'); } else toast(r.error||'Failed.',1); }
+
+/* add-event form */
+function showAdd(){
+  document.getElementById('root').querySelector('.body').innerHTML =
+    '<div class="card" style="border-color:rgba(255,209,0,.5)"><div class="eyebrow">＋ Add an event</div>'+
+    '<div class="fld"><label>What is it?</label><select id="ae-type">'+Object.keys(TYPES).map(function(k){return '<option value="'+k+'"'+(k==='friendly'?' selected':'')+'>'+TYPES[k].ic+' '+TYPES[k].lbl+'</option>';}).join('')+'</select></div>'+
+    '<div class="fld"><label>Opponent (blank for photoshoot / club event)</label><input id="ae-opp" placeholder="Metropolitan Police"></div>'+
+    '<div class="fld"><label>Home or away</label><select id="ae-ha"><option value="home">🏠 Home — Tithe Farm</option><option value="away">🚌 Away</option></select></div>'+
+    '<div class="fld"><label>Competition / title</label><input id="ae-comp" placeholder="Pre-Season Friendly"></div>'+
+    '<div class="split"><div class="fld"><label>Date &amp; kick-off</label><input id="ae-start" type="datetime-local"></div><div class="fld"><label>Meet time</label><input id="ae-meet" type="datetime-local"></div></div>'+
+    '<div class="fld"><label>Kit</label><input id="ae-kit" placeholder="Away — White"></div>'+
+    '<button class="btn btn-y" id="ae-go" onclick="addEvent()">Add &amp; ask the squad</button>'+
+    '<button class="btn btn-o btn-sm" style="margin-top:7px" onclick="refresh()">Cancel</button>'+
+    '<div class="honest" style="margin-top:9px">FWP gives you league &amp; cup only. Friendlies, charity games, photoshoots and club nights are added here.</div></div>';
+}
+async function addEvent(){
+  var g=function(i){return (document.getElementById(i)||{}).value||'';};
+  var type=g('ae-type'), start=g('ae-start');
+  if(!start){ toast('Pick a date & time.',1); return; }
+  var home=g('ae-ha')==='home';
+  var venue = home ? {club_name:'Rayners Lane', ground:'Tithe Farm Sports & Social Club', address:'151 Rayners Lane, Harrow HA2 0XH', lat:51.5754, lng:-0.3705} : (g('ae-opp')?{club_name:g('ae-opp').trim(), ground:'TBC', address:'', lat:null, lng:null}:null);
+  var body={ type:type, opponent:g('ae-opp').trim()||null, is_home:home, competition:g('ae-comp').trim()||null,
+    starts_at:new Date(start).toISOString(), meet_at:g('ae-meet')?new Date(g('ae-meet')).toISOString():null, kit:g('ae-kit').trim()||null, venue:venue };
+  var btn=document.getElementById('ae-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Adding…';}
+  var r=await api('la-event', body); if(!r.ok){ toast(r.error||'Failed.',1); if(btn){btn.disabled=false;btn.textContent='Add & ask the squad';} return; }
+  state.activeEvent=r.event.id; toast('✅ Event added — the squad has been asked.'); refresh();
+}
+
+/* ═══════ RENDER ═══════ */
+function loginView(){
+  if(authMode==='done'){
+    return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px"><h1>YOU’RE<br><span class="y">IN THE QUEUE</span></h1><p>The manager has been notified — he approves you with one tap and you’re in the squad.</p>'+installButton()+'<button class="btn btn-y" style="margin-top:6px" onclick="refresh()">Continue →</button></div>';
+  }
+  if(authMode==='signup'){
+    return '<div class="login" style="justify-content:flex-start;padding-top:34px"><h1 style="font-size:30px">PLAYER<br><span class="y">SIGN-UP</span></h1><p>Join the Rayners Lane squad</p>'+
+      '<div class="fld"><label>Full name</label><input id="su-name" placeholder="Danny Whitfield"></div>'+
+      '<div class="fld"><label>Email</label><input id="su-em" type="email" placeholder="you@email.com"></div>'+
+      '<div class="fld"><label>Phone</label><input id="su-ph" type="tel" placeholder="07…"></div>'+
+      '<div class="fld"><label>Position</label><select id="su-pos"><option>Goalkeeper</option><option>Defender</option><option selected>Midfielder</option><option>Forward</option></select></div>'+
+      '<div class="fld"><label>Choose a username</label><input id="su-un" placeholder="dannyw" autocapitalize="none"></div>'+
+      '<div class="fld"><label>Choose a 6-digit code</label><input id="su-pw" type="password" inputmode="numeric" maxlength="6" placeholder="6 numbers"></div>'+
+      '<label style="display:flex;gap:8px;align-items:flex-start;text-align:left;font-family:var(--fb);font-size:11px;color:#cfcfc6;margin:2px 0 12px"><input type="checkbox" id="su-consent" style="margin-top:3px"><span>I agree my headshot &amp; name may appear on the club’s public website, programme and graphics, and to the club’s privacy notice.</span></label>'+
+      '<button class="btn btn-y" id="su-go" onclick="doSignup()">Sign up</button>'+
+      '<div class="loginnote">🔒 Your code is hashed and locked after 5 wrong tries. You go into a <b style="color:var(--y)">pending</b> queue until staff approve you.</div>'+
+      '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
+  }
+  if(authMode==='login'){
+    return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:16px"><h1>SIGN<br><span class="y">IN</span></h1><p>Players &amp; staff</p>'+
+      '<div class="fld"><label>Username</label><input id="li-un" placeholder="username" autocapitalize="none"></div>'+
+      '<div class="fld"><label>6-digit code</label><input id="li-pw" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>'+
+      '<button class="btn btn-y" id="li-go" onclick="doLogin()">Sign in</button>'+
+      '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
+  }
+  return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:18px"><h1>THE LANE<br><span class="y">APP</span></h1><p>Players · Manager · Coaches · Committee</p>'+
+    '<button class="btn btn-y" style="margin-bottom:9px" onclick="setAuth(\'signup\')">⚽ I’m a player — sign up</button>'+
+    '<button class="btn btn-o" onclick="setAuth(\'login\')">🔑 Sign in</button>'+ installButton() +
+    '<div class="loginnote">Players sign themselves up — they land in a <b style="color:var(--y)">pending queue</b> and staff approve with one tap. Nobody joins the club by accident.</div></div>';
+}
+function render(){
+  reflectOffline();
+  var root=document.getElementById('root');
+  if(!state.token){ root.innerHTML=loginView(); return; }
+  var body, tabs, badge, cls;
+  if(isStaff()){
+    body = state.tab==='home'?staffHome() : state.tab==='squad'?staffSquad() : state.tab==='post'?staffPost() : staffHome();
+    tabs=[['home','🏠','Avail'],['squad','📋','Squad'],['post','📣','Post']];
+    badge = state.role==='chairman'?'Chairman':state.role==='coach'?'Coach':'Manager'; cls='mgr';
+  } else {
+    body = state.tab==='news'?playerNews() : state.tab==='me'?playerMe() : playerHome();
+    tabs=[['home','⚽','Match'],['news','📣','Club'],['me','👤','My Card']];
+    var nm=(state.me&&state.me.player&&state.me.player.name)||'Player'; badge=nm.split(' ')[0]; cls='';
+  }
+  root.innerHTML =
+    '<div class="abar"><img src="/img/badge.png" alt=""><span class="t">THE LANE</span><span class="role '+cls+'">'+esc(badge)+'</span><button class="lo" onclick="logout()">Sign out</button></div>'+
+    '<div class="body">'+body+'</div>'+
+    '<div class="tabs">'+tabs.map(function(t){ return '<button class="'+(state.tab===t[0]?'on':'')+'" onclick="state.tab=\''+t[0]+'\';render()"><span class="ic">'+t[1]+'</span>'+t[2]+'</button>'; }).join('')+'</div>';
+}
+
+/* ═══════ BOOT ═══════ */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw-pm.js').catch(function(){}); }
+(function(){ if(state.token){ refresh(); } else { render(); } flushQueue(); })();
+</script>
+</body>
+</html>
