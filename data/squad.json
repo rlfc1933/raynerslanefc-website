@@ -188,7 +188,16 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-jamie-pitt",
+      "no": 0,
+      "name": "Jamie Pitt",
+      "pos": "Defender",
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-13T15:39:30.559Z"
+  "updatedAt": "2026-07-13T15:39:45.254Z"
 }
