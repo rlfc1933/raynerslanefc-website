@@ -16,12 +16,12 @@
     },
     {
       "id": "matchday-current",
-      "date": "2026-07-11",
-      "kickoff": "13:00",
-      "opponent": "Punjab Utd FC",
+      "date": "2026-07-14",
+      "kickoff": "19:45",
+      "opponent": "Wealdstone FC under 23's",
       "oppCrest": "",
-      "isHome": false,
-      "venue": "The Sports Ground, Dunkirk Cl, Gravesend, DA12 5ND",
+      "isHome": true,
+      "venue": "Tithe Farm Social Club",
       "competition": "Friendly",
       "status": "scheduled",
       "us": null,
@@ -71,5 +71,5 @@
       "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-12T19:58:25.639Z"
+  "updatedAt": "2026-07-14T12:07:31.541Z"
 }
