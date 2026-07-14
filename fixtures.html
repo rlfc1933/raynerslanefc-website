@@ -303,6 +303,11 @@ function fxComp(c) {
   if (/friendly/.test(s)) return { cls: 'tag-friendly', lbl: 'Friendly' };
   return { cls: 'tag-league', lbl: 'League' };
 }
+/* A game is "gone" ~3h after kick-off. Upcoming must be decided by TIME, not by
+   whether a score happens to have been typed in yet — otherwise a game that was
+   played a week ago still shows as upcoming (with Directions), which is exactly
+   what made the countdown look like it pointed at a random match. */
+function fxPast(f) { return fxDate(f).getTime() < Date.now() - 3 * 3600000; }
 function fxVenue(f) { return f.venue || (f.isHome !== false ? 'Tithe Farm Sports & Social Club' : ''); }
 function fxDir(f) { var v = fxVenue(f); return v ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(v + ', UK') : ''; }
 function fxDate(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00'); }
@@ -331,16 +336,19 @@ function fxActs(f) {
 }
 function fxCard(f) {
   var home = f.isHome !== false, comp = fxComp(f.competition);
-  var played = (f.us != null && f.them != null);
+  var played = (f.us != null && f.them != null), gone = fxPast(f);
   var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   var venue = fxVenue(f);
-  return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + '">' +
+  // played → score only. Already gone but no score → honest "result to follow"
+  // (never Directions/countdown for a game that's been and gone). Future → actions.
+  var foot = played ? '' : (gone ? '<div class="fxc__await">Result to follow</div>' : '<div class="fxc__acts">' + fxActs(f) + '</div>');
+  return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + (gone && !played ? ' fxc--gone' : '') + '">' +
     '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
     '<span class="fxc__ha">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
     (venue ? '<div class="fxc__venue">📍 ' + fxEsc(venue) + '</div>' : '') +
-    (played ? '' : '<div class="fxc__acts">' + fxActs(f) + '</div>') +
+    foot +
   '</article>';
 }
 function fxHero(f) {
@@ -398,9 +406,12 @@ function renderFxSeason(list) {
   var now = Date.now();
   function dt(f) { return fxDate(f).getTime(); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
-  var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
-  var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
-  var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
+  var hasScore = function (f) { return f.us != null && f.them != null; };
+  // Classify by TIME, not by whether a score was typed in.
+  var played   = sorted.filter(hasScore);                                        // finished, score known
+  var awaiting = sorted.filter(function (f) { return !hasScore(f) && fxPast(f); }); // finished, score not entered
+  var upcoming = sorted.filter(function (f) { return !hasScore(f) && !fxPast(f); }); // genuinely still to come
+  var next = upcoming[0] || null;                                                // the real next fixture
 
   var nextEl = document.getElementById('fx-next');
   nextEl.innerHTML = next ? fxHero(next) : '';
@@ -420,10 +431,12 @@ function renderFxSeason(list) {
         '<span class="fxm__c">' + g.length + ' game' + (g.length > 1 ? 's' : '') + '</span></div>' + g.map(fxCard).join('') + '</section>';
     }).join('');
   }
-  if (played.length) {
-    var recent = played.slice().reverse();
-    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">RESULTS</span><span class="fxm__c">' + recent.length + ' played</span></div>' +
-      recent.map(fxCard).join('') + '</section>';
+  // Games that have been and gone go in RESULTS — newest first — whether or not
+  // the score has been entered yet. They never sit in "upcoming".
+  var done = played.concat(awaiting).sort(function (a, b) { return dt(b) - dt(a); });
+  if (done.length) {
+    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">RESULTS</span><span class="fxm__c">' + done.length + ' played</span></div>' +
+      done.map(fxCard).join('') + '</section>';
   }
   document.getElementById('fx-results').innerHTML = html || '<div class="fx-empty">Fixtures are released soon — check back.</div>';
 
@@ -567,6 +580,8 @@ function renderFxTable(rows) {
   .fxc__score.w{color:#3ddc84}.fxc__score.d{color:var(--yellow)}.fxc__score.l{color:#ef4444}
   .fxc__meta{font-family:var(--font-c);font-weight:600;font-size:12px;color:var(--lgrey);text-align:center;margin-top:10px;letter-spacing:.03em}
   .fxc__venue{font-family:var(--font-b);font-size:11.5px;color:var(--grey);text-align:center;margin-top:3px}
+  .fxc--gone{opacity:.72}
+  .fxc__await{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);text-align:center;margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
   .fxc__acts{display:flex;gap:6px;margin-top:11px}
   .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:8px;padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
   .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
