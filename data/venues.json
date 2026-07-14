@@ -1,0 +1,245 @@
+{
+  "_note": "Ground NAMES verified (Football Ground Map, CCL Prem North, June 2026). address/postcode/lat/lng are ONLY trustworthy where verified:true — each carries its source. NEVER guess a ground: a wrong address sends a coach to the wrong town.",
+  "_verified": "ground names only",
+  "venues": [
+    {
+      "club": "Rayners Lane",
+      "ground": "Tithe Farm Sports & Social Club",
+      "address": "151 Rayners Lane, Harrow",
+      "postcode": "HA2 0XH",
+      "lat": 51.5754,
+      "lng": -0.3705,
+      "verified": true,
+      "notes": "Our home. Also the home ground of Broadfields United (groundshare)."
+    },
+    {
+      "club": "Broadfields United",
+      "ground": "Tithe Farm Sports & Social Club",
+      "address": "151 Rayners Lane, Harrow",
+      "postcode": "HA2 0XH",
+      "lat": 51.5754,
+      "lng": -0.3705,
+      "verified": true,
+      "notes": "GROUNDSHARE. Broadfields play at OUR ground. When Broadfields are the home team we are officially AWAY (isHome:false — away kit, away dressing room, away designation) but the VENUE is still Tithe Farm, so there is NO TRAVEL. 'Away' = designation; 'venue' = physical location. They are independent — never infer the venue from isHome."
+    },
+    {
+      "club": "Abingdon United",
+      "ground": "The Northcourt",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Amersham Town",
+      "ground": "Spratleys Meadow",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Ardley United",
+      "ground": "Ardley Playing Fields",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Bedfont",
+      "ground": "The Orchard",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Burnham",
+      "ground": "The 1878 Stadium",
+      "address": "Wymers Wood Road, Burnham, Buckinghamshire",
+      "postcode": "SL1 8JG",
+      "lat": 51.5378065,
+      "lng": -0.6669018,
+      "verified": true,
+      "source": "Club website burnhamfc1878.co.uk/directions-to-the-1878-stadium (address+postcode) + OpenStreetMap stadium feature (coords, postcode matches)",
+      "notes": "Coords are the OSM stadium feature — pitch-exact."
+    },
+    {
+      "club": "Easington Sports",
+      "ground": "Addison Road",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Harefield United",
+      "ground": "Preston Park",
+      "address": "Breakspear Road North, Harefield, Middlesex",
+      "postcode": "UB9 6NE",
+      "lat": 51.6024362,
+      "lng": -0.4780076,
+      "verified": true,
+      "source": "Club website harefieldunited.com/contact (address+postcode) + OpenStreetMap postcode centroid (coords)",
+      "notes": "Coords are the UB9 6NE postcode centroid (ground not mapped as a named feature in OSM). NOTE: an earlier internal note said UB9 6NB — that was WRONG; the club states UB9 6NE."
+    },
+    {
+      "club": "Hilltop",
+      "ground": "Silver Jubilee Park",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "notes": "Groundshare at Hendon — Silver Jubilee Park, Townsend Lane, NW9. VERIFY."
+    },
+    {
+      "club": "Holyport",
+      "ground": "Summerleaze Village",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Kidlington",
+      "ground": "Yarnton Road",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "North Greenford United",
+      "ground": "Berkeley Fields",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "North Leigh",
+      "ground": "Eynsham Hall Park",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Northwood",
+      "ground": "Northwood Park",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Penn & Tylers Green",
+      "ground": "Elm Road",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Reading City",
+      "ground": "Scours Lane",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Thatcham Town",
+      "ground": "Waterside Park",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Wallingford & Crowmarsh",
+      "ground": "Wallingford Sports Park",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Wokingham Town",
+      "ground": "Lowther Road",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false
+    },
+    {
+      "club": "Metropolitan Police FC",
+      "ground": "Imber Court",
+      "address": "Ember Lane, East Molesey",
+      "postcode": "KT8 0BT",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "notes": "Pre-season friendly, 25 Jul."
+    },
+    {
+      "club": "London Lions",
+      "ground": "Rowley Lane Sports Ground",
+      "address": "Rowley Lane, Barnet, Hertfordshire",
+      "postcode": "EN5 3HW",
+      "lat": 51.6524956,
+      "lng": -0.2482668,
+      "verified": true,
+      "notes": "FA Cup Extra Prelim, 8 Aug — AWAY. Maccabi London Lions. Coords are the OSM ground polygon, not a postcode centroid.",
+      "source": "Club website mlfc.co.uk/contact (address+postcode) + OpenStreetMap named ground polygon (coords)"
+    },
+    {
+      "club": "New Bradwell St Peter",
+      "ground": "",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "notes": "FA Vase 1Q, 15 Aug — HOME at Tithe Farm, so their ground is not needed for travel."
+    },
+    {
+      "club": "Punjab Utd FC",
+      "ground": "",
+      "address": "The Sports Ground, Dunkirk Cl, Gravesend",
+      "postcode": "DA12 5ND",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "notes": "Friendly — venue already on the fixture."
+    },
+    {
+      "club": "Hayes & Yeading United",
+      "ground": "",
+      "address": "",
+      "postcode": "",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "notes": "Friendly, already played (4 Jul, home)."
+    }
+  ],
+  "updatedAt": "2026-07-14T15:29:47.311Z"
+}

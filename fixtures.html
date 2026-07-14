@@ -221,6 +221,9 @@
 function fxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function loadFixturesData() {
+  // Venues first — every card needs the ground/address/coords to render
+  // Directions (or to say honestly that the address isn't confirmed yet).
+  await fxLoadVenues();
   // PRIMARY: the club-controlled season schedule (admin → Fixtures).
   var usedLocal = false;
   try {
@@ -308,8 +311,41 @@ function fxComp(c) {
    played a week ago still shows as upcoming (with Directions), which is exactly
    what made the countdown look like it pointed at a random match. */
 function fxPast(f) { return fxDate(f).getTime() < Date.now() - 3 * 3600000; }
-function fxVenue(f) { return f.venue || (f.isHome !== false ? 'Tithe Farm Sports & Social Club' : ''); }
-function fxDir(f) { var v = fxVenue(f); return v ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(v + ', UK') : ''; }
+/* ── VENUES ───────────────────────────────────────────────────────────────
+   RULE: "away" is a DESIGNATION, not a location. isHome and venue are
+   independent — never infer one from the other. The venue is always the HOME
+   team's ground: ours if we're at home, the opponent's if we're away. The
+   Broadfields groundshare (they play at OUR Tithe Farm, so we're "away" with
+   no travel) falls out of this rule correctly, with no special-casing.
+   A venue is only usable for Directions if it's VERIFIED with lat/lng —
+   otherwise we say "address to be confirmed" rather than send anyone to a
+   guessed location. */
+var FXV = {};
+function fxNorm(s) {
+  return String(s || '').toLowerCase()
+    .replace(/\bf\.?c\.?\b/g, '').replace(/\butd\b/g, 'united')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+}
+function fxLoadVenues() {
+  return fetch('data/venues.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (v) { ((v && v.venues) || []).forEach(function (x) { FXV[fxNorm(x.club)] = x; }); })
+    .catch(function () {});
+}
+function fxResolveVenue(f) {
+  var homeClub = (f.isHome !== false) ? 'Rayners Lane' : (f.opponent || '');
+  return FXV[fxNorm(homeClub)] || null;
+}
+function fxVenueInfo(f) {
+  var v = fxResolveVenue(f);
+  var usable = !!(v && v.verified && v.lat != null && v.lng != null);
+  // a venue typed in by staff on the fixture always wins for the label
+  var ground = f.venue || (v && v.ground) || '';
+  var addr = v ? [v.address, v.postcode].filter(Boolean).join(', ') : '';
+  var groundshare = f.isHome === false && v && /tithe farm/i.test(v.ground || '');
+  return { v: v, usable: usable, ground: ground, addr: addr, groundshare: groundshare };
+}
+function fxVenue(f) { return fxVenueInfo(f).ground; }   // label only
 function fxDate(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00'); }
 function fxLock(f) {
   var home = f.isHome !== false;
@@ -327,32 +363,55 @@ function fxLock(f) {
     '<div class="fxc__team">' + fxCrestEl(R.crest, R.name) + '<span class="fxc__nm">' + fxEsc(R.name.toUpperCase()) + '</span></div>' +
   '</div>';
 }
+/* Venue block: real ground + address, or an honest "to be confirmed".
+   Never a dead button, never a guessed location. */
+function fxVenueBlock(f) {
+  var i = fxVenueInfo(f);
+  var h = '';
+  if (i.ground) {
+    h += '<div class="fxc__venue">📍 ' + fxEsc(i.ground) + (i.addr ? '<span class="fxc__addr">' + fxEsc(i.addr) + '</span>' : '') + '</div>';
+  }
+  if (i.groundshare) h += '<div class="fxc__note">Away — but played at Tithe Farm (groundshare). No travel.</div>';
+  if (!i.usable && !i.groundshare) h += '<div class="fxc__tbc">Address to be confirmed</div>';
+  return h;
+}
+/* Directions straight from the venue's lat/lng — the phone's own map app does
+   the routing. No API key, no billing. Only rendered when the venue is
+   VERIFIED with coordinates. */
 function fxActs(f) {
-  var dir = fxDir(f), a = '';
-  if (dir) a += '<a class="fxc__b" href="' + dir + '" target="_blank" rel="noopener">📍 Directions</a>';
-  a += '<a class="fxc__b" href="/.netlify/functions/fixtures-ics">📅 Calendar</a>';
-  a += '<button class="fxc__b" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>';
-  return a;
+  var i = fxVenueInfo(f), rows = '';
+  if (i.usable) {
+    var ll = i.v.lat + ',' + i.v.lng;
+    rows += '<div class="fxc__acts">' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=driving" target="_blank" rel="noopener">🚗 Drive</a>' +
+      '<a class="fxc__b" href="https://waze.com/ul?ll=' + ll + '&navigate=yes" target="_blank" rel="noopener">🛣️ Waze</a>' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=transit" target="_blank" rel="noopener">🚇 Transport</a>' +
+    '</div>';
+  }
+  rows += '<div class="fxc__acts">' +
+    '<a class="fxc__b" href="/.netlify/functions/fixtures-ics">📅 Calendar</a>' +
+    '<button class="fxc__b" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>' +
+  '</div>';
+  return rows;
 }
 function fxCard(f) {
   var home = f.isHome !== false, comp = fxComp(f.competition);
   var played = (f.us != null && f.them != null), gone = fxPast(f);
   var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-  var venue = fxVenue(f);
   // played → score only. Already gone but no score → honest "result to follow"
   // (never Directions/countdown for a game that's been and gone). Future → actions.
-  var foot = played ? '' : (gone ? '<div class="fxc__await">Result to follow</div>' : '<div class="fxc__acts">' + fxActs(f) + '</div>');
+  var foot = played ? '' : (gone ? '<div class="fxc__await">Result to follow</div>' : fxActs(f));
   return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + (gone && !played ? ' fxc--gone' : '') + '">' +
     '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
     '<span class="fxc__ha">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
-    (venue ? '<div class="fxc__venue">📍 ' + fxEsc(venue) + '</div>' : '') +
+    fxVenueBlock(f) +
     foot +
   '</article>';
 }
 function fxHero(f) {
-  var comp = fxComp(f.competition), home = f.isHome !== false, venue = fxVenue(f);
+  var comp = fxComp(f.competition), home = f.isHome !== false;
   var d = fxDate(f);
   var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
   return '<div class="fxh" data-ko="' + d.getTime() + '"><span class="fxh__lbl">Next Match</span>' +
@@ -360,9 +419,8 @@ function fxHero(f) {
     '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + '</div>' +
-    (venue ? '<div class="fxc__venue">📍 ' + fxEsc(venue) + '</div>' : '') +
-    '<div class="fxh__cd" id="fx-cd"></div>' +
-    '<div class="fxc__acts" style="margin-top:12px">' + fxActs(f) + '</div></div>';
+    fxVenueBlock(f) +
+    '<div class="fxh__cd" id="fx-cd"></div>' + fxActs(f) + '</div>';
 }
 function fxCountdown() {
   var h = document.querySelector('.fxh'); if (!h) return;
@@ -701,6 +759,9 @@ function renderFxTable(rows) {
   .fxc__score.w{color:#3ddc84}.fxc__score.d{color:var(--yellow)}.fxc__score.l{color:#ef4444}
   .fxc__meta{font-family:var(--font-c);font-weight:600;font-size:12px;color:var(--lgrey);text-align:center;margin-top:10px;letter-spacing:.03em}
   .fxc__venue{font-family:var(--font-b);font-size:11.5px;color:var(--grey);text-align:center;margin-top:3px}
+  .fxc__addr{display:block;font-size:10.5px;color:#6f6f68;margin-top:1px}
+  .fxc__note{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7fe0a3;background:rgba(26,92,50,.18);border:1px solid rgba(26,92,50,.5);border-radius:8px;padding:6px 8px;text-align:center;margin-top:8px}
+  .fxc__tbc{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffca6b;text-align:center;margin-top:6px}
   .fxc--gone{opacity:.72}
   .fxc__await{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);text-align:center;margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
   .fxc__acts{display:flex;gap:6px;margin-top:11px}
