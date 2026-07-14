@@ -106,10 +106,23 @@ function renderSquad(players) {
 
       var imgWrap = document.createElement('div');
       imgWrap.className = 'player-card__img';
+      // A real headshot gets cropped to fill the card; the cartoon placeholder
+      // is an illustration and has to be fitted whole, or it loses its head.
+      if (!p.photo) imgWrap.classList.add('is-placeholder');
       var imgEl = document.createElement('img');
       imgEl.src = img;
       imgEl.alt = name;
-      imgEl.addEventListener('error', function() { this.src = FALLBACK_IMG; });
+      imgEl.loading = 'lazy';
+      // Only swap the source on error — do NOT reclassify the card as a
+      // placeholder here. img.js re-points images at Netlify's image CDN, which
+      // 404s anywhere that CDN isn't running (localhost, previews) and fires
+      // this handler even though img.js then falls back and the real photo
+      // loads fine. Marking the card a placeholder on that transient error
+      // shrank real headshots into a green box. Placeholder is decided by the
+      // DATA (does this player have a photo), never by a load event.
+      imgEl.addEventListener('error', function() {
+        if (this.src.indexOf(FALLBACK_IMG) === -1) this.src = FALLBACK_IMG;
+      });
       imgWrap.appendChild(imgEl);
 
       var numEl = document.createElement('div');
