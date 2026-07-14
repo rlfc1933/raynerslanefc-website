@@ -365,11 +365,17 @@ function fixtureCard(){
     '<div style="margin-top:9px;background:rgba(255,255,255,.04);border-radius:9px;padding:9px">'+
       '<div style="font-family:var(--fc);font-weight:800;font-size:12px">📍 '+esc(v.ground||'TBC')+'</div>'+
       '<div class="muted" style="font-size:10.5px;margin-bottom:8px">'+esc(v.address||'')+'</div>'+
-      '<div style="display:flex;gap:5px">'+
-        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'drive\')">🚗 Drive</button>'+
-        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'waze\')">🛣️ Waze</button>'+
-        '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'transit\')">🚇 Transport</button>'+
-      '</div></div>'+
+      /* Ground-specific warnings (e.g. "the postcode lands on the main road,
+         not the entrance") matter most to the person driving there. */
+      (v.notes?'<div style="font-size:10px;line-height:1.45;color:var(--y);background:rgba(255,214,0,.08);border-radius:7px;padding:6px 7px;margin-bottom:8px">⚠️ '+esc(v.notes)+'</div>':'')+
+      (v.lat!=null&&v.lng!=null
+        ? '<div style="display:flex;gap:5px">'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'drive\')">🚗 Drive</button>'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'waze\')">🛣️ Waze</button>'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'transit\')">🚇 Transport</button>'+
+          '</div>'
+        : '<div class="muted" style="font-size:10px;line-height:1.45">Venue to be confirmed — the ground isn’t in the club’s venue book yet, so there’s nothing to navigate to. Staff can add it in the Portal under Venues.</div>')+
+      '</div>'+
     '<div class="muted" style="text-align:center;margin-top:7px;font-size:9.5px">Source: '+(e.source==='fwp_import'?'🔄 Football Web Pages':'✍️ added by staff')+'</div></div>';
 }
 
@@ -552,12 +558,41 @@ function showAdd(){
     '<button class="btn btn-o btn-sm" style="margin-top:7px" onclick="refresh()">Cancel</button>'+
     '<div class="honest" style="margin-top:9px">FWP gives you league &amp; cup only. Friendlies, charity games, photoshoots and club nights are added here.</div></div>';
 }
+/* The club venue book (data/venues.json) — the same one the website's Directions
+   buttons read. Loaded once and cached so adding an away game fills in the
+   opponent's real ground instead of leaving players with "TBC". */
+var VBOOK=null;
+function vbNorm(s){ return String(s||'').toLowerCase().replace(/\bf\.?c\.?\b/g,'').replace(/\butd\b/g,'united').replace(/&/g,'and').replace(/[^a-z0-9]/g,''); }
+async function venueBook(){
+  if(VBOOK) return VBOOK;
+  try{
+    var r=await fetch('/data/venues.json?t='+Date.now());
+    var j=await r.json(); VBOOK={};
+    (j.venues||[]).forEach(function(v){ if(v&&v.club) VBOOK[vbNorm(v.club)]=v; });
+  }catch(e){ VBOOK={}; }
+  return VBOOK;
+}
 async function addEvent(){
   var g=function(i){return (document.getElementById(i)||{}).value||'';};
   var type=g('ae-type'), start=g('ae-start');
   if(!start){ toast('Pick a date & time.',1); return; }
   var home=g('ae-ha')==='home';
-  var venue = home ? {club_name:'Rayners Lane', ground:'Tithe Farm Sports & Social Club', address:'151 Rayners Lane, Harrow HA2 0XH', lat:51.5754, lng:-0.3705} : (g('ae-opp')?{club_name:g('ae-opp').trim(), ground:'TBC', address:'', lat:null, lng:null}:null);
+  // The venue is the HOME club's ground — for an away game that's the
+  // opponent's. Look it up rather than shipping "TBC" with no coordinates, but
+  // only trust a verified entry; an unchecked one stays TBC on purpose.
+  var book=await venueBook();
+  var homeClub = home ? 'Rayners Lane' : g('ae-opp').trim();
+  var vb = book[vbNorm(homeClub)];
+  var venue;
+  if(vb && vb.verified && vb.lat!=null){
+    venue={ club_name:vb.club, ground:vb.ground||'TBC',
+      address:[vb.address,vb.postcode].filter(Boolean).join(', '),
+      lat:vb.lat, lng:vb.lng, notes:vb.notes||null };
+  } else if(home){
+    venue={club_name:'Rayners Lane', ground:'Tithe Farm Sports & Social Club', address:'151 Rayners Lane, Harrow HA2 0XH', lat:51.5754, lng:-0.3705};
+  } else {
+    venue = g('ae-opp') ? {club_name:g('ae-opp').trim(), ground:'TBC', address:'', lat:null, lng:null} : null;
+  }
   var body={ type:type, opponent:g('ae-opp').trim()||null, is_home:home, competition:g('ae-comp').trim()||null,
     starts_at:new Date(start).toISOString(), meet_at:g('ae-meet')?new Date(g('ae-meet')).toISOString():null, kit:g('ae-kit').trim()||null, venue:venue };
   var btn=document.getElementById('ae-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Adding…';}

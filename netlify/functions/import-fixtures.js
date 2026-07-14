@@ -25,6 +25,35 @@ const TEAM_SLUG = process.env.FWP_TEAM_SLUG || 'rayners-lane';
 const EXPECTED_SEASON = process.env.FWP_SEASON || '2026-2027';
 const ORIGIN = process.env.SITE_ORIGIN || 'https://raynerslanefc.co.uk';
 
+// Club-name matcher. FWP's spelling won't always match ours ("Punjab Utd FC"
+// vs "Punjab United"), so compare on a normalised key rather than raw text.
+function normClub(s) {
+  return String(s || '').toLowerCase()
+    .replace(/\bf\.?c\.?\b/g, '').replace(/\butd\b/g, 'united')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+}
+
+// The venue table, read from GitHub raw so it's current the moment staff save it
+// (the deployed copy lags a rebuild). Falls back to the site, then to {} — a
+// failed lookup must leave venue blank, never guess.
+async function loadVenues() {
+  var urls = [
+    'https://raw.githubusercontent.com/rlfc1933/raynerslanefc-website/main/data/venues.json',
+    ORIGIN + '/data/venues.json?t=' + Date.now(),
+  ];
+  for (var i = 0; i < urls.length; i++) {
+    try {
+      var r = await fetch(urls[i], { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) continue;
+      var j = await r.json();
+      var map = {};
+      (j.venues || []).forEach(function (v) { if (v && v.club) map[normClub(v.club)] = v; });
+      if (Object.keys(map).length) return map;
+    } catch (e) { /* try the next source */ }
+  }
+  return {};
+}
+
 function resp(code, obj) {
   return {
     statusCode: code,
@@ -138,11 +167,28 @@ exports.handler = async function () {
 
   fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
 
+  // Auto-attach the ground from the venue table. FWP gives us the opponent, never
+  // their ground — so without this every away game imports with venue:"" and the
+  // directions buttons are dead. The venue is the HOME club's ground; isHome is a
+  // designation, not a location, so we look up the home club by name and take
+  // whatever the table says (Broadfields' "home" games are at Tithe Farm).
+  // Only VERIFIED entries are attached — an unverified guess is worse than blank.
+  var venues = await loadVenues();
+  var needGround = [];
+  fixtures.forEach(function (f) {
+    var homeClub = f.isHome ? 'Rayners Lane' : f.opponent;
+    var v = venues[normClub(homeClub)];
+    if (v && v.verified && v.ground) { f.venue = v.ground; f.venueClub = v.club; }
+    else { f.venue = ''; needGround.push(f.opponent); }
+  });
+
   return resp(200, {
     ok: true,
     season: EXPECTED_SEASON,
     count: fixtures.length,
     fixtures: fixtures,
+    venuesAttached: fixtures.filter(function (f) { return !!f.venue; }).length,
+    needGround: needGround.filter(function (c, i, a) { return a.indexOf(c) === i; }),
     source: 'Football Web Pages',
     note: fixtures.length
       ? 'Schedule only — scores stay yours to enter on match day.'

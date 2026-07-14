@@ -537,6 +537,11 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/></svg></span>
           <div class="tile-name">Fixtures</div><div class="tile-desc">Season schedule &amp; results</div>
         </button>
+        <button class="tile" style="--accent:#10B981" onclick="openPanel('venues')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.7-7-11a7 7 0 1 1 14 0c0 5.3-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></span>
+          <div class="tile-name">Venues<span id="vn-badge" class="tile-badge" style="display:none"></span></div><div class="tile-desc">Grounds, addresses &amp; directions</div>
+        </button>
         <button class="tile" style="--accent:#EF4444" onclick="openPanel('matchday')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/></svg></span>
@@ -776,7 +781,7 @@
         <div class="field"><label class="fl">Date</label><input type="date" id="fx-date"></div>
         <div class="field"><label class="fl">Kick-off</label><input type="time" id="fx-ko" value="15:00"></div>
       </div>
-      <div class="field"><label class="fl">Venue / location</label><input type="text" id="fx-venue" value="Tithe Farm, Harrow"></div>
+      <div class="field"><label class="fl">Venue / location</label><input type="text" id="fx-venue" value="Tithe Farm, Harrow"><div id="fx-venue-hint" style="font-family:var(--fc);font-size:10px;margin-top:3px;line-height:1.5"></div></div>
       <div class="field"><label class="fl">Competition</label><input type="text" id="fx-comp" value="Combined Counties Premier Division North"></div>
       <div class="slbl">Result <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank until it&rsquo;s played</span></div>
       <div class="row2">
@@ -792,6 +797,45 @@
       <div id="fx-list"></div>
       <button class="save" style="margin-top:10px" onclick="saveFixtures()">&#10003; Save to Site</button>
       <div class="dep" id="dep-fixtures"></div>
+    </div>
+
+    <!-- VENUES (grounds + addresses that power every Directions button) -->
+    <div class="panel" id="panel-venues">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128205; Venues</div></div>
+      <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5;margin-bottom:14px">The club address book. Every <b style="color:var(--w)">Drive</b>, <b style="color:var(--w)">Waze</b> and <b style="color:var(--w)">Transport</b> button on the Fixtures page and in The Lane App reads from here. Add a club once and every future fixture against them fills itself in.</div>
+      <div id="vn-todo" style="display:none;border:1px solid #F59E0B;border-radius:12px;padding:12px 14px;margin-bottom:16px;background:rgba(245,158,11,.08)">
+        <div style="font-family:var(--fd);font-size:15px;color:#F59E0B;letter-spacing:.02em" id="vn-todo-ttl"></div>
+        <div style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.5;margin-top:5px" id="vn-todo-body"></div>
+      </div>
+
+      <div class="slbl">Add / Edit Venue</div>
+      <div class="field"><label class="fl">Club</label><input id="vn-club" list="vn-club-list" placeholder="e.g. Burnham FC" autocomplete="off"><datalist id="vn-club-list"></datalist><div style="font-family:var(--fc);font-size:10px;color:var(--gr);margin-top:3px">Must match the opponent name on the fixture &mdash; then it attaches automatically.</div></div>
+      <div class="field"><label class="fl">Ground name</label><input id="vn-ground" placeholder="e.g. The 1878 Stadium"></div>
+      <div class="field"><label class="fl">Address</label><input id="vn-address" placeholder="e.g. Wymers Wood Road, Burnham"></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Postcode</label><input id="vn-postcode" placeholder="SL1 8JG" style="text-transform:uppercase"></div>
+        <div class="field"><label class="fl">Find on map</label><button class="save sec" style="margin:0;padding:11px" onclick="vnLookup()">&#128269; Look up</button></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Latitude</label><input id="vn-lat" placeholder="51.5406"></div>
+        <div class="field"><label class="fl">Longitude</label><input id="vn-lng" placeholder="-0.6614"></div>
+      </div>
+      <div id="vn-map-out" style="margin-bottom:10px"></div>
+      <div class="field"><label class="fl">Where this came from</label><input id="vn-source" placeholder="e.g. club website directions page"><div style="font-family:var(--fc);font-size:10px;color:var(--gr);margin-top:3px">So the next person knows it was checked, and where to re-check it.</div></div>
+      <div class="field"><label class="fl">Notes for players (optional)</label><input id="vn-notes" placeholder="e.g. postcode lands on the main road — entrance is 200m past the garage"></div>
+      <div class="field" style="border:1px solid var(--br);border-radius:10px;padding:12px;background:var(--c2)">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="vn-verified" style="width:20px;height:20px;margin-top:1px;flex:0 0 auto">
+          <span style="font-family:var(--fb);font-size:12.5px;color:var(--w);line-height:1.5"><b>I&rsquo;ve checked this against the club&rsquo;s own website or a match-day letter.</b><br><span style="color:var(--gr)">Only ticked venues get Directions buttons. An unchecked one shows &ldquo;venue to be confirmed&rdquo; &mdash; which is safe. A wrong address sends the team to the wrong town, so if you&rsquo;re not sure, leave this off.</span></span>
+        </label>
+      </div>
+      <button class="save sec" onclick="vnAdd()">+ Add / Update Venue</button>
+      <button class="save" style="background:var(--c2);color:var(--gr);margin-top:8px" onclick="vnClearForm()">Clear form</button>
+      <div class="div"></div>
+      <div class="slbl" id="vn-cnt">Venue Book</div>
+      <div id="vn-list"></div>
+      <button class="save" style="margin-top:10px" onclick="saveVenues()">&#10003; Save to Site</button>
+      <div class="dep" id="dep-venues"></div>
     </div>
 
     <!-- PROGRAMME -->
@@ -2914,6 +2958,7 @@ function openPanel(name) {
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
+  if (name === 'venues')    vnInit();
   if (name === 'programme') initProgramme();
   if (name === 'mail')      initMail();
   if (name === 'analytics') renderAnalytics();
@@ -2971,6 +3016,7 @@ function initDash() {
 // links straight to its editor. Auto-hides once everything is filled.
 var SEASON_SETUP = [
   { label: 'Fixtures',                file: 'fixtures', panel: 'fixtures', test: function (d) { return (d.fixtures || []).length > 0; }, why: 'Homepage next match, countdown & results' },
+  { label: 'Venues',                  file: 'venues',   panel: 'venues',   test: function (d) { return (d.venues || []).filter(function (v) { return v.verified; }).length > 0; }, why: 'Away-day addresses & Directions buttons' },
   { label: 'Squad & player profiles', file: 'players',  panel: 'squad',    test: function (d) { return (d.players || []).length > 0; },  why: 'Squad page + programme team-sheets' },
   { label: 'Matchday programme',      file: 'programmes',panel: 'programme',test: function (d) { return (d.programmes || []).length > 0; }, why: 'Publish your first programme' },
   { label: 'Gallery photos',          file: 'gallery',  panel: 'gallery',  test: function (d) { return (d.items || []).length > 0; },    why: 'Replace the placeholder gallery' },
@@ -5237,6 +5283,169 @@ function renderSponsors() {
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
 }
 
+// ── VENUES (the address book behind every Directions button) ──
+// A wrong address sends the team to the wrong town, so nothing here is ever
+// guessed: `verified` is a human tick, and only verified venues get buttons.
+var venues = [];
+var venuesDeleted = [];
+function vnNorm(s) {
+  return String(s || '').toLowerCase()
+    .replace(/\bf\.?c\.?\b/g, '').replace(/\butd\b/g, 'united')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+}
+function vnFind(club) {
+  var k = vnNorm(club);
+  for (var i = 0; i < venues.length; i++) if (vnNorm(venues[i].club) === k) return venues[i];
+  return null;
+}
+function vnInit() {
+  fetchJSON('venues', function (d) {
+    venues = (d && d.venues) || [];
+    renderVenues();
+    fetchJSON('fixtures', function (f) { vnTodo((f && f.fixtures) || []); });
+  });
+  vnClearForm();
+}
+function vnFillClubs() {
+  var dl = document.getElementById('vn-club-list'); if (!dl) return;
+  // Suggest opponents we already play but have no ground for yet.
+  var have = {}; venues.forEach(function (v) { have[vnNorm(v.club)] = 1; });
+  var opts = (fxCrests || []).filter(function (c) { return !/rayners\s*lane/i.test(c.name) && !have[vnNorm(c.name)]; });
+  dl.innerHTML = opts.map(function (c) { return '<option value="' + escH(c.name) + '"></option>'; }).join('');
+}
+// The to-do: which upcoming AWAY games still can't give players directions.
+// Home games never need one — we know where Tithe Farm is.
+function vnTodo(fixtures) {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var gaps = (fixtures || []).filter(function (f) {
+    if (f.isHome !== false) return false;
+    if (new Date(f.date + 'T00:00:00').getTime() < today.getTime()) return false;
+    var v = vnFind(f.opponent);
+    return !(v && v.verified && v.lat != null && v.lng != null);
+  });
+  var clubs = []; gaps.forEach(function (f) { if (clubs.indexOf(f.opponent) < 0) clubs.push(f.opponent); });
+  var box = document.getElementById('vn-todo'), badge = document.getElementById('vn-badge');
+  if (badge) { badge.style.display = clubs.length ? '' : 'none'; badge.textContent = clubs.length; }
+  if (!box) return;
+  if (!clubs.length) {
+    box.style.display = '';
+    box.style.borderColor = '#10B981'; box.style.background = 'rgba(16,185,129,.08)';
+    document.getElementById('vn-todo-ttl').style.color = '#10B981';
+    document.getElementById('vn-todo-ttl').textContent = '✓ Every away game has directions';
+    document.getElementById('vn-todo-body').textContent = 'Nothing outstanding. Every upcoming away fixture has a checked ground, so players get Drive, Waze and Transport buttons for all of them.';
+    return;
+  }
+  box.style.display = '';
+  box.style.borderColor = '#F59E0B'; box.style.background = 'rgba(245,158,11,.08)';
+  document.getElementById('vn-todo-ttl').style.color = '#F59E0B';
+  document.getElementById('vn-todo-ttl').textContent = clubs.length + (clubs.length === 1 ? ' away game needs a ground' : ' away games need a ground');
+  document.getElementById('vn-todo-body').innerHTML = 'Players will see &ldquo;venue to be confirmed&rdquo; instead of Directions for: <b style="color:var(--w)">' +
+    clubs.map(escH).join(', ') + '</b>. Add each club below &mdash; check their website first.';
+}
+function renderVenues() {
+  vnFillClubs();
+  var ok = venues.filter(function (v) { return v.verified; }).length;
+  document.getElementById('vn-cnt').innerHTML = 'Venue Book <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">&mdash; ' +
+    venues.length + ' clubs, ' + ok + ' checked</span>';
+  var sorted = venues.slice().sort(function (a, b) { return String(a.club).localeCompare(String(b.club)); });
+  document.getElementById('vn-list').innerHTML = sorted.length ? sorted.map(function (v) {
+    var i = venues.indexOf(v);
+    var routable = v.verified && v.lat != null && v.lng != null;
+    var tag = routable
+      ? '<span style="font-family:var(--fc);font-size:9.5px;color:#10B981;border:1px solid #10B981;border-radius:4px;padding:1px 5px">CHECKED</span>'
+      : '<span style="font-family:var(--fc);font-size:9.5px;color:#F59E0B;border:1px solid #F59E0B;border-radius:4px;padding:1px 5px">NEEDS CHECKING</span>';
+    var where = [v.ground, v.postcode].filter(Boolean).join(' · ') || 'No ground yet';
+    return '<div style="border:1px solid var(--br);border-radius:10px;padding:11px 12px;margin-bottom:8px;background:var(--c2)">' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-family:var(--fd);font-size:15px;color:var(--w);letter-spacing:.02em">' + escH(v.club) + '</b>' + tag + '</div>' +
+      '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);margin-top:3px">' + escH(where) + '</div>' +
+      (v.notes ? '<div style="font-family:var(--fb);font-size:11.5px;color:#F59E0B;margin-top:4px">&#9432; ' + escH(v.notes) + '</div>' : '') +
+      '<div style="display:flex;gap:7px;margin-top:9px">' +
+      '<button class="save sec" style="margin:0;padding:7px 12px;font-size:12px;width:auto" onclick="vnEdit(' + i + ')">Edit</button>' +
+      (routable ? '<a class="save sec" style="margin:0;padding:7px 12px;font-size:12px;width:auto;text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + v.lat + ',' + v.lng + '">Check on map</a>' : '') +
+      '<button class="save" style="margin:0;padding:7px 12px;font-size:12px;width:auto;background:var(--c2);color:#EF4444" onclick="vnDel(' + i + ')">Delete</button>' +
+      '</div></div>';
+  }).join('') : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+function vnEdit(i) {
+  var v = venues[i]; if (!v) return;
+  ['club', 'ground', 'address', 'postcode', 'source', 'notes'].forEach(function (f) {
+    document.getElementById('vn-' + f).value = v[f] || '';
+  });
+  document.getElementById('vn-lat').value = v.lat != null ? v.lat : '';
+  document.getElementById('vn-lng').value = v.lng != null ? v.lng : '';
+  document.getElementById('vn-verified').checked = !!v.verified;
+  document.getElementById('vn-map-out').innerHTML = '';
+  document.getElementById('panel-venues').scrollIntoView({ block: 'start' });
+}
+function vnClearForm() {
+  ['club', 'ground', 'address', 'postcode', 'lat', 'lng', 'source', 'notes'].forEach(function (f) {
+    var el = document.getElementById('vn-' + f); if (el) el.value = '';
+  });
+  var c = document.getElementById('vn-verified'); if (c) c.checked = false;
+  var m = document.getElementById('vn-map-out'); if (m) m.innerHTML = '';
+}
+// Postcode → coordinates via OpenStreetMap. This deliberately does NOT tick
+// "checked" for you: a postcode lookup happily returns a theatre, a café or the
+// middle of a housing estate. It shows you what it found so YOU can judge it.
+function vnLookup() {
+  var pc = (document.getElementById('vn-postcode').value || '').trim();
+  var out = document.getElementById('vn-map-out');
+  if (!pc) { toast('Enter a postcode first', true); return; }
+  out.innerHTML = '<div style="font-family:var(--fb);font-size:12px;color:var(--gr)">Looking up ' + escH(pc) + '…</div>';
+  fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=gb&limit=1&postalcode=' + encodeURIComponent(pc))
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.length) {
+        out.innerHTML = '<div style="font-family:var(--fb);font-size:12px;color:#EF4444">No match for that postcode. Check it against the club’s website — don’t guess.</div>';
+        return;
+      }
+      var hit = j[0];
+      document.getElementById('vn-lat').value = Number(hit.lat).toFixed(7);
+      document.getElementById('vn-lng').value = Number(hit.lon).toFixed(7);
+      out.innerHTML = '<div style="border:1px solid #F59E0B;border-radius:9px;padding:10px 11px;background:rgba(245,158,11,.08)">' +
+        '<div style="font-family:var(--fb);font-size:12px;color:var(--w);line-height:1.5"><b>OpenStreetMap says this postcode is:</b><br>' + escH(hit.display_name) + '</div>' +
+        '<div style="font-family:var(--fb);font-size:11.5px;color:var(--gr);line-height:1.5;margin-top:6px">Is that the right town for this club? A postcode gives you the <i>area</i>, not the pitch — it can land on a theatre or a main road. Only tick &ldquo;checked&rdquo; if it looks right.</div>' +
+        '<a href="https://www.google.com/maps/search/?api=1&query=' + hit.lat + ',' + hit.lon + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-family:var(--fc);font-size:11px;color:#F59E0B">See it on the map →</a></div>';
+    })
+    .catch(function () { out.innerHTML = '<div style="font-family:var(--fb);font-size:12px;color:#EF4444">Lookup failed — you can still type the coordinates by hand.</div>'; });
+}
+function vnAdd() {
+  var club = (document.getElementById('vn-club').value || '').trim();
+  if (!club) { toast('Club name is required', true); return; }
+  var lat = (document.getElementById('vn-lat').value || '').trim();
+  var lng = (document.getElementById('vn-lng').value || '').trim();
+  var verified = document.getElementById('vn-verified').checked;
+  if (verified && (!lat || !lng)) { toast('A checked venue needs coordinates — use Look up', true); return; }
+  var v = vnFind(club) || {};
+  var isNew = !v.club;
+  v.club = club;
+  v.ground = (document.getElementById('vn-ground').value || '').trim();
+  v.address = (document.getElementById('vn-address').value || '').trim();
+  v.postcode = (document.getElementById('vn-postcode').value || '').trim().toUpperCase();
+  v.lat = lat ? Number(lat) : null;
+  v.lng = lng ? Number(lng) : null;
+  v.source = (document.getElementById('vn-source').value || '').trim();
+  v.notes = (document.getElementById('vn-notes').value || '').trim();
+  v.verified = verified;
+  if (isNew) venues.push(v);
+  var di = venuesDeleted.indexOf(club); if (di >= 0) venuesDeleted.splice(di, 1);
+  renderVenues();
+  vnClearForm();
+  fetchJSON('fixtures', function (f) { vnTodo((f && f.fixtures) || []); });
+  toast(club + (isNew ? ' added' : ' updated') + ' — now tap Save to Site');
+}
+function vnDel(i) {
+  var v = venues[i]; if (!v) return;
+  if (!confirm('Delete ' + v.club + '? Their away games will lose their Directions buttons.')) return;
+  venuesDeleted.push(v.club);
+  venues.splice(i, 1);
+  renderVenues();
+  fetchJSON('fixtures', function (f) { vnTodo((f && f.fixtures) || []); });
+}
+function saveVenues(msg) {
+  commitDomain('venues', 'venues', 'club', venues, venuesDeleted, null, 'dep-venues', msg || 'Venues saved ✓ — live in ~30s', function () { venuesDeleted = []; });
+}
+
 // ── FIXTURES (Season Schedule — the Match Engine spine) ──
 var fixtures = [];
 var fxCrests = [];
@@ -5244,6 +5453,10 @@ var fxHome = true;
 function fxInit() {
   fetchJSON('crests', function (d) { fxCrests = (d && d.crests) || []; fxFillOpp(); });
   fetchJSON('fixtures', function (d) { fixtures = (d && d.fixtures) || []; renderFixtures(); });
+  // The venue book, so the ground fills itself in as you pick the opponent.
+  fetchJSON('venues', function (d) { venues = (d && d.venues) || []; fxAutoVenue(); });
+  var opp = document.getElementById('fx-opp');
+  if (opp && !opp.dataset.vwired) { opp.dataset.vwired = '1'; opp.addEventListener('input', fxAutoVenue); }
   fxClearForm();
 }
 function fxFillOpp() {
@@ -5256,11 +5469,38 @@ function fxSetHA(h) {
   fxHome = h;
   document.getElementById('fx-h').classList.toggle('on', h);
   document.getElementById('fx-a').classList.toggle('on', !h);
+  fxAutoVenue();
+}
+// Fill the venue from the address book so nobody has to remember it. The venue
+// is the HOME club's ground — for an away game that's the opponent's. It only
+// ever fills a BLANK box: if you've typed something, that's your call and it stands.
+function fxAutoVenue() {
+  var box = document.getElementById('fx-venue'); if (!box) return;
+  var hint = document.getElementById('fx-venue-hint');
+  var homeClub = fxHome ? 'Rayners Lane' : (document.getElementById('fx-opp').value || '').trim();
+  if (!homeClub) return;
+  var v = vnFind(homeClub);
+  var auto = v && v.ground;
+  if (auto && (!box.value.trim() || box.dataset.auto === '1')) {
+    box.value = v.ground; box.dataset.auto = '1';
+  } else if (!auto && box.dataset.auto === '1') {
+    box.value = ''; box.dataset.auto = '';
+  }
+  if (!hint) return;
+  if (fxHome) { hint.innerHTML = ''; return; }
+  if (v && v.verified && v.lat != null) {
+    hint.innerHTML = '<span style="color:#10B981">&#10003; ' + escH(v.club) + '&rsquo;s ground is in the venue book &mdash; players will get Directions.</span>';
+  } else if (homeClub) {
+    hint.innerHTML = '<span style="color:#F59E0B">&#9432; No checked ground for ' + escH(homeClub) + ' yet &mdash; players will see &ldquo;venue to be confirmed&rdquo;. Add it under Venues.</span>';
+  } else { hint.innerHTML = ''; }
 }
 function fxClearForm() {
   setVal('fx-id', ''); setVal('fx-date', ''); setVal('fx-ko', '15:00'); setVal('fx-opp', '');
-  setVal('fx-venue', 'Tithe Farm, Harrow'); setVal('fx-comp', 'Combined Counties Premier Division North');
+  setVal('fx-venue', ''); setVal('fx-comp', 'Combined Counties Premier Division North');
   setVal('fx-us', ''); setVal('fx-them', ''); setVal('fx-scorers', '');
+  // Let the venue book fill the ground in rather than defaulting to ours — an
+  // away game left saying "Tithe Farm" sends the team to the wrong place.
+  var box = document.getElementById('fx-venue'); if (box) box.dataset.auto = '1';
   fxSetHA(true);
 }
 function addFixture() {
@@ -5293,8 +5533,11 @@ function fxEdit(id) {
   setVal('fx-venue', f.venue || ''); setVal('fx-comp', f.competition || '');
   setVal('fx-us', f.us == null ? '' : f.us); setVal('fx-them', f.them == null ? '' : f.them);
   setVal('fx-scorers', f.scorers || '');
-  fxSetHA(f.isHome !== false);
+  // A saved venue is a decision someone made — hold it, don't auto-replace it.
+  // Only an empty one is ours to fill.
+  var vb = document.getElementById('fx-venue'); if (vb) vb.dataset.auto = f.venue ? '' : '1';
   setVal('fx-opp', f.opponent || '');
+  fxSetHA(f.isHome !== false);
   var panel = document.getElementById('panel-fixtures'); if (panel) panel.scrollIntoView({ block: 'start' });
 }
 function removeFixture(id) {
@@ -5363,6 +5606,9 @@ function importFromFWP() {
           if ((existing.kickoff || '') !== imp.kickoff) { existing.kickoff = imp.kickoff; changed = true; }
           if (existing.isHome !== imp.isHome) { existing.isHome = imp.isHome; changed = true; }
           if (imp.competition && (existing.competition || '') !== imp.competition) { existing.competition = imp.competition; changed = true; }
+          // Backfill a MISSING ground from the venue book — but never overwrite
+          // one that's already there; a staff member may have set it by hand.
+          if (!existing.venue && imp.venue) { existing.venue = imp.venue; changed = true; }
           // Never touch us/them/scorers/status/id — those are the staff's.
           changed ? updated++ : unchanged++;
         } else {
@@ -5371,7 +5617,7 @@ function importFromFWP() {
             id: 'fwp-' + (imp.fwpId || (imp.date.replace(/-/g, '') + _fxNorm(imp.opponent))),
             date: imp.date, kickoff: imp.kickoff || '15:00',
             opponent: imp.opponent, oppCrest: crest ? crest.file : '',
-            isHome: imp.isHome, venue: imp.isHome ? 'Tithe Farm Sports & Social Club' : '',
+            isHome: imp.isHome, venue: imp.venue || (imp.isHome ? 'Tithe Farm Sports & Social Club' : ''),
             competition: imp.competition || '', status: 'scheduled',
             us: null, them: null, scorers: ''
           });
@@ -5387,8 +5633,15 @@ function importFromFWP() {
       var msg = added || updated
         ? 'Staged ' + parts.join(' · ') + ' from Football Web Pages (season ' + escH(d.season) + '). Your scores are untouched. Review the list below, then <b style="color:var(--w)">Save to Site</b> to publish.'
         : 'Everything already matches Football Web Pages — nothing to change. ✓';
+      // Grounds are attached automatically from the venue book. Any club that
+      // isn't in it yet gets flagged here rather than quietly importing blank.
+      var gaps = (d.needGround || []).filter(function (c) { return !/rayners\s*lane/i.test(c); });
+      var vmsg = gaps.length
+        ? '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.55;background:rgba(245,158,11,.08);border:1px solid #F59E0B;border-radius:8px;padding:11px;margin-top:9px">📍 Grounds filled in from the venue book for <b style="color:var(--w)">' + (d.venuesAttached || 0) + '</b> of these. No ground yet for <b style="color:var(--w)">' + gaps.map(escH).join(', ') + '</b> — players will see “venue to be confirmed” until you add them under <b style="color:var(--w)">Venues</b>.</div>'
+        : '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.55;background:rgba(16,185,129,.08);border:1px solid #10B981;border-radius:8px;padding:11px;margin-top:9px">📍 Grounds filled in automatically from the venue book — every one of these has Directions.</div>';
       out.innerHTML =
         '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:11px">📥 ' + msg + '</div>' +
+        vmsg +
         (added || updated ? '<button class="save" style="margin-top:9px" onclick="saveFixtures(\'Imported fixtures saved ✓ — live in ~30s\')">✓ Save these to the site</button>' : '');
     })
     .catch(function (e) {
