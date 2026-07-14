@@ -15,8 +15,20 @@
       "role": "First Team Manager",
       "note": "",
       "bio": "",
-      "photo": "/img/uploads/1783559009927-hhexmhlwiaa1dtb.jpg",
+      "photo": "/img/players/gary-pitt.webp",
       "featured": false
+    },
+    {
+      "name": "Dave Roberts",
+      "role": "Coach",
+      "note": "",
+      "photo": "/img/players/dave-roberts.webp"
+    },
+    {
+      "name": "Louis Blinko",
+      "role": "Coach",
+      "note": "",
+      "photo": "/img/players/louis-blinko.webp"
     },
     {
       "name": "Jenny Pitt",
@@ -49,5 +61,5 @@
       "featured": false
     }
   ],
-  "updatedAt": "2026-07-09T01:03:38.278Z"
+  "updatedAt": "2026-07-14T22:59:41.451Z"
 }
