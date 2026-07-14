@@ -25,29 +25,33 @@
     {
       "club": "Abingdon United",
       "ground": "The Northcourt",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Northcourt Road, Abingdon, Oxfordshire",
+      "postcode": "OX14 1PL",
+      "lat": 51.6818284,
+      "lng": -1.2752114,
+      "verified": true,
+      "source": "Club contact page abingdonunitedfc.com + Football Foundation site profile (Northcourt Road, Abingdon OX14 1PL); coords = OSM postcode centroid",
+      "notes": "CAUTION: \"The Northcourt\" is ALSO an arts centre/theatre on the same road — a naive map search returns the theatre. This is the football ground postcode."
     },
     {
       "club": "Amersham Town",
       "ground": "Spratleys Meadow",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "School Lane, Amersham, Buckinghamshire",
+      "postcode": "HP7 0EJ",
+      "lat": 51.67109,
+      "lng": -0.62532,
+      "verified": true,
+      "source": "Club site amershamtownfc.com/ground + Sports Facilities listing (Spratleys Meadow, Amersham HP7 0EJ); coords = OSM postcode centroid"
     },
     {
       "club": "Ardley United",
-      "ground": "Ardley Playing Fields",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "ground": "Ardley Playing Fields (Nolan Oils Ground)",
+      "address": "Oxford Road, Ardley, Bicester, Oxfordshire",
+      "postcode": "OX27 7PA",
+      "lat": 51.94562,
+      "lng": -1.21189,
+      "verified": true,
+      "source": "Club site ardleyunitedfc.co.uk + Wikipedia + Football in Berkshire ground guide (Oxford Road, Ardley, Bicester OX27 7PA); coords = OSM postcode centroid"
     },
     {
       "club": "Bedfont",
@@ -74,11 +78,12 @@
     {
       "club": "Easington Sports",
       "ground": "Addison Road",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Addison Road, Banbury, Oxfordshire",
+      "postcode": "OX16 9DH",
+      "lat": 52.04773,
+      "lng": -1.33914,
+      "verified": true,
+      "source": "Club contact page easingtonsportsfc.com + Wikipedia (Addison Road, Banbury OX16 9DH); coords = OSM postcode centroid (matches the Addison Road street segment)"
     },
     {
       "club": "Harefield United",
@@ -94,21 +99,24 @@
     {
       "club": "Hilltop",
       "ground": "Silver Jubilee Park",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false,
-      "notes": "Groundshare at Hendon — Silver Jubilee Park, Townsend Lane, NW9. VERIFY."
+      "address": "Townsend Lane, Kingsbury, London",
+      "postcode": "NW9 7NE",
+      "lat": 51.5765538,
+      "lng": -0.253342,
+      "verified": true,
+      "notes": "GROUNDSHARE at Hendon FC. Address confirmed; the groundshare itself should be re-checked nearer the fixture (4 Dec) — groundshares change mid-season.",
+      "source": "Hendon FC directions + Non-League Grounds + Brent Council (Silver Jubilee Park, Townsend Lane NW9 7NE); coords = OSM postcode centroid"
     },
     {
       "club": "Holyport",
       "ground": "Summerleaze Village",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Summerleaze Road, Maidenhead, Berkshire",
+      "postcode": "SL6 8SP",
+      "lat": 51.5344199,
+      "lng": -0.71447,
+      "verified": true,
+      "source": "Club website holyportfc.co.uk (First Time Visitor / directions) gives Summerleaze Road SL6 8SP; coords = OSM SL6 8SP centroid",
+      "notes": "CLUB WARNS: the postcode takes you to the main road OUTSIDE the ground. Enter via the electric gate on the left, follow the track over the bridge, past the cricket club."
     },
     {
       "club": "Kidlington",
@@ -153,21 +161,24 @@
     },
     {
       "club": "Penn & Tylers Green",
-      "ground": "Elm Road",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "ground": "Elm Road (French School Meadow)",
+      "address": "Elm Road, Penn, High Wycombe, Buckinghamshire",
+      "postcode": "HP10 8LF",
+      "lat": 51.6348696,
+      "lng": -0.6902379,
+      "verified": true,
+      "source": "Club site ptgfc.co.uk + Wikipedia (French School Meadow, Elm Road, Penn HP10 8LF); coords = OSM postcode centroid"
     },
     {
       "club": "Reading City",
-      "ground": "Scours Lane",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "ground": "Scours Lane (The Rivermoor)",
+      "address": "Scours Lane, Tilehurst, Reading",
+      "postcode": "RG30 6AY",
+      "lat": 51.4661467,
+      "lng": -1.0145852,
+      "verified": true,
+      "source": "Club directions page readingcityfc.co.uk/the-rivermoor/directions (states RG30 6AY for sat nav); coords = OSM postcode centroid",
+      "notes": "Ground is The Rivermoor on Scours Lane. NB an OSM street lookup suggested RG30 6YD — that was WRONG; the club states RG30 6AY."
     },
     {
       "club": "Thatcham Town",
@@ -192,11 +203,13 @@
     {
       "club": "Wokingham Town",
       "ground": "Lowther Road",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Emmbrook Sports & Social Club, Emmbrook Road, Wokingham, Berkshire",
+      "postcode": "RG41 1JB",
+      "lat": 51.42309,
+      "lng": -0.85717,
+      "verified": true,
+      "source": "Non-League Grounds + Wokingham council directory (Lowther Road ground at Emmbrook Sports & Social Club, RG41 1JB); coords = OSM postcode centroid",
+      "notes": "Also listed as RG41 1HY for the general site — RG41 1JB used as the ground address."
     },
     {
       "club": "Metropolitan Police FC",
@@ -232,13 +245,14 @@
     },
     {
       "club": "Punjab Utd FC",
-      "ground": "",
-      "address": "The Sports Ground, Dunkirk Cl, Gravesend",
+      "ground": "The Sports Ground",
+      "address": "Dunkirk Close, Gravesend, Kent",
       "postcode": "DA12 5ND",
-      "lat": null,
-      "lng": null,
-      "verified": false,
-      "notes": "Friendly — venue already on the fixture."
+      "lat": 51.4168387,
+      "lng": 0.3770153,
+      "verified": true,
+      "notes": "Pre-season friendly, already played 11 Jul.",
+      "source": "Venue as recorded on the fixture by club staff (The Sports Ground, Dunkirk Cl, Gravesend DA12 5ND); coords = OSM DA12 5ND centroid (Gravesend, Kent — matches)"
     },
     {
       "club": "Hayes & Yeading United",
@@ -251,5 +265,5 @@
       "notes": "Friendly, already played (4 Jul, home)."
     }
   ],
-  "updatedAt": "2026-07-14T15:37:21.307Z"
+  "updatedAt": "2026-07-14T15:49:46.010Z"
 }
