@@ -33,7 +33,7 @@
       "date": "2026-07-25",
       "kickoff": "15:00",
       "opponent": "Metropolitan Police FC",
-      "oppCrest": "",
+      "oppCrest": "img/crests/metropolitan-police.png",
       "isHome": false,
       "venue": "Imber Court, East Molesey",
       "competition": "Pre-Season Friendly",
@@ -47,7 +47,7 @@
       "date": "2026-08-08",
       "kickoff": "15:00",
       "opponent": "London Lions",
-      "oppCrest": "",
+      "oppCrest": "img/crests/london-lions.png",
       "isHome": false,
       "venue": "",
       "competition": "FA Cup EP",
@@ -61,7 +61,7 @@
       "date": "2026-08-15",
       "kickoff": "15:00",
       "opponent": "New Bradwell St Peter",
-      "oppCrest": "",
+      "oppCrest": "img/crests/new-bradwell-st-peter.png",
       "isHome": true,
       "venue": "Tithe Farm Sports & Social Club",
       "competition": "FA Vase 1Q",
@@ -603,5 +603,5 @@
       "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-14T13:58:53.763Z"
+  "updatedAt": "2026-07-14T14:28:44.969Z"
 }

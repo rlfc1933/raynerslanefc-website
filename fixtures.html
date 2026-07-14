@@ -107,7 +107,16 @@
           <span style="font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--white)">Premier Division North</span>
           <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)">● Live · Football Web Pages</span>
         </div>
-        <div style="background:#fff"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
+        <!-- No forced white background / min-height: an empty widget (the season
+             hasn't started) would render as a white void on a dark site. The
+             wrapper only goes white once the embed actually has content. -->
+        <div id="fwp-table-wrap"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
+        <div id="fwp-table-empty" class="fwp-empty" hidden>
+          <div class="fwp-empty__i">🗓️</div>
+          <div class="fwp-empty__t">League table starts when the season kicks off</div>
+          <div class="fwp-empty__d">First game <strong>Saturday 1 August 2026</strong>. No games played yet, so there’s no table to show — it will appear here automatically.</div>
+          <a class="fwp-empty__a" href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">View on Football Web Pages →</a>
+        </div>
       </div>
       <div class="fx-attr" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <span>Live table via <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Football Web Pages</a> — updates automatically</span>
@@ -258,7 +267,7 @@ function injectFixtureEvents(list) {
     var opp = { '@type': 'SportsTeam', name: f.opponent || 'TBC' };
     var ev = {
       '@type': 'SportsEvent', sport: 'Soccer',
-      name: 'Rayners Lane FC ' + (home ? 'vs ' : '@ ') + (f.opponent || 'TBC'),
+      name: home ? ('Rayners Lane FC vs ' + (f.opponent || 'TBC')) : ((f.opponent || 'TBC') + ' vs Rayners Lane FC'),
       startDate: f.date + 'T' + (f.kickoff || '15:00') + ':00',
       eventStatus: 'https://schema.org/' + (ST[f.status] || 'EventScheduled'),
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
@@ -274,57 +283,153 @@ function injectFixtureEvents(list) {
   });
   injectJSONLD('lane-fixtures', { '@context': 'https://schema.org', '@graph': events });
 }
+/* ── Crest-led fixture rendering ──────────────────────────────────────────
+   Never "@": HOME lists Rayners Lane first, AWAY lists the opponent first —
+   the way real clubs do it. A missing crest degrades to on-brand initials,
+   never a broken image. Grouped by month, colour-coded home/away + by comp. */
+var RL = { name: 'Rayners Lane', crest: 'img/badge.png' };
+function fxInitials(n) { return String(n || '').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).join('').slice(0, 3).toUpperCase(); }
+function fxCrestEl(src, name) {
+  var ini = fxInitials(name);
+  if (!src) return '<div class="fxc__ph">' + ini + '</div>';
+  return '<img class="fxc__crest" src="' + fxEsc(src) + '" alt="' + fxEsc(name) + '" loading="lazy" ' +
+    'onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'fxc__ph\',textContent:\'' + ini + '\'}))">';
+}
+function fxComp(c) {
+  var s = String(c || '').toLowerCase();
+  if (/vase/.test(s)) return { cls: 'tag-favase', lbl: 'FA Vase' };
+  if (/fa\s*cup/.test(s)) return { cls: 'tag-facup', lbl: 'FA Cup' };
+  if (/charity/.test(s)) return { cls: 'tag-charity', lbl: 'Charity' };
+  if (/friendly/.test(s)) return { cls: 'tag-friendly', lbl: 'Friendly' };
+  return { cls: 'tag-league', lbl: 'League' };
+}
+function fxVenue(f) { return f.venue || (f.isHome !== false ? 'Tithe Farm Sports & Social Club' : ''); }
+function fxDir(f) { var v = fxVenue(f); return v ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(v + ', UK') : ''; }
+function fxDate(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00'); }
+function fxLock(f) {
+  var home = f.isHome !== false;
+  var OP = { name: f.opponent || 'TBC', crest: f.oppCrest || '' };
+  var L = home ? RL : OP, R = home ? OP : RL;
+  var mid;
+  if (f.us != null && f.them != null) {
+    var ls = home ? f.us : f.them, rs = home ? f.them : f.us;
+    var cls = f.us > f.them ? 'w' : (f.us === f.them ? 'd' : 'l');
+    mid = '<span class="fxc__score ' + cls + '">' + ls + '–' + rs + '</span>';
+  } else mid = '<span class="fxc__vs">VS</span>';
+  return '<div class="fxc__lock">' +
+    '<div class="fxc__team">' + fxCrestEl(L.crest, L.name) + '<span class="fxc__nm">' + fxEsc(L.name.toUpperCase()) + '</span></div>' +
+    mid +
+    '<div class="fxc__team">' + fxCrestEl(R.crest, R.name) + '<span class="fxc__nm">' + fxEsc(R.name.toUpperCase()) + '</span></div>' +
+  '</div>';
+}
+function fxActs(f) {
+  var dir = fxDir(f), a = '';
+  if (dir) a += '<a class="fxc__b" href="' + dir + '" target="_blank" rel="noopener">📍 Directions</a>';
+  a += '<a class="fxc__b" href="/.netlify/functions/fixtures-ics">📅 Calendar</a>';
+  a += '<button class="fxc__b" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>';
+  return a;
+}
+function fxCard(f) {
+  var home = f.isHome !== false, comp = fxComp(f.competition);
+  var played = (f.us != null && f.them != null);
+  var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  var venue = fxVenue(f);
+  return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + '">' +
+    '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
+    '<span class="fxc__ha">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
+    fxLock(f) +
+    '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
+    (venue ? '<div class="fxc__venue">📍 ' + fxEsc(venue) + '</div>' : '') +
+    (played ? '' : '<div class="fxc__acts">' + fxActs(f) + '</div>') +
+  '</article>';
+}
+function fxHero(f) {
+  var comp = fxComp(f.competition), home = f.isHome !== false, venue = fxVenue(f);
+  var d = fxDate(f);
+  var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  return '<div class="fxh" data-ko="' + d.getTime() + '"><span class="fxh__lbl">Next Match</span>' +
+    '<div class="fxc__top" style="justify-content:center;gap:10px"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
+    '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
+    fxLock(f) +
+    '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + '</div>' +
+    (venue ? '<div class="fxc__venue">📍 ' + fxEsc(venue) + '</div>' : '') +
+    '<div class="fxh__cd" id="fx-cd"></div>' +
+    '<div class="fxc__acts" style="margin-top:12px">' + fxActs(f) + '</div></div>';
+}
+function fxCountdown() {
+  var h = document.querySelector('.fxh'); if (!h) return;
+  var ko = Number(h.getAttribute('data-ko')), el = document.getElementById('fx-cd'); if (!el) return;
+  function tick() {
+    var ms = ko - Date.now();
+    if (ms <= 0) { el.innerHTML = '<div class="fxh__u" style="min-width:auto;padding:6px 14px"><div class="fxh__n" style="font-size:17px">KICK OFF</div></div>'; return; }
+    var s = Math.floor(ms / 1000);
+    var u = [[Math.floor(s / 86400), 'Days'], [Math.floor(s % 86400 / 3600), 'Hrs'], [Math.floor(s % 3600 / 60), 'Min'], [s % 60, 'Sec']];
+    el.innerHTML = u.map(function (x) {
+      return '<div class="fxh__u"><div class="fxh__n">' + ('0' + x[0]).slice(-2) + '</div><div class="fxh__l">' + x[1] + '</div></div>';
+    }).join('');
+  }
+  tick(); clearInterval(window._fxCd); window._fxCd = setInterval(tick, 1000);
+}
+function fxToast(msg, links) {
+  var t = document.getElementById('fx-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'fx-toast'; t.className = 'fx-toast'; document.body.appendChild(t); }
+  t.innerHTML = msg + (links || '');
+  t.classList.add('on'); clearTimeout(window._fxT);
+  window._fxT = setTimeout(function () { t.classList.remove('on'); }, 5400);
+}
+function fxShare(id) {
+  var f = (window._fxAll || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
+  var home = f.isHome !== false, v = fxVenue(f);
+  var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  var teams = home ? ('Rayners Lane vs ' + f.opponent) : (f.opponent + ' vs Rayners Lane');
+  var line = '⚽ ' + teams + ' — ' + ds + ', ' + (f.kickoff || '15:00') + (v ? ', ' + v : '') + '. Up The Lane 💛';
+  var url = 'https://raynerslanefc.co.uk/fixtures.html';
+  if (navigator.share) { navigator.share({ title: 'Rayners Lane FC', text: line, url: url }).catch(function () {}); return; }
+  var full = line + ' ' + url;
+  var wa = 'https://wa.me/?text=' + encodeURIComponent(full);
+  var tw = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(full);
+  function done() { fxToast('Copied — paste it anywhere.', '<a href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a><a href="' + tw + '" target="_blank" rel="noopener">X</a>'); }
+  if (navigator.clipboard) navigator.clipboard.writeText(full).then(done).catch(done); else done();
+}
+
 function renderFxSeason(list) {
   injectFixtureEvents(list);
+  window._fxAll = list;
   var now = Date.now();
-  function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
+  function dt(f) { return fxDate(f).getTime(); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
   var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
   var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
   var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
 
   var nextEl = document.getElementById('fx-next');
-  if (next) {
-    var d = new Date(next.date + 'T' + (next.kickoff || '15:00') + ':00');
-    var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
-      '<div class="fx-next__teams">Rayners Lane ' + (next.isHome !== false ? 'vs ' : '@ ') + fxEsc(next.opponent) + '</div>' +
-      '<div class="fx-next__meta">' + ds + ' &middot; ' + (next.kickoff || '15:00') + (next.venue ? ' &middot; ' + fxEsc(next.venue) : '') + '</div></div>';
-  } else { nextEl.innerHTML = ''; }
+  nextEl.innerHTML = next ? fxHero(next) : '';
+  if (next) fxCountdown();
 
-  var html = '';
-  // Honest interim state: the league hasn't released the Prem Div North schedule
-  // yet. Show it clearly (data-driven — disappears the moment a league fixture lands).
-  var hasLeague = list.some(function (f) { return /combined counties|premier div|step 5|\bleague\b/i.test(f.competition || ''); });
-  if (!hasLeague) {
-    html += '<div style="border:1px solid var(--border);border-left:4px solid var(--yellow);border-radius:10px;background:rgba(255,209,0,.06);padding:14px 16px;margin-bottom:18px;font-family:var(--font-b);font-size:14px;line-height:1.6;color:var(--lgrey)">' +
-      '<strong style="color:var(--white);font-family:var(--font-c);letter-spacing:.04em">🗓️ League fixtures to be released</strong><br>' +
-      'The Combined Counties Premier Division North schedule isn’t out yet — the season kicks off <strong style="color:var(--white)">Saturday 1 August 2026</strong>. Our confirmed cup ties and pre-season friendlies are below; the full league list will appear here automatically the moment it’s published.</div>';
-  }
-  if (upcoming.length) {
-    html += '<div class="fx-rlbl">Upcoming Fixtures</div>' + upcoming.map(function (f) {
-      var fd = new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00');
-      var rd = fd.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-      return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (f.isHome !== false ? 'vs ' : '@ ') + fxEsc(f.opponent) +
-        ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s" style="color:#fff;opacity:.8">' + (f.kickoff || '15:00') + '</div></div>';
+  var html = '', rest = upcoming.filter(function (f) { return !next || f.id !== next.id; });
+  if (rest.length) {
+    var months = {}, order = [];
+    rest.forEach(function (f) {
+      var k = fxDate(f).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      if (!months[k]) { months[k] = []; order.push(k); }
+      months[k].push(f);
+    });
+    html += order.map(function (k) {
+      var g = months[k];
+      return '<section class="fxm"><div class="fxm__h"><span class="fxm__m">' + fxEsc(k.split(' ')[0].toUpperCase()) + '</span>' +
+        '<span class="fxm__c">' + g.length + ' game' + (g.length > 1 ? 's' : '') + '</span></div>' + g.map(fxCard).join('') + '</section>';
     }).join('');
   }
   if (played.length) {
     var recent = played.slice().reverse();
-    html += '<div class="fx-rlbl" style="margin-top:18px">Recent Results</div>' + recent.map(function (r) {
-      var win = r.us > r.them, draw = r.us === r.them, cls = win ? 'w' : (draw ? 'd' : 'l');
-      var rd = new Date(r.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-      return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (r.isHome !== false ? 'vs ' : '@ ') + fxEsc(r.opponent) +
-        ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s ' + cls + '">' + r.us + '–' + r.them + '</div></div>';
-    }).join('');
+    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">RESULTS</span><span class="fxm__c">' + recent.length + ' played</span></div>' +
+      recent.map(fxCard).join('') + '</section>';
   }
   document.getElementById('fx-results').innerHTML = html || '<div class="fx-empty">Fixtures are released soon — check back.</div>';
 
   renderFxForm({ results: played.slice().reverse() });
-
   var attr = document.querySelector('#tab-fixtures .fx-attr');
   if (attr) attr.textContent = 'Official Rayners Lane FC fixtures & results';
-
   fxInjectSchema(sorted);
 }
 
@@ -367,7 +472,7 @@ function renderFxResults(fx) {
     var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
     var ds = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
     nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
-      '<div class="fx-next__teams">Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + fxEsc(fx.next.opponent) + '</div>' +
+      '<div class="fx-next__teams">' + fxEsc(fx.next.isHome ? ('Rayners Lane vs ' + fx.next.opponent) : (fx.next.opponent + ' vs Rayners Lane')) + '</div>' +
       '<div class="fx-next__meta">' + ds + ' &middot; ' + (fx.next.kickoff || '15:00') + (fx.next.isHome ? ' &middot; Tithe Farm' : '') + '</div></div>';
   }
   if (!fx.results || !fx.results.length) {
@@ -378,7 +483,7 @@ function renderFxResults(fx) {
     var win = r.us > r.them, draw = r.us === r.them;
     var cls = win ? 'w' : (draw ? 'd' : 'l');
     var rd = r.date ? new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
-    return '<div class="fx-res"><div class="fx-res__m">Rayners Lane ' + (r.isHome?'vs ':'@ ') + fxEsc(r.opponent) +
+    return '<div class="fx-res"><div class="fx-res__m">' + fxEsc(r.isHome ? ('Rayners Lane vs ' + r.opponent) : (r.opponent + ' vs Rayners Lane')) +
       ' <span class="fx-res__d">' + rd + '</span></div><div class="fx-res__s ' + cls + '">' + r.us + '–' + r.them + '</div></div>';
   }).join('');
 }
@@ -433,10 +538,86 @@ function renderFxTable(rows) {
   .fx-table tr.me td.l{color:var(--yellow);font-weight:700}
   @media(max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}}
   /* FWP embed: fit the third-party iframe cleanly into its branded frame */
-  .fwp-embed{min-height:340px}
+  /* ── FIXTURE CARDS — crest-led lockups, month-sectioned, colour-coded ── */
+  .fxm{margin-bottom:26px}
+  .fxm__h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
+  .fxm__m{font-family:var(--font-d);font-size:30px;letter-spacing:.05em;color:var(--white);line-height:1}
+  .fxm__c{font-family:var(--font-c);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
+  .fxc{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;margin-bottom:10px;overflow:hidden}
+  .fxc:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+  .fxc--home:before{background:var(--yellow)}
+  .fxc--away:before{background:var(--green)}
+  .fxc__top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .fxc__tag{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid transparent}
+  .tag-league{background:rgba(255,209,0,.14);color:var(--yellow);border-color:rgba(255,209,0,.4)}
+  .tag-facup{background:rgba(255,202,107,.14);color:#ffca6b;border-color:rgba(255,202,107,.4)}
+  .tag-favase{background:rgba(196,181,253,.14);color:#c4b5fd;border-color:rgba(196,181,253,.4)}
+  .tag-friendly{background:rgba(147,197,253,.14);color:#93c5fd;border-color:rgba(147,197,253,.4)}
+  .tag-charity{background:rgba(255,157,157,.14);color:#ff9d9d;border-color:rgba(255,157,157,.4)}
+  .fxc__ha{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase}
+  .fxc--home .fxc__ha{color:var(--yellow)}
+  .fxc--away .fxc__ha{color:#7fe0a3}
+  .fxc__lock{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+  .fxc__team{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+  .fxc__crest{width:52px;height:52px;object-fit:contain}
+  .fxc__ph{width:52px;height:52px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:17px;letter-spacing:.04em;color:var(--grey)}
+  .fxc__nm{font-family:var(--font-d);font-size:15px;letter-spacing:.04em;color:var(--white);text-align:center;line-height:1.05;word-break:break-word}
+  .fxc__vs{font-family:var(--font-d);font-size:16px;color:var(--yellow);letter-spacing:.06em}
+  .fxc__score{font-family:var(--font-d);font-size:26px;letter-spacing:.04em;white-space:nowrap}
+  .fxc__score.w{color:#3ddc84}.fxc__score.d{color:var(--yellow)}.fxc__score.l{color:#ef4444}
+  .fxc__meta{font-family:var(--font-c);font-weight:600;font-size:12px;color:var(--lgrey);text-align:center;margin-top:10px;letter-spacing:.03em}
+  .fxc__venue{font-family:var(--font-b);font-size:11.5px;color:var(--grey);text-align:center;margin-top:3px}
+  .fxc__acts{display:flex;gap:6px;margin-top:11px}
+  .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:8px;padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
+  .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
+  /* next match — elevated hero with countdown */
+  .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:16px;padding:18px 16px 14px;margin-bottom:22px}
+  .fxh__lbl{display:block;font-family:var(--font-c);font-weight:800;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:10px}
+  .fxh .fxc__crest,.fxh .fxc__ph{width:68px;height:68px}
+  .fxh .fxc__ph{font-size:22px}
+  .fxh .fxc__nm{font-size:19px}
+  .fxh__cd{display:flex;justify-content:center;gap:8px;margin-top:14px}
+  .fxh__u{text-align:center;min-width:50px;background:rgba(255,255,255,.04);border-radius:8px;padding:6px 4px}
+  .fxh__n{font-family:var(--font-d);font-size:24px;color:var(--yellow);line-height:1}
+  .fxh__l{font-family:var(--font-c);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:2px}
+  .fx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--card2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:10px;padding:11px 14px;z-index:9999;transition:transform .35s;font-family:var(--font-b);font-size:13px;color:var(--white);box-shadow:0 12px 34px rgba(0,0,0,.6);max-width:90vw}
+  .fx-toast.on{transform:translateX(-50%) translateY(0)}
+  .fx-toast a{color:var(--yellow);margin-left:8px;font-family:var(--font-c);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
+  @media(max-width:420px){ .fxc__nm{font-size:13px} .fxh .fxc__nm{font-size:16px} .fxc__crest,.fxc__ph{width:46px;height:46px} }
+
+  /* No unconditional min-height — an empty widget must collapse, not reserve a
+     void. The wrapper only turns white once the embed genuinely has content. */
   .fwp-embed iframe{width:100%!important;border:0!important;display:block}
+  #fwp-table-wrap.has-content{background:#fff;min-height:340px}
+  .fwp-empty{padding:28px 20px;text-align:center;background:var(--card)}
+  .fwp-empty__i{font-size:30px;margin-bottom:8px}
+  .fwp-empty__t{font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--yellow)}
+  .fwp-empty__d{font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.6;margin:6px auto 12px;max-width:420px}
+  .fwp-empty__d strong{color:var(--white)}
+  .fwp-empty__a{font-family:var(--font-c);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);text-decoration:none}
 </style>
 <!-- Football Web Pages live embeds (loads once; renders the league-table iframe above) -->
 <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
+<script>
+/* FWP empty-state guard — the 2026-27 table has no rows until the season starts
+   (Sat 1 Aug), so the widget renders nothing. Rather than leave a white void, we
+   watch the embed and, if it never gains real height, swap in an on-brand
+   message. It's cross-origin so we can only measure it, not read it. */
+(function () {
+  function check(wrapId, emptyId, tries) {
+    var wrap = document.getElementById(wrapId), empty = document.getElementById(emptyId);
+    if (!wrap || !empty) return;
+    var fr = wrap.querySelector('iframe');
+    var h = fr ? Math.round(fr.getBoundingClientRect().height) : 0;
+    if (h > 80) {                       // real content rendered
+      wrap.classList.add('has-content'); empty.hidden = true; return;
+    }
+    if (tries > 0) return setTimeout(function () { check(wrapId, emptyId, tries - 1); }, 900);
+    wrap.style.display = 'none';        // nothing came back — show the honest message
+    empty.hidden = false;
+  }
+  window.addEventListener('load', function () { setTimeout(function () { check('fwp-table-wrap', 'fwp-table-empty', 8); }, 1200); });
+})();
+</script>
 </body>
 </html>

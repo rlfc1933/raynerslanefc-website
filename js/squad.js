@@ -178,6 +178,9 @@ var _profiles = {};
 })();
 
 function pmEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* Stats engine lands in Phase 2 — until a game is actually recorded, show '–'
+   rather than a 0 that looks like a real (bad) statistic. */
+function pmStat(v){ return (v == null || Number(v) === 0) ? '–' : v; }
 function closePlayerModal(){ var o=document.getElementById('pm-overlay'); if(o) o.classList.remove('on'); document.body.style.overflow=''; }
 
 function openPlayerModal(id, basic) {
@@ -195,10 +198,12 @@ function openPlayerModal(id, basic) {
   var hasProfile = !!(p.bio || p.nickname || p.nationality || p.role || p.age || p.apps || p.goals || p.assists);
   var stats = hasProfile
     ? '<div class="pm-stats">' +
-        '<div class="pm-stat"><b>'+(p.apps||0)+'</b><span>Apps</span></div>' +
-        '<div class="pm-stat"><b>'+(p.goals||0)+'</b><span>Goals</span></div>' +
-        '<div class="pm-stat"><b>'+(p.assists||0)+'</b><span>Assists</span></div>' +
-        '<div class="pm-stat"><b>'+(num||'-')+'</b><span>Squad No</span></div>' +
+        // Stats haven't started (season kicks off 1 Aug). Show an honest dash —
+        // a hard 0 reads as "played and scored nothing", which isn't true.
+        '<div class="pm-stat"><b>'+pmStat(p.apps)+'</b><span>Apps</span></div>' +
+        '<div class="pm-stat"><b>'+pmStat(p.goals)+'</b><span>Goals</span></div>' +
+        '<div class="pm-stat"><b>'+pmStat(p.assists)+'</b><span>Assists</span></div>' +
+        '<div class="pm-stat"><b>'+(num||'–')+'</b><span>Squad No</span></div>' +
       '</div>'
     : '';
   var body = '<div class="pm-body">' +
