@@ -52,11 +52,13 @@
     {
       "club": "Bedfont",
       "ground": "The Orchard",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Hatton Road, Bedfont, Feltham, Middlesex",
+      "postcode": "TW14 9QT",
+      "lat": 51.4619504,
+      "lng": -0.4264165,
+      "verified": true,
+      "source": "Property/address listings + Football Ground Map both give The Orchard, Hatton Road TW14 9QT; coords = OSM \"Bedfont Football & Social Club\" on Hatton Road",
+      "notes": "Two Bedfont clubs exist — this is Bedfont FC at The Orchard (Hatton Rd), NOT Bedfont Sports."
     },
     {
       "club": "Burnham",
@@ -111,38 +113,43 @@
     {
       "club": "Kidlington",
       "ground": "Yarnton Road",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Yarnton Road, Kidlington, Oxfordshire",
+      "postcode": "OX5 1UH",
+      "lat": 51.8171832,
+      "lng": -1.2900161,
+      "verified": true,
+      "source": "OpenStreetMap sports_centre named \"Kidlington Football Club\", Yarnton Road (matches verified ground name)"
     },
     {
       "club": "North Greenford United",
       "ground": "Berkeley Fields",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Berkeley Avenue, Perivale, Greenford",
+      "postcode": "UB6 0NY",
+      "lat": 51.5476775,
+      "lng": -0.3375227,
+      "verified": true,
+      "source": "OpenStreetMap feature named \"North Greenford United Football Club\", Berkeley Avenue, Perivale (matches the verified ground name Berkeley Fields)"
     },
     {
       "club": "North Leigh",
       "ground": "Eynsham Hall Park",
-      "address": "",
+      "address": "North Leigh, West Oxfordshire",
       "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "lat": 51.8121137,
+      "lng": -1.4281964,
+      "verified": true,
+      "source": "OpenStreetMap recreation_ground named \"North Leigh Football Club\", North Leigh (coords). Postcode NOT confirmed — left blank deliberately.",
+      "notes": "Coords sourced from the club-named OSM feature; postcode still to confirm."
     },
     {
       "club": "Northwood",
       "ground": "Northwood Park",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Chestnut Avenue, Northwood",
+      "postcode": "HA6 1JU",
+      "lat": 51.6007196,
+      "lng": -0.4157191,
+      "verified": true,
+      "source": "OpenStreetMap pitch named \"Northwood Football Club\", Northwood, Hillingdon (matches verified ground name Northwood Park)"
     },
     {
       "club": "Penn & Tylers Green",
@@ -165,20 +172,22 @@
     {
       "club": "Thatcham Town",
       "ground": "Waterside Park",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Chamberhouse Mill Lane, Colthrop, Thatcham, Berkshire",
+      "postcode": "RG19 4AS",
+      "lat": 51.3913762,
+      "lng": -1.2423924,
+      "verified": true,
+      "source": "OpenStreetMap pitch named \"Waterside Park\", Chamberhouse Mill Lane, Thatcham (matches verified ground name)"
     },
     {
       "club": "Wallingford & Crowmarsh",
       "ground": "Wallingford Sports Park",
-      "address": "",
-      "postcode": "",
-      "lat": null,
-      "lng": null,
-      "verified": false
+      "address": "Fir Tree Avenue, Wallingford, Oxfordshire",
+      "postcode": "OX10 0PE",
+      "lat": 51.5991057,
+      "lng": -1.1431794,
+      "verified": true,
+      "source": "OpenStreetMap sports_centre named \"Wallingford Sports Park\", Fir Tree Avenue (matches verified ground name)"
     },
     {
       "club": "Wokingham Town",
@@ -192,12 +201,13 @@
     {
       "club": "Metropolitan Police FC",
       "ground": "Imber Court",
-      "address": "Ember Lane, East Molesey",
+      "address": "Ember Lane, East Molesey, Surrey",
       "postcode": "KT8 0BT",
-      "lat": null,
-      "lng": null,
-      "verified": false,
-      "notes": "Pre-season friendly, 25 Jul."
+      "lat": 51.3902693,
+      "lng": -0.3525791,
+      "verified": true,
+      "notes": "Pre-season friendly 25 Jul. Coords are postcode-level, not pitch polygon.",
+      "source": "Club Pitchero contact page + UK postcode registry + Companies House (all give Imber Court, Ember Lane, KT8 0BT); coords = OSM KT8 0BT centroid"
     },
     {
       "club": "London Lions",
@@ -241,5 +251,5 @@
       "notes": "Friendly, already played (4 Jul, home)."
     }
   ],
-  "updatedAt": "2026-07-14T15:29:47.311Z"
+  "updatedAt": "2026-07-14T15:37:21.307Z"
 }
