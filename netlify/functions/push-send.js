@@ -6,11 +6,12 @@
 // Requires env vars:
 //   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY   (generate once — see PUSH-SETUP.md)
 //   SUPABASE_URL, SUPABASE_SERVICE_KEY
-//   ADMIN_PIN (optional, defaults 19332026)
+//   ADMIN_PIN (optional, defaults <set in ADMIN_PIN>)
 //
 // Body: { pin, title, body, url? }  →  { ok, sent, failed }
 
 const webpush = require('web-push');
+const adminOk = require('./lib/pin');
 
 const URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rewkixywfgsyqinfbggv.supabase.co'; // public project URL (also in js/supabase-config.js) — safe fallback so only the SECRET key must be set
 const KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;  // accept classic, new, or Netlify-integration name
@@ -31,7 +32,7 @@ exports.handler = async function (event) {
 
   let payload = {};
   try { payload = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(payload.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(payload.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   if (!PUB || !PRIV) return resp(200, { ok: false, error: 'no-vapid' });
   if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase' });
   if (!payload.title) return resp(400, { ok: false, error: 'No title' });

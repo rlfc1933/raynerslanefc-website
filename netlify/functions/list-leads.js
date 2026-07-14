@@ -1,10 +1,11 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — open Player-Trials deals for the admin "Trialists" view.
 //
 // PIN-gated. Reads deals in the Player-Trials pipeline from HubSpot so staff see
 // applicants inside the admin without logging into HubSpot. No-ops cleanly if
 // HubSpot isn't set up.
 //
-// ENV: HUBSPOT_TOKEN, HUBSPOT_PLAYER_PIPELINE, ADMIN_PIN (defaults 19332026).
+// ENV: HUBSPOT_TOKEN, HUBSPOT_PLAYER_PIPELINE, ADMIN_PIN (defaults <set in ADMIN_PIN>).
 
 const BASE = 'https://api.hubapi.com';
 
@@ -20,7 +21,7 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
   const TOKEN = process.env.HUBSPOT_TOKEN;
   const PIPELINE = process.env.HUBSPOT_PLAYER_PIPELINE;

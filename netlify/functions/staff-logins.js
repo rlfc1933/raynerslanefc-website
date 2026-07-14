@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — staff sign-in history (Netlify Blobs, ZERO setup).
 //   GET  ?pin=...                          → { ok, logins:[{username,role,at}] } (latest 60)
 //   POST { pin, username, role }           → append a sign-in (called by the client on
@@ -13,7 +14,7 @@ exports.handler = async function (event) {
   let pin = (event.queryStringParameters && event.queryStringParameters.pin) || '';
   let b = {};
   if (event.httpMethod === 'POST') { try { b = JSON.parse(event.body || '{}'); pin = b.pin || pin; } catch (e) {} }
-  if (String(pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized', logins: [] });
+  if (!adminOk(pin)) return resp(401, { ok: false, error: 'Unauthorized', logins: [] });
 
   let store, logins;
   try { const { getStore } = await import('@netlify/blobs'); store = getStore('rlfc-staff'); logins = (await store.get('logins', { type: 'json' })) || []; }

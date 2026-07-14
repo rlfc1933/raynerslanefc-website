@@ -5,6 +5,7 @@
 // login by signing up with their name (la-signup "claim"). Does NOT touch the
 // website — purely fills Supabase.
 const L = require('./lib/lane');
+const adminOk = require('./lib/pin');
 
 function slug(name) { return String(name || '').toLowerCase().replace(/\s+/g, '-'); }
 function norm(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
@@ -13,7 +14,7 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
   if (event.httpMethod !== 'POST') return L.resp(405, { ok: false, error: 'POST only' });
   const b = L.parseBody(event);
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return L.resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return L.resp(401, { ok: false, error: 'Unauthorized' });
 
   // Read the authoritative website squad.
   let players = [];

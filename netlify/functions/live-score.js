@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — REAL-TIME live scoreboard write (Fix A part 2).
 //
 // PIN-gated. The admin score buttons POST here to update the single live_match
@@ -7,7 +8,7 @@
 //
 // Requires env vars:
 //   SUPABASE_URL, SUPABASE_SERVICE_KEY  (service_role secret — SECRET)
-//   ADMIN_PIN  (defaults 19332026 if unset)
+//   ADMIN_PIN  (defaults <set in ADMIN_PIN> if unset)
 //
 // Run this SQL once in Supabase (see supabase-schema.sql):
 //   create table if not exists public.live_match (
@@ -33,7 +34,7 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase' });
 
   const row = {

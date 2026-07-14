@@ -12,6 +12,7 @@
 // (The sign-in is logged by the client via staff-logins so default logins count too.)
 
 const crypto = require('crypto');
+const adminOk = require('./lib/pin');
 const PEPPER = 'rlfc:staff:v1';
 
 function hash(pw) { return crypto.createHash('sha256').update(String(pw) + ':' + PEPPER).digest('hex'); }
@@ -25,7 +26,7 @@ exports.handler = async function (event) {
 
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   if (!b.username || !b.password) return resp(400, { ok: false, error: 'missing' });
 
   let users;

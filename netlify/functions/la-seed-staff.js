@@ -4,13 +4,14 @@
 // in with their individual code (la-login) — the shared PIN is NEVER the gate
 // to player data, only the one-time bootstrap of accounts.
 const L = require('./lib/lane');
+const adminOk = require('./lib/pin');
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
   if (event.httpMethod !== 'POST') return L.resp(405, { ok: false, error: 'POST only' });
   if (!L.KEY) return L.resp(500, { ok: false, error: 'Server not configured' });
   const b = L.parseBody(event);
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return L.resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return L.resp(401, { ok: false, error: 'Unauthorized' });
 
   const username = String(b.username || '').trim().toLowerCase();
   const code = String(b.code || '').trim();

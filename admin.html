@@ -2502,7 +2502,6 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 <div class="toast" id="toast"></div>
 
 <script>
-const PIN = '19332026';
 const BUILD_HOOK = 'https://api.netlify.com/build_hooks/6a10e5d0c22b131a9544d269';
 
 // ── INSTALL THIS ADMIN AS AN APP ──
@@ -2686,17 +2685,43 @@ function tileInfoShow(title, body) {
   pop.innerHTML = '<span class="x" onclick="document.getElementById(\'tile-info-pop\').style.display=\'none\'">&times;</span><b>' + escH(title) + '</b><p>' + escH(body) + '</p>';
   pop.style.display = 'block';
 }
-function checkPin() {
-  if (pinVal === PIN) {
+// The PIN is checked by the server (admin-pin.js). It used to live in this
+// file as a plain string, which meant it was in the public source of the site
+// it was protecting — anyone could read it with view-source. The number never
+// comes down to the browser now; we send what was typed and get back yes/no.
+async function checkPin() {
+  var err = document.getElementById('perr');
+  err.textContent = 'Checking…';
+  var ok = false, notConfigured = false;
+  try {
+    var r = await fetch('/.netlify/functions/admin-pin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: pinVal }),
+    });
+    var d = await r.json();
+    ok = !!d.ok;
+    notConfigured = d.error === 'not-configured';
+  } catch (e) {
+    err.textContent = 'No connection — check signal and try again';
+    pinVal = ''; renderDots();
+    setTimeout(function () { err.textContent = ''; }, 3000);
+    return;
+  }
+  if (ok) {
+    err.textContent = '';
     // Stay signed in across reloads + the device back button for this browser
     // session (clears when the tab/app is closed). Fixes "back logs me out".
     try { sessionStorage.setItem('rlfc_admin_ok', '1'); } catch (e) {}
     showRoleLogin();
   } else {
-    document.getElementById('perr').textContent = 'Wrong PIN — try again';
+    // A missing env var looks identical to "everyone forgot the PIN" unless we
+    // say so — that ambiguity already cost a day once.
+    err.textContent = notConfigured
+      ? 'No PIN is set on the server (ADMIN_PIN) — ask the chairman'
+      : 'Wrong PIN — try again';
     pinVal = '';
     renderDots();
-    setTimeout(function() { document.getElementById('perr').textContent = ''; }, 2000);
+    setTimeout(function() { err.textContent = ''; }, notConfigured ? 6000 : 2000);
   }
 }
 function lock() {

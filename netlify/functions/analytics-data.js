@@ -27,8 +27,8 @@ exports.handler = async function (event) {
   let pin = (event.queryStringParameters && event.queryStringParameters.pin) || '';
   let b = {};
   if (event.httpMethod === 'POST') { try { b = JSON.parse(event.body || '{}'); pin = b.pin || pin; } catch (e) {} }
-  const gate = process.env.ANALYTICS_PIN || process.env.ADMIN_PIN || '19332026';
-  if (String(pin) !== String(gate)) return resp(401, { ok: false, error: 'Unauthorized', matches: [] });
+  const gate = process.env.ANALYTICS_PIN || process.env.ADMIN_PIN;
+  if (!gate || pin == null || pin === '' || String(pin) !== String(gate)) return resp(401, { ok: false, error: 'Unauthorized', matches: [] });
   if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase', matches: [] });
 
   const headers = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };

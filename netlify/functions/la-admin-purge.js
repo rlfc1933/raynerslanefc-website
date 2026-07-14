@@ -2,12 +2,13 @@
 // players by throwaway email domain, and every staff login that isn't a real
 // one) so the squad and the Management dropdown only show real people.
 const L = require('./lib/lane');
+const adminOk = require('./lib/pin');
 const REAL_STAFF = ['pete.singh', 'gary.pitt'];
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
   const b = L.parseBody(event);
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return L.resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return L.resp(401, { ok: false, error: 'Unauthorized' });
 
   const inlist = function (a) { return '(' + a.join(',') + ')'; };
 

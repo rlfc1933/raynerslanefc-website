@@ -6,6 +6,7 @@
 // Passwords stored as a salted SHA-256 hash — never plain text, never returned.
 
 const crypto = require('crypto');
+const adminOk = require('./lib/pin');
 const PEPPER = 'rlfc:staff:v1';
 
 function hash(pw) { return crypto.createHash('sha256').update(String(pw) + ':' + PEPPER).digest('hex'); }
@@ -19,7 +20,7 @@ exports.handler = async function (event) {
   let pin = (event.queryStringParameters && event.queryStringParameters.pin) || '';
   let b = {};
   if (event.httpMethod === 'POST') { try { b = JSON.parse(event.body || '{}'); pin = b.pin || pin; } catch (e) {} }
-  if (String(pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
   let store, users;
   try { const { getStore } = await import('@netlify/blobs'); store = getStore('rlfc-staff'); users = (await store.get('users', { type: 'json' })) || {}; }

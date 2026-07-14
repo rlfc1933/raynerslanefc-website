@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — secure admin save proxy
 // The GitHub token is read from the GITHUB_TOKEN environment variable
 // (set in Netlify → Site settings → Environment variables). It is NEVER
@@ -162,8 +163,7 @@ exports.handler = async function (event) {
   try { payload = JSON.parse(event.body || '{}'); }
   catch (e) { return resp(400, { error: 'Invalid request body' }); }
 
-  const expectedPin = process.env.ADMIN_PIN || '19332026';
-  if (String(payload.pin) !== String(expectedPin)) return resp(401, { error: 'Unauthorized' });
+  if (!adminOk(payload.pin)) return resp(401, { error: 'Unauthorized' });
 
   const ghHeaders = {
     'Authorization': 'token ' + token,

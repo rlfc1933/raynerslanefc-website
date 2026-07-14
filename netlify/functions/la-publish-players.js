@@ -4,6 +4,7 @@
 // Supabase, this publishes. dryRun:true returns the generated content without
 // committing (used to verify before going live).
 const L = require('./lib/lane');
+const adminOk = require('./lib/pin');
 const REPO = 'rlfc1933/raynerslanefc-website', BRANCH = 'main';
 const GH = 'https://api.github.com/repos/' + REPO + '/contents/';
 
@@ -44,7 +45,7 @@ async function publish(dryRun) {
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
   const b = L.parseBody(event);
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return L.resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return L.resp(401, { ok: false, error: 'Unauthorized' });
   const res = await publish(!!b.dryRun);
   return L.resp(res.ok ? 200 : 500, res);
 };

@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — match-day check-in (Phase 1, the scan loop).
 //
 // PIN-gated. scan.html POSTs a Lane number here when a staffer scans a fan's
@@ -37,7 +38,7 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase' });
 
   // Accept "RLFC LANE-1234 Name" or a raw number → keep digits only.

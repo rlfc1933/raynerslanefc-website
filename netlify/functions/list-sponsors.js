@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — sponsor applications for the admin Sponsor Hub.
 //
 // Businesses apply via the Netlify Form "sponsor-enquiry" on investment.html.
@@ -7,7 +8,7 @@
 //
 // Requires env vars:
 //   NETLIFY_API_TOKEN  (required) — Netlify personal access token (same one used by list-fans)
-//   ADMIN_PIN          (optional) — shared PIN (defaults 19332026)
+//   ADMIN_PIN          (optional) — shared PIN (defaults <set in ADMIN_PIN>)
 // SITE_ID is injected automatically by Netlify.
 
 const API = 'https://api.netlify.com/api/v1';
@@ -32,8 +33,7 @@ exports.handler = async function (event) {
   let pin = '';
   try { pin = JSON.parse(event.body || '{}').pin; } catch (e) {}
   if (!pin && event.queryStringParameters) pin = event.queryStringParameters.pin;
-  const expectedPin = process.env.ADMIN_PIN || '19332026';
-  if (String(pin) !== String(expectedPin)) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
   const token = process.env.NETLIFY_API_TOKEN;
   if (!token) {

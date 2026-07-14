@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — fan members for the admin Fan Club.
 //
 // Reads the real fan accounts (created in the Fan Zone) from Supabase, server-
@@ -8,7 +9,7 @@
 // Requires env vars:
 //   SUPABASE_URL          – your project URL (https://xxxx.supabase.co)
 //   SUPABASE_SERVICE_KEY  – the service_role secret key (Settings → API). SECRET.
-//   ADMIN_PIN             – optional (defaults 19332026)
+//   ADMIN_PIN             – optional (defaults <set in ADMIN_PIN>)
 
 const URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rewkixywfgsyqinfbggv.supabase.co'; // public project URL (also in js/supabase-config.js) — safe fallback so only the SECRET key must be set
 const KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;  // accept classic, new, or Netlify-integration name
@@ -26,7 +27,7 @@ exports.handler = async function (event) {
   let pin = '';
   try { pin = JSON.parse(event.body || '{}').pin; } catch (e) {}
   if (!pin && event.queryStringParameters) pin = event.queryStringParameters.pin;
-  if (String(pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
   if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase', members: [] });
 

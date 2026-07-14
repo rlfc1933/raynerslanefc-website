@@ -3,12 +3,13 @@
 // player who is still on the squad. Use if a login needs wiping or a wrong
 // person claimed a profile. Does not remove the player from the squad.
 const L = require('./lib/lane');
+const adminOk = require('./lib/pin');
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return L.resp(204, {});
   if (event.httpMethod !== 'POST') return L.resp(405, { ok: false, error: 'POST only' });
   const b = L.parseBody(event);
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return L.resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return L.resp(401, { ok: false, error: 'Unauthorized' });
 
   let ids = [];
   if (b.player_id) ids = [parseInt(b.player_id, 10)];

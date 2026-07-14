@@ -1,3 +1,4 @@
+const adminOk = require('./lib/pin');
 // Rayners Lane FC — AI copywriter for Post Studio (server-side, PIN-gated).
 //
 // Rewrites a volunteer's rough note into ready-to-post X captions + a short
@@ -5,7 +6,7 @@
 // browser. Works with EITHER provider — set whichever you have:
 //   GROQ_API_KEY    (OpenAI-compatible, very fast)  + optional GROQ_MODEL
 //   GEMINI_API_KEY  (Google)                         + optional GEMINI_MODEL
-// Plus ADMIN_PIN (reused; default 19332026) to gate it like live-score.js.
+// Plus ADMIN_PIN (reused; default <set in ADMIN_PIN>) to gate it like live-score.js.
 //
 // POST { pin, mode, text, context? }   mode ∈ "tweet" | "hook" | "both"
 // → { ok:true, tweets:[3 strings], hook:"…" }   (returns what the mode asks)
@@ -78,7 +79,7 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
   var b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (String(b.pin) !== String(process.env.ADMIN_PIN || '19332026')) return resp(401, { ok: false, error: 'Unauthorized' });
+  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
   var hasGroq = !!process.env.GROQ_API_KEY, hasGemini = !!process.env.GEMINI_API_KEY;
   if (!hasGroq && !hasGemini) return resp(200, { ok: false, error: 'no-key', setup: 'Add GROQ_API_KEY (or GEMINI_API_KEY) in Netlify env vars.' });
