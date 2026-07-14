@@ -771,7 +771,7 @@
         <button class="ha-btn on" id="fx-h" onclick="fxSetHA(true)">&#127968; Home</button>
         <button class="ha-btn" id="fx-a" onclick="fxSetHA(false)">&#128652; Away</button>
       </div>
-      <div class="field"><label class="fl">Opponent</label><select id="fx-opp"></select></div>
+      <div class="field"><label class="fl">Opponent</label><input id="fx-opp" list="fx-opp-list" placeholder="Type any team — e.g. Wealdstone FC" autocomplete="off"><datalist id="fx-opp-list"></datalist><div style="font-family:var(--fc);font-size:10px;color:var(--gr);margin-top:3px">Type any opponent. League teams auto-suggest; anyone else, just type their name.</div></div>
       <div class="row2">
         <div class="field"><label class="fl">Date</label><input type="date" id="fx-date"></div>
         <div class="field"><label class="fl">Kick-off</label><input type="time" id="fx-ko" value="15:00"></div>
@@ -5247,11 +5247,10 @@ function fxInit() {
   fxClearForm();
 }
 function fxFillOpp() {
-  var sel = document.getElementById('fx-opp'); if (!sel) return;
+  var dl = document.getElementById('fx-opp-list'); if (!dl) return;
   var opts = fxCrests.filter(function (c) { return !/rayners\s*lane/i.test(c.name); });
-  sel.innerHTML = opts.length
-    ? opts.map(function (c) { return '<option value="' + esc(c.file) + '">' + esc(c.name) + '</option>'; }).join('')
-    : '<option value="">— add crests in Post Studio first —</option>';
+  // datalist = SUGGESTIONS only; the field accepts ANY typed opponent.
+  dl.innerHTML = opts.map(function (c) { return '<option value="' + escH(c.name) + '"></option>'; }).join('');
 }
 function fxSetHA(h) {
   fxHome = h;
@@ -5259,17 +5258,18 @@ function fxSetHA(h) {
   document.getElementById('fx-a').classList.toggle('on', !h);
 }
 function fxClearForm() {
-  setVal('fx-id', ''); setVal('fx-date', ''); setVal('fx-ko', '15:00');
+  setVal('fx-id', ''); setVal('fx-date', ''); setVal('fx-ko', '15:00'); setVal('fx-opp', '');
   setVal('fx-venue', 'Tithe Farm, Harrow'); setVal('fx-comp', 'Combined Counties Premier Division North');
   setVal('fx-us', ''); setVal('fx-them', ''); setVal('fx-scorers', '');
   fxSetHA(true);
 }
 function addFixture() {
   var date = gv('fx-date'); if (!date) { toast('Pick a date', true); return; }
-  var sel = document.getElementById('fx-opp');
-  var oppFile = sel.value;
-  var oppName = (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].text) || '';
-  if (!oppName) { toast('Pick an opponent', true); return; }
+  var oppName = (gv('fx-opp') || '').trim();
+  if (!oppName) { toast('Type an opponent', true); return; }
+  // if a crest exists for that name, attach its logo; otherwise none — either way the fixture saves
+  var crest = fxCrests.filter(function (c) { return (c.name || '').toLowerCase() === oppName.toLowerCase(); })[0];
+  var oppFile = crest ? crest.file : '';
   var us = gv('fx-us'), them = gv('fx-them');
   var played = us !== '' && them !== '';
   var id = gv('fx-id') || ('f' + Date.now());
@@ -5294,7 +5294,7 @@ function fxEdit(id) {
   setVal('fx-us', f.us == null ? '' : f.us); setVal('fx-them', f.them == null ? '' : f.them);
   setVal('fx-scorers', f.scorers || '');
   fxSetHA(f.isHome !== false);
-  var sel = document.getElementById('fx-opp'); if (sel) sel.value = f.oppCrest || '';
+  setVal('fx-opp', f.opponent || '');
   var panel = document.getElementById('panel-fixtures'); if (panel) panel.scrollIntoView({ block: 'start' });
 }
 function removeFixture(id) {
