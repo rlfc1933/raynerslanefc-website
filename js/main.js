@@ -35,7 +35,7 @@ async function liveScoreboard() {
           '<span class="livebar__t">' + awayTeam + '</span>' +
         '</span>' +
         (m.status ? '<span class="livebar__status">' + m.status + '</span>' : '') +
-        (m.scorers ? '<span class="livebar__scorers">&#9917; ' + m.scorers + '</span>' : '') +
+        (m.scorers ? '<span class="livebar__scorers"><i class="ico ico-football"></i> ' + m.scorers + '</span>' : '') +
       '</div>';
     bar.style.display = 'block';
   } catch (e) {}

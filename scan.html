@@ -6,7 +6,8 @@
 <title>Match-Day Scanner | Rayners Lane FC</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="img/badge.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{ --y:#FFD100; --g:#1A5C32; --bg:#080808; --card:#141414; --bd:#242424; --w:#F5F3ED; --gr:#888; --su:#22C55E; --re:#EF4444;
@@ -68,7 +69,7 @@
     </div>
     <div class="row" style="margin-top:10px">
       <div><label>Match date</label><input type="date" id="date"></div>
-      <div><label>Venue</label><select id="ha"><option value="home">Home 🏠</option><option value="away">Away ✈️</option></select></div>
+      <div><label>Venue</label><select id="ha"><option value="home">Home <i class="ico ico-house"></i></option><option value="away">Away <i class="ico ico-plane"></i></option></select></div>
     </div>
   </div>
 
@@ -80,7 +81,7 @@
   <div class="card">
     <label>Scan a membership QR</label>
     <div id="reader"></div>
-    <button class="btn" id="scanbtn" onclick="toggleScan()">📷 Start Camera</button>
+    <button class="btn" id="scanbtn" onclick="toggleScan()"><i class="ico ico-camera"></i> Start Camera</button>
     <div class="muted" style="margin-top:8px">Point at the fan's Lane QR. It scans automatically.</div>
   </div>
 
@@ -145,9 +146,9 @@
           else feedback('err', 'Couldn\'t save (' + (j.error || 'error') + ')');
           return;
         }
-        if (j.duplicate) { feedback('dup', '⚠️ Lane #' + j.lane_no + ' already scanned today — ' + j.total + ' total'); return; }
+        if (j.duplicate) { feedback('dup', '<i class="ico ico-triangle-alert"></i> Lane #' + j.lane_no + ' already scanned today — ' + j.total + ' total'); return; }
         if (!checkedThisMatch[j.lane_no]) { checkedThisMatch[j.lane_no] = true; bumpCount(); }
-        feedback('ok', '✓ Lane #' + j.lane_no + ' — heart #' + j.total + (j.home ? ' · ' + j.home + ' home' : ''));
+        feedback('ok', '<i class="ico ico-check"></i> Lane #' + j.lane_no + ' — heart #' + j.total + (j.home ? ' · ' + j.home + ' home' : ''));
       })
       .catch(function () { feedback('err', 'Network error — try again'); });
   }
@@ -172,7 +173,7 @@
   function stopScan() {
     if (!scanner) return;
     scanner.stop().then(function () { scanner.clear(); }).catch(function () {});
-    scanning = false; var b = document.getElementById('scanbtn'); b.textContent = '📷 Start Camera'; b.classList.remove('red');
+    scanning = false; var b = document.getElementById('scanbtn'); b.textContent = 'Start Camera'; b.classList.remove('red');
   }
   function onScan(text) {
     var now = Date.now();

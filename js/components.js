@@ -756,7 +756,7 @@ function initComponents(currentPage) {
     try {
       if (btn) { btn.disabled = true; btn.dataset.lbl = btn.textContent; btn.textContent = 'Turning on…'; }
       var cfg = await (await fetch('/.netlify/functions/push-key')).json();
-      if (!cfg.enabled || !cfg.key) { alert('Match alerts aren\'t switched on by the club yet — check back soon. 💛'); return; }
+      if (!cfg.enabled || !cfg.key) { alert('Match alerts aren\'t switched on by the club yet — check back soon.'); return; }
       var perm = await Notification.requestPermission();
       if (perm !== 'granted') { alert('No problem — you can enable match alerts any time from this button.'); return; }
       var reg = await navigator.serviceWorker.ready;
@@ -767,8 +767,8 @@ function initComponents(currentPage) {
         body: JSON.stringify({ subscription: sub })
       })).json();
       if (res.ok) {
-        alert('You\'re in! 💛 We\'ll send a notification for kick-offs, goals and big club news.');
-        if (btn) { btn.textContent = '✓ Match Alerts On'; return; }
+        alert('You\'re in! We\'ll send a notification for kick-offs, goals and big club news.');
+        if (btn) { btn.textContent = 'Match Alerts On'; return; }
       } else { alert('Couldn\'t save that just now — please try again in a moment.'); }
     } catch (e) {
       alert('Couldn\'t turn on alerts: ' + (e && e.message ? e.message : 'unknown error'));
@@ -799,14 +799,14 @@ function initComponents(currentPage) {
     banner.id = 'pwa-banner';
     banner.style.cssText = 'background:#FFD100;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10001;';
     var icon = isIOS
-      ? '&#11014; Tap <strong>Share</strong> then <strong>Add to Home Screen</strong> to install The Lane app'
-      : '&#11014; Tap <strong>Add to Home Screen</strong> to install The Lane app';
+      ? '<i class="ico ico-arrow-up"></i> Tap <strong>Share</strong> then <strong>Add to Home Screen</strong> to install The Lane app'
+      : '<i class="ico ico-arrow-up"></i> Tap <strong>Add to Home Screen</strong> to install The Lane app';
     banner.innerHTML =
       '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
         '<img src="/img/badge.png" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
         '<div style="font-family:var(--font-c);font-size:12px;font-weight:600;color:#000;letter-spacing:.02em;line-height:1.4">' + icon + '</div>' +
       '</div>' +
-      '<button onclick="dismissPWA()" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent">✕</button>';
+      '<button onclick="dismissPWA()" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x"></i></button>';
     document.body.insertBefore(banner, document.body.firstChild);
   }
 
@@ -816,7 +816,7 @@ function initComponents(currentPage) {
     banner.id = 'cookie-banner';
     banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;border-top:2px solid var(--yellow);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:10000;flex-wrap:wrap;';
     banner.innerHTML = '<div style="font-family:var(--font-c);font-size:12px;color:var(--lgrey);letter-spacing:.04em;flex:1;min-width:200px">' +
-      '<span style="color:var(--yellow);font-weight:700">🍪 Cookies</span> — We use cookies to improve your experience and track site visits via Google Analytics. ' +
+      '<span style="color:var(--yellow);font-weight:700"><i class="ico ico-cookie"></i> Cookies</span> — We use cookies to improve your experience and track site visits via Google Analytics. ' +
       '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Learn more</a>' +
       '</div>' +
       '<div style="display:flex;gap:8px;flex-shrink:0">' +

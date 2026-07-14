@@ -22,6 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/icons.css">
   <style>
     /* Override FWP embed colours to match club theme */
     .fwp-embed-container {
@@ -65,7 +66,7 @@
     <h1 class="page-header__h">Fixtures <span>&amp; Results</span></h1>
     <p class="page-header__meta">2026-27 Season &middot; Fixtures, results &amp; table update automatically</p>
   </div>
-    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px">&#9993; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
+    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px"><i class="ico ico-mail"></i> <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
 </div>
 </div>
 
@@ -112,7 +113,7 @@
              wrapper only goes white once the embed actually has content. -->
         <div id="fwp-table-wrap"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
         <div id="fwp-table-empty" class="fwp-empty" hidden>
-          <div class="fwp-empty__i">🗓️</div>
+          <div class="fwp-empty__i"><i class="ico ico-calendar-days"></i></div>
           <div class="fwp-empty__t">League table starts when the season kicks off</div>
           <div class="fwp-empty__d">First game <strong>Saturday 1 August 2026</strong>. No games played yet, so there’s no table to show — it will appear here automatically.</div>
           <a class="fwp-empty__a" href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">View on Football Web Pages →</a>
@@ -171,9 +172,9 @@
       </div>
       <div style="margin-top:16px;padding:14px 18px;background:rgba(255,209,0,.05);border:1px solid rgba(255,209,0,.12);border-radius:3px">
         <p style="font-family:var(--font-c);font-size:13px;color:var(--lgrey);letter-spacing:.03em;line-height:1.7">
-          <strong style="color:var(--yellow)">&#128241; iPhone:</strong> Tap "iPhone / Apple Calendar" &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.<br>
-          <strong style="color:var(--yellow)">&#129302; Android:</strong> Tap "Android / Google Calendar" &rarr; sign in &rarr; tap Add. Syncs every few hours.<br>
-          <strong style="color:var(--yellow)">&#128190; Other:</strong> Download the .ics and open with Outlook, Thunderbird etc.
+          <strong style="color:var(--yellow)"><i class="ico ico-smartphone"></i> iPhone:</strong> Tap "iPhone / Apple Calendar" &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.<br>
+          <strong style="color:var(--yellow)"><i class="ico ico-bot"></i> Android:</strong> Tap "Android / Google Calendar" &rarr; sign in &rarr; tap Add. Syncs every few hours.<br>
+          <strong style="color:var(--yellow)"><i class="ico ico-save"></i> Other:</strong> Download the .ics and open with Outlook, Thunderbird etc.
         </p>
       </div>
     </div>
@@ -369,7 +370,7 @@ function fxVenueBlock(f) {
   var i = fxVenueInfo(f);
   var h = '';
   if (i.ground) {
-    h += '<div class="fxc__venue">📍 ' + fxEsc(i.ground) + (i.addr ? '<span class="fxc__addr">' + fxEsc(i.addr) + '</span>' : '') + '</div>';
+    h += '<div class="fxc__venue"><i class="ico ico-map-pin"></i> ' + fxEsc(i.ground) + (i.addr ? '<span class="fxc__addr">' + fxEsc(i.addr) + '</span>' : '') + '</div>';
   }
   if (i.groundshare) h += '<div class="fxc__note">Away — but played at Tithe Farm (groundshare). No travel.</div>';
   if (!i.usable && !i.groundshare) h += '<div class="fxc__tbc">Address to be confirmed</div>';
@@ -383,13 +384,13 @@ function fxActs(f) {
   if (i.usable) {
     var ll = i.v.lat + ',' + i.v.lng;
     rows += '<div class="fxc__acts">' +
-      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=driving" target="_blank" rel="noopener">🚗 Drive</a>' +
-      '<a class="fxc__b" href="https://waze.com/ul?ll=' + ll + '&navigate=yes" target="_blank" rel="noopener">🛣️ Waze</a>' +
-      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=transit" target="_blank" rel="noopener">🚇 Transport</a>' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=driving" target="_blank" rel="noopener"><i class="ico ico-car"></i> Drive</a>' +
+      '<a class="fxc__b" href="https://waze.com/ul?ll=' + ll + '&navigate=yes" target="_blank" rel="noopener"><i class="ico ico-route"></i> Waze</a>' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=transit" target="_blank" rel="noopener"><i class="ico ico-train-front"></i> Transport</a>' +
     '</div>';
   }
   rows += '<div class="fxc__acts">' +
-    '<a class="fxc__b" href="/.netlify/functions/fixtures-ics">📅 Calendar</a>' +
+    '<a class="fxc__b" href="/.netlify/functions/fixtures-ics"><i class="ico ico-calendar"></i> Calendar</a>' +
     '<button class="fxc__b" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>' +
   '</div>';
   return rows;
@@ -403,7 +404,7 @@ function fxCard(f) {
   var foot = played ? '' : (gone ? '<div class="fxc__await">Result to follow</div>' : fxActs(f));
   return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + (gone && !played ? ' fxc--gone' : '') + '">' +
     '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
-    '<span class="fxc__ha">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
+    '<span class="fxc__ha">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
     fxVenueBlock(f) +
@@ -416,7 +417,7 @@ function fxHero(f) {
   var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
   return '<div class="fxh" data-ko="' + d.getTime() + '"><span class="fxh__lbl">Next Match</span>' +
     '<div class="fxc__top" style="justify-content:center;gap:10px"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
-    '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '🏠 Home' : '🚌 Away') + '</span></div>' +
+    '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + '</div>' +
     fxVenueBlock(f) +
@@ -548,7 +549,7 @@ async function fxShare(id) {
   var home = f.isHome !== false, v = fxVenue(f);
   var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   var teams = home ? ('Rayners Lane vs ' + f.opponent) : (f.opponent + ' vs Rayners Lane');
-  var line = '⚽ ' + teams + ' — ' + ds + ', ' + (f.kickoff || '15:00') + (v ? ', ' + v : '') + '. Up The Lane 💛';
+  var line = '<i class="ico ico-football"></i> ' + teams + ' — ' + ds + ', ' + (f.kickoff || '15:00') + (v ? ', ' + v : '') + '. Up The Lane <i class="ico ico-heart"></i>';
   var url = 'https://raynerslanefc.co.uk/fixtures.html';
   var full = line + ' ' + url;
   var wa = 'https://wa.me/?text=' + encodeURIComponent(full);

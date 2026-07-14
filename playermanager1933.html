@@ -14,7 +14,8 @@
 <link rel="apple-touch-icon" href="/img/icon-pm-192.png">
 <link rel="icon" type="image/png" href="/img/icon-pm-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
+<link rel="stylesheet" href="css/icons.css">
+  <style>
   :root{
     --y:#FFD100; --g:#1A5C32; --bk:#080808; --dk:#0F0F0F; --c:#161616; --c2:#1E1E1E;
     --br:#2A2A2A; --w:#F5F3ED; --gr:#8A8A82; --re:#EF4444; --su:#22C55E; --am:#F59E0B; --bl:#3B82F6;
@@ -127,7 +128,7 @@
 </head>
 <body>
 <div class="push" id="push"><div class="b" id="push-body"></div></div>
-<div class="off" id="off">📴 Offline — your taps are saved and will sync when you're back.</div>
+<div class="off" id="off"><i class="ico ico-bell-off"></i> Offline — your taps are saved and will sync when you're back.</div>
 <div class="screen" id="root"></div>
 
 <script>
@@ -163,7 +164,7 @@ async function flushQueue(){
     catch(e){ left.push(q[i]); }
   }
   setQueue(left); reflectOffline();
-  if(left.length===0 && q.length){ toast('✅ Synced your offline taps.'); refresh(); }
+  if(left.length===0 && q.length){ toast('Synced your offline taps.'); refresh(); }
 }
 function reflectOffline(){ var el=document.getElementById('off'); if(el) el.classList.toggle('on', !navigator.onLine || getQueue().length>0); }
 window.addEventListener('online', function(){ reflectOffline(); flushQueue(); });
@@ -176,7 +177,7 @@ function toast(msg, err){ var b=document.getElementById('push-body'), el=documen
 var deferredPrompt=null, isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
 window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; render(); });
-window.addEventListener('appinstalled', function(){ deferredPrompt=null; toast('✅ Installed — open “The Lane App” from your home screen.'); render(); });
+window.addEventListener('appinstalled', function(){ deferredPrompt=null; toast('Installed — open “The Lane App” from your home screen.'); render(); });
 async function installApp(){
   if(deferredPrompt){ deferredPrompt.prompt(); var c=await deferredPrompt.userChoice; deferredPrompt=null; if(c.outcome==='accepted') toast('Installing…'); render(); return; }
   if(isIOS){ showIosInstall(); return; }
@@ -189,7 +190,7 @@ function installButton(){
     '<img src="/img/icon-pm-192.png" style="width:42px;height:42px;border-radius:10px">'+
     '<div style="flex:1;text-align:left"><div style="font-family:var(--fc);font-weight:800;font-size:14px">Install the app</div>'+
     '<div class="muted" style="font-size:10.5px">Add to your home screen — needed for match alerts</div></div></div>'+
-    '<button class="btn btn-y btn-sm" style="margin-top:9px" onclick="installApp()">📲 Add to Home Screen</button></div>';
+    '<button class="btn btn-y btn-sm" style="margin-top:9px" onclick="installApp()"><i class="ico ico-smartphone"></i> Add to Home Screen</button></div>';
 }
 function showIosInstall(){
   document.getElementById('root').innerHTML =
@@ -223,7 +224,7 @@ async function enableNotifications(){
     var sub = await reg.pushManager.getSubscription();
     if(!sub){ sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: b64ToU8(keyRes.key) }); }
     var r = await api('la-push-subscribe', { subscription: sub.toJSON ? sub.toJSON() : sub });
-    if(r.ok){ LS.setItem('la_notif','on'); toast('🔔 Alerts on — you’ll be notified on this phone.'); render(); }
+    if(r.ok){ LS.setItem('la_notif','on'); toast('Alerts on — you’ll be notified on this phone.'); render(); }
     else toast(r.error||'Could not turn on alerts.',1);
   }catch(e){ toast('Could not turn on alerts.',1); }
 }
@@ -238,8 +239,8 @@ function notifyBanner(){
   var st=notifyState();
   if(st==='granted' && LS.getItem('la_notif')==='on') return '';
   if(st==='unsupported') return '';
-  if(st==='install-first') return '<div class="install-banner" onclick="showIosInstall()" style="cursor:pointer"><b>🔔 Turn on alerts</b><div class="muted" style="font-size:10.5px;margin-top:2px">Add the app to your home screen first, then enable alerts.</div></div>';
-  return '<div class="install-banner"><div style="font-family:var(--fc);font-weight:800;font-size:14px">🔔 Turn on alerts</div><div class="muted" style="font-size:10.5px;margin:2px 0 9px">'+(isStaff()?'Get a buzz the moment a player signs up or you need to act.':'Get told your squad status and club updates.')+'</div><button class="btn btn-y btn-sm" onclick="enableNotifications()">Enable notifications</button></div>';
+  if(st==='install-first') return '<div class="install-banner" onclick="showIosInstall()" style="cursor:pointer"><b><i class="ico ico-bell"></i> Turn on alerts</b><div class="muted" style="font-size:10.5px;margin-top:2px">Add the app to your home screen first, then enable alerts.</div></div>';
+  return '<div class="install-banner"><div style="font-family:var(--fc);font-weight:800;font-size:14px"><i class="ico ico-bell"></i> Turn on alerts</div><div class="muted" style="font-size:10.5px;margin:2px 0 9px">'+(isStaff()?'Get a buzz the moment a player signs up or you need to act.':'Get told your squad status and club updates.')+'</div><button class="btn btn-y btn-sm" onclick="enableNotifications()">Enable notifications</button></div>';
 }
 
 /* ═══════ AUTH ═══════ */
@@ -316,10 +317,10 @@ function loadCache(){
 }
 
 /* ═══════ TIME / EVENT HELPERS ═══════ */
-var TYPES={ league:{lbl:'League',ic:'🏆',col:'var(--y)',match:true}, cup:{lbl:'Cup',ic:'🥇',col:'#ffca6b',match:true},
-  charity:{lbl:'Charity',ic:'❤️',col:'#ff9d9d',match:true}, friendly:{lbl:'Friendly',ic:'🤝',col:'#93c5fd',match:true},
-  training:{lbl:'Training',ic:'🏃',col:'#8ff0b4',match:false}, photoshoot:{lbl:'Photoshoot',ic:'📸',col:'#7fe0a3',match:false},
-  club_event:{lbl:'Club Event',ic:'🎟️',col:'#c4b5fd',match:false} };
+var TYPES={ league:{lbl:'League',ic:'<i class="ico ico-trophy"></i>',col:'var(--y)',match:true}, cup:{lbl:'Cup',ic:'<i class="ico ico-medal"></i>',col:'#ffca6b',match:true},
+  charity:{lbl:'Charity',ic:'<i class="ico ico-heart"></i>',col:'#ff9d9d',match:true}, friendly:{lbl:'Friendly',ic:'<i class="ico ico-handshake"></i>',col:'#93c5fd',match:true},
+  training:{lbl:'Training',ic:'<i class="ico ico-footprints"></i>',col:'#8ff0b4',match:false}, photoshoot:{lbl:'Photoshoot',ic:'<i class="ico ico-camera"></i>',col:'#7fe0a3',match:false},
+  club_event:{lbl:'Club Event',ic:'<i class="ico ico-ticket"></i>',col:'#c4b5fd',match:false} };
 function ty(e){ return TYPES[e&&e.type]||TYPES.league; }
 function events(){ return (isStaff()? (state.board&&state.board.events) : (state.me&&state.me.events)) || []; }
 function evt(){ var es=events(); return es.filter(function(e){return e.id===state.activeEvent;})[0] || es[0] || null; }
@@ -350,7 +351,7 @@ function fixtureCard(){
   var e=evt(); if(!e) return '<div class="card"><div class="muted">No events yet.</div></div>';
   var v=venueOf(e), t=ty(e), isMatch=t.match;
   var head = isMatch
-    ? '<div style="text-align:center"><span class="ha '+(e.is_home?'h':'a')+'">'+(e.is_home?'🏠 Home':'🚌 Away')+'</span></div>'+
+    ? '<div style="text-align:center"><span class="ha '+(e.is_home?'h':'a')+'">'+(e.is_home?'<i class="ico ico-house"></i> Home':'<i class="ico ico-bus"></i> Away')+'</span></div>'+
       '<div class="vs"><img src="/img/badge.png" alt="RLFC"><span class="sep">VS</span><div class="opp">'+ini(e.opponent)+'</div></div>'+
       '<h2 class="big" style="text-align:center">'+esc(e.is_home?'Rayners Lane':(e.opponent||'').toUpperCase())+'<br><span style="color:var(--y);font-size:16px">vs</span><br>'+esc(e.is_home?(e.opponent||'').toUpperCase():'Rayners Lane')+'</h2>'
     : '<div style="text-align:center;font-size:38px;margin:6px 0 2px">'+t.ic+'</div><h2 class="big" style="text-align:center">'+esc((e.competition||t.lbl).toUpperCase())+'</h2>'+
@@ -363,20 +364,20 @@ function fixtureCard(){
       '<div><div class="k">'+(isMatch?'Kit':'Wear')+'</div><div class="v">'+esc(e.kit||'TBC')+'</div></div>'+
     '</div>'+
     '<div style="margin-top:9px;background:rgba(255,255,255,.04);border-radius:9px;padding:9px">'+
-      '<div style="font-family:var(--fc);font-weight:800;font-size:12px">📍 '+esc(v.ground||'TBC')+'</div>'+
+      '<div style="font-family:var(--fc);font-weight:800;font-size:12px"><i class="ico ico-map-pin"></i> '+esc(v.ground||'TBC')+'</div>'+
       '<div class="muted" style="font-size:10.5px;margin-bottom:8px">'+esc(v.address||'')+'</div>'+
       /* Ground-specific warnings (e.g. "the postcode lands on the main road,
          not the entrance") matter most to the person driving there. */
-      (v.notes?'<div style="font-size:10px;line-height:1.45;color:var(--y);background:rgba(255,214,0,.08);border-radius:7px;padding:6px 7px;margin-bottom:8px">⚠️ '+esc(v.notes)+'</div>':'')+
+      (v.notes?'<div style="font-size:10px;line-height:1.45;color:var(--y);background:rgba(255,214,0,.08);border-radius:7px;padding:6px 7px;margin-bottom:8px"><i class="ico ico-triangle-alert"></i> '+esc(v.notes)+'</div>':'')+
       (v.lat!=null&&v.lng!=null
         ? '<div style="display:flex;gap:5px">'+
-            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'drive\')">🚗 Drive</button>'+
-            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'waze\')">🛣️ Waze</button>'+
-            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'transit\')">🚇 Transport</button>'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'drive\')"><i class="ico ico-car"></i> Drive</button>'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'waze\')"><i class="ico ico-route"></i> Waze</button>'+
+            '<button class="btn btn-o btn-sm" style="flex:1;padding:8px 4px;font-size:9.5px" onclick="nav(\'transit\')"><i class="ico ico-train-front"></i> Transport</button>'+
           '</div>'
         : '<div class="muted" style="font-size:10px;line-height:1.45">Venue to be confirmed — the ground isn’t in the club’s venue book yet, so there’s nothing to navigate to. Staff can add it in the Portal under Venues.</div>')+
       '</div>'+
-    '<div class="muted" style="text-align:center;margin-top:7px;font-size:9.5px">Source: '+(e.source==='fwp_import'?'🔄 Football Web Pages':'✍️ added by staff')+'</div></div>';
+    '<div class="muted" style="text-align:center;margin-top:7px;font-size:9.5px">Source: '+(e.source==='fwp_import'?'<i class="ico ico-refresh-cw"></i> Football Web Pages':'<i class="ico ico-pen-line"></i> added by staff')+'</div></div>';
 }
 
 /* ═══════ PLAYER ═══════ */
@@ -390,24 +391,24 @@ function playerHome(){
   else banner='<div class="status-banner sb-non"><div class="s">NOT IN THE SQUAD</div><div class="d">Not this week — come and back the lads</div></div>';
   out += banner + fixtureCard();
   out += '<div class="card"><div class="eyebrow">Are you available?</div><div class="split">'+
-    '<button class="avail-btn yes '+(a==='available'?'on':'')+'" onclick="setAvail(\'available\')"><span class="ic">✅</span>Available</button>'+
-    '<button class="avail-btn no '+(a==='unavailable'?'on':'')+'" onclick="setAvail(\'unavailable\')"><span class="ic">❌</span>Can’t Play</button>'+
+    '<button class="avail-btn yes '+(a==='available'?'on':'')+'" onclick="setAvail(\'available\')"><span class="ic"><i class="ico ico-circle-check"></i></span>Available</button>'+
+    '<button class="avail-btn no '+(a==='unavailable'?'on':'')+'" onclick="setAvail(\'unavailable\')"><span class="ic"><i class="ico ico-x"></i></span>Can’t Play</button>'+
     '</div><div class="muted" style="text-align:center;margin-top:8px">Two taps. The manager sees it instantly.</div></div>';
   out += '<div class="card"><div class="eyebrow">Match-day check-in</div>'+
-    (e.myCheckin ? '<div class="status-banner sb-sub" style="margin:0"><div class="s">✅ CHECKED IN</div><div class="d">The manager knows you’re here</div></div>'
-      : '<button class="btn btn-g" onclick="checkIn()">📍 I’m here — check in</button>')+'</div>';
+    (e.myCheckin ? '<div class="status-banner sb-sub" style="margin:0"><div class="s"><i class="ico ico-circle-check"></i> CHECKED IN</div><div class="d">The manager knows you’re here</div></div>'
+      : '<button class="btn btn-g" onclick="checkIn()"><i class="ico ico-map-pin"></i> I’m here — check in</button>')+'</div>';
   return out;
 }
 function playerNews(){
   var out='', fbs=(state.me&&state.me.feedback)||[];
   if(fbs.length){ out+='<div class="eyebrow">Your feedback from the gaffer</div>';
-    out+=fbs.map(function(f){ return '<div class="ann fb"><div class="t">💬 Feedback</div><div class="m">'+esc(f.body)+'</div>'+
-      (f.acknowledged_at?'<div class="w" style="color:#8ff0b4">✔ You acknowledged this</div>':'<button class="btn btn-o btn-sm" style="margin-top:7px" onclick="ackFb('+f.id+')">👍 Got it</button>')+'</div>'; }).join('');
+    out+=fbs.map(function(f){ return '<div class="ann fb"><div class="t"><i class="ico ico-message-circle"></i> Feedback</div><div class="m">'+esc(f.body)+'</div>'+
+      (f.acknowledged_at?'<div class="w" style="color:#8ff0b4"><i class="ico ico-check"></i> You acknowledged this</div>':'<button class="btn btn-o btn-sm" style="margin-top:7px" onclick="ackFb('+f.id+')"><i class="ico ico-thumbs-up"></i> Got it</button>')+'</div>'; }).join('');
   }
   out+='<div class="eyebrow">From the club</div>';
   var anns=(state.me&&state.me.announcements)||[];
   out+= anns.length ? anns.map(function(a){ return '<div class="ann"><div class="t">'+esc(a.title||'')+'</div><div class="m">'+esc(a.body||'')+'</div></div>'; }).join('') : '<div class="muted">No announcements yet.</div>';
-  out+='<div class="honest" style="margin-top:6px">📣 Broadcast + feedback only. There are <b>no private chats</b> here — that’s what keeps it safe for youth teams.</div>';
+  out+='<div class="honest" style="margin-top:6px"><i class="ico ico-megaphone"></i> Broadcast + feedback only. There are <b>no private chats</b> here — that’s what keeps it safe for youth teams.</div>';
   return out;
 }
 function playerMe(){
@@ -428,10 +429,10 @@ function staffHome(){
   var b=state.board; if(!b) return '<div class="muted">Loading…</div>';
   var e=evt(), out=notifyBanner();
   if(b.pending&&b.pending.length){
-    out+='<div class="card" style="border-color:rgba(255,209,0,.5);background:rgba(255,209,0,.07)"><div class="eyebrow">🔔 '+b.pending.length+' signed up — approve to add to the squad</div>'+
+    out+='<div class="card" style="border-color:rgba(255,209,0,.5);background:rgba(255,209,0,.07)"><div class="eyebrow"><i class="ico ico-bell"></i> '+b.pending.length+' signed up — approve to add to the squad</div>'+
       b.pending.map(function(p){ return '<div class="prow" style="background:var(--c2)"><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+' · '+esc(p.phone||'')+'</small></div>'+
-        '<button class="btn btn-y btn-sm" style="width:auto;padding:6px 10px" onclick="approve('+p.id+')">✔</button>'+
-        '<button class="btn btn-o btn-sm" style="width:auto;padding:6px 8px" onclick="approve('+p.id+',1)">✕</button></div>'; }).join('')+'</div>';
+        '<button class="btn btn-y btn-sm" style="width:auto;padding:6px 10px" onclick="approve('+p.id+')"><i class="ico ico-check"></i></button>'+
+        '<button class="btn btn-o btn-sm" style="width:auto;padding:6px 8px" onclick="approve('+p.id+',1)"><i class="ico ico-x"></i></button></div>'; }).join('')+'</div>';
   }
   out+='<button class="btn btn-o btn-sm" style="margin-bottom:9px" onclick="showAdd()">＋ Add a match, friendly, charity game or event</button>';
   out+=fixturePicker()+fixtureCard();
@@ -445,14 +446,14 @@ function staffHome(){
     '<div class="in"><div class="n">'+checked+'</div><div class="l">Here</div></div></div>';
   out+=sq.map(function(p){
     var pill = p.status==='injured'?'<span class="pill no">Injured</span>': p.availability==='available'?'<span class="pill yes">In</span>':p.availability==='unavailable'?'<span class="pill no">Out</span>':'<span class="pill wait">No reply</span>';
-    var chk = p.checkedIn?'<span class="pill in">✓ Here</span>':'';
+    var chk = p.checkedIn?'<span class="pill in"><i class="ico ico-check"></i> Here</span>':'';
     return '<div class="prow"><span class="num">'+(p.squad_no||'')+'</span><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+'</small></div>'+chk+pill+'</div>';
   }).join('');
   return out;
 }
 function staffSquad(){
   var b=state.board, e=evt(); if(!b||!e) return '<div class="muted">Loading…</div>';
-  if(!b.perms.can_select_squad) return '<div class="honest">🔒 Squad selection is a <b>permission</b>, not a role. It hasn’t been granted to you — the chairman can switch it on with no code change.</div>';
+  if(!b.perms.can_select_squad) return '<div class="honest"><i class="ico ico-lock"></i> Squad selection is a <b>permission</b>, not a role. It hasn’t been granted to you — the chairman can switch it on with no code change.</div>';
   if(!ty(e).match) return '<div class="card hero" style="text-align:center"><div style="font-size:34px">'+ty(e).ic+'</div><h2 class="big" style="margin-top:6px">'+esc((e.competition||ty(e).lbl).toUpperCase())+'</h2><div class="muted" style="margin-top:8px">This isn’t a match — there’s no XI to pick.</div></div><div class="honest">Photoshoots and club nights still need availability, a push and a check-in — just no squad. That’s why the model is <b style="color:var(--y)">events</b>, not fixtures.</div>';
   var sq=b.squad||[], cS=function(k){return sq.filter(function(p){return p.selection===k;}).length;};
   var out='<div class="eyebrow">Pick the squad · '+ty(e).ic+' '+esc(e.competition||ty(e).lbl)+'</div>'+
@@ -463,11 +464,11 @@ function staffSquad(){
     var pill = s==='starting'?'<span class="pill xi">Starting</span>': s==='sub'?'<span class="pill sub">Sub</span>': a!=='available'?'<span class="pill no">Unavailable</span>':'<span class="pill wait">Tap to pick</span>';
     return '<div class="prow selrow" onclick="cycleSel('+p.id+',\''+(s||'none')+'\','+ (a==='available'?'1':'0') +')" style="'+(a!=='available'?'opacity:.45':'')+'"><span class="num">'+(p.squad_no||'')+'</span><div class="ph">'+ini(p.name)+'</div><div class="nm">'+esc(p.name)+'<small>'+esc(p.position||'')+'</small></div>'+pill+'</div>';
   }).join('');
-  out+='<button class="btn btn-y" style="margin-top:9px" onclick="publish()">📣 Publish squad &amp; notify everyone</button>';
+  out+='<button class="btn btn-y" style="margin-top:9px" onclick="publish()"><i class="ico ico-megaphone"></i> Publish squad &amp; notify everyone</button>';
   return out;
 }
 function staffPost(){
-  var out='<div class="eyebrow">Broadcast to the squad</div><div class="card"><div class="fld"><label>Title</label><input id="an-t" placeholder="e.g. Meet time moved"></div><div class="fld"><label>Message</label><textarea id="an-m" placeholder="Goes to every player…"></textarea></div><button class="btn btn-g" onclick="sendAnn()">📣 Send to all players</button></div>';
+  var out='<div class="eyebrow">Broadcast to the squad</div><div class="card"><div class="fld"><label>Title</label><input id="an-t" placeholder="e.g. Meet time moved"></div><div class="fld"><label>Message</label><textarea id="an-m" placeholder="Goes to every player…"></textarea></div><button class="btn btn-g" onclick="sendAnn()">Send to all players</button></div>';
   if(state.role==='chairman') out+=manageStaffCard();
   out+=accountCard();
   out+=installButton();
@@ -491,7 +492,7 @@ async function checkIn(){
   var r=await api('la-checkin', {event_id:e.id, idempotency_key:uid()}, {queueable:true});
   if(r.queued) toast('Check-in saved offline — will sync.');
   else if(!r.ok){ toast(r.error||'Check-in failed.',1); e.myCheckin=false; render(); return; }
-  else toast('✅ Checked in.');
+  else toast('Checked in.');
   maybeAskNotify();
 }
 async function cycleSel(id, cur, avail){
@@ -503,10 +504,10 @@ async function cycleSel(id, cur, avail){
 }
 async function publish(){ var r=await api('la-publish', {event_id:state.activeEvent}); if(!r.ok){ toast(r.error||'Failed.',1); return; }
   toast('Squad published — '+r.starting+' starting, '+r.subs+' subs.'+(r.pushConfigured?' Everyone notified.':' (Push not set up yet.)')); refresh(); }
-async function approve(id, reject){ var r=await api('la-approve', {player_id:id, reject:!!reject}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast(reject?'Rejected.':'✅ Approved — now in the squad.'); refresh(); }
+async function approve(id, reject){ var r=await api('la-approve', {player_id:id, reject:!!reject}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast(reject?'Rejected.':'Approved — now in the squad.'); refresh(); }
 async function sendAnn(){ var t=(document.getElementById('an-t')||{}).value||'', m=(document.getElementById('an-m')||{}).value||''; if(!t||!m){ toast('Add a title and a message.',1); return; }
-  var r=await api('la-broadcast', {title:t, body:m}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast('📣 Broadcast sent.'); render(); }
-async function ackFb(id){ var r=await api('la-feedback', {ack:id}); if(r.ok){ toast('Acknowledged 👍'); refresh(); } }
+  var r=await api('la-broadcast', {title:t, body:m}); if(!r.ok){ toast(r.error||'Failed.',1); return; } toast('Broadcast sent.'); render(); }
+async function ackFb(id){ var r=await api('la-feedback', {ack:id}); if(r.ok){ toast('Acknowledged'); refresh(); } }
 async function saveBio(){ var v=(document.getElementById('bio-in')||{}).value||''; var r=await api('la-profile',{bio:v}); if(r.ok){ toast('Profile updated.'); } else toast(r.error||'Failed.',1); }
 
 /* account: change your own code (players + staff) */
@@ -520,7 +521,7 @@ async function changeCode(){
   var cur=(document.getElementById('cc-cur')||{}).value||'', nw=(document.getElementById('cc-new')||{}).value||'';
   if(!/^\d{6}$/.test(nw)){ toast('New code must be 6 numbers.',1); return; }
   var r=await api('la-set-code',{current_code:cur.trim(), new_code:nw.trim()});
-  if(r.ok){ toast('✅ Code changed.'); var a=document.getElementById('cc-cur'),b=document.getElementById('cc-new'); if(a)a.value='';if(b)b.value=''; }
+  if(r.ok){ toast('Code changed.'); var a=document.getElementById('cc-cur'),b=document.getElementById('cc-new'); if(a)a.value='';if(b)b.value=''; }
   else toast(r.error||'Could not change code.',1);
 }
 /* chairman: manage staff logins in-app (no shared PIN) */
@@ -537,7 +538,7 @@ async function addStaff(){
   var u=(document.getElementById('as-un')||{}).value||'', c=(document.getElementById('as-code')||{}).value||'', role=(document.getElementById('as-role')||{}).value||'coach';
   if(!u||!/^\d{6}$/.test(c)){ toast('Username + a 6-digit starter code.',1); return; }
   var r=await api('la-staff-admin',{action:'create', username:u.trim(), code:c.trim(), role:role});
-  if(r.ok){ toast('✅ '+u+' added as '+role+'.'); var a=document.getElementById('as-un'),b=document.getElementById('as-code'); if(a)a.value='';if(b)b.value=''; loadStaff(); }
+  if(r.ok){ toast(''+u+' added as '+role+'.'); var a=document.getElementById('as-un'),b=document.getElementById('as-code'); if(a)a.value='';if(b)b.value=''; loadStaff(); }
   else toast(r.error||'Could not add staff.',1);
 }
 async function loadStaff(){ var r=await api('la-staff-admin',{action:'list'}); var el=document.getElementById('staff-list'); if(!el||!r.ok) return;
@@ -550,7 +551,7 @@ function showAdd(){
     '<div class="card" style="border-color:rgba(255,209,0,.5)"><div class="eyebrow">＋ Add an event</div>'+
     '<div class="fld"><label>What is it?</label><select id="ae-type">'+Object.keys(TYPES).map(function(k){return '<option value="'+k+'"'+(k==='friendly'?' selected':'')+'>'+TYPES[k].ic+' '+TYPES[k].lbl+'</option>';}).join('')+'</select></div>'+
     '<div class="fld"><label>Opponent (blank for photoshoot / club event)</label><input id="ae-opp" placeholder="Metropolitan Police"></div>'+
-    '<div class="fld"><label>Home or away</label><select id="ae-ha"><option value="home">🏠 Home — Tithe Farm</option><option value="away">🚌 Away</option></select></div>'+
+    '<div class="fld"><label>Home or away</label><select id="ae-ha"><option value="home"><i class="ico ico-house"></i> Home — Tithe Farm</option><option value="away"><i class="ico ico-bus"></i> Away</option></select></div>'+
     '<div class="fld"><label>Competition / title</label><input id="ae-comp" placeholder="Pre-Season Friendly"></div>'+
     '<div class="split"><div class="fld"><label>Date &amp; kick-off</label><input id="ae-start" type="datetime-local"></div><div class="fld"><label>Meet time</label><input id="ae-meet" type="datetime-local"></div></div>'+
     '<div class="fld"><label>Kit</label><input id="ae-kit" placeholder="Away — White"></div>'+
@@ -597,7 +598,7 @@ async function addEvent(){
     starts_at:new Date(start).toISOString(), meet_at:g('ae-meet')?new Date(g('ae-meet')).toISOString():null, kit:g('ae-kit').trim()||null, venue:venue };
   var btn=document.getElementById('ae-go'); if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Adding…';}
   var r=await api('la-event', body); if(!r.ok){ toast(r.error||'Failed.',1); if(btn){btn.disabled=false;btn.textContent='Add & ask the squad';} return; }
-  state.activeEvent=r.event.id; toast('✅ Event added — the squad has been asked.'); refresh();
+  state.activeEvent=r.event.id; toast('Event added — the squad has been asked.'); refresh();
 }
 
 /* ═══════ RENDER ═══════ */
@@ -615,7 +616,7 @@ function loginView(){
       '<div class="fld"><label>Choose a 6-digit code</label><input id="su-pw" type="password" inputmode="numeric" maxlength="6" placeholder="6 numbers"></div>'+
       '<label style="display:flex;gap:8px;align-items:flex-start;text-align:left;font-family:var(--fb);font-size:11px;color:#cfcfc6;margin:2px 0 12px"><input type="checkbox" id="su-consent" style="margin-top:3px"><span>I agree my headshot &amp; name may appear on the club’s public website, programme and graphics, and to the club’s privacy notice.</span></label>'+
       '<button class="btn btn-y" id="su-go" onclick="doSignup()">Sign up</button>'+
-      '<div class="loginnote">🔒 Your code is hashed and locked after 5 wrong tries. You go into a <b style="color:var(--y)">pending</b> queue until staff approve you.</div>'+
+      '<div class="loginnote"><i class="ico ico-lock"></i> Your code is hashed and locked after 5 wrong tries. You go into a <b style="color:var(--y)">pending</b> queue until staff approve you.</div>'+
       '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
   }
   if(authMode==='psignin'){
@@ -635,9 +636,9 @@ function loginView(){
       '<button class="btn btn-o btn-sm" style="margin-top:10px" onclick="setAuth(\'choose\')">← Back</button></div>';
   }
   return '<div class="login"><img src="/img/icon-pm-192.png" style="border-radius:18px"><h1>THE LANE<br><span class="y">APP</span></h1><p>Players · Manager · Coaches · Committee</p>'+
-    '<button class="btn btn-y" style="margin-bottom:9px" onclick="setAuth(\'signup\')">⚽ I’m a player — sign up</button>'+
-    '<button class="btn btn-o" style="margin-bottom:9px" onclick="setAuth(\'psignin\')">👤 Player sign in</button>'+
-    '<button class="btn btn-g" onclick="setAuth(\'staff\')">👔 Management sign in</button>'+ installButton() +
+    '<button class="btn btn-y" style="margin-bottom:9px" onclick="setAuth(\'signup\')"><i class="ico ico-football"></i> I’m a player — sign up</button>'+
+    '<button class="btn btn-o" style="margin-bottom:9px" onclick="setAuth(\'psignin\')"><i class="ico ico-user"></i> Player sign in</button>'+
+    '<button class="btn btn-g" onclick="setAuth(\'staff\')"><i class="ico ico-shirt"></i> Management sign in</button>'+ installButton() +
     '<div class="loginnote"><b style="color:#fff">Players</b> sign up and land in a <b style="color:var(--y)">pending queue</b> until staff approve them, then sign in with their username + code.<br><br><b style="color:#fff">Management</b> pick their name from the list and tap in their code on the keypad. Staff can’t self-register — the chairman adds managers, coaches &amp; committee from inside the app.</div></div>';
 }
 function render(){
@@ -647,11 +648,11 @@ function render(){
   var body, tabs, badge, cls;
   if(isStaff()){
     body = state.tab==='home'?staffHome() : state.tab==='squad'?staffSquad() : state.tab==='post'?staffPost() : staffHome();
-    tabs=[['home','🏠','Avail'],['squad','📋','Squad'],['post','📣','Post']];
+    tabs=[['home','<i class="ico ico-house"></i>','Avail'],['squad','<i class="ico ico-clipboard-list"></i>','Squad'],['post','<i class="ico ico-megaphone"></i>','Post']];
     badge = state.role==='chairman'?'Chairman':state.role==='coach'?'Coach':'Manager'; cls='mgr';
   } else {
     body = state.tab==='news'?playerNews() : state.tab==='me'?playerMe() : playerHome();
-    tabs=[['home','⚽','Match'],['news','📣','Club'],['me','👤','My Card']];
+    tabs=[['home','<i class="ico ico-football"></i>','Match'],['news','<i class="ico ico-megaphone"></i>','Club'],['me','<i class="ico ico-user"></i>','My Card']];
     var nm=(state.me&&state.me.player&&state.me.player.name)||'Player'; badge=nm.split(' ')[0]; cls='';
   }
   root.innerHTML =

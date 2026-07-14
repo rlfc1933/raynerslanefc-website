@@ -12,6 +12,7 @@
   <link rel="icon" type="image/png" href="img/badge.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -81,7 +82,7 @@
       </div>
 
       <button type="submit" class="tr-submit">Register My Interest</button>
-      <div class="tr-private">🔒 Your details go privately to the club management team only — never shown on the site. We'll contact you about trial dates.</div>
+      <div class="tr-private"><i class="ico ico-lock"></i> Your details go privately to the club management team only — never shown on the site. We'll contact you about trial dates.</div>
     </form>
   </div>
 </section>
@@ -129,7 +130,7 @@
   }
   function trialThanks(form) {
     form.innerHTML = '<div style="text-align:center;padding:26px">' +
-      '<div style="font-family:var(--font-d);font-size:34px;color:var(--yellow);margin-bottom:10px">Registered 💛</div>' +
+      '<div style="font-family:var(--font-d);font-size:34px;color:var(--yellow);margin-bottom:10px">Registered <i class="ico ico-heart"></i></div>' +
       '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.7;max-width:440px;margin:0 auto">Thanks for putting your name forward. The management team reviews every applicant and will be in touch about upcoming trial dates at Tithe Farm.</p></div>';
   }
 </script>

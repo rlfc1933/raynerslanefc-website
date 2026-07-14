@@ -2,8 +2,8 @@
 // Always tries the live network so updates show immediately; the cache is only
 // an offline fallback. (The old cache-first version froze the site on returning
 // visitors and made deploys look like they hadn't happened.)
-var CACHE = 'rlfc-v7'; // bump on deploy → old caches purged, new assets picked up cleanly
-var CORE = ['/', '/index.html', '/css/style.css', '/js/components.js', '/js/main.js', '/img/badge.png'];
+var CACHE = 'rlfc-v8'; // bump on deploy → old caches purged, new assets picked up cleanly
+var CORE = ['/', '/index.html', '/css/style.css', '/css/icons.css', '/js/components.js', '/js/main.js', '/img/badge.png'];
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();

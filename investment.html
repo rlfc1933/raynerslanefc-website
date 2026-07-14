@@ -20,6 +20,7 @@
   <link rel="icon" type="image/png" href="img/badge.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -77,7 +78,7 @@
       line-height:1.5; display:flex; align-items:flex-start; gap:10px;
     }
     .tier-features li::before {
-      content:"✓"; color:var(--yellow); font-weight:700;
+      content:"<i class="ico ico-check"></i>"; color:var(--yellow); font-weight:700;
       flex-shrink:0; margin-top:1px;
     }
     .tier-features li.no::before { content:"—"; color:var(--grey); }
@@ -352,7 +353,7 @@
           <label class="spon-l">Tell us about your business &amp; what you'd like</label>
           <textarea name="message" rows="3" placeholder="A bit about you and what you're hoping to get from partnering with The Lane."></textarea>
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:15px;margin-top:18px">Submit Application</button>
-          <p style="font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.03em;text-align:center;margin-top:12px">🔒 Goes privately to the commercial team at info@raynerslanefc.co.uk. No obligation.</p>
+          <p style="font-family:var(--font-c);font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.03em;text-align:center;margin-top:12px"><i class="ico ico-lock"></i> Goes privately to the commercial team at info@raynerslanefc.co.uk. No obligation.</p>
         </form>
       </div>
     </div>
@@ -389,7 +390,7 @@
   }
   function sponsorThanks(form) {
     form.innerHTML = '<div style="text-align:center;padding:24px">' +
-      '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:10px">Application received 💛</div>' +
+      '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:10px">Application received <i class="ico ico-heart"></i></div>' +
       '<p style="font-family:var(--font-b);color:rgba(255,255,255,.7);line-height:1.7;max-width:420px;margin:0 auto">Thank you for wanting to back The Lane. The commercial team will review it and get back to you within 48 hours with a tailored proposal.</p></div>';
   }
 

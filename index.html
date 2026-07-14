@@ -125,7 +125,8 @@
 <div id="nav-placeholder"></div>
 
 <!-- ══════════ LIVE SCOREBOARD (shows only when a match is live) ══════════ -->
-<style>
+<link rel="stylesheet" href="css/icons.css">
+  <style>
   .livebar{display:none;background:linear-gradient(90deg,#7f1010,#b91c1c 50%,#7f1010);border-bottom:2px solid #FFD100;position:relative;z-index:30;animation:lbIn .4s ease}
   @keyframes lbIn{from{transform:translateY(-100%)}to{transform:none}}
   .livebar__in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:10px 18px;flex-wrap:wrap;justify-content:center}
@@ -262,7 +263,7 @@
     </div>
 
     <div class="hero__badge" style="position:relative;bottom:auto;left:auto;right:auto;flex-shrink:0;border-top:1px solid var(--border)">
-      <div class="hero__badge-label">&#9917; Next Match</div>
+      <div class="hero__badge-label"><i class="ico ico-football"></i> Next Match</div>
       <div class="hero__badge-match" id="match-teams">Rayners Lane FC vs TBC</div>
       <div class="hero__badge-meta" id="match-meta">Pre-Season 2026 &middot; Tithe Farm Social Club, Harrow</div>
       <div id="countdown" style="margin-top:12px"></div>
@@ -475,20 +476,20 @@
     </div>
     <div class="join__grid">
       <a class="join__card" href="fixtures.html">
-        <div class="join__ic">⚽</div>
+        <div class="join__ic"><i class="ico ico-football"></i></div>
         <div class="join__t">Come to a Game</div>
         <div class="join__d">Saturdays &amp; Tuesdays at Tithe Farm, minutes from Rayners Lane tube. First time? You're very welcome.</div>
         <span class="join__go">See Fixtures &rarr;</span>
       </a>
       <a class="join__card join__card--y" href="fan-zone.html">
         <span class="join__tag">Free</span>
-        <div class="join__ic">💛</div>
+        <div class="join__ic"><i class="ico ico-heart"></i></div>
         <div class="join__t">Join the Family</div>
         <div class="join__d">Grab your free Lane membership card &amp; number. Collect a yellow heart every game and unlock rewards.</div>
         <span class="join__go">Get Your Card &rarr;</span>
       </a>
       <a class="join__card" href="investment.html">
-        <div class="join__ic">🤝</div>
+        <div class="join__ic"><i class="ico ico-handshake"></i></div>
         <div class="join__t">Back the Club</div>
         <div class="join__d">Sponsor a matchball, a matchday or the shirts. We champion every partner across the club — loudly.</div>
         <span class="join__go">Partner With Us &rarr;</span>
@@ -609,10 +610,10 @@
       var md = await (await fetch('data/motm.json?t=' + Date.now())).json();
       var m = (md.entries || [])[0];
       if (m && m.name) {
-        var photo = m.photo ? '<img class="spot-photo" src="'+esc(m.photo)+'" alt="'+esc(m.name)+'">' : '<div class="spot-photo spot-photo--ph">&#11088;</div>';
+        var photo = m.photo ? '<img class="spot-photo" src="'+esc(m.photo)+'" alt="'+esc(m.name)+'">' : '<div class="spot-photo spot-photo--ph"><i class="ico ico-star"></i></div>';
         var meta = [m.position, m.opponent ? 'vs '+m.opponent : '', (m.goals ? m.goals+' goal'+(m.goals>1?'s':'') : '')].filter(Boolean).map(esc).join(' &middot; ');
         cards.push('<div class="spot-card spot-card--motm">'+photo+'<div class="spot-body">'+
-          '<span class="spot-badge">&#11088; Man of the Match</span>'+
+          '<span class="spot-badge"><i class="ico ico-star"></i> Man of the Match</span>'+
           '<div class="spot-name">'+esc(m.name)+'</div>'+
           (meta ? '<div class="spot-meta">'+meta+'</div>' : '')+
           (m.description ? '<div class="spot-desc">'+esc(m.description)+'</div>' : '')+
@@ -623,7 +624,7 @@
       var sd = await (await fetch('data/signing.json?t=' + Date.now())).json();
       var s = (sd.entries || [])[0];
       if (s && s.name) {
-        var sphoto = s.photo ? '<img class="spot-photo" src="'+esc(s.photo)+'" alt="'+esc(s.name)+'">' : '<div class="spot-photo spot-photo--ph">&#127881;</div>';
+        var sphoto = s.photo ? '<img class="spot-photo" src="'+esc(s.photo)+'" alt="'+esc(s.name)+'">' : '<div class="spot-photo spot-photo--ph"><i class="ico ico-party-popper"></i></div>';
         var smeta = [s.position, s.from ? 'from '+s.from : ''].filter(Boolean).map(esc).join(' &middot; ');
         cards.push('<div class="spot-card spot-card--sign">'+sphoto+'<div class="spot-body">'+
           '<span class="spot-badge">&#10022; New Signing</span>'+

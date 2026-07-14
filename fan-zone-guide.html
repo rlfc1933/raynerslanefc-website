@@ -8,7 +8,8 @@
 <link rel="icon" type="image/png" href="img/badge.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --y:#FFD100; --g:#1A5C32; --bk:#0a0a0a; --w:#F5F3ED; --ink:#1a1a1a; --soft:#5a5a5a; --line:#e4e2da;
     --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
@@ -89,7 +90,7 @@
 <div class="bar">
   <img src="img/badge.png" alt="RLFC" style="width:30px;height:30px;object-fit:contain">
   <h1>Fan Zone &amp; Scanning — Guide</h1>
-  <button onclick="window.print()">🖨️ Save as PDF / Print</button>
+  <button onclick="window.print()"><i class="ico ico-printer"></i> Save as PDF / Print</button>
   <span class="hint">Click → choose <b>Save as PDF</b> (paper <b>A4</b>, “Background graphics” ON). That’s your shareable PDF.</span>
   <span class="sp"></span>
   <a href="fan-zone.html" style="color:#aaa;font-family:var(--fc);font-size:13px">← Fan Zone</a>
@@ -108,7 +109,7 @@
       <div class="cover__strip">
         <div class="a"><div class="n">FREE</div><div class="l">Membership</div></div>
         <div class="b"><div class="n">1 TAP</div><div class="l">To scan a fan</div></div>
-        <div class="b"><div class="n">💛</div><div class="l">A heart every game</div></div>
+        <div class="b"><div class="n"><i class="ico ico-heart"></i></div><div class="l">A heart every game</div></div>
       </div>
     </div>
   </div>
@@ -117,7 +118,7 @@
   <div class="page">
     <div class="sec-head"><span class="sec-num">1</span><div><div class="sec-tag">Start here</div><div class="sec-title">What the Fan Zone is</div></div></div>
     <div class="rule"></div>
-    <p class="lead">The Fan Zone turns everyday supporters into a real, named community — <b>The Lane Family</b>. It’s a <b>free digital membership</b>: each fan gets a personal <b>Lane number</b> and a phone <b>membership card with a QR code</b>. When they come to a game, a steward scans that card and the fan earns a <b>“heart” 💛</b> for attending. Over a season it builds a real picture of who backs the club and how often — the foundation for loyalty rewards, better matchday promotion, and hard numbers to show sponsors.</p>
+    <p class="lead">The Fan Zone turns everyday supporters into a real, named community — <b>The Lane Family</b>. It’s a <b>free digital membership</b>: each fan gets a personal <b>Lane number</b> and a phone <b>membership card with a QR code</b>. When they come to a game, a steward scans that card and the fan earns a <b>“heart” <i class="ico ico-heart"></i></b> for attending. Over a season it builds a real picture of who backs the club and how often — the foundation for loyalty rewards, better matchday promotion, and hard numbers to show sponsors.</p>
 
     <div class="sec-head"><span class="sec-num">2</span><div><div class="sec-tag">Front of house · the supporter</div><div class="sec-title">How a fan joins &amp; gets scanned</div></div></div>
     <div class="rule"></div>
@@ -127,7 +128,7 @@
     <div class="step step--fan"><div class="step__n">3</div><div class="step__b"><div class="step__h">Get their Lane card + QR</div><div class="step__t">They’re given a unique <b>Lane number</b> (e.g. <code>LANE-4500</code>) and a digital <b>membership card with a QR code</b>.</div></div></div>
     <div class="step step--fan"><div class="step__n">4</div><div class="step__b"><div class="step__h">Save it to their phone</div><div class="step__t">Add to home screen or screenshot the card, so it’s ready to show at the gate — no printing needed.</div></div></div>
     <div class="step step--fan"><div class="step__n">5</div><div class="step__b"><div class="step__h">Show it on matchday</div><div class="step__t">At the game they show the QR to a steward to be scanned. That’s it for the fan.</div></div></div>
-    <div class="step step--fan"><div class="step__n">6</div><div class="step__b"><div class="step__h">Collect their hearts 💛</div><div class="step__t">Every game they’re scanned in, their card gains a heart — building an attendance history they can see grow.</div></div></div>
+    <div class="step step--fan"><div class="step__n">6</div><div class="step__b"><div class="step__h">Collect their hearts <i class="ico ico-heart"></i></div><div class="step__t">Every game they’re scanned in, their card gains a heart — building an attendance history they can see grow.</div></div></div>
 
     <div class="callout"><div class="k">Tell every fan</div><div class="t">“Join The Lane Family free in a minute — get your Lane card, then just show it at every game to collect your hearts.” The more members, the stronger every point below.</div></div>
 
@@ -144,7 +145,7 @@
     <div class="step"><div class="step__n">2</div><div class="step__b"><div class="step__h">Enter the club PIN</div><div class="step__t">The scanner is <b>staff-only</b> — type the club PIN to unlock it.</div></div></div>
     <div class="step"><div class="step__n">3</div><div class="step__b"><div class="step__h">Check the match date</div><div class="step__t">It defaults to <b>today</b>. Only change it if you’re logging a past game.</div></div></div>
     <div class="step"><div class="step__n">4</div><div class="step__b"><div class="step__h">Start the camera &amp; point</div><div class="step__t">Tap <b>“Start Camera”</b> and point at the fan’s Lane QR. It scans <b>automatically</b> — no button to press per fan.</div></div></div>
-    <div class="step"><div class="step__n">5</div><div class="step__b"><div class="step__h">Watch for the tick</div><div class="step__t">You’ll see <code>✓ Lane #4500 — heart #7</code>. If they’ve already been scanned today you’ll get <code>⚠️ already scanned</code> — so nobody is double-counted.</div></div></div>
+    <div class="step"><div class="step__n">5</div><div class="step__b"><div class="step__h">Watch for the tick</div><div class="step__t">You’ll see <code><i class="ico ico-check"></i> Lane #4500 — heart #7</code>. If they’ve already been scanned today you’ll get <code><i class="ico ico-triangle-alert"></i> already scanned</code> — so nobody is double-counted.</div></div></div>
     <div class="step"><div class="step__n">6</div><div class="step__b"><div class="step__h">Keep going</div><div class="step__t">Scan the next fan, and the next. A running count shows how many you’ve checked in. Every scan saves instantly.</div></div></div>
 
     <div class="sec-head" style="margin-top:16px"><span class="sec-num">4</span><div><div class="sec-tag">Under the bonnet</div><div class="sec-title">How the back end works</div></div></div>
@@ -156,7 +157,7 @@
       <div class="flow__arrow">→</div>
       <div class="flow__b"><div class="n">DATABASE</div><div class="d">records attendance · no duplicates</div></div>
       <div class="flow__arrow">→</div>
-      <div class="flow__b"><div class="n">HEART 💛</div><div class="d">fan’s card updates instantly</div></div>
+      <div class="flow__b"><div class="n">HEART <i class="ico ico-heart"></i></div><div class="d">fan’s card updates instantly</div></div>
     </div>
     <p class="lead" style="margin-bottom:0">In plain English: the QR just holds the fan’s <b>Lane number</b>. Scanning sends that number and the match date to a secure club system, which logs the attendance in the club’s database (one check-in per fan per game) and instantly adds the heart to their card. Nothing sensitive is ever shown publicly, and only a staff PIN can record a check-in.</p>
 
@@ -178,7 +179,7 @@
 
     <div class="callout" style="margin-top:24px;border-left-color:var(--g);background:#f3f8f4"><div class="k" style="color:var(--g)">The one-line pitch</div><div class="t"><b>Every scan makes the club’s story bigger.</b> More members and more scanned attendance means more to show sponsors, more people to sell to, and more reasons for the community to feel part of The Lane. Get every fan signed up, and scan every one, every game.</div></div>
 
-    <div class="foot"><span>Rayners Lane FC · Est. 1933 · Harrow</span><span>raynerslanefc.co.uk · <b>Up The Lane</b> 💛💚</span></div>
+    <div class="foot"><span>Rayners Lane FC · Est. 1933 · Harrow</span><span>raynerslanefc.co.uk · <b>Up The Lane</b> <i class="ico ico-heart"></i><i class="ico ico-heart"></i></span></div>
   </div>
 
 </div>

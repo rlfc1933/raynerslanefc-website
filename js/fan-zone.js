@@ -8,12 +8,12 @@ var FAN_KEY = 'rlfc_fan';
 
 // ── LOYALTY: 5 tiers by total games attended ──
 var TIERS = [
-  { min: 50, name: 'Terrace Royalty', icon: '👑' },
-  { min: 25, name: 'Lane Legend',     icon: '🏆' },
-  { min: 10, name: 'Lane Loyal',      icon: '💛' },
-  { min: 5,  name: 'Yellow Regular',  icon: '⚽' },
-  { min: 1,  name: 'Local Laner',     icon: '🧣' },
-  { min: 0,  name: 'New to The Lane', icon: '✨' },
+  { min: 50, name: 'Terrace Royalty', icon: '<i class="ico ico-crown"></i>' },
+  { min: 25, name: 'Lane Legend',     icon: '<i class="ico ico-trophy"></i>' },
+  { min: 10, name: 'Lane Loyal',      icon: '<i class="ico ico-heart"></i>' },
+  { min: 5,  name: 'Yellow Regular',  icon: '<i class="ico ico-football"></i>' },
+  { min: 1,  name: 'Local Laner',     icon: '<i class="ico ico-shirt"></i>' },
+  { min: 0,  name: 'New to The Lane', icon: '<i class="ico ico-sparkles"></i>' },
 ];
 function tierFor(games) { for (var i = 0; i < TIERS.length; i++) if (games >= TIERS[i].min) return TIERS[i]; return TIERS[TIERS.length - 1]; }
 
@@ -172,10 +172,10 @@ function joinOrCreate(mode) { if (SB) openAuth(mode || 'signup'); else openCardE
 function signIn() {
   if (SB) { openAuth('login'); return; }
   if (!getFan()) { openCardEditor(); return; }
-  localStorage.removeItem(SESSION_OUT); refreshFanUI(); toast('Welcome back 💛');
+  localStorage.removeItem(SESSION_OUT); refreshFanUI(); toast('Welcome back');
 }
 async function signOut() {
-  if (SB) { await sbLogout(); refreshFanUI(); toast('Logged out 💛'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (SB) { await sbLogout(); refreshFanUI(); toast('Logged out'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   localStorage.setItem(SESSION_OUT, '1'); refreshFanUI(); toast('Logged out — your card is safe on this device. Log back in any time.'); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function refreshFanUI() {
@@ -193,7 +193,7 @@ function renderAccountBar() {
     var btns = SB
       ? '<button class="fz-acct__btn" onclick="openAuth(\'login\')">Log in</button><button class="fz-acct__btn fz-acct__btn--y" style="margin-left:6px" onclick="openAuth(\'signup\')">Join</button>'
       : (f ? '<button class="fz-acct__btn fz-acct__btn--y" onclick="signIn()">Log in</button>' : '<button class="fz-acct__btn fz-acct__btn--y" onclick="openCardEditor()">Join Free</button>');
-    el.innerHTML = '<div class="fz-acct"><div class="fz-acct__av">&#10024;</div>' +
+    el.innerHTML = '<div class="fz-acct"><div class="fz-acct__av"><i class="ico ico-sparkles"></i></div>' +
       '<div class="fz-acct__main"><div class="fz-acct__hi">' + (f && !SB ? 'Welcome back' : 'Join The Lane') + '</div>' +
       '<div class="fz-acct__sub">' + sub + '</div></div>' + btns + '</div>';
     return;
@@ -241,7 +241,7 @@ async function doLogin() {
   authErr('Logging in…');
   var r = await sbLogin(email, pass);
   if (r.error) { authErr(r.error); return; }
-  closeEditor(); refreshFanUI(); toast('Welcome back 💛');
+  closeEditor(); refreshFanUI(); toast('Welcome back');
 }
 async function doSignup() {
   authErr('Creating your account…');
@@ -252,14 +252,14 @@ async function doSignup() {
   });
   if (r && r.error) { authErr(r.error); return; }
   if (r && r.needConfirm) { authErr('Account created — check your email to confirm, then log in.'); return; }
-  closeEditor(); refreshFanUI(); toast('Welcome to The Lane! 💛');
+  closeEditor(); refreshFanUI(); toast('Welcome to The Lane!');
 }
 
 /* ---------- MEMBERS AREA (vouchers, promos, member news) ---------- */
 async function renderMembers() {
   var el = document.getElementById('fz-members'); if (!el) return;
   if (!isSignedIn()) {
-    el.innerHTML = '<div class="fz-locked"><div class="fz-locked__ic">&#128274;</div>' +
+    el.innerHTML = '<div class="fz-locked"><div class="fz-locked__ic"><i class="ico ico-lock"></i></div>' +
       '<div class="fz-locked__t">Members-only perks</div>' +
       '<div class="fz-locked__p">Vouchers, promos and exclusive member news live here. Create your free Lane account (or log in) to unlock them.</div>' +
       '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="signIn()">' + (getFan() ? 'Log in' : 'Join Free') + '</button></div>';
@@ -286,7 +286,7 @@ async function renderMembers() {
         '<div class="fz-mnews__b">' + esc(n.body) + '</div>' + (dt ? '<div class="fz-mnews__d">' + dt + '</div>' : '') + '</div>';
     }).join('') + '</div>';
   }
-  if (!html) html = '<div class="fz-locked"><div class="fz-locked__ic">&#128153;</div><div class="fz-locked__t">You&rsquo;re all set</div><div class="fz-locked__p">No perks live right now — as a member you&rsquo;ll be first to know when they drop.</div></div>';
+  if (!html) html = '<div class="fz-locked"><div class="fz-locked__ic"><i class="ico ico-heart"></i></div><div class="fz-locked__t">You&rsquo;re all set</div><div class="fz-locked__p">No perks live right now — as a member you&rsquo;ll be first to know when they drop.</div></div>';
   el.innerHTML = html;
 }
 
@@ -350,15 +350,15 @@ function renderFanCard() {
     ? '<img class="fancard__photo" src="' + f.photo + '" alt="">'
     : '<div class="fancard__photo" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;color:#fff">' + esc(initials) + '</div>';
   var maxHearts = 16, hearts = '';
-  for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '💛';
+  for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '<i class="ico ico-heart"></i>';
   if (games > maxHearts) hearts += ' <span style="font-family:var(--font-c);font-size:12px;color:var(--yellow);font-weight:700">+' + (games - maxHearts) + '</span>';
   var streak = attendStreak(f);
   var streakBadge = streak >= 2
-    ? '<span style="float:right;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.04em;color:#fb923c;background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.3);border-radius:999px;padding:2px 10px">🔥 ' + streak + ' in a row</span>'
+    ? '<span style="float:right;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.04em;color:#fb923c;background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.3);border-radius:999px;padding:2px 10px"><i class="ico ico-flame"></i> ' + streak + ' in a row</span>'
     : '';
   var heartsRow = games
     ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + streakBadge + hearts + '</div>'
-    : '<div style="padding:14px 18px 2px;font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.5">No hearts yet — show your card at the gate and the club adds a 💛 after every game.</div>';
+    : '<div style="padding:14px 18px 2px;font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.5">No hearts yet — show your card at the gate and the club adds a <i class="ico ico-heart"></i> after every game.</div>';
 
   // Progress bar to the next reward (anticipation)
   var nr = nextReward(f);
@@ -380,17 +380,17 @@ function renderFanCard() {
 
   // All rewards — unlocked shine, locked tease (mystery), each "powered by" its sponsor
   var rewardsHtml =
-    '<div style="padding:2px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">🎁 Rewards</div>' +
+    '<div style="padding:2px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px"><i class="ico ico-gift"></i> Rewards</div>' +
     REWARDS.map(function (r) {
       var got = home >= r.home;
-      var powered = r.sponsor ? '<span style="display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4ade80;background:rgba(34,197,94,.12);border-radius:4px;padding:2px 7px;margin-top:5px">⚡ Powered by ' + esc(r.sponsor) + '</span>' : '';
+      var powered = r.sponsor ? '<span style="display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4ade80;background:rgba(34,197,94,.12);border-radius:4px;padding:2px 7px;margin-top:5px"><i class="ico ico-zap"></i> Powered by ' + esc(r.sponsor) + '</span>' : '';
       if (got) {
         return '<div style="background:rgba(255,209,0,.08);border:1px solid rgba(255,209,0,.3);border-radius:8px;padding:9px 12px;margin-bottom:6px">' +
-          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff">✓ ' + esc(r.title) + '</div>' +
+          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff"><i class="ico ico-check"></i> ' + esc(r.title) + '</div>' +
           '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey);line-height:1.4">' + esc(r.note) + '</div>' + powered + '</div>';
       }
       return '<div style="background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;opacity:.72">' +
-        '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--lgrey,#bbb)">🔒 ' + esc(r.title) + '</div>' +
+        '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--lgrey,#bbb)"><i class="ico ico-lock"></i> ' + esc(r.title) + '</div>' +
         '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey)">' + (r.home - home) + ' more home game' + ((r.home - home) > 1 ? 's' : '') + ' to unlock</div>' + powered + '</div>';
     }).join('') + '</div>';
   var avatar = f.photo
@@ -412,7 +412,7 @@ function renderFanCard() {
           '<div class="vipcard__vlabel">Valued Member</div>' +
           '<div class="vipcard__name">' + esc(f.username || 'Lane Fan') + '</div>' +
           '<div class="vipcard__meta">' + metaLine + '</div>' +
-          (isFounding(f) ? '<div class="vipcard__founding">⭐ Founding Laner</div>' : '') +
+          (isFounding(f) ? '<div class="vipcard__founding"><i class="ico ico-star"></i> Founding Laner</div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="vipcard__strip">' +
@@ -432,7 +432,7 @@ function renderFanCard() {
       (f.meaning ? '<div class="fancard__meaning" style="padding:14px 2px 4px">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
       '<div style="margin-top:10px">' + nextHtml + rewardsHtml + '</div>' +
       '<div class="fancard__foot" style="padding:6px 0 0">' +
-        '<button class="fz-btn fz-btn--y" onclick="saveToPhone()">📲 Save to Phone</button>' +
+        '<button class="fz-btn fz-btn--y" onclick="saveToPhone()"><i class="ico ico-smartphone"></i> Save to Phone</button>' +
         '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Profile</button>' +
       '</div>' +
     '</div>';
@@ -498,7 +498,7 @@ function fcPhoto(input) {
       var c = document.createElement('canvas'); c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       document.getElementById('fz-editor')._photo = c.toDataURL('image/jpeg', 0.8);
-      toast('Photo ready ✓');
+      toast('Photo ready');
     };
     img.src = e.target.result;
   };
@@ -521,7 +521,7 @@ async function saveCard() {
     var r = await SB.from('fans').update(upd).eq('id', sbUser.id);
     if (r.error) { toast(r.error.message, true); return; }
     await sbLoadProfile();
-    closeEditor(); refreshFanUI(); toast('Profile updated 💛');
+    closeEditor(); refreshFanUI(); toast('Profile updated');
     return;
   }
   // Device mode: on-phone card.
@@ -535,7 +535,7 @@ async function saveCard() {
   localStorage.removeItem(SESSION_OUT);
   closeEditor();
   refreshFanUI();
-  toast('Card saved to your phone 💛');
+  toast('Card saved to your phone');
 }
 
 /* ---------- LADDER ---------- */
@@ -543,16 +543,16 @@ function renderLadder(f) {
   var el = document.getElementById('fz-ladder'); if (!el) return;
   var games = f ? totalGames(f) : -1;
   var rungs = [
-    { g: 1,  t: 'Local Laner',     i: '🧣', d: 'Your first game in. You\'re one of us.' },
-    { g: 5,  t: 'Yellow Regular',  i: '⚽', d: 'Shout-outs, early team news + your 6th home game free.' },
-    { g: 10, t: 'Lane Loyal',      i: '💛', d: 'Name on the Patrons wall + a drink on the house.' },
-    { g: 25, t: 'Lane Legend',     i: '🏆', d: 'Matchday VIP — shout-outs, programme mention, coin toss.' },
-    { g: 50, t: 'Terrace Royalty', i: '👑', d: 'Ever-present. After-season party invite + club pin badge.' },
+    { g: 1,  t: 'Local Laner',     i: '<i class="ico ico-shirt"></i>', d: 'Your first game in. You\'re one of us.' },
+    { g: 5,  t: 'Yellow Regular',  i: '<i class="ico ico-football"></i>', d: 'Shout-outs, early team news + your 6th home game free.' },
+    { g: 10, t: 'Lane Loyal',      i: '<i class="ico ico-heart"></i>', d: 'Name on the Patrons wall + a drink on the house.' },
+    { g: 25, t: 'Lane Legend',     i: '<i class="ico ico-trophy"></i>', d: 'Matchday VIP — shout-outs, programme mention, coin toss.' },
+    { g: 50, t: 'Terrace Royalty', i: '<i class="ico ico-crown"></i>', d: 'Ever-present. After-season party invite + club pin badge.' },
   ];
   el.innerHTML = rungs.map(function (r) {
     var on = games >= r.g;
     return '<div class="fz-rung' + (on ? ' on' : '') + '"><div class="fz-rung__g">' + r.i + ' ' + r.g + '</div>' +
-      '<div class="fz-rung__t">' + r.t + (on ? ' ✓' : '') + '</div>' +
+      '<div class="fz-rung__t">' + r.t + (on ? ' <i class="ico ico-check"></i>' : '') + '</div>' +
       '<div class="fz-rung__d">' + r.d + '</div></div>';
   }).join('');
 }
@@ -564,7 +564,7 @@ async function renderWall() {
     var d = await (await fetch('data/patrons.json?t=' + Date.now())).json();
     var list = d.patrons || [];
     if (!list.length) {
-      el.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-family:var(--font-b);color:var(--grey);padding:30px">Our patrons wall is just getting started. Get to the games, climb the ladder, and be one of the first names up here. 💛</div>';
+      el.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-family:var(--font-b);color:var(--grey);padding:30px">Our patrons wall is just getting started. Get to the games, climb the ladder, and be one of the first names up here. <i class="ico ico-heart"></i></div>';
       return;
     }
     var fom = d.fanOfMonth;
@@ -576,7 +576,7 @@ async function renderWall() {
       var badges = (p.badges || []).map(function (b) { return '<span class="patron__badge">' + esc(b) + '</span>'; }).join('');
       var years = p.since ? (2026 - parseInt(p.since)) : null;
       return '<div class="patron' + (featured ? ' patron--featured' : '') + '">' +
-        (featured ? '<div class="patron__crown">★ Fan of the Month</div>' : '') +
+        (featured ? '<div class="patron__crown"><i class="ico ico-star"></i> Fan of the Month</div>' : '') +
         photo +
         '<div class="patron__name">' + esc(p.username || 'Lane Fan') + '</div>' +
         '<div class="patron__meta">' + (p.town ? esc(p.town) + ' &middot; ' : '') + (years != null ? years + ' yrs a fan' : '') + (p.games ? ' &middot; ' + p.games + ' games' : '') + '</div>' +
