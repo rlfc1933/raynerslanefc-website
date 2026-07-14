@@ -9,7 +9,7 @@
       "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/michael-adefolami.webp"
     },
     {
       "id": "player-carl-adiku",
@@ -42,7 +42,7 @@
       "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/temi-animashaun.webp"
     },
     {
       "id": "player-charlie-austin",
@@ -53,7 +53,7 @@
       "age": 19,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/charlie-austin.webp"
     },
     {
       "id": "player-jenyo-balogun",
@@ -64,7 +64,7 @@
       "age": 21,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/jenyo-balogun.webp"
     },
     {
       "id": "player-keiran-barnard-white",
@@ -75,7 +75,7 @@
       "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/keiran-barnard-white.webp"
     },
     {
       "id": "player-alfie-campbell",
@@ -86,7 +86,7 @@
       "age": 24,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/alfie-campbell.webp"
     },
     {
       "id": "player-jaycob-campbell",
@@ -97,7 +97,7 @@
       "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/jaycob-campbell.webp"
     },
     {
       "id": "player-le'kai-chevannes",
@@ -108,7 +108,7 @@
       "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/le-kai-chevannes.webp"
     },
     {
       "id": "player-ati-diamond",
@@ -119,7 +119,7 @@
       "age": 23,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/ati-diamond.webp"
     },
     {
       "id": "player-mateo-dos-reis",
@@ -130,7 +130,7 @@
       "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/mateo-dos-reis.webp"
     },
     {
       "id": "player-jevan-el-kaffash",
@@ -141,7 +141,7 @@
       "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/jevan-el-kaffash.webp"
     },
     {
       "id": "player-badou-faye",
@@ -163,7 +163,7 @@
       "age": 26,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/matthew-forkin.webp"
     },
     {
       "id": "player-micah-haley",
@@ -174,7 +174,7 @@
       "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/micah-haley.webp"
     },
     {
       "id": "player-leon-iluobe",
@@ -185,7 +185,7 @@
       "age": 28,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/leon-iluobe.webp"
     },
     {
       "id": "player-christon-john-ahye",
@@ -196,7 +196,7 @@
       "age": 22,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/christon-john-ahye.webp"
     },
     {
       "id": "player-jalen-johnson",
@@ -207,7 +207,7 @@
       "age": 19,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/jalen-johnson.webp"
     },
     {
       "id": "player-nathan-kpemou",
@@ -240,7 +240,7 @@
       "age": 18,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/ruben-santangelo.webp"
     },
     {
       "id": "player-alvin-walters",
@@ -262,8 +262,8 @@
       "age": 24,
       "apps": 0,
       "goals": 0,
-      "photo": ""
+      "photo": "/img/players/casey-yousuff-phillips.webp"
     }
   ],
-  "updatedAt": "2026-07-14T22:23:53.177Z"
+  "updatedAt": "2026-07-14T23:16:53.213Z"
 }
