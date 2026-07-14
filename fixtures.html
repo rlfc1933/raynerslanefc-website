@@ -385,17 +385,138 @@ function fxToast(msg, links) {
   t.classList.add('on'); clearTimeout(window._fxT);
   window._fxT = setTimeout(function () { t.classList.remove('on'); }, 5400);
 }
-function fxShare(id) {
+/* ── Branded share CARD (1080×1080 PNG) ───────────────────────────────────
+   Same design language as Post Studio's matchday graphic (dark base, skewed
+   brand band, crest pair, Bebas) but drawn natively so the public page needs
+   no extra library. Crests are loaded from their raw same-origin path so the
+   canvas is never tainted. A fan sharing this to WhatsApp/Instagram is free
+   reach — that's the point. */
+function fxImg(src) {
+  return new Promise(function (res) {
+    if (!src) return res(null);
+    var i = new Image(); i.crossOrigin = 'anonymous';
+    i.onload = function () { res(i); }; i.onerror = function () { res(null); };
+    i.src = src;
+  });
+}
+function fxFit(ctx, text, max, size, font) {
+  var s = size;
+  do { ctx.font = s + 'px ' + font; if (ctx.measureText(text).width <= max || s <= 18) break; s -= 2; } while (true);
+  return s;
+}
+function fxDrawCrest(ctx, img, cx, cy, box, initials) {
+  if (img) {                                   // contain, never stretch
+    var r = Math.min(box / img.width, box / img.height);
+    var w = img.width * r, h = img.height * r;
+    ctx.drawImage(img, cx - w / 2, cy - h / 2, w, h);
+    return;
+  }
+  ctx.save();                                  // on-brand initials fallback
+  ctx.beginPath(); ctx.arc(cx, cy, box / 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#1c1c1c'; ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = '#2c2c2c'; ctx.stroke();
+  ctx.fillStyle = '#8A8A82'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = Math.round(box * 0.3) + 'px "Bebas Neue", sans-serif';
+  ctx.fillText(initials, cx, cy + 2);
+  ctx.restore();
+}
+async function fxCardPng(f) {
+  try { if (document.fonts && document.fonts.ready) { await document.fonts.load('700 60px "Bebas Neue"'); await document.fonts.ready; } } catch (e) {}
+  var W = 1080, H = 1080, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  var x = c.getContext('2d');
+  var home = f.isHome !== false;
+  var OP = { name: f.opponent || 'TBC', crest: f.oppCrest || '' };
+  var RLo = { name: 'Rayners Lane', crest: 'img/badge.png' };
+  var L = home ? RLo : OP, R = home ? OP : RLo;
+
+  // base + brand glow
+  x.fillStyle = '#080808'; x.fillRect(0, 0, W, H);
+  var g = x.createRadialGradient(W / 2, -100, 0, W / 2, -100, H); g.addColorStop(0, '#1e3a24'); g.addColorStop(1, '#080808');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // skewed brand band behind the lockup (Post Studio's signature)
+  x.save(); x.translate(0, 470); x.transform(1, 0, -0.12, 1, 0, 0);
+  x.fillStyle = 'rgba(26,92,50,.5)'; x.fillRect(-120, -150, W + 240, 300);
+  x.fillStyle = 'rgba(255,209,0,.9)'; x.fillRect(-120, -152, W + 240, 4);
+  x.restore();
+
+  var comp = fxComp(f.competition);
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  // eyebrow
+  x.fillStyle = '#FFD100'; x.font = '700 30px "Barlow Condensed", sans-serif';
+  try { x.letterSpacing = '6px'; } catch (e) {}
+  x.fillText((comp.lbl + ' · ' + (home ? 'HOME' : 'AWAY')).toUpperCase(), W / 2, 96);
+  try { x.letterSpacing = '0px'; } catch (e) {}
+
+  // crest pair + VS
+  var cy = 400, box = 240, lx = W * 0.265, rx = W * 0.735;
+  var li = await fxImg(L.crest), ri = await fxImg(R.crest);
+  fxDrawCrest(x, li, lx, cy, box, fxInitials(L.name));
+  fxDrawCrest(x, ri, rx, cy, box, fxInitials(R.name));
+  x.fillStyle = '#FFD100'; x.font = '64px "Bebas Neue", sans-serif';
+  x.fillText('VS', W / 2, cy + 4);
+
+  // team names
+  x.fillStyle = '#F5F3ED';
+  [[L.name, lx], [R.name, rx]].forEach(function (t) {
+    var s = fxFit(x, t[0].toUpperCase(), 400, 46, '"Bebas Neue", sans-serif');
+    x.font = s + 'px "Bebas Neue", sans-serif';
+    x.fillText(t[0].toUpperCase(), t[1], cy + box / 2 + 46);
+  });
+
+  // date / kick-off / venue
+  var d = fxDate(f);
+  x.fillStyle = '#F5F3ED'; x.font = '68px "Bebas Neue", sans-serif';
+  x.fillText(d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(), W / 2, 720);
+  x.fillStyle = '#FFD100'; x.font = '700 38px "Barlow Condensed", sans-serif';
+  x.fillText((f.kickoff || '15:00') + ' KICK-OFF', W / 2, 782);
+  var v = fxVenue(f);
+  if (v) { x.fillStyle = '#8A8A82'; x.font = '30px "Barlow", sans-serif'; x.fillText(v, W / 2, 830); }
+
+  // footer
+  x.strokeStyle = '#2c2c2c'; x.lineWidth = 2; x.beginPath(); x.moveTo(120, 900); x.lineTo(W - 120, 900); x.stroke();
+  var badge = await fxImg('img/badge.png');
+  if (badge) { var bs = 84; x.drawImage(badge, W / 2 - 190, 940 - bs / 2, bs, bs); }
+  x.textAlign = 'left';
+  x.fillStyle = '#F5F3ED'; x.font = '46px "Bebas Neue", sans-serif';
+  x.fillText('UP THE LANE', W / 2 - 86, 932);
+  x.fillStyle = '#8A8A82'; x.font = '24px "Barlow Condensed", sans-serif';
+  x.fillText('raynerslanefc.co.uk', W / 2 - 86, 966);
+
+  return new Promise(function (res) { c.toBlob(res, 'image/png'); });
+}
+async function fxShare(id) {
   var f = (window._fxAll || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
   var home = f.isHome !== false, v = fxVenue(f);
   var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   var teams = home ? ('Rayners Lane vs ' + f.opponent) : (f.opponent + ' vs Rayners Lane');
   var line = '⚽ ' + teams + ' — ' + ds + ', ' + (f.kickoff || '15:00') + (v ? ', ' + v : '') + '. Up The Lane 💛';
   var url = 'https://raynerslanefc.co.uk/fixtures.html';
-  if (navigator.share) { navigator.share({ title: 'Rayners Lane FC', text: line, url: url }).catch(function () {}); return; }
   var full = line + ' ' + url;
   var wa = 'https://wa.me/?text=' + encodeURIComponent(full);
   var tw = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(full);
+
+  fxToast('Building your share card…');
+  var blob = null;
+  try { blob = await fxCardPng(f); } catch (e) { blob = null; }
+
+  if (blob) {
+    var file = new File([blob], 'rayners-lane-' + f.id + '.png', { type: 'image/png' });
+    // Phone: share the actual graphic to WhatsApp / Instagram / anywhere.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'Rayners Lane FC', text: line }); return; } catch (e) { return; }
+    }
+    // Desktop: save the card + hand over the caption and the quick links.
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'rayners-lane-' + f.id + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    if (navigator.clipboard) { try { await navigator.clipboard.writeText(full); } catch (e) {} }
+    fxToast('Card saved + caption copied.', '<a href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a><a href="' + tw + '" target="_blank" rel="noopener">X</a>');
+    return;
+  }
+  // Last resort — text only.
+  if (navigator.share) { navigator.share({ title: 'Rayners Lane FC', text: line, url: url }).catch(function () {}); return; }
   function done() { fxToast('Copied — paste it anywhere.', '<a href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a><a href="' + tw + '" target="_blank" rel="noopener">X</a>'); }
   if (navigator.clipboard) navigator.clipboard.writeText(full).then(done).catch(done); else done();
 }
