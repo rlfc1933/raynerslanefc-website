@@ -5,3 +5,10 @@ node_modules/
 .env
 .claude/
 /sponsors/
+
+# Local Netlify folder
+.netlify
+
+# Full-res photo originals from the club shoot (~40MB). The optimised
+# derivatives in img/players/ are what ship; these are the archive.
+_source/
