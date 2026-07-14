@@ -34,17 +34,25 @@
 # caching without risking stale-asset bugs. stale-while-revalidate is the safe
 # win: returning visitors get the cached file INSTANTLY (no blocking round-trip),
 # the browser revalidates in the background, and a deploy is picked up on the
-# next load. Big improvement over max-age=0 (which revalidates on every load)
-# with none of the staleness risk of immutable-without-hashing.
+# next load.
+#
+# max-age MUST stay 0. It was 3600, which does NOT do the above: the browser
+# served JS from cache for an hour without ever asking, so a deploy took up to
+# an hour to reach anyone — and worse, the service worker's install-time
+# addAll() was handed that stale copy out of the HTTP cache and then froze it
+# into the SW cache, where it survived until the next CACHE bump. That is the
+# "I published it but nothing changed" complaint, for code instead of data.
+# max-age=0 + stale-while-revalidate still serves instantly from cache; it just
+# also revalidates, which is the whole point.
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+    Cache-Control = "public, max-age=0, stale-while-revalidate=86400"
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+    Cache-Control = "public, max-age=0, stale-while-revalidate=86400"
 
 # Fonts / static images are safe to cache hard — their content is stable and
 # Netlify Image CDN URLs already carry their own long cache.

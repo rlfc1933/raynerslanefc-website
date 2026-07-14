@@ -2,12 +2,22 @@
 // Always tries the live network so updates show immediately; the cache is only
 // an offline fallback. (The old cache-first version froze the site on returning
 // visitors and made deploys look like they hadn't happened.)
-var CACHE = 'rlfc-v8'; // bump on deploy → old caches purged, new assets picked up cleanly
+var CACHE = 'rlfc-v9'; // bump on deploy → old caches purged, new assets picked up cleanly
 var CORE = ['/', '/index.html', '/css/style.css', '/css/icons.css', '/js/components.js', '/js/main.js', '/img/badge.png'];
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE).catch(function(){}); }));
+  // {cache:'reload'} is load-bearing: a plain addAll() is allowed to fill the
+  // SW cache FROM THE BROWSER'S HTTP CACHE, so a fresh install right after a
+  // deploy can bake a stale file in and serve it until the next CACHE bump.
+  // Forcing the network means the SW cache always starts from what's live.
+  e.waitUntil(caches.open(CACHE).then(function (c) {
+    return Promise.all(CORE.map(function (u) {
+      return fetch(new Request(u, { cache: 'reload' }))
+        .then(function (r) { return r.ok ? c.put(u, r) : null; })
+        .catch(function () { return null; });
+    }));
+  }));
 });
 
 self.addEventListener('activate', function (e) {
