@@ -5604,7 +5604,11 @@ function importFromFWP() {
         })[0];
         if (existing) {
           var changed = false;
-          if ((existing.kickoff || '') !== imp.kickoff) { existing.kickoff = imp.kickoff; changed = true; }
+          // A played game has a SCORE in FWP's kick-off cell, so imp.kickoff is
+          // null — that means "FWP didn't say", not "it's 3pm". Writing that
+          // over a real 19:45 midweek kick-off is how you send a squad to a
+          // ground four hours late.
+          if (imp.kickoff && (existing.kickoff || '') !== imp.kickoff) { existing.kickoff = imp.kickoff; changed = true; }
           if (existing.isHome !== imp.isHome) { existing.isHome = imp.isHome; changed = true; }
           if (imp.competition && (existing.competition || '') !== imp.competition) { existing.competition = imp.competition; changed = true; }
           // Backfill a MISSING ground from the venue book — but never overwrite

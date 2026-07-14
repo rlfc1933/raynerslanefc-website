@@ -16,6 +16,16 @@
 //   • Only SCHEDULE is imported (date, opponent, H/A, competition, kick-off).
 //     Scores/scorers are never touched here — staff own those on match day.
 //
+// WHY SCORES AREN'T AUTO-IMPORTED (checked 14 Jul 2026, don't "fix" this):
+//   FWP's ko-score cell does double duty — kick-off time before a game, score
+//   after. Tempting to read the score straight out of it. But as of today FWP
+//   has published NO result for this club at all (the feed starts 1 Aug; the
+//   July friendlies aren't in it), so there is no way to see whether it writes
+//   OUR score first or the opponent's. Guessing that orientation would publish
+//   a defeat as a win. Each row's raw cell is carried through as `koRaw` so the
+//   first real result on 1 Aug shows us the format; wire it up then, and keep
+//   staff-entered scores winning — they're at the ground, FWP lags.
+//
 // Config (Netlify env, all optional):
 //   FWP_TEAM_SLUG    default 'rayners-lane'
 //   FWP_SEASON       default '2026-2027'  (FWP's YYYY-YYYY format)
@@ -133,14 +143,22 @@ exports.handler = async function () {
     opponent = strip(opponent);
 
     var competition = strip((row.match(/class="[^"]*competition[^"]*"[^>]*>([\s\S]*?)<\/td>/) || [])[1] || '');
+    // ONE cell does double duty: it holds the kick-off time BEFORE a game and
+    // the score AFTER it. So a played fixture has no time in it at all — and
+    // `parseKickoff(...) || '15:00'` used to quietly hand back 15:00 for every
+    // played game, which the merge then wrote over a real 19:45 midweek
+    // kick-off. Null now means "FWP isn't telling us", not "it's 3pm".
     var koRaw = strip((row.match(/class="ko-score"[^>]*>([\s\S]*?)<\/td>/) || [])[1] || '');
-    var kickoff = parseKickoff(koRaw) || '15:00';
-
-    if (!date || !opponent) return; // skip anything we couldn't read cleanly
+    var kickoff = parseKickoff(koRaw);   // null once the game is played
+    if (!date || !opponent) return;      // skip anything we couldn't read cleanly
 
     fixtures.push({
       fwpId: fwpId, season: season, date: date, kickoff: kickoff,
       opponent: opponent, isHome: isHome, competition: competition,
+      // koRaw is carried through so that when the first result lands we can SEE
+      // what FWP actually writes here before trusting any of it. Nothing reads
+      // it yet — see the note on scores above.
+      koRaw: koRaw,
     });
   });
 
