@@ -180,7 +180,7 @@ function buildNav(currentPage) {
   // bottom "More" open this same sheet, so no page is unreachable on a phone.
   const menuGroups = [
     { h:'Matchday',     items:[['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
-    { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['News','news.html'],['Contact','contact.html']] },
+    { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['Technology & The Lane','innovation.html'],['News','news.html'],['Contact','contact.html']] },
     { h:'Get Involved', items:[['Membership','membership.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
     { h:'Commercial',   items:[['Sponsorship','investment.html'],['Club Shop','shop.html']] },
   ];

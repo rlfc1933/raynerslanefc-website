@@ -18,9 +18,6 @@ Disallow: /staff-guide.html
 Disallow: /playermanager1933.html
 Disallow: /scan.html
 Disallow: /programme-print.html
-# The investor/sponsor deck. Shows how the club operates, so it's shown
-# deliberately rather than indexed. Reachable by URL if the club sends it.
-Disallow: /innovation.html
 
 # ── AI crawlers and answer engines: explicitly welcome ──
 # Listed individually and on purpose. Several of these treat "no rule" as "no
