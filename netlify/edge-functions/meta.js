@@ -145,8 +145,15 @@ export default async function handler(request, context) {
       '<script type="application/ld+json">' + JSON.stringify(h.ld) + '</script>'
     ].join('\n  ');
 
-    // Replace the shell's generic <title>, then inject before </head>.
-    html = html.replace(/<title>[\s\S]*?<\/title>/i, '');
+    // Strip the shell's own head tags BEFORE injecting, or the page ends up
+    // with two of each and the FIRST wins — which is the shell's generic one.
+    // That silently made every article share one description.
+    html = html
+      .replace(/<title>[\s\S]*?<\/title>/i, '')
+      .replace(/<meta\s+name=["']description["'][^>]*>/gi, '')
+      .replace(/<meta\s+(?:property|name)=["'](?:og|twitter):[^"']*["'][^>]*>/gi, '')
+      .replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '')
+      .replace(/<link\s+rel=["']alternate["'][^>]*hreflang[^>]*>/gi, '');
     html = html.replace(/<\/head>/i, '  ' + tags + '\n</head>');
 
     // A copy of the real content for crawlers that never run the page's JS.
