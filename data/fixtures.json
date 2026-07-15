@@ -29,6 +29,34 @@
       "scorers": ""
     },
     {
+      "id": "friendly-20260718-cockfosters",
+      "date": "2026-07-18",
+      "kickoff": "15:00",
+      "opponent": "Cockfosters",
+      "oppCrest": "img/crests/cockfosters.svg",
+      "isHome": true,
+      "venue": "Tithe Farm Sports & Social Club",
+      "competition": "Pre-Season Friendly",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
+      "id": "friendly-cockfosters-20260718",
+      "date": "2026-07-18",
+      "kickoff": "15:00",
+      "opponent": "Cockfosters",
+      "oppCrest": "img/crests/cockfosters.svg",
+      "isHome": true,
+      "venue": "Tithe Farm Sports & Social Club",
+      "competition": "Pre-Season Friendly",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
       "id": "friendly-met-police-20260725",
       "date": "2026-07-25",
       "kickoff": "15:00",
@@ -37,34 +65,6 @@
       "isHome": false,
       "venue": "Imber Court, East Molesey",
       "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": ""
-    },
-    {
-      "id": "facup-ep-london-lions-20260808",
-      "date": "2026-08-08",
-      "kickoff": "15:00",
-      "opponent": "London Lions",
-      "oppCrest": "img/crests/london-lions.png",
-      "isHome": false,
-      "venue": "Rowley Lane Sports Ground",
-      "competition": "FA Cup EP",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": ""
-    },
-    {
-      "id": "favase-1q-new-bradwell-20260815",
-      "date": "2026-08-15",
-      "kickoff": "15:00",
-      "opponent": "New Bradwell St Peter",
-      "oppCrest": "img/crests/new-bradwell-st-peter.png",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "FA Vase 1Q",
       "status": "scheduled",
       "us": null,
       "them": null,
@@ -99,6 +99,20 @@
       "scorers": ""
     },
     {
+      "id": "facup-ep-london-lions-20260808",
+      "date": "2026-08-08",
+      "kickoff": "15:00",
+      "opponent": "London Lions",
+      "oppCrest": "img/crests/london-lions.png",
+      "isHome": false,
+      "venue": "Rowley Lane Sports Ground",
+      "competition": "FA Cup EP",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
       "id": "fwp-578241",
       "date": "2026-08-11",
       "kickoff": "19:45",
@@ -107,6 +121,20 @@
       "isHome": true,
       "venue": "Tithe Farm Sports & Social Club",
       "competition": "Combined Counties Prem N",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
+    },
+    {
+      "id": "favase-1q-new-bradwell-20260815",
+      "date": "2026-08-15",
+      "kickoff": "15:00",
+      "opponent": "New Bradwell St Peter",
+      "oppCrest": "img/crests/new-bradwell-st-peter.png",
+      "isHome": true,
+      "venue": "Tithe Farm Sports & Social Club",
+      "competition": "FA Vase 1Q",
       "status": "scheduled",
       "us": null,
       "them": null,
@@ -603,5 +631,5 @@
       "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-14T15:51:48.079Z"
+  "updatedAt": "2026-07-15T14:04:03.200Z"
 }
