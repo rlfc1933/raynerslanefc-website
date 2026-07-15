@@ -97,6 +97,19 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .hero__badge-label{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:10px}
 .hero__badge-match{font-family:var(--font-d);font-size:26px;letter-spacing:.04em;color:var(--white);margin-bottom:6px}
 .hero__badge-meta{font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.05em;margin-bottom:16px}
+/* Crest row on the next-match badge. Wraps on small screens so a long club
+   name never squashes the crests. */
+.hero__badge-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hero__badge-crests{display:flex;align-items:center;gap:8px;flex:none}
+.hero__badge-crest{width:38px;height:38px;object-fit:contain;flex:none}
+.hero__badge-crest--ini{display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:var(--card2);border:1px solid var(--border);font-family:var(--font-d);font-size:13px;
+  letter-spacing:.04em;color:var(--grey)}
+.hero__badge-v{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--yellow);flex:none}
+.hero__badge-textcol{min-width:0;flex:1 1 220px}
+.hero__badge-textcol .hero__badge-meta{margin-bottom:0}
+@media(max-width:520px){.hero__badge-crest{width:32px;height:32px}}
 .countdown{display:flex;gap:16px}
 .countdown__unit{text-align:center}
 .countdown__num{font-family:var(--font-d);font-size:36px;color:var(--yellow);line-height:1;display:block}

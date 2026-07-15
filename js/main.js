@@ -107,6 +107,7 @@ async function loadMatchDay() {
             m.competition = shaped.next.competition || m.competition;
             m.date = (shaped.next.date || '') + 'T' + (shaped.next.kickoff || '15:00') + ':00';
             if (shaped.next.venue) m.venue = shaped.next.venue;
+            m.oppCrest = shaped.next.oppCrest || '';
           }
         }
       }
@@ -144,6 +145,25 @@ async function loadMatchDay() {
   var metaEl  = document.getElementById('match-meta');
   if (teamsEl) teamsEl.textContent = m.homeTeam + ' vs ' + m.awayTeam;
   if (metaEl)  metaEl.textContent  = m.competition + ' · ' + m.venue;
+
+  // Opponent crest next to the fixture. Falls back to their initials rather
+  // than a broken image — some opponents haven't supplied artwork.
+  var crestEl = document.getElementById('match-crest');
+  if (crestEl) {
+    crestEl.innerHTML = '';
+    if (m.opponent && m.opponent !== 'TBC') {
+      if (m.oppCrest) {
+        var im = document.createElement('img');
+        im.src = m.oppCrest;
+        im.alt = m.opponent;
+        im.className = 'hero__badge-crest';
+        im.addEventListener('error', function () { crestEl.innerHTML = ''; crestEl.appendChild(crestInitials(m.opponent)); });
+        crestEl.appendChild(im);
+      } else {
+        crestEl.appendChild(crestInitials(m.opponent));
+      }
+    }
+  }
 
   // Countdown
   startCountdown(m.date);
@@ -215,9 +235,20 @@ function rlfcFixturesShape(list) {
   var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
   return {
     source: 'club',
-    next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, venue: next.venue } : null,
+    next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, venue: next.venue, oppCrest: next.oppCrest || '' } : null,
     results: played.slice().reverse().map(function (r) { return { opponent: r.opponent, date: r.date, isHome: r.isHome, us: r.us, them: r.them }; })
   };
+}
+
+// Their initials in a circle — the same fallback the fixtures page uses, so a
+// club with no crest still reads as a club rather than a broken image icon.
+function crestInitials(name) {
+  var ini = String(name || '').replace(/\b(fc|afc|utd|united|town|city)\b/gi, '')
+    .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase();
+  var d = document.createElement('div');
+  d.className = 'hero__badge-crest hero__badge-crest--ini';
+  d.textContent = ini || '?';
+  return d;
 }
 
 function startCountdown(dateStr) {
