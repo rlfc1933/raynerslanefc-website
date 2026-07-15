@@ -73,7 +73,11 @@
     var hh = 460;
     if (hero && hero.naturalWidth) {
       var ar = hero.naturalWidth / hero.naturalHeight;
-      var isBadge = /\/img\/crests\//i.test(a.image || '') || (ar > 0.8 && ar < 1.25);
+      // No leading slash: article images are stored as "img/crests/x.svg", so a
+      // /\/img\/crests\// test never matched and every crest got cover-cropped.
+      var isBadge = /(^|\/)img\/crests\//i.test(a.image || '')
+                 || /\.svg(\?|$)/i.test(a.image || '')     // a vector is a badge, not a photo
+                 || (ar > 0.8 && ar < 1.25);
       if (isBadge) {
         // Crest: on the club's green, whole, with room to breathe.
         var bg = x.createLinearGradient(0, 0, W, hh);
