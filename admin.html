@@ -495,6 +495,18 @@
     .so-pub:disabled{opacity:.55}
     .so-skip{background:var(--c2);border:1px solid var(--br);border-radius:9px;color:var(--gr);font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px 16px;cursor:pointer}
     .so-done{font-family:var(--fb);font-size:12.5px;line-height:1.5;margin-top:9px;min-height:16px}
+    /* Month dropdowns. 84 posts in one scroll is unusable on a phone; the
+       nearest month opens by default because that's the work actually due. */
+    .so-mth{border:1px solid var(--br);border-radius:12px;margin-bottom:9px;overflow:hidden;background:var(--c)}
+    .so-mth-hd{width:100%;display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;
+      padding:15px 14px;font-family:var(--fd);font-size:19px;letter-spacing:.03em;color:var(--w);text-align:left;
+      min-height:54px;-webkit-tap-highlight-color:transparent}
+    .so-mth-n{margin-left:auto;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.06em;
+      color:var(--y);border:1px solid var(--y);border-radius:999px;padding:2px 9px}
+    .so-mth-ar{color:var(--gr);transition:transform .2s;font-size:16px;transform:rotate(180deg)}
+    .so-mth--open .so-mth-ar{transform:rotate(0deg)}
+    .so-mth-in{display:none;padding:0 10px 10px}
+    .so-mth--open .so-mth-in{display:block}
     .tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .tile{position:relative;background:linear-gradient(165deg,var(--c) 0%,var(--dk) 100%);border:1px solid var(--br);border-radius:15px;padding:15px 14px 16px;cursor:pointer;text-align:left;width:100%;overflow:hidden;transition:transform .18s ease,border-color .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;animation:tileIn .45s cubic-bezier(.2,.7,.2,1) backwards}
     .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent,var(--y));opacity:.85}
@@ -5647,8 +5659,11 @@ function soUpcoming(){
 }
 
 function soRender(){
+  // THE WHOLE SEASON. This was capped at 6 fixtures, which silently stopped the
+  // list at Hilltop while the page claimed "a post for every upcoming game" —
+  // 12 drafts shown out of 84. Never cap a list without saying so on the page.
   var drafts=[];
-  soUpcoming().slice(0,6).forEach(function(f){
+  soUpcoming().forEach(function(f){
     ['monday','wednesday'].forEach(function(w){
       var d=soDraft(f,w);
       // Already published? Then it isn't a draft any more — drop it.
@@ -5661,7 +5676,33 @@ function soRender(){
   var box=document.getElementById('so-list');
   if(!box) return;
   if(!drafts.length){ box.innerHTML='<div class="nm-skel">Nothing waiting. Every upcoming game already has its posts published.</div>'; return; }
-  box.innerHTML=drafts.map(function(d,i){
+  // Grouped by month and collapsed, or it's 84 textareas in one scroll on a
+  // phone. The nearest month opens by default: that's the work that's actually
+  // due. The rest are a tap away rather than gone.
+  var groups=[], seen={};
+  drafts.forEach(function(d,i){
+    var k=new Date(d.date+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    if(!(k in seen)){ seen[k]=groups.length; groups.push({month:k,items:[]}); }
+    groups[seen[k]].items.push(i);
+  });
+  box.innerHTML = groups.map(function(g,gi){
+    return '<div class="so-mth'+(gi===0?' so-mth--open':'')+'" id="so-m-'+gi+'">'+
+      '<button class="so-mth-hd" onclick="soToggle('+gi+')">'+
+        '<span>'+escH(g.month)+'</span>'+
+        '<span class="so-mth-n">'+g.items.length+'</span>'+
+        '<i class="ico ico-arrow-down so-mth-ar"></i>'+
+      '</button>'+
+      '<div class="so-mth-in">'+g.items.map(function(i){ return soCardHtml(drafts[i], i); }).join('')+'</div>'+
+    '</div>';
+  }).join('');
+  window._soDrafts=drafts;
+  return;
+}
+function soToggle(gi){
+  var el=document.getElementById('so-m-'+gi);
+  if(el) el.classList.toggle('so-mth--open');
+}
+function soCardHtml(d, i){
     var crest = d.crest ? '<img src="'+escH(d.crest)+'" alt="'+escH(d.opponent)+'" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'so-ini\',textContent:'+JSON.stringify(soIni(d.opponent))+'}))">'
                         : '<div class="so-ini">'+escH(soIni(d.opponent))+'</div>';
     return '<div class="so-card" data-i="'+i+'">'+
@@ -5681,8 +5722,6 @@ function soRender(){
       '</div>'+
       '<div class="so-done" id="so-d-'+i+'"></div>'+
     '</div>';
-  }).join('');
-  window._soDrafts=drafts;
 }
 function soIni(n){
   return String(n||'').replace(/\b(fc|afc|utd|united|town|city)\b/gi,'').trim().split(/\s+/)
