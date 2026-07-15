@@ -1,5 +1,5 @@
 {
-  "_note": "Ground NAMES verified (Football Ground Map, CCL Prem North, June 2026). address/postcode/lat/lng are ONLY trustworthy where verified:true — each carries its source. NEVER guess a ground: a wrong address sends a coach to the wrong town.",
+  "_note": "Ground NAMES verified (Football Ground Map, CCL Prem North, June 2026). address/postcode/lat/lng are ONLY trustworthy where verified:true \u2014 each carries its source. NEVER guess a ground: a wrong address sends a coach to the wrong town.",
   "_verified": "ground names only",
   "venues": [
     {
@@ -11,7 +11,7 @@
       "lng": -0.365073,
       "verified": true,
       "notes": "Our home. Also the home ground of Broadfields United (groundshare). Coordinates corrected 15 Jul 2026: the previous pair (51.570435,-0.365073) was ~800m north-west of the ground and would have mis-routed anyone driving to a home game.",
-      "source": "OpenStreetMap named POI \"Tithe Farm Social Club, 151 Rayners Lane\" + street-address match (HA2 0XH). Replaces a coordinate that was ~800m off — see note."
+      "source": "OpenStreetMap named POI \"Tithe Farm Social Club, 151 Rayners Lane\" + street-address match (HA2 0XH). Replaces a coordinate that was ~800m off \u2014 see note."
     },
     {
       "club": "Broadfields United",
@@ -21,7 +21,7 @@
       "lat": 51.570435,
       "lng": -0.365073,
       "verified": true,
-      "notes": "GROUNDSHARE. Broadfields play at OUR ground. When Broadfields are the home team we are officially AWAY (isHome:false — away kit, away dressing room, away designation) but the VENUE is still Tithe Farm, so there is NO TRAVEL. 'Away' = designation; 'venue' = physical location. They are independent — never infer the venue from isHome."
+      "notes": "GROUNDSHARE. Broadfields play at OUR ground. When Broadfields are the home team we are officially AWAY (isHome:false \u2014 away kit, away dressing room, away designation) but the VENUE is still Tithe Farm, so there is NO TRAVEL. 'Away' = designation; 'venue' = physical location. They are independent \u2014 never infer the venue from isHome."
     },
     {
       "club": "Abingdon United",
@@ -32,7 +32,7 @@
       "lng": -1.2752114,
       "verified": true,
       "source": "Club contact page abingdonunitedfc.com + Football Foundation site profile (Northcourt Road, Abingdon OX14 1PL); coords = OSM postcode centroid",
-      "notes": "CAUTION: \"The Northcourt\" is ALSO an arts centre/theatre on the same road — a naive map search returns the theatre. This is the football ground postcode."
+      "notes": "CAUTION: \"The Northcourt\" is ALSO an arts centre/theatre on the same road \u2014 a naive map search returns the theatre. This is the football ground postcode."
     },
     {
       "club": "Amersham Town",
@@ -63,7 +63,7 @@
       "lng": -0.4264165,
       "verified": true,
       "source": "Property/address listings + Football Ground Map both give The Orchard, Hatton Road TW14 9QT; coords = OSM \"Bedfont Football & Social Club\" on Hatton Road",
-      "notes": "Two Bedfont clubs exist — this is Bedfont FC at The Orchard (Hatton Rd), NOT Bedfont Sports."
+      "notes": "Two Bedfont clubs exist \u2014 this is Bedfont FC at The Orchard (Hatton Rd), NOT Bedfont Sports."
     },
     {
       "club": "Burnham",
@@ -74,7 +74,7 @@
       "lng": -0.6669018,
       "verified": true,
       "source": "Club website burnhamfc1878.co.uk/directions-to-the-1878-stadium (address+postcode) + OpenStreetMap stadium feature (coords, postcode matches)",
-      "notes": "Coords are the OSM stadium feature — pitch-exact."
+      "notes": "Coords are the OSM stadium feature \u2014 pitch-exact."
     },
     {
       "club": "Easington Sports",
@@ -95,7 +95,7 @@
       "lng": -0.4780076,
       "verified": true,
       "source": "Club website harefieldunited.com/contact (address+postcode) + OpenStreetMap postcode centroid (coords)",
-      "notes": "Coords are the UB9 6NE postcode centroid (ground not mapped as a named feature in OSM). NOTE: an earlier internal note said UB9 6NB — that was WRONG; the club states UB9 6NE."
+      "notes": "Coords are the UB9 6NE postcode centroid (ground not mapped as a named feature in OSM). NOTE: an earlier internal note said UB9 6NB \u2014 that was WRONG; the club states UB9 6NE."
     },
     {
       "club": "Hilltop",
@@ -105,7 +105,7 @@
       "lat": 51.5765538,
       "lng": -0.253342,
       "verified": true,
-      "notes": "GROUNDSHARE at Hendon FC. Address confirmed; the groundshare itself should be re-checked nearer the fixture (4 Dec) — groundshares change mid-season.",
+      "notes": "GROUNDSHARE at Hendon FC. Address confirmed; the groundshare itself should be re-checked nearer the fixture (4 Dec) \u2014 groundshares change mid-season.",
       "source": "Hendon FC directions + Non-League Grounds + Brent Council (Silver Jubilee Park, Townsend Lane NW9 7NE); coords = OSM postcode centroid"
     },
     {
@@ -147,7 +147,7 @@
       "lat": 51.8121137,
       "lng": -1.4281964,
       "verified": true,
-      "source": "OpenStreetMap recreation_ground named \"North Leigh Football Club\", North Leigh (coords). Postcode NOT confirmed — left blank deliberately.",
+      "source": "OpenStreetMap recreation_ground named \"North Leigh Football Club\", North Leigh (coords). Postcode NOT confirmed \u2014 left blank deliberately.",
       "notes": "Coords sourced from the club-named OSM feature; postcode still to confirm."
     },
     {
@@ -179,7 +179,7 @@
       "lng": -1.0145852,
       "verified": true,
       "source": "Club directions page readingcityfc.co.uk/the-rivermoor/directions (states RG30 6AY for sat nav); coords = OSM postcode centroid",
-      "notes": "Ground is The Rivermoor on Scours Lane. NB an OSM street lookup suggested RG30 6YD — that was WRONG; the club states RG30 6AY."
+      "notes": "Ground is The Rivermoor on Scours Lane. NB an OSM street lookup suggested RG30 6YD \u2014 that was WRONG; the club states RG30 6AY."
     },
     {
       "club": "Thatcham Town",
@@ -210,7 +210,7 @@
       "lng": -0.85717,
       "verified": true,
       "source": "Non-League Grounds + Wokingham council directory (Lowther Road ground at Emmbrook Sports & Social Club, RG41 1JB); coords = OSM postcode centroid",
-      "notes": "Also listed as RG41 1HY for the general site — RG41 1JB used as the ground address."
+      "notes": "Also listed as RG41 1HY for the general site \u2014 RG41 1JB used as the ground address."
     },
     {
       "club": "Metropolitan Police FC",
@@ -221,7 +221,7 @@
       "lng": -0.3525791,
       "verified": true,
       "notes": "Pre-season friendly 25 Jul. Coords are postcode-level, not pitch polygon.",
-      "source": "Club Pitchero contact page + UK postcode registry + Companies House (all give Imber Court, Ember Lane, KT8 0BT); coords = OSM KT8 0BT centroid"
+      "source": "Metropolitan Police FC's own club website contact page + UK postcode registry + Companies House (all give Imber Court, Ember Lane, KT8 0BT); coords = OSM KT8 0BT centroid"
     },
     {
       "club": "London Lions",
@@ -231,7 +231,7 @@
       "lat": 51.6524956,
       "lng": -0.2482668,
       "verified": true,
-      "notes": "FA Cup Extra Prelim, 8 Aug — AWAY. Maccabi London Lions. Coords are the OSM ground polygon, not a postcode centroid.",
+      "notes": "FA Cup Extra Prelim, 8 Aug \u2014 AWAY. Maccabi London Lions. Coords are the OSM ground polygon, not a postcode centroid.",
       "source": "Club website mlfc.co.uk/contact (address+postcode) + OpenStreetMap named ground polygon (coords)"
     },
     {
@@ -242,7 +242,7 @@
       "lat": null,
       "lng": null,
       "verified": false,
-      "notes": "FA Vase 1Q, 15 Aug — HOME at Tithe Farm, so their ground is not needed for travel."
+      "notes": "FA Vase 1Q, 15 Aug \u2014 HOME at Tithe Farm, so their ground is not needed for travel."
     },
     {
       "club": "Punjab Utd FC",
@@ -253,7 +253,7 @@
       "lng": 0.3770153,
       "verified": true,
       "notes": "Pre-season friendly, already played 11 Jul.",
-      "source": "Venue as recorded on the fixture by club staff (The Sports Ground, Dunkirk Cl, Gravesend DA12 5ND); coords = OSM DA12 5ND centroid (Gravesend, Kent — matches)"
+      "source": "Venue as recorded on the fixture by club staff (The Sports Ground, Dunkirk Cl, Gravesend DA12 5ND); coords = OSM DA12 5ND centroid (Gravesend, Kent \u2014 matches)"
     },
     {
       "club": "Hayes & Yeading United",

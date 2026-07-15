@@ -133,7 +133,7 @@ const PAGES = [
 const TICKER_ITEMS = [
   "The Lane 2026-27: Combined Counties Premier Division North — Step 5",
   "Gary Pitt appointed First Team Manager — new era at Tithe Farm",
-  "Summer Trials 2026 open — register on Pitchero now",
+  "Summer Trials 2026 open — register on our Trials page",
   "Harrow's club since 1933. Yellow & Green. Always.",
   "Fully integrated members section of Tithe Farm Sports & Social Club LTD",
   "Club vacancies — join the backroom team",
@@ -331,11 +331,11 @@ function buildTwitterSection() {
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
                 YouTube Channel
               </a>
-              <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" rel="noopener"
+              <a href="fixtures.html"
                  style="display:flex;align-items:center;gap:12px;background:var(--yellow);border:1px solid var(--yellow);padding:13px 18px;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--black);text-decoration:none;transition:opacity .2s"
                  onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-                Club Page on Pitchero
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Fixtures &amp; Results
               </a>
             </div>
           </div>
@@ -398,9 +398,6 @@ function buildFooter() {
               </a>
               <a href="https://youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" rel="noopener" aria-label="YouTube">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-              </a>
-              <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" rel="noopener" aria-label="Pitchero">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
               </a>
             </div>
           </div>
@@ -657,8 +654,7 @@ function initComponents(currentPage) {
     sameAs: [
       'https://twitter.com/RaynersLaneFC',
       'https://instagram.com/raynerslanefc',
-      'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA',
-      'https://www.pitchero.com/clubs/raynerslanefc'
+      'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA'
     ]
   });
 

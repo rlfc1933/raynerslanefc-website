@@ -1,5 +1,6 @@
 [build]
   functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
 
 # Serve the DYNAMIC sitemap (netlify/functions/sitemap.js) at /sitemap.xml.
 # force=true so it wins over any static file; status 200 so it's a rewrite (the

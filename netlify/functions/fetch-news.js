@@ -4,7 +4,9 @@
 const FEEDS = [
   { key: 'nonleague', url: 'https://www.thenonleaguefootballpaper.com/feed', label: 'Non-League Paper' },
   { key: 'fa',        url: 'https://www.thefa.com/news/rss.xml',              label: 'The FA' },
-  { key: 'pitchero',  url: 'https://www.pitchero.com/clubs/raynerslanefc/rss.xml', label: 'Rayners Lane FC' },
+  // The club's own news comes from data/news.json now. It used to be pulled from
+  // the club's old third-party RSS, which 404s since that account was deleted.
+  // The feeds below are external and still live.
 ];
 
 function parseItems(xml, key, label) {

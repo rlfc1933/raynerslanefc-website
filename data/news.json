@@ -59,9 +59,8 @@
       "author": "Rayners Lane FC",
       "image": "img/news/news-league.svg",
       "excerpt": "Back at Step 5 in the Combined Counties Premier Division North. Gary Pitt leads the charge for the new season.",
-      "body": "",
-      "link": "https://www.pitchero.com/clubs/raynerslanefc/news/league-allocation-20262027-2979103.html",
-      "external": true
+      "body": "<p>Rayners Lane FC will compete in the <strong>Combined Counties Football League, Premier Division North</strong> for the 2026-27 season — Step 5 of the National League System.</p><p>The squad, led by manager Gary Pitt, returns to this level determined to make its mark.</p><p>Full fixtures are on our <a href=\"fixtures.html\">Fixtures page</a>, and you can follow every game live through the site and The Lane app.</p><p><strong>Up The Lane.</strong></p>",
+      "external": false
     },
     {
       "id": "summer-trials-2026",
@@ -72,8 +71,8 @@
       "image": "img/news/news-trials.svg",
       "excerpt": "Register for 1st team trials at Tithe Farm Social Club. Gary Pitt is building his squad.",
       "body": "",
-      "link": "https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html",
-      "external": true
+      "link": "trials.html",
+      "external": false
     },
     {
       "id": "commercial-sponsorship-2026-27",
@@ -84,9 +83,9 @@
       "image": "img/news/news-commercial.svg",
       "excerpt": "Multiple sponsorship packages available for the new season. Get your brand in front of Harrow.",
       "body": "",
-      "link": "https://www.pitchero.com/clubs/raynerslanefc/news/rayners-lane-fc-202627-commercial-sponsorship-2980361.html",
-      "external": true
+      "link": "investment.html",
+      "external": false
     }
   ],
-  "updatedAt": "2026-06-18T21:33:35.805Z"
+  "updatedAt": "2026-07-15T17:13:14.264Z"
 }

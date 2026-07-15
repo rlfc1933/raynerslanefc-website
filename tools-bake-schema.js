@@ -50,8 +50,7 @@ const ORG = {
   sameAs: [
     'https://twitter.com/RaynersLaneFC',
     'https://instagram.com/raynerslanefc',
-    'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA',
-    'https://www.pitchero.com/clubs/raynerslanefc'
+    'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA'
   ]
 };
 const SITE = {

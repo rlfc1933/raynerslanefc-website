@@ -27,31 +27,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .squad-tabs { display:flex; gap:2px; margin-bottom:2px; }
-    .squad-tab-btn {
-      flex:1; background:var(--card); border:none; color:var(--grey);
-      font-family:var(--font-c); font-size:14px; font-weight:700;
-      letter-spacing:.1em; text-transform:uppercase; padding:18px 16px;
-      cursor:pointer; transition:all .2s; border-bottom:3px solid transparent;
-    }
-    .squad-tab-btn:hover { color:var(--white); background:var(--card2); }
-    .squad-tab-btn.active { color:var(--yellow); border-bottom-color:var(--yellow); background:var(--card2); }
-    .squad-tab-btn .tab-badge {
-      display:inline-block; font-size:10px; font-weight:700;
-      letter-spacing:.12em; padding:2px 7px; border-radius:2px;
-      margin-left:8px; vertical-align:middle;
-    }
     .tab-badge-sheet { background:rgba(255,209,0,.15); color:var(--yellow); }
     .tab-badge-live  { background:rgba(34,197,94,.15);  color:#22C55E; }
-    .squad-tab-panel { display:none; }
-    .squad-tab-panel.active { display:block; }
-    .pitchero-frame-wrap {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:3px; overflow:hidden; position:relative;
-    }
-    .pitchero-frame-wrap iframe {
-      display:block; width:100%; min-height:800px; border:none;
-    }
     .sheet-setup-banner {
       background:rgba(255,209,0,.07); border:1px solid rgba(255,209,0,.2);
       border-left:4px solid var(--yellow); padding:20px 24px;
@@ -68,7 +45,7 @@
        still exactly ONE club entity per page.
        ⛔ Regenerate with scratchpad/bake-schema.js — don't hand-edit, and never
        add a fact that isn't on the club's own pages. -->
-  <script type="application/ld+json" id="lane-org">{"@context":"https://schema.org","@type":["SportsTeam","SportsOrganization","LocalBusiness"],"@id":"https://raynerslanefc.co.uk/#team","name":"Rayners Lane FC","legalName":"Rayners Lane Football Club","alternateName":["The Lane","Rayners Lane","Rayners Lane Football Club"],"sport":"Soccer","foundingDate":"1933","foundingLocation":{"@type":"Place","name":"Harrow, Middlesex, England"},"award":["Hellenic League Division One Champions (1982)","FA Cup Second Qualifying Round (1992-93)"],"url":"https://raynerslanefc.co.uk/","logo":"https://raynerslanefc.co.uk/img/badge.png","image":"https://raynerslanefc.co.uk/img/og-card.jpg","email":"info@raynerslanefc.co.uk","description":"Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North at Step 5 of the English football pyramid.","memberOf":{"@type":"SportsOrganization","name":"Combined Counties Football League","url":"https://www.combinedcountiesleague.co.uk"},"address":{"@type":"PostalAddress","streetAddress":"151 Rayners Lane","addressLocality":"Harrow","addressRegion":"Middlesex","postalCode":"HA2 0XH","addressCountry":"GB"},"geo":{"@type":"GeoCoordinates","latitude":51.570435,"longitude":-0.365073},"areaServed":[{"@type":"Place","name":"Harrow"},{"@type":"Place","name":"Rayners Lane"},{"@type":"Place","name":"Pinner"},{"@type":"Place","name":"South Harrow"},{"@type":"Place","name":"Ruislip"},{"@type":"Place","name":"Northwood"},{"@type":"Place","name":"Wembley"},{"@type":"AdministrativeArea","name":"London Borough of Harrow"}],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"14:00","closes":"17:00","description":"Matchday"}],"knowsAbout":["Community football","Non-league football","Football in Harrow","Digital and technology in grassroots football"],"sameAs":["https://twitter.com/RaynersLaneFC","https://instagram.com/raynerslanefc","https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA","https://www.pitchero.com/clubs/raynerslanefc"]}</script>
+  <script type="application/ld+json" id="lane-org">{"@context":"https://schema.org","@type":["SportsTeam","SportsOrganization","LocalBusiness"],"@id":"https://raynerslanefc.co.uk/#team","name":"Rayners Lane FC","legalName":"Rayners Lane Football Club","alternateName":["The Lane","Rayners Lane","Rayners Lane Football Club"],"sport":"Soccer","foundingDate":"1933","foundingLocation":{"@type":"Place","name":"Harrow, Middlesex, England"},"award":["Hellenic League Division One Champions (1982)","FA Cup Second Qualifying Round (1992-93)"],"url":"https://raynerslanefc.co.uk/","logo":"https://raynerslanefc.co.uk/img/badge.png","image":"https://raynerslanefc.co.uk/img/og-card.jpg","email":"info@raynerslanefc.co.uk","description":"Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North at Step 5 of the English football pyramid.","memberOf":{"@type":"SportsOrganization","name":"Combined Counties Football League","url":"https://www.combinedcountiesleague.co.uk"},"address":{"@type":"PostalAddress","streetAddress":"151 Rayners Lane","addressLocality":"Harrow","addressRegion":"Middlesex","postalCode":"HA2 0XH","addressCountry":"GB"},"geo":{"@type":"GeoCoordinates","latitude":51.570435,"longitude":-0.365073},"areaServed":[{"@type":"Place","name":"Harrow"},{"@type":"Place","name":"Rayners Lane"},{"@type":"Place","name":"Pinner"},{"@type":"Place","name":"South Harrow"},{"@type":"Place","name":"Ruislip"},{"@type":"Place","name":"Northwood"},{"@type":"Place","name":"Wembley"},{"@type":"AdministrativeArea","name":"London Borough of Harrow"}],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"14:00","closes":"17:00","description":"Matchday"}],"knowsAbout":["Community football","Non-league football","Football in Harrow","Digital and technology in grassroots football"],"sameAs":["https://twitter.com/RaynersLaneFC","https://instagram.com/raynerslanefc","https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA"]}</script>
   <script type="application/ld+json" id="lane-site">{"@context":"https://schema.org","@type":"WebSite","@id":"https://raynerslanefc.co.uk/#website","url":"https://raynerslanefc.co.uk/","name":"Rayners Lane FC","publisher":{"@id":"https://raynerslanefc.co.uk/#team"},"inLanguage":"en-GB"}</script>
   <!-- lane-schema:end -->
 </head>
@@ -118,34 +95,16 @@
         <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em">Wear the Yellow of The Lane?</div>
         <p style="font-family:var(--font-c);font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.04em;margin-top:4px">Gary Pitt is building The Lane's 2026-27 squad. Wear the yellow. Play for Harrow. Register for trials at Tithe Farm.</p>
       </div>
-      <a class="btn btn-primary" href="https://www.pitchero.com/clubs/raynerslanefc/news/1st-team-summer-trials-2026-2977642.html" target="_blank">Register Now</a>
+      <a class="btn btn-primary" href="trials.html">Register Now</a>
     </div>
 
-    <!-- Google Sheet setup notice (shown when sheet not connected) -->
-    <div class="sheet-setup-banner" id="sheet-banner">
-      <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">
-        <i class="ico ico-triangle-alert"></i> Developer Setup Required
-      </div>
-      <p style="font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.7">
-        Player Cards tab needs a Google Sheet connected. See <strong style="color:var(--white)">SETUP-GUIDE.md</strong> 
-        for instructions. Use the <strong style="color:var(--white)">Live Pitchero</strong> tab in the meantime 
-        — it always shows the current squad automatically.
-      </p>
-    </div>
-
-    <!-- ═══ TABS ═══ -->
-    <div class="squad-tabs">
-      <button class="squad-tab-btn active" data-tab="cards">
-        Player Cards
-      </button>
-      <button class="squad-tab-btn" data-tab="pitchero">
-        View on Pitchero
-        <span class="tab-badge tab-badge-live">↗ New Tab</span>
-      </button>
-    </div>
+    <!-- One view, no tabs. There was a second tab here linking out to the club's
+         old third-party platform; the club deleted that account, so it pointed at
+         a 404. The squad renders from the club's own squad.json / players.json
+         and that is now the only source. -->
 
     <!-- TAB 1: Styled Player Cards (Google Sheet) -->
-    <div class="squad-tab-panel active" id="tab-cards">
+    <div id="tab-cards">
       <div style="background:var(--card);border:1px solid var(--border);padding:2px">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
 
@@ -161,24 +120,6 @@
           <div class="squad-grid" id="squad-grid"></div>
         </div>
       </div>
-    </div>
-
-    <!-- TAB 2: Pitchero Link -->
-    <div class="squad-tab-panel" id="tab-pitchero">
-      <a href="https://www.pitchero.com/clubs/raynerslanefc/teams/259686" target="_blank" rel="noopener"
-         style="display:block;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--yellow);padding:40px;text-decoration:none;transition:background .2s"
-         onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px">
-          <div>
-            <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px">Official Club Platform</div>
-            <div style="font-family:var(--font-d);font-size:clamp(28px,4vw,48px);letter-spacing:.03em;color:var(--white);margin-bottom:10px">View Full Squad on Pitchero</div>
-            <p style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.7;max-width:520px">
-              Full registered squad, player profiles, appearances and stats — all live on the official Rayners Lane FC Pitchero page. Opens in a new tab.
-            </p>
-          </div>
-          <div style="font-family:var(--font-d);font-size:64px;color:var(--yellow);letter-spacing:.02em;flex-shrink:0">&rarr;</div>
-        </div>
-      </a>
     </div>
 
   </div>
@@ -199,14 +140,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // Tab switching
-  document.querySelectorAll(".squad-tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".squad-tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".squad-tab-panel").forEach(p => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-    });
-  });
 
   // Position filter tabs
   document.querySelectorAll(".filter-tab[data-pos]").forEach(tab => {

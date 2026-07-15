@@ -1,0 +1,39 @@
+{
+  "_note": "Verified mapping of uploaded photos in 'img/squad pics/' to player/staff records. Filenames differ from DB names (spelling) — these matches are confirmed. Do NOT re-guess; use this map.",
+  "source_folder": "img/squad pics",
+  "target_folder_suggestion": "img/players (URL-safe, no space)",
+  "players": [
+    { "file": "Michael Adofolami.png",       "player_id": "player-michael-adefolami",        "name": "Michael Adefolami" },
+    { "file": "Charlie Austin.png",           "player_id": "player-charlie-austin",           "name": "Charlie Austin" },
+    { "file": "Jenyo Balogun.png",            "player_id": "player-jenyo-balogun",            "name": "Jenyo Balogun" },
+    { "file": "Keiran Bernard-White.png",     "player_id": "player-keiran-barnard-white",     "name": "Keiran Barnard-White" },
+    { "file": "Alfie Campbell.png",           "player_id": "player-alfie-campbell",           "name": "Alfie Campbell" },
+    { "file": "Jaycob Campbell.png",          "player_id": "player-jaycob-campbell",          "name": "Jaycob Campbell" },
+    { "file": "Le-Kai Chevannes.png",         "player_id": "player-le'kai-chevannes",         "name": "Le'Kai Chevannes" },
+    { "file": "Atahan Diamond.png",           "player_id": "player-ati-diamond",              "name": "Ati Diamond" },
+    { "file": "Matteo Dos Reis.png",          "player_id": "player-mateo-dos-reis",           "name": "Mateo Dos Reis" },
+    { "file": "Jevan El-Kafash.png",          "player_id": "player-jevan-el-kaffash",         "name": "Jevan El-Kaffash" },
+    { "file": "Matt Forkin.png",              "player_id": "player-matthew-forkin",           "name": "Matthew Forkin" },
+    { "file": "Micah Haley.png",              "player_id": "player-micah-haley",              "name": "Micah Haley" },
+    { "file": "Leon Iluobe.png",              "player_id": "player-leon-iluobe",              "name": "Leon Iluobe" },
+    { "file": "Christon John-Ahye.png",       "player_id": "player-christon-john-ahye",       "name": "Christon John-Ahye" },
+    { "file": "Jalen Johnson.png",            "player_id": "player-jalen-johnson",            "name": "Jalen Johnson" },
+    { "file": "Ruben Santagelo.png",          "player_id": "player-ruben-santangelo",         "name": "Ruben Santangelo" },
+    { "file": "Casey Yusuff-Phillips.png",    "player_id": "player-casey-yousuff-phillips",   "name": "Casey Yousuff-Phillips" },
+    { "file": "Temi.png",                     "player_id": "player-temi-animashaun",          "name": "Temi Animashaun" }
+  ],
+  "manager": [
+    { "file": "Gary Pitt.png", "role": "First Team Manager", "name": "Gary Pitt" }
+  ],
+  "coaches_add_to_club_tab": [
+    { "file": "Dave Roberts - Coach.png",  "role": "Coach", "name": "Dave Roberts" },
+    { "file": "Louis Blinko - Coach.png",  "role": "Coach", "name": "Louis Blinko" }
+  ],
+  "signed_players_awaiting_photo": {
+    "_note": "These are SIGNED squad players — they stay on the site. They just don't have a photo yet (awaiting pics). Show a clean initials placeholder now; their photo will be added later. Do NOT remove them.",
+    "names": [
+      "Carl Adiku", "Joshua Andrews", "Badou Faye", "Nathan Kpemou", "Jamie Pitt", "Alvin Walters"
+    ]
+  },
+  "unmatched_photo_rule": "If any photo file in the folder matches NO player/staff in the squad, that person was a trialist on the shoot day — SKIP the file, do not create a new player from it. (Currently every file matches, so nothing is skipped.)"
+}

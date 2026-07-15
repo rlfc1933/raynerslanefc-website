@@ -107,7 +107,7 @@
        still exactly ONE club entity per page.
        ⛔ Regenerate with scratchpad/bake-schema.js — don't hand-edit, and never
        add a fact that isn't on the club's own pages. -->
-  <script type="application/ld+json" id="lane-org">{"@context":"https://schema.org","@type":["SportsTeam","SportsOrganization","LocalBusiness"],"@id":"https://raynerslanefc.co.uk/#team","name":"Rayners Lane FC","legalName":"Rayners Lane Football Club","alternateName":["The Lane","Rayners Lane","Rayners Lane Football Club"],"sport":"Soccer","foundingDate":"1933","foundingLocation":{"@type":"Place","name":"Harrow, Middlesex, England"},"award":["Hellenic League Division One Champions (1982)","FA Cup Second Qualifying Round (1992-93)"],"url":"https://raynerslanefc.co.uk/","logo":"https://raynerslanefc.co.uk/img/badge.png","image":"https://raynerslanefc.co.uk/img/og-card.jpg","email":"info@raynerslanefc.co.uk","description":"Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North at Step 5 of the English football pyramid.","memberOf":{"@type":"SportsOrganization","name":"Combined Counties Football League","url":"https://www.combinedcountiesleague.co.uk"},"address":{"@type":"PostalAddress","streetAddress":"151 Rayners Lane","addressLocality":"Harrow","addressRegion":"Middlesex","postalCode":"HA2 0XH","addressCountry":"GB"},"geo":{"@type":"GeoCoordinates","latitude":51.570435,"longitude":-0.365073},"areaServed":[{"@type":"Place","name":"Harrow"},{"@type":"Place","name":"Rayners Lane"},{"@type":"Place","name":"Pinner"},{"@type":"Place","name":"South Harrow"},{"@type":"Place","name":"Ruislip"},{"@type":"Place","name":"Northwood"},{"@type":"Place","name":"Wembley"},{"@type":"AdministrativeArea","name":"London Borough of Harrow"}],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"14:00","closes":"17:00","description":"Matchday"}],"knowsAbout":["Community football","Non-league football","Football in Harrow","Digital and technology in grassroots football"],"sameAs":["https://twitter.com/RaynersLaneFC","https://instagram.com/raynerslanefc","https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA","https://www.pitchero.com/clubs/raynerslanefc"]}</script>
+  <script type="application/ld+json" id="lane-org">{"@context":"https://schema.org","@type":["SportsTeam","SportsOrganization","LocalBusiness"],"@id":"https://raynerslanefc.co.uk/#team","name":"Rayners Lane FC","legalName":"Rayners Lane Football Club","alternateName":["The Lane","Rayners Lane","Rayners Lane Football Club"],"sport":"Soccer","foundingDate":"1933","foundingLocation":{"@type":"Place","name":"Harrow, Middlesex, England"},"award":["Hellenic League Division One Champions (1982)","FA Cup Second Qualifying Round (1992-93)"],"url":"https://raynerslanefc.co.uk/","logo":"https://raynerslanefc.co.uk/img/badge.png","image":"https://raynerslanefc.co.uk/img/og-card.jpg","email":"info@raynerslanefc.co.uk","description":"Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North at Step 5 of the English football pyramid.","memberOf":{"@type":"SportsOrganization","name":"Combined Counties Football League","url":"https://www.combinedcountiesleague.co.uk"},"address":{"@type":"PostalAddress","streetAddress":"151 Rayners Lane","addressLocality":"Harrow","addressRegion":"Middlesex","postalCode":"HA2 0XH","addressCountry":"GB"},"geo":{"@type":"GeoCoordinates","latitude":51.570435,"longitude":-0.365073},"areaServed":[{"@type":"Place","name":"Harrow"},{"@type":"Place","name":"Rayners Lane"},{"@type":"Place","name":"Pinner"},{"@type":"Place","name":"South Harrow"},{"@type":"Place","name":"Ruislip"},{"@type":"Place","name":"Northwood"},{"@type":"Place","name":"Wembley"},{"@type":"AdministrativeArea","name":"London Borough of Harrow"}],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"14:00","closes":"17:00","description":"Matchday"}],"knowsAbout":["Community football","Non-league football","Football in Harrow","Digital and technology in grassroots football"],"sameAs":["https://twitter.com/RaynersLaneFC","https://instagram.com/raynerslanefc","https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA"]}</script>
   <script type="application/ld+json" id="lane-site">{"@context":"https://schema.org","@type":"WebSite","@id":"https://raynerslanefc.co.uk/#website","url":"https://raynerslanefc.co.uk/","name":"Rayners Lane FC","publisher":{"@id":"https://raynerslanefc.co.uk/#team"},"inLanguage":"en-GB"}</script>
   <!-- lane-schema:end -->
 </head>
@@ -409,18 +409,21 @@
   </div>
 </div>
 
-<!-- ══════════ LIVE NEWS FROM PITCHERO ══════════ -->
+<!-- ══════════ LATEST NEWS — from data/news.json ══════════
+     Was a live feed from the club's old third-party platform, pulled through a
+     CORS proxy. The club deleted that account, so the feed 404s and the section
+     rendered nothing. It now reads the club's own news.json — the same file the
+     newsroom and the staff portal use. One source, ours, no middleman. -->
 <section class="section">
   <div class="container">
     <div class="section-header">
       <div>
-        <span class="label">Live from Pitchero</span>
+        <span class="label">From The Lane</span>
         <div class="divider"></div>
         <h2 class="section-title">Latest <span>News</span></h2>
       </div>
-      <a class="btn btn-outline" href="news.html" target="_blank" rel="noopener">All News</a>
+      <a class="btn btn-outline" href="news.html">All News</a>
     </div>
-    <!-- Populated automatically by pitchero.js -->
     <div class="news-grid" id="news-grid"></div>
   </div>
 </section>
@@ -643,18 +646,63 @@
 <script>document.addEventListener("DOMContentLoaded",function(){initComponents("index.html");});</script>
 <!-- Cinematic WebGL hero (progressive enhancement; degrades to the static hero). -->
 <script type="module" src="js/hero-webgl.js"></script>
-<script src="js/pitchero.js"></script>
 <!-- Supabase config (public anon key) so the live scoreboard can read the
      real-time live_match row. Falls back to matchday.json if absent. -->
 <script src="js/supabase-config.js"></script>
 <script src="js/main.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    initPitcheroNews();
+    renderLatestNews();
     loadHeroNews();
     renderPartners();
     renderSpotlight();
   });
+
+  // ── LATEST NEWS — the club's own newsroom ──
+  // Replaces a feed that pulled the club's old third-party RSS through a public
+  // CORS proxy. The club deleted that account, so the feed 404s and the homepage
+  // news grid rendered empty. This reads data/news.json, the same
+  // file news.html and the staff portal use: one source, ours, no third party
+  // and no proxy in the middle.
+  async function renderLatestNews() {
+    var grid = document.getElementById('news-grid');
+    if (!grid) return;
+    var arts = [];
+    try {
+      var r = await fetch('data/news.json?t=' + Date.now());
+      if (r.ok) arts = ((await r.json()).articles || []);
+    } catch (e) {}
+    if (!arts.length) {
+      grid.innerHTML = '<div style="padding:28px 22px;font-family:var(--font-c);font-size:14px;color:var(--grey)">Club news is on its way. See the <a href="news.html" style="color:var(--yellow)">newsroom</a>.</div>';
+      return;
+    }
+    arts.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+
+    var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; };
+    var fmt = function (d) {
+      var dt = new Date(d + 'T12:00:00');
+      return isNaN(dt) ? (d || '') : dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    };
+    var CAT = { Community: 'news-card__cat--community', Club: 'news-card__cat--club', Match: 'news-card__cat--match' };
+
+    grid.innerHTML = arts.slice(0, 4).map(function (a, i) {
+      // An article can carry an internal link (e.g. trials.html) and still be
+      // ours — only an http link opens in a new tab.
+      var ext = !!(a.link && /^https?:/i.test(a.link));
+      var href = a.link ? a.link : ('news-article.html?id=' + encodeURIComponent(a.id));
+      var tgt = ext ? ' target="_blank" rel="noopener"' : '';
+      var img = a.image || 'img/news/news-default.svg';
+      var cat = a.category || 'Club';
+      var arrow = '<div class="news-card__arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>';
+      return '<a class="news-card' + (i === 0 ? ' news-card--featured' : '') + '" href="' + esc(href) + '"' + tgt + '>' +
+        '<div class="news-card__img"><img src="' + esc(img) + '" alt="' + esc(a.title) + '" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>' +
+        '<div class="news-card__content">' +
+          '<span class="news-card__cat ' + (CAT[cat] || '') + '">' + esc(cat) + '</span>' +
+          '<h3 class="news-card__title">' + esc(a.title) + '</h3>' +
+          '<p class="news-card__date">' + esc(fmt(a.date)) + '</p>' +
+        '</div>' + arrow + '</a>';
+    }).join('');
+  }
 
   // Spotlight — floating Man of the Match + New Signing cards under the hero.
   // Shows the newest of each (set in admin); hidden entirely if neither exists.
@@ -792,7 +840,7 @@
       }
     } catch(e) {}
     if (!rows.length) {
-      el.innerHTML = '<div style="padding:24px 20px;font-family:var(--font-c);color:var(--grey)">Latest news coming soon — follow us <a href="https://www.pitchero.com/clubs/raynerslanefc" target="_blank" style="color:var(--yellow)">on Pitchero</a>.</div>';
+      el.innerHTML = '<div style="padding:24px 20px;font-family:var(--font-c);color:var(--grey)">Latest news coming soon — see the <a href="news.html" style="color:var(--yellow)">newsroom</a>.</div>';
     }
   }
 
