@@ -4,14 +4,15 @@
     {
       "key": "Broadfields United",
       "nickname": "The Fighting Cocks",
-      "ground": "Tithe Farm, Rayners Lane (groundshare with US)",
+      "ground": "Tithe Farm, Rayners Lane",
       "town": "Harrow",
       "founded": 1993,
       "honours": "Middlesex Charity Cup 2022-23 & 2024-25.",
-      "angle": "They share OUR ground at Tithe Farm — the ultimate home-away derby, played on our patch whoever's listed first.",
+      "angle": "They share our ground at Tithe Farm — so this one is a derby in the truest sense. Same pitch, same changing rooms, different dugout.",
       "travel": "On the doorstep",
       "wikipedia": "https://en.wikipedia.org/wiki/Broadfields_United_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "groundshare": true
     },
     {
       "key": "Harefield United",
@@ -176,7 +177,7 @@
       "town": "Thatcham, nr Newbury",
       "founded": 1894,
       "honours": "FA VASE WINNERS 2017-18 (Wembley). Hellenic Premier champs 1974-75.",
-      "angle": "FA Vase winners at Wembley in 2018 — a big name and our longest league trip. A real test.",
+      "angle": "FA Vase winners at Wembley in 2018 — one of the biggest names in this division, and a proper test of where we are.",
       "travel": "~45-50 miles W (longest league trip)",
       "wikipedia": "https://en.wikipedia.org/wiki/Thatcham_Town_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
@@ -213,7 +214,7 @@
       "town": "Abingdon, Oxon",
       "founded": 1946,
       "honours": "Founded 1946 by ex-servicemen; 60-year Northcourt lease signed 2026.",
-      "angle": "A settled Oxfordshire community club, just committed to a 60-year lease. Note: 'The Northcourt' is also a theatre — mind the sat-nav.",
+      "angle": "A settled Oxfordshire community club that has just committed to a 60-year lease at The Northcourt. Worth knowing before you set off: there's a theatre of the same name in the town, so check the sat-nav.",
       "travel": "~50 mins NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Abingdon_United_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
@@ -225,10 +226,11 @@
       "town": "Arkley / Barnet",
       "founded": 1995,
       "honours": "PROMOTED to Southern League Div One Central (Step 4) via 2024-25 play-offs.",
-      "angle": "FA CUP: our biggest test — a Maccabi-founded all-Jewish club who now play a DIVISION ABOVE us at Step 4. Underdog away tie at Rowley Lane.",
+      "angle": "They came up through the play-offs and now play a division above us at Step 4. An FA Cup away tie against higher-league opposition — exactly the sort of day you want.",
       "travel": "~10-12 miles NE (FA Cup)",
       "wikipedia": "https://en.wikipedia.org/wiki/London_Lions_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "note": "Founded by Maccabi London; see their Wikipedia article. Deliberately not used in matchday copy — a club's religious or ethnic identity is theirs to lead on, not ours."
     },
     {
       "key": "New Bradwell St Peter",
@@ -237,7 +239,7 @@
       "town": "New Bradwell, Milton Keynes",
       "founded": 1895,
       "honours": "Spartan South Midlands Senior Div champions 1997-98.",
-      "angle": "FA VASE: an old church club (founded 1895 by a curate of St James') from Milton Keynes — cup football at Tithe Farm.",
+      "angle": "an old church club (founded 1895 by a curate of St James') from Milton Keynes — cup football at Tithe Farm.",
       "travel": "~40-45 miles NW (FA Vase, home tie)",
       "wikipedia": "https://en.wikipedia.org/wiki/New_Bradwell_St_Peter_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"

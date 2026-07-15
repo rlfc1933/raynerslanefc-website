@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Admin | Rayners Lane FC</title>
+  <script src="js/hooks.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -486,6 +487,19 @@
     .so-ha--h{color:var(--su);border-color:var(--su)}
     .so-ha--a{color:var(--bl);border-color:var(--bl)}
     .so-ttl{width:100%;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--w);font-family:var(--fd);font-size:19px;letter-spacing:.03em;padding:10px 11px;margin-bottom:8px}
+    .so-hook-row{display:flex;gap:8px;align-items:stretch}
+    .so-hook-row .so-ttl{flex:1}
+    .so-regen{flex:0 0 44px;border:1px solid rgba(255,209,0,.35);background:rgba(255,209,0,.08);
+      color:var(--yellow);border-radius:8px;font-size:16px;cursor:pointer;min-height:44px}
+    .so-regen:hover{background:rgba(255,209,0,.18)}
+    .so-regen:disabled{opacity:.5;cursor:default}
+    .so-hook-note{font-size:11.5px;color:#8a8a8a;margin:5px 2px 8px;line-height:1.45}
+    .so-prog{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;
+      border:1px solid var(--line,#242424);border-radius:10px;background:rgba(255,255,255,.02)}
+    .so-prog-bar{flex:1;height:7px;border-radius:4px;background:#242424;overflow:hidden}
+    .so-prog-fill{height:100%;background:var(--yellow);border-radius:4px}
+    .so-prog-txt{font-size:12px;color:#9a9a9a;white-space:nowrap}
+
     .so-body{width:100%;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--lg,var(--w));font-family:var(--fb);font-size:14px;line-height:1.7;padding:11px 12px;resize:vertical;min-height:170px}
     .so-ttl:focus,.so-body:focus{outline:none;border-color:var(--y)}
     .so-meta{font-family:var(--fb);font-size:11px;color:var(--gr);margin:8px 0 10px;line-height:1.5}
@@ -1208,7 +1222,7 @@
         <span><b>Monday</b> &mdash; who they are, showing them respect</span>
         <span><b>Wednesday</b> &mdash; gearing up, get behind the lads</span>
       </div>
-      <div id="so-list"><div class="nm-skel">Drafting…</div></div>
+      <div id="sgn-list"><div class="nm-skel">Drafting…</div></div>
     </div>
 
     <div class="panel" id="panel-news">
@@ -5573,73 +5587,37 @@ function soKo(k){ var p=(k||'15:00').split(':'), H=+p[0]; return (H%12||12)+(p[1
 function soPlace(o){ var m=(o.summary||'').match(/based in ([^,.]+(?:,\s*[^,.]+)?)/i); return m?m[1].replace(/\s+in\s+the\s+London Borough of\s+/i,', ').trim():''; }
 function soNick(o){ var n=(o.nickname||'').trim(); return n?(/s$/i.test(n)?'the '+n:n):''; }
 
+// The Monday/Wednesday drafts. The copy lives in js/hooks.js — ONE engine,
+// shared with tools-bake-hooks.js, so a fix to the voice lands everywhere and
+// the portal can't drift from what the share cards say.
+//
+// This used to hold its own copy of the logic, matching opponents on o.club and
+// parsing facts out of o.summary. The opponents file no longer has either field,
+// so every draft was silently losing its background and reading generic — the
+// panel would have looked fine and said nothing about anybody.
 function soDraft(f, when){
-  var home=f.isHome!==false, opp=f.opponent, o=soO(opp);
-  var v=soV(home?'Rayners Lane':opp);
-  var ground=f.venue||(v&&v.ground)||'';
-  // "Away" is a designation, not a journey — Broadfields groundshare at ours.
-  var share=!home && v && /tithe farm/i.test(v.ground||'');
-  var place=soPlace(o), nick=soNick(o), yr=o.founded;
-  var comp=/friendly/i.test(f.competition)?'friendly':/fa cup/i.test(f.competition)?'FA Cup tie':/vase/i.test(f.competition)?'FA Vase tie':'league game';
-  var samePlace = place && soNorm(place).indexOf(soNorm(opp))>-1;
-  var L=[];
-  if(when==='monday'){
-    if(home){
-      L.push('This '+soWd(f.date)+' we welcome '+opp+' to Tithe Farm.');
-      L.push(nick&&!samePlace&&place ? 'Known as '+nick+', they travel over from '+place+'.'
-           : nick ? 'Known as '+nick+', they\'re one of the division\'s own.'
-           : !samePlace&&place ? 'They travel over from '+place+'.'
-           : 'They\'re our visitors for this one.');
-    } else {
-      L.push('This '+soWd(f.date)+' we\'re at '+opp+'.');
-      var who=nick||opp;
-      L.push(share ? opp+' are our hosts — though they\'ll not be dragging us far.'
-           : !samePlace&&place ? 'We head for '+place+' to take on '+who+' on their own patch.'
-           : 'We take on '+who+' on their own patch.');
-    }
-    if(yr){
-      var age=2026-(+yr);
-      // Rotate off the fixture id: stable per post, but consecutive opponents
-      // don't read identically. Still only stating the sourced founding year.
-      var seed=String(f.id).split('').reduce(function(a,c){ return a+c.charCodeAt(0); },0);
-      var opts=[
-        'Formed in '+yr+'. '+age+' years of somebody turning up, week after week — we know exactly what that takes.',
-        yr+'. That\'s '+age+' years of a club being kept alive by people who care about it. Respect where it\'s due.',
-        'They\'ve been at it since '+yr+'. Not many clubs last '+age+' years. The ones that do are built on volunteers, same as us.'
-      ];
-      L.push(opts[seed%opts.length]);
-    }
-    if(share) L.push('A quirk worth knowing: Broadfields share Tithe Farm with us. It\'s an away game we can walk to — same ground, away shirts.');
-    L.push(home?'We\'ll see you '+soWd(f.date)+'. Come and give them a proper Lane welcome.'
-                :'Details, directions and the countdown are on the site.');
-  } else {
-    if(home){
-      L.push(opp+' at The Lane, '+soDay(f.date)+', '+soKo(f.kickoff)+'.');
-      L.push(comp==='friendly'?'Our ground. Our yellow. First proper look at this squad.'
-           : comp==='league game'?'Our ground. Our yellow. Three points on the table.'
-           : 'Our ground. Our yellow. '+comp.replace(/^FA /,'The FA ')+' at The Lane.');
-      L.push('Tithe Farm, 151 Rayners Lane, HA2 0XH — minutes from the station. Get down early, get a drink in, and make it loud.');
-      L.push('Every voice counts at this level. Be there.');
-    } else {
-      L.push(soDay(f.date)+'. '+(ground||opp)+'. '+soKo(f.kickoff)+'.');
-      L.push(share?'An away day that isn\'t — Broadfields host us at Tithe Farm. No excuse not to be there.'
-                  :'We\'re taking the yellow'+(place?' to '+place:' on the road')+'. If you can travel, travel.');
-      L.push(share?'Same ground, away shirts. Come and back the lads.'
-                  :'Away support is worth a goal at this level. Directions are on the site — one tap and you\'re on your way.');
-    }
-  }
+  var o = window.rlHooks.findOpponent(soOpp, f.opponent);
+  var home = f.isHome !== false, opp = f.opponent;
+  // Opening day is the first LEAGUE game, not the first fixture — friendlies
+  // come before it and are not "the wait is over".
+  var league = soFix.filter(function(x){ return /combined counties/i.test(x.competition||''); })
+                    .sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  var hook = window.rlHooks.fixtureHook(f, o, { opener: league.length && league[0].id === f.id });
   return {
     id: 'match-'+when+'-'+f.id,
     fixtureId: f.id,
     when: when,
     home: home,
     opponent: opp,
-    title: home ? 'Rayners Lane v '+opp : opp+' v Rayners Lane',
+    title: hook,                      // the dramatic line IS the title
+    shareHeadline: hook,              // ...and the share card reads the same one
+    plainTitle: home ? 'Rayners Lane v '+opp : opp+' v Rayners Lane',
     strap: f.competition+' · '+(home?'HOME':'AWAY')+' · '+soDay(f.date)+', '+soKo(f.kickoff),
-    body: L.join('\n\n'),
+    body: (when==='monday' ? window.rlHooks.monday(f,o) : window.rlHooks.wednesday(f,o)),
     date: f.date,
     crest: f.oppCrest || soCrest(opp),
-    wiki: o.wikipedia || ''
+    wiki: (o && o.wikipedia) || '',
+    hasProfile: !!o
   };
 }
 
@@ -5673,7 +5651,7 @@ function soRender(){
   });
   var badge=document.getElementById('so-badge');
   if(badge){ badge.style.display=drafts.length?'':'none'; badge.textContent=drafts.length; }
-  var box=document.getElementById('so-list');
+  var box=document.getElementById('sgn-list');
   if(!box) return;
   if(!drafts.length){ box.innerHTML='<div class="nm-skel">Nothing waiting. Every upcoming game already has its posts published.</div>'; return; }
   // Grouped by month and collapsed, or it's 84 textareas in one scroll on a
@@ -5695,8 +5673,29 @@ function soRender(){
       '<div class="so-mth-in">'+g.items.map(function(i){ return soCardHtml(drafts[i], i); }).join('')+'</div>'+
     '</div>';
   }).join('');
+  // Progress banner sits above the months so "what's left" is the first thing seen.
+  var host=document.getElementById('sgn-list');
+  if(host) host.insertAdjacentHTML('afterbegin', soProgressHtml());
   window._soDrafts=drafts;
   return;
+}
+// "Which games still need doing?" — answered off the live news file, using the
+// exact id soPublish writes ('match-<when>-<fixtureId>'). Derived, not tracked
+// separately, so it can never disagree with what's actually published.
+function soProgressHtml(){
+  var up=soUpcoming(), total=up.length*2, done=0;
+  up.forEach(function(f){
+    ['monday','wednesday'].forEach(function(w){
+      if(soNews.some(function(a){ return a.id==='match-'+w+'-'+f.id; })) done++;
+    });
+  });
+  if(!total) return '';
+  var pct = Math.round(done/total*100);
+  return '<div class="so-prog">'+
+    '<div class="so-prog-bar"><div class="so-prog-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="so-prog-txt"><b style="color:var(--yellow)">'+done+'</b> of '+total+' posts published &middot; '+
+      (total-done)+' still to sign off</div>'+
+  '</div>';
 }
 function soToggle(gi){
   var el=document.getElementById('so-m-'+gi);
@@ -5711,10 +5710,16 @@ function soCardHtml(d, i){
         '<span class="so-ha '+(d.home?'so-ha--h">HOME':'so-ha--a">AWAY')+'</span>'+
         '<span class="so-when '+(d.when==='monday'?'so-when--mon">Monday':'so-when--wed">Wednesday')+'</span>'+
       '</div>'+
-      '<input class="so-ttl" id="so-t-'+i+'" value="'+escH(d.title)+'">'+
+      '<div class="so-hook-row">'+
+        '<input class="so-ttl" id="so-t-'+i+'" value="'+escH(d.title)+'" title="This line is the post title AND the share card headline. Edit it freely — yours wins.">'+
+        '<button class="so-regen" id="so-r-'+i+'" onclick="soRegen('+i+')" title="Ask the AI for a different headline. It can only use the facts already in the post.">&#10024;</button>'+
+      '</div>'+
+      '<div class="so-hook-note" id="so-hn-'+i+'">This line is the post title <b>and</b> the share-card headline.</div>'+
       '<textarea class="so-body" id="so-b-'+i+'">'+escH(d.body)+'</textarea>'+
       '<div class="so-meta">'+escH(d.strap)+
-        (d.wiki?' &middot; background from <a href="'+escH(d.wiki)+'" target="_blank" rel="noopener">Wikipedia</a>':' &middot; no background found — facts only')+
+        (d.wiki?' &middot; background from <a href="'+escH(d.wiki)+'" target="_blank" rel="noopener">Wikipedia</a>'
+              : d.hasProfile ? ' &middot; facts from our opponent record'
+              : ' &middot; <b style="color:var(--wa,#e8a33d)">no opponent profile</b> — generic copy, nothing claimed about them. Add their info to data/opponents.json if you have it.')+
       '</div>'+
       '<div class="so-acts">'+
         '<button class="so-pub" id="so-p-'+i+'" onclick="soPublish('+i+')">Publish to the site</button>'+
@@ -5726,6 +5731,36 @@ function soCardHtml(d, i){
 function soIni(n){
   return String(n||'').replace(/\b(fc|afc|utd|united|town|city)\b/gi,'').trim().split(/\s+/)
     .map(function(w){ return w[0]||''; }).join('').slice(0,3).toUpperCase()||'?';
+}
+// Ask the AI for a different headline. Deliberately narrow: it receives the
+// post we already drafted from verified data and is told it may use no other
+// fact. A refusal or an outage just leaves the existing hook in place — the
+// deterministic line is always good enough to ship on its own.
+function soRegen(i){
+  var d=window._soDrafts[i]; if(!d) return;
+  var t=document.getElementById('so-t-'+i), btn=document.getElementById('so-r-'+i), note=document.getElementById('so-hn-'+i);
+  var body=(document.getElementById('so-b-'+i).value||'').trim();
+  btn.disabled=true; btn.textContent='…';
+  note.innerHTML='<span style="color:var(--gr,#888)">Asking for a headline…</span>';
+  fetch('/.netlify/functions/gen-post',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ pin: PIN, mode:'headline',
+      text: (d.home?'HOME game':'AWAY game')+' vs '+d.opponent+'. '+d.strap+'\n\n'+body })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    btn.disabled=false; btn.innerHTML='&#10024;';
+    if(j && j.ok && j.headline){
+      t.value=j.headline.toUpperCase();
+      note.innerHTML='AI suggestion — <b>edit it or press &#10024; again</b>. Yours is what publishes.';
+    } else {
+      // Be specific about WHY. "It didn't work" wastes a volunteer's evening.
+      var why = !j ? 'no reply' : j.error==='no-key' ? 'no AI key set in Netlify'
+              : j.error==='Unauthorized' ? 'PIN rejected' : (j.error||'unknown');
+      note.innerHTML='<span style="color:var(--wa,#e8a33d)">Couldn\'t reach the AI ('+escH(why)+'). Keeping the headline we wrote — it\'s fine to publish.</span>';
+    }
+  }).catch(function(){
+    btn.disabled=false; btn.innerHTML='&#10024;';
+    note.innerHTML='<span style="color:var(--wa,#e8a33d)">AI unavailable. Keeping the headline we wrote — it\'s fine to publish.</span>';
+  });
 }
 function soSkip(i){
   var c=document.querySelector('.so-card[data-i="'+i+'"]');
@@ -5743,6 +5778,9 @@ function soPublish(i){
   var art={
     id: d.id,
     title: title,
+    // The line staff signed off is BOTH the article title and the share-card
+    // headline — one hook, reused, so the card and the page never disagree.
+    shareHeadline: title,
     category: 'Match',
     date: new Date().toISOString().slice(0,10),   // published today, not match day
     author: 'Rayners Lane FC',

@@ -59,6 +59,37 @@
   }
   function nickBare(o) { return String((o && o.nickname) || '').replace(/^the\s+/i, '').trim(); }
 
+  // "Rowley Lane, Arkley" + town "Arkley / Barnet" printed as
+  // "Rowley Lane, Arkley, Arkley / Barnet". If the ground already names the
+  // place, the town adds nothing.
+  function placeOf(o) {
+    var g = String((o && o.ground) || '').trim(), t = String((o && o.town) || '').trim();
+    if (!g) return t;
+    if (!t) return g;
+    var gn = norm(g), first = norm(t.split(/[\/,]/)[0]);
+    if (first && gn.indexOf(first) > -1) return g;   // town already in the ground
+    return g + ', ' + t;
+  }
+  // Broadfields groundshare at Tithe Farm: their "away" fixture has no journey.
+  // Never infer travel from isHome — 'away' is a designation, not a location.
+  function isGroundshare(o) { return !!(o && o.groundshare); }
+  // travel carries internal annotations — "~45-50 miles W (longest league trip)",
+  // "~10-12 miles NE (FA Cup)". The parenthetical is a note to us; it printed
+  // straight into a supporter's post.
+  function travelOf(o) {
+    return String((o && o.travel) || '').replace(/\s*\([^)]*\)/g, '').replace(/^~/, 'About ').trim();
+  }
+  // Honours are a database field. Dropped in raw they read like a dump:
+  // "Middlesex Charity Cup 2022-23 & 2024-25." floating as its own paragraph.
+  function honoursLine(o) {
+    var h = String((o && o.honours) || '').trim();
+    if (!h) return '';
+    if (/^(founded|formed|among|historic|long |rose |started|as )/i.test(h)) return h;  // already a sentence
+    // Do NOT lowercase the first letter to graft it onto a stem — it wrecked every
+    // proper noun and acronym: "middlesex Charity Cup", "fA VASE WINNERS".
+    return 'On their honours list: ' + h;
+  }
+
   // ── Hand-written hooks, one club at a time ────────────────────────────────
   // Each is tied to something VERIFIED in that club's opponents.json record —
   // the groundshare, the colours, the Vase win, the division gap. Generic lines
@@ -165,9 +196,15 @@
       }
     } else {
       L.push('This ' + dayName(f.date) + ' we\'re away at ' + opp + '.');
-      var where = (o && o.ground) ? o.ground + (o.town ? ', ' + o.town : '') : '';
-      if (where) L.push(N ? 'We head to ' + where + ' to take on ' + N + '.' : 'We head to ' + where + '.');
-      else if (N) L.push('We take on ' + N + ' on their own patch.');
+      if (isGroundshare(o)) {
+        // Their home game is at OUR ground. "We head to Tithe Farm" would be daft.
+        L.push(N ? 'They\'re the hosts — but we\'re not going anywhere. ' + opp + ' share Tithe Farm with us, so ' + N + ' are at home on our pitch.'
+                 : opp + ' share Tithe Farm with us, so they\'re at home on our own pitch.');
+      } else {
+        var where = placeOf(o);
+        if (where) L.push(N ? 'We head to ' + where + ' to take on ' + N + '.' : 'We head to ' + where + '.');
+        else if (N) L.push('We take on ' + N + ' on their own patch.');
+      }
     }
 
     // The respect. Straight from the verified record — nothing added.
@@ -178,7 +215,8 @@
       if (o.foundedNote) L.push('A club with roots back to ' + yr + ' — and we know what it takes to keep one going that long.');
       else L.push('Formed in ' + yr + '. That\'s ' + age + ' years of people turning up and keeping a football club alive. We know exactly what that takes.');
     }
-    if (o && o.honours) L.push(o.honours);
+    var hon = honoursLine(o);
+    if (hon) L.push(hon);
     if (o && o.angle) L.push(o.angle);
 
     L.push(home
@@ -194,23 +232,33 @@
   function wednesday(f, o) {
     var home = isHome(f), L = [], opp = f.opponent;
     var venue = home ? HOME_GROUND : ((o && o.ground) || f.venue || '');
+    if (isGroundshare(o)) venue = HOME_GROUND;
 
     L.push(home ? opp + ' at The Lane. ' + longDate(f.date) + '. ' + ko(f.kickoff) + '.'
                 : longDate(f.date) + '. ' + (venue || opp) + '. ' + ko(f.kickoff) + '.');
     L.push(home
       ? 'Our ground, our yellow. ' + HOME_GROUND + ', 151 Rayners Lane, HA2 0XH — minutes from the station.'
-      : 'We\'re taking the yellow on the road' + (o && o.travel ? ' — ' + o.travel + '.' : '.'));
+      : isGroundshare(o)
+        ? 'An away day that isn\'t: same ground, away shirts. No excuse for not being there.'
+        // o.travel is a note like "~25-30 mins WSW" or "On the doorstep" — it can't
+        // be dropped mid-sentence after "on the road", so give it its own clause.
+        : 'We\'re taking the yellow on the road.' + (travelOf(o) ? ' ' + travelOf(o) + '.' : ''));
 
     var c = comp(f);
     if (c === 'facup') L.push('Cup football. One game, winner stays in.');
     else if (c === 'vase') L.push('The Vase. Every round is a step towards Wembley.');
     else if (c === 'league') L.push('Three points on the table.');
 
-    if (o && o.angle) L.push(o.angle);
+    // Deliberately NOT the angle again — Monday already told that story, and the
+    // same paragraph twice in one week reads like a bot wrote it. Wednesday is
+    // hype, not background.
 
     L.push(home
       ? 'Get down early, get a drink in, and make it loud. Every voice counts at this level.'
-      : 'Away support is worth a goal at this level. If you can travel, travel.');
+      : isGroundshare(o)
+        // Telling people to travel to a ground they're already standing in.
+        ? 'Nothing to travel to and nothing to organise. Just turn up and be loud.'
+        : 'Away support is worth a goal at this level. If you can travel, travel.');
     L.push('Up The Lane. 💛');
     return L.join('\n\n');
   }
