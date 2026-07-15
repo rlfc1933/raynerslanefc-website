@@ -5,6 +5,14 @@
 # Serve the DYNAMIC sitemap (netlify/functions/sitemap.js) at /sitemap.xml.
 # force=true so it wins over any static file; status 200 so it's a rewrite (the
 # URL stays /sitemap.xml for crawlers).
+# The club's own news feed. Pitchero used to provide one; when the club deleted
+# that account the feed died with it. This is ours, at a proper URL.
+[[redirects]]
+  from = "/rss.xml"
+  to = "/.netlify/functions/rss"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"

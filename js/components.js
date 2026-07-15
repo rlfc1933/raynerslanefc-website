@@ -666,6 +666,16 @@ function initComponents(currentPage) {
     inLanguage: 'en-GB'
   });
 
+  // Feed autodiscovery. This is how a feed reader, an aggregator or a crawler
+  // finds us without being told — the club had this via Pitchero and lost it.
+  if (!document.querySelector('link[type="application/rss+xml"]')) {
+    var rss = document.createElement('link');
+    rss.rel = 'alternate'; rss.type = 'application/rss+xml';
+    rss.title = 'Rayners Lane FC — Club News';
+    rss.href = '/rss.xml';
+    document.head.appendChild(rss);
+  }
+
   const nav     = document.getElementById('nav-placeholder');
   const footer  = document.getElementById('footer-placeholder');
   const twitter = document.getElementById('twitter-placeholder');

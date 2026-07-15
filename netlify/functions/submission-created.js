@@ -23,6 +23,11 @@ exports.handler = async function (event) {
     if (!key) return { statusCode: 200, body: 'not configured' };
     var from = process.env.WELCOME_FROM || 'Rayners Lane FC <info@raynerslanefc.co.uk>';
     var club = process.env.CLUB_INBOX || 'info@raynerslanefc.co.uk';
+    // Player and sponsor enquiries go to the chairman as well as the club inbox.
+    // One inbox is a single point of failure: if the person watching info@ is on
+    // holiday, a lad who wants to play for us waits a fortnight and signs
+    // somewhere else. Two addresses, so somebody always sees it.
+    var chairman = process.env.CHAIRMAN_INBOX || 'chairman@raynerslanefc.co.uk';
 
     // ── SPONSOR APPLICATION → alert the commercial team at info@ ──
     if (formName === 'sponsor-enquiry') {
@@ -43,7 +48,13 @@ exports.handler = async function (event) {
       var sRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: from, to: [club], reply_to: (data.email || club), subject: '💼 Sponsor application — ' + (data.company || 'New enquiry'), html: sHtml }),
+        body: JSON.stringify({
+          from: from,
+          to: [club, chairman],
+          reply_to: (data.email || club),
+          subject: 'Form complete — sponsor enquiry: ' + (data.company || 'New enquiry'),
+          html: sHtml
+        }),
       });
       return { statusCode: 200, body: sRes.ok ? 'sponsor alert sent' : 'resend error ' + sRes.status };
     }
@@ -60,17 +71,67 @@ exports.handler = async function (event) {
         .join('');
       var pHtml = '<div style="background:#080808;padding:24px;font-family:Arial,Helvetica,sans-serif">' +
         '<div style="max-width:560px;margin:0 auto;background:#111;border:1px solid #2a2a2a;border-radius:14px;padding:24px 26px">' +
-          '<div style="color:#FFD100;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">New Trial Registration</div>' +
-          '<h1 style="color:#fff;font-size:22px;margin:0 0 16px">' + escapeHtml(data.name || 'A player') + ' wants to trial for The Lane</h1>' +
+          '<div style="color:#FFD100;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Form complete &middot; Player interest</div>' +
+          '<h1 style="color:#fff;font-size:22px;margin:0 0 6px">' + escapeHtml(data.name || 'A player') + ' wants to play for The Lane</h1>' +
+          '<p style="color:#888;font-size:13px;margin:0 0 16px">Someone from the club needs to get back to them.</p>' +
+          // Contact details up top and big — this is the bit a committee member
+          // needs on a phone, not buried in a table.
+          '<div style="background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #FFD100;border-radius:8px;padding:14px 16px;margin-bottom:16px">' +
+            (data.email ? '<div style="margin-bottom:6px"><a href="mailto:' + escapeHtml(data.email) + '" style="color:#FFD100;font-size:16px;text-decoration:none">' + escapeHtml(data.email) + '</a></div>' : '') +
+            (data.phone ? '<div><a href="tel:' + escapeHtml(String(data.phone).replace(/[^0-9+]/g, '')) + '" style="color:#FFD100;font-size:16px;text-decoration:none">' + escapeHtml(data.phone) + '</a></div>' : '') +
+          '</div>' +
           '<table style="width:100%;border-collapse:collapse">' + prows + '</table>' +
-          '<p style="font-size:13px;color:#888;margin-top:18px">Reply to reach them directly, or open the Trialists view in the admin to track it.</p>' +
+          '<p style="font-size:13px;color:#888;margin-top:18px">Sent to info@ and chairman@. Hit reply to go straight back to them, or open the Trialists view in the admin.</p>' +
         '</div></div>';
       var pRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: from, to: [club], reply_to: (data.email || club), subject: '⚽ Trial registration — ' + (data.name || 'New applicant'), html: pHtml }),
+        body: JSON.stringify({
+          from: from,
+          to: [club, chairman],
+          // Hitting reply goes straight to the player, not back to ourselves.
+          reply_to: (data.email || club),
+          subject: 'Form complete — player interest: ' + (data.name || 'New applicant'),
+          html: pHtml
+        }),
       });
       return { statusCode: 200, body: pRes.ok ? 'trial alert sent' : 'resend error ' + pRes.status };
+    }
+
+    // VOLUNTEERS. This form existed and posted to Netlify Forms, but nothing
+    // emailed anyone — every application landed in a dashboard nobody opens.
+    // The club runs on volunteers; an offer of help going unanswered is the
+    // worst possible outcome here.
+    if (formName === 'volunteer') {
+      var vrows = [
+        ['Name', data.name], ['Email', data.email], ['Phone', data.phone],
+        ['Interested in', data.role], ['Availability', data.availability],
+        ['Message', data.message],
+      ].filter(function (r) { return r[1]; })
+        .map(function (r) { return '<tr><td style="padding:6px 14px 6px 0;color:#888;font-size:13px;vertical-align:top">' + r[0] + '</td><td style="padding:6px 0;color:#eee;font-size:14px">' + escapeHtml(r[1]) + '</td></tr>'; })
+        .join('');
+      var vHtml = '<div style="background:#080808;padding:24px;font-family:Arial,Helvetica,sans-serif">' +
+        '<div style="max-width:560px;margin:0 auto;background:#111;border:1px solid #2a2a2a;border-radius:14px;padding:24px 26px">' +
+          '<div style="color:#FFD100;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Form complete &middot; Volunteer</div>' +
+          '<h1 style="color:#fff;font-size:22px;margin:0 0 6px">' + escapeHtml(data.name || 'Someone') + ' wants to help out</h1>' +
+          '<p style="color:#888;font-size:13px;margin:0 0 16px">Somebody should thank them and say what happens next.</p>' +
+          '<div style="background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #FFD100;border-radius:8px;padding:14px 16px;margin-bottom:16px">' +
+            (data.email ? '<div style="margin-bottom:6px"><a href="mailto:' + escapeHtml(data.email) + '" style="color:#FFD100;font-size:16px;text-decoration:none">' + escapeHtml(data.email) + '</a></div>' : '') +
+            (data.phone ? '<div><a href="tel:' + escapeHtml(String(data.phone).replace(/[^0-9+]/g, '')) + '" style="color:#FFD100;font-size:16px;text-decoration:none">' + escapeHtml(data.phone) + '</a></div>' : '') +
+          '</div>' +
+          '<table style="width:100%;border-collapse:collapse">' + vrows + '</table>' +
+          '<p style="font-size:13px;color:#888;margin-top:18px">Hit reply to go straight back to them.</p>' +
+        '</div></div>';
+      var vRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: from, to: [club], reply_to: (data.email || club),
+          subject: 'Form complete — volunteer: ' + (data.name || 'New offer of help'),
+          html: vHtml
+        }),
+      });
+      return { statusCode: 200, body: vRes.ok ? 'volunteer alert sent' : 'resend error ' + vRes.status };
     }
 
     if (formName !== 'fan-signup') return { statusCode: 200, body: 'ignored' };
