@@ -161,7 +161,7 @@
     .soc-cap{position:relative;background:var(--dk);border:1px solid var(--br);border-radius:9px;padding:13px 40px 13px 14px;margin:0 0 12px;font-family:var(--fb);font-size:13px;color:#e8e8e8;line-height:1.5;white-space:pre-wrap;cursor:pointer;transition:border-color .15s}
     .soc-cap:hover{border-color:var(--y)}
     .soc-cap::after{content:"⧉ copy";position:absolute;top:9px;right:11px;font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gr)}
-    .soc-cap.copied::after{content:"<i class="ico ico-check"></i> copied";color:#22C55E}
+    .soc-cap.copied::after{content:"\2713 copied";color:#22C55E}
     /* Business Playbook */
     .tile-hero{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:20px;background:linear-gradient(135deg,#1c3a12 0%,#0c1a0a 60%,#161208 100%);border:1px solid rgba(255,209,0,.5);border-radius:16px;position:relative;overflow:hidden}
     .tile-hero::before{height:0}
@@ -675,7 +675,7 @@
         <button class="tile tile-hero" style="background:linear-gradient(135deg,#1c1c1c,#0a0a0a 60%,#161208);border-color:rgba(255,209,0,.45)" onclick="openPanel('poststudio')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
           <div class="tile-body">
-            <div class="tile-name"><i class="ico ico-palette"></i> Post Studio</div>
+            <div class="tile-name"><i class="ico ico-post-studio"></i> Post Studio</div>
             <div class="tile-desc">Make uniform, on-brand Instagram &amp; X graphics in seconds — matchday, goals, scores, signings, festive &amp; more. All league crests loaded.</div>
           </div>
           <span class="tile-badge">Social</span>
@@ -1218,7 +1218,7 @@
       <div class="field"><label class="fl">Role / Package</label><input type="text" id="sp-role" placeholder="Home Shirt Sponsor"></div>
       <div class="field">
         <label class="fl">Sponsor Logo <span style="color:var(--gr);font-weight:400">— upload a JPG or PNG (transparent PNG looks best)</span></label>
-        <div class="iup-wrap" id="sp-iw"><input type="file" accept="image/png,image/jpeg,image/webp" onchange="prevImg('sp',this)"><div class="iup-icon"><i class="ico ico-palette"></i></div><div class="iup-lbl">Tap to upload logo</div><div class="iup-sub">JPG, PNG or WebP — max 4MB</div></div>
+        <div class="iup-wrap" id="sp-iw"><input type="file" accept="image/png,image/jpeg,image/webp" onchange="prevImg('sp',this)"><div class="iup-icon"><i class="ico ico-image"></i></div><div class="iup-lbl">Tap to upload logo</div><div class="iup-sub">JPG, PNG or WebP — max 4MB</div></div>
         <div class="iup-prev" id="sp-ip"><img id="sp-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('sp')">&#10005; Remove</button></div>
       </div>
       <div class="field"><label class="fl">…or paste an existing logo path (optional)</label><input type="text" id="sp-logo" placeholder="img/sponsors/hanlon-dry-lining.png"></div>
@@ -1887,7 +1887,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
     <!-- POST STUDIO — on-brand social graphics generator -->
     <div class="panel" id="panel-poststudio">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-palette"></i> Post Studio</div></div>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-post-studio"></i> Post Studio</div></div>
       <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Make <strong style="color:var(--w)">uniform, on-brand</strong> graphics in seconds — pick a post, fill the fields, choose Instagram or X sizing, and download a ready-to-post PNG. Bebas font, club colours, every time.</p></div>
 
       <div class="slbl"><i class="ico ico-pen-line"></i> Write &amp; reword for X <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— type a rough note, AI gives you ready tweets to copy + a headline card</span></div>
