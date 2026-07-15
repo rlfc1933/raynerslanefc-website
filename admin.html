@@ -1240,6 +1240,14 @@
         <div class="iup-prev" id="nw-ip"><img id="nw-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('nw')">&#10005; Remove</button></div>
       </div>
       <div class="field"><label class="fl">Short Summary (card preview)</label><textarea id="nw-exc" rows="2" placeholder="One or two sentences..."></textarea></div>
+      <div class="field">
+        <label class="fl">Share Headline <span style="opacity:.6;font-weight:400">&mdash; the big line on the share card</span></label>
+        <div class="so-hook-row">
+          <input id="nw-hook" placeholder="e.g. THE LANE LAND THEIR MAN — blank uses the title">
+          <button type="button" class="so-regen" id="nw-hook-btn" onclick="nwHook()" title="Suggest a headline from your article. It can only use facts already in your text.">&#10024;</button>
+        </div>
+        <div class="so-hook-note" id="nw-hook-note">Write the article first, then press &#10024; for a suggestion. Blank is fine &mdash; the card falls back to the title.</div>
+      </div>
       <div class="field"><label class="fl">Full Article</label><textarea id="nw-body" rows="8" placeholder="Write the full article here..."></textarea></div>
       <button class="save" onclick="publishArticle()">&#10003; Publish Article</button>
       <div class="div"></div>
@@ -4070,6 +4078,38 @@ function commitArticle(art, depId, after) {
   });
 }
 
+// Suggest a share headline for the article being written. The AI sees only the
+// article text and is told it may use no other fact. If it's unreachable (no key,
+// outage, PIN), fall back to the local category-led hook — the button should
+// never just fail at a volunteer.
+function nwHook() {
+  var out = document.getElementById('nw-hook'), note = document.getElementById('nw-hook-note'), btn = document.getElementById('nw-hook-btn');
+  var title = gv('nw-title'), body = gv('nw-body'), cat = gv('nw-cat');
+  if (!title && !body) { note.innerHTML = '<span style="color:var(--wa,#e8a33d)">Write the article first — there\'s nothing to work from yet.</span>'; return; }
+  btn.disabled = true; btn.textContent = '…';
+  note.innerHTML = '<span style="color:#888">Thinking…</span>';
+  var local = (window.rlHooks && window.rlHooks.articleHook({ title: title, category: cat })) || '';
+  fetch('/.netlify/functions/gen-post', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, mode: 'headline', text: (cat ? cat + ': ' : '') + title + '\n\n' + body })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    btn.disabled = false; btn.innerHTML = '&#10024;';
+    if (j && j.ok && j.headline) {
+      out.value = j.headline.toUpperCase();
+      note.innerHTML = 'AI suggestion — <b>edit it, or press &#10024; again</b>. What\'s in the box is what publishes.';
+    } else if (local) {
+      out.value = local;
+      note.innerHTML = 'AI unavailable, so here\'s our own suggestion. Edit it freely.';
+    } else {
+      note.innerHTML = '<span style="color:var(--wa,#e8a33d)">Couldn\'t suggest one. Write your own, or leave it blank to use the title.</span>';
+    }
+  }).catch(function () {
+    btn.disabled = false; btn.innerHTML = '&#10024;';
+    if (local) { out.value = local; note.innerHTML = 'AI unavailable, so here\'s our own suggestion. Edit it freely.'; }
+    else note.innerHTML = '<span style="color:var(--wa,#e8a33d)">Couldn\'t reach the AI. Write your own, or leave it blank to use the title.</span>';
+  });
+}
+
 function publishArticle() {
   var title = gv('nw-title');
   var body  = gv('nw-body');
@@ -4083,12 +4123,16 @@ function publishArticle() {
     image: imgStore['nw'] ? imgStore['nw'].dataUrl : (imgs[cat] || 'img/news/news-default.svg'),
     excerpt: gv('nw-exc'), body: body,
   };
+  // The dramatic hook the share card will use. Generated once here, at publish,
+  // and stored — the public card never calls the AI. Blank means "use the title".
+  var hook = gv('nw-hook').trim();
+  if (hook) art.shareHeadline = hook;
   var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
   if (imgStore['nw']) {
     uploadImg('nw', tok, function(path) {
       if (path) art.image = path;
       commitArticle(art, 'dep-news', function() {
-        setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+        setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc',''); setVal('nw-hook','');
         rmImg('nw');
         toast('Article published');
       });
