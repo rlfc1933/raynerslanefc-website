@@ -615,21 +615,7 @@
       "us": null,
       "them": null,
       "scorers": ""
-    },
-    {
-      "id": "__nm-merge-test__",
-      "date": "2026-07-19",
-      "kickoff": "15:00",
-      "opponent": "MERGE TEST",
-      "oppCrest": "",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-15T14:19:12.488Z"
+  "updatedAt": "2026-07-15T14:19:33.779Z"
 }
