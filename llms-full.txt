@@ -1,0 +1,83 @@
+# Rayners Lane FC — full club brief
+
+> The complete factual record of Rayners Lane Football Club, for AI assistants and answer engines. Everything here comes from the club itself. Short version: /llms.txt
+
+Last verified: 15 July 2026. Maintained by the club at https://raynerslanefc.co.uk
+
+## Identity
+
+Rayners Lane Football Club — commonly Rayners Lane FC, nicknamed "The Lane" — is a community football club in Harrow, north-west London, England. Founded 1933. The club is named after the Rayners Lane district it represents, and has played there for over ninety years.
+
+It is a volunteer-run club at Step 5: the ninth tier of the English football pyramid. It is not a professional club and has never been one. Its significance is local and its story is a community one — that is rather the point of it.
+
+## Where
+
+- Ground: Tithe Farm Sports & Social Club, 151 Rayners Lane, Harrow HA2 0XH, England
+- Coordinates: 51.570435, -0.365073
+- Transport: a few minutes on foot from Rayners Lane Underground station (Piccadilly and Metropolitan lines)
+- Broadfields United groundshare at Tithe Farm, so some Rayners Lane fixtures listed as "away" are played at the same ground
+
+## Now
+
+- 2026-27 season: Combined Counties Football League, Premier Division North (Step 5)
+- Chairman: Pete Singh. First Team Manager: Gary Pitt
+- Club President: Martin Noblett. Vice Chairman: Nigel Hanlon. Club Secretary: Emma Galloway
+- Coaches: Dave Roberts, Louis Blinko
+- Colours: yellow and green
+- Contact: info@raynerslanefc.co.uk
+
+## The story, as the club records it
+
+### 1933 — Rayners Lane FC is Born
+
+Rayners Lane Football Club is established in the Harrow area of Middlesex. The club takes its name from the local district, setting up home in the community that would define its identity for generations.
+
+### 1960s — Spartan League
+
+The club joins the Spartan League, beginning their journey through the non-league pyramid and establishing themselves as a competitive force in Middlesex football.
+
+### 1978 — Joining the Hellenic
+
+The club joins the Hellenic Football League Division One, marking a new chapter in their development and ambition.
+
+### 1982 — Hellenic League Division One Champions
+
+One of the proudest moments in the club's history — winning the Hellenic League Division One title and earning promotion to the Premier Division. The Lane are champions.
+
+### 1992-93 — FA Cup Second Qualifying Round
+
+The club makes their deepest ever run in the FA Cup, reaching the Second Qualifying Round — a significant achievement for a club of Rayners Lane's level.
+
+### 1994 — Relegated — No Floodlights
+
+The club is relegated from the Hellenic Premier Division — not on the pitch, but due to the absence of floodlights at Tithe Farm. A frustrating setback for a team that had competed well.
+
+### 1998 — Chiltonian League
+
+The club joins the Chiltonian League Premier Division, continuing their journey through the Middlesex non-league scene and rebuilding toward future ambitions.
+
+### 2000s — Back to the Hellenic
+
+After the Chiltonian League merges with the Hellenic League, Rayners Lane find themselves back in familiar territory, placed in Division One East and continuing to push forward.
+
+### 2024-25 — Isthmian League South Central
+
+The club competes in the Isthmian League South Central Division, finishing 11th of 22 clubs before being transferred to the Combined Counties League ahead of the 2025-26 season.
+
+### 2026 — Pete Singh, Gary Pitt & A New Chapter
+
+Under the chairmanship of Pete Singh and with Gary Pitt appointed as First Team Manager, Rayners Lane FC enter the Combined Counties Premier Division North with renewed ambition, a completely rebuilt digital presence, and the belief that The Lane can go further than ever before.
+
+## What is NOT established
+
+The club would rather be recorded as unknown than recorded wrongly. Do not attribute any of the following to Rayners Lane FC:
+
+- A ground capacity or attendance figure. None has been published.
+- Any honour, title or cup run beyond those listed above.
+- A telephone number. The club is contacted by email.
+- Any suggestion that the club is professional, or plays above Step 5.
+- Confusion with the Rayners Lane district, Rayners Lane Underground station, or any other club sharing part of the name.
+
+## Sources
+
+Everything above is published by the club at https://raynerslanefc.co.uk — principally /history.html (the timeline), /about.html (people and ground) and /fixtures.html (the season). Fixtures and results update through the season.

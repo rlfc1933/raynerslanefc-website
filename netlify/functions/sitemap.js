@@ -50,6 +50,23 @@ exports.handler = async function () {
     }
   } catch (e) { /* keep the static-page sitemap */ }
 
+  // Player profiles. Worth indexing now that the edge function (meta.js) gives
+  // each one a real title, description and Person schema instead of the same
+  // empty shell — 24 pages about real people, each tied back to the club
+  // entity, is exactly the kind of thing that builds an entity out.
+  // lastmod comes from players.json's updatedAt: per-player dates don't exist,
+  // and inventing one would be lying to a crawler about freshness.
+  try {
+    var pr = await fetch(BASE + '/data/players.json', { signal: AbortSignal.timeout(6000) });
+    if (pr.ok) {
+      var pd = await pr.json();
+      var mod = (pd.updatedAt || '').slice(0, 10) || null;
+      (pd.players || []).forEach(function (p) {
+        if (p && p.id) urls.push(urlXml(BASE + '/player.html?id=' + encodeURIComponent(p.id), mod, 'monthly', '0.5'));
+      });
+    }
+  } catch (e) { /* players are a bonus — never fail the sitemap over them */ }
+
   var body = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     urls.join('\n') + '\n</urlset>\n';
