@@ -542,9 +542,21 @@ function makeCard(a, featured) {
     // The card is an <a>. Without stopping the event, tapping Share would
     // navigate to the article instead of sharing it — and a <button> inside an
     // <a> is invalid HTML besides, so it's appended to the card, not the link body.
+    var payload = { id: a.id, title: a.title, image: a.image, category: a.category };
+    // Warm the card on first touch/hover — that lands before the click, so the
+    // tap itself has no await in front of navigator.share() and iOS still
+    // considers the gesture live. Warming every card on load would render a
+    // dozen 1080x1080 canvases nobody asked for.
+    var warmed = false;
+    var warm = function () {
+      if (warmed || !window.rlPrebuildCard) return;
+      warmed = true; window.rlPrebuildCard(payload);
+    };
+    sh.addEventListener('pointerenter', warm);
+    sh.addEventListener('touchstart', warm, { passive: true });
     sh.addEventListener('click', function (ev) {
       ev.preventDefault(); ev.stopPropagation();
-      window.rlShareArticle({ id: a.id, title: a.title, image: a.image, category: a.category }, sh);
+      window.rlShareArticle(payload, sh);
     });
     meta.appendChild(sh);
   }

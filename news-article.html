@@ -104,10 +104,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Only show Share once we actually have an article to share.
     const sb = document.getElementById('art-share');
     if (sb && window.rlShareArticle) {
+      const payload = { id: art.id, title: art.title, image: art.image, category: art.category };
       sb.style.display = 'inline-flex';
-      sb.addEventListener('click', () => window.rlShareArticle({
-        id: art.id, title: art.title, image: art.image, category: art.category
-      }, sb));
+      sb.addEventListener('click', () => window.rlShareArticle(payload, sb));
+      // Build the card now, quietly, while they're reading. navigator.share()
+      // has to fire on the tap itself — a 1.1s render in between spends the
+      // user gesture and iOS refuses to open the share sheet at all.
+      const warm = () => window.rlPrebuildCard && window.rlPrebuildCard(payload);
+      if (window.requestIdleCallback) requestIdleCallback(warm, { timeout: 2500 });
+      else setTimeout(warm, 1200);
     }
   } catch(e) {
     document.getElementById('art-body').innerHTML = '<p style="color:var(--grey)">Article not found.</p>';

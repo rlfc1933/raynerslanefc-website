@@ -162,6 +162,22 @@
     clearTimeout(t._t); t._t = setTimeout(function () { t.style.display = 'none'; }, extra ? 9000 : 3200);
   }
 
+  // ── Pre-build the card BEFORE anyone taps ───────────────────────────
+  // navigator.share() must be called while the tap is still "active". Building
+  // the card takes ~1.1s (fonts, image decode, 1080x1080 raster), and after that
+  // await iOS Safari has expired the activation: share() throws NotAllowedError
+  // and the AirDrop sheet never opens. That was this feature's headline bug.
+  // So we render the card quietly on page load and keep the blob ready. The tap
+  // then goes straight to share() with no await in front of it.
+  var _cache = {};
+  function cacheKey(a) { return a.id + '|' + a.title; }
+  window.rlPrebuildCard = function (a) {
+    var k = cacheKey(a);
+    if (_cache[k]) return _cache[k];
+    _cache[k] = cardPng(a).catch(function () { return null; });
+    return _cache[k];
+  };
+
   // The public entry point. article = {id,title,image,category}
   window.rlShareArticle = async function (a, btn) {
     var url = location.origin + '/news-article.html?id=' + encodeURIComponent(a.id);
@@ -173,24 +189,54 @@
     var old = btn && btn.innerHTML;
     if (btn) { btn.disabled = true; btn.innerHTML = 'Building card…'; }
 
+    // Already built? Then there's no await between the tap and share() and the
+    // activation survives. Only a cold tap pays the render cost.
+    var pending = _cache[cacheKey(a)];
     var blob = null;
-    try { blob = await cardPng(a); } catch (e) { blob = null; }
+    if (pending) { blob = await pending; }
+    else {
+      try { blob = await cardPng(a); } catch (e) { blob = null; }
+      _cache[cacheKey(a)] = Promise.resolve(blob);
+    }
     if (btn) { btn.disabled = false; btn.innerHTML = old; }
 
     if (blob) {
       var file = new File([blob], 'rayners-lane-' + a.id + '.png', { type: 'image/png' });
-      // PHONE: the card + the link straight into WhatsApp / Messages / Instagram.
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try { await navigator.share({ files: [file], title: 'Rayners Lane FC', text: text, url: url }); } catch (e) {}
-        return;
+      // PHONE: the card into AirDrop / Save Image / WhatsApp / Messages.
+      //
+      // FILES ONLY — no text, no url. Sending {files, text, url} together makes
+      // iOS treat it as a multi-item share, and AirDrop and "Save Image" then
+      // take the LINK instead of the PNG: they fail, or they send the wrong
+      // thing. That was the second half of this bug. The caption still travels —
+      // it goes on the clipboard just below, so it's one paste away in whatever
+      // app they land in.
+      var payload = { files: [file], title: 'Rayners Lane FC' };
+      if (navigator.canShare && navigator.canShare(payload)) {
+        // Start the copy, but DON'T await it — an await here would spend the
+        // user gesture before share() and put us straight back in the bug this
+        // whole change exists to fix. Fire it off; share() follows in the same
+        // task, so the activation is still live when it's called.
+        if (navigator.clipboard) { try { navigator.clipboard.writeText(full).catch(function () {}); } catch (e) {} }
+        try {
+          await navigator.share(payload);
+          toast('<b style="color:' + Y + '">Shared.</b><br><span style="color:#888;font-size:12.5px">Caption + link copied — paste it with the card.</span>');
+          return;
+        } catch (e) {
+          // AbortError = they closed the sheet. That's not a failure; leave them be.
+          if (e && e.name === 'AbortError') return;
+          // Anything else (NotAllowedError from a spent gesture, an OS refusal)
+          // MUST fall through to the save path. Swallowing it here is why the
+          // button did nothing at all: no sheet, no download, no message.
+        }
       }
-      // DESKTOP: save the card, copy the caption, offer the direct links.
+      // SAVE PATH. Reached on desktop, and on a phone whose share sheet refused
+      // — so the wording can't assume a Downloads folder and a mouse.
       var dl = document.createElement('a');
       dl.href = URL.createObjectURL(blob); dl.download = 'rayners-lane-' + a.id + '.png';
       document.body.appendChild(dl); dl.click(); dl.remove();
       setTimeout(function () { URL.revokeObjectURL(dl.href); }, 5000);
       if (navigator.clipboard) { try { await navigator.clipboard.writeText(full); } catch (e) {} }
-      toast('<b style="color:' + Y + '">Card saved & link copied.</b><br><span style="color:#888;font-size:12.5px">Post it anywhere, or:</span>',
+      toast('<b style="color:' + Y + '">Card saved &amp; link copied.</b><br><span style="color:#888;font-size:12.5px">Post it anywhere, or send it straight to:</span>',
         '<div style="display:flex;gap:8px;margin-top:9px">' +
         ['<a href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a>',
          '<a href="' + tw + '" target="_blank" rel="noopener">X</a>',
