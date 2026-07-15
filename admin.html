@@ -469,6 +469,32 @@
     .nm-row-when span{display:block;font-family:var(--fc);font-size:9px;color:var(--gr);letter-spacing:.1em}
     @media(min-width:560px){ .nm{padding:20px 18px 22px} .nm-opp{font-size:27px} }
 
+    /* ── Latest News sign-off ── */
+    .so-key{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .so-key span{font-family:var(--fb);font-size:11px;color:var(--gr);background:var(--c);border:1px solid var(--br);border-radius:999px;padding:5px 11px}
+    .so-key b{color:var(--y)}
+    .so-card{background:linear-gradient(165deg,#12130e 0%,var(--dk) 60%,#0a0a08 100%);border:1px solid var(--br);border-top:3px solid var(--y);border-radius:14px;padding:15px 14px;margin-bottom:14px}
+    .so-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .so-crests{display:flex;align-items:center;gap:6px;flex:none}
+    .so-crests img,.so-ini{width:30px;height:30px;object-fit:contain;flex:none}
+    .so-ini{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--c2);border:1px solid var(--br);font-family:var(--fd);font-size:10px;color:var(--gr)}
+    .so-v{font-family:var(--fc);font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--y)}
+    .so-when{margin-left:auto;font-family:var(--fc);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:5px;padding:3px 8px;border:1px solid}
+    .so-when--mon{color:var(--bl);border-color:var(--bl)}
+    .so-when--wed{color:var(--y);border-color:var(--y)}
+    .so-ha{font-family:var(--fc);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:5px;padding:3px 8px;border:1px solid}
+    .so-ha--h{color:var(--su);border-color:var(--su)}
+    .so-ha--a{color:var(--bl);border-color:var(--bl)}
+    .so-ttl{width:100%;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--w);font-family:var(--fd);font-size:19px;letter-spacing:.03em;padding:10px 11px;margin-bottom:8px}
+    .so-body{width:100%;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--lg,var(--w));font-family:var(--fb);font-size:14px;line-height:1.7;padding:11px 12px;resize:vertical;min-height:170px}
+    .so-ttl:focus,.so-body:focus{outline:none;border-color:var(--y)}
+    .so-meta{font-family:var(--fb);font-size:11px;color:var(--gr);margin:8px 0 10px;line-height:1.5}
+    .so-meta a{color:var(--y)}
+    .so-acts{display:flex;gap:8px;flex-wrap:wrap}
+    .so-pub{flex:1;background:var(--y);color:#0d0d0d;border:none;border-radius:9px;padding:13px;font-family:var(--fc);font-size:13px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;min-height:46px}
+    .so-pub:disabled{opacity:.55}
+    .so-skip{background:var(--c2);border:1px solid var(--br);border-radius:9px;color:var(--gr);font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px 16px;cursor:pointer}
+    .so-done{font-family:var(--fb);font-size:12.5px;line-height:1.5;margin-top:9px;min-height:16px}
     .tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .tile{position:relative;background:linear-gradient(165deg,var(--c) 0%,var(--dk) 100%);border:1px solid var(--br);border-radius:15px;padding:15px 14px 16px;cursor:pointer;text-align:left;width:100%;overflow:hidden;transition:transform .18s ease,border-color .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;animation:tileIn .45s cubic-bezier(.2,.7,.2,1) backwards}
     .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent,var(--y));opacity:.85}
@@ -741,6 +767,11 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M13 10h5M13 14h5M5 16.5a3 3 0 0 1 6 0"/></svg></span>
           <div class="tile-name">Player Profiles</div><div class="tile-desc">Bios, photos &amp; stats</div>
+        </button>
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('signoff')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><i class="ico ico-square-pen" style="font-size:22px"></i></span>
+          <div class="tile-name">Latest News<span id="so-badge" class="tile-badge" style="display:none"></span></div><div class="tile-desc">Match posts &mdash; please sign off</div>
         </button>
         <button class="tile" style="--accent:#FF7A00" onclick="openPanel('news')">
           <span class="tile-arrow">&#8594;</span>
@@ -1144,6 +1175,30 @@
     </div>
 
     <!-- NEWS -->
+    <!-- ═══ LATEST NEWS — SIGN OFF ═══
+         Drafts a match post for every upcoming fixture from data we already
+         hold: fixtures.json (date, kick-off, H/A), venues.json (ground,
+         address, groundshare) and opponents.json (Wikipedia-sourced, attributed).
+         NOTHING publishes on its own. A human reads it, edits it, and presses
+         the button — which is the whole point. A generator has a finite voice
+         and the club's doesn't, so this exists to do the boring 80% and leave
+         the line only a person can write.
+         Drafts are generated live each time this opens; a fixture that's already
+         published simply stops appearing. No draft storage, nothing to fall out
+         of sync. -->
+    <div class="panel" id="panel-signoff">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-square-pen"></i> Latest News</div></div>
+      <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.55;margin-bottom:14px">
+        A post drafted for every upcoming game. <b style="color:var(--w)">Nothing goes out until you press publish.</b>
+        Read it, change anything you like, add the bit only you know &mdash; then send it to the News page.
+      </div>
+      <div class="so-key">
+        <span><b>Monday</b> &mdash; who they are, showing them respect</span>
+        <span><b>Wednesday</b> &mdash; gearing up, get behind the lads</span>
+      </div>
+      <div id="so-list"><div class="nm-skel">Drafting…</div></div>
+    </div>
+
     <div class="panel" id="panel-news">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-megaphone"></i> Club News</div></div>
       <div class="slbl">New Article</div>
@@ -3158,6 +3213,7 @@ function openPanel(name) {
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
   if (name === 'venues')    vnInit();
+  if (name === 'signoff')   soInit();
   if (name === 'programme') initProgramme();
   if (name === 'mail')      initMail();
   if (name === 'analytics') renderAnalytics();
@@ -3195,6 +3251,7 @@ window.addEventListener('popstate', function () {
 // Greeting + live status on the dashboard hero
 function initDash() {
   nmInit();                       // the Next Match control at the top of the dash
+  soInit();                       // draft count for the Latest News badge
   var g = document.getElementById('hq-greet');
   if (g) {
     var h = new Date().getHours();
@@ -5481,6 +5538,190 @@ function renderSponsors() {
         return '<div class="li">' + thumb + '<div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+
+// ── LATEST NEWS — SIGN OFF ──────────────────────────────────────────────
+// Drafts a post per upcoming fixture. Four voices, because one template with
+// the date swapped is what people scroll past:
+//   MONDAY    = who they are. Respect. We looked them up.
+//   WEDNESDAY = we're playing them. Us. Energy.
+//   HOME      = welcome them to The Lane.
+//   AWAY      = we're coming. Strength, travelling support.
+// Every FACT traces to a file; the voice is ours. A missing fact drops its
+// sentence rather than being invented — these carry the club's badge.
+var soFix = [], soVen = [], soOpp = [], soNews = [], soCrests = [];
+
+function soNorm(x){ return String(x||'').toLowerCase().replace(/\bf\.?c\.?\b/g,'').replace(/\butd\b/g,'united').replace(/&/g,'and').replace(/[^a-z0-9]/g,''); }
+function soV(c){ return soVen.filter(function(v){ return soNorm(v.club)===soNorm(c); })[0]; }
+function soO(c){ return soOpp.filter(function(o){ return soNorm(o.club)===soNorm(c); })[0] || {}; }
+function soCrest(c){ var h=soCrests.filter(function(x){ return soNorm(x.name)===soNorm(c); })[0]; return h?h.file:''; }
+function soDay(d){ return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+function soWd(d){ return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long'}); }
+function soKo(k){ var p=(k||'15:00').split(':'), H=+p[0]; return (H%12||12)+(p[1]==='00'?'':'.'+p[1])+(H>=12?'pm':'am'); }
+function soPlace(o){ var m=(o.summary||'').match(/based in ([^,.]+(?:,\s*[^,.]+)?)/i); return m?m[1].replace(/\s+in\s+the\s+London Borough of\s+/i,', ').trim():''; }
+function soNick(o){ var n=(o.nickname||'').trim(); return n?(/s$/i.test(n)?'the '+n:n):''; }
+
+function soDraft(f, when){
+  var home=f.isHome!==false, opp=f.opponent, o=soO(opp);
+  var v=soV(home?'Rayners Lane':opp);
+  var ground=f.venue||(v&&v.ground)||'';
+  // "Away" is a designation, not a journey — Broadfields groundshare at ours.
+  var share=!home && v && /tithe farm/i.test(v.ground||'');
+  var place=soPlace(o), nick=soNick(o), yr=o.founded;
+  var comp=/friendly/i.test(f.competition)?'friendly':/fa cup/i.test(f.competition)?'FA Cup tie':/vase/i.test(f.competition)?'FA Vase tie':'league game';
+  var samePlace = place && soNorm(place).indexOf(soNorm(opp))>-1;
+  var L=[];
+  if(when==='monday'){
+    if(home){
+      L.push('This '+soWd(f.date)+' we welcome '+opp+' to Tithe Farm.');
+      L.push(nick&&!samePlace&&place ? 'Known as '+nick+', they travel over from '+place+'.'
+           : nick ? 'Known as '+nick+', they\'re one of the division\'s own.'
+           : !samePlace&&place ? 'They travel over from '+place+'.'
+           : 'They\'re our visitors for this one.');
+    } else {
+      L.push('This '+soWd(f.date)+' we\'re at '+opp+'.');
+      var who=nick||opp;
+      L.push(share ? opp+' are our hosts — though they\'ll not be dragging us far.'
+           : !samePlace&&place ? 'We head for '+place+' to take on '+who+' on their own patch.'
+           : 'We take on '+who+' on their own patch.');
+    }
+    if(yr){
+      var age=2026-(+yr);
+      // Rotate off the fixture id: stable per post, but consecutive opponents
+      // don't read identically. Still only stating the sourced founding year.
+      var seed=String(f.id).split('').reduce(function(a,c){ return a+c.charCodeAt(0); },0);
+      var opts=[
+        'Formed in '+yr+'. '+age+' years of somebody turning up, week after week — we know exactly what that takes.',
+        yr+'. That\'s '+age+' years of a club being kept alive by people who care about it. Respect where it\'s due.',
+        'They\'ve been at it since '+yr+'. Not many clubs last '+age+' years. The ones that do are built on volunteers, same as us.'
+      ];
+      L.push(opts[seed%opts.length]);
+    }
+    if(share) L.push('A quirk worth knowing: Broadfields share Tithe Farm with us. It\'s an away game we can walk to — same ground, away shirts.');
+    L.push(home?'We\'ll see you '+soWd(f.date)+'. Come and give them a proper Lane welcome.'
+                :'Details, directions and the countdown are on the site.');
+  } else {
+    if(home){
+      L.push(opp+' at The Lane, '+soDay(f.date)+', '+soKo(f.kickoff)+'.');
+      L.push(comp==='friendly'?'Our ground. Our yellow. First proper look at this squad.'
+           : comp==='league game'?'Our ground. Our yellow. Three points on the table.'
+           : 'Our ground. Our yellow. '+comp.replace(/^FA /,'The FA ')+' at The Lane.');
+      L.push('Tithe Farm, 151 Rayners Lane, HA2 0XH — minutes from the station. Get down early, get a drink in, and make it loud.');
+      L.push('Every voice counts at this level. Be there.');
+    } else {
+      L.push(soDay(f.date)+'. '+(ground||opp)+'. '+soKo(f.kickoff)+'.');
+      L.push(share?'An away day that isn\'t — Broadfields host us at Tithe Farm. No excuse not to be there.'
+                  :'We\'re taking the yellow'+(place?' to '+place:' on the road')+'. If you can travel, travel.');
+      L.push(share?'Same ground, away shirts. Come and back the lads.'
+                  :'Away support is worth a goal at this level. Directions are on the site — one tap and you\'re on your way.');
+    }
+  }
+  return {
+    id: 'match-'+when+'-'+f.id,
+    fixtureId: f.id,
+    when: when,
+    home: home,
+    opponent: opp,
+    title: home ? 'Rayners Lane v '+opp : opp+' v Rayners Lane',
+    strap: f.competition+' · '+(home?'HOME':'AWAY')+' · '+soDay(f.date)+', '+soKo(f.kickoff),
+    body: L.join('\n\n'),
+    date: f.date,
+    crest: f.oppCrest || soCrest(opp),
+    wiki: o.wikipedia || ''
+  };
+}
+
+function soInit(){
+  fetchJSON('crests', function(c){ soCrests=(c&&c.crests)||[];
+  fetchJSON('venues', function(v){ soVen=(v&&v.venues)||[];
+  fetchJSON('opponents', function(o){ soOpp=(o&&o.opponents)||[];
+  fetchJSON('news', function(n){ soNews=(n&&n.articles)||[];
+  fetchJSON('fixtures', function(f){ soFix=(f&&f.fixtures)||[]; soRender(); });});});});});
+}
+
+function soUpcoming(){
+  var now=Date.now();
+  return soFix.filter(function(f){
+    return f.us==null && new Date(f.date+'T'+(f.kickoff||'15:00')).getTime() > now;
+  }).sort(function(a,b){ return (a.date+a.kickoff).localeCompare(b.date+b.kickoff); });
+}
+
+function soRender(){
+  var drafts=[];
+  soUpcoming().slice(0,6).forEach(function(f){
+    ['monday','wednesday'].forEach(function(w){
+      var d=soDraft(f,w);
+      // Already published? Then it isn't a draft any more — drop it.
+      if(soNews.some(function(a){ return a.id===d.id; })) return;
+      drafts.push(d);
+    });
+  });
+  var badge=document.getElementById('so-badge');
+  if(badge){ badge.style.display=drafts.length?'':'none'; badge.textContent=drafts.length; }
+  var box=document.getElementById('so-list');
+  if(!box) return;
+  if(!drafts.length){ box.innerHTML='<div class="nm-skel">Nothing waiting. Every upcoming game already has its posts published.</div>'; return; }
+  box.innerHTML=drafts.map(function(d,i){
+    var crest = d.crest ? '<img src="'+escH(d.crest)+'" alt="'+escH(d.opponent)+'" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'so-ini\',textContent:'+JSON.stringify(soIni(d.opponent))+'}))">'
+                        : '<div class="so-ini">'+escH(soIni(d.opponent))+'</div>';
+    return '<div class="so-card" data-i="'+i+'">'+
+      '<div class="so-hd">'+
+        '<div class="so-crests"><img src="img/badge.png" alt="Rayners Lane"><span class="so-v">V</span>'+crest+'</div>'+
+        '<span class="so-ha '+(d.home?'so-ha--h">HOME':'so-ha--a">AWAY')+'</span>'+
+        '<span class="so-when '+(d.when==='monday'?'so-when--mon">Monday':'so-when--wed">Wednesday')+'</span>'+
+      '</div>'+
+      '<input class="so-ttl" id="so-t-'+i+'" value="'+escH(d.title)+'">'+
+      '<textarea class="so-body" id="so-b-'+i+'">'+escH(d.body)+'</textarea>'+
+      '<div class="so-meta">'+escH(d.strap)+
+        (d.wiki?' &middot; background from <a href="'+escH(d.wiki)+'" target="_blank" rel="noopener">Wikipedia</a>':' &middot; no background found — facts only')+
+      '</div>'+
+      '<div class="so-acts">'+
+        '<button class="so-pub" id="so-p-'+i+'" onclick="soPublish('+i+')">Publish to the site</button>'+
+        '<button class="so-skip" onclick="soSkip('+i+')">Not this one</button>'+
+      '</div>'+
+      '<div class="so-done" id="so-d-'+i+'"></div>'+
+    '</div>';
+  }).join('');
+  window._soDrafts=drafts;
+}
+function soIni(n){
+  return String(n||'').replace(/\b(fc|afc|utd|united|town|city)\b/gi,'').trim().split(/\s+/)
+    .map(function(w){ return w[0]||''; }).join('').slice(0,3).toUpperCase()||'?';
+}
+function soSkip(i){
+  var c=document.querySelector('.so-card[data-i="'+i+'"]');
+  if(c) c.style.display='none';
+}
+function soPublish(i){
+  var d=window._soDrafts[i]; if(!d) return;
+  var title=(document.getElementById('so-t-'+i).value||'').trim();
+  var body=(document.getElementById('so-b-'+i).value||'').trim();
+  var st=document.getElementById('so-d-'+i), btn=document.getElementById('so-p-'+i);
+  if(!title||!body){ st.innerHTML='<span style="color:var(--re)">Needs a title and some words.</span>'; return; }
+  btn.disabled=true; btn.textContent='Publishing…';
+  st.innerHTML='<span style="color:var(--gr)">Saving…</span>';
+
+  var art={
+    id: d.id,
+    title: title,
+    category: 'Match',
+    date: new Date().toISOString().slice(0,10),   // published today, not match day
+    author: 'Rayners Lane FC',
+    image: d.crest || 'img/news/news-default.svg',
+    excerpt: body.split('\n\n')[0].slice(0,150),
+    body: body.split('\n\n').map(function(p){ return '<p>'+escH(p)+'</p>'; }).join(''),
+    featured: false
+  };
+  // The same id-keyed merge that protects the squad: only this article is
+  // touched, the other 40-odd are read server-side and kept. commitDomain also
+  // fires the build hook, which is what actually ships it — a push to GitHub
+  // alone doesn't trigger a deploy on this site.
+  commitDomain('news','articles','id',[art],[],null,null,null,function(merged){
+    soNews=merged||soNews;
+    btn.disabled=false; btn.textContent='Publish to the site';
+    st.innerHTML='<span style="color:var(--su)"><i class="ico ico-circle-check"></i> Published — live on the News page in about 30 seconds.</span>';
+    setTimeout(function(){ soRender(); }, 2600);
+  });
 }
 
 // ── NEXT MATCH (the committee's one-tap control) ──
