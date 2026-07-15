@@ -125,6 +125,7 @@ const PAGES = [
   { href: 'programme.html', label: 'Programme' },
   { href: 'about.html',     label: 'The Club'  },
   { href: 'contact.html',   label: 'Contact'   },
+  { href: 'innovation.html',label: 'Innovation'},
   { href: 'investment.html',label: 'Sponsors'  },
   { href: 'shop.html',      label: 'Shop'      },
   { href: 'policies.html',  label: 'Policies'  },
@@ -156,6 +157,7 @@ function buildNav(currentPage) {
     { label:'Membership',  href:'membership.html' },
     { label:'Fan Zone',    href:'fan-zone.html'   },
     { label:'Volunteer',   href:'volunteer.html'  },
+    { label:'Innovation',  href:'innovation.html' },
     { label:'The Club',    href:'about.html'      },
     { label:'Contact',     href:'contact.html'    },
   ];
@@ -182,7 +184,7 @@ function buildNav(currentPage) {
     { h:'Matchday',     items:[['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
     { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['News','news.html'],['Contact','contact.html']] },
     { h:'Get Involved', items:[['Membership','membership.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
-    { h:'Commercial',   items:[['Sponsorship','investment.html'],['Club Shop','shop.html']] },
+    { h:'Commercial',   items:[['Innovation & Tech','innovation.html'],['Sponsorship','investment.html'],['Club Shop','shop.html']] },
   ];
   const mLink = function (label, href) {
     var on = currentPage === href;
