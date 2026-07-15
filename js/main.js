@@ -232,7 +232,13 @@ function rlfcFixturesShape(list) {
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
   var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
   var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
-  var next = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; })[0] || upcoming[0] || null;
+  // Not-yet-kicked-off, or kicked off within the last 6h (a game in progress is
+  // still "next" — it shouldn't vanish from the homepage at 15:01).
+  var live = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; });
+  // Staff can pin a game in admin → Next Match to force it to the front, for
+  // when a friendly is arranged late and the date logic would pick another.
+  // No pin (the normal case) = soonest wins.
+  var next = live.filter(function (f) { return f.pinned; })[0] || live[0] || upcoming[0] || null;
   return {
     source: 'club',
     next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, venue: next.venue, oppCrest: next.oppCrest || '' } : null,

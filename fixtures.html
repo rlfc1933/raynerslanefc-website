@@ -591,7 +591,10 @@ function renderFxSeason(list) {
   var played   = sorted.filter(hasScore);                                        // finished, score known
   var awaiting = sorted.filter(function (f) { return !hasScore(f) && fxPast(f); }); // finished, score not entered
   var upcoming = sorted.filter(function (f) { return !hasScore(f) && !fxPast(f); }); // genuinely still to come
-  var next = upcoming[0] || null;                                                // the real next fixture
+  // A game staff pinned in admin → Next Match wins; otherwise soonest wins.
+  // Must match js/main.js's rule exactly — if the homepage and this page
+  // disagree about "next", one of them is lying to supporters.
+  var next = upcoming.filter(function (f) { return f.pinned; })[0] || upcoming[0] || null;
 
   var nextEl = document.getElementById('fx-next');
   nextEl.innerHTML = next ? fxHero(next) : '';

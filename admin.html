@@ -398,6 +398,77 @@
     .sect-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gr);margin:18px 2px 10px;display:flex;align-items:center;gap:10px}
     .sect-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--br),transparent)}
 
+    /* ── NEXT MATCH quick-control ──
+       Built thumb-first: every control is >=46px tall because it gets used on a
+       phone, one-handed, in a clubhouse, by someone who isn't technical. */
+    .nm{background:linear-gradient(165deg,#12130e 0%,var(--dk) 55%,#0a0a08 100%);border:1px solid #3a3413;border-top:3px solid var(--y);border-radius:16px;padding:16px 15px 18px;margin-bottom:18px;position:relative;overflow:hidden}
+    .nm-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .nm-eyebrow{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--y);display:flex;align-items:center;gap:7px}
+    .nm-add{background:var(--y);color:#0d0d0d;border:none;border-radius:999px;padding:9px 15px;font-family:var(--fc);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:40px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .nm-add:active{transform:scale(.97)}
+    .nm-skel{font-family:var(--fb);font-size:13px;color:var(--gr);padding:16px 2px}
+
+    /* the card showing what the public sees right now */
+    .nm-card{background:rgba(0,0,0,.32);border:1px solid var(--br);border-radius:13px;padding:14px;cursor:pointer;transition:border-color .18s;-webkit-tap-highlight-color:transparent}
+    .nm-card:active{border-color:var(--y)}
+    .nm-crests{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+    .nm-crests img,.nm-ini{width:36px;height:36px;object-fit:contain;flex:none}
+    .nm-ini{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--c2);border:1px solid var(--br);font-family:var(--fd);font-size:12px;color:var(--gr)}
+    .nm-v{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--y)}
+    .nm-opp{font-family:var(--fd);font-size:23px;letter-spacing:.03em;color:var(--w);line-height:1.05}
+    .nm-meta{font-family:var(--fb);font-size:12px;color:var(--gr);margin-top:4px;line-height:1.5}
+    .nm-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+    .nm-tag{font-family:var(--fc);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:5px;padding:3px 7px;border:1px solid}
+    .nm-tag--h{color:var(--su);border-color:var(--su)}
+    .nm-tag--a{color:var(--bl);border-color:var(--bl)}
+    .nm-tag--pin{color:var(--y);border-color:var(--y)}
+    .nm-cd{display:flex;gap:7px;margin-top:12px}
+    .nm-cd div{flex:1;background:rgba(255,209,0,.07);border:1px solid rgba(255,209,0,.22);border-radius:8px;padding:7px 4px;text-align:center}
+    .nm-cd b{display:block;font-family:var(--fd);font-size:20px;color:var(--y);line-height:1}
+    .nm-cd span{font-family:var(--fc);font-size:8.5px;letter-spacing:.12em;color:var(--gr);text-transform:uppercase}
+    .nm-tapedit{font-family:var(--fc);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:11px;text-align:center}
+
+    /* form */
+    .nm-form{border-top:1px solid var(--br);margin-top:14px;padding-top:15px}
+    .nm-form-ttl{font-family:var(--fd);font-size:19px;letter-spacing:.03em;color:var(--w);margin-bottom:12px}
+    .nm-lbl{display:block;font-family:var(--fc);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin:13px 0 6px}
+    .nm-in{width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fb);font-size:16px;padding:13px 12px;min-height:48px}
+    .nm-in:focus{outline:none;border-color:var(--y)}
+    .nm-sel{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--gr) 50%),linear-gradient(135deg,var(--gr) 50%,transparent 50%);background-position:calc(100% - 18px) 21px,calc(100% - 13px) 21px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
+    .nm-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .nm-ha{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+    .nm-ha-btn{background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--gr);font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:13px;min-height:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .nm-ha-btn.on{background:rgba(255,209,0,.12);border-color:var(--y);color:var(--y)}
+    .nm-crestrow{display:flex;align-items:center;gap:10px}
+    .nm-crestrow .nm-sel{flex:1}
+    .nm-crestprev{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--c);border:1px solid var(--br);border-radius:10px;overflow:hidden}
+    .nm-crestprev img{width:34px;height:34px;object-fit:contain}
+    .nm-crestprev .nm-ini{width:34px;height:34px;font-size:11px}
+    .nm-hint{font-family:var(--fb);font-size:11px;line-height:1.5;margin-top:5px;color:var(--gr)}
+    .nm-pin{display:flex;align-items:flex-start;gap:11px;background:var(--c);border:1px solid var(--br);border-radius:11px;padding:13px;margin-top:15px;cursor:pointer}
+    .nm-pin input{width:22px;height:22px;margin-top:1px;flex:none;accent-color:var(--y)}
+    .nm-pin b{font-family:var(--fb);font-size:13.5px;color:var(--w)}
+    .nm-pin-sub{font-family:var(--fb);font-size:11.5px;color:var(--gr);line-height:1.5}
+    .nm-save{width:100%;background:var(--y);color:#0d0d0d;border:none;border-radius:11px;padding:16px;margin-top:16px;font-family:var(--fc);font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:54px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .nm-save:active{transform:scale(.985)}
+    .nm-save:disabled{opacity:.55}
+    .nm-status{font-family:var(--fb);font-size:12.5px;line-height:1.5;margin-top:10px;min-height:18px}
+    .nm-actions{display:flex;gap:8px;margin-top:10px}
+    .nm-ghost,.nm-del{flex:1;background:var(--c2);border:1px solid var(--br);border-radius:10px;color:var(--gr);font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:12px;min-height:46px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .nm-del{color:var(--re);border-color:rgba(239,68,68,.4);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+
+    /* upcoming list */
+    .nm-listttl{font-family:var(--fc);font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gr);margin:18px 0 9px}
+    .nm-row{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,.24);border:1px solid var(--br);border-radius:10px;padding:11px 12px;margin-bottom:7px;cursor:pointer;min-height:56px;-webkit-tap-highlight-color:transparent}
+    .nm-row:active{border-color:var(--y)}
+    .nm-row img,.nm-row .nm-ini{width:28px;height:28px;flex:none}
+    .nm-row-mid{flex:1;min-width:0}
+    .nm-row-opp{font-family:var(--fb);font-size:14px;font-weight:600;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .nm-row-sub{font-family:var(--fc);font-size:10.5px;letter-spacing:.06em;color:var(--gr);margin-top:2px}
+    .nm-row-when{font-family:var(--fd);font-size:15px;color:var(--y);letter-spacing:.03em;text-align:right;flex:none;line-height:1.15}
+    .nm-row-when span{display:block;font-family:var(--fc);font-size:9px;color:var(--gr);letter-spacing:.1em}
+    @media(min-width:560px){ .nm{padding:20px 18px 22px} .nm-opp{font-size:27px} }
+
     .tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .tile{position:relative;background:linear-gradient(165deg,var(--c) 0%,var(--dk) 100%);border:1px solid var(--br);border-radius:15px;padding:15px 14px 16px;cursor:pointer;text-align:left;width:100%;overflow:hidden;transition:transform .18s ease,border-color .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;animation:tileIn .45s cubic-bezier(.2,.7,.2,1) backwards}
     .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent,var(--y));opacity:.85}
@@ -506,6 +577,86 @@
           <div class="hq-live" id="hq-live"><span class="dot"></span><span id="hq-live-txt">Scoreboard off</span></div>
           <button class="hq-live" id="hq-fans" onclick="openPanel('fanclub')" style="cursor:pointer;border-color:rgba(255,209,0,.4)"><span style="color:var(--y)"><i class="ico ico-heart"></i></span><span id="hq-fans-txt">Fans —</span></button>
         </div>
+      </div>
+
+      <!-- ═══ NEXT MATCH — the one control the committee actually needs ═══
+           Pre-season friendlies appear and move at short notice, and whoever
+           has the phone needs to change the game the whole site points at
+           without learning anything. This is a simplified front door onto the
+           SAME data/fixtures.json the Fixtures panel edits — not a second
+           system — saved through the same id-keyed merge, so adding or removing
+           one game can never touch the other 43. -->
+      <div class="nm">
+        <div class="nm-hdr">
+          <div class="nm-eyebrow"><i class="ico ico-football"></i> Next Match</div>
+          <button class="nm-add" id="nm-addbtn" onclick="nmNew()"><i class="ico ico-plus"></i> Add a game</button>
+        </div>
+
+        <!-- what the public is seeing right now -->
+        <div class="nm-live" id="nm-live">
+          <div class="nm-skel">Loading the next game…</div>
+        </div>
+
+        <!-- add / edit form (hidden until you tap Add or a game) -->
+        <div class="nm-form" id="nm-form" style="display:none">
+          <div class="nm-form-ttl" id="nm-form-ttl">Add a game</div>
+
+          <div class="nm-ha">
+            <button type="button" class="nm-ha-btn on" id="nm-h" onclick="nmSetHA(true)"><i class="ico ico-house"></i> Home</button>
+            <button type="button" class="nm-ha-btn" id="nm-a" onclick="nmSetHA(false)"><i class="ico ico-bus"></i> Away</button>
+          </div>
+
+          <label class="nm-lbl">Who are we playing?</label>
+          <input class="nm-in" id="nm-opp" list="nm-opp-list" placeholder="e.g. Cockfosters" autocomplete="off" oninput="nmOppChanged()">
+          <datalist id="nm-opp-list"></datalist>
+
+          <label class="nm-lbl">Their badge</label>
+          <div class="nm-crestrow">
+            <span class="nm-crestprev" id="nm-crestprev"></span>
+            <select class="nm-in nm-sel" id="nm-crest" onchange="nmCrestPreview()"></select>
+          </div>
+
+          <div class="nm-2col">
+            <div>
+              <label class="nm-lbl">Date</label>
+              <input class="nm-in" type="date" id="nm-date">
+            </div>
+            <div>
+              <label class="nm-lbl">Kick-off</label>
+              <input class="nm-in" type="time" id="nm-ko" value="15:00">
+            </div>
+          </div>
+
+          <label class="nm-lbl">Where</label>
+          <input class="nm-in" id="nm-venue" placeholder="Ground name">
+          <div class="nm-hint" id="nm-venue-hint"></div>
+
+          <label class="nm-lbl">Competition</label>
+          <select class="nm-in nm-sel" id="nm-comp">
+            <option>Pre-Season Friendly</option>
+            <option>Combined Counties Prem N</option>
+            <option>FA Cup</option>
+            <option>FA Vase</option>
+            <option>Charity Match</option>
+          </select>
+
+          <label class="nm-pin" for="nm-pin">
+            <input type="checkbox" id="nm-pin">
+            <span><b>Pin this as the next match</b><br>
+              <span class="nm-pin-sub">Normally the site shows whichever game is soonest — that's usually right, so leave this off. Tick it only to force this game to the front (e.g. a friendly added late).</span></span>
+          </label>
+
+          <input type="hidden" id="nm-id">
+          <button class="nm-save" id="nm-savebtn" onclick="nmSave()">Save &mdash; goes live in ~30s</button>
+          <div class="nm-status" id="nm-status"></div>
+          <div class="nm-actions">
+            <button class="nm-ghost" onclick="nmCancel()">Cancel</button>
+            <button class="nm-del" id="nm-delbtn" style="display:none" onclick="nmDelete()"><i class="ico ico-x"></i> Remove this game</button>
+          </div>
+        </div>
+
+        <div class="nm-listttl">Coming up</div>
+        <div id="nm-list"></div>
       </div>
 
       <!-- (Fix C) Season Setup — shows which data is still empty so the public
@@ -2502,6 +2653,14 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 <div class="toast" id="toast"></div>
 
 <script>
+// The staff PIN for THIS session. Deliberately empty in the source — it used to
+// be a hardcoded constant here, which published the club's PIN to every visitor
+// via view-source. It's filled in from what the staff member actually types
+// (verified server-side by admin-pin.js), and restored from sessionStorage on
+// reload so a refresh doesn't sign you out. Never assign a literal to this.
+var PIN = '';
+try { PIN = sessionStorage.getItem('rlfc_admin_pin') || ''; } catch (e) {}
+
 const BUILD_HOOK = 'https://api.netlify.com/build_hooks/6a10e5d0c22b131a9544d269';
 
 // ── INSTALL THIS ADMIN AS AN APP ──
@@ -2709,9 +2868,16 @@ async function checkPin() {
   }
   if (ok) {
     err.textContent = '';
-    // Stay signed in across reloads + the device back button for this browser
-    // session (clears when the tab/app is closed). Fixes "back logs me out".
-    try { sessionStorage.setItem('rlfc_admin_ok', '1'); } catch (e) {}
+    // Hold the PIN for this session. Every privileged function still checks it
+    // server-side on each call, so the portal needs it after sign-in — it just
+    // must never be a constant in this file. It comes from what the staff
+    // member typed, lives in memory + sessionStorage (their own tab, wiped when
+    // it closes), and is never in the source anyone can view.
+    PIN = pinVal;
+    try {
+      sessionStorage.setItem('rlfc_admin_ok', '1');
+      sessionStorage.setItem('rlfc_admin_pin', pinVal);
+    } catch (e) {}
     showRoleLogin();
   } else {
     // A missing env var looks identical to "everyone forgot the PIN" unless we
@@ -2725,7 +2891,14 @@ async function checkPin() {
   }
 }
 function lock() {
-  try { sessionStorage.removeItem('rlfc_admin_ok'); sessionStorage.removeItem('rlfc_staff'); } catch (e) {}
+  // Drop the PIN on lock — otherwise "sign out" leaves the credential sitting
+  // in the tab and the next person to pick the phone up can still save.
+  PIN = '';
+  try {
+    sessionStorage.removeItem('rlfc_admin_ok');
+    sessionStorage.removeItem('rlfc_admin_pin');
+    sessionStorage.removeItem('rlfc_staff');
+  } catch (e) {}
   document.getElementById('app').style.display = 'none';
   document.getElementById('role-screen').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
@@ -3021,6 +3194,7 @@ window.addEventListener('popstate', function () {
 });
 // Greeting + live status on the dashboard hero
 function initDash() {
+  nmInit();                       // the Next Match control at the top of the dash
   var g = document.getElementById('hq-greet');
   if (g) {
     var h = new Date().getHours();
@@ -5307,6 +5481,272 @@ function renderSponsors() {
         return '<div class="li">' + thumb + '<div class="li-main"><div class="li-name">' + s.name + '</div><div class="li-sub">' + (s.tier ? s.tier + ' &middot; ' : '') + s.role + (s.note ? ' &middot; ' + s.note : '') + '</div></div><button class="li-del" onclick="removeSponsor(\'' + esc(s.name) + '\')">Remove</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">Empty</div>';
+}
+
+// ── NEXT MATCH (the committee's one-tap control) ──
+// A simplified front door onto data/fixtures.json — the SAME file the Fixtures
+// panel edits. Saves through commitDomain's id-keyed merge, so adding or
+// removing one game can never touch the rest of the season. Deliberately does
+// not know about scores: that's match day's job, this is "what's next".
+var nmFix = [], nmCrests = [], nmHome = true, nmTick = null;
+
+function nmDT(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00'); }
+function nmPlayed(f) { return f.us != null && f.them != null; }
+// Upcoming = not played and not more than 6h past kick-off (a game in progress
+// still counts as "next" — you don't want it vanishing at 15:01).
+function nmUpcoming() {
+  var now = Date.now();
+  return nmFix.filter(function (f) { return !nmPlayed(f) && nmDT(f).getTime() > now - 6 * 3600000; })
+              .sort(function (a, b) { return nmDT(a) - nmDT(b); });
+}
+// The one the public sees. A pin wins; otherwise soonest wins. Same rule the
+// site uses — if these ever disagree, the admin is lying to staff.
+function nmNext() {
+  var up = nmUpcoming();
+  return up.filter(function (f) { return f.pinned; })[0] || up[0] || null;
+}
+function nmCrestFor(name) {
+  var k = String(name || '').toLowerCase().replace(/\bf\.?c\.?\b/g, '').replace(/[^a-z0-9]/g, '');
+  var hit = nmCrests.filter(function (c) {
+    return String(c.name).toLowerCase().replace(/\bf\.?c\.?\b/g, '').replace(/[^a-z0-9]/g, '') === k;
+  })[0];
+  return hit ? hit.file : '';
+}
+function nmIni(name) {
+  return String(name || '').replace(/\b(fc|afc|utd|united|town|city)\b/gi, '')
+    .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase() || '?';
+}
+function nmCrestHTML(file, name, cls) {
+  return file
+    ? '<img src="' + escH(file) + '" alt="' + escH(name) + '" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'nm-ini\',textContent:' + JSON.stringify(nmIni(name)) + '}))">'
+    : '<div class="nm-ini' + (cls ? ' ' + cls : '') + '">' + escH(nmIni(name)) + '</div>';
+}
+function nmFmtDate(f) {
+  var d = nmDT(f);
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
+function nmInit() {
+  // The venue book too: nmVenueSuggest() looks up an away ground through
+  // vnFind(), which reads `venues`. That array is otherwise only filled when
+  // someone opens the Venues panel — so on the dashboard every away game
+  // silently kept Tithe Farm, our own ground.
+  if (!venues.length) fetchJSON('venues', function (v) { venues = (v && v.venues) || []; });
+  fetchJSON('crests', function (c) {
+    nmCrests = (c && c.crests) || [];
+    fetchJSON('fixtures', function (d) {
+      nmFix = (d && d.fixtures) || [];
+      nmFillPickers();
+      nmRender();
+    });
+  });
+}
+function nmFillPickers() {
+  var dl = document.getElementById('nm-opp-list');
+  if (dl) dl.innerHTML = nmCrests.filter(function (c) { return !/rayners\s*lane/i.test(c.name); })
+    .map(function (c) { return '<option value="' + escH(c.name) + '"></option>'; }).join('');
+  var sel = document.getElementById('nm-crest');
+  if (sel) sel.innerHTML = '<option value="">No badge — show their initials</option>' +
+    nmCrests.map(function (c) { return '<option value="' + escH(c.file) + '">' + escH(c.name) + '</option>'; }).join('');
+}
+function nmRender() {
+  var next = nmNext();
+  var box = document.getElementById('nm-live');
+  if (!next) {
+    box.innerHTML = '<div class="nm-skel">No upcoming game yet. Tap <b style="color:var(--y)">Add a game</b> and it appears on the website in about 30 seconds.</div>';
+  } else {
+    var crest = next.oppCrest || nmCrestFor(next.opponent);
+    box.innerHTML =
+      '<div class="nm-card" data-id="' + escH(next.id) + '" onclick="nmEdit(this.dataset.id)">' +
+        '<div class="nm-crests">' + nmCrestHTML('img/badge.png', 'Rayners Lane') +
+          '<span class="nm-v">V</span>' + nmCrestHTML(crest, next.opponent) + '</div>' +
+        '<div class="nm-opp">' + escH(next.opponent) + '</div>' +
+        '<div class="nm-meta">' + escH(nmFmtDate(next)) + ' &middot; ' + escH(next.kickoff || '15:00') +
+          '<br>' + escH(next.venue || 'Venue to be confirmed') + '</div>' +
+        '<div class="nm-tags">' +
+          '<span class="nm-tag ' + (next.isHome !== false ? 'nm-tag--h">Home' : 'nm-tag--a">Away') + '</span>' +
+          '<span class="nm-tag" style="color:var(--gr);border-color:var(--br)">' + escH(next.competition || 'Friendly') + '</span>' +
+          (next.pinned ? '<span class="nm-tag nm-tag--pin"><i class="ico ico-pin"></i> Pinned</span>' : '') +
+        '</div>' +
+        '<div class="nm-cd" id="nm-cd"></div>' +
+        '<div class="nm-tapedit">Tap to change or remove</div>' +
+      '</div>';
+    nmCountdown(next);
+  }
+  // the run of games behind it
+  var rest = nmUpcoming().filter(function (f) { return !next || f.id !== next.id; }).slice(0, 6);
+  document.getElementById('nm-list').innerHTML = rest.length ? rest.map(function (f) {
+    var c = f.oppCrest || nmCrestFor(f.opponent);
+    return '<div class="nm-row" data-id="' + escH(f.id) + '" onclick="nmEdit(this.dataset.id)">' +
+      nmCrestHTML(c, f.opponent) +
+      '<div class="nm-row-mid"><div class="nm-row-opp">' + escH(f.opponent) + '</div>' +
+      '<div class="nm-row-sub">' + (f.isHome !== false ? 'Home' : 'Away') + ' &middot; ' + escH(f.competition || 'Friendly') + '</div></div>' +
+      '<div class="nm-row-when">' + escH(nmFmtDate(f)) + '<span>' + escH(f.kickoff || '15:00') + '</span></div></div>';
+  }).join('') : '<div class="nm-skel" style="padding:8px 2px">Nothing else booked in.</div>';
+}
+function nmCountdown(f) {
+  if (nmTick) clearInterval(nmTick);
+  var el = document.getElementById('nm-cd');
+  if (!el) return;
+  function paint() {
+    var el2 = document.getElementById('nm-cd');
+    if (!el2) { clearInterval(nmTick); return; }
+    var ms = nmDT(f).getTime() - Date.now();
+    if (ms <= 0) { el2.innerHTML = '<div style="flex:1"><b>KICK OFF</b><span>Good luck</span></div>'; clearInterval(nmTick); return; }
+    var s = Math.floor(ms / 1000);
+    var p = [[Math.floor(s / 86400), 'Days'], [Math.floor(s / 3600) % 24, 'Hrs'], [Math.floor(s / 60) % 60, 'Min'], [s % 60, 'Sec']];
+    el2.innerHTML = p.map(function (x) { return '<div><b>' + String(x[0]).padStart(2, '0') + '</b><span>' + x[1] + '</span></div>'; }).join('');
+  }
+  paint();
+  nmTick = setInterval(paint, 1000);
+}
+function nmSetHA(h) {
+  nmHome = h;
+  document.getElementById('nm-h').classList.toggle('on', h);
+  document.getElementById('nm-a').classList.toggle('on', !h);
+  nmVenueSuggest();
+}
+// Home is always Tithe Farm. Away we look up the opponent's ground in the venue
+// book — the same one the Directions buttons use — so staff don't retype it.
+// Only ever fills a blank box; a venue you typed is yours and stands.
+function nmVenueSuggest() {
+  var box = document.getElementById('nm-venue');
+  var hint = document.getElementById('nm-venue-hint');
+  var opp = (document.getElementById('nm-opp').value || '').trim();
+  var suggested = nmHome ? 'Tithe Farm Sports & Social Club' : '';
+  if (!nmHome && opp && typeof vnFind === 'function') {
+    var v = vnFind(opp);
+    if (v && v.verified && v.ground) suggested = v.ground;
+  }
+  if (suggested && (!box.value.trim() || box.dataset.auto === '1')) {
+    box.value = suggested; box.dataset.auto = '1';
+  } else if (!suggested && box.dataset.auto === '1') {
+    // Clear an auto-filled ground when the new opponent has none. Without this,
+    // changing Burnham -> an unknown club left THEIR ground in the box and you'd
+    // save the new club as playing at the 1878 Stadium.
+    box.value = ''; box.dataset.auto = '1';
+  }
+  if (!hint) return;
+  if (nmHome) { hint.innerHTML = ''; return; }
+  if (!opp) { hint.innerHTML = ''; return; }
+  var vv = (typeof vnFind === 'function') ? vnFind(opp) : null;
+  hint.innerHTML = (vv && vv.verified && vv.lat != null)
+    ? '<span style="color:var(--su)">Their ground is in the venue book — players get Directions.</span>'
+    : '<span style="color:var(--am,#F59E0B)">No checked ground for them yet — players will see &ldquo;venue to be confirmed&rdquo;. Add it under Venues.</span>';
+}
+function nmOppChanged() {
+  var opp = (document.getElementById('nm-opp').value || '').trim();
+  var sel = document.getElementById('nm-crest');
+  // auto-pick their badge if we have one and the user hasn't chosen
+  if (sel && !sel.dataset.touched) {
+    var f = nmCrestFor(opp);
+    sel.value = f || '';
+    nmCrestPreview();
+  }
+  nmVenueSuggest();
+}
+function nmCrestPreview() {
+  var sel = document.getElementById('nm-crest');
+  var opp = (document.getElementById('nm-opp').value || '').trim();
+  document.getElementById('nm-crestprev').innerHTML = nmCrestHTML(sel.value, opp || '?');
+}
+function nmNew() {
+  document.getElementById('nm-form-ttl').textContent = 'Add a game';
+  document.getElementById('nm-delbtn').style.display = 'none';
+  setVal('nm-id', ''); setVal('nm-opp', ''); setVal('nm-date', ''); setVal('nm-ko', '15:00');
+  setVal('nm-venue', ''); setVal('nm-comp', 'Pre-Season Friendly');
+  document.getElementById('nm-pin').checked = false;
+  var sel = document.getElementById('nm-crest'); sel.value = ''; delete sel.dataset.touched;
+  sel.onchange = function () { this.dataset.touched = '1'; nmCrestPreview(); };
+  var vb = document.getElementById('nm-venue'); vb.dataset.auto = '1';
+  document.getElementById('nm-status').textContent = '';
+  document.getElementById('nm-form').style.display = 'block';
+  nmSetHA(true);
+  nmCrestPreview();
+  document.getElementById('nm-form').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function nmEdit(id) {
+  var f = nmFix.filter(function (x) { return x.id === id; })[0];
+  if (!f) return;
+  document.getElementById('nm-form-ttl').textContent = 'Change this game';
+  document.getElementById('nm-delbtn').style.display = '';
+  setVal('nm-id', f.id); setVal('nm-opp', f.opponent || ''); setVal('nm-date', f.date || '');
+  setVal('nm-ko', f.kickoff || '15:00'); setVal('nm-venue', f.venue || '');
+  setVal('nm-comp', f.competition || 'Pre-Season Friendly');
+  document.getElementById('nm-pin').checked = !!f.pinned;
+  var sel = document.getElementById('nm-crest');
+  sel.value = f.oppCrest || nmCrestFor(f.opponent) || '';
+  sel.dataset.touched = '1';                       // don't second-guess a saved choice
+  sel.onchange = function () { nmCrestPreview(); };
+  document.getElementById('nm-venue').dataset.auto = f.venue ? '' : '1';
+  document.getElementById('nm-status').textContent = '';
+  document.getElementById('nm-form').style.display = 'block';
+  nmHome = f.isHome !== false;
+  document.getElementById('nm-h').classList.toggle('on', nmHome);
+  document.getElementById('nm-a').classList.toggle('on', !nmHome);
+  nmCrestPreview();
+  document.getElementById('nm-form').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function nmCancel() {
+  document.getElementById('nm-form').style.display = 'none';
+  document.getElementById('nm-status').textContent = '';
+}
+function nmSave() {
+  var opp = (document.getElementById('nm-opp').value || '').trim();
+  var date = document.getElementById('nm-date').value;
+  var st = document.getElementById('nm-status');
+  if (!opp)  { st.innerHTML = '<span style="color:var(--re)">Who are we playing?</span>'; return; }
+  if (!date) { st.innerHTML = '<span style="color:var(--re)">Pick a date.</span>'; return; }
+
+  var id = gv('nm-id');
+  var existing = id ? nmFix.filter(function (x) { return x.id === id; })[0] : null;
+  var ko = document.getElementById('nm-ko').value || '15:00';
+  var pinned = document.getElementById('nm-pin').checked;
+
+  var fix = Object.assign({}, existing || {
+    // A new game only. Never invent a score — that's match day's job.
+    status: 'scheduled', us: null, them: null, scorers: ''
+  }, {
+    id: id || ('friendly-' + date.replace(/-/g, '') + '-' + opp.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')),
+    date: date, kickoff: ko, opponent: opp,
+    oppCrest: document.getElementById('nm-crest').value || '',
+    isHome: nmHome,
+    venue: (document.getElementById('nm-venue').value || '').trim(),
+    competition: gv('nm-comp') || 'Pre-Season Friendly',
+    pinned: pinned || undefined,          // absent rather than false — keeps the file clean
+  });
+
+  // Only one game can be pinned, or "the next match" is ambiguous.
+  var ups = [fix];
+  if (pinned) nmFix.forEach(function (o) { if (o.id !== fix.id && o.pinned) ups.push(Object.assign({}, o, { pinned: undefined })); });
+
+  var btn = document.getElementById('nm-savebtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  st.innerHTML = '<span style="color:var(--gr)">Saving…</span>';
+
+  // The id-keyed merge — the same engine that protects the squad. Only these
+  // ids are touched; the other 40-odd fixtures are read server-side and kept.
+  commitDomain('fixtures', 'fixtures', 'id', ups, [], null, null, null, function (merged) {
+    nmFix = merged || nmFix;
+    btn.disabled = false; btn.textContent = 'Save — goes live in ~30s';
+    st.innerHTML = '<span style="color:var(--su)"><i class="ico ico-circle-check"></i> Saved — the website updates in about 30 seconds.</span>';
+    nmRender();
+    setTimeout(function () { document.getElementById('nm-form').style.display = 'none'; st.textContent = ''; }, 2600);
+  });
+}
+function nmDelete() {
+  var id = gv('nm-id');
+  var f = nmFix.filter(function (x) { return x.id === id; })[0];
+  if (!f) return;
+  if (!confirm('Remove ' + f.opponent + ' on ' + nmFmtDate(f) + '?\n\nIt comes off the website and the countdown moves to the next game.')) return;
+  var st = document.getElementById('nm-status');
+  st.innerHTML = '<span style="color:var(--gr)">Removing…</span>';
+  commitDomain('fixtures', 'fixtures', 'id', [], [id], null, null, null, function (merged) {
+    nmFix = merged || nmFix.filter(function (x) { return x.id !== id; });
+    st.innerHTML = '<span style="color:var(--su)"><i class="ico ico-circle-check"></i> Removed — the website updates shortly.</span>';
+    nmRender();
+    setTimeout(function () { document.getElementById('nm-form').style.display = 'none'; st.textContent = ''; }, 2600);
+  });
 }
 
 // ── VENUES (the address book behind every Directions button) ──
