@@ -29,20 +29,6 @@
       "scorers": ""
     },
     {
-      "id": "friendly-20260718-cockfosters",
-      "date": "2026-07-18",
-      "kickoff": "15:00",
-      "opponent": "Cockfosters",
-      "oppCrest": "img/crests/cockfosters.svg",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": ""
-    },
-    {
       "id": "friendly-cockfosters-20260718",
       "date": "2026-07-18",
       "kickoff": "15:00",
@@ -631,5 +617,5 @@
       "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-15T14:04:03.200Z"
+  "updatedAt": "2026-07-15T14:06:42.152Z"
 }
