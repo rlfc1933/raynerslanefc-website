@@ -12,3 +12,8 @@ node_modules/
 # Full-res photo originals from the club shoot (~40MB). The optimised
 # derivatives in img/players/ are what ship; these are the archive.
 _source/
+
+# Internal briefs, audits and setup notes. NOT site content, and several
+# contain the staff PIN and references to service keys. This is a PUBLIC repo.
+*.md
+!README.md
