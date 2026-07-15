@@ -65,18 +65,35 @@
     g.addColorStop(0, '#1e3a24'); g.addColorStop(1, BK);
     x.fillStyle = g; x.fillRect(0, 0, W, H);
 
-    // the article's own image, bled across the top, faded into the card
+    // The article image. A photo and a crest are not the same thing and must not
+    // be drawn the same way: cover-cropping a square crest to fill 1080x460
+    // zooms it to abstraction — you can't tell what it is. Photos bleed; crests
+    // sit whole, centred, at a size a badge is meant to be seen at.
     var hero = await loadImg(a.image);
+    var hh = 460;
     if (hero && hero.naturalWidth) {
-      var hh = 460;
-      var r = Math.max(W / hero.naturalWidth, hh / hero.naturalHeight);
-      var dw = hero.naturalWidth * r, dh = hero.naturalHeight * r;
-      x.save(); x.beginPath(); x.rect(0, 0, W, hh); x.clip();
-      x.drawImage(hero, (W - dw) / 2, (hh - dh) / 2, dw, dh);
-      var f = x.createLinearGradient(0, hh - 240, 0, hh);
+      var ar = hero.naturalWidth / hero.naturalHeight;
+      var isBadge = /\/img\/crests\//i.test(a.image || '') || (ar > 0.8 && ar < 1.25);
+      if (isBadge) {
+        // Crest: on the club's green, whole, with room to breathe.
+        var bg = x.createLinearGradient(0, 0, W, hh);
+        bg.addColorStop(0, '#16311f'); bg.addColorStop(1, '#0b1a11');
+        x.fillStyle = bg; x.fillRect(0, 0, W, hh);
+        var bs = 300;
+        var bw = ar >= 1 ? bs : bs * ar, bh = ar >= 1 ? bs / ar : bs;
+        x.drawImage(hero, (W - bw) / 2, (hh - bh) / 2, bw, bh);
+      } else {
+        // Photo: bleed it across the top and fade into the card.
+        var r = Math.max(W / hero.naturalWidth, hh / hero.naturalHeight);
+        var dw = hero.naturalWidth * r, dh = hero.naturalHeight * r;
+        x.save(); x.beginPath(); x.rect(0, 0, W, hh); x.clip();
+        x.drawImage(hero, (W - dw) / 2, (hh - dh) / 2, dw, dh);
+        x.restore();
+      }
+      var f = x.createLinearGradient(0, hh - 200, 0, hh);
       f.addColorStop(0, 'rgba(8,8,8,0)'); f.addColorStop(1, BK);
-      x.fillStyle = f; x.fillRect(0, hh - 240, W, 240);
-      x.restore();
+      x.fillStyle = f; x.fillRect(0, hh - 200, W, 200);
+      x.fillStyle = 'rgba(255,209,0,.85)'; x.fillRect(0, hh - 3, W, 3);
     }
 
     // skewed brand band — the club's signature, same as the fixture cards
