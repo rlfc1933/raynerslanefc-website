@@ -108,8 +108,7 @@
       <p style="font-family:var(--font-c);font-size:15px;color:var(--grey);letter-spacing:.04em;text-align:center;margin-bottom:32px">
         Fill in the form below and we'll be in touch. All volunteers are welcome.
       </p>
-      <form name="volunteer" method="POST" data-netlify="true" onsubmit="return volunteerApply(this)" style="display:flex;flex-direction:column;gap:14px">
-        <input type="hidden" name="form-name" value="volunteer">
+      <form name="volunteer" onsubmit="return volunteerApply(this)" style="display:flex;flex-direction:column;gap:14px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div>
             <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Full Name</label>
@@ -121,7 +120,8 @@
           </div>
         </div>
         <div>
-          <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Role Interested In</label>
+          <div><label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Phone</label><input type="tel" name="phone" placeholder="So we can give you a ring" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none"></div>
+        <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Role Interested In</label>
           <select name="role" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none">
             <option value="">Select a role...</option>
             <option>Match Day Steward</option>
@@ -150,22 +150,61 @@
 <script src="js/components.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded",()=>initComponents("volunteer.html"));
+  // ── Sent from THEIR email, not ours ──────────────────────────────────
+  // Was a POST to the site, which relied on an email service that was never
+  // switched on — so every offer of help landed in a dashboard nobody opened.
+  // Now we build the message and hand it to their own email app: the club gets
+  // a normal email from a real person and can just hit reply. Copy-and-paste
+  // fallback always shown, because plenty of people have no mail app wired up.
+  var VOL_TO = 'info@raynerslanefc.co.uk';
+
+  function volCompose(form){
+    var d={}; new FormData(form).forEach(function(v,k){ d[k]=String(v||'').trim(); });
+    var rows=[['Name',d.name],['Email',d.email],['Phone',d.phone],
+              ['Interested in',d.role],['About me',d.message]]
+      .filter(function(r){ return r[1]; });
+    return {
+      subject: 'Volunteering — ' + (d.name || 'Offer of help'),
+      body: "I'd like to help out at Rayners Lane FC.\n\n" +
+            rows.map(function(r){ return r[0] + ': ' + r[1]; }).join('\n') +
+            "\n\nThanks,\n" + (d.name || '')
+    };
+  }
+
   function volunteerApply(form){
-    var data=new FormData(form), body=new URLSearchParams();
-    data.forEach(function(v,k){ body.append(k,v); });
-    // 1) private record via Netlify Forms
-    fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: body.toString() })
-      .then(function(){ vThanks(form); }).catch(function(){ vThanks(form); });
-    // 2) HubSpot contact tagged volunteer (fire-and-forget; no-ops if HubSpot off)
-    var payload={ lead_source:'volunteer' }; data.forEach(function(v,k){ payload[k]=v; });
-    if(payload.role) payload.lead_type=payload.role;
-    try{ fetch('/.netlify/functions/hs-lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){}); }catch(e){}
+    if(!form.checkValidity()){ form.reportValidity(); return false; }
+    var msg = volCompose(form);
+    try {
+      window.location.href = 'mailto:' + VOL_TO +
+        '?subject=' + encodeURIComponent(msg.subject) +
+        '&body=' + encodeURIComponent(msg.body);
+    } catch(e){}
     if(window.gtag){ try{ gtag('event','generate_lead',{ lead_type:'volunteer' }); }catch(e){} }
+    vThanks(form, msg);
     return false;
   }
-  function vThanks(form){
-    form.innerHTML='<div style="text-align:center;padding:24px"><div style="font-family:var(--font-d);font-size:30px;color:var(--yellow);margin-bottom:10px">Thank you <i class="ico ico-heart"></i></div>'+
-      '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.7;max-width:420px;margin:0 auto">We\'ve got your details — someone from the club will be in touch about getting you involved at The Lane.</p></div>';
+
+  function volCopy(btn){
+    var ta=document.getElementById('vol-copytext');
+    navigator.clipboard.writeText(ta.value).then(function(){
+      var o=btn.innerHTML; btn.innerHTML='<i class="ico ico-check"></i> Copied';
+      setTimeout(function(){ btn.innerHTML=o; },1800);
+    }).catch(function(){ ta.focus(); ta.select(); });
+  }
+
+  function vThanks(form, msg){
+    var esc=function(t){ var e=document.createElement('div'); e.textContent=t; return e.innerHTML; };
+    form.innerHTML =
+      '<div style="text-align:center;padding:4px 0 16px">' +
+        '<div style="font-family:var(--font-d);font-size:30px;color:var(--yellow);margin-bottom:8px">Nearly there</div>' +
+        '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.7;max-width:440px;margin:0 auto 6px">Your email app should have opened with everything filled in — <strong style="color:var(--white)">just press send</strong>.</p>' +
+        '<p style="font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.7;max-width:440px;margin:0 auto">Nothing opened? Copy the details below into an email to <a href="mailto:' + VOL_TO + '" style="color:var(--yellow)">' + VOL_TO + '</a>.</p>' +
+      '</div>' +
+      '<textarea id="vol-copytext" readonly rows="8" style="width:100%;background:var(--black);border:1px solid var(--border);border-radius:8px;color:var(--lgrey);font-family:var(--font-b);font-size:13px;line-height:1.6;padding:12px 13px;resize:vertical">' + esc(msg.body) + '</textarea>' +
+      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+        '<button type="button" onclick="volCopy(this)" style="flex:1;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:10px;font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.04em;padding:13px;cursor:pointer"><i class="ico ico-clipboard-list"></i> Copy the details</button>' +
+        '<a href="mailto:' + VOL_TO + '?subject=' + encodeURIComponent(msg.subject) + '&body=' + encodeURIComponent(msg.body) + '" style="flex:1;text-align:center;border:1px solid var(--yellow);color:var(--yellow);border-radius:10px;font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.04em;padding:13px;text-decoration:none">Open email again</a>' +
+      '</div>';
   }
 </script>
 </body>
