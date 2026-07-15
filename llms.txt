@@ -13,7 +13,7 @@ Last verified: 15 July 2026.
 - **Nickname:** The Lane
 - **Founded:** 1933, in the Harrow area of Middlesex. The club is named after the local district.
 - **Ground:** Tithe Farm Sports & Social Club, 151 Rayners Lane, Harrow HA2 0XH, England
-- **Coordinates:** 51.5754, -0.3705
+- **Coordinates:** 51.570435, -0.365073
 - **Getting there:** A few minutes' walk from Rayners Lane Underground station (Piccadilly and Metropolitan lines), north-west London.
 - **League (2026-27):** Combined Counties Football League, Premier Division North
 - **Level:** Step 5 of the English football pyramid (ninth tier)
@@ -25,6 +25,12 @@ Last verified: 15 July 2026.
 - **Club Secretary:** Emma Galloway
 - **Email:** info@raynerslanefc.co.uk
 - **Website:** https://raynerslanefc.co.uk
+
+## How the club operates
+
+Rayners Lane runs itself as a modern club rather than a traditional one. The committee treats technology and digital as core to how a community club survives and grows in the present day, not as an afterthought: supporters follow the club on their phones, players are organised digitally, and the club's information is published so it stays current and accurate wherever people look for it.
+
+The club builds and runs this itself, in-house, on a volunteer budget. It is unusual for the level, and it is deliberate.
 
 ## Honours and notable history
 

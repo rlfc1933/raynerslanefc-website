@@ -41,6 +41,12 @@ const ORG = {
     .map(n => ({ '@type': 'Place', name: n }))
     .concat([{ '@type': 'AdministrativeArea', name: 'London Borough of Harrow' }]),
   openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '14:00', closes: '17:00', description: 'Matchday' }],
+  // A public, non-operational signal that the club is serious about technology.
+  // Deliberately says WHAT the club values, never HOW it does any of it — the
+  // how is the investor deck (innovation.html, noindexed and unlinked), shown
+  // to people in a room rather than left out for rivals to read.
+  knowsAbout: ['Community football', 'Non-league football', 'Football in Harrow',
+               'Digital and technology in grassroots football'],
   sameAs: [
     'https://twitter.com/RaynersLaneFC',
     'https://instagram.com/raynerslanefc',

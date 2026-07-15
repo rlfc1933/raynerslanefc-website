@@ -11,7 +11,6 @@ var BASE = 'https://raynerslanefc.co.uk';
 // [path, changefreq, priority]
 var PAGES = [
   ['/', 'weekly', '1.0'],
-  ['/innovation.html', 'monthly', '0.9'],
   ['/fixtures.html', 'daily', '0.9'],
   ['/news.html', 'daily', '0.9'],
   ['/squad.html', 'weekly', '0.8'],
