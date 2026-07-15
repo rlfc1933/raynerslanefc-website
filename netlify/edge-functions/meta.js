@@ -76,11 +76,15 @@ function headFor(page, item) {
              body: plain(item.body, 1800), heading: item.title };
   }
   // player
-  const pos = [item.role, item.position].filter(Boolean).join(', ');
+  // role ("Centre Midfield") is the specific one; position ("Midfielder") is
+  // the bucket. Joining both gives "plays Centre Midfield, Midfielder", which
+  // reads like a machine wrote it — and this is the sentence an answer engine
+  // quotes. Prefer the specific, fall back to the bucket.
+  const pos = item.role || item.position || '';
   const title = item.name + (item.position ? ' — ' + item.position : '') + ' | Rayners Lane FC';
   const desc = plain(item.bio, 155) ||
     (item.name + (pos ? ' plays ' + pos : ' plays') +
-     ' for Rayners Lane FC, Combined Counties Premier Division North.');
+     ' for Rayners Lane FC in the Combined Counties Premier Division North, at Step 5 of the English football pyramid.');
   const url = ORIGIN + '/player.html?id=' + encodeURIComponent(item.id);
   const img = abs(item.photo);
   const ld = {
@@ -99,7 +103,7 @@ function headFor(page, item) {
   if (item.bio) ld.description = plain(item.bio, 400);
   if (item.nickname) ld.alternateName = item.nickname;
   return { title, desc, url, img, ld, type: 'profile',
-           body: plain(item.bio, 1200), heading: item.name +
+           body: plain(item.bio, 1200) || desc, heading: item.name +
              (pos ? ' — ' + pos : '') };
 }
 
