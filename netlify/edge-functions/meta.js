@@ -55,7 +55,12 @@ function headFor(page, item) {
     const desc = plain(item.excerpt || item.body, 155) ||
       'News from Rayners Lane FC, Harrow.';
     const url = ORIGIN + '/news-article.html?id=' + encodeURIComponent(item.id);
-    const img = abs(item.image);
+    // og:image must be a RASTER at a sensible size. WhatsApp, Facebook and
+    // iMessage will not render an SVG preview — and several articles carry an
+    // SVG crest as their image, so the link preview silently showed nothing.
+    // Fall back to the club's own OG card, which is a real 1200x630 JPEG.
+    const raw = abs(item.image);
+    const img = (!raw || /\.svg(\?|$)/i.test(raw)) ? ORIGIN + '/img/og-card.jpg' : raw;
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'NewsArticle',

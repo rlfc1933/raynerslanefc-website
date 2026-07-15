@@ -197,7 +197,16 @@
     @media(max-width: 600px) {
       .featured-body { padding: 20px; }
     }
-  </style>
+    /* Public share button on our own news cards. Big enough to hit with a thumb,
+     quiet enough not to compete with the story. */
+  .news-share{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:transparent;
+    border:1px solid var(--border);border-radius:7px;color:var(--grey);font-family:var(--font-c);
+    font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;
+    min-height:36px;cursor:pointer;transition:color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
+  .news-share:hover{color:var(--yellow);border-color:var(--yellow)}
+  .news-share:disabled{opacity:.6}
+  .news-card-meta,.featured-card .news-card-meta{display:flex;align-items:center;gap:10px}
+</style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -357,6 +366,7 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
+<script src="js/share-news.js"></script>
 <script>
 var SOURCES = {
   club:      { label:'Rayners Lane FC',  colour:'#FFD100', text:'#000' },
@@ -518,6 +528,25 @@ function makeCard(a, featured) {
     arrow.style.fontWeight = '700';
     arrow.textContent = ' Read More →';
     meta.appendChild(arrow);
+  }
+  // ── Share, on OUR stories only ──────────────────────────────────────
+  // Third-party feed items (Non-League Paper, The FA) aren't ours to make a
+  // Rayners Lane card out of, and they have no article id to link back to.
+  // Only club articles get a Share button.
+  if (a.source === 'club' && a.id && !a.external && window.rlShareArticle) {
+    var sh = document.createElement('button');
+    sh.type = 'button';
+    sh.className = 'news-share';
+    sh.innerHTML = '<i class="ico ico-smartphone"></i> Share';
+    sh.setAttribute('aria-label', 'Share: ' + (a.title || 'this story'));
+    // The card is an <a>. Without stopping the event, tapping Share would
+    // navigate to the article instead of sharing it — and a <button> inside an
+    // <a> is invalid HTML besides, so it's appended to the card, not the link body.
+    sh.addEventListener('click', function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      window.rlShareArticle({ id: a.id, title: a.title, image: a.image, category: a.category }, sh);
+    });
+    meta.appendChild(sh);
   }
   body.appendChild(meta);
 
