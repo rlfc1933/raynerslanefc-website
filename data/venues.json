@@ -7,18 +7,19 @@
       "ground": "Tithe Farm Sports & Social Club",
       "address": "151 Rayners Lane, Harrow",
       "postcode": "HA2 0XH",
-      "lat": 51.5754,
-      "lng": -0.3705,
+      "lat": 51.570435,
+      "lng": -0.365073,
       "verified": true,
-      "notes": "Our home. Also the home ground of Broadfields United (groundshare)."
+      "notes": "Our home. Also the home ground of Broadfields United (groundshare). Coordinates corrected 15 Jul 2026: the previous pair (51.570435,-0.365073) was ~800m north-west of the ground and would have mis-routed anyone driving to a home game.",
+      "source": "OpenStreetMap named POI \"Tithe Farm Social Club, 151 Rayners Lane\" + street-address match (HA2 0XH). Replaces a coordinate that was ~800m off — see note."
     },
     {
       "club": "Broadfields United",
       "ground": "Tithe Farm Sports & Social Club",
       "address": "151 Rayners Lane, Harrow",
       "postcode": "HA2 0XH",
-      "lat": 51.5754,
-      "lng": -0.3705,
+      "lat": 51.570435,
+      "lng": -0.365073,
       "verified": true,
       "notes": "GROUNDSHARE. Broadfields play at OUR ground. When Broadfields are the home team we are officially AWAY (isHome:false — away kit, away dressing room, away designation) but the VENUE is still Tithe Farm, so there is NO TRAVEL. 'Away' = designation; 'venue' = physical location. They are independent — never infer the venue from isHome."
     },
@@ -265,5 +266,5 @@
       "notes": "Friendly, already played (4 Jul, home)."
     }
   ],
-  "updatedAt": "2026-07-14T15:49:46.010Z"
+  "updatedAt": "2026-07-15T14:34:56.708Z"
 }

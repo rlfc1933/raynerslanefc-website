@@ -590,7 +590,7 @@ async function addEvent(){
       address:[vb.address,vb.postcode].filter(Boolean).join(', '),
       lat:vb.lat, lng:vb.lng, notes:vb.notes||null };
   } else if(home){
-    venue={club_name:'Rayners Lane', ground:'Tithe Farm Sports & Social Club', address:'151 Rayners Lane, Harrow HA2 0XH', lat:51.5754, lng:-0.3705};
+    venue={club_name:'Rayners Lane', ground:'Tithe Farm Sports & Social Club', address:'151 Rayners Lane, Harrow HA2 0XH', lat:51.570435, lng:-0.365073};
   } else {
     venue = g('ae-opp') ? {club_name:g('ae-opp').trim(), ground:'TBC', address:'', lat:null, lng:null} : null;
   }
@@ -664,7 +664,7 @@ function render(){
 
 /* ═══════ DEMO MODE (guide screenshots only — ?shot=NAME, no backend) ═══════ */
 function demoShot(name){
-  var homeVenue={club_name:'Rayners Lane',ground:'Tithe Farm Sports & Social Club',address:'151 Rayners Lane, Harrow HA2 0XH',lat:51.5754,lng:-0.3705};
+  var homeVenue={club_name:'Rayners Lane',ground:'Tithe Farm Sports & Social Club',address:'151 Rayners Lane, Harrow HA2 0XH',lat:51.570435,lng:-0.365073};
   var ev={id:1,type:'cup',opponent:'Harefield United',is_home:true,competition:'FA Cup · Extra Preliminary',starts_at:'2026-08-08T14:00:00Z',meet_at:'2026-08-08T12:45:00Z',kit:'Yellow / Green',published:false,source:'fwp_import',la_venues:homeVenue};
   var squad=[
     {id:1,name:'Sam Okoro',position:'Goalkeeper',squad_no:1,status:'active',availability:'available',selection:'starting',checkedIn:false},

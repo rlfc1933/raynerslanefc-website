@@ -36,85 +36,61 @@
   <script type="importmap">
   { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
   </script>
+  <!-- Structured data.
+       The club entity (SportsTeam/SportsOrganization + WebSite) is emitted
+       site-wide by js/components.js under @id .../#team, so it is NOT repeated
+       here — two SportsTeam blocks with different @ids split the club into two
+       entities, which is precisely the opposite of what this work is for.
+       Only the homepage-specific FAQPage lives here, and every Q&A below has
+       matching VISIBLE content further down the page (Google requires that;
+       schema-only FAQ earns nothing and can be treated as spam). -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@graph": [
+    "@type": "FAQPage",
+    "@id": "https://raynerslanefc.co.uk/#faq",
+    "isPartOf": { "@id": "https://raynerslanefc.co.uk/#website" },
+    "about": { "@id": "https://raynerslanefc.co.uk/#team" },
+    "mainEntity": [
       {
-        "@type": "SportsTeam",
-        "@id": "https://raynerslanefc.co.uk/#team",
-        "name": "Rayners Lane FC",
-        "alternateName": "The Lane",
-        "sport": "Association football",
-        "foundingDate": "1933",
-        "url": "https://raynerslanefc.co.uk/",
-        "logo": "https://raynerslanefc.co.uk/img/og-card.jpg",
-        "image": "https://raynerslanefc.co.uk/img/og-card.jpg",
-        "description": "Rayners Lane FC is a community football club founded in 1933, based at Tithe Farm Social Club in Harrow. The club competes in the Combined Counties Premier Division North at Step 5 of the English football pyramid.",
-        "memberOf": { "@type": "SportsOrganization", "name": "Combined Counties Football League" },
-        "location": {
-          "@type": "Place",
-          "name": "Tithe Farm Social Club",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "151 Rayners Lane",
-            "addressLocality": "Harrow",
-            "addressRegion": "Middlesex",
-            "postalCode": "HA2 0XH",
-            "addressCountry": "GB"
-          }
-        },
-        "email": "info@raynerslanefc.co.uk",
-        "sameAs": [
-          "https://twitter.com/RaynersLaneFC",
-          "https://instagram.com/raynerslanefc",
-          "https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA",
-          "https://www.pitchero.com/clubs/raynerslanefc"
-        ]
+        "@type": "Question",
+        "name": "Who are Rayners Lane FC?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC are a community football club founded in 1933 in Harrow, Middlesex, nicknamed \u201cThe Lane\u201d. They play at Tithe Farm Sports & Social Club and compete in the Combined Counties Premier Division North, at Step 5 of the English football pyramid." }
       },
       {
-        "@type": "WebSite",
-        "@id": "https://raynerslanefc.co.uk/#website",
-        "url": "https://raynerslanefc.co.uk/",
-        "name": "Rayners Lane FC",
-        "publisher": { "@id": "https://raynerslanefc.co.uk/#team" },
-        "inLanguage": "en-GB"
+        "@type": "Question",
+        "name": "Where do Rayners Lane FC play their home games?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC play at Tithe Farm Sports & Social Club, 151 Rayners Lane, Harrow HA2 0XH \u2014 minutes from Rayners Lane Underground station on the Piccadilly and Metropolitan lines." }
       },
       {
-        "@type": "FAQPage",
-        "@id": "https://raynerslanefc.co.uk/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Who are Rayners Lane FC?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC, nicknamed 'The Lane', are a community football club founded in 1933 in Harrow, Middlesex. They are a fully integrated members section of Tithe Farm Sports & Social Club LTD and an FA Charter Standard Community Club." }
-          },
-          {
-            "@type": "Question",
-            "name": "Where do Rayners Lane FC play their home games?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC play at Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH — minutes from Rayners Lane Underground station on the Piccadilly and Metropolitan lines." }
-          },
-          {
-            "@type": "Question",
-            "name": "What league are Rayners Lane FC in?",
-            "acceptedAnswer": { "@type": "Answer", "text": "For the 2026-27 season Rayners Lane FC compete in the Combined Counties Premier Division North, at Step 5 of the English football pyramid." }
-          },
-          {
-            "@type": "Question",
-            "name": "When were Rayners Lane FC founded?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC were founded in 1933 and have played in Harrow for over 90 years." }
-          },
-          {
-            "@type": "Question",
-            "name": "Who runs Rayners Lane FC?",
-            "acceptedAnswer": { "@type": "Answer", "text": "The club is chaired by Pete Singh, with Gary Pitt as First Team Manager and Jenny Pitt as Club Secretary." }
-          },
-          {
-            "@type": "Question",
-            "name": "How can I play for or join Rayners Lane FC?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Players interested in trials and anyone wanting to join, volunteer or sponsor the club can get in touch at info@raynerslanefc.co.uk or via the contact page at raynerslanefc.co.uk/contact.html." }
-          }
-        ]
+        "@type": "Question",
+        "name": "What league are Rayners Lane FC in?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC compete in the Combined Counties Football League Premier Division North for the 2026-27 season, at Step 5 of the English football pyramid (the ninth tier). The club moved to the Combined Counties League ahead of the 2025-26 season, having previously played in the Isthmian League South Central Division." }
+      },
+      {
+        "@type": "Question",
+        "name": "When were Rayners Lane FC founded?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Rayners Lane FC were founded in 1933 in the Harrow area of Middlesex, and take their name from the local district. The club has played in Harrow for over 90 years." }
+      },
+      {
+        "@type": "Question",
+        "name": "Who runs Rayners Lane FC?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Pete Singh is Club Chairman and Gary Pitt is First Team Manager. Martin Noblett is Club President, Nigel Hanlon is Vice Chairman and Emma Galloway is Club Secretary." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I play for or trial at Rayners Lane FC?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Contact the club at info@raynerslanefc.co.uk to ask about trials. Rayners Lane run open trials at Tithe Farm before the season and are a Step 5 club in the Combined Counties Premier Division North, so players of a good local standard are welcome to get in touch." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I sponsor Rayners Lane FC?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Email info@raynerslanefc.co.uk. The club offers shirt, matchball and board sponsorship, and works with local Harrow businesses. Details are on the club\u2019s sponsorship pages." }
+      },
+      {
+        "@type": "Question",
+        "name": "When is the next Rayners Lane FC game?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The next fixture and a live countdown are always shown on the Rayners Lane FC homepage and on the fixtures page at raynerslanefc.co.uk/fixtures.html, which lists the full 2026-27 season with dates, kick-off times and grounds." }
       }
     ]
   }
@@ -558,7 +534,7 @@
         Tithe Farm Social Club bar open on match days.
       </p>
       <div class="ground__directions" style="margin-top:28px">
-        <a class="btn btn-primary" href="https://maps.google.com/maps?q=51.5699654,-0.3651601" target="_blank">Get Directions</a>
+        <a class="btn btn-primary" href="https://maps.google.com/maps?q=51.570435,-0.365073" target="_blank">Get Directions</a>
         <a class="btn btn-outline" href="about.html#ground">About the Ground</a>
       </div>
     </div>
@@ -588,6 +564,63 @@
   </div>
 </div>
 
+<!-- ══════════ THE FACTS — visible answers behind the FAQPage schema ══════════
+     These are the questions people actually type into Google and ask ChatGPT /
+     Perplexity / Gemini about this club. Two rules make them work:
+       1. The first sentence answers the question outright. Answer engines lift
+          the opening sentence; burying the answer in paragraph three means it
+          never gets quoted.
+       2. Every Q&A here matches the FAQPage JSON-LD in <head> word for word.
+          Schema without visible content earns no rich result and can be treated
+          as spam — the block that used to be here had no visible counterpart.
+     Every fact traces to the club's own pages (history.html, committee.json,
+     venues.json). Nothing here is inferred. ══════════════════════════════ -->
+<section class="section" id="club-faq">
+  <div class="container">
+    <span class="label" style="display:block;margin-bottom:8px">The Facts</span>
+    <h2 style="font-family:var(--font-d);font-size:clamp(32px,4vw,52px);letter-spacing:.03em;margin-bottom:8px">
+      Rayners Lane FC <span style="color:var(--yellow)">Explained</span>
+    </h2>
+    <p style="font-family:var(--font-b);font-size:14px;color:var(--grey);line-height:1.8;max-width:640px;margin-bottom:28px">
+      The straight answers — for supporters, players, sponsors, groundhoppers and anyone who just asked the internet who we are.
+    </p>
+
+    <div class="faq-grid">
+      <div class="faq-item">
+        <h3>Who are Rayners Lane FC?</h3>
+        <p>Rayners Lane FC are a community football club founded in <strong>1933</strong> in Harrow, Middlesex, nicknamed <strong>&ldquo;The Lane&rdquo;</strong>. We play at Tithe Farm Sports &amp; Social Club and compete in the Combined Counties Premier Division North, at Step 5 of the English football pyramid. The club takes its name from the local district it has represented for over 90 years.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Where do Rayners Lane FC play?</h3>
+        <p>Rayners Lane FC play at <strong>Tithe Farm Sports &amp; Social Club, 151 Rayners Lane, Harrow HA2 0XH</strong> &mdash; minutes on foot from Rayners Lane Underground station on the Piccadilly and Metropolitan lines. Broadfields United groundshare at Tithe Farm, so some &ldquo;away&rdquo; fixtures are played here too.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What league are Rayners Lane FC in?</h3>
+        <p>Rayners Lane FC compete in the <strong>Combined Counties Football League Premier Division North</strong> for 2026-27, at <strong>Step 5</strong> of the English football pyramid (the ninth tier). The club moved to the Combined Counties League ahead of 2025-26, having previously played in the Isthmian League South Central Division.</p>
+      </div>
+      <div class="faq-item">
+        <h3>When were Rayners Lane FC founded?</h3>
+        <p>Rayners Lane FC were founded in <strong>1933</strong> in the Harrow area of Middlesex. The club&rsquo;s proudest moment came in <strong>1982</strong>, winning the Hellenic League Division One title and promotion to the Premier Division. Its deepest FA Cup run was the <strong>Second Qualifying Round in 1992-93</strong>.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Who runs Rayners Lane FC?</h3>
+        <p><strong>Pete Singh</strong> is Club Chairman and <strong>Gary Pitt</strong> is First Team Manager. Martin Noblett is Club President, Nigel Hanlon is Vice Chairman and Emma Galloway is Club Secretary.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I play for or trial at Rayners Lane FC?</h3>
+        <p>Email <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a> to ask about trials. Rayners Lane run open trials at Tithe Farm before the season. We&rsquo;re a Step 5 club in the Combined Counties Premier Division North, so players of a good local standard are welcome to get in touch.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I sponsor Rayners Lane FC?</h3>
+        <p>Email <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>. The club offers shirt, matchball and board sponsorship and works with local Harrow businesses. Sponsoring a Step 5 club puts your name in front of a real community every Saturday.</p>
+      </div>
+      <div class="faq-item">
+        <h3>When is the next Rayners Lane game?</h3>
+        <p>The next fixture and a live countdown are always at the top of this page and on the <a href="fixtures.html">fixtures page</a>, which lists the full 2026-27 season with dates, kick-off times (UK time) and grounds &mdash; plus directions to every away ground.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <div id="footer-placeholder"></div>
 

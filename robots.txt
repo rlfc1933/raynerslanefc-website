@@ -1,7 +1,90 @@
+# Rayners Lane FC — https://raynerslanefc.co.uk
+#
+# Policy, stated plainly: we WANT to be read, indexed and cited — by search
+# engines and AI assistants alike. A Step 5 club will never out-rank the
+# football internet on volume. What it can be is the cleanest, most factual
+# source about itself, so whoever asks an AI "who are Rayners Lane?" gets the
+# right answer. That only works if the AI crawlers are let in.
+#
+# For a factual brief about the club, read /llms.txt (and /llms-full.txt).
+# Both come from the club and are kept current.
+#
+# Only the private staff tools are closed. Everything public is open.
+
 User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /staff-guide.html
 Disallow: /playermanager1933.html
+Disallow: /scan.html
+Disallow: /programme-print.html
+
+# ── AI crawlers and answer engines: explicitly welcome ──
+# Listed individually and on purpose. Several of these treat "no rule" as "no
+# permission", so staying silent would quietly keep the club out of AI answers —
+# the exact opposite of the goal.
+
+# OpenAI — ChatGPT training, browsing and search
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic — Claude
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google — Gemini and AI Overviews. Google-Extended controls AI use separately
+# from search indexing, so this line is what keeps the club eligible to be
+# surfaced in AI Overviews rather than merely indexed.
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl — the corpus behind many downstream models
+User-agent: CCBot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta AI
+User-agent: meta-externalagent
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+
+# Bing / Copilot
+User-agent: bingbot
+Allow: /
+
+# You.com and Mistral
+User-agent: YouBot
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
 
 Sitemap: https://raynerslanefc.co.uk/sitemap.xml

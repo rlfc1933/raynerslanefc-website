@@ -617,11 +617,32 @@ function initComponents(currentPage) {
   //    geo, opening hours, sameAs) + a per-page BreadcrumbList. Data-driven,
   //    on every page. index.html keeps its own #team + FAQPage; Google merges
   //    same-@id nodes, so this simply enriches it with local signals. ──
+  // ⛔ Every fact below traces to the club's own pages. NEVER add one that
+  //    doesn't. A wrong "fact" here is copied into AI answers and training data
+  //    and is close to impossible to retract. Verified or omitted.
+  //    founded 1933 ........ site-wide "EST. 1933" + history.html [1933]
+  //    ground + address .... data/venues.json (verified) + about.html
+  //    geo ................. OSM named POI "Tithe Farm Social Club, 151 Rayners
+  //                          Lane" + street match. NOT the old 51.5754,-0.3705,
+  //                          which sat ~800m from the ground and mis-routed
+  //                          anyone driving to a home game.
+  //    honours ............. history.html [1982] and [1992-93] — nothing else
+  //    people .............. data/committee.json
+  //    NOT asserted (unverifiable, and a guess is worse than silence): ground
+  //    capacity, phone number, attendance, any other honour, a Wikidata id
+  //    (none exists yet — see SEO-AEO-SETUP.md).
   injectJSONLD('lane-org', {
     '@context': 'https://schema.org',
-    '@type': ['SportsTeam', 'LocalBusiness'],
+    '@type': ['SportsTeam', 'SportsOrganization', 'LocalBusiness'],
     '@id': 'https://raynerslanefc.co.uk/#team',
-    name: 'Rayners Lane FC', alternateName: 'The Lane', sport: 'Soccer', foundingDate: '1933',
+    name: 'Rayners Lane FC',
+    legalName: 'Rayners Lane Football Club',
+    alternateName: ['The Lane', 'Rayners Lane', 'Rayners Lane Football Club'],
+    sport: 'Soccer', foundingDate: '1933',
+    foundingLocation: { '@type': 'Place', name: 'Harrow, Middlesex, England' },
+    // Only what history.html actually records.
+    award: ['Hellenic League Division One Champions (1982)',
+            'FA Cup Second Qualifying Round (1992-93)'],
     url: 'https://raynerslanefc.co.uk/',
     logo: 'https://raynerslanefc.co.uk/img/badge.png',
     image: 'https://raynerslanefc.co.uk/img/og-card.jpg',
@@ -629,7 +650,7 @@ function initComponents(currentPage) {
     description: "Rayners Lane FC ('The Lane') — a community football club founded in 1933, playing non-league football at Tithe Farm, Harrow, in the Combined Counties Premier Division North.",
     memberOf: { '@type': 'SportsOrganization', name: 'Combined Counties Football League', url: 'https://www.combinedcountiesleague.co.uk' },
     address: { '@type': 'PostalAddress', streetAddress: '151 Rayners Lane', addressLocality: 'Harrow', addressRegion: 'Greater London', postalCode: 'HA2 0XH', addressCountry: 'GB' },
-    geo: { '@type': 'GeoCoordinates', latitude: 51.5699654, longitude: -0.3651601 },
+    geo: { '@type': 'GeoCoordinates', latitude: 51.570435, longitude: -0.365073 },
     areaServed: ['Harrow', 'Rayners Lane', 'Pinner', 'South Harrow', 'Ruislip', 'Northwood', 'Wembley'].map(function (n) { return { '@type': 'Place', name: n }; })
       .concat([{ '@type': 'AdministrativeArea', name: 'London Borough of Harrow' }]),
     openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '14:00', closes: '17:00', description: 'Matchday' }],
@@ -639,6 +660,14 @@ function initComponents(currentPage) {
       'https://www.youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA',
       'https://www.pitchero.com/clubs/raynerslanefc'
     ]
+  });
+
+  injectJSONLD('lane-site', {
+    '@context': 'https://schema.org', '@type': 'WebSite',
+    '@id': 'https://raynerslanefc.co.uk/#website',
+    url: 'https://raynerslanefc.co.uk/', name: 'Rayners Lane FC',
+    publisher: { '@id': 'https://raynerslanefc.co.uk/#team' },
+    inLanguage: 'en-GB'
   });
 
   const nav     = document.getElementById('nav-placeholder');

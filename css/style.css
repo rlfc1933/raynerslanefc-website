@@ -175,6 +175,15 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .fix__score.loss{color:#EF4444}
 .fix__time{color:var(--yellow)}
 
+/* ── FAQ / "The Facts" — the visible answers behind the FAQPage schema ── */
+.faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:2px}
+.faq-item{background:var(--card);border-left:3px solid var(--yellow);padding:22px 24px}
+.faq-item h3{font-family:var(--font-d);font-size:20px;letter-spacing:.03em;color:var(--white);margin-bottom:9px;line-height:1.15}
+.faq-item p{font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.8}
+.faq-item strong{color:var(--white);font-weight:600}
+.faq-item a{color:var(--yellow);text-decoration:none;border-bottom:1px solid rgba(255,209,0,.35)}
+.faq-item a:hover{border-bottom-color:var(--yellow)}
+
 /* ── SQUAD GRID ── */
 .squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px}
 .player-card{background:var(--card);padding:0;overflow:hidden;transition:background .22s;cursor:pointer;position:relative}
