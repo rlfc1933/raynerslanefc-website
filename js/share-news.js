@@ -51,90 +51,124 @@
     return lines;
   }
 
+  // Category accent. Brand palette only — a card that turns up in a colour the
+  // club doesn't own looks like someone else's graphic.
+  function accentFor(cat) {
+    var c = String(cat || '').toLowerCase();
+    if (/match|fixture|report|result|cup|vase/.test(c)) return { chip: Y, ink: '#0d0d0d', rule: Y };
+    if (/sign|transfer|squad|player/.test(c))          return { chip: W_, ink: '#0d0d0d', rule: W_ };
+    return { chip: Y, ink: '#0d0d0d', rule: Y };       // news + everything else
+  }
+
+  // Fit the hook to the box: big hooks go huge, long ones shrink rather than
+  // clip. A back-page headline that's been cut off mid-word isn't a headline.
+  function fitHook(x, text, maxW, maxH, startPx) {
+    var size = startPx, lines;
+    for (;;) {
+      x.font = '400 ' + size + 'px "Bebas Neue", sans-serif';
+      lines = wrap(x, text, maxW, 4);
+      var h = lines.length * size * 0.92;
+      if ((h <= maxH && lines.length <= 3) || size <= 44) break;
+      size -= 4;
+    }
+    return { size: size, lines: lines };
+  }
+
   async function cardPng(a) {
     // Wait for Bebas — draw too early and the card renders in Times.
-    try { if (document.fonts) { await document.fonts.load('400 72px "Bebas Neue"'); await document.fonts.load('600 26px "Barlow"'); await document.fonts.ready; } } catch (e) {}
+    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Barlow"'); await document.fonts.ready; } } catch (e) {}
 
     var W = 1080, H = 1080;
     var c = document.createElement('canvas'); c.width = W; c.height = H;
     var x = c.getContext('2d');
+    var acc = accentFor(a.category);
+
+    // THE LINE. The stored hook if there is one, else the real title — never
+    // generated here, never an AI call on a public page. See data/fixtures.json
+    // shareHeadline and the staff sign-off panel.
+    var head = String(a.shareHeadline || a.title || '').trim();
 
     // base + the club's green glow
     x.fillStyle = BK; x.fillRect(0, 0, W, H);
-    var g = x.createRadialGradient(W * 0.75, -120, 0, W * 0.75, -120, H * 1.1);
+    var g = x.createRadialGradient(W * 0.72, -140, 0, W * 0.72, -140, H * 1.15);
     g.addColorStop(0, '#1e3a24'); g.addColorStop(1, BK);
     x.fillStyle = g; x.fillRect(0, 0, W, H);
 
-    // The article image. A photo and a crest are not the same thing and must not
-    // be drawn the same way: cover-cropping a square crest to fill 1080x460
-    // zooms it to abstraction — you can't tell what it is. Photos bleed; crests
-    // sit whole, centred, at a size a badge is meant to be seen at.
+    // ── the image, treated ────────────────────────────────────────────────
+    // A photo and a crest are not the same thing and must not be drawn the same
+    // way: cover-cropping a square crest to fill the panel zooms it to
+    // abstraction. Photos bleed; crests sit whole, centred, at badge size.
     var hero = await loadImg(a.image);
-    var hh = 460;
+    var hh = 430;
     if (hero && hero.naturalWidth) {
       var ar = hero.naturalWidth / hero.naturalHeight;
       // No leading slash: article images are stored as "img/crests/x.svg", so a
       // /\/img\/crests\// test never matched and every crest got cover-cropped.
       var isBadge = /(^|\/)img\/crests\//i.test(a.image || '')
-                 || /\.svg(\?|$)/i.test(a.image || '')     // a vector is a badge, not a photo
+                 || /\.svg(\?|$)/i.test(a.image || '')
                  || (ar > 0.8 && ar < 1.25);
       if (isBadge) {
-        // Crest: on the club's green, whole, with room to breathe.
         var bg = x.createLinearGradient(0, 0, W, hh);
         bg.addColorStop(0, '#16311f'); bg.addColorStop(1, '#0b1a11');
         x.fillStyle = bg; x.fillRect(0, 0, W, hh);
-        var bs = 300;
-        var bw = ar >= 1 ? bs : bs * ar, bh = ar >= 1 ? bs / ar : bs;
+        var bs = 330, bw = ar >= 1 ? bs : bs * ar, bh = ar >= 1 ? bs / ar : bs;
         x.drawImage(hero, (W - bw) / 2, (hh - bh) / 2, bw, bh);
       } else {
-        // Photo: bleed it across the top and fade into the card.
         var r = Math.max(W / hero.naturalWidth, hh / hero.naturalHeight);
         var dw = hero.naturalWidth * r, dh = hero.naturalHeight * r;
         x.save(); x.beginPath(); x.rect(0, 0, W, hh); x.clip();
         x.drawImage(hero, (W - dw) / 2, (hh - dh) / 2, dw, dh);
+        // Darken the photo so white Bebas over it is always legible, whatever
+        // the photo is. An untreated bright photo eats the headline.
+        x.fillStyle = 'rgba(8,8,8,.30)'; x.fillRect(0, 0, W, hh);
         x.restore();
       }
-      var f = x.createLinearGradient(0, hh - 200, 0, hh);
+      var f = x.createLinearGradient(0, hh - 220, 0, hh);
       f.addColorStop(0, 'rgba(8,8,8,0)'); f.addColorStop(1, BK);
-      x.fillStyle = f; x.fillRect(0, hh - 200, W, 200);
-      x.fillStyle = 'rgba(255,209,0,.85)'; x.fillRect(0, hh - 3, W, 3);
+      x.fillStyle = f; x.fillRect(0, hh - 220, W, 220);
+      x.fillStyle = acc.rule; x.globalAlpha = .9; x.fillRect(0, hh - 4, W, 4); x.globalAlpha = 1;
     }
 
     // skewed brand band — the club's signature, same as the fixture cards
-    x.save(); x.translate(0, 560); x.transform(1, 0, -0.12, 1, 0, 0);
-    x.fillStyle = 'rgba(26,92,50,.45)'; x.fillRect(-120, -120, W + 240, 240);
-    x.fillStyle = 'rgba(255,209,0,.9)'; x.fillRect(-120, -122, W + 240, 4);
+    x.save(); x.translate(0, 500); x.transform(1, 0, -0.12, 1, 0, 0);
+    x.fillStyle = 'rgba(26,92,50,.45)'; x.fillRect(-120, -110, W + 240, 220);
+    x.fillStyle = 'rgba(255,209,0,.9)'; x.fillRect(-120, -112, W + 240, 4);
     x.restore();
 
     // crest + lockup
     var badge = await loadImg('img/badge.png');
-    if (badge && badge.naturalWidth) x.drawImage(badge, 64, 522, 96, 96);
+    if (badge && badge.naturalWidth) x.drawImage(badge, 64, 458, 92, 92);
     x.textAlign = 'left';
     x.fillStyle = Y; x.font = '700 22px "Barlow Condensed", sans-serif';
-    x.fillText('RAYNERS LANE FC', 180, 560);
+    x.fillText('RAYNERS LANE FC', 176, 494);
     x.fillStyle = 'rgba(245,243,237,.62)'; x.font = '400 19px "Barlow", sans-serif';
-    x.fillText('Est. 1933 · Harrow', 180, 592);
+    x.fillText('Est. 1933 · Harrow', 176, 526);
 
     // category chip
     if (a.category) {
       x.font = '700 20px "Barlow Condensed", sans-serif';
-      var cw = x.measureText(a.category.toUpperCase()).width + 30;
-      x.fillStyle = Y; x.fillRect(64, 660, cw, 38);
-      x.fillStyle = '#0d0d0d'; x.fillText(a.category.toUpperCase(), 79, 686);
+      var label = String(a.category).toUpperCase();
+      var cw = x.measureText(label).width + 30;
+      x.fillStyle = acc.chip; x.fillRect(64, 590, cw, 38);
+      x.fillStyle = acc.ink; x.fillText(label, 79, 616);
     }
 
-    // the headline — the reason anyone taps
+    // ── THE HOOK — the reason anyone stops scrolling ──────────────────────
+    // Given the room to be big. Everything above is context; this is the card.
+    var strap = String(a.strap || '').trim();
+    var hookBottom = strap ? H - 170 : H - 120;
+    var hookTop = 656;
+    var fit = fitHook(x, head, W - 128, hookBottom - hookTop, 112);
     x.fillStyle = W_;
-    var size = 76;
-    x.font = '400 ' + size + 'px "Bebas Neue", sans-serif';
-    var lines = wrap(x, a.title, W - 128, 4);
-    // long headlines get smaller rather than clipped
-    while (lines.length > 3 && size > 50) {
-      size -= 6; x.font = '400 ' + size + 'px "Bebas Neue", sans-serif';
-      lines = wrap(x, a.title, W - 128, 4);
+    var ty = hookTop + fit.size;
+    fit.lines.forEach(function (l) { x.fillText(l, 64, ty); ty += fit.size * 0.92; });
+
+    // strap — fixture detail (date / KO / venue). Facts, small, under the drama.
+    if (strap) {
+      x.fillStyle = 'rgba(245,243,237,.72)';
+      x.font = '600 25px "Barlow", sans-serif';
+      x.fillText(strap, 64, H - 132);
     }
-    var ty = 740 + size;
-    lines.forEach(function (l) { x.fillText(l, 64, ty); ty += size * 0.94; });
 
     // footer — the whole point: send them to the site
     x.fillStyle = 'rgba(255,209,0,.16)'; x.fillRect(0, H - 92, W, 4);
@@ -142,7 +176,7 @@
     x.fillText('raynerslanefc.co.uk', 64, H - 36);
     x.textAlign = 'right';
     x.fillStyle = 'rgba(245,243,237,.5)'; x.font = '400 22px "Barlow", sans-serif';
-    x.fillText('Read the full story', W - 64, H - 36);
+    x.fillText(a.cta || 'Read the full story', W - 64, H - 36);
 
     return new Promise(function (res) { c.toBlob(res, 'image/png'); });
   }
@@ -170,7 +204,7 @@
   // So we render the card quietly on page load and keep the blob ready. The tap
   // then goes straight to share() with no await in front of it.
   var _cache = {};
-  function cacheKey(a) { return a.id + '|' + a.title; }
+  function cacheKey(a) { return a.id + '|' + a.title + '|' + (a.shareHeadline || ''); }
   window.rlPrebuildCard = function (a) {
     var k = cacheKey(a);
     if (_cache[k]) return _cache[k];
@@ -180,7 +214,9 @@
 
   // The public entry point. article = {id,title,image,category}
   window.rlShareArticle = async function (a, btn) {
-    var url = location.origin + '/news-article.html?id=' + encodeURIComponent(a.id);
+    var url = a.link
+      ? location.origin + a.link
+      : location.origin + '/news-article.html?id=' + encodeURIComponent(a.id);
     var text = a.title + ' — Rayners Lane FC';
     var full = text + '\n' + url;
     var wa = 'https://wa.me/?text=' + encodeURIComponent(full);
@@ -249,5 +285,34 @@
     if (navigator.share) { navigator.share({ title: 'Rayners Lane FC', text: text, url: url }).catch(function () {}); return; }
     if (navigator.clipboard) navigator.clipboard.writeText(full).catch(function () {});
     toast('Link copied.', '<div style="display:flex;gap:8px;margin-top:9px"><a style="color:' + Y + '" href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a></div>');
+  };
+  // Fixtures: same card, same rules. The hook is the STORED fixtures.json
+  // shareHeadline — baked by tools-bake-hooks.js, editable by staff. Falls back
+  // to "Rayners Lane vs X" if a fixture somehow has none.
+  window.rlShareFixture = function (f, btn) {
+    var home = f.isHome !== false;
+    var opp = f.opponent || '';
+    var title = home ? 'Rayners Lane vs ' + opp : opp + ' vs Rayners Lane';
+    var d = '';
+    try {
+      d = new Date(f.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
+    } catch (e) { d = f.date || ''; }
+    var p = String(f.kickoff || '15:00').split(':'), Hh = +p[0], mm = p[1] || '00';
+    var koTxt = (Hh % 12 || 12) + (mm === '00' ? '' : '.' + mm) + (Hh >= 12 ? 'pm' : 'am');
+    var venue = home ? 'Tithe Farm' : (f.venue || 'Away');
+    return window.rlShareArticle({
+      id: 'fixture-' + (f.id || f.date),
+      title: title,
+      shareHeadline: f.shareHeadline || title,
+      // The field is oppCrest, not crest — reading the wrong name shipped every
+      // fixture card with an empty panel. Two clubs (Hayes & Yeading, Punjab)
+      // have no crest on file; our own badge beats a blank green box.
+      image: f.oppCrest || f.image || 'img/badge.png',
+      category: /friendly/i.test(f.competition || '') ? 'PRE-SEASON'
+              : /vase|cup/i.test(f.competition || '') ? 'CUP' : 'MATCH',
+      strap: d + ' · ' + koTxt + ' · ' + venue,
+      cta: 'Fixtures & directions',
+      link: '/fixtures.html'
+    }, btn);
   };
 })();

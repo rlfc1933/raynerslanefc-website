@@ -542,7 +542,8 @@ function makeCard(a, featured) {
     // The card is an <a>. Without stopping the event, tapping Share would
     // navigate to the article instead of sharing it — and a <button> inside an
     // <a> is invalid HTML besides, so it's appended to the card, not the link body.
-    var payload = { id: a.id, title: a.title, image: a.image, category: a.category };
+    var payload = { id: a.id, title: a.title, image: a.image, category: a.category,
+                    shareHeadline: a.shareHeadline || '' };
     // Warm the card on first touch/hover — that lands before the click, so the
     // tap itself has no await in front of navigator.share() and iOS still
     // considers the gesture live. Warming every card on load would render a

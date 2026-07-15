@@ -104,7 +104,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Only show Share once we actually have an article to share.
     const sb = document.getElementById('art-share');
     if (sb && window.rlShareArticle) {
-      const payload = { id: art.id, title: art.title, image: art.image, category: art.category };
+      // shareHeadline is the dramatic hook staff signed off at publish time.
+      // Absent (older articles) -> the card falls back to the real title.
+      const payload = { id: art.id, title: art.title, image: art.image,
+                        category: art.category, shareHeadline: art.shareHeadline || '' };
       sb.style.display = 'inline-flex';
       sb.addEventListener('click', () => window.rlShareArticle(payload, sb));
       // Build the card now, quietly, while they're reading. navigator.share()
