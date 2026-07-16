@@ -48,6 +48,9 @@
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- Leaflet — free maps with OpenStreetMap tiles (no Google Maps billing). Used by Sponsor Radar. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="js/supabase-config.js"></script>
   <link rel="stylesheet" href="css/icons.css">
@@ -827,6 +830,11 @@
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg></span>
           <div class="tile-name">Sponsors</div><div class="tile-desc">Logos &amp; partners</div>
+        </button>
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('radar')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+          <div class="tile-name">Sponsor Radar</div><div class="tile-desc">Find local sponsors</div>
         </button>
         <button class="tile" style="--accent:#10B981" onclick="openPanel('sponsorhub')">
           <span class="tile-arrow">&#8594;</span>
@@ -2061,6 +2069,141 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div id="trialists-list"></div>
     </div>
 
+    <style>
+    /* ── Sponsor Radar ── */
+    #panel-radar .rdr-setup{font-family:var(--fb);font-size:12px;color:var(--gr);margin-bottom:12px;line-height:1.5}
+    #panel-radar .rdr-setup b{color:var(--w)} #panel-radar .rdr-setup .ok{color:var(--su)} #panel-radar .rdr-setup .no{color:var(--wa,#e8a33d)}
+    .rdr-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px}
+    .rdr-field{display:flex;flex-direction:column;gap:4px} .rdr-field.rdr-grow{flex:1;min-width:160px}
+    .rdr-field label{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr)}
+    .rdr-field select,.rdr-field input{background:var(--c);border:1px solid var(--br);color:var(--w);border-radius:8px;padding:9px 11px;font-family:var(--fc);font-size:14px;min-height:40px}
+    .rdr-field select:focus,.rdr-field input:focus{outline:none;border-color:var(--y)}
+    .rdr-chk{display:inline-flex;align-items:center;gap:7px;font-family:var(--fc);font-size:13px;color:var(--w);padding:9px 0}
+    .rdr-chk input{width:16px;height:16px;accent-color:var(--y)}
+    .rdr-refresh{background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.4);color:var(--y);border-radius:8px;padding:9px 14px;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;min-height:40px;white-space:nowrap}
+    .rdr-refresh:hover{background:rgba(255,209,0,.18)} .rdr-refresh:disabled{opacity:.5;cursor:default}
+    .rdr-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .rdr-cat{background:var(--c);border:1px solid var(--br);color:var(--gr);border-radius:999px;padding:6px 13px;font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:.02em;cursor:pointer;transition:.12s}
+    .rdr-cat.on{background:var(--y);border-color:var(--y);color:#0d0d0d}
+    .rdr-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+    .rdr-kpi{background:var(--c);border:1px solid var(--br);border-radius:12px;padding:14px 16px}
+    .rdr-kpi.hot{border-color:rgba(255,209,0,.5);background:rgba(255,209,0,.05)}
+    .rdr-kpi .n{font-family:var(--fd);font-size:34px;line-height:1;color:var(--w);letter-spacing:.02em}
+    .rdr-kpi.hot .n{color:var(--y)}
+    .rdr-kpi .l{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);margin-top:6px}
+    .rdr-map-wrap{position:relative;border:1px solid var(--br);border-radius:12px;overflow:hidden;margin-bottom:14px}
+    #rdr-map{height:400px;width:100%;background:var(--dk)}
+    #rdr-map .leaflet-tile{filter:grayscale(.4) brightness(.85) contrast(1.05)}
+    .rdr-map-attr{position:absolute;bottom:0;left:0;z-index:500;background:rgba(8,8,8,.7);color:var(--gr);font-family:var(--fb);font-size:10px;padding:2px 8px;border-top-right-radius:6px}
+    .rdr-marker{border-radius:50%;border:2px solid #0d0d0d;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+    .rdr-table-wrap{border:1px solid var(--br);border-radius:12px;overflow:auto;max-height:560px}
+    .rdr-table{width:100%;border-collapse:collapse;font-family:var(--fc)}
+    .rdr-table thead th{position:sticky;top:0;background:var(--c2);z-index:2;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);text-align:center;padding:11px 8px;border-bottom:1px solid var(--br);white-space:nowrap}
+    .rdr-table th.l{text-align:left;padding-left:14px} .rdr-table th.rdr-sort{cursor:pointer} .rdr-table th.rdr-sort:hover{color:var(--y)}
+    .rdr-table tbody td{padding:0;height:50px;text-align:center;border-bottom:1px solid var(--br);font-size:14px;color:var(--w)}
+    .rdr-table tbody tr{cursor:pointer} .rdr-table tbody tr:hover td{background:rgba(255,255,255,.03)}
+    .rdr-table td.l{text-align:left;padding-left:14px}
+    .rdr-bname{font-family:var(--fc);font-weight:600;font-size:15px;color:var(--w)}
+    .rdr-baddr{font-family:var(--fb);font-size:11.5px;color:var(--gr)}
+    .rdr-fit{display:inline-block;min-width:38px;font-family:var(--fd);font-size:20px;border-radius:7px;padding:2px 8px}
+    .rdr-fit.hi{color:#0d0d0d;background:var(--y)} .rdr-fit.mid{color:var(--y);background:rgba(255,209,0,.14)} .rdr-fit.lo{color:var(--gr);background:rgba(255,255,255,.05)}
+    .rdr-tag{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--gr);background:var(--c);border:1px solid var(--br);border-radius:6px;padding:3px 8px}
+    .rdr-cico{display:inline-flex;gap:6px;color:var(--gr)} .rdr-cico .on{color:var(--su)}
+    .rdr-pill{font-family:var(--fc);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+    .rdr-pill.none{color:var(--gr);background:rgba(255,255,255,.05)} .rdr-pill.new{color:var(--y);background:rgba(255,209,0,.12)}
+    .rdr-pill.researching{color:var(--bl);background:rgba(59,130,246,.14)} .rdr-pill.contacted{color:#c084fc;background:rgba(168,85,247,.14)}
+    .rdr-pill.meeting{color:#38bdf8;background:rgba(56,189,248,.14)} .rdr-pill.won{color:var(--su);background:rgba(34,197,94,.14)}
+    .rdr-pill.declined{color:var(--re);background:rgba(239,68,68,.12)} .rdr-pill.dnc{color:var(--re);background:rgba(239,68,68,.12)}
+    .rdr-empty{padding:44px 20px;text-align:center;font-family:var(--fc);color:var(--gr);font-size:14px}
+    /* drawer */
+    .rdr-scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1200;opacity:0;pointer-events:none;transition:.2s}
+    .rdr-scrim.on{opacity:1;pointer-events:auto}
+    .rdr-drawer{position:fixed;top:0;right:0;height:100%;width:460px;max-width:94vw;background:var(--dk);border-left:1px solid var(--br);z-index:1201;transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-20px 0 50px rgba(0,0,0,.5)}
+    .rdr-drawer.on{transform:translateX(0)}
+    .rdr-dr-hd{position:sticky;top:0;background:var(--dk);border-bottom:1px solid var(--br);padding:18px 20px;z-index:3}
+    .rdr-dr-x{position:absolute;top:16px;right:16px;background:var(--c);border:1px solid var(--br);color:var(--w);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px}
+    .rdr-dr-name{font-family:var(--fd);font-size:30px;line-height:1;color:var(--w);letter-spacing:.02em;padding-right:40px}
+    .rdr-dr-sub{font-family:var(--fc);font-size:13px;color:var(--gr);margin-top:6px}
+    .rdr-dr-body{padding:18px 20px 40px}
+    .rdr-sec{margin-bottom:20px} .rdr-sec-h{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin-bottom:9px;display:flex;align-items:center;gap:8px}
+    .rdr-src{font-family:var(--fb);font-size:10px;color:var(--gr);font-weight:400;letter-spacing:.02em;text-transform:none}
+    .rdr-kv{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-family:var(--fb);font-size:13.5px}
+    .rdr-kv .k{color:var(--gr);flex:0 0 120px} .rdr-kv .v{color:var(--w);flex:1}
+    .rdr-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 4px}
+    .rdr-act{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--c);border:1px solid var(--br);color:var(--w);border-radius:9px;padding:11px;font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.03em;text-decoration:none;cursor:pointer}
+    .rdr-act:hover{border-color:var(--y);color:var(--y)} .rdr-act.pri{background:var(--y);color:#0d0d0d;border-color:var(--y)} .rdr-act.pri:hover{color:#0d0d0d;filter:brightness(1.05)}
+    .rdr-act.dis{opacity:.4;pointer-events:none}
+    .rdr-fitbar{height:8px;border-radius:4px;background:var(--c);overflow:hidden;margin:2px 0 10px} .rdr-fitbar i{display:block;height:100%;background:var(--y);border-radius:4px}
+    .rdr-reason{display:flex;justify-content:space-between;font-family:var(--fb);font-size:12.5px;color:var(--w);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .rdr-reason .p{font-family:var(--fd);color:var(--y);font-size:15px} .rdr-reason .nt{color:var(--gr);font-size:11.5px}
+    .rdr-brief{background:var(--c);border:1px solid var(--br);border-radius:10px;padding:12px;font-family:var(--fb);font-size:13.5px;color:var(--w);line-height:1.6;white-space:pre-wrap;min-height:80px;width:100%}
+    .rdr-ch-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--fc);font-weight:700;font-size:11px;letter-spacing:.04em;border-radius:6px;padding:3px 9px}
+    .rdr-ch-badge.ok{color:var(--su);background:rgba(34,197,94,.12)} .rdr-ch-badge.no{color:var(--wa,#e8a33d);background:rgba(232,163,61,.12)}
+    .rdr-note-in{width:100%;background:var(--c);border:1px solid var(--br);color:var(--w);border-radius:8px;padding:9px;font-family:var(--fb);font-size:13px;min-height:38px}
+    .rdr-note{font-family:var(--fb);font-size:12.5px;color:var(--w);padding:8px 10px;background:var(--c);border-radius:8px;margin-bottom:6px} .rdr-note .t{color:var(--gr);font-size:10.5px;margin-bottom:3px}
+    @media(max-width:760px){ .rdr-kpis{grid-template-columns:1fr 1fr} #rdr-map{height:300px} .rdr-table th:nth-child(3),.rdr-table td:nth-child(3){display:none} }
+    </style>
+    <!-- SPONSOR RADAR — local business intelligence + one-click outreach -->
+    <div class="panel" id="panel-radar">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-target"></i> Sponsor Radar</div></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Real local businesses near <strong style="color:var(--w)">Tithe Farm</strong>, from OpenStreetMap. Pick a radius, filter, and open a business for its public record, a fit score, an AI brief, and one-click contact. <strong style="color:var(--w)">A research aid — every contact is you, in your own email/phone. Nothing is invented; everything shows its source.</strong></p></div>
+      <div id="rdr-setup" class="rdr-setup"></div>
+
+      <!-- filter bar -->
+      <div class="rdr-bar">
+        <div class="rdr-field"><label>Radius</label>
+          <select id="rdr-radius" onchange="rdrSetRadius(this.value)">
+            <option value="1">1 mile</option><option value="3" selected>3 miles</option><option value="5">5 miles</option><option value="10">10 miles</option>
+          </select>
+        </div>
+        <div class="rdr-field rdr-grow"><label>Search</label><input id="rdr-search" type="text" placeholder="Name or category…" oninput="rdrFilter()"></div>
+        <div class="rdr-field"><label>Min fit</label>
+          <select id="rdr-minfit" onchange="rdrFilter()"><option value="0">All</option><option value="50">50+</option><option value="65">65+</option><option value="80">80+</option></select>
+        </div>
+        <div class="rdr-field"><label>Status</label>
+          <select id="rdr-status" onchange="rdrFilter()">
+            <option value="all">All</option><option value="none">Not approached</option><option value="saved">Saved / in pipeline</option>
+            <option value="contacted">Contacted</option><option value="meeting">Meeting</option><option value="won">Won</option><option value="declined">Declined</option>
+          </select>
+        </div>
+        <div class="rdr-field"><label>Sort</label>
+          <select id="rdr-sort" onchange="rdrFilter()"><option value="fit">Best fit</option><option value="distance">Closest</option><option value="name">A&ndash;Z</option></select>
+        </div>
+        <label class="rdr-chk"><input type="checkbox" id="rdr-reach" onchange="rdrFilter()"> Reachable only</label>
+        <label class="rdr-chk"><input type="checkbox" id="rdr-dnc" checked onchange="rdrFilter()"> Hide &ldquo;do not contact&rdquo;</label>
+        <button class="rdr-refresh" id="rdr-refresh" onclick="rdrDiscover(true)"><i class="ico ico-rotate-cw"></i> Refresh from OpenStreetMap</button>
+      </div>
+      <div class="rdr-cats" id="rdr-cats"></div>
+
+      <!-- KPI strip -->
+      <div class="rdr-kpis" id="rdr-kpis"></div>
+
+      <!-- map -->
+      <div class="rdr-map-wrap"><div id="rdr-map"></div>
+        <div class="rdr-map-attr">Businesses &amp; map &copy; OpenStreetMap contributors</div>
+      </div>
+
+      <!-- table -->
+      <div class="rdr-table-wrap">
+        <table class="rdr-table" id="rdr-table">
+          <thead><tr>
+            <th class="rdr-sort" data-k="fit_score" onclick="rdrSortBy('fit_score')">Fit</th>
+            <th class="l">Business</th>
+            <th>Type</th>
+            <th class="rdr-sort" data-k="distance_miles" onclick="rdrSortBy('distance_miles')">Dist</th>
+            <th>Contact</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="rdr-tbody"></tbody>
+        </table>
+        <div id="rdr-empty" class="rdr-empty" style="display:none"></div>
+      </div>
+
+      <!-- profile drawer -->
+      <div class="rdr-scrim" id="rdr-scrim" onclick="rdrClose()"></div>
+      <aside class="rdr-drawer" id="rdr-drawer"><div class="rdr-drawer-in" id="rdr-drawer-in"></div></aside>
+    </div>
+
     <div class="panel" id="panel-sponsorhub">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-briefcase"></i> Sponsor Hub</div></div>
       <div class="snote" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06)"><p>Your commercial pipeline. Businesses apply on the <strong style="color:var(--w)">Sponsorships page</strong>; they land here. Track each one from enquiry → quote → paid, build a quote with your bank details, and confirm payment.</p></div>
@@ -2078,6 +2221,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="div"></div>
       <div class="slbl">Applications <button onclick="loadSponsorHub()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh <i class="ico ico-rotate-cw"></i></button></div>
+      <div id="sh-radar" style="margin-bottom:16px"></div>
       <div id="sh-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap Refresh to load applications.</div></div>
       <button class="save" style="margin-top:12px" onclick="saveSponsorCrm()">&#10003; Save Pipeline to Site</button>
       <div class="dep" id="dep-sponsorcrm"></div>
@@ -3292,6 +3436,7 @@ function openPanel(name) {
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); loadLiveAttendance(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
+  if (name === 'radar')      rdrInit();
   if (name === 'trialists')  loadLeads();
   if (name === 'poststudio') loadPostStudio();
   if (name === 'monthlyfix') mfInit();
@@ -5653,7 +5798,7 @@ async function loadSponsorHub() {
   // pipeline (status/amount/notes) from the repo
   await new Promise(function (res) { fetchJSON('sponsor-crm', function (d) { sponsorCrm = (d && d.deals) || {}; res(); }); });
   var el = document.getElementById('sh-list');
-  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading applications…</div>';
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Loading applications…</div>'; shLoadRadar();
   try {
     var r = await fetch('/.netlify/functions/list-sponsors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
     var d = await r.json();
@@ -5667,6 +5812,24 @@ async function loadSponsorHub() {
   } catch (e) {
     el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server.</div>';
   }
+}
+function shLoadRadar() {
+  var host = document.getElementById('sh-radar'); if (!host) return;
+  fetch('/.netlify/functions/radar-state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'get' }) })
+    .then(function (r) { return r.json(); }).then(function (j) {
+      var st = (j && j.state) || {};
+      var rows = Object.keys(st).map(function (k) { return st[k]; }).filter(function (b) { return b.pipeline && b.pipeline.status; })
+        .sort(function (a, b) { return (b.fit_score || 0) - (a.fit_score || 0); });
+      if (!rows.length) { host.innerHTML = ''; return; }
+      host.innerHTML = '<div class="slbl" style="display:flex;justify-content:space-between;align-items:center"><span><i class="ico ico-target"></i> From Sponsor Radar <span style="color:var(--gr);font-weight:400">&mdash; prospects you added</span></span>' +
+        '<button onclick="openPanel(\'radar\')" style="background:none;border:1px solid var(--br);color:var(--y);border-radius:7px;padding:5px 10px;font-family:var(--fc);font-size:11px;font-weight:700;cursor:pointer">Open Radar &rarr;</button></div>' +
+        rows.map(function (b) {
+          var stt = b.pipeline.status;
+          return '<div class="li"><div class="li-main"><div class="li-name">' + escH(b.name) + ' <span class="rdr-pill ' + stt + '" style="margin-left:6px">' + stt + '</span></div>' +
+            '<div class="li-sub">' + escH(b.category_label || '') + (b.distance_miles != null ? ' &middot; ' + b.distance_miles.toFixed(1) + ' mi' : '') + (b.fit_score ? ' &middot; fit ' + b.fit_score : '') + (b.pipeline.next_action ? ' &middot; next: ' + escH(b.pipeline.next_action) : '') + '</div></div>' +
+            (b.email ? '<a class="li-del" style="border-color:var(--br);color:var(--y)" href="mailto:' + escH(b.email) + '">Email</a>' : '') + '</div>';
+        }).join('');
+    }).catch(function () { host.innerHTML = ''; });
 }
 function renderSponsorHub() {
   var el = document.getElementById('sh-list');
@@ -5726,6 +5889,328 @@ function saveSponsorCrm() {
   pushToGitHub('sponsor-crm', { deals: sponsorCrm, updatedAt: new Date().toISOString() }, 'dep-sponsorcrm');
   toast('Pipeline saved');
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  SPONSOR RADAR — local business intelligence + one-click outreach.
+//  Discovery (OpenStreetMap) + Companies House + AI brief, all server-side and
+//  PIN-gated. Filtering/sorting is client-side and instant. Every datum is
+//  sourced; nothing is invented; outreach opens the staffer's own tools.
+// ══════════════════════════════════════════════════════════════════════════
+var rdrAll = [], rdrView = [], rdrState = {}, rdrMap = null, rdrLayer = null, rdrRings = [];
+var rdrCapped = false, rdrCachedAt = '', rdrLoaded = false, rdrChKey = null, rdrAiKey = null;
+var RDR_CATS = ['hospitality', 'trades', 'automotive', 'professional', 'fitness', 'health', 'retail', 'other'];
+var RDR_CATLBL = { hospitality: 'Hospitality', trades: 'Trades & crafts', automotive: 'Motor trade', professional: 'Professional', fitness: 'Gym / fitness', health: 'Health', retail: 'Local retail', other: 'Other' };
+var rdrCatOn = {}; RDR_CATS.forEach(function (c) { rdrCatOn[c] = true; });
+var RDR_TITHE = [51.5704, -0.3651];
+
+function rdrPost(fn, body) {
+  return fetch('/.netlify/functions/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ pin: PIN }, body)) }).then(function (r) { return r.json(); });
+}
+function rdrEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function rdrInit() {
+  // category chips
+  document.getElementById('rdr-cats').innerHTML = RDR_CATS.map(function (c) {
+    return '<button class="rdr-cat on" data-c="' + c + '" onclick="rdrToggleCat(\'' + c + '\')">' + rdrEsc(RDR_CATLBL[c]) + '</button>';
+  }).join('');
+  rdrSetupLine();
+  if (!rdrLoaded) { rdrLoaded = true; rdrLoadState().then(function () { rdrDiscover(false); }); }
+  else { setTimeout(function () { if (rdrMap) rdrMap.invalidateSize(); }, 60); }
+}
+function rdrSetupLine() {
+  var el = document.getElementById('rdr-setup'); if (!el) return;
+  var ch = rdrChKey === false ? '<span class="no">add COMPANIES_HOUSE_API_KEY to enable</span>' : rdrChKey === true ? '<span class="ok">live</span>' : 'enriches on open';
+  var ai = rdrAiKey === false ? '<span class="no">add GEMINI_API_KEY to enable</span>' : rdrAiKey === true ? '<span class="ok">live</span>' : 'on demand';
+  el.innerHTML = 'Sources — <b>OpenStreetMap</b> <span class="ok">live</span> &middot; <b>Companies House</b> ' + ch + ' &middot; <b>AI brief</b> ' + ai +
+    (rdrCachedAt ? ' &middot; refreshed ' + rdrAgo(rdrCachedAt) : '');
+}
+function rdrAgo(iso) {
+  var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 90) return 'just now'; if (s < 3600) return Math.round(s / 60) + 'm ago';
+  if (s < 86400) return Math.round(s / 3600) + 'h ago'; return Math.round(s / 86400) + 'd ago';
+}
+function rdrLoadState() {
+  return rdrPost('radar-state', { action: 'get' }).then(function (j) { rdrState = (j && j.state) || {}; }).catch(function () { rdrState = {}; });
+}
+function rdrSetRadius() { rdrDiscover(false); }
+function rdrDiscover(refresh) {
+  var radius = +document.getElementById('rdr-radius').value || 3;
+  var btn = document.getElementById('rdr-refresh'); if (btn) { btn.disabled = true; }
+  document.getElementById('rdr-empty').style.display = 'block';
+  document.getElementById('rdr-empty').textContent = refresh ? 'Querying OpenStreetMap…' : 'Loading businesses…';
+  document.getElementById('rdr-tbody').innerHTML = '';
+  rdrPost('radar-discover', { radius: radius, refresh: !!refresh }).then(function (j) {
+    if (btn) btn.disabled = false;
+    if (!j || !j.ok) { document.getElementById('rdr-empty').textContent = 'Could not load businesses' + (j && j.error ? ' (' + j.error + ')' : '') + '.'; return; }
+    rdrAll = j.businesses || []; rdrCapped = !!j.capped; rdrCachedAt = j.cachedAt || '';
+    rdrMerge(); rdrSetupLine(); rdrFilter();
+  }).catch(function () { if (btn) btn.disabled = false; document.getElementById('rdr-empty').textContent = 'Network error loading businesses.'; });
+}
+// overlay saved state (do-not-contact, pipeline, brief) onto discovered records
+function rdrMerge() {
+  rdrAll.forEach(function (b) {
+    var st = rdrState[b.id];
+    b._dnc = !!(st && st.do_not_contact);
+    b._pipe = st && st.pipeline ? st.pipeline.status : '';
+    b._brief = st && st.brief ? st.brief : '';
+    b._ch = st && st.ch ? st.ch : null;
+    b._notes = (st && st.notes) || [];
+  });
+}
+function rdrToggleCat(c) { rdrCatOn[c] = !rdrCatOn[c]; var el = document.querySelector('.rdr-cat[data-c="' + c + '"]'); if (el) el.classList.toggle('on', rdrCatOn[c]); rdrFilter(); }
+function rdrSortBy(k) { document.getElementById('rdr-sort').value = (k === 'distance_miles' ? 'distance' : 'fit'); rdrFilter(); }
+
+function rdrFilter() {
+  var q = (document.getElementById('rdr-search').value || '').toLowerCase().trim();
+  var minFit = +document.getElementById('rdr-minfit').value || 0;
+  var status = document.getElementById('rdr-status').value;
+  var reach = document.getElementById('rdr-reach').checked;
+  var hideDnc = document.getElementById('rdr-dnc').checked;
+  var sort = document.getElementById('rdr-sort').value;
+
+  rdrView = rdrAll.filter(function (b) {
+    if (!rdrCatOn[b.category]) return false;
+    if (b.fit_score < minFit) return false;
+    if (reach && !(b.phone || b.email || b.website)) return false;
+    if (hideDnc && b._dnc) return false;
+    if (q && (b.name + ' ' + b.category_label + ' ' + (b.address || '')).toLowerCase().indexOf(q) === -1) return false;
+    if (status !== 'all') {
+      if (status === 'none') { if (b._pipe || b._dnc) return false; }
+      else if (status === 'saved') { if (!b._pipe) return false; }
+      else { if (b._pipe !== status) return false; }
+    }
+    return true;
+  });
+  rdrView.sort(function (a, b) {
+    if (sort === 'distance') return a.distance_miles - b.distance_miles;
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    return b.fit_score - a.fit_score || a.distance_miles - b.distance_miles;
+  });
+  rdrRenderKpis(); rdrRenderMap(); rdrRenderTable();
+}
+
+function rdrRenderKpis() {
+  var total = rdrAll.filter(function (b) { return !document.getElementById('rdr-dnc').checked || !b._dnc; }).length;
+  var inPipe = rdrAll.filter(function (b) { return b._pipe; }).length;
+  var contacted = rdrAll.filter(function (b) { return ['contacted', 'meeting', 'won'].indexOf(b._pipe) > -1; }).length;
+  var hotUntapped = rdrAll.filter(function (b) { return b.fit_score >= 70 && !b._pipe && !b._dnc && (b.phone || b.email || b.website); }).length;
+  document.getElementById('rdr-kpis').innerHTML =
+    '<div class="rdr-kpi"><div class="n">' + rdrView.length + '</div><div class="l">Shown / ' + total + ' found</div></div>' +
+    '<div class="rdr-kpi"><div class="n">' + contacted + '</div><div class="l">Contacted</div></div>' +
+    '<div class="rdr-kpi"><div class="n">' + inPipe + '</div><div class="l">In pipeline</div></div>' +
+    '<div class="rdr-kpi hot"><div class="n">' + hotUntapped + '</div><div class="l">High-fit, not approached</div></div>';
+}
+
+function rdrMarkerColor(b) {
+  if (b._dnc) return '#EF4444';
+  if (b._pipe === 'won') return '#22C55E'; if (b._pipe === 'declined') return '#EF4444';
+  if (b._pipe === 'contacted' || b._pipe === 'meeting') return '#A855F7';
+  if (b._pipe) return '#3B82F6';
+  return b.fit_score >= 70 ? '#FFD100' : b.fit_score >= 50 ? '#C9A200' : '#777';
+}
+function rdrRenderMap() {
+  if (!window.L) return;
+  if (!rdrMap) {
+    rdrMap = L.map('rdr-map', { scrollWheelZoom: true, attributionControl: false }).setView(RDR_TITHE, 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(rdrMap);
+    L.circleMarker(RDR_TITHE, { radius: 8, color: '#1A5C32', fillColor: '#FFD100', fillOpacity: 1, weight: 3 }).addTo(rdrMap).bindTooltip('Tithe Farm — Rayners Lane FC', { direction: 'top' });
+    rdrLayer = L.layerGroup().addTo(rdrMap);
+  }
+  rdrLayer.clearLayers();
+  rdrRings.forEach(function (r) { rdrMap.removeLayer(r); }); rdrRings = [];
+  var radius = +document.getElementById('rdr-radius').value || 3;
+  [1, 3, 5, 10].filter(function (m) { return m <= radius; }).forEach(function (m) {
+    rdrRings.push(L.circle(RDR_TITHE, { radius: m * 1609.34, color: '#FFD100', weight: 1, opacity: .18, fill: false }).addTo(rdrMap));
+  });
+  rdrView.slice(0, 600).forEach(function (b) {
+    var col = rdrMarkerColor(b);
+    L.circleMarker([b.lat, b.lng], { radius: b.fit_score >= 70 ? 8 : 6, color: '#0d0d0d', weight: 1.5, fillColor: col, fillOpacity: .95 })
+      .addTo(rdrLayer)
+      .bindTooltip(rdrEsc(b.name) + ' · fit ' + b.fit_score, { direction: 'top' })
+      .on('click', function () { rdrOpen(b.id); });
+  });
+  try { rdrMap.setView(RDR_TITHE, radius <= 1 ? 15 : radius <= 3 ? 14 : radius <= 5 ? 13 : 12); } catch (e) {}
+  setTimeout(function () { rdrMap.invalidateSize(); }, 40);
+}
+
+function rdrFitClass(s) { return s >= 70 ? 'hi' : s >= 50 ? 'mid' : 'lo'; }
+function rdrRenderTable() {
+  var e = document.getElementById('rdr-empty');
+  if (!rdrView.length) { document.getElementById('rdr-tbody').innerHTML = ''; e.style.display = 'block'; e.textContent = rdrAll.length ? 'No businesses match these filters.' : 'No businesses loaded yet.'; return; }
+  e.style.display = 'none';
+  document.getElementById('rdr-tbody').innerHTML = rdrView.slice(0, 400).map(function (b) {
+    var cico = '<span class="rdr-cico">' + (b.phone ? '<i class="ico ico-phone on" title="phone"></i>' : '') + (b.email ? '<i class="ico ico-mail on" title="email"></i>' : '') + (b.website ? '<i class="ico ico-globe on" title="website"></i>' : '') + (!b.phone && !b.email && !b.website ? '<span style="color:#555">—</span>' : '') + '</span>';
+    var pill = b._dnc ? '<span class="rdr-pill dnc">Do not contact</span>' : b._pipe ? '<span class="rdr-pill ' + b._pipe + '">' + b._pipe + '</span>' : '<span class="rdr-pill none">New</span>';
+    return '<tr onclick="rdrOpen(\'' + b.id + '\')">' +
+      '<td><span class="rdr-fit ' + rdrFitClass(b.fit_score) + '">' + b.fit_score + '</span></td>' +
+      '<td class="l"><div class="rdr-bname">' + rdrEsc(b.name) + '</div>' + (b.address ? '<div class="rdr-baddr">' + rdrEsc(b.address) + '</div>' : '') + '</td>' +
+      '<td><span class="rdr-tag">' + rdrEsc(b.category_label) + '</span></td>' +
+      '<td>' + b.distance_miles.toFixed(1) + '<span style="color:#666;font-size:11px"> mi</span></td>' +
+      '<td>' + cico + '</td>' +
+      '<td>' + pill + '</td></tr>';
+  }).join('') + (rdrView.length > 400 ? '<tr><td colspan="6" style="color:#666;font-family:var(--fb);font-size:12px;padding:12px">Showing top 400 of ' + rdrView.length + ' — narrow the filters to see the rest.</td></tr>' : '');
+}
+
+// ── Profile drawer ────────────────────────────────────────────────────────
+function rdrBiz(id) { return rdrAll.filter(function (b) { return b.id === id; })[0]; }
+function rdrClose() { document.getElementById('rdr-drawer').classList.remove('on'); document.getElementById('rdr-scrim').classList.remove('on'); rdrOpenId = null; }
+function rdrOpen(id) {
+  var b = rdrBiz(id); if (!b) return; rdrOpenId = id;
+  document.getElementById('rdr-drawer').classList.add('on');
+  document.getElementById('rdr-scrim').classList.add('on');
+  document.getElementById('rdr-drawer').scrollTop = 0;
+  rdrDrawer(b);
+  if (!b.address) rdrGeocode(b);
+  rdrEnrich(b);
+}
+function rdrDirLink(b) { return 'https://www.google.com/maps/dir/?api=1&destination=' + b.lat + ',' + b.lng; }
+function rdrWebLink(b) { var w = b.website || ''; return /^https?:/i.test(w) ? w : (w ? 'https://' + w : ''); }
+function rdrMailto(b) {
+  var subj = 'Rayners Lane FC — local sponsorship';
+  var approach = '';
+  if (b._brief) { var m = b._brief.match(/APPROACH[:\s]*([^\n]+)/i); if (m) approach = m[1].trim(); }
+  var body = 'Hello,\n\nI\'m writing from Rayners Lane FC, a community football club based just up the road at Tithe Farm in Rayners Lane. '
+    + (approach ? approach + '\n\n' : 'We\'re a friendly Step 5 non-league club and we work with local businesses on affordable sponsorship — a pitchside board, a matchday, a shout-out to our supporters.\n\n')
+    + 'Would you be open to a quick chat about backing the club this season?\n\nMany thanks,\nRayners Lane FC\ninfo@raynerslanefc.co.uk';
+  return 'mailto:' + b.email + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+}
+function rdrDrawer(b) {
+  var reasons = (b.fit_reasons || []).map(function (r) {
+    return '<div class="rdr-reason"><span>' + rdrEsc(r.label) + ' <span class="nt">' + rdrEsc(r.note) + '</span></span><span class="p">+' + r.pts + '</span></div>';
+  }).join('');
+  var acts =
+    '<a class="rdr-act pri' + (b.email ? '' : ' dis') + '" ' + (b.email ? 'href="' + rdrMailto(b) + '"' : '') + '><i class="ico ico-mail"></i> Email</a>' +
+    '<a class="rdr-act' + (b.phone ? '' : ' dis') + '" ' + (b.phone ? 'href="tel:' + rdrEsc(b.phone) + '"' : '') + '><i class="ico ico-phone"></i> Call</a>' +
+    '<a class="rdr-act" href="' + rdrDirLink(b) + '" target="_blank" rel="noopener"><i class="ico ico-map-pin"></i> Directions</a>' +
+    '<a class="rdr-act' + (b.website ? '' : ' dis') + '" ' + (b.website ? 'href="' + rdrEsc(rdrWebLink(b)) + '" target="_blank" rel="noopener"' : '') + '><i class="ico ico-globe"></i> Website</a>';
+  var pipeOpts = ['new', 'researching', 'contacted', 'meeting', 'won', 'declined'].map(function (s) { return '<option value="' + s + '"' + (b._pipe === s ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+  var notes = (b._notes || []).map(function (n) { return '<div class="rdr-note"><div class="t">' + rdrAgo(n.at) + ' · ' + rdrEsc(n.by) + '</div>' + rdrEsc(n.text) + '</div>'; }).join('');
+
+  document.getElementById('rdr-drawer-in').innerHTML =
+    '<div class="rdr-dr-hd"><button class="rdr-dr-x" onclick="rdrClose()">&times;</button>' +
+      '<div class="rdr-dr-name">' + rdrEsc(b.name) + '</div>' +
+      '<div class="rdr-dr-sub">' + rdrEsc(b.category_label) + ' &middot; ' + b.distance_miles.toFixed(1) + ' mi from Tithe Farm' + (b._dnc ? ' &middot; <span style="color:var(--re)">DO NOT CONTACT</span>' : '') + '</div>' +
+    '</div>' +
+    '<div class="rdr-dr-body">' +
+      '<div class="rdr-sec"><div class="rdr-acts">' + acts + '</div></div>' +
+
+      '<div class="rdr-sec"><div class="rdr-sec-h">Fit score <span class="rdr-src">— from real signals only</span></div>' +
+        '<div style="font-family:var(--fd);font-size:40px;color:var(--y);line-height:1">' + b.fit_score + '<span style="font-size:16px;color:var(--gr)"> / 100</span></div>' +
+        '<div class="rdr-fitbar"><i style="width:' + b.fit_score + '%"></i></div>' + reasons +
+        '<div class="rdr-reason" id="rdr-chreason" style="color:var(--gr)"><span>Company standing <span class="nt">pending Companies House…</span></span><span class="p">?</span></div>' +
+      '</div>' +
+
+      '<div class="rdr-sec"><div class="rdr-sec-h">Details <span class="rdr-src">— © OpenStreetMap</span></div>' +
+        '<div id="rdr-addr" class="rdr-kv"><span class="k">Address</span><span class="v">' + (b.address ? rdrEsc(b.address) : '<span style="color:var(--gr)">looking up…</span>') + '</span></div>' +
+        (b.opening_hours ? '<div class="rdr-kv"><span class="k">Hours</span><span class="v">' + rdrEsc(b.opening_hours) + '</span></div>' : '') +
+        (b.phone ? '<div class="rdr-kv"><span class="k">Phone</span><span class="v">' + rdrEsc(b.phone) + '</span></div>' : '') +
+        (b.email ? '<div class="rdr-kv"><span class="k">Email</span><span class="v">' + rdrEsc(b.email) + '</span></div>' : '') +
+        (b.website ? '<div class="rdr-kv"><span class="k">Website</span><span class="v">' + rdrEsc(b.website) + '</span></div>' : '') +
+        '<div class="rdr-kv"><span class="k">On OSM</span><span class="v"><a href="' + b.osm_url + '" target="_blank" rel="noopener" style="color:var(--y)">view map record →</a></span></div>' +
+      '</div>' +
+
+      '<div class="rdr-sec" id="rdr-ch"><div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div>' +
+        '<div style="color:var(--gr);font-family:var(--fb);font-size:13px">Checking Companies House…</div></div>' +
+
+      '<div class="rdr-sec"><div class="rdr-sec-h">Sponsor brief <span class="rdr-src">— AI, from the facts above</span></div>' +
+        '<textarea class="rdr-brief" id="rdr-brief-t" placeholder="Generate a grounded brief, then edit freely…">' + rdrEsc(b._brief) + '</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:8px">' +
+          '<button class="rdr-act pri" style="flex:1" onclick="rdrGenBrief(\'' + b.id + '\')"><i class="ico ico-sparkles"></i> ' + (b._brief ? 'Regenerate' : 'Generate brief') + '</button>' +
+          '<button class="rdr-act" style="flex:0 0 auto" onclick="rdrSaveBrief(\'' + b.id + '\')">Save</button>' +
+        '</div><div id="rdr-brief-note" style="font-family:var(--fb);font-size:11.5px;color:var(--gr);margin-top:6px"></div>' +
+      '</div>' +
+
+      '<div class="rdr-sec"><div class="rdr-sec-h">Pipeline</div>' +
+        '<div class="rdr-acts" style="grid-template-columns:1fr 1fr">' +
+          '<div class="rdr-field"><label>Status</label><select onchange="rdrSetPipe(\'' + b.id + '\',this.value)"><option value="">Not in pipeline</option>' + pipeOpts + '</select></div>' +
+          '<div class="rdr-field"><label>Next action</label><input id="rdr-next" type="text" value="' + rdrEsc(b._pipeNext || '') + '" placeholder="e.g. call Mon" onchange="rdrSetNext(\'' + b.id + '\',this.value)"></div>' +
+        '</div>' +
+        '<label class="rdr-chk" style="margin-top:6px"><input type="checkbox"' + (b._dnc ? ' checked' : '') + ' onchange="rdrToggleDNC(\'' + b.id + '\',this.checked)"> Mark &ldquo;do not contact&rdquo; (honour their wish / GDPR)</label>' +
+        '<div style="margin-top:10px"><input class="rdr-note-in" id="rdr-note-in" type="text" placeholder="Add a note…" onkeydown="if(event.key===\'Enter\')rdrAddNote(\'' + b.id + '\')"></div>' +
+        '<div style="margin-top:8px" id="rdr-notes">' + notes + '</div>' +
+      '</div>' +
+
+    '</div>';
+}
+
+function rdrGeocode(b) {
+  rdrPost('radar-geocode', { lat: b.lat, lng: b.lng }).then(function (j) {
+    if (j && j.ok && j.address) {
+      b.address = j.address; if (j.postcode) b.postcode = j.postcode;
+      var el = document.getElementById('rdr-addr'); if (el && rdrOpenId === b.id) el.querySelector('.v').textContent = j.address;
+    } else { var el2 = document.getElementById('rdr-addr'); if (el2 && rdrOpenId === b.id) el2.querySelector('.v').innerHTML = '<span style="color:var(--gr)">not published</span>'; }
+  });
+}
+function rdrEnrich(b) {
+  var box = document.getElementById('rdr-ch');
+  var render = function (ch) {
+    if (rdrOpenId !== b.id || !box) return;
+    if (!ch || (ch.ok === false && ch.error === 'no-ch-key')) { rdrChKey = false; rdrSetupLine(); box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><div style="color:var(--gr);font-family:var(--fb);font-size:12.5px">Not configured. Add a free <b style="color:var(--w)">COMPANIES_HOUSE_API_KEY</b> in Netlify to show registration, status and directors.</div>'; return; }
+    rdrChKey = true;
+    if (ch.ok === false) { box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><div style="color:var(--gr);font-family:var(--fb);font-size:12.5px">' + rdrEsc(ch.note || ch.error || 'unavailable') + '</div>'; return; }
+    if (!ch.match) { box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><span class="rdr-ch-badge no"><i class="ico ico-info"></i> No confident match</span><div style="color:var(--gr);font-family:var(--fb);font-size:12px;margin-top:8px">Likely a sole trader / unregistered — or trades under a different name.</div>'; return; }
+    var dirs = (ch.directors || []).map(function (d) { return '<div class="rdr-kv"><span class="k">' + rdrEsc(d.role) + '</span><span class="v">' + rdrEsc(d.name) + (d.appointed ? ' <span style="color:var(--gr);font-size:11px">since ' + d.appointed + '</span>' : '') + '</span></div>'; }).join('');
+    box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div>' +
+      '<span class="rdr-ch-badge ' + (ch.active ? 'ok' : 'no') + '">' + (ch.active ? '<i class="ico ico-circle-check"></i> Active' : '<i class="ico ico-triangle-alert"></i> ' + rdrEsc(ch.status)) + '</span> ' +
+      '<span class="rdr-tag" style="margin-left:6px">' + rdrEsc(ch.confidence) + ' match</span>' +
+      '<div class="rdr-kv" style="margin-top:8px"><span class="k">Company</span><span class="v">' + rdrEsc(ch.company_name) + ' (' + rdrEsc(ch.company_number) + ')</span></div>' +
+      (ch.incorporated ? '<div class="rdr-kv"><span class="k">Incorporated</span><span class="v">' + rdrEsc(ch.incorporated) + '</span></div>' : '') +
+      (ch.sic_codes && ch.sic_codes.length ? '<div class="rdr-kv"><span class="k">SIC (industry)</span><span class="v">' + rdrEsc(ch.sic_codes.join(', ')) + '</span></div>' : '') +
+      (ch.registered_office ? '<div class="rdr-kv"><span class="k">Reg. office</span><span class="v">' + rdrEsc(ch.registered_office) + '</span></div>' : '') +
+      (dirs ? '<div style="font-family:var(--fc);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);margin:12px 0 4px">Directors (public record — not a sponsorship contact)</div>' + dirs : '') +
+      '<div class="rdr-kv"><span class="k"></span><span class="v"><a href="' + ch.ch_url + '" target="_blank" rel="noopener" style="color:var(--y)">Companies House page →</a></span></div>';
+    // company standing bumps the fit score (up to +20) — active + established
+    var bump = 0, note = '';
+    if (ch.active) {
+      bump = 12; note = 'Active';
+      if (ch.incorporated) { var yrs = (Date.now() - new Date(ch.incorporated).getTime()) / (365.25 * 864e5); if (yrs >= 3) { bump += 8; note += ', established ' + Math.floor(yrs) + 'y'; } else { bump += 4; note += ', trading ' + Math.max(1, Math.floor(yrs)) + 'y'; } }
+      b.fit_score = Math.min(100, b.fit_score + bump);
+    } else { note = ch.status + ' — not active'; }
+    var cr = document.getElementById('rdr-chreason');
+    if (cr) cr.innerHTML = '<span>Company standing <span class="nt">' + rdrEsc(note) + '</span></span><span class="p">' + (bump ? '+' + bump : '0') + '</span>';
+    b._ch = ch;
+    rdrPost('radar-state', { action: 'upsert', business: b, ch: ch });  // cache CH onto the saved record
+  };
+  if (b._ch) { render(b._ch); return; }
+  rdrPost('radar-enrich', { name: b.name, postcode: b.postcode }).then(function (j) {
+    if (j && j.ok) { j.match = j.match !== false; } render(j);
+  }).catch(function () { render({ ok: false, error: 'network' }); });
+}
+function rdrGenBrief(id) {
+  var b = rdrBiz(id); if (!b) return;
+  var note = document.getElementById('rdr-brief-note'); note.textContent = 'Writing a grounded brief…';
+  var biz = Object.assign({}, b, { ch: b._ch });
+  rdrPost('radar-brief', { business: biz }).then(function (j) {
+    if (j && j.ok && j.brief) { document.getElementById('rdr-brief-t').value = j.brief; rdrAiKey = true; rdrSetupLine(); note.innerHTML = 'Draft ready — <b style="color:var(--w)">edit it</b>, then Save. Grounded in the facts above; check before sending.'; }
+    else if (j && j.error === 'no-key') { rdrAiKey = false; rdrSetupLine(); note.innerHTML = '<span style="color:var(--wa,#e8a33d)">AI not configured. Add GEMINI_API_KEY in Netlify. You can still write a brief by hand.</span>'; }
+    else note.innerHTML = '<span style="color:var(--wa,#e8a33d)">Couldn\'t generate (' + rdrEsc((j && j.error) || 'error') + '). Write one by hand.</span>';
+  }).catch(function () { note.textContent = 'Network error.'; });
+}
+function rdrSaveBrief(id) {
+  var b = rdrBiz(id); if (!b) return;
+  b._brief = document.getElementById('rdr-brief-t').value;
+  rdrPost('radar-state', { action: 'upsert', business: b, brief: b._brief });
+  document.getElementById('rdr-brief-note').innerHTML = '<span style="color:var(--su)">Saved.</span>';
+}
+function rdrSetPipe(id, status) {
+  var b = rdrBiz(id); if (!b) return; b._pipe = status;
+  rdrPost('radar-state', { action: 'upsert', business: b, pipeline: { status: status || 'new', last_contact: (status === 'contacted' ? new Date().toISOString().slice(0, 10) : undefined) } }).then(function () { if (!status) { b._pipe = ''; } rdrFilter(); });
+  toast(status ? 'Added to pipeline · ' + status : 'Removed from pipeline');
+}
+function rdrSetNext(id, v) { var b = rdrBiz(id); if (!b) return; b._pipeNext = v; rdrPost('radar-state', { action: 'upsert', business: b, pipeline: { next_action: v } }); }
+function rdrToggleDNC(id, on) {
+  var b = rdrBiz(id); if (!b) return; b._dnc = !!on;
+  rdrPost('radar-state', { action: 'upsert', business: b, do_not_contact: !!on }).then(function () { rdrFilter(); });
+  toast(on ? 'Marked do-not-contact' : 'Cleared do-not-contact');
+}
+function rdrAddNote(id) {
+  var inp = document.getElementById('rdr-note-in'); var t = (inp.value || '').trim(); if (!t) return;
+  var b = rdrBiz(id); if (!b) return;
+  rdrPost('radar-state', { action: 'note', id: id, text: t, by: (window.staffName || 'staff') }).then(function (j) {
+    if (j && j.ok) { b._notes = j.record.notes || []; inp.value = ''; document.getElementById('rdr-notes').innerHTML = (b._notes).map(function (n) { return '<div class="rdr-note"><div class="t">' + rdrAgo(n.at) + ' · ' + rdrEsc(n.by) + '</div>' + rdrEsc(n.text) + '</div>'; }).join(''); }
+  });
+}
+
 
 // ── SYSTEM STATUS (Settings) — live check of the club's integrations ──
 async function runSystemCheck() {
