@@ -5892,7 +5892,7 @@ function saveSponsorCrm() {
 
 // ══════════════════════════════════════════════════════════════════════════
 //  SPONSOR RADAR — local business intelligence + one-click outreach.
-//  Discovery (OpenStreetMap) + Companies House + AI brief, all server-side and
+//  Discovery (OpenStreetMap) + one-click Google lookup + AI brief, all server-side and
 //  PIN-gated. Filtering/sorting is client-side and instant. Every datum is
 //  sourced; nothing is invented; outreach opens the staffer's own tools.
 // ══════════════════════════════════════════════════════════════════════════
@@ -5919,9 +5919,8 @@ function rdrInit() {
 }
 function rdrSetupLine() {
   var el = document.getElementById('rdr-setup'); if (!el) return;
-  var ch = rdrChKey === false ? '<span class="no">add COMPANIES_HOUSE_API_KEY to enable</span>' : rdrChKey === true ? '<span class="ok">live</span>' : 'enriches on open';
   var ai = rdrAiKey === false ? '<span class="no">add GEMINI_API_KEY to enable</span>' : rdrAiKey === true ? '<span class="ok">live</span>' : 'on demand';
-  el.innerHTML = 'Sources — <b>OpenStreetMap</b> <span class="ok">live</span> &middot; <b>Companies House</b> ' + ch + ' &middot; <b>AI brief</b> ' + ai +
+  el.innerHTML = 'Sources &mdash; <b>OpenStreetMap</b> <span class="ok">live</span> &middot; <b>Google</b> one-click lookup (reviews &amp; reputation) &middot; <b>AI brief</b> ' + ai +
     (rdrCachedAt ? ' &middot; refreshed ' + rdrAgo(rdrCachedAt) : '');
 }
 function rdrAgo(iso) {
@@ -6061,9 +6060,10 @@ function rdrOpen(id) {
   document.getElementById('rdr-drawer').scrollTop = 0;
   rdrDrawer(b);
   if (!b.address) rdrGeocode(b);
-  rdrEnrich(b);
 }
 function rdrDirLink(b) { return 'https://www.google.com/maps/dir/?api=1&destination=' + b.lat + ',' + b.lng; }
+function rdrGoogleMaps(b) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.name + ' ' + (b.postcode || b.address || 'Harrow')); }
+function rdrGoogleSearch(b) { return 'https://www.google.com/search?q=' + encodeURIComponent(b.name + ' ' + (b.address || b.postcode || 'Rayners Lane Harrow')); }
 function rdrWebLink(b) { var w = b.website || ''; return /^https?:/i.test(w) ? w : (w ? 'https://' + w : ''); }
 function rdrMailto(b) {
   var subj = 'Rayners Lane FC — local sponsorship';
@@ -6097,7 +6097,6 @@ function rdrDrawer(b) {
       '<div class="rdr-sec"><div class="rdr-sec-h">Fit score <span class="rdr-src">— from real signals only</span></div>' +
         '<div style="font-family:var(--fd);font-size:40px;color:var(--y);line-height:1">' + b.fit_score + '<span style="font-size:16px;color:var(--gr)"> / 100</span></div>' +
         '<div class="rdr-fitbar"><i style="width:' + b.fit_score + '%"></i></div>' + reasons +
-        '<div class="rdr-reason" id="rdr-chreason" style="color:var(--gr)"><span>Company standing <span class="nt">pending Companies House…</span></span><span class="p">?</span></div>' +
       '</div>' +
 
       '<div class="rdr-sec"><div class="rdr-sec-h">Details <span class="rdr-src">— © OpenStreetMap</span></div>' +
@@ -6109,8 +6108,13 @@ function rdrDrawer(b) {
         '<div class="rdr-kv"><span class="k">On OSM</span><span class="v"><a href="' + b.osm_url + '" target="_blank" rel="noopener" style="color:var(--y)">view map record →</a></span></div>' +
       '</div>' +
 
-      '<div class="rdr-sec" id="rdr-ch"><div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div>' +
-        '<div style="color:var(--gr);font-family:var(--fb);font-size:13px">Checking Companies House…</div></div>' +
+      '<div class="rdr-sec"><div class="rdr-sec-h">Look them up <span class="rdr-src">— Google&rsquo;s listing: reviews, photos, hours</span></div>' +
+        '<div class="rdr-acts">' +
+          '<a class="rdr-act pri" href="' + rdrGoogleMaps(b) + '" target="_blank" rel="noopener"><i class="ico ico-map-pin"></i> View on Google</a>' +
+          '<a class="rdr-act" href="' + rdrGoogleSearch(b) + '" target="_blank" rel="noopener"><i class="ico ico-search"></i> Web search</a>' +
+        '</div>' +
+        '<div style="font-family:var(--fb);font-size:11.5px;color:var(--gr);margin-top:7px">Opens Google in a new tab &mdash; check their reviews and reputation before making contact.</div>' +
+      '</div>' +
 
       '<div class="rdr-sec"><div class="rdr-sec-h">Sponsor brief <span class="rdr-src">— AI, from the facts above</span></div>' +
         '<textarea class="rdr-brief" id="rdr-brief-t" placeholder="Generate a grounded brief, then edit freely…">' + rdrEsc(b._brief) + '</textarea>' +
@@ -6141,45 +6145,11 @@ function rdrGeocode(b) {
     } else { var el2 = document.getElementById('rdr-addr'); if (el2 && rdrOpenId === b.id) el2.querySelector('.v').innerHTML = '<span style="color:var(--gr)">not published</span>'; }
   });
 }
-function rdrEnrich(b) {
-  var box = document.getElementById('rdr-ch');
-  var render = function (ch) {
-    if (rdrOpenId !== b.id || !box) return;
-    if (!ch || (ch.ok === false && ch.error === 'no-ch-key')) { rdrChKey = false; rdrSetupLine(); box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><div style="color:var(--gr);font-family:var(--fb);font-size:12.5px">Not configured. Add a free <b style="color:var(--w)">COMPANIES_HOUSE_API_KEY</b> in Netlify to show registration, status and directors.</div>'; return; }
-    rdrChKey = true;
-    if (ch.ok === false) { box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><div style="color:var(--gr);font-family:var(--fb);font-size:12.5px">' + rdrEsc(ch.note || ch.error || 'unavailable') + '</div>'; return; }
-    if (!ch.match) { box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div><span class="rdr-ch-badge no"><i class="ico ico-info"></i> No confident match</span><div style="color:var(--gr);font-family:var(--fb);font-size:12px;margin-top:8px">Likely a sole trader / unregistered — or trades under a different name.</div>'; return; }
-    var dirs = (ch.directors || []).map(function (d) { return '<div class="rdr-kv"><span class="k">' + rdrEsc(d.role) + '</span><span class="v">' + rdrEsc(d.name) + (d.appointed ? ' <span style="color:var(--gr);font-size:11px">since ' + d.appointed + '</span>' : '') + '</span></div>'; }).join('');
-    box.innerHTML = '<div class="rdr-sec-h">Companies House <span class="rdr-src">— public record</span></div>' +
-      '<span class="rdr-ch-badge ' + (ch.active ? 'ok' : 'no') + '">' + (ch.active ? '<i class="ico ico-circle-check"></i> Active' : '<i class="ico ico-triangle-alert"></i> ' + rdrEsc(ch.status)) + '</span> ' +
-      '<span class="rdr-tag" style="margin-left:6px">' + rdrEsc(ch.confidence) + ' match</span>' +
-      '<div class="rdr-kv" style="margin-top:8px"><span class="k">Company</span><span class="v">' + rdrEsc(ch.company_name) + ' (' + rdrEsc(ch.company_number) + ')</span></div>' +
-      (ch.incorporated ? '<div class="rdr-kv"><span class="k">Incorporated</span><span class="v">' + rdrEsc(ch.incorporated) + '</span></div>' : '') +
-      (ch.sic_codes && ch.sic_codes.length ? '<div class="rdr-kv"><span class="k">SIC (industry)</span><span class="v">' + rdrEsc(ch.sic_codes.join(', ')) + '</span></div>' : '') +
-      (ch.registered_office ? '<div class="rdr-kv"><span class="k">Reg. office</span><span class="v">' + rdrEsc(ch.registered_office) + '</span></div>' : '') +
-      (dirs ? '<div style="font-family:var(--fc);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gr);margin:12px 0 4px">Directors (public record — not a sponsorship contact)</div>' + dirs : '') +
-      '<div class="rdr-kv"><span class="k"></span><span class="v"><a href="' + ch.ch_url + '" target="_blank" rel="noopener" style="color:var(--y)">Companies House page →</a></span></div>';
-    // company standing bumps the fit score (up to +20) — active + established
-    var bump = 0, note = '';
-    if (ch.active) {
-      bump = 12; note = 'Active';
-      if (ch.incorporated) { var yrs = (Date.now() - new Date(ch.incorporated).getTime()) / (365.25 * 864e5); if (yrs >= 3) { bump += 8; note += ', established ' + Math.floor(yrs) + 'y'; } else { bump += 4; note += ', trading ' + Math.max(1, Math.floor(yrs)) + 'y'; } }
-      b.fit_score = Math.min(100, b.fit_score + bump);
-    } else { note = ch.status + ' — not active'; }
-    var cr = document.getElementById('rdr-chreason');
-    if (cr) cr.innerHTML = '<span>Company standing <span class="nt">' + rdrEsc(note) + '</span></span><span class="p">' + (bump ? '+' + bump : '0') + '</span>';
-    b._ch = ch;
-    rdrPost('radar-state', { action: 'upsert', business: b, ch: ch });  // cache CH onto the saved record
-  };
-  if (b._ch) { render(b._ch); return; }
-  rdrPost('radar-enrich', { name: b.name, postcode: b.postcode }).then(function (j) {
-    if (j && j.ok) { j.match = j.match !== false; } render(j);
-  }).catch(function () { render({ ok: false, error: 'network' }); });
-}
+
 function rdrGenBrief(id) {
   var b = rdrBiz(id); if (!b) return;
   var note = document.getElementById('rdr-brief-note'); note.textContent = 'Writing a grounded brief…';
-  var biz = Object.assign({}, b, { ch: b._ch });
+  var biz = Object.assign({}, b);
   rdrPost('radar-brief', { business: biz }).then(function (j) {
     if (j && j.ok && j.brief) { document.getElementById('rdr-brief-t').value = j.brief; rdrAiKey = true; rdrSetupLine(); note.innerHTML = 'Draft ready — <b style="color:var(--w)">edit it</b>, then Save. Grounded in the facts above; check before sending.'; }
     else if (j && j.error === 'no-key') { rdrAiKey = false; rdrSetupLine(); note.innerHTML = '<span style="color:var(--wa,#e8a33d)">AI not configured. Add GEMINI_API_KEY in Netlify. You can still write a brief by hand.</span>'; }

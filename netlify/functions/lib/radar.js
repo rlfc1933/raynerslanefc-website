@@ -44,17 +44,16 @@ function categoryOf(tags) {
   return { cat: 'other', label: 'Other', weight: 10 };
 }
 
-// The fit score — computed from REAL signals only, and returned WITH its reasons
-// so staff can see exactly why. 0-100. The Companies-House component (up to 20)
-// is added later, only once radar-enrich confirms an active, established company;
-// until then it's shown as "pending", never guessed.
+// The fit score — computed from REAL local signals only, 0-100, returned WITH
+// its reasons so staff can see exactly why. Three components: proximity (40),
+// business type (30), reachable (30). No third-party registration data.
 function osmFitScore(biz, radiusMiles) {
   const reasons = [];
   let score = 0;
 
-  // proximity (max 32) — closer is better
+  // proximity (max 40) — closer is better
   const prox = Math.max(0, 1 - (biz.distance_miles / Math.max(radiusMiles, 0.5)));
-  const proxPts = Math.round(prox * 32);
+  const proxPts = Math.round(prox * 40);
   score += proxPts;
   reasons.push({ label: 'Proximity', pts: proxPts, note: biz.distance_miles.toFixed(1) + ' mi from Tithe Farm' });
 
@@ -63,15 +62,15 @@ function osmFitScore(biz, radiusMiles) {
   score += c.weight;
   reasons.push({ label: 'Business type', pts: c.weight, note: c.label + ' — local trades of this kind often back grassroots clubs' });
 
-  // reachable (max 18) — do they publish a way to contact them?
+  // reachable (max 30) — do they publish a way to contact them?
   let reach = 0; const has = [];
-  if (biz.email) { reach += 7; has.push('email'); }
-  if (biz.phone) { reach += 7; has.push('phone'); }
-  if (biz.website) { reach += 4; has.push('website'); }
+  if (biz.email) { reach += 12; has.push('email'); }
+  if (biz.phone) { reach += 12; has.push('phone'); }
+  if (biz.website) { reach += 6; has.push('website'); }
   score += reach;
   reasons.push({ label: 'Reachable', pts: reach, note: has.length ? 'Published ' + has.join(' + ') : 'No published contact details yet' });
 
-  return { score: Math.min(100, score), reasons: reasons, categoryPending: 20 };
+  return { score: Math.min(100, score), reasons: reasons };
 }
 
 // ── Netlify Blobs cache (private, server-side) ────────────────────────────

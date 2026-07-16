@@ -74,7 +74,7 @@ async function overpass(radiusMiles) {
       osm_url: 'https://www.openstreetmap.org/' + el.type + '/' + el.id,
     };
     const fit = osmFitScore(biz, radiusMiles);
-    biz.fit_score = fit.score; biz.fit_reasons = fit.reasons; biz.fit_category_pending = fit.categoryPending;
+    biz.fit_score = fit.score; biz.fit_reasons = fit.reasons;
     out.push(biz);
   });
   out.sort(function (a, b) { return b.fit_score - a.fit_score || a.distance_miles - b.distance_miles; });

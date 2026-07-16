@@ -18,7 +18,7 @@ const SYSTEM = [
   'SUGGESTED PACKAGE — suggest a TYPE of sponsorship that suits their size and trade (e.g. matchday ball, pitchside board, programme advert, social media shout-out, kit/training-wear). Do NOT quote a price — the club sets that.',
   'APPROACH — one line: a warm, non-pushy opening angle for a first email or call.',
   '',
-  'HARD RULES: Invent NOTHING. Do not state revenue, turnover, marketing budget, employee numbers, owner names, or any contact detail unless it is in the facts. If Companies House data is absent, say the company registration is unconfirmed. If a fact is missing, leave it out — never guess. British English. Keep the whole thing under ~100 words. End with one line: "CONFIDENCE: …" summarising how much is actually known vs assumed.',
+  'HARD RULES: Invent NOTHING. Do not state revenue, turnover, marketing budget, employee numbers, owner names, reviews, ratings, or any contact detail unless it is in the facts. Do not guess how big, how established, or how successful they are. If a fact is missing, leave it out. British English. Keep the whole thing under ~100 words. End with one line: "CONFIDENCE: …" — and if their size/reputation isn\'t known, say to check their Google listing (reviews, photos, hours) before making contact.',
 ].join('\n');
 
 function extractText(providerText) { return String(providerText || '').trim(); }
@@ -53,12 +53,8 @@ function factsBlock(b) {
   if (b.address) L.push('Address: ' + b.address);
   L.push('Distance from Tithe Farm: ' + b.distance_miles + ' miles');
   if (b.opening_hours) L.push('Opening hours: ' + b.opening_hours);
-  L.push('Published contact: ' + [b.phone ? 'phone' : '', b.email ? 'email' : '', b.website ? 'website' : ''].filter(Boolean).join(', ') || 'none published');
-  if (b.ch && b.ch.match) {
-    L.push('Companies House: ' + b.ch.status + (b.ch.active ? ' (active)' : ' (NOT active — check before pitching)') + (b.ch.incorporated ? ', incorporated ' + b.ch.incorporated : '') + (b.ch.sic_codes && b.ch.sic_codes.length ? ', SIC ' + b.ch.sic_codes.join('/') : ''));
-  } else {
-    L.push('Companies House: no confident match (registration unconfirmed).');
-  }
+  L.push('Published contact: ' + ([b.phone ? 'phone' : '', b.email ? 'email' : '', b.website ? 'website' : ''].filter(Boolean).join(', ') || 'none published'));
+  L.push('Size / reputation: not known from this data — the club will check their Google listing.');
   return L.join('\n');
 }
 
