@@ -27,25 +27,6 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/icons.css">
   <style>
-    /* Override FWP embed colours to match club theme */
-    .fwp-embed-container {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .fwp-embed-container iframe {
-      display: block;
-      width: 100%;
-      min-height: 600px;
-      border: none;
-      /* Invert + hue-rotate to force dark mode on the widget */
-      filter: invert(1) hue-rotate(180deg) contrast(0.9) brightness(0.95);
-    }
-    .fwp-embed-container iframe img,
-    .fwp-embed-container iframe .badge {
-      filter: invert(1) hue-rotate(180deg);
-    }
     .tab-row { display:flex; gap:2px; margin-bottom:2px; }
     .tab-btn {
       flex:1; background:var(--card); border:none; color:var(--grey);
@@ -115,31 +96,23 @@
       <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
     </div>
     <div class="tab-panel" id="tab-table">
-      <!-- Live league table via the Football Web Pages embed (a third-party
-           iframe with its own white styling — can't be recoloured or row-
-           highlighted from here, so we CONTAIN it in a branded frame). -->
+      <!-- OUR OWN league table — rendered from live standings so it's fully on
+           brand: our fonts and colours, opponent crest beside each club, and the
+           Rayners Lane row highlighted. Data comes from the fetch-table function
+           (live Wikipedia standings, server-side, cached 15 min) so it updates
+           itself through the season. Replaced the Football Web Pages iframe,
+           which is cross-origin and can't be styled. -->
       <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--card2);border-bottom:1px solid var(--border)">
           <span style="font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--white)">Premier Division North</span>
-          <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)">● Live · Football Web Pages</span>
+          <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)"><span style="color:#22C55E">●</span> Live &middot; 2026-27</span>
         </div>
-        <!-- No forced white background / min-height: an empty widget (the season
-             hasn't started) would render as a white void on a dark site. The
-             wrapper only goes white once the embed actually has content. -->
-        <div id="fwp-table-wrap"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
-        <div id="fwp-table-empty" class="fwp-empty" hidden>
-          <div class="fwp-empty__i"><i class="ico ico-calendar-days"></i></div>
-          <div class="fwp-empty__t">Table loading…</div>
-          <div class="fwp-empty__d">The live Combined Counties Premier North table loads from Football Web Pages and updates automatically.</div>
-          <a class="fwp-empty__a" href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">View on Football Web Pages →</a>
-        </div>
+        <div id="fx-table" style="overflow-x:auto"><div class="fx-loading">Loading table…</div></div>
       </div>
       <div class="fx-attr" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <span>Live table via <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Football Web Pages</a> — updates automatically</span>
-        <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia table →</a>
+        <span>Standings via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA) — updates automatically</span>
+        <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Live on Football Web Pages →</a>
       </div>
-      <!-- Kept hidden as a silent fallback source for the programme's fetch-table -->
-      <div id="fx-table" style="display:none"></div>
     </div>
     <div class="tab-panel" id="tab-form">
       <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
@@ -264,12 +237,14 @@ async function loadFixturesData() {
       document.getElementById('fx-form').innerHTML = '';
     }
   }
-  // League table (Wikipedia) — unchanged.
+  // League table — our own branded render from live Wikipedia standings. If the
+  // fetch fails, still show the branded 20-team table (all zeros) rather than an
+  // error, so the tab is never ugly.
   try {
     var t = await (await fetch('/.netlify/functions/fetch-table')).json();
-    renderFxTable(t.table || []);
+    renderFxTable((t && t.table) || []);
   } catch (e) {
-    document.getElementById('fx-table').innerHTML = '<div class="fx-empty">Table unavailable right now.</div>';
+    renderFxTable([]);
   }
 }
 
@@ -651,16 +626,41 @@ function renderFxForm(fx) {
   el.innerHTML = '<div class="fx-rlbl">Last ' + last5.length + ' (newest first)</div><div class="fx-form">' + dots + '</div>';
 }
 
+// The 20 CCL Prem North clubs, alphabetical, all zeros — used if the live fetch
+// ever fails so the table is NEVER empty or broken (this is also the pre-season
+// order). Rayners Lane flagged for the highlight.
+var FX_TABLE_FALLBACK = ['Abingdon United','Amersham Town','Ardley United','Bedfont','Broadfields United','Burnham','Easington Sports','Harefield United','Hilltop','Holyport','Kidlington','North Greenford United','North Leigh','Northwood','Penn & Tylers Green','Rayners Lane','Reading City','Thatcham Town','Wallingford & Crowmarsh','Wokingham Town']
+  .map(function(t,i){ return { pos:i+1, team:t, pld:0, w:0, d:0, l:0, gf:0, ga:0, gd:'0', pts:0, rlfc:/rayners\s*lane/i.test(t) }; });
+
+function fxTeamSlug(s){ return String(s).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+function fxTeamIni(s){ return String(s).replace(/\b(fc|afc|utd|united|town|city|sports|club)\b/gi,'').trim().split(/\s+/).map(function(w){return w[0]||'';}).join('').slice(0,3).toUpperCase() || '?'; }
+// Crest beside the club name. Rayners Lane uses our badge; everyone else the
+// crest library. Missing file -> a clean on-brand initials disc, never a broken
+// image. data-no-opt: these are already tiny, skip the image CDN so the onerror
+// fallback fires reliably.
+function fxCrestHtml(team){
+  var src = /rayners\s*lane/i.test(team) ? 'img/badge.png' : 'img/crests/' + fxTeamSlug(team) + '.png';
+  var ini = fxTeamIni(team);
+  return '<img class="lt-crest" src="' + src + '" alt="" loading="lazy" data-no-opt ' +
+    'onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'lt-crest lt-crest--ini\',textContent:' + JSON.stringify(ini) + '}))">';
+}
+
 function renderFxTable(rows) {
   var el = document.getElementById('fx-table');
-  if (!rows.length) { el.innerHTML = '<div class="fx-empty">The 2026-27 table appears once the season kicks off.</div>'; return; }
-  var head = '<tr><th>#</th><th class="l">Team</th><th>P</th><th class="hide">W</th><th class="hide">D</th><th class="hide">L</th><th>GD</th><th>Pts</th></tr>';
+  if (!rows || !rows.length) rows = FX_TABLE_FALLBACK;   // never empty
+  var head = '<tr><th class="lt-pos-h">#</th><th class="l">Team</th><th>P</th>' +
+    '<th class="hide">W</th><th class="hide">D</th><th class="hide">L</th>' +
+    '<th class="hide">GF</th><th class="hide">GA</th><th>GD</th><th class="pts-h">Pts</th></tr>';
   var body = rows.map(function(t){
-    return '<tr class="' + (t.rlfc ? 'me' : '') + '"><td>' + t.pos + '</td><td class="l">' + fxEsc(t.team) + '</td>' +
-      '<td>' + t.pld + '</td><td class="hide">' + t.w + '</td><td class="hide">' + t.d + '</td><td class="hide">' + t.l + '</td>' +
-      '<td>' + fxEsc(t.gd) + '</td><td class="pts">' + t.pts + '</td></tr>';
+    return '<tr class="' + (t.rlfc ? 'me' : '') + '">' +
+      '<td class="lt-pos">' + t.pos + '</td>' +
+      '<td class="l"><span class="lt-team">' + fxCrestHtml(t.team) + '<span class="lt-name">' + fxEsc(t.team) + '</span></span></td>' +
+      '<td>' + t.pld + '</td>' +
+      '<td class="hide">' + t.w + '</td><td class="hide">' + t.d + '</td><td class="hide">' + t.l + '</td>' +
+      '<td class="hide">' + (t.gf || 0) + '</td><td class="hide">' + (t.ga || 0) + '</td>' +
+      '<td>' + fxEsc(String(t.gd)) + '</td><td class="pts">' + t.pts + '</td></tr>';
   }).join('');
-  el.innerHTML = '<table class="fx-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+  el.innerHTML = '<table class="fx-table lt"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
 }
 </script>
 <style>
@@ -681,13 +681,31 @@ function renderFxTable(rows) {
   .fx-form__dot{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff}
   .fx-form__dot.w{background:#22C55E} .fx-form__dot.d{background:#FBBF24;color:#0d0d0d} .fx-form__dot.l{background:#EF4444}
   .fx-table{width:100%;border-collapse:collapse;font-family:var(--font-c)}
-  .fx-table th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:center;padding:10px 6px;border-bottom:1px solid var(--border)}
+  .fx-table th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:center;padding:12px 6px;border-bottom:1px solid var(--border)}
   .fx-table th.l,.fx-table td.l{text-align:left}
   .fx-table td{font-size:14px;color:var(--lgrey);text-align:center;padding:11px 6px;border-bottom:1px solid var(--border)}
   .fx-table td.pts{font-weight:800;color:#fff}
   .fx-table tr.me td{background:rgba(255,209,0,.1);color:#fff}
   .fx-table tr.me td.l{color:var(--yellow);font-weight:700}
   @media(max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}}
+  /* ── Our branded league table (crest-led, RLFC highlighted) ── */
+  .lt th{padding-top:14px;padding-bottom:14px}
+  .lt th.pts-h{color:var(--yellow)}
+  .lt td{height:52px;padding-top:0;padding-bottom:0}
+  .lt td.lt-pos{width:46px;font-family:var(--font-d);font-size:19px;letter-spacing:.02em;color:var(--lgrey)}
+  .lt td.l{padding-left:14px}
+  .lt-team{display:flex;align-items:center;gap:11px;min-width:0}
+  .lt-crest{width:27px;height:27px;object-fit:contain;flex:0 0 27px}
+  .lt-crest--ini{border-radius:50%;background:linear-gradient(160deg,#242424,#0b0b0b);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:10px;color:var(--yellow)}
+  .lt-name{font-family:var(--font-c);font-weight:600;font-size:15px;letter-spacing:.01em;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lt td.pts{font-family:var(--font-d);font-weight:400;font-size:20px;letter-spacing:.03em;color:var(--yellow)}
+  .lt tbody tr:hover td,.lt tbody tr:hover td{background:rgba(255,255,255,.02)}
+  .lt tr.me td{background:rgba(255,209,0,.1)}
+  .lt tr.me td:first-child{box-shadow:inset 3px 0 0 var(--yellow)}
+  .lt tr.me .lt-name{color:var(--yellow);font-weight:700}
+  .lt tr.me td.lt-pos{color:var(--yellow)}
+  .lt tr.me td.pts{color:#fff}
+  .lt tr:last-child td{border-bottom:0}
   /* FWP embed: fit the third-party iframe cleanly into its branded frame */
   /* ── FIXTURE CARDS — crest-led lockups, month-sectioned, colour-coded ── */
   .fxm{margin-bottom:26px}
@@ -740,82 +758,7 @@ function renderFxTable(rows) {
   .fx-toast.on{transform:translateX(-50%) translateY(0)}
   .fx-toast a{color:var(--yellow);margin-left:8px;font-family:var(--font-c);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
   @media(max-width:420px){ .fxc__nm{font-size:13px} .fxh .fxc__nm{font-size:16px} .fxc__crest,.fxc__ph{width:46px;height:46px} }
-
-  /* No unconditional min-height — an empty widget must collapse, not reserve a
-     void. The wrapper only turns white once the embed genuinely has content. */
-  .fwp-embed iframe{width:100%!important;border:0!important;display:block}
-  /* FWP reports this pre-season table's height as 0px via postMessage (their side),
-     which collapses the iframe to nothing. A STYLESHEET !important floor beats
-     embed.js's inline min-height:0 and shows the full 20-team table. 740px fits it
-     exactly on mobile and desktop; if FWP ever reports a real, larger height that
-     still wins (min-height only floors, never caps). */
-  #fwp-table-wrap iframe{min-height:740px!important}
-  #fwp-table-wrap.has-content{background:#fff;min-height:340px}
-  .fwp-empty{padding:28px 20px;text-align:center;background:var(--card)}
-  .fwp-empty__i{font-size:30px;margin-bottom:8px}
-  .fwp-empty__t{font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--yellow)}
-  .fwp-empty__d{font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.6;margin:6px auto 12px;max-width:420px}
-  .fwp-empty__d strong{color:var(--white)}
-  .fwp-empty__a{font-family:var(--font-c);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);text-decoration:none}
 </style>
-<!-- Football Web Pages live embeds (loads once; renders the league-table iframe above) -->
-<script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
-<script>
-/* FWP league table — make it SHOW.
-   The table lives in a tab that's display:none until opened. embed.js measured
-   the container at width 0 on page load and built a zero-size iframe (src has
-   &width=0), so the table rendered blank. The old guard then read 0 height and
-   hid the whole thing behind a "starts 1 August" placeholder — so FWP looked
-   populated and we looked empty. The table has in fact existed since pre-season.
-
-   Fix: (re)build the embed at the REAL width the moment the League Table tab is
-   opened. The iframe's collapsed height is floored in CSS (see #fwp-table-wrap
-   iframe). Default to SHOWING; the neutral fallback only appears if the iframe
-   genuinely can't be built. */
-(function () {
-  var builtWidth = 0;
-  function build() {
-    var wrap = document.getElementById('fwp-table-wrap');
-    var empty = document.getElementById('fwp-table-empty');
-    if (!wrap || !wrap.offsetWidth) return;            // tab not visible yet — wait
-    var embed = wrap.querySelector('.fwp-embed');
-    if (!embed) return;
-    // Already built at ~this width? Don't reload it needlessly on a re-click.
-    if (builtWidth && Math.abs(wrap.offsetWidth - builtWidth) < 24 && embed.querySelector('iframe')) {
-      wrap.style.display = ''; wrap.classList.add('has-content'); if (empty) empty.hidden = true; return;
-    }
-    builtWidth = wrap.offsetWidth;
-    // Rebuild at the real width. embed.js only (re)creates embeds that have no
-    // data-id, so clear the iframe + id and re-run its own initialiser.
-    embed.innerHTML = '';
-    try { delete embed.dataset.id; } catch (e) { embed.removeAttribute('data-id'); }
-    if (typeof window.initEmbeds === 'function') window.initEmbeds();
-    var built = !!embed.querySelector('iframe');
-    wrap.style.display = built ? '' : 'none';
-    wrap.classList.toggle('has-content', built);
-    if (empty) empty.hidden = built;                   // neutral message only if we truly couldn't build
-  }
-  // Build when the League Table tab is opened (it has real width then).
-  document.addEventListener('click', function (e) {
-    var b = e.target && e.target.closest && e.target.closest('.tab-btn[data-tab="table"]');
-    if (b) setTimeout(build, 60);
-  });
-  // Rebuild on a meaningful resize/orientation change so it matches the new width.
-  var rz; window.addEventListener('resize', function () {
-    clearTimeout(rz); rz = setTimeout(function () {
-      var p = document.getElementById('tab-table');
-      if (p && p.classList.contains('active')) build();
-    }, 300);
-  });
-  // If the table tab is the active one on load (e.g. a deep link), build it.
-  window.addEventListener('load', function () {
-    setTimeout(function () {
-      var p = document.getElementById('tab-table');
-      if (p && p.classList.contains('active')) build();
-    }, 700);
-  });
-})();
-</script>
   <script src="js/share-news.js"></script>
 </body>
 </html>
