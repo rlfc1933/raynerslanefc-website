@@ -2,6 +2,12 @@
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
 
+# Guarantee the Sponsor Radar baked business snapshots are bundled with the
+# radar-discover function (it require()s them, but this makes it bulletproof).
+# These ship INSIDE the function bundle — not publicly served.
+[functions."radar-discover"]
+  included_files = ["netlify/functions/radar-data/**"]
+
 # Serve the DYNAMIC sitemap (netlify/functions/sitemap.js) at /sitemap.xml.
 # force=true so it wins over any static file; status 200 so it's a rewrite (the
 # URL stays /sitemap.xml for crawlers).
