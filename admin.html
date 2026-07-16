@@ -761,6 +761,11 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h4"/></svg></span>
           <div class="tile-name">Match Report</div><div class="tile-desc">Post-match writeup</div>
         </button>
+        <button class="tile" style="--accent:#1DA1F2" onclick="openPanel('fwp')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
+          <div class="tile-name">FWP Images</div><div class="tile-desc">Match-day tweet cards</div>
+        </button>
         <button class="tile" style="--accent:#FFD100" onclick="openPanel('monthlyfix')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M7 13h4M7 17h6"/></svg></span>
@@ -2039,6 +2044,16 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div id="mf-note" style="font-family:var(--fb);font-size:11.5px;color:var(--gr);line-height:1.5;margin-top:9px"></div>
     </div>
 
+    <!-- FWP IMAGES — generic Twitter cards for Football Web Pages match events -->
+    <div class="panel" id="panel-fwp">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-brand-x"></i> FWP Images</div></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Football Web Pages auto-tweets from our X account on match day.</strong> Download the card for each event below and upload it into the matching FWP section (Kick-off, Goal, Full-time&hellip;). They're generic and on-brand &mdash; no names or scores &mdash; sized for Twitter (1600&times;900). Use <strong style="color:var(--w)">Download</strong> on a computer, <strong style="color:var(--w)">Share</strong> on a phone.</p></div>
+      <button class="save" onclick="fwpDownloadAll()" style="margin-bottom:14px"><i class="ico ico-download"></i> Download all 16 cards</button>
+      <div id="fwp-grid" style="display:grid;grid-template-columns:1fr;gap:16px"></div>
+      <!-- Off-screen full-size staging node so html2canvas captures at true resolution -->
+      <div id="fwp-stage" style="position:fixed;left:-20000px;top:0;pointer-events:none"></div>
+    </div>
+
     <!-- SPONSOR HUB — applications, pipeline, quotes & payments -->
     <div class="panel" id="panel-trialists">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-football"></i> Trialists</div></div>
@@ -3280,6 +3295,7 @@ function openPanel(name) {
   if (name === 'trialists')  loadLeads();
   if (name === 'poststudio') loadPostStudio();
   if (name === 'monthlyfix') mfInit();
+  if (name === 'fwp')        fwpInit();
   if (name === 'clubstats') loadClubStats();
   if (name === 'settings')  runSystemCheck();
   if (name === 'playbook')  { buildJumpNav(); loadIncomePlan(); loadWins(); }
@@ -5394,6 +5410,158 @@ function mfDownloadAll() {
     mfExport(k, true).then(function () { setTimeout(next, 700); });   // gap so the browser allows each download
   })();
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  FWP IMAGES — generic Twitter cards for Football Web Pages match events.
+//
+//  FWP auto-tweets from the club's X account on match day. For each event it can
+//  attach an image; this builds one on-brand 1600x900 (Twitter landscape) card
+//  per event, downloadable for phone or computer. Deliberately generic — no
+//  names, no scores — so one card serves every match all season.
+//
+//  Reuses the Post Studio pipeline: psCardBg (SVG bg — html2canvas can't do CSS
+//  gradients), psAutoFit (shrinks a long headline), psSaveBlob, PS_ICONS, and the
+//  same html2canvas(scale:2) path. No CSS %-transforms (html2canvas mangles them)
+//  — everything is absolutely positioned in px.
+// ══════════════════════════════════════════════════════════════════════════
+var FWP_W = 1600, FWP_H = 900;
+// A few stroke icons PS_ICONS doesn't carry. Same 24x24 stroke style as psIco.
+var FWP_ICONS = {
+  swap: '<path d="M7 4v13"/><path d="M4 7l3-3 3 3"/><path d="M17 20V7"/><path d="M20 17l-3 3-3-3"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13A4 4 0 0 1 16 11"/>',
+  warning: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function fwpIco(key, px, color) {
+  var d = FWP_ICONS[key] || (typeof PS_ICONS !== 'undefined' && PS_ICONS[key]) || '';
+  if (!d) return '';
+  return '<svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+}
+
+var FWP_Y = '#FFD100', FWP_R = '#E5341F', FWP_AM = '#E8A33D', FWP_WH = '#F5F3ED';
+// key matches nothing external; `sect` is the exact FWP subheader to upload into.
+var FWP_EVENTS = [
+  { key: 'lineup',       sect: 'Line-up received',   icon: 'list',      accent: FWP_Y,  eyebrow: 'TEAM NEWS',        big: 'THE LANE IS NAMED', sub: "Today's starting XI" },
+  { key: 'kickoff',      sect: 'Kick-off',           icon: 'whistle',   accent: FWP_Y,  eyebrow: "WE'RE UNDERWAY",   big: 'KICK-OFF',          sub: 'Come on you Yellows' },
+  { key: 'goal',         sect: 'Goal scored',        icon: 'ball',      accent: FWP_Y,  eyebrow: 'RAYNERS LANE',     big: 'GOAAAL!',           sub: 'Get in! Up the Lane' },
+  { key: 'goalconceded', sect: 'Goal conceded',      icon: 'ball',      accent: FWP_Y,  eyebrow: 'GAME ON',          big: 'COME ON LANE',      sub: 'Heads up — we go again' },
+  { key: 'yellow',       sect: 'Yellow card',        icon: 'card',      accent: FWP_Y,  eyebrow: 'BOOKING',          big: 'YELLOW CARD',       sub: "Into the referee's book" },
+  { key: 'red',          sect: 'Red card',           icon: 'card',      accent: FWP_R,  ink: '#fff', eyebrow: 'SENDING OFF', big: 'RED CARD',    sub: 'Off he goes' },
+  { key: 'sub',          sect: 'Substitution',       icon: 'swap',      accent: FWP_Y,  eyebrow: 'CHANGE',           big: 'SUBSTITUTION',      sub: 'Fresh legs for the Lane' },
+  { key: 'halftime',     sect: 'Half-time',          icon: 'whistle',   accent: FWP_Y,  eyebrow: '45 GONE',          big: 'HALF-TIME',         sub: 'Stay with us' },
+  { key: 'fulltime',     sect: 'Full-time',          icon: 'whistle',   accent: FWP_Y,  eyebrow: 'THE FINAL WHISTLE',big: 'FULL-TIME',         sub: "That's the game" },
+  { key: 'attendance',   sect: 'Attendance received',icon: 'users',     accent: FWP_Y,  eyebrow: 'THANK YOU',        big: "TODAY'S CROWD",     sub: 'The Lane faithful' },
+  { key: 'abandoned',    sect: 'Match abandoned',    icon: 'warning',   accent: FWP_AM, eyebrow: 'MATCH UPDATE',     big: 'ABANDONED',         sub: "Today's game is abandoned" },
+  { key: 'delayed',      sect: 'Match delayed',      icon: 'clock',     accent: FWP_AM, eyebrow: 'MATCH UPDATE',     big: 'DELAYED',           sub: 'Kick-off is delayed' },
+  { key: 'postponed',    sect: 'Match postponed',    icon: 'calendar',  accent: FWP_AM, eyebrow: 'MATCH UPDATE',     big: 'POSTPONED',         sub: "Today's game is off" },
+  { key: 'correction',   sect: 'Correction',         icon: 'pen',       accent: FWP_WH, eyebrow: 'UPDATE',           big: 'CORRECTION',        sub: 'A quick clarification' },
+  { key: 'extratime',    sect: 'Extra-time is next', icon: 'hourglass', accent: FWP_Y,  eyebrow: 'STILL LEVEL',      big: 'EXTRA-TIME',        sub: '30 more minutes' },
+  { key: 'penalties',    sect: 'Penalties are next', icon: 'ball',      accent: FWP_Y,  eyebrow: "IT'S SPOT-KICKS",  big: 'PENALTIES',         sub: 'Hold your nerve' }
+];
+function fwpEv(key) { return FWP_EVENTS.filter(function (e) { return e.key === key; })[0]; }
+
+function fwpCardHtml(ev) {
+  var A = ev.accent, W = FWP_W, H = FWP_H;
+  var beb = function (px, c) { return "font-family:'Bebas Neue',sans-serif;font-size:" + px + "px;line-height:.88;letter-spacing:2px;color:" + c + ";"; };
+  var isCard = (ev.key === 'yellow' || ev.key === 'red');
+  var h = '';
+  // hero: a big tilted card for the card events, else a faint icon watermark
+  if (isCard) {
+    h += '<div style="position:absolute;left:' + ((W - 210) / 2) + 'px;top:130px;width:210px;height:296px;border-radius:16px;background:' + A + ';transform:rotate(-8deg);box-shadow:0 30px 60px -18px rgba(0,0,0,.75)"></div>';
+  } else {
+    h += '<div style="position:absolute;left:' + ((W - 460) / 2) + 'px;top:' + ((H - 460) / 2) + 'px;opacity:.06">' + fwpIco(ev.icon, 460, A) + '</div>';
+  }
+  // brand lockup, top-left
+  h += '<div style="position:absolute;top:54px;left:60px;width:760px;height:84px">' +
+    '<img src="img/badge.png" crossorigin="anonymous" style="position:absolute;left:0;top:0;width:84px;height:84px;object-fit:contain">' +
+    '<div style="position:absolute;left:100px;top:6px;white-space:nowrap;' + beb(34, '#fff') + '">RAYNERS LANE FC' +
+    '<div style="font-family:Arial;font-size:13px;letter-spacing:3px;color:' + A + ';font-weight:800;margin-top:5px;white-space:nowrap">EST. 1933 &middot; HARROW</div></div></div>';
+  // eyebrow / headline / rule / sub
+  var eyeY = isCard ? 470 : 322, bigY = isCard ? 512 : 372, bigH = isCard ? 150 : 220, ruleY = isCard ? 682 : 612, subY = isCard ? 706 : 638;
+  var bigPx = isCard ? 170 : 250;
+  h += '<div style="position:absolute;top:' + eyeY + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:26px;font-weight:800;letter-spacing:8px;color:' + A + '">' + escH(ev.eyebrow) + '</div>';
+  h += '<div data-fit="' + bigPx + ':84" style="position:absolute;top:' + bigY + 'px;left:64px;right:64px;height:' + bigH + 'px;overflow:hidden;text-align:center;' + beb(bigPx, '#fff') + '">' + escH(ev.big) + '</div>';
+  if (!isCard) h += '<div style="position:absolute;top:' + ruleY + 'px;left:' + ((W - 200) / 2) + 'px;width:200px;height:6px;background:' + A + ';border-radius:3px"></div>';
+  h += '<div style="position:absolute;top:' + subY + 'px;left:0;right:0;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:34px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(245,243,237,.85)">' + escH(ev.sub) + '</div>';
+  // footer
+  h += '<div style="position:absolute;bottom:0;left:0;right:0;height:12px;background:' + A + '"></div>';
+  h += '<div style="position:absolute;bottom:28px;left:60px;font-family:Arial;font-size:18px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>';
+  h += '<div style="position:absolute;bottom:28px;right:60px;font-family:Arial;font-size:18px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">@RAYNERSLANEFC</div>';
+  return h;
+}
+
+function fwpInit() {
+  var grid = document.getElementById('fwp-grid'); if (!grid) return;
+  grid.innerHTML = FWP_EVENTS.map(function (ev) {
+    return '<div style="border:1px solid var(--br);border-radius:12px;padding:14px;background:rgba(255,255,255,.02)">' +
+      '<div style="font-family:var(--fc);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--y);margin-bottom:10px">FWP &middot; ' + escH(ev.sect) + '</div>' +
+      '<div id="fwp-prev-' + ev.key + '" style="border-radius:8px;overflow:hidden;margin-bottom:12px;background:#000"></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="save" style="flex:1;min-width:140px;margin:0" onclick="fwpDownload(\'' + ev.key + '\')"><i class="ico ico-download"></i> Download</button>' +
+        '<button class="save sec" style="flex:1;min-width:140px;margin:0" onclick="fwpShare(\'' + ev.key + '\')"><i class="ico ico-smartphone"></i> Share</button>' +
+      '</div></div>';
+  }).join('');
+  // next frame: the grid has laid out, so clientWidth is real
+  requestAnimationFrame(function () { FWP_EVENTS.forEach(fwpRenderPreview); });
+}
+function fwpRenderPreview(ev) {
+  var host = document.getElementById('fwp-prev-' + ev.key); if (!host) return;
+  var avail = host.clientWidth || (host.parentNode && host.parentNode.clientWidth - 28) || 600;
+  var k = Math.min(1, avail / FWP_W);
+  var card = document.createElement('div');
+  card.style.cssText = 'position:relative;width:' + FWP_W + 'px;height:' + FWP_H + 'px;background:' + psCardBg('yellow') + ';background-size:cover;overflow:hidden;transform-origin:top left;transform:scale(' + k + ')';
+  card.innerHTML = fwpCardHtml(ev);
+  host.style.height = Math.round(FWP_H * k) + 'px';
+  host.innerHTML = ''; host.appendChild(card);
+  psAutoFit(card);
+}
+
+// Off-screen full-size node on <body> (never inside a hidden panel) for export.
+function fwpBuildNode(ev) {
+  var node = document.createElement('div');
+  node.style.cssText = 'position:fixed;left:-20000px;top:0;width:' + FWP_W + 'px;height:' + FWP_H + 'px;background:' + psCardBg('yellow') + ';background-size:cover;overflow:hidden;z-index:-1';
+  node.innerHTML = fwpCardHtml(ev);
+  document.body.appendChild(node);
+  psAutoFit(node);
+  return node;
+}
+// Export to a true 1600x900 PNG (supersampled from a 2x render).
+function fwpExport(ev, forceSave) {
+  return new Promise(function (resolve) {
+    if (typeof html2canvas === 'undefined') { toast('Still loading — try again in a second', true); resolve(false); return; }
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+      var node = fwpBuildNode(ev); psAutoFit(node);
+      html2canvas(node, { backgroundColor: null, useCORS: true, scale: 2, width: FWP_W, height: FWP_H }).then(function (cv) {
+        node.remove();
+        var out = document.createElement('canvas'); out.width = FWP_W; out.height = FWP_H;
+        var ctx = out.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(cv, 0, 0, FWP_W, FWP_H);
+        var fname = 'rayners-lane-fwp-' + ev.key + '.png';
+        out.toBlob(function (blob) {
+          if (!blob) { toast('Could not build the image', true); resolve(false); return; }
+          var file = (typeof File !== 'undefined') ? new File([blob], fname, { type: 'image/png' }) : null;
+          if (!forceSave && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], title: 'Rayners Lane FC' })
+              .then(function () { toast('Done'); resolve(true); })
+              .catch(function (err) { if (err && err.name === 'AbortError') { resolve(true); return; } psSaveBlob(blob, fname); resolve(true); });
+          } else { psSaveBlob(blob, fname); resolve(true); }
+        }, 'image/png');
+      }).catch(function (e) { node.remove(); toast('Render failed: ' + e.message, true); resolve(false); });
+    });
+  });
+}
+function fwpDownload(key) { var ev = fwpEv(key); if (ev) { toast('Building ' + ev.sect + '…'); fwpExport(ev, true); } }
+function fwpShare(key) { var ev = fwpEv(key); if (ev) { toast('Building ' + ev.sect + '…'); fwpExport(ev, false); } }
+function fwpDownloadAll() {
+  var list = FWP_EVENTS.slice(), i = 0;
+  toast('Building all ' + list.length + ' cards…');
+  (function next() {
+    if (i >= list.length) { toast('All ' + list.length + ' saved'); return; }
+    var ev = list[i++];
+    fwpExport(ev, true).then(function () { setTimeout(next, 700); });
+  })();
+}
+
 
 
 // crest library upload
