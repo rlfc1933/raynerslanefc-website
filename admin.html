@@ -2009,8 +2009,9 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="slbl">3 &middot; Save or share</div>
       <div class="ps-stage"><div id="ps-card-wrap"><div id="ps-card"></div></div></div>
-      <button class="save" onclick="psDownload()"><i class="ico ico-smartphone"></i> Save / Share Post</button>
-      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:7px">On your phone this opens your share menu — tap <strong style="color:var(--w)">Save Image</strong> for the camera roll, or send straight to <strong style="color:var(--w)">WhatsApp / Instagram</strong>. On a computer it downloads the PNG.</div>
+      <button class="save" onclick="psDownload()"><i class="ico ico-download"></i> Download PNG <span style="font-weight:400;opacity:.7">— saves to your device</span></button>
+      <button class="save sec" onclick="psShare()" style="margin-top:8px"><i class="ico ico-smartphone"></i> Share <span style="font-weight:400;opacity:.7">— WhatsApp / Instagram / AirDrop</span></button>
+      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:7px">On a <strong style="color:var(--w)">computer</strong>, use <strong style="color:var(--w)">Download PNG</strong> — it saves straight to your Downloads folder. On a <strong style="color:var(--w)">phone</strong>, <strong style="color:var(--w)">Share</strong> opens the menu to send it to WhatsApp / Instagram or save to your camera roll.</div>
 
       <div class="div"></div>
       <div class="slbl"><i class="ico ico-shield"></i> Crest Library <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— upload any missing/updated club crest</span></div>
@@ -2032,7 +2033,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="ps-seg" id="mf-months" style="flex-wrap:wrap;display:flex"></div>
       <div class="slbl">2 &middot; Preview</div>
       <div class="ps-stage"><div id="mf-card-wrap"><div id="mf-preview"></div></div></div>
-      <button class="save" onclick="mfDownloadOne()"><i class="ico ico-smartphone"></i> Save / Share this month</button>
+      <button class="save" onclick="mfDownloadOne()"><i class="ico ico-download"></i> Download this month <span style="font-weight:400;opacity:.7">— saves to your device</span></button>
+      <button class="save sec" onclick="mfShareOne()" style="margin-top:8px"><i class="ico ico-smartphone"></i> Share this month <span style="font-weight:400;opacity:.7">— WhatsApp / AirDrop</span></button>
       <button class="save sec" onclick="mfDownloadAll()" style="margin-top:8px"><i class="ico ico-download"></i> Download all months</button>
       <div id="mf-note" style="font-family:var(--fb);font-size:11.5px;color:var(--gr);line-height:1.5;margin-top:9px"></div>
     </div>
@@ -4560,6 +4562,7 @@ function psFieldDefs() {
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home score</label><input type="number" min="0" value="' + (d.hs || 0) + '" oninput="psSet(\'hs\',this.value)"></div><div class="field"><label class="fl">Away score</label><input type="number" min="0" value="' + (d.as || 0) + '" oninput="psSet(\'as\',this.value)"></div></div>' : '';
   var player = (['goal', 'yellow', 'red', 'motm', 'signing', 'potm'].indexOf(T) > -1)
     ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
+  var manualName = '<div class="field"><label class="fl">…or type a name <span style="color:var(--gr);font-weight:400">— a new signing, or anyone not in the squad list</span></label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>';
   // Fixture picker — auto-fills the card from the season schedule (Fixtures manager)
   var fxPick = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1 && psFixtures.length)
     ? '<div class="field"><label class="fl"><i class="ico ico-zap"></i> Load from fixture <span style="color:var(--gr);font-weight:400">— auto-fills opponent, date, time, venue' + (['halftime', 'fulltime'].indexOf(T) > -1 ? ' &amp; score' : '') + '</span></label><select onchange="psApplyFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option>' +
@@ -4586,13 +4589,13 @@ function psFieldDefs() {
       '<div class="ps-crestrow"><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || 'Sat 12 Jul') + '" oninput="psSet(\'date\',this.value)"></div><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div></div>' +
       '<div class="field"><label class="fl">Venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
     case 'kickoff': return fxPick + crests + '<div class="field"><label class="fl">Line under it (optional)</label><input type="text" value="' + escH(d.sub || 'We are underway!') + '" oninput="psSet(\'sub\',this.value)"></div>';
-    case 'goal': return player + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psSet(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psSet(\'score\',this.value)"></div></div>';
-    case 'yellow': case 'red': return player + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psSet(\'min\',this.value)"></div>';
+    case 'goal': return player + manualName + '<div class="ps-crestrow"><div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '23') + '" oninput="psSet(\'min\',this.value)"></div><div class="field"><label class="fl">Score now</label><input type="text" value="' + escH(d.score || '1-0') + '" oninput="psSet(\'score\',this.value)"></div></div>';
+    case 'yellow': case 'red': return player + manualName + '<div class="field"><label class="fl">Minute</label><input type="text" value="' + escH(d.min || '41') + '" oninput="psSet(\'min\',this.value)"></div>';
     case 'halftime': return fxPick + crests + score;
     case 'fulltime': return fxPick + crests + score +
       '<div class="field"><label class="fl">Goalscorers <span style="color:var(--gr);font-weight:400">— optional, e.g. Hill 23\', Cole 67\'. A long list auto-shrinks.</span></label><input type="text" value="' + escH(d.scorers || '') + '" placeholder="Hill 23\', Cole 67\'" oninput="psSet(\'scorers\',this.value)"></div>' +
       '<div class="field"><label class="fl">Manager\'s quote <span style="color:var(--gr);font-weight:400">— optional, 1–3 sentences. Auto-shrinks to fit.</span></label><textarea rows="3" placeholder="Delighted with the character the lads showed today…" oninput="psSet(\'mgrQuote\',this.value)">' + escH(d.mgrQuote || '') + '</textarea></div>';
-    case 'motm': return player + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>' + psCutoutControls();
+    case 'motm': return player + manualName + '<div class="field"><label class="fl">Sponsor (optional)</label><input type="text" value="' + escH(d.sponsor || '') + '" placeholder="Sponsored by…" oninput="psSet(\'sponsor\',this.value)"></div>' + psCutoutControls();
     case 'potm': return player +
       '<div class="ps-crestrow"><div class="field"><label class="fl">…or type a name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Position (optional)</label><input type="text" value="' + escH(d.manualPos || '') + '" placeholder="Striker" oninput="psSet(\'manualPos\',this.value)"></div></div>' +
@@ -4779,7 +4782,7 @@ function psEff() {
   var p = psPlayerObj(), d = PS.data;
   if (p) return { surname: psSurname(p), photo: p.photo, position: p.position, name: p.name };
   var mn = (d.manualName || '').trim();
-  return { surname: mn ? mn.toUpperCase() : '[NAME]', photo: '', position: d.manualPos || '', name: mn };
+  return { surname: mn ? mn.toUpperCase() : (PS._exporting ? '' : 'ADD A NAME'), photo: '', position: d.manualPos || '', name: mn };
 }
 
 /* ── templates (return inner HTML of #ps-card, sized to s.w × s.h) ── */
@@ -4812,6 +4815,18 @@ function psBig(txt, t, size, top) {
 }
 function psPlayerObj() { var i = PS.data.player; return (i !== '' && i != null && psPlayers[i]) ? psPlayers[i] : null; }
 function psSurname(p, fallback) { if (!p) return fallback || ''; var n = (p.name || '').trim().split(' '); return (n[n.length - 1] || p.name || '').toUpperCase(); }
+// The name shown on a player card. Priority: the picked player's surname, then a
+// name typed by hand (a new signing not in the squad yet), then nothing. When
+// nothing is set we show a dim "ADD A NAME" hint in the PREVIEW so staff know
+// where it goes — but psExporting is true while the PNG is being built, so the
+// hint is stripped and a shared card is NEVER left saying [PLAYER] or [NAME].
+function psPlayerName() {
+  var p = psPlayerObj();
+  if (p) return psSurname(p);
+  var mn = ((PS.data && PS.data.manualName) || '').trim();
+  if (mn) return mn.toUpperCase();
+  return PS._exporting ? '' : 'ADD A NAME';
+}
 function psPlayerCard(t, s, p, big, framed) {
   // framed photo (or initials) centred
   var cx = s.w / 2;
@@ -4940,11 +4955,11 @@ function psRender() {
       inner += ctr(ebTop + 70, '<span style="' + beb(X ? 130 : 180, '#fff') + '">GOAL!</span>');
       inner += playerFrame(p, X ? 280 : 380, W / 2, ebTop + (X ? 210 : 280));
       var gy = X ? H - 150 : (ST ? H - 340 : H - 230);
-      inner += ctr(gy, '<span style="' + beb(96, '#fff') + '">' + psSurname(p, '[PLAYER]') + '</span>');
+      inner += ctr(gy, '<span style="' + beb(96, '#fff') + '">' + escH(psPlayerName()) + '</span>');
       inner += ctr(gy + 96, '<span style="font-family:Arial;font-size:30px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
     } else {
       inner += ctr(midY - (X ? 150 : 250), '<span style="' + beb(X ? 180 : 260, t.accent) + '">GOAL!</span>');
-      inner += ctr(midY - (X ? 10 : 10), '<span style="' + beb(X ? 130 : 180, '#fff') + '">' + psSurname(p, '[PLAYER]') + '</span>');
+      inner += ctr(midY - (X ? 10 : 10), '<span style="' + beb(X ? 130 : 180, '#fff') + '">' + escH(psPlayerName()) + '</span>');
       inner += ctr(midY + (X ? 130 : 180), '<span style="font-family:Arial;font-size:34px;font-weight:800;letter-spacing:4px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
     }
   } else if (PS.type === 'yellow' || PS.type === 'red') {
@@ -4952,7 +4967,7 @@ function psRender() {
     inner += psEyebrow(PS.type === 'red' ? 'RED CARD' : 'YELLOW CARD', t, ebTop);
     inner += '<div style="position:absolute;top:' + (midY - (X ? 150 : 220)) + 'px;left:' + (W / 2 - (X ? 110 : 150)) + 'px;width:' + (X ? 220 : 300) + 'px;height:' + (X ? 300 : 420) + 'px;border-radius:22px;background:' + col + ';box-shadow:0 26px 64px -16px rgba(0,0,0,.85)"></div>';
     var cy3 = X ? H - 150 : (ST ? H - 350 : H - 240);
-    inner += ctr(cy3, '<span style="' + beb(X ? 80 : 100, '#fff') + '">' + psSurname(pc, '[PLAYER]') + '</span>');
+    inner += ctr(cy3, '<span style="' + beb(X ? 80 : 100, '#fff') + '">' + escH(psPlayerName()) + '</span>');
     inner += ctr(cy3 + (X ? 84 : 104), '<span style="font-family:Arial;font-size:28px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '41') + '\'' + (pos(pc) ? ' &middot; ' + pos(pc) : '') + '</span>');
   } else if (PS.type === 'halftime' || PS.type === 'fulltime') {
     var cz4 = X ? 170 : 210, cyc = X ? midY - 20 : (ST ? 560 : 420);
@@ -4979,12 +4994,12 @@ function psRender() {
     var pm = psPlayerObj(), hasM = pm && pm.photo;
     inner += psEyebrow('MAN OF THE MATCH', t, ebTop);
     if (d.useCut && d.pCut) {
-      inner += psCutoutHero(W, H, X, ST, t, beb, '', psSurname(pm, (d.manualName || '[PLAYER]').toUpperCase()), (pos(pm) || '') + (d.sponsor ? (pos(pm) ? ' · ' : '') + 'SPONSORED BY ' + escH(d.sponsor).toUpperCase() : ''));
+      inner += psCutoutHero(W, H, X, ST, t, beb, '', escH(psPlayerName()), (pos(pm) || '') + (d.sponsor ? (pos(pm) ? ' · ' : '') + 'SPONSORED BY ' + escH(d.sponsor).toUpperCase() : ''));
     } else {
       var mEff = d.pPhoto || (pm && pm.photo);
       if (mEff) inner += playerFrame({ photo: mEff }, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
       var my = X ? H - 150 : (ST ? H - 340 : H - 230);
-      inner += ctr(mEff ? my : midY - 40, '<span style="' + beb(mEff ? 96 : (X ? 150 : 200), '#fff') + '">' + psSurname(pm, '[PLAYER]') + '</span>');
+      inner += ctr(mEff ? my : midY - 40, '<span style="' + beb(mEff ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(psPlayerName()) + '</span>');
       inner += ctr(mEff ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
     }
   } else if (PS.type === 'potm') {
@@ -5018,10 +5033,10 @@ function psRender() {
     inner += ctr(ebTop + (X ? 70 : 110), '<span style="' + beb(X ? 110 : 150, t.accent) + '">HAPPY BIRTHDAY</span>');
     if (bp && bp.photo) inner += playerFrame(bp, X ? 250 : 330, W / 2, ebTop + (X ? 150 : 230));
     var byy = (bp && bp.photo) ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 10;
-    inner += ctr(byy, '<span style="' + beb(X ? 120 : 160, '#fff') + '">' + escH(eb2.surname || (bp ? psSurname(bp) : '[NAME]')) + (d.age ? ' <span style="color:' + t.accent + '">' + escH(d.age) + '</span>' : '') + '</span>');
+    inner += ctr(byy, '<span style="' + beb(X ? 120 : 160, '#fff') + '">' + escH(psPlayerName()) + (d.age ? ' <span style="color:' + t.accent + '">' + escH(d.age) + '</span>' : '') + '</span>');
     if (d.bmsg) inner += ctr(byy + (X ? 96 : 130), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.bmsg) + '</span>');
   } else if (PS.type === 'signing') {
-    var psn = psPlayerObj(), nm = psn ? psSurname(psn) : (d.manualName || '[NAME]').toUpperCase(), hasS = psn && psn.photo;
+    var psn = psPlayerObj(), nm = escH(psPlayerName()), hasS = psn && psn.photo;
     inner += psEyebrow('NEW SIGNING', t, ebTop);
     if (d.useCut && d.pCut) {
       // Cinematic unveiling: big faded crest, player knocked out bottom-centre,
@@ -5097,33 +5112,53 @@ function psRender() {
   wrap.style.cssText = 'position:relative;width:' + (W * k) + 'px;height:' + (H * k) + 'px;margin:0 auto;overflow:hidden';
 }
 
-function psDownload() {
-  var card = document.getElementById('ps-card');
+function psFname() { return 'rayners-lane-' + PS.type + '-' + PS.size + '.png'; }
+
+// Build the PNG once, hand the blob to a callback. Shared by Download and Share.
+// psExporting is flipped on around the render so the "ADD A NAME" preview hint is
+// blanked — the exported card never carries a placeholder. A full re-render (not
+// just a capture of the current DOM) is what makes that swap clean.
+function psBuildBlob(cb) {
   if (typeof html2canvas === 'undefined') { toast('Still loading — try again in a second', true); return; }
   toast('Building your post…');
-  var prevT = card.style.transform; card.style.transform = 'scale(1)';
+  PS._exporting = true; psRender();                      // rebuild with hints stripped
+  var card = document.getElementById('ps-card');
+  card.style.transform = 'scale(1)';                     // capture at full resolution
+  var restore = function () { PS._exporting = false; psRender(); };  // back to the live preview
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
-    psAutoFit(card); // re-fit with real fonts loaded so the exported PNG matches
+    psAutoFit(card);
     html2canvas(card, { backgroundColor: null, useCORS: true, scale: 2, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
-      card.style.transform = prevT;
-      var fname = 'rayners-lane-' + PS.type + '-' + PS.size + '.png';
-      cv.toBlob(function (blob) {
-        if (!blob) { toast('Could not build the image — try again', true); return; }
-        var file = (typeof File !== 'undefined') ? new File([blob], fname, { type: 'image/png' }) : null;
-        // PHONE: hand the PNG to the native share sheet — Save to Photos /
-        // camera roll, WhatsApp, Instagram, Messages — all one tap, no preview tab.
-        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({ files: [file], title: 'Rayners Lane FC' })
-            .then(function () { toast('Done'); })
-            .catch(function (err) {
-              if (err && err.name === 'AbortError') return; // they closed the sheet
-              psSaveBlob(blob, fname);                       // anything else → just save it
-            });
-        } else {
-          psSaveBlob(blob, fname); // desktop / older browser → normal download
-        }
-      }, 'image/png');
-    }).catch(function (e) { card.style.transform = prevT; toast('Render failed: ' + e.message, true); });
+      restore();
+      cv.toBlob(function (blob) { cb(blob); }, 'image/png');
+    }).catch(function (e) { restore(); toast('Render failed: ' + e.message, true); });
+  });
+}
+
+// COMPUTER (and anywhere): save the PNG straight to the device — Downloads folder
+// on a desktop. This is the button to use on a laptop, where a share sheet would
+// otherwise only offer AirDrop and no plain "save".
+function psDownload() {
+  psBuildBlob(function (blob) {
+    if (!blob) { toast('Could not build the image — try again', true); return; }
+    psSaveBlob(blob, psFname());
+  });
+}
+
+// PHONE: the native share sheet — Save to Photos, WhatsApp, Instagram, AirDrop.
+// Falls back to a straight download where sharing files isn't supported (most
+// desktops), so the button always does something useful.
+function psShare() {
+  psBuildBlob(function (blob) {
+    if (!blob) { toast('Could not build the image — try again', true); return; }
+    var fname = psFname();
+    var file = (typeof File !== 'undefined') ? new File([blob], fname, { type: 'image/png' }) : null;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: 'Rayners Lane FC' })
+        .then(function () { toast('Done'); })
+        .catch(function (err) { if (err && err.name === 'AbortError') return; psSaveBlob(blob, fname); });
+    } else {
+      psSaveBlob(blob, fname);   // no file-sharing here (e.g. desktop) → just save it
+    }
   });
 }
 function psSaveBlob(blob, fname) {
@@ -5346,7 +5381,8 @@ function mfExport(monthKey, forceSave) {
     });
   });
 }
-function mfDownloadOne() { if (MF.month) { toast('Building ' + mfMonthLabel(MF.month) + '…'); mfExport(MF.month, false); } }
+function mfDownloadOne() { if (MF.month) { toast('Building ' + mfMonthLabel(MF.month) + '…'); mfExport(MF.month, true); } }   // always save to device
+function mfShareOne() { if (MF.month) { toast('Building ' + mfMonthLabel(MF.month) + '…'); mfExport(MF.month, false); } }  // native share sheet
 // All months, one after another. forceSave so we don't fire nine share sheets.
 function mfDownloadAll() {
   var list = MF.months.slice(), i = 0;
