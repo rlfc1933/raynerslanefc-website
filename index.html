@@ -640,6 +640,50 @@
   </div>
 </section>
 
+<!-- ══════════ WELCOME TO TITHE FARM — cinematic full-bleed aerial ══════════ -->
+<style>
+  .titheband{position:relative;overflow:hidden;isolation:isolate}
+  .titheband__bg{position:absolute;inset:0;z-index:-2;display:block}
+  .titheband__bg img{width:100%;height:100%;object-fit:cover;
+    /* keep the pitch + clubhouse in frame as the crop narrows on phones */
+    object-position:center 46%}
+  /* dark gradient for legibility only — the photo stays visible, not washed out */
+  .titheband__overlay{position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(90deg,rgba(8,8,8,.82) 0%,rgba(8,8,8,.55) 45%,rgba(8,8,8,.30) 100%),
+               linear-gradient(0deg,rgba(8,8,8,.75) 0%,rgba(8,8,8,0) 40%)}
+  .titheband__content{position:relative;min-height:clamp(420px,58vh,620px);
+    display:flex;flex-direction:column;justify-content:center;padding-top:70px;padding-bottom:70px}
+  .titheband__eyebrow{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--yellow)}
+  .titheband__title{font-family:var(--font-d);font-size:clamp(64px,11vw,150px);line-height:.9;
+    letter-spacing:.02em;color:var(--white);margin:14px 0 0;text-shadow:0 4px 30px rgba(0,0,0,.5)}
+  .titheband__rule{width:84px;height:5px;background:var(--yellow);border-radius:3px;margin:20px 0 18px}
+  .titheband__sub{font-family:var(--font-c);font-size:clamp(17px,2.4vw,24px);font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--white);opacity:.9}
+  .titheband__cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+  .titheband .btn-outline{color:var(--white);border-color:rgba(255,255,255,.55);backdrop-filter:blur(2px)}
+  .titheband .btn-outline:hover{border-color:var(--yellow);color:var(--yellow)}
+</style>
+<section class="titheband" aria-label="Tithe Farm, home of Rayners Lane FC">
+  <picture class="titheband__bg">
+    <source type="image/webp" srcset="img/ground/tithe-farm-aerial-wide-800.webp 800w, img/ground/tithe-farm-aerial-wide-1600.webp 1600w" sizes="100vw">
+    <img src="img/ground/tithe-farm-aerial-wide-1600.jpg" data-no-opt
+      srcset="img/ground/tithe-farm-aerial-wide-800.jpg 800w, img/ground/tithe-farm-aerial-wide-1600.jpg 1600w" sizes="100vw"
+      alt="Aerial view of Tithe Farm, home of Rayners Lane FC — the 3G pitch, clubhouse and surrounding Harrow" loading="lazy" decoding="async">
+  </picture>
+  <div class="titheband__overlay"></div>
+  <div class="container titheband__content" data-reveal>
+    <span class="titheband__eyebrow">Home of The Lane</span>
+    <h2 class="titheband__title">TITHE FARM</h2>
+    <div class="titheband__rule"></div>
+    <p class="titheband__sub">Harrow, Middlesex &middot; Since 1933</p>
+    <div class="titheband__cta">
+      <a class="btn btn-primary" href="https://maps.google.com/maps?q=51.570435,-0.365073" target="_blank" rel="noopener">Get Directions</a>
+      <a class="btn btn-outline" href="fixtures.html">See Fixtures</a>
+    </div>
+  </div>
+</section>
+
 <div id="footer-placeholder"></div>
 
 <script src="js/components.js"></script>
