@@ -129,8 +129,8 @@
         <div id="fwp-table-wrap"><div class="fwp-embed" data-url="combined-counties-league-premier-division-north/league-table"></div></div>
         <div id="fwp-table-empty" class="fwp-empty" hidden>
           <div class="fwp-empty__i"><i class="ico ico-calendar-days"></i></div>
-          <div class="fwp-empty__t">League table starts when the season kicks off</div>
-          <div class="fwp-empty__d">First game <strong>Saturday 1 August 2026</strong>. No games played yet, so there’s no table to show — it will appear here automatically.</div>
+          <div class="fwp-empty__t">Table loading…</div>
+          <div class="fwp-empty__d">The live Combined Counties Premier North table loads from Football Web Pages and updates automatically.</div>
           <a class="fwp-empty__a" href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">View on Football Web Pages →</a>
         </div>
       </div>
@@ -744,6 +744,12 @@ function renderFxTable(rows) {
   /* No unconditional min-height — an empty widget must collapse, not reserve a
      void. The wrapper only turns white once the embed genuinely has content. */
   .fwp-embed iframe{width:100%!important;border:0!important;display:block}
+  /* FWP reports this pre-season table's height as 0px via postMessage (their side),
+     which collapses the iframe to nothing. A STYLESHEET !important floor beats
+     embed.js's inline min-height:0 and shows the full 20-team table. 740px fits it
+     exactly on mobile and desktop; if FWP ever reports a real, larger height that
+     still wins (min-height only floors, never caps). */
+  #fwp-table-wrap iframe{min-height:740px!important}
   #fwp-table-wrap.has-content{background:#fff;min-height:340px}
   .fwp-empty{padding:28px 20px;text-align:center;background:var(--card)}
   .fwp-empty__i{font-size:30px;margin-bottom:8px}
@@ -755,24 +761,59 @@ function renderFxTable(rows) {
 <!-- Football Web Pages live embeds (loads once; renders the league-table iframe above) -->
 <script src="https://www.footballwebpages.co.uk/embed.js" defer></script>
 <script>
-/* FWP empty-state guard — the 2026-27 table has no rows until the season starts
-   (Sat 1 Aug), so the widget renders nothing. Rather than leave a white void, we
-   watch the embed and, if it never gains real height, swap in an on-brand
-   message. It's cross-origin so we can only measure it, not read it. */
+/* FWP league table — make it SHOW.
+   The table lives in a tab that's display:none until opened. embed.js measured
+   the container at width 0 on page load and built a zero-size iframe (src has
+   &width=0), so the table rendered blank. The old guard then read 0 height and
+   hid the whole thing behind a "starts 1 August" placeholder — so FWP looked
+   populated and we looked empty. The table has in fact existed since pre-season.
+
+   Fix: (re)build the embed at the REAL width the moment the League Table tab is
+   opened. The iframe's collapsed height is floored in CSS (see #fwp-table-wrap
+   iframe). Default to SHOWING; the neutral fallback only appears if the iframe
+   genuinely can't be built. */
 (function () {
-  function check(wrapId, emptyId, tries) {
-    var wrap = document.getElementById(wrapId), empty = document.getElementById(emptyId);
-    if (!wrap || !empty) return;
-    var fr = wrap.querySelector('iframe');
-    var h = fr ? Math.round(fr.getBoundingClientRect().height) : 0;
-    if (h > 80) {                       // real content rendered
-      wrap.classList.add('has-content'); empty.hidden = true; return;
+  var builtWidth = 0;
+  function build() {
+    var wrap = document.getElementById('fwp-table-wrap');
+    var empty = document.getElementById('fwp-table-empty');
+    if (!wrap || !wrap.offsetWidth) return;            // tab not visible yet — wait
+    var embed = wrap.querySelector('.fwp-embed');
+    if (!embed) return;
+    // Already built at ~this width? Don't reload it needlessly on a re-click.
+    if (builtWidth && Math.abs(wrap.offsetWidth - builtWidth) < 24 && embed.querySelector('iframe')) {
+      wrap.style.display = ''; wrap.classList.add('has-content'); if (empty) empty.hidden = true; return;
     }
-    if (tries > 0) return setTimeout(function () { check(wrapId, emptyId, tries - 1); }, 900);
-    wrap.style.display = 'none';        // nothing came back — show the honest message
-    empty.hidden = false;
+    builtWidth = wrap.offsetWidth;
+    // Rebuild at the real width. embed.js only (re)creates embeds that have no
+    // data-id, so clear the iframe + id and re-run its own initialiser.
+    embed.innerHTML = '';
+    try { delete embed.dataset.id; } catch (e) { embed.removeAttribute('data-id'); }
+    if (typeof window.initEmbeds === 'function') window.initEmbeds();
+    var built = !!embed.querySelector('iframe');
+    wrap.style.display = built ? '' : 'none';
+    wrap.classList.toggle('has-content', built);
+    if (empty) empty.hidden = built;                   // neutral message only if we truly couldn't build
   }
-  window.addEventListener('load', function () { setTimeout(function () { check('fwp-table-wrap', 'fwp-table-empty', 8); }, 1200); });
+  // Build when the League Table tab is opened (it has real width then).
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('.tab-btn[data-tab="table"]');
+    if (b) setTimeout(build, 60);
+  });
+  // Rebuild on a meaningful resize/orientation change so it matches the new width.
+  var rz; window.addEventListener('resize', function () {
+    clearTimeout(rz); rz = setTimeout(function () {
+      var p = document.getElementById('tab-table');
+      if (p && p.classList.contains('active')) build();
+    }, 300);
+  });
+  // If the table tab is the active one on load (e.g. a deep link), build it.
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var p = document.getElementById('tab-table');
+      if (p && p.classList.contains('active')) build();
+    }, 700);
+  });
 })();
 </script>
   <script src="js/share-news.js"></script>
