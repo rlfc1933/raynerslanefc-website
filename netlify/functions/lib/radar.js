@@ -73,6 +73,57 @@ function osmFitScore(biz, radiusMiles) {
   return { score: Math.min(100, score), reasons: reasons };
 }
 
+// ── Overpass query + processing (shared by the function AND the bake script) ──
+// A BOUNDING-BOX query is far faster than `around` (which measures distance for
+// every element), so it fits inside Netlify's 10s function limit. We then filter
+// the square back down to the circle in code.
+const AMENITY_RE = 'restaurant|cafe|pub|bar|fast_food|food_court|ice_cream|bank|pharmacy|dentist|doctors|veterinary|clinic|optician|car_repair|fuel|car_wash|car_rental|driving_school|vehicle_inspection|marketplace|bureau_de_change|cinema|nightclub|gym';
+function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+function bboxQuery(radiusMiles) {
+  const dLat = radiusMiles / 69, dLng = radiusMiles / (69 * Math.cos(TITHE.lat * Math.PI / 180));
+  const bb = '(' + (TITHE.lat - dLat).toFixed(5) + ',' + (TITHE.lng - dLng).toFixed(5) + ',' + (TITHE.lat + dLat).toFixed(5) + ',' + (TITHE.lng + dLng).toFixed(5) + ')';
+  return '[out:json][timeout:25];(' +
+    'nwr' + bb + '[shop][name];' +
+    'nwr' + bb + '[amenity~"^(' + AMENITY_RE + ')$"][name];' +
+    'nwr' + bb + '[office][name];' +
+    'nwr' + bb + '[craft][name];' +
+    'nwr' + bb + '[leisure~"^(fitness_centre|sports_centre)$"][name];' +
+    ');out center tags 1500;';
+}
+function addressFrom(t) {
+  return [t['addr:housenumber'], t['addr:street'], t['addr:suburb'] || t['addr:city'], t['addr:postcode']].filter(Boolean).join(', ');
+}
+// Turn raw Overpass elements into scored, de-duped business records within the
+// circle. Identical logic wherever it runs, so baked data == live data.
+function processElements(elements, radiusMiles) {
+  const seen = {}, out = [];
+  (elements || []).forEach(function (el) {
+    const t = el.tags || {}; if (!t.name) return;
+    const lat = el.lat != null ? el.lat : (el.center && el.center.lat);
+    const lng = el.lon != null ? el.lon : (el.center && el.center.lon);
+    if (lat == null || lng == null) return;
+    const dist = haversineMiles(TITHE.lat, TITHE.lng, lat, lng);
+    if (dist > radiusMiles) return;                 // bbox is a square — keep the circle
+    const k = normName(t.name) + '@' + lat.toFixed(3) + ',' + lng.toFixed(3);
+    if (seen[k]) return; seen[k] = 1;
+    const cat = categoryOf(t);
+    const biz = {
+      id: el.type[0] + el.id, osm_type: el.type, osm_id: el.id,
+      name: t.name, category: cat.cat, category_label: cat.label,
+      lat: lat, lng: lng, address: addressFrom(t), postcode: t['addr:postcode'] || '',
+      phone: t.phone || t['contact:phone'] || '', website: t.website || t['contact:website'] || t.url || '',
+      email: t.email || t['contact:email'] || '', opening_hours: t.opening_hours || '',
+      distance_miles: +dist.toFixed(2), tags: t, source: 'OpenStreetMap',
+      osm_url: 'https://www.openstreetmap.org/' + el.type + '/' + el.id,
+    };
+    const fit = osmFitScore(biz, radiusMiles);
+    biz.fit_score = fit.score; biz.fit_reasons = fit.reasons;
+    out.push(biz);
+  });
+  out.sort(function (a, b) { return b.fit_score - a.fit_score || a.distance_miles - b.distance_miles; });
+  return out;
+}
+
 // ── Netlify Blobs cache (private, server-side) ────────────────────────────
 async function store() {
   const { getStore } = await import('@netlify/blobs');
@@ -103,4 +154,4 @@ function resp(code, obj, cacheSeconds) {
   return { statusCode: code, headers: headers, body: JSON.stringify(obj) };
 }
 
-module.exports = { TITHE, haversineMiles, categoryOf, osmFitScore, cacheGet, cacheSet, politeHeaders, resp };
+module.exports = { TITHE, haversineMiles, categoryOf, osmFitScore, bboxQuery, processElements, cacheGet, cacheSet, politeHeaders, resp };
