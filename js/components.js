@@ -474,7 +474,7 @@ function buildFooter() {
 
         <div class="footer__bottom">
           <p class="footer__legal">
-            &copy; 2026 Rayners Lane FC. Tithe Farm Sports &amp; Social Club LTD. All rights reserved. &middot; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a> &middot; <a href='admin.html' style='color:rgba(255,255,255,.18);font-size:11px;letter-spacing:.06em'>Staff Admin</a>
+            &copy; 2026 Rayners Lane FC. Tithe Farm Sports &amp; Social Club LTD. All rights reserved. &middot; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow);text-decoration:underline'>info@raynerslanefc.co.uk</a> &middot; <a href='admin.html' style='color:var(--grey);font-size:11px;letter-spacing:.06em;text-decoration:underline'>Staff Admin</a>
           </p>
           <div class="affils">
             <span class="affil-item">FA Charter Standard</span>
@@ -874,7 +874,7 @@ function initComponents(currentPage) {
         '<img src="/img/badge.png" alt="" aria-hidden="true" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
         '<div style="font-family:var(--font-c);font-size:12px;font-weight:600;color:#000;letter-spacing:.02em;line-height:1.4">' + icon + '</div>' +
       '</div>' +
-      '<button onclick="dismissPWA()" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x"></i></button>';
+      '<button onclick="dismissPWA()" type="button" aria-label="Dismiss app install prompt" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x" aria-hidden="true"></i></button>';
     document.body.insertBefore(banner, document.body.firstChild);
   }
 

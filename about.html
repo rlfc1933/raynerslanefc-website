@@ -396,7 +396,7 @@
             </div>
           </div>
           <div style="background:var(--card);padding:18px 20px;border-left:3px solid var(--green)">
-            <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:8px"><i class="ico ico-bus"></i> By Bus</div>
+            <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-bottom:8px"><i class="ico ico-bus"></i> By Bus</div>
             <div style="font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.7">
               Routes <strong style="color:var(--white)">H13</strong> and <strong style="color:var(--white)">398</strong> stop nearby.<br>
               Alight at Rayners Lane station stop.
@@ -438,7 +438,7 @@
     var bg = featured ? 'var(--green)' : (i % 2 ? 'var(--card2)' : 'var(--card)');
     var border = featured ? 'var(--yellow)' : 'var(--border)';
     var roleCol = 'var(--yellow)';
-    var note = m.note ? '<div style="font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.08em;margin-top:4px">' + esc(m.note) + '</div>' : '';
+    var note = m.note ? '<div style="font-family:var(--font-c);font-size:11px;color:' + (featured ? 'var(--white)' : 'var(--grey)') + ';letter-spacing:.08em;margin-top:4px">' + esc(m.note) + '</div>' : '';
     var photo = m.photo
       ? '<div style="width:100%;aspect-ratio:1/1;overflow:hidden;margin-bottom:16px;border-radius:4px;background:#0b0b0b"><img src="' + esc(m.photo) + '" alt="' + esc(m.name) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;object-position:center top"></div>'
       : '';
