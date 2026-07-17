@@ -47,6 +47,15 @@ var LANE_HS_CHAT  = '';
 // are untouched). Self-initialising, progressive, reversible.
 (function () { var s = document.createElement('script'); s.src = 'js/img.js'; s.defer = true; document.head.appendChild(s); })();
 
+// Accessibility toggle (built-in, free — text size / high contrast / reduce
+// motion, persisted per device). Public pages only, never the portal. The CSS
+// loads first so saved high-contrast/text prefs paint correctly, then the JS
+// applies them and builds the control.
+(function () {
+  var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/a11y.css'; document.head.appendChild(l);
+  var s = document.createElement('script'); s.src = 'js/a11y.js'; s.defer = true; document.head.appendChild(s);
+})();
+
 // Floating WhatsApp click-to-chat button (only if a number is configured).
 function initWhatsApp() {
   if (!LANE_WHATSAPP || document.getElementById('lane-wa')) return;

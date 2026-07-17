@@ -1,0 +1,145 @@
+/* ════════════════════════════════════════════════════════════════════════
+   RAYNERS LANE FC — ACCESSIBILITY TOGGLE (built-in, free, on-brand)
+
+   A discreet floating control that lets any visitor tune the site to their
+   needs — bigger text, maximum contrast, calmer motion. Choices persist in
+   localStorage across pages and visits. No third-party overlay widget: this
+   is native, keyboard-operable, screen-reader-labelled, and it never fights
+   real assistive tech.
+
+   Injected on every PUBLIC page by js/components.js (never on the portal).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TEXT SIZE — scale the root font; the type tokens (rem/clamp) reflow ──
+   .t1 ≈ default 100% · .t2 ≈ 112.5% (18px) · .t3 ≈ 125% (20px). */
+html.a11y-text-2 { font-size: 112.5%; }
+html.a11y-text-3 { font-size: 125%; }
+
+/* ── 2. HIGH-CONTRAST MODE — remap the shared colour tokens to their maximum.
+   Almost all text uses var(--grey/--lgrey/--muted/--white), so remapping the
+   tokens cascades site-wide. Pure-black surfaces + a visible border keep cards
+   separated; links underline for non-colour affordance. ── */
+html.a11y-contrast {
+  --grey:   #EDEDED;   /* was #777  */
+  --lgrey:  #FFFFFF;   /* was #AAA  */
+  --muted:  #EDEDED;   /* was #9A9A92 */
+  --white:  #FFFFFF;
+  --border: #7C7C7C;   /* was #242424 — now a visible outline */
+  --card:   #000000;
+  --card2:  #0A0A0A;
+  --dark:   #000000;
+  --black:  #000000;
+  --yellow-dim: #FFD100;   /* dimmed yellow → full yellow for AA */
+}
+html.a11y-contrast body { background: #000; }
+html.a11y-contrast a:not(.btn):not([class*="fz-btn"]):not(.nav__ticket) { text-decoration: underline; text-underline-offset: 2px; }
+/* Strong, always-on focus ring in contrast mode (not just :focus-visible). */
+html.a11y-contrast a:focus, html.a11y-contrast button:focus,
+html.a11y-contrast input:focus, html.a11y-contrast select:focus,
+html.a11y-contrast textarea:focus, html.a11y-contrast [tabindex]:focus {
+  outline: 3px solid #FFD100 !important; outline-offset: 2px !important;
+}
+
+/* ── 3. REDUCE MOTION — manual switch, mirrors prefers-reduced-motion so users
+   whose OS setting is off can still calm the site. ── */
+html.a11y-reduce-motion *, html.a11y-reduce-motion *::before, html.a11y-reduce-motion *::after {
+  animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+  transition-duration: .001ms !important; scroll-behavior: auto !important;
+}
+
+/* ════════════════ THE FLOATING CONTROL + PANEL ════════════════ */
+/* class-based z-index (specificity beats the body>* z-index:1 clamp). */
+.a11y-fab {
+  position: fixed; left: 18px; bottom: 18px; z-index: 90000;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--yellow, #FFD100); color: #0d0d0d;
+  border: 2px solid #0d0d0d; box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform .18s var(--ease, ease), box-shadow .18s;
+}
+.a11y-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 12px 30px rgba(0,0,0,.55); }
+.a11y-fab svg { width: 28px; height: 28px; display: block; }
+.a11y-fab:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.a11y-panel {
+  position: fixed; left: 18px; bottom: 80px; z-index: 90001;
+  width: min(320px, calc(100vw - 36px));
+  background: #111; color: var(--white, #F5F3ED);
+  border: 1px solid #2a2a2a; border-top: 4px solid var(--yellow, #FFD100);
+  border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  padding: 18px 18px 16px; font-family: var(--font-body, system-ui, sans-serif);
+  display: none;
+}
+.a11y-panel.open { display: block; }
+.a11y-panel[hidden] { display: none; }
+
+.a11y-panel__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.a11y-panel__title {
+  font-family: var(--font-display, sans-serif); font-size: 24px;
+  letter-spacing: .02em; color: var(--white, #F5F3ED); line-height: 1;
+}
+.a11y-panel__close {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 9px;
+  background: #1e1e1e; border: 1px solid #2a2a2a; color: #fff;
+  font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.a11y-panel__close:hover { border-color: var(--yellow, #FFD100); }
+.a11y-panel__sub { font-size: 12px; color: var(--muted, #9A9A92); margin: 0 0 14px; line-height: 1.5; }
+
+.a11y-group { margin-bottom: 16px; }
+.a11y-group__label {
+  display: block; font-size: 10px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--yellow, #FFD100); margin-bottom: 8px;
+}
+
+/* text-size segmented control */
+.a11y-seg { display: flex; gap: 6px; }
+.a11y-seg button {
+  flex: 1; padding: 10px 4px; border-radius: 9px; cursor: pointer;
+  background: #1a1a1a; border: 1px solid #2a2a2a; color: var(--lgrey, #AAA);
+  font-family: var(--font-display, sans-serif); letter-spacing: .02em; line-height: 1;
+}
+.a11y-seg button:nth-child(1) { font-size: 15px; }
+.a11y-seg button:nth-child(2) { font-size: 19px; }
+.a11y-seg button:nth-child(3) { font-size: 23px; }
+.a11y-seg button[aria-pressed="true"] {
+  background: var(--yellow, #FFD100); color: #0d0d0d; border-color: var(--yellow, #FFD100);
+}
+.a11y-seg button:focus-visible { outline: 3px solid var(--yellow, #FFD100); outline-offset: 2px; }
+
+/* switch rows (high contrast / reduce motion) */
+.a11y-switch {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 12px; border-radius: 10px; cursor: pointer;
+  background: #1a1a1a; border: 1px solid #2a2a2a; color: var(--white, #F5F3ED);
+  font-family: var(--font-body, sans-serif); font-size: 14px; font-weight: 600; text-align: left;
+}
+.a11y-switch + .a11y-switch { margin-top: 8px; }
+.a11y-switch:hover { border-color: #3a3a3a; }
+.a11y-switch:focus-visible { outline: 3px solid var(--yellow, #FFD100); outline-offset: 2px; }
+.a11y-switch__track {
+  width: 44px; height: 26px; border-radius: 999px; background: #333; position: relative;
+  flex-shrink: 0; transition: background .18s;
+}
+.a11y-switch__track::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff; transition: transform .18s;
+}
+.a11y-switch[aria-checked="true"] .a11y-switch__track { background: var(--green-mid, #236B3C); }
+.a11y-switch[aria-checked="true"] .a11y-switch__track::after { transform: translateX(18px); }
+
+.a11y-reset {
+  width: 100%; margin-top: 4px; padding: 9px; border-radius: 9px; cursor: pointer;
+  background: none; border: 1px solid #2a2a2a; color: var(--muted, #9A9A92);
+  font-family: var(--font-body, sans-serif); font-size: 12px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.a11y-reset:hover { color: var(--white, #F5F3ED); border-color: #3a3a3a; }
+.a11y-reset:focus-visible { outline: 3px solid var(--yellow, #FFD100); outline-offset: 2px; }
+
+/* The control honours reduced-motion too. */
+@media (prefers-reduced-motion: reduce) {
+  .a11y-fab, .a11y-switch__track, .a11y-switch__track::after { transition: none; }
+}
+/* Nudge the FAB above a WhatsApp button if one is ever configured. */
+.a11y-fab.a11y-fab--raised { bottom: 84px; }
