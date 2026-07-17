@@ -24,6 +24,7 @@ var PAGES = [
   ['/fan-zone.html', 'monthly', '0.6'],
   ['/volunteer.html', 'monthly', '0.6'],
   ['/investment.html', 'monthly', '0.6'],
+  ['/acerbis.html', 'monthly', '0.6'],
   ['/programme.html', 'weekly', '0.5'],
   ['/programmes.html', 'weekly', '0.5'],
   ['/shop.html', 'monthly', '0.5'],

@@ -416,6 +416,19 @@
   (function () {
     function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function box(s){
+      // Kit Partner (Acerbis) gets an elevated, logo-led card — top billing.
+      if (/kit partner/i.test(s.tier||'')) {
+        var kst = 'background:linear-gradient(135deg,#12261a,#0a160c);border:1px solid rgba(255,209,0,.5);border-top:3px solid var(--yellow);padding:16px 24px;border-radius:8px;display:flex;flex-direction:column;gap:9px;text-decoration:none;box-shadow:0 14px 34px -20px rgba(255,209,0,.3)';
+        var klogo = s.logo
+          ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + ' — Official Kit Partner" style="height:34px;width:auto;max-width:160px;object-fit:contain;align-self:flex-start" onerror="this.style.display=\'none\';var t=this.parentNode.querySelector(\'.kit-fb\');if(t)t.style.display=\'block\'">'
+          : '';
+        var kinner = '<span style="font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)">Official Kit Partner</span>'
+          + klogo
+          + '<span class="kit-fb" style="' + (s.logo ? 'display:none;' : '') + 'font-family:var(--font-d);font-size:30px;letter-spacing:.05em;color:#fff;line-height:1">' + esc(s.name).toUpperCase() + '</span>';
+        return s.url
+          ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener" style="' + kst + '">' + kinner + '</a>'
+          : '<div style="' + kst + '">' + kinner + '</div>';
+      }
       var inner = esc(s.name) + '<br><span style="color:var(--grey);font-weight:400;font-size:10px">' + esc(s.role || s.tier || 'Club Partner') + '</span>';
       var st = 'background:var(--dark);border:1px solid var(--border);padding:12px 20px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--lgrey);text-transform:uppercase;text-decoration:none;display:block';
       return s.url

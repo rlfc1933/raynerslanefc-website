@@ -1,0 +1,14 @@
+{
+  "_note": "Site-wide config a staffer can edit without touching HTML. `admission` drives the reusable 'At the Gate' block (js/components.js → initGate) on the homepage, fixtures and contact pages.",
+  "admission": {
+    "heading": "At the Gate",
+    "sub": "Pay on the day — cash or card",
+    "prices": [
+      { "label": "General Admission", "price": "£9" },
+      { "label": "Concessions", "price": "£6", "note": "Over-65s, students" },
+      { "label": "Under 18s", "price": "£3" },
+      { "label": "Under 10s", "price": "Free" }
+    ]
+  },
+  "updatedAt": "2026-07-17T00:00:00.000Z"
+}

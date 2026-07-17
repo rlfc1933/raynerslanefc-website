@@ -115,6 +115,30 @@ function wrapMain() {
   nodes.forEach(function (node) { main.appendChild(node); });
 }
 
+// "At the Gate" admission prices — reusable + data-driven. Fills every
+// [data-at-the-gate] container from data/config.json (admission block), so staff
+// update prices in one JSON file, not in HTML. Silent if config/admission absent.
+function initGate() {
+  var hosts = document.querySelectorAll('[data-at-the-gate]');
+  if (!hosts.length) return;
+  function g(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  fetch('data/config.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (c) {
+      var a = c && c.admission; if (!a || !(a.prices && a.prices.length)) return;
+      var rows = a.prices.map(function (p) {
+        return '<div class="gate__row"><span class="gate__price">' + g(p.price) + '</span>' +
+          '<span class="gate__label">' + g(p.label) + (p.note ? '<span class="gate__note">' + g(p.note) + '</span>' : '') + '</span></div>';
+      }).join('');
+      var html = '<div class="gate">' +
+        '<div class="gate__head"><span class="gate__eyebrow"><i class="ico ico-ticket" aria-hidden="true"></i> ' + g(a.heading || 'At the Gate') + '</span>' +
+        (a.sub ? '<span class="gate__sub">' + g(a.sub) + '</span>' : '') + '</div>' +
+        '<div class="gate__grid">' + rows + '</div></div>';
+      hosts.forEach(function (h) { h.innerHTML = html; });
+    })
+    .catch(function () {});
+}
+
 function dismissPWA() {
   localStorage.setItem('rlfc_pwa_dismissed', '1');
   var b = document.getElementById('pwa-banner');
@@ -432,6 +456,12 @@ function buildFooter() {
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
               </a>
             </div>
+            <!-- Official Kit Partner credit — site-wide -->
+            <a href="acerbis.html" style="display:inline-flex;align-items:center;gap:12px;margin-top:22px;text-decoration:none">
+              <span style="font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);line-height:1.4">Official<br>Kit Partner</span>
+              <img src="img/sponsors/acerbis-wordmark.png" alt="Acerbis — Official Kit Partner" style="height:26px;width:auto;max-width:130px;object-fit:contain;opacity:.9"
+                   onerror="this.outerHTML='&lt;span style=\'font-family:var(--font-d);font-size:24px;letter-spacing:.06em;color:var(--white)\'&gt;ACERBIS&lt;/span&gt;'">
+            </a>
           </div>
 
           <div class="footer__col">
@@ -461,6 +491,7 @@ function buildFooter() {
             <h4>Get Involved</h4>
             <ul>
               <li><a href="investment.html">Sponsorship</a></li>
+              <li><a href="acerbis.html">Kit Partner: Acerbis</a></li>
               <li><a href="shop.html">Club Shop</a></li>
               <li><a href="https://www.easyfundraising.org.uk/causes/raynerslanefc" target="_blank">Easy Fundraising</a></li>
               <li><a href="volunteer.html">Volunteer</a></li>
@@ -736,6 +767,7 @@ function initComponents(currentPage) {
   if (footer)  footer.innerHTML  = buildFooter();
 
   wrapMain();          // a11y: wrap primary content in a <main> landmark
+  initGate();          // matchday admission prices (data/config.json → [data-at-the-gate])
   initWhatsApp();      // floating WhatsApp button (Phase 4) — only if configured
   initHubSpotChat();   // HubSpot live chat (Phase 4) — only if configured
   initSkipLink();      // a11y: keyboard "skip to content" link (targets <main>)
