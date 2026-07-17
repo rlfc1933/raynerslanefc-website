@@ -385,7 +385,9 @@ function fxActs(f) {
   rows += '<div class="fxc__acts">' +
     '<a class="fxc__b" href="/.netlify/functions/fixtures-ics"><i class="ico ico-calendar"></i> Calendar</a>' +
     '<button class="fxc__b" data-fxshare="' + fxEsc(f.id) + '" onpointerenter="fxWarmShare(\'' + fxEsc(f.id) + '\')" ontouchstart="fxWarmShare(\'' + fxEsc(f.id) + '\')" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>' +
-  '</div>';
+  '</div>' +
+  // The matchday graphic: both crests, date, venue, two themes, #UpTheLane.
+  '<div class="fxc__acts"><button class="fxc__b fxc__b--mc" onclick="fxMatchCard(\'' + fxEsc(f.id) + '\')"><i class="ico ico-image"></i> Match Card</button></div>';
   return rows;
 }
 function fxCard(f) {
@@ -492,6 +494,12 @@ function fxDrawCrest(ctx, img, cx, cy, box, initials) {
     if (!f || !window.rlShareFixture) return;
     var btn = document.querySelector('[data-fxshare="' + id + '"]');
     return window.rlShareFixture(f, btn);
+  }
+  // The matchday graphic (both crests + date/venue, two themes) — a separate card
+  // from the headline share above.
+  function fxMatchCard(id) {
+    var f = (window._fxAll || []).filter(function (x) { return x.id === id; })[0];
+    if (f && window.rlMatchCard) window.rlMatchCard(f);
   }
   // Build the card on first touch/hover — it lands before the click, so the tap
   // itself has no await in front of navigator.share() and iOS keeps the gesture.
@@ -743,6 +751,8 @@ function renderFxTable(rows) {
   .fxc__await{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);text-align:center;margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
   .fxc__acts{display:flex;gap:6px;margin-top:11px}
   .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:8px;padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
+  .fxc__b--mc{border-color:rgba(255,209,0,.45);color:var(--yellow);background:rgba(255,209,0,.06)}
+  .fxc__b--mc:hover{background:rgba(255,209,0,.14);border-color:var(--yellow);color:var(--yellow)}
   .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
   /* next match — elevated hero with countdown */
   .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:16px;padding:18px 16px 14px;margin-bottom:22px}

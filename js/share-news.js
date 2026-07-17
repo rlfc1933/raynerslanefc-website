@@ -315,4 +315,189 @@
       link: '/fixtures.html'
     }, btn);
   };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  //  MATCH CARD — a matchday graphic with BOTH crests (home left, away right),
+  //  the date, kick-off and venue, in the club's two brand themes. Separate from
+  //  the headline share card above; opened by the "Match Card" button on a
+  //  fixture. On brand, with raynerslanefc.co.uk and #UpTheLane in the footer.
+  // ══════════════════════════════════════════════════════════════════════════
+  var MC_THEMES = {
+    dark: {
+      label: 'Dark', ink: W_, sub: 'rgba(245,243,237,.72)', accent: Y, vs: Y,
+      tagBg: Y, tagInk: '#0d0d0d', panel: 'rgba(255,255,255,.05)', rule: Y, url: Y, tag: W_,
+      bg: function (x, W, H) {
+        x.fillStyle = BK; x.fillRect(0, 0, W, H);
+        var g = x.createRadialGradient(W * 0.5, H * 0.32, 0, W * 0.5, H * 0.32, H * 0.95);
+        g.addColorStop(0, '#1e3a24'); g.addColorStop(1, BK); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      }
+    },
+    yellow: {
+      label: 'Yellow', ink: '#0d0d0d', sub: 'rgba(13,13,13,.68)', accent: G, vs: G,
+      tagBg: '#0d0d0d', tagInk: Y, panel: 'rgba(0,0,0,.06)', rule: G, url: '#0d0d0d', tag: G,
+      bg: function (x, W, H) {
+        var g = x.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, '#FFDE42'); g.addColorStop(1, '#EFC200'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      }
+    }
+  };
+
+  function fitFont(x, text, maxW, start, family) {
+    var s = start;
+    do { x.font = '400 ' + s + 'px ' + family; if (x.measureText(text).width <= maxW || s <= 24) break; s -= 2; } while (s > 24);
+    return s;
+  }
+
+  function mcDetails(f) {
+    var home = f.isHome !== false;
+    var d = '';
+    try { d = new Date(f.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' }); } catch (e) { d = f.date || ''; }
+    var p = String(f.kickoff || '15:00').split(':'), Hh = +p[0], mm = p[1] || '00';
+    var ko = (Hh % 12 || 12) + ':' + (mm.length === 1 ? '0' + mm : mm) + (Hh >= 12 ? ' PM' : ' AM');
+    var venue = home ? 'Tithe Farm, Harrow' : (f.venue || 'Away');
+    return { dateLine: (d + ' · ' + ko).toUpperCase(), venue: venue, home: home };
+  }
+
+  async function matchCardPng(f, themeKey) {
+    var t = MC_THEMES[themeKey] || MC_THEMES.dark;
+    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Barlow"'); await document.fonts.load('700 26px "Barlow Condensed"'); await document.fonts.ready; } } catch (e) {}
+
+    var W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d');
+    t.bg(x, W, H);
+
+    var home = f.isHome !== false, opp = (f.opponent || 'TBC').toUpperCase();
+    var RL = 'img/badge.png', OPP = f.oppCrest || f.image || 'img/badge.png';
+    var leftCrest = home ? RL : OPP, rightCrest = home ? OPP : RL;
+    var leftName = home ? 'RAYNERS LANE' : opp, rightName = home ? opp : 'RAYNERS LANE';
+    var leftHA = home ? 'HOME' : 'AWAY', rightHA = home ? 'AWAY' : 'HOME';
+
+    // header lockup
+    var badge = await loadImg('img/badge.png');
+    if (badge && badge.naturalWidth) x.drawImage(badge, 60, 52, 86, 86);
+    x.textAlign = 'left';
+    x.fillStyle = t.ink; x.font = "700 27px 'Barlow Condensed', sans-serif";
+    x.fillText('RAYNERS LANE FC', 160, 90);
+    x.fillStyle = t.sub; x.font = "400 18px 'Barlow', sans-serif";
+    x.fillText('EST. 1933 · HARROW', 160, 118);
+    // competition tag, top-right
+    var comp = /friendly/i.test(f.competition || '') ? 'PRE-SEASON' : /vase/i.test(f.competition || '') ? 'FA VASE' : /fa cup/i.test(f.competition || '') ? 'FA CUP' : 'MATCHDAY';
+    x.font = "700 20px 'Barlow Condensed', sans-serif";
+    var tw = x.measureText(comp).width + 32;
+    x.fillStyle = t.tagBg; x.fillRect(W - 60 - tw, 60, tw, 42);
+    x.fillStyle = t.tagInk; x.fillText(comp, W - 60 - tw + 16, 88);
+
+    // crests + VS
+    var cy = 400, lx = 300, rx = 780;
+    async function crest(src, cx) {
+      var img = await loadImg(src);
+      x.fillStyle = t.panel; x.beginPath(); x.arc(cx, cy, 156, 0, Math.PI * 2); x.fill();
+      if (img && img.naturalWidth) {
+        var ar = img.naturalWidth / img.naturalHeight, S = 250, w = ar >= 1 ? S : S * ar, h = ar >= 1 ? S / ar : S;
+        x.drawImage(img, cx - w / 2, cy - h / 2, w, h);
+      }
+    }
+    await crest(leftCrest, lx); await crest(rightCrest, rx);
+    x.textAlign = 'center'; x.fillStyle = t.vs; x.font = "400 104px 'Bebas Neue', sans-serif";
+    x.fillText('VS', W / 2, cy + 36);
+
+    // names + HOME/AWAY
+    x.fillStyle = t.ink;
+    [[leftName, lx], [rightName, rx]].forEach(function (n) {
+      var s = fitFont(x, n[0], 430, 56, "'Bebas Neue', sans-serif");
+      x.fillText(n[0], n[1], cy + 250);
+    });
+    x.fillStyle = t.sub; x.font = "700 19px 'Barlow Condensed', sans-serif";
+    x.fillText(leftHA, lx, cy + 288); x.fillText(rightHA, rx, cy + 288);
+
+    // detail band — date · kick-off, then venue
+    var by = 762, det = mcDetails(f);
+    x.fillStyle = t.panel; x.fillRect(60, by, W - 120, 148);
+    x.fillStyle = t.rule; x.fillRect(60, by, 6, 148);
+    x.textAlign = 'center';
+    x.fillStyle = t.accent; x.font = "400 46px 'Bebas Neue', sans-serif";
+    x.fillText(det.dateLine, W / 2, by + 68);
+    x.fillStyle = t.ink; var vs = fitFont(x, det.venue, W - 200, 30, "'Barlow Condensed', sans-serif");
+    x.font = "600 " + vs + "px 'Barlow Condensed', sans-serif";
+    x.fillText(det.venue, W / 2, by + 116);
+
+    // footer — site + #UpTheLane
+    x.fillStyle = t.rule; x.globalAlpha = .9; x.fillRect(0, H - 92, W, 4); x.globalAlpha = 1;
+    x.textAlign = 'left'; x.fillStyle = t.url; x.font = "700 27px 'Barlow Condensed', sans-serif";
+    x.fillText('raynerslanefc.co.uk', 64, H - 34);
+    x.textAlign = 'right'; x.fillStyle = t.tag; x.font = "400 40px 'Bebas Neue', sans-serif";
+    x.fillText('#UPTHELANE', W - 64, H - 30);
+
+    return new Promise(function (res) { c.toBlob(res, 'image/png'); });
+  }
+
+  // files-only share (keeps AirDrop/Save-Image working), with a save fallback.
+  function mcSave(blob, fname) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+  }
+  function mcShare(blob, fname) {
+    var file = (typeof File !== 'undefined') ? new File([blob], fname, { type: 'image/png' }) : null;
+    var payload = { files: [file], title: 'Rayners Lane FC' };
+    if (file && navigator.canShare && navigator.canShare(payload)) {
+      try { navigator.share(payload).then(function () {}).catch(function (err) { if (err && err.name === 'AbortError') return; mcSave(blob, fname); }); return; } catch (e) {}
+    }
+    mcSave(blob, fname);
+  }
+
+  // The overlay: preview + theme toggle + Share/Save. Blob for the current theme
+  // is always pre-built, so the Share tap stays inside the user gesture (iOS).
+  window.rlMatchCard = function (f) {
+    var st = { theme: 'dark', blobs: {}, urls: {} };
+    var ov = document.getElementById('rl-mc-ov');
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'rl-mc-ov';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(6,6,6,.975);display:flex;align-items:center;justify-content:center;padding:18px;opacity:1;transition:opacity .18s';
+      ov.innerHTML = '<div id="rl-mc-box" style="background:#111;border:1px solid #2a2a2a;border-radius:16px;max-width:420px;width:100%;max-height:94vh;overflow:auto;padding:16px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:1px;color:#F5F3ED">MATCH CARD</div>' +
+          '<button id="rl-mc-x" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer">×</button>' +
+        '</div>' +
+        '<div id="rl-mc-prev" style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;color:#666;font-family:Arial;font-size:13px">Building…</div>' +
+        '<div style="display:flex;gap:8px;margin-top:12px">' +
+          '<button class="rl-mc-th" data-t="dark" style="flex:1">Dark</button>' +
+          '<button class="rl-mc-th" data-t="yellow" style="flex:1">Yellow</button>' +
+        '</div>' +
+        '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
+        '<div style="font-family:Arial;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
+      '</div>';
+      document.body.appendChild(ov);
+    }
+    var box = ov.querySelector('#rl-mc-box'), prev = ov.querySelector('#rl-mc-prev'), shareBtn = ov.querySelector('#rl-mc-share');
+    function close() { ov.style.opacity = '0'; setTimeout(function () { ov.style.display = 'none'; }, 200); Object.keys(st.urls).forEach(function (k) { URL.revokeObjectURL(st.urls[k]); }); }
+    ov.style.display = 'flex'; ov.style.opacity = '1';
+    ov.querySelector('#rl-mc-x').onclick = close;
+    ov.onclick = function (e) { if (e.target === ov) close(); };
+    function paintTheme() {
+      ov.querySelectorAll('.rl-mc-th').forEach(function (b) {
+        var on = b.dataset.t === st.theme;
+        b.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;' +
+          (on ? 'background:#FFD100;color:#0d0d0d;border:1px solid #FFD100' : 'background:#1a1a1a;color:#aaa;border:1px solid #2a2a2a');
+      });
+    }
+    function render() {
+      paintTheme();
+      if (st.blobs[st.theme]) { prev.innerHTML = '<img src="' + st.urls[st.theme] + '" style="width:100%;display:block">'; return; }
+      prev.innerHTML = '<span>Building…</span>';
+      matchCardPng(f, st.theme).then(function (blob) {
+        if (!blob) { prev.innerHTML = '<span>Could not build card</span>'; return; }
+        st.blobs[st.theme] = blob; st.urls[st.theme] = URL.createObjectURL(blob);
+        if (st.theme) prev.innerHTML = '<img src="' + st.urls[st.theme] + '" style="width:100%;display:block">';
+      });
+    }
+    ov.querySelectorAll('.rl-mc-th').forEach(function (b) { b.onclick = function () { st.theme = b.dataset.t; render(); }; });
+    shareBtn.onclick = function () {
+      var blob = st.blobs[st.theme];
+      var fname = 'rayners-lane-match-' + (f.id || f.date || 'card') + '-' + st.theme + '.png';
+      if (blob) mcShare(blob, fname);
+      else matchCardPng(f, st.theme).then(function (bl) { if (bl) mcShare(bl, fname); });
+    };
+    render();
+  };
+
 })();
