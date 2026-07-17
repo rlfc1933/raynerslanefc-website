@@ -35,6 +35,7 @@
   <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/club-now.css">
   <!-- three.js for the cinematic WebGL hero (free CDN, ES module). If it fails to
        load, the hero degrades gracefully to its existing markup. -->
   <script type="importmap">
@@ -162,7 +163,7 @@
        the "Born in Harrow" copy, while the blur keeps the text crisp. */
     .gl-on .hero__right{background:linear-gradient(160deg,rgba(20,44,31,.62) 0%,rgba(11,27,17,.56) 55%,rgba(8,8,8,.46) 100%)!important;
       -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
-    .gl-on .hero__right > div:first-child{background:rgba(26,92,50,.78)!important} /* keep the top RLFC bar legible */
+    .gl-on .hero__right .cn__head{background:rgba(26,92,50,.88)!important} /* keep the Club Now header legible over video */
   </style>
   <div class="hero__left">
     <div class="hero__shirts" id="hero-shirts"></div>
@@ -197,79 +198,24 @@
     @media(max-width:600px){.install-cta em{display:none}}
   </style>
 
-  <div class="hero__right" style="display:flex;flex-direction:column;overflow:hidden;">
-
-    <div style="background:var(--green);border-bottom:1px solid rgba(255,255,255,.1);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-      <span style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7)">Rayners Lane FC</span>
-      <span style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow)">Est. 1933 · Harrow</span>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);flex-shrink:0">
-      <div style="padding:14px 12px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em;color:var(--yellow);line-height:1">91</div>
-        <div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:3px">Years</div>
+  <!-- ══ CLUB NOW — the living command centre (js/club-now.js) ══
+       Grows the old Next-Match badge into a one-glance state-of-the-club block,
+       layered over the WebGL video with the existing .gl-on legibility gradient.
+       Flips to a LIVE score on matchday; shows next match + countdown otherwise;
+       strip = position / last result / last-5 form with honest pre-season states. -->
+  <div class="hero__right hero__right--cn">
+    <div id="club-now" class="cn" aria-label="Club Now — the club's live match centre">
+      <div class="cn__head">
+        <span class="cn__brand">Club Now</span>
+        <span class="cn__status" id="cn-status">The Lane</span>
       </div>
-      <div style="padding:14px 12px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em;color:var(--yellow);line-height:1">Step 5</div>
-        <div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:3px">Level</div>
-      </div>
-      <div style="padding:14px 12px;text-align:center;border-right:1px solid var(--border)">
-        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em;color:var(--yellow);line-height:1">HA2</div>
-        <div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:3px">Harrow</div>
-      </div>
-      <div style="padding:14px 12px;text-align:center">
-        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em;color:var(--yellow);line-height:1">Yellow</div>
-        <div style="font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:3px">Always</div>
+      <div class="cn__body">
+        <div class="cn__primary" id="cn-primary" aria-live="polite">
+          <div class="cn__skel">Loading the latest from The Lane&hellip;</div>
+        </div>
+        <div class="cn__strip" id="cn-strip"></div>
       </div>
     </div>
-
-    <div style="flex:1;overflow-y:auto;padding:24px 20px 32px">
-      <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:16px">
-        Born in Harrow.<br>Built on <span style="color:var(--yellow)">Pride.</span>
-      </div>
-
-      <p style="font-family:var(--font-b);font-size:13px;color:var(--lgrey);line-height:1.8;margin-bottom:12px">
-        Rayners Lane FC was founded in 1933 in the heart of Harrow, Middlesex. For over nine decades, the club has been a constant in the community — a place where local football is played with genuine passion, and where the yellow and green of The Lane means something real.
-      </p>
-
-      <p style="font-family:var(--font-b);font-size:13px;color:var(--lgrey);line-height:1.8;margin-bottom:12px">
-        Home has always been Tithe Farm Social Club on Rayners Lane, just minutes from the tube station that shares the club's name. The ground is part of the fabric of this area — unpretentious, community-built, and proud.
-      </p>
-
-      <p style="font-family:var(--font-b);font-size:13px;color:var(--lgrey);line-height:1.8;margin-bottom:16px">
-        The Lane has never been a club that shouts the loudest. It has always let its football do the talking — representing Harrow, its people, and a borough that deserves to see its team compete at the highest level it can reach.
-      </p>
-
-      <div style="background:rgba(255,209,0,.06);border-left:3px solid var(--yellow);padding:14px 16px;margin-bottom:16px">
-        <div style="font-family:var(--font-b);font-size:13px;color:var(--white);line-height:1.75;font-style:italic">
-          "Yellow first. The Lane always. Community built, Harrow proud. Since 1933."
-        </div>
-        <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-top:8px">
-          Rayners Lane FC
-        </div>
-      </div>
-
-      <p style="font-family:var(--font-b);font-size:13px;color:var(--lgrey);line-height:1.8">
-        Under Chairman Pete Singh and First Team Manager Gary Pitt, the club enters the 2026-27 season in the Combined Counties Premier Division North with renewed purpose — and the belief that the best days for Rayners Lane FC are still ahead.
-      </p>
-    </div>
-
-    <div class="hero__badge" style="position:relative;bottom:auto;left:auto;right:auto;flex-shrink:0;border-top:1px solid var(--border)">
-      <div class="hero__badge-label"><i class="ico ico-football"></i> Next Match</div>
-      <div class="hero__badge-row">
-        <div class="hero__badge-crests">
-          <img src="img/badge.png" alt="Rayners Lane FC" class="hero__badge-crest">
-          <span class="hero__badge-v">v</span>
-          <span id="match-crest"></span>
-        </div>
-        <div class="hero__badge-textcol">
-          <div class="hero__badge-match" id="match-teams">Rayners Lane FC vs TBC</div>
-          <div class="hero__badge-meta" id="match-meta">Pre-Season 2026 &middot; Tithe Farm Social Club, Harrow</div>
-        </div>
-      </div>
-      <div id="countdown" style="margin-top:12px"></div>
-    </div>
-
   </div>
 </section>
 
@@ -695,6 +641,7 @@
      real-time live_match row. Falls back to matchday.json if absent. -->
 <script src="js/supabase-config.js"></script>
 <script src="js/main.js"></script>
+<script src="js/club-now.js" defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     renderLatestNews();

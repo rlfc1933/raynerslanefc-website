@@ -1,0 +1,171 @@
+/* ════════════════════════════════════════════════════════════════════════
+   RAYNERS LANE FC — "CLUB NOW" command centre
+
+   The living heartbeat of the homepage. Grows the hero's right-panel Next-Match
+   badge into a one-glance state-of-the-club block, layered over the WebGL video
+   (it inherits .gl-on .hero__right's frosted gradient for legibility).
+
+   States (js/club-now.js): LIVE takeover · next match + countdown · league
+   position / last result / last-5 form · intentional pre-season empty states.
+   All type from the shared tokens; AA contrast; reduced-motion safe; ≥44px CTAs.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.cn { display:flex; flex-direction:column; height:100%; min-height:0; }
+/* header pinned top; primary + strip cluster in the vertical centre so the
+   whole block stays above the fold even when the hero column runs tall. */
+.cn__body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:center; }
+
+/* ── header bar (stays first child so .gl-on's legibility tint still applies) ── */
+.cn__head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 20px; flex-shrink:0;
+  background:var(--green); border-bottom:1px solid rgba(255,255,255,.12);
+}
+.cn__brand {
+  font-family:var(--font-c); font-size:11px; font-weight:800; letter-spacing:.2em;
+  text-transform:uppercase; color:#fff; display:inline-flex; align-items:center; gap:8px;
+}
+.cn__brand::before {
+  content:''; width:7px; height:7px; border-radius:50%; background:var(--yellow);
+}
+.cn__status {
+  font-family:var(--font-c); font-size:10px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--yellow);
+}
+
+/* ── primary block (next match / live) ── */
+.cn__primary {
+  flex:0 0 auto; display:flex; flex-direction:column;
+  justify-content:center; gap:14px; padding:22px 22px 20px;
+}
+.cn__eyebrow {
+  font-family:var(--font-c); font-size:11px; font-weight:800; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--yellow);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.cn__eyebrow--live { color:#fff; }
+.cn__dot {
+  width:9px; height:9px; border-radius:50%; background:#EF4444; flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(239,68,68,.7); animation:cn-pulse 1.6s ease-out infinite;
+}
+@keyframes cn-pulse {
+  0%   { box-shadow:0 0 0 0 rgba(239,68,68,.7); }
+  70%  { box-shadow:0 0 0 9px rgba(239,68,68,0); }
+  100% { box-shadow:0 0 0 0 rgba(239,68,68,0); }
+}
+
+/* VS lockup (crests + names) */
+.cn__lock { display:flex; align-items:flex-start; justify-content:center; gap:14px; }
+.cn__team { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+.cn__crest { width:60px; height:60px; object-fit:contain; flex:none; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5)); }
+.cn__crest--ini {
+  display:flex; align-items:center; justify-content:center; border-radius:50%;
+  background:var(--card2); border:1px solid var(--border);
+  font-family:var(--font-d); font-size:22px; letter-spacing:.03em; color:var(--yellow);
+}
+.cn__nm {
+  font-family:var(--font-d); font-size:clamp(15px,1.6vw,19px); letter-spacing:.03em;
+  color:#fff; line-height:1.05; max-width:100%;
+}
+.cn__ha {
+  font-family:var(--font-c); font-size:9px; font-weight:800; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted);
+}
+.cn__ha--home { color:var(--yellow); }
+.cn__mid { flex:none; align-self:center; padding-top:14px; }
+.cn__vs { font-family:var(--font-d); font-size:30px; letter-spacing:.02em; color:var(--yellow); line-height:1; }
+
+/* live score */
+.cn__score {
+  font-family:var(--font-d); font-size:clamp(40px,7vw,58px); letter-spacing:.02em;
+  color:#fff; line-height:.9; white-space:nowrap;
+}
+.cn__scorers {
+  font-family:var(--font-b); font-size:12px; color:var(--lgrey); text-align:center;
+  line-height:1.5; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.cn__scorers .ico { color:var(--yellow); }
+
+/* countdown */
+.cn__countdown { display:flex; align-items:flex-start; justify-content:center; gap:16px; min-height:44px; }
+.cn__cd-unit { text-align:center; min-width:34px; }
+.cn__cd-num  { font-family:var(--font-d); font-size:clamp(26px,4vw,40px); letter-spacing:.03em; color:var(--yellow); line-height:1; }
+.cn__cd-lbl  { font-family:var(--font-c); font-size:9px; font-weight:700; letter-spacing:.14em; color:var(--muted); margin-top:3px; }
+.cn__ko { font-family:var(--font-d); color:var(--yellow); font-size:24px; letter-spacing:.03em; }
+
+.cn__meta {
+  font-family:var(--font-c); font-size:12px; font-weight:600; letter-spacing:.04em;
+  color:var(--lgrey); text-align:center; line-height:1.5;
+}
+.cn__meta .ico { color:var(--yellow); }
+
+/* CTA row */
+.cn__cta { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+.cn__btn {
+  flex:1 1 auto; min-height:44px; min-width:104px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  font-family:var(--font-c); font-size:12px; font-weight:800; letter-spacing:.06em;
+  text-transform:uppercase; text-decoration:none; cursor:pointer;
+  border-radius:9px; padding:11px 14px; border:1px solid var(--border);
+  background:rgba(8,8,8,.5); color:#fff; transition:transform .16s var(--ease), border-color .16s, background .16s;
+}
+.cn__btn .ico, .cn__btn svg { width:15px; height:15px; flex:none; }
+.cn__btn:hover { transform:translateY(-2px); border-color:var(--yellow); }
+.cn__btn--y { background:var(--yellow); color:#0d0d0d; border-color:var(--yellow); }
+.cn__btn--y:hover { background:#ffdf3d; }
+.cn__btn--ghost { background:transparent; }
+.cn__btn:focus-visible { outline:3px solid var(--yellow); outline-offset:2px; }
+
+/* ── strip: position / last result / form ── */
+.cn__strip {
+  flex-shrink:0; display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--border);
+}
+.cn__strip > * { border-right:1px solid var(--border); }
+.cn__strip > *:last-child { border-right:none; }
+.cn__tile { padding:13px 10px 12px; text-align:center; display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center; }
+.cn__tile--wide { grid-column:span 2; }
+.cn__tile--full { grid-column:1 / -1; }
+.cn__tile-num { font-family:var(--font-d); font-size:26px; letter-spacing:.03em; color:var(--yellow); line-height:1; }
+.cn__tile-num small { font-size:.6em; }
+.cn__tile-lbl { font-family:var(--font-c); font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.cn__tile-sub { font-family:var(--font-b); font-size:11px; color:var(--lgrey); line-height:1.3; }
+
+/* W/D/L — colour PLUS letter (never colour alone) */
+.cn__wdl { display:inline-flex; align-items:center; justify-content:center; width:1.55em; height:1.55em;
+  border-radius:5px; font-family:var(--font-c); font-weight:800; font-size:12px; letter-spacing:0; color:#0d0d0d; }
+.cn__wdl--w { background:#22C55E; }
+.cn__wdl--d { background:#FBBF24; }
+.cn__wdl--l { background:#EF4444; color:#fff; }
+.cn__result-score { font-family:var(--font-d); font-size:22px; letter-spacing:.04em; color:#fff; }
+.cn__chips { display:flex; gap:4px; justify-content:center; }
+
+.cn__skel { color:var(--muted); font-family:var(--font-c); font-size:12px; letter-spacing:.08em; text-align:center; padding:30px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cn__dot { animation:none; }
+  .cn__btn:hover { transform:none; }
+}
+
+/* ── the block is desktop-panel by default; on stacked layouts it becomes a
+   clean card directly under the hero copy (the hero's right panel is otherwise
+   hidden < 1024px — club-now.css re-shows it as this card). ── */
+@media (max-width:1024px) {
+  /* stack, and LEAD with the command centre so the next match / live score is
+     the first thing a phone visitor sees (the identity hero follows below). */
+  .hero { min-height:auto; display:flex; flex-direction:column; }
+  .hero__left { order:2; }
+  .hero__right.hero__right--cn {
+    order:1; display:flex !important; margin:14px 16px 4px;
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    background:linear-gradient(160deg,#132A1E 0%,#0A1A10 60%,#080808 100%);
+  }
+  .cn__head { border-radius:0; }
+  .cn__body { justify-content:flex-start; }
+  .cn__primary { padding:20px 18px 18px; }
+}
+@media (max-width:600px) {
+  .cn__crest { width:52px; height:52px; }
+  .cn__lock { gap:8px; }
+  .hero__right.hero__right--cn { margin:0 14px 6px; }
+}
