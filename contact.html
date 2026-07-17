@@ -47,7 +47,7 @@
     }
     .email-hero-icon{font-size:40px;flex-shrink:0}
     .email-hero-text{flex:1}
-    .email-hero-label{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.5);margin-bottom:4px}
+    .email-hero-label{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.7);margin-bottom:4px}
     .email-hero-address{font-family:var(--font-d);font-size:clamp(24px,4vw,40px);letter-spacing:.04em;color:var(--black)}
     .email-hero-address a{color:var(--black)}
     @media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
@@ -99,21 +99,21 @@
         <form class="contact-form" action="mailto:info@raynerslanefc.co.uk" method="GET" enctype="text/plain">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="field">
-              <label>First Name</label>
-              <input type="text" name="first_name" placeholder="John" required>
+              <label for="cont-f1">First Name</label>
+              <input id="cont-f1" type="text" name="first_name" placeholder="John" required>
             </div>
             <div class="field">
-              <label>Last Name</label>
-              <input type="text" name="last_name" placeholder="Smith" required>
+              <label for="cont-f2">Last Name</label>
+              <input id="cont-f2" type="text" name="last_name" placeholder="Smith" required>
             </div>
           </div>
           <div class="field">
-            <label>Your Email Address</label>
-            <input type="email" name="email" placeholder="john@example.com" required>
+            <label for="cont-f3">Your Email Address</label>
+            <input id="cont-f3" type="email" name="email" placeholder="john@example.com" required>
           </div>
           <div class="field">
-            <label>Enquiry Type</label>
-            <select name="subject">
+            <label for="cont-f4">Enquiry Type</label>
+            <select id="cont-f4" name="subject">
               <option value="">Select a category</option>
               <option>Sponsorship &amp; Commercial</option>
               <option>Media &amp; Press</option>
@@ -124,8 +124,8 @@
             </select>
           </div>
           <div class="field">
-            <label>Message</label>
-            <textarea name="body" rows="5" placeholder="Tell us how we can help..." required></textarea>
+            <label for="cont-f5">Message</label>
+            <textarea id="cont-f5" name="body" rows="5" placeholder="Tell us how we can help..." required></textarea>
           </div>
           <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">
             Send Message

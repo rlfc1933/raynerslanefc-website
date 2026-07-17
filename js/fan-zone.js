@@ -200,7 +200,7 @@ function renderAccountBar() {
   }
   var laneNo = ensureLaneNo(f);
   var initials = (f.username || 'L').trim().slice(0, 2).toUpperCase();
-  var av = f.photo ? '<img src="' + f.photo + '" alt="">' : esc(initials);
+  var av = f.photo ? '<img src="' + f.photo + '" alt="' + esc(f.name || 'Fan') + '">' : esc(initials);
   el.innerHTML = '<div class="fz-acct">' +
     '<div class="fz-acct__av">' + av + '</div>' +
     '<div class="fz-acct__main"><div class="fz-acct__hi">Hi, ' + esc(f.username || 'Lane Fan') + '</div>' +
@@ -216,7 +216,7 @@ function openAuth(mode) {
   var ov = document.getElementById('fz-editor');
   if (!ov) { ov = document.createElement('div'); ov.id = 'fz-editor'; ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(6,6,6,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px'; document.body.appendChild(ov); }
   function fld(id, label, type, ph) {
-    return '<label style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:11px 0 5px">' + label + '</label>' +
+    return '<label for="' + id + '" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:11px 0 5px">' + label + '</label>' +
       '<input id="' + id + '" type="' + type + '" placeholder="' + (ph || '') + '" autocomplete="off" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px">';
   }
   var login = fld('au-email', 'Email', 'email', 'you@email.com') + fld('au-pass', 'Password', 'password', '') +
@@ -347,7 +347,7 @@ function renderFanCard() {
   var tier = tierFor(games);
   var initials = (f.username || 'L').trim().slice(0, 2).toUpperCase();
   var photo = f.photo
-    ? '<img class="fancard__photo" src="' + f.photo + '" alt="">'
+    ? '<img class="fancard__photo" src="' + f.photo + '" alt="' + esc(f.name || 'Fan') + '">'
     : '<div class="fancard__photo" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;color:#fff">' + esc(initials) + '</div>';
   var maxHearts = 16, hearts = '';
   for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '<i class="ico ico-heart"></i>';
@@ -394,7 +394,7 @@ function renderFanCard() {
         '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey)">' + (r.home - home) + ' more home game' + ((r.home - home) > 1 ? 's' : '') + ' to unlock</div>' + powered + '</div>';
     }).join('') + '</div>';
   var avatar = f.photo
-    ? '<img class="vipcard__av" src="' + f.photo + '" alt="">'
+    ? '<img class="vipcard__av" src="' + f.photo + '" alt="' + esc(f.name || 'Fan') + '">'
     : '<div class="vipcard__av">' + esc(initials) + '</div>';
   var metaLine = (f.handle ? '@' + esc(f.handle) + ' &middot; ' : '') +
     (f.since ? 'Member since ' + esc(f.since) : 'The Lane Family') + (f.town ? ' &middot; ' + esc(f.town) : '');
@@ -470,12 +470,12 @@ function openCardEditor() {
       '<label class="fl" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Display name</label>' +
       '<input id="fc-name" value="' + esc(f.username || '') + '" placeholder="YellowArmyJoe" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px;margin-bottom:12px">' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-        '<div><label class="fl" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Town</label><input id="fc-town" value="' + esc(f.town || '') + '" placeholder="Harrow" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px"></div>' +
-        '<div><label class="fl" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Fan since</label><input id="fc-since" type="number" min="1933" max="2026" value="' + esc(f.since || '') + '" placeholder="2011" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px"></div>' +
+        '<div><label class="fl" for="fc-town" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Town</label><input id="fc-town" value="' + esc(f.town || '') + '" placeholder="Harrow" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px"></div>' +
+        '<div><label class="fl" for="fc-since" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Fan since</label><input id="fc-since" type="number" min="1933" max="2026" value="' + esc(f.since || '') + '" placeholder="2011" style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px"></div>' +
       '</div>' +
-      '<label class="fl" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:12px 0 6px">What The Lane means to you</label>' +
+      '<label class="fl" for="fc-meaning" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:12px 0 6px">What The Lane means to you</label>' +
       '<textarea id="fc-meaning" rows="2" placeholder="My Saturday religion." style="width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:11px 13px">' + esc(f.meaning || '') + '</textarea>' +
-      '<label class="fl" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:12px 0 6px">Profile photo</label>' +
+      '<label class="fl" for="fc-photo" style="display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:12px 0 6px">Profile photo</label>' +
       '<input id="fc-photo" type="file" accept="image/*" onchange="fcPhoto(this)" style="width:100%;color:var(--grey);font-family:var(--font-c);font-size:13px">' +
       '<div style="display:flex;gap:8px;margin-top:18px">' +
         '<button class="fz-btn fz-btn--y" onclick="saveCard()">Save Card</button>' +
@@ -571,7 +571,7 @@ async function renderWall() {
     el.innerHTML = list.map(function (p) {
       var featured = p.featured || p.id === fom;
       var photo = p.photo
-        ? '<img class="patron__photo" src="' + esc(p.photo) + '" alt="">'
+        ? '<img class="patron__photo" src="' + esc(p.photo) + '" alt="' + esc(p.name || 'Patron') + '">'
         : '<div class="patron__photo">' + esc((p.username || 'L').slice(0, 2).toUpperCase()) + '</div>';
       var badges = (p.badges || []).map(function (b) { return '<span class="patron__badge">' + esc(b) + '</span>'; }).join('');
       var years = p.since ? (2026 - parseInt(p.since)) : null;

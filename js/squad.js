@@ -179,7 +179,7 @@ var _profiles = {};
     '.pm-stat{background:#111;padding:14px 6px;text-align:center}' +
     '.pm-stat b{display:block;font-family:var(--font-d);font-size:26px;color:var(--yellow);line-height:1}' +
     '.pm-stat span{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}' +
-    '.pm-close{position:absolute;top:14px;right:14px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;line-height:1}' +
+    '.pm-close{position:absolute;top:14px;right:14px;z-index:3;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;line-height:1}' +
     '.pm-empty{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:14px;letter-spacing:.04em}';
   document.head.appendChild(st);
   var ov = document.createElement('div');

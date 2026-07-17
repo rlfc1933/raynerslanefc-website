@@ -92,7 +92,7 @@
         '<a href="programme.html?id='+encodeURIComponent(p.id)+'" style="text-decoration:none"><div class="pa-cover" style="background:'+t.bg+';color:'+t.ink+'">'+
           '<div class="ko" style="color:'+t.accent+'">Official Programme</div>'+
           '<div class="ttl" style="color:'+t.ink+'">Rayners Lane FC</div>'+
-          '<div class="vs"><img src="img/badge.png" alt=""><span style="color:'+t.accent+'">VS</span><img src="'+esc(crestFor(p))+'" alt=""></div>'+
+          '<div class="vs"><img src="img/badge.png" alt="" aria-hidden="true"><span style="color:'+t.accent+'">VS</span><img src="'+esc(crestFor(p))+'" alt="'+esc(p.opponent||'Opponent')+' crest"></div>'+
           '<div class="opp" style="color:'+t.ink+'">'+esc(p.opponent||'TBC')+'</div>'+
           '<div class="meta" style="color:'+t.ink+'">'+esc(shortDate(p.date))+'</div>'+
         '</div></a>'+

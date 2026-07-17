@@ -60,11 +60,11 @@
 <div id="nav-placeholder"></div>
 
 <div style="background:var(--yellow);padding:72px 0 56px;position:relative;overflow:hidden">
-  <div style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--font-d);font-size:200px;color:rgba(0,0,0,.06);pointer-events:none">GALLERY</div>
+  <div aria-hidden="true" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--font-d);font-size:200px;color:rgba(0,0,0,.06);pointer-events:none">GALLERY</div>
   <div class="container" style="position:relative;z-index:1">
-    <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.5);display:block;margin-bottom:12px">The Lane</span>
+    <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.7);display:block;margin-bottom:12px">The Lane</span>
     <h1 style="font-family:var(--font-d);font-size:clamp(56px,9vw,110px);letter-spacing:.02em;line-height:.9;color:var(--black);margin-bottom:16px">GALLERY</h1>
-    <p style="font-family:var(--font-c);font-size:17px;font-weight:500;color:rgba(0,0,0,.55);letter-spacing:.04em">Matchday. Ground. Squad. All things The Lane.</p>
+    <p style="font-family:var(--font-c);font-size:17px;font-weight:500;color:rgba(0,0,0,.7);letter-spacing:.04em">Matchday. Ground. Squad. All things The Lane.</p>
   </div>
 </div>
 
@@ -163,7 +163,7 @@ function renderGallery() {
   }
   grid.innerHTML = filtered.map(item =>
     `<div class="gallery-item" onclick="openLightbox('${item.src}','${item.label||""}')">
-      <img src="${item.src}" alt="${item.label||""}" loading="lazy">
+      <img src="${item.src}" alt="${item.label||"Rayners Lane FC match day photo"}" loading="lazy">
       <div class="gallery-item-overlay">
         <div class="gallery-item-label">${item.label||""}</div>
       </div>

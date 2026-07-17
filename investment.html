@@ -344,16 +344,16 @@
           <input type="hidden" name="form-name" value="sponsor-enquiry">
           <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
           <div class="spon-row">
-            <div><label class="spon-l">Company / Business name *</label><input type="text" name="company" required></div>
-            <div><label class="spon-l">Your name *</label><input type="text" name="contact" required></div>
+            <div><label for="inve-f1" class="spon-l">Company / Business name *</label><input id="inve-f1" type="text" name="company" required></div>
+            <div><label for="inve-f2" class="spon-l">Your name *</label><input id="inve-f2" type="text" name="contact" required></div>
           </div>
           <div class="spon-row">
-            <div><label class="spon-l">Email *</label><input type="email" name="email" required></div>
-            <div><label class="spon-l">Phone</label><input type="tel" name="phone"></div>
+            <div><label for="inve-f3" class="spon-l">Email *</label><input id="inve-f3" type="email" name="email" required></div>
+            <div><label for="inve-f4" class="spon-l">Phone</label><input id="inve-f4" type="tel" name="phone"></div>
           </div>
           <div class="spon-row">
-            <div><label class="spon-l">Package you're interested in</label>
-              <select name="package">
+            <div><label for="inve-f5" class="spon-l">Package you're interested in</label>
+              <select id="inve-f5" name="package">
                 <option>Not sure yet — advise me</option>
                 <option>Shirt Sponsor</option>
                 <option>Match Sponsor</option>
@@ -363,11 +363,11 @@
                 <option>Bespoke Partnership</option>
               </select>
             </div>
-            <div><label class="spon-l">Indicative budget (optional)</label><input type="text" name="budget" placeholder="e.g. £500"></div>
+            <div><label for="inve-f6" class="spon-l">Indicative budget (optional)</label><input id="inve-f6" type="text" name="budget" placeholder="e.g. £500"></div>
           </div>
-          <label class="spon-l">Company website (optional)</label><input type="text" name="website" placeholder="https://">
-          <label class="spon-l">Tell us about your business &amp; what you'd like</label>
-          <textarea name="message" rows="3" placeholder="A bit about you and what you're hoping to get from partnering with The Lane."></textarea>
+          <label for="inve-f7" class="spon-l">Company website (optional)</label><input id="inve-f7" type="text" name="website" placeholder="https://">
+          <label for="inve-f8" class="spon-l">Tell us about your business &amp; what you'd like</label>
+          <textarea id="inve-f8" name="message" rows="3" placeholder="A bit about you and what you're hoping to get from partnering with The Lane."></textarea>
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:15px;margin-top:18px">Submit Application</button>
           <p style="font-family:var(--font-c);font-size:11px;color:var(--muted);letter-spacing:.03em;text-align:center;margin-top:12px"><i class="ico ico-lock"></i> Goes privately to the commercial team at info@raynerslanefc.co.uk. No obligation.</p>
         </form>

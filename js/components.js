@@ -84,6 +84,28 @@ function initSkipLink() {
   document.body.insertBefore(a, document.body.firstChild);
 }
 
+// a11y: wrap the page's primary content in a <main> landmark. Every public page
+// is <nav-placeholder> … page content … <footer-placeholder>; move that run of
+// nodes into a single <main id="lane-main"> so screen readers get a proper
+// "main" region and the skip-link has a real target. Runs once, after the nav
+// is built (and its mobile menu sheet portaled onto <body>), so the sheet is
+// never swept in. #bg-imagery / skip-link sit before nav-placeholder and are
+// left untouched.
+function wrapMain() {
+  if (document.getElementById('lane-main')) return;
+  var navPh  = document.getElementById('nav-placeholder');
+  var footPh = document.getElementById('footer-placeholder');
+  if (!navPh || !footPh || navPh.parentElement !== footPh.parentElement) return;
+  var parent = navPh.parentElement;
+  var main = document.createElement('main');
+  main.id = 'lane-main';
+  main.setAttribute('tabindex', '-1');   // focusable for the skip-link, out of tab order
+  var nodes = [], n = navPh.nextSibling;
+  while (n && n !== footPh) { var next = n.nextSibling; nodes.push(n); n = next; }
+  parent.insertBefore(main, footPh);
+  nodes.forEach(function (node) { main.appendChild(node); });
+}
+
 function dismissPWA() {
   localStorage.setItem('rlfc_pwa_dismissed', '1');
   var b = document.getElementById('pwa-banner');
@@ -345,13 +367,13 @@ function buildTwitterSection() {
             <div style="font-family:var(--font-d);font-size:32px;letter-spacing:.04em;color:var(--white);margin-bottom:8px">Rayners Lane FC</div>
             <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px">Est. 1933 &middot; Harrow &middot; The Lane</div>
             <div style="display:flex;justify-content:center;gap:16px">
-              <a href="https://twitter.com/RaynersLaneFC" target="_blank" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
+              <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener" aria-label="Rayners Lane FC on X (opens in a new tab)" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
                 <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="https://instagram.com/raynerslanefc" target="_blank" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
+              <a href="https://instagram.com/raynerslanefc" target="_blank" rel="noopener" aria-label="Rayners Lane FC on Instagram (opens in a new tab)" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="white" stroke="none"/></svg>
               </a>
-              <a href="https://youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
+              <a href="https://youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" rel="noopener" aria-label="Rayners Lane FC on YouTube (opens in a new tab)" style="width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;transition:border-color .2s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border)'">
                 <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
               </a>
             </div>
@@ -377,6 +399,7 @@ function buildFooter() {
               <form name="newsletter" method="POST" data-netlify="true" style="display:flex;gap:0">
                 <input type="hidden" name="form-name" value="newsletter">
                 <input type="email" name="email" placeholder="Your email" required
+                  aria-label="Your email address for the newsletter"
                   style="flex:1;background:var(--dark);border:1px solid var(--border);border-right:none;color:var(--white);font-family:var(--font-b);font-size:14px;padding:10px 14px;outline:none">
                 <button type="submit"
                   style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:none;cursor:pointer;white-space:nowrap">
@@ -703,9 +726,10 @@ function initComponents(currentPage) {
   if (twitter) twitter.innerHTML = buildTwitterSection();
   if (footer)  footer.innerHTML  = buildFooter();
 
+  wrapMain();          // a11y: wrap primary content in a <main> landmark
   initWhatsApp();      // floating WhatsApp button (Phase 4) — only if configured
   initHubSpotChat();   // HubSpot live chat (Phase 4) — only if configured
-  initSkipLink();      // a11y: keyboard "skip to content" link
+  initSkipLink();      // a11y: keyboard "skip to content" link (targets <main>)
 
 
 
@@ -838,7 +862,7 @@ function initComponents(currentPage) {
       : '<i class="ico ico-arrow-up"></i> Tap <strong>Add to Home Screen</strong> to install The Lane app';
     banner.innerHTML =
       '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
-        '<img src="/img/badge.png" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
+        '<img src="/img/badge.png" alt="" aria-hidden="true" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
         '<div style="font-family:var(--font-c);font-size:12px;font-weight:600;color:#000;letter-spacing:.02em;line-height:1.4">' + icon + '</div>' +
       '</div>' +
       '<button onclick="dismissPWA()" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x"></i></button>';

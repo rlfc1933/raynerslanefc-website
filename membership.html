@@ -135,17 +135,17 @@
         <input type="hidden" name="form-name" value="membership">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div>
-            <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Full Name</label>
-            <input type="text" name="name" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="Your name">
+            <label for="memb-f1" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Full Name</label>
+            <input id="memb-f1" type="text" name="name" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="Your name">
           </div>
           <div>
-            <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Email</label>
-            <input type="email" name="email" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="your@email.com">
+            <label for="memb-f2" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Email</label>
+            <input id="memb-f2" type="email" name="email" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none" placeholder="your@email.com">
           </div>
         </div>
         <div>
-          <label style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Membership Type</label>
-          <select name="tier" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none">
+          <label for="memb-f3" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Membership Type</label>
+          <select id="memb-f3" name="tier" required style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;-webkit-appearance:none">
             <option value="">Select...</option>
             <option>Supporter (£40)</option>
             <option>Season Ticket (£120)</option>

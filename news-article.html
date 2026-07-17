@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('art-author').textContent = art.author ? 'By '+art.author : '';
     if (art.image) {
       const img = document.getElementById('art-img');
-      img.src = art.image; img.style.display='block';
+      img.src = art.image; img.alt = art.title || 'Article image'; img.style.display='block';
     }
     document.getElementById('art-body').innerHTML = (art.body||'')
       .split('\n').filter(l=>l.trim())

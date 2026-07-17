@@ -68,38 +68,38 @@
       <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
 
       <div class="tr-row">
-        <div><label class="tr-l">Full name *</label><input type="text" name="name" required></div>
-        <div><label class="tr-l">Date of birth *</label><input type="date" name="dob" id="tr-dob" required onchange="trAge()"></div>
+        <div><label for="tria-f1" class="tr-l">Full name *</label><input id="tria-f1" type="text" name="name" required></div>
+        <div><label for="tr-dob" class="tr-l">Date of birth *</label><input type="date" name="dob" id="tr-dob" required onchange="trAge()"></div>
       </div>
       <div class="tr-row">
-        <div><label class="tr-l">Preferred position *</label>
-          <select name="position" required>
+        <div><label for="tria-f2" class="tr-l">Preferred position *</label>
+          <select id="tria-f2" name="position" required>
             <option value="">Select…</option>
             <option>Goalkeeper</option><option>Right-back</option><option>Centre-back</option>
             <option>Left-back</option><option>Defensive midfield</option><option>Central midfield</option>
             <option>Attacking midfield</option><option>Winger</option><option>Striker</option>
           </select>
         </div>
-        <div><label class="tr-l">Current / last club</label><input type="text" name="current_club" placeholder="Optional"></div>
+        <div><label for="tria-f3" class="tr-l">Current / last club</label><input id="tria-f3" type="text" name="current_club" placeholder="Optional"></div>
       </div>
       <div class="tr-row">
-        <div><label class="tr-l">Email *</label><input type="email" name="email" required></div>
-        <div><label class="tr-l">Phone *</label><input type="tel" name="phone" required></div>
+        <div><label for="tria-f4" class="tr-l">Email *</label><input id="tria-f4" type="email" name="email" required></div>
+        <div><label for="tria-f5" class="tr-l">Phone *</label><input id="tria-f5" type="tel" name="phone" required></div>
       </div>
-      <label class="tr-l">Where do you live? *</label>
-      <input type="text" name="location" placeholder="Town or postcode area — e.g. South Harrow, HA2" required>
+      <label for="tria-f6" class="tr-l">Where do you live? *</label>
+      <input id="tria-f6" type="text" name="location" placeholder="Town or postcode area — e.g. South Harrow, HA2" required>
 
-      <label class="tr-l">Previous injuries</label>
-      <textarea name="injuries" rows="2" placeholder="Optional — anything ongoing or recent"></textarea>
+      <label for="tria-f7" class="tr-l">Previous injuries</label>
+      <textarea id="tria-f7" name="injuries" rows="2" placeholder="Optional — anything ongoing or recent"></textarea>
       <div class="tr-note">Only so we can look after you properly. Held in confidence by the management team.</div>
 
-      <label class="tr-l">Availability</label>
-      <textarea name="availability" rows="2" placeholder="e.g. Tuesday training + Saturday matches"></textarea>
+      <label for="tria-f8" class="tr-l">Availability</label>
+      <textarea id="tria-f8" name="availability" rows="2" placeholder="e.g. Tuesday training + Saturday matches"></textarea>
 
       <!-- Shown + required automatically when the applicant is under 18 -->
       <div class="tr-guardian" id="tr-guardian">
-        <label class="tr-l">Parent / guardian name *</label><input type="text" name="guardian" id="tr-guardian-name">
-        <label class="tr-l">Parent / guardian contact (phone or email) *</label><input type="text" name="guardian_contact" id="tr-guardian-contact">
+        <label for="tr-guardian-name" class="tr-l">Parent / guardian name *</label><input type="text" name="guardian" id="tr-guardian-name">
+        <label for="tr-guardian-contact" class="tr-l">Parent / guardian contact (phone or email) *</label><input type="text" name="guardian_contact" id="tr-guardian-contact">
         <div class="tr-note">Required for applicants under 18 — safeguarding.</div>
       </div>
 
