@@ -1,0 +1,97 @@
+/* ════════════════════════════════════════════════════════════════════════
+   RAYNERS LANE FC — TYPOGRAPHY (single source of truth)
+
+   Two families, self-hosted, no Google Fonts request, no CDN dependency:
+     • Bebas Neue — DISPLAY ONLY (hero titles, section headers, scores,
+       player names, big stats). Never body.
+     • Manrope   — everything else (nav, buttons, body, cards, labels,
+       tables, forms). Variable 400–800 in one file.
+
+   This file owns the type TOKENS. css/style.css and brand/tokens.css own the
+   colours/spacing. Old font tokens (--font-d/--font-c/--font-b) are ALIASED
+   here so every existing page + the portal migrates without being touched.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Bebas Neue (400) ── */
+@font-face {
+  font-family: 'Bebas Neue'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../fonts/bebas-neue-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Bebas Neue'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../fonts/bebas-neue-latinext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Manrope (variable 400–800) ── */
+@font-face {
+  font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('../fonts/manrope-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('../fonts/manrope-latinext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* ── the two families ── */
+  --font-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --font-body:    'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* ── fluid type scale (no hard-coded px for type) ── */
+  --fs-hero:    clamp(3.5rem, 8vw, 7.5rem);     /* 56–120px  · Bebas hero */
+  --fs-section: clamp(2.5rem, 5vw, 4rem);       /* 40–64px   · Bebas section */
+  --fs-card:    clamp(1.15rem, 2vw, 1.5rem);    /* 18–24px   · card headings */
+  --fs-sub:     clamp(1rem, 1.5vw, 1.25rem);    /* 16–20px   · sub-headings */
+  --fs-body:    clamp(1rem, 1.1vw, 1.125rem);   /* 16–18px   · body */
+  --fs-small:   0.8125rem;                       /* 13px      · micro / captions */
+  --fs-stat:    clamp(3rem, 7vw, 6rem);         /* 48–96px   · big numbers */
+
+  /* ── rhythm ── */
+  --lh-display: 0.92;
+  --lh-body:    1.6;
+  --ls-tight:  -0.02em;   /* Bebas display */
+  --ls-wide:    0.14em;   /* uppercase labels */
+  --ls-nav:     0.02em;
+
+  /* ── aliases: the whole codebase migrates without a find-and-replace ──
+     Old public tokens (style.css / brand/tokens.css used --font-d/c/b).
+     Point them at the new families. Barlow Condensed labels become Manrope
+     + wide tracking (see .t-label). */
+  --font-d: var(--font-display);   /* was Bebas — unchanged */
+  --font-b: var(--font-body);      /* was Barlow — now Manrope */
+  --font-c: var(--font-body);      /* was Barlow Condensed — now Manrope */
+}
+
+/* ════════ REUSABLE HIERARCHY UTILITIES (token-driven, not arbitrary) ════════ */
+.t-hero    { font-family: var(--font-display); font-size: var(--fs-hero); line-height: var(--lh-display); letter-spacing: var(--ls-tight); }
+.t-section { font-family: var(--font-display); font-size: var(--fs-section); line-height: var(--lh-display); letter-spacing: var(--ls-tight); }
+.t-stat    { font-family: var(--font-display); font-size: var(--fs-stat); line-height: 0.9; letter-spacing: 0.01em; }
+.t-card    { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-card); line-height: 1.15; letter-spacing: -0.01em; }
+.t-sub     { font-family: var(--font-body); font-weight: 600; font-size: var(--fs-sub); line-height: 1.35; }
+.t-body    { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-body); line-height: var(--lh-body); }
+.t-label   { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-small); line-height: 1; letter-spacing: var(--ls-wide); text-transform: uppercase; }
+.t-btn     { font-family: var(--font-body); font-weight: 700; letter-spacing: 0.04em; }
+.t-mute    { color: var(--grey, #777); }
+
+/* ════════ ACCENT — LIVE · GOAL · FINAL · NEW · SIGNED · BREAKING ════════
+   Manrope heaviest weight, uppercase, tight, in a small tokened pill.
+   Yellow-on-black by default; .is-live pulses (reduced-motion safe). */
+.t-accent {
+  display: inline-flex; align-items: center; gap: 0.4em;
+  font-family: var(--font-body); font-weight: 800; font-size: 0.72em;
+  letter-spacing: 0.1em; text-transform: uppercase; line-height: 1;
+  padding: 0.42em 0.72em; border-radius: 999px;
+  background: var(--yellow, #FFD100); color: #0d0d0d;
+}
+.t-accent--green { background: var(--green, #1A5C32); color: var(--white, #F5F3ED); }
+.t-accent--live  { background: #EF4444; color: #fff; }
+.t-accent--live::before {
+  content: ''; width: 0.5em; height: 0.5em; border-radius: 50%;
+  background: currentColor; animation: t-pulse 1.6s ease-in-out infinite;
+}
+@keyframes t-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .t-accent--live::before { animation: none; } }

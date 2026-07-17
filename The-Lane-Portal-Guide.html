@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Lane · Staff Portal — Committee Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --y:#FFD100; --g:#1A5C32; --bk:#080808; --dk:#0F0F0F; --c:#161616; --br:#2A2A2A;
     --ink:#14140f; --grey:#6b6b66; --line:#e4e2d8; --paper:#ffffff; --cream:#faf9f4;
-    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+    --fd:var(--font-display); --fc:var(--font-body); --fb:var(--font-body);
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ font-family:var(--fb); color:var(--ink); background:#8a8a8a; line-height:1.6; }
@@ -133,6 +132,10 @@
     @page{ size:A4; margin:0; }
   }
 </style>
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
 </head>
 <body>
 

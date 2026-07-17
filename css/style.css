@@ -4,7 +4,7 @@
    Combined Counties Premier Division North
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+/* fonts are self-hosted — see css/fonts.css */
 
 /* ── TOKENS ── */
 :root {
@@ -20,9 +20,7 @@
   --white:      #F5F3ED;
   --grey:       #777;
   --lgrey:      #AAAAAA;
-  --font-d: 'Bebas Neue', sans-serif;
-  --font-c: 'Barlow Condensed', sans-serif;
-  --font-b: 'Barlow', sans-serif;
+  /* type tokens live in css/fonts.css (single source): --font-d/c/b + --font-display/--font-body + --fs-* */
   --nav-h: 68px;
   --ease: cubic-bezier(.4,0,.2,1);
 }

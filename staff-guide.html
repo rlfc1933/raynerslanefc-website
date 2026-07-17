@@ -6,10 +6,13 @@
   <title>Staff Guide — How to Run The Lane | Rayners Lane FC</title>
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/png" href="img/badge.png">
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#999;--lg:#bbb;--su:#22C55E;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
+    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#999;--lg:#bbb;--su:#22C55E;--fd:var(--font-display);--fc:var(--font-body);--fb:var(--font-body)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:radial-gradient(120% 70% at 50% -5%,#13160d 0%,var(--bk) 55%) fixed;color:var(--w);font-family:var(--fb);-webkit-font-smoothing:antialiased;line-height:1.6;padding-bottom:80px}
     .top{position:sticky;top:0;z-index:20;background:rgba(10,10,10,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--br);padding:12px 18px;display:flex;align-items:center;gap:12px}

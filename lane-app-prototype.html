@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Lane App — Interactive Prototype v2</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --y:#FFD100; --g:#1A5C32; --bk:#080808; --dk:#0F0F0F; --c:#161616; --c2:#1E1E1E;
     --br:#2A2A2A; --w:#F5F3ED; --gr:#8A8A82; --re:#EF4444; --su:#22C55E; --am:#F59E0B; --bl:#3B82F6;
-    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+    --fd:var(--font-display); --fc:var(--font-body); --fb:var(--font-body);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{background:#2b2b2b;font-family:var(--fb);color:var(--w);min-height:100vh;padding:20px 14px 60px;
@@ -170,6 +169,10 @@
   .note.g{border-left-color:var(--g)} .note.r{border-left-color:var(--re)} .note.b{border-left-color:var(--bl)}
   @media(max-width:830px){.notes{width:378px}}
 </style>
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
 </head>
 <body>
 

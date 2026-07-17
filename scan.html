@@ -6,12 +6,15 @@
 <title>Match-Day Scanner | Rayners Lane FC</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="img/badge.png">
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/icons.css">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{ --y:#FFD100; --g:#1A5C32; --bg:#080808; --card:#141414; --bd:#242424; --w:#F5F3ED; --gr:#888; --su:#22C55E; --re:#EF4444;
-    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
+    --fd:var(--font-display); --fc:var(--font-body); --fb:var(--font-body); }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--w);font-family:var(--fb);min-height:100vh}
   .wrap{max-width:520px;margin:0 auto;padding:16px 16px 60px}

@@ -76,7 +76,7 @@
 
   async function cardPng(a) {
     // Wait for Bebas — draw too early and the card renders in Times.
-    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Barlow"'); await document.fonts.ready; } } catch (e) {}
+    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Manrope"'); await document.fonts.ready; } } catch (e) {}
 
     var W = 1080, H = 1080;
     var c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -139,14 +139,14 @@
     var badge = await loadImg('img/badge.png');
     if (badge && badge.naturalWidth) x.drawImage(badge, 64, 458, 92, 92);
     x.textAlign = 'left';
-    x.fillStyle = Y; x.font = '700 22px "Barlow Condensed", sans-serif';
+    x.fillStyle = Y; x.font = '700 22px "Manrope", sans-serif';
     x.fillText('RAYNERS LANE FC', 176, 494);
-    x.fillStyle = 'rgba(245,243,237,.62)'; x.font = '400 19px "Barlow", sans-serif';
+    x.fillStyle = 'rgba(245,243,237,.62)'; x.font = '400 19px "Manrope", sans-serif';
     x.fillText('Est. 1933 · Harrow', 176, 526);
 
     // category chip
     if (a.category) {
-      x.font = '700 20px "Barlow Condensed", sans-serif';
+      x.font = '700 20px "Manrope", sans-serif';
       var label = String(a.category).toUpperCase();
       var cw = x.measureText(label).width + 30;
       x.fillStyle = acc.chip; x.fillRect(64, 590, cw, 38);
@@ -166,16 +166,16 @@
     // strap — fixture detail (date / KO / venue). Facts, small, under the drama.
     if (strap) {
       x.fillStyle = 'rgba(245,243,237,.72)';
-      x.font = '600 25px "Barlow", sans-serif';
+      x.font = '600 25px "Manrope", sans-serif';
       x.fillText(strap, 64, H - 132);
     }
 
     // footer — the whole point: send them to the site
     x.fillStyle = 'rgba(255,209,0,.16)'; x.fillRect(0, H - 92, W, 4);
-    x.fillStyle = Y; x.font = '700 26px "Barlow Condensed", sans-serif';
+    x.fillStyle = Y; x.font = '700 26px "Manrope", sans-serif';
     x.fillText('raynerslanefc.co.uk', 64, H - 36);
     x.textAlign = 'right';
-    x.fillStyle = 'rgba(245,243,237,.5)'; x.font = '400 22px "Barlow", sans-serif';
+    x.fillStyle = 'rgba(245,243,237,.5)'; x.font = '400 22px "Manrope", sans-serif';
     x.fillText(a.cta || 'Read the full story', W - 64, H - 36);
 
     return new Promise(function (res) { c.toBlob(res, 'image/png'); });
@@ -187,7 +187,7 @@
       t = document.createElement('div'); t.id = 'rl-share-toast';
       t.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99999;' +
         'background:#111;border:1px solid #2a2a2a;border-left:3px solid ' + Y + ';border-radius:10px;' +
-        'padding:13px 16px;font-family:Barlow,sans-serif;font-size:14px;color:#F5F3ED;max-width:90vw;' +
+        'padding:13px 16px;font-family:Manrope,sans-serif;font-size:14px;color:#F5F3ED;max-width:90vw;' +
         'box-shadow:0 18px 50px rgba(0,0,0,.6)';
       document.body.appendChild(t);
     }
@@ -360,7 +360,7 @@
 
   async function matchCardPng(f, themeKey) {
     var t = MC_THEMES[themeKey] || MC_THEMES.dark;
-    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Barlow"'); await document.fonts.load('700 26px "Barlow Condensed"'); await document.fonts.ready; } } catch (e) {}
+    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Manrope"'); await document.fonts.load('700 26px "Manrope"'); await document.fonts.ready; } } catch (e) {}
 
     var W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
     var x = c.getContext('2d');
@@ -376,13 +376,13 @@
     var badge = await loadImg('img/badge.png');
     if (badge && badge.naturalWidth) x.drawImage(badge, 60, 52, 86, 86);
     x.textAlign = 'left';
-    x.fillStyle = t.ink; x.font = "700 27px 'Barlow Condensed', sans-serif";
+    x.fillStyle = t.ink; x.font = "700 27px 'Manrope', sans-serif";
     x.fillText('RAYNERS LANE FC', 160, 90);
-    x.fillStyle = t.sub; x.font = "400 18px 'Barlow', sans-serif";
+    x.fillStyle = t.sub; x.font = "400 18px 'Manrope', sans-serif";
     x.fillText('EST. 1933 · HARROW', 160, 118);
     // competition tag, top-right
     var comp = /friendly/i.test(f.competition || '') ? 'PRE-SEASON' : /vase/i.test(f.competition || '') ? 'FA VASE' : /fa cup/i.test(f.competition || '') ? 'FA CUP' : 'MATCHDAY';
-    x.font = "700 20px 'Barlow Condensed', sans-serif";
+    x.font = "700 20px 'Manrope', sans-serif";
     var tw = x.measureText(comp).width + 32;
     x.fillStyle = t.tagBg; x.fillRect(W - 60 - tw, 60, tw, 42);
     x.fillStyle = t.tagInk; x.fillText(comp, W - 60 - tw + 16, 88);
@@ -407,7 +407,7 @@
       var s = fitFont(x, n[0], 430, 56, "'Bebas Neue', sans-serif");
       x.fillText(n[0], n[1], cy + 250);
     });
-    x.fillStyle = t.sub; x.font = "700 19px 'Barlow Condensed', sans-serif";
+    x.fillStyle = t.sub; x.font = "700 19px 'Manrope', sans-serif";
     x.fillText(leftHA, lx, cy + 288); x.fillText(rightHA, rx, cy + 288);
 
     // detail band — date · kick-off, then venue
@@ -417,13 +417,13 @@
     x.textAlign = 'center';
     x.fillStyle = t.accent; x.font = "400 46px 'Bebas Neue', sans-serif";
     x.fillText(det.dateLine, W / 2, by + 68);
-    x.fillStyle = t.ink; var vs = fitFont(x, det.venue, W - 200, 30, "'Barlow Condensed', sans-serif");
-    x.font = "600 " + vs + "px 'Barlow Condensed', sans-serif";
+    x.fillStyle = t.ink; var vs = fitFont(x, det.venue, W - 200, 30, "'Manrope', sans-serif");
+    x.font = "600 " + vs + "px 'Manrope', sans-serif";
     x.fillText(det.venue, W / 2, by + 116);
 
     // footer — site + #UpTheLane
     x.fillStyle = t.rule; x.globalAlpha = .9; x.fillRect(0, H - 92, W, 4); x.globalAlpha = 1;
-    x.textAlign = 'left'; x.fillStyle = t.url; x.font = "700 27px 'Barlow Condensed', sans-serif";
+    x.textAlign = 'left'; x.fillStyle = t.url; x.font = "700 27px 'Manrope', sans-serif";
     x.fillText('raynerslanefc.co.uk', 64, H - 34);
     x.textAlign = 'right'; x.fillStyle = t.tag; x.font = "400 40px 'Bebas Neue', sans-serif";
     x.fillText('#UPTHELANE', W - 64, H - 30);
@@ -463,7 +463,7 @@
           '<button class="rl-mc-th" data-t="dark" style="flex:1">Dark</button>' +
           '<button class="rl-mc-th" data-t="yellow" style="flex:1">Yellow</button>' +
         '</div>' +
-        '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
+        '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Manrope\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
         '<div style="font-family:Arial;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
       '</div>';
       document.body.appendChild(ov);
@@ -476,7 +476,7 @@
     function paintTheme() {
       ov.querySelectorAll('.rl-mc-th').forEach(function (b) {
         var on = b.dataset.t === st.theme;
-        b.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;' +
+        b.style.cssText = 'flex:1;padding:10px;border-radius:9px;font-family:\'Manrope\',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;' +
           (on ? 'background:#FFD100;color:#0d0d0d;border:1px solid #FFD100' : 'background:#1a1a1a;color:#aaa;border:1px solid #2a2a2a');
       });
     }

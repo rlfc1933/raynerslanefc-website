@@ -6,13 +6,14 @@
 <meta name="robots" content="noindex">
 <title>Fan Zone &amp; Matchday Scanning — The Guide | Rayners Lane FC</title>
 <link rel="icon" type="image/png" href="img/badge.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/icons.css">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --y:#FFD100; --g:#1A5C32; --bk:#0a0a0a; --w:#F5F3ED; --ink:#1a1a1a; --soft:#5a5a5a; --line:#e4e2da;
-    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif; }
+    --fd:var(--font-display); --fc:var(--font-body); --fb:var(--font-body); }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:#8a8a8a; font-family:var(--fb); color:var(--ink); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 

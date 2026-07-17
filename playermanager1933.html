@@ -13,13 +13,16 @@
 <meta name="apple-mobile-web-app-title" content="The Lane App">
 <link rel="apple-touch-icon" href="/img/icon-pm-192.png">
 <link rel="icon" type="image/png" href="/img/icon-pm-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/icons.css">
   <style>
   :root{
     --y:#FFD100; --g:#1A5C32; --bk:#080808; --dk:#0F0F0F; --c:#161616; --c2:#1E1E1E;
     --br:#2A2A2A; --w:#F5F3ED; --gr:#8A8A82; --re:#EF4444; --su:#22C55E; --am:#F59E0B; --bl:#3B82F6;
-    --fd:'Bebas Neue',sans-serif; --fc:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+    --fd:var(--font-display); --fc:var(--font-body); --fb:var(--font-body);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}

@@ -42,9 +42,7 @@
   --print-line:  #E2E2E2;
 
   /* Typography (names match css/style.css) */
-  --font-d:      'Bebas Neue', sans-serif;      /* headings + big stats/scores */
-  --font-b:      'Barlow', sans-serif;          /* body copy */
-  --font-c:      'Barlow Condensed', sans-serif;/* labels / eyebrows / tables */
+    /* type tokens live in css/fonts.css (single source) */
 
   /* Spacing scale */
   --space-xs: 4px;

@@ -43,7 +43,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lane HQ">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/icon-apple-180.png">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -51,11 +50,14 @@
   <!-- Leaflet — free maps with OpenStreetMap tiles (no Google Maps billing). Used by Sponsor Radar. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="js/supabase-config.js"></script>
+  <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <style>
-    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:"Bebas Neue",sans-serif;--fc:"Barlow Condensed",sans-serif;--fb:"Barlow",sans-serif}
+    :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:var(--font-display);--fc:var(--font-body);--fb:var(--font-body)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bk);color:var(--w);font-family:var(--fb);min-height:100svh;-webkit-font-smoothing:antialiased}
     /* PIN */
@@ -2782,7 +2784,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="sg-card" style="border-left-color:var(--y)"><h4><i class="ico ico-palette"></i> Brand system (single source of truth)</h4><div class="sg-w">
         <b>One source</b><span>All brand colours, fonts, spacing &amp; radius live in <code>brand/tokens.css</code> + <code>brand/tokens.json</code> (mirrored by <code>css/style.css :root</code>). Rules + the locked palette are in <code>brand/BRAND.md</code>.</span>
         <b>Colours</b><span>Yellow <code>#FFD100</code>, green <code>#1A5C32</code> + the dark UI surfaces. Win/loss <code>#22C55E</code>/<code>#EF4444</code> and card yellow/red are <strong style="color:var(--w)">match-event only</strong> — never for chrome.</span>
-        <b>Fonts</b><span>Bebas Neue (headings/scores), Barlow (body), Barlow Condensed (labels/tables). No other fonts.</span>
+        <b>Fonts</b><span>Bebas Neue (headings/scores) + Manrope (body, labels, tables). No other fonts.</span>
         <b>Rule</b><span>Web, digital programme, print edition &amp; admin all pull from these tokens — the print page (<code>programme-print.html</code>) imports <code>brand/tokens.css</code> directly. If a new colour/font is ever needed, add it to the tokens file first — never inline in a page.</span>
       </div></div>
 
@@ -2949,7 +2951,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').c
     prompted = true;
     var bar = document.createElement('div');
     bar.id = 'rlfc-update-bar';
-    bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:#FFD100;color:#080808;font-family:"Barlow",sans-serif;font-weight:700;font-size:14px;padding:13px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer';
+    bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:#FFD100;color:#080808;font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;padding:13px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer';
     bar.innerHTML = '<span><i class="ico ico-refresh-cw"></i> A new version of Lane HQ is ready</span><span style="background:#080808;color:#FFD100;padding:6px 12px;border-radius:8px;white-space:nowrap">Update now</span>';
     bar.addEventListener('click', function () { location.reload(); });
     document.body.appendChild(bar);
@@ -5407,7 +5409,7 @@ function mfRow(f, y, h) {
     crestEl +
     // opponent name + town, auto-fit to the name box
     '<div style="position:absolute;left:' + cx + 'px;top:' + ((h - (town ? 58 : 40)) / 2) + 'px;width:' + nameW + 'px;height:' + (town ? 58 : 40) + 'px;overflow:hidden">' +
-      '<div data-fit="40:22" style="height:40px;line-height:40px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(String(f.opponent).toUpperCase()) + '</div>' +
+      '<div data-fit="40:22" style="height:40px;line-height:40px;font-family:\'Manrope\',sans-serif;font-weight:700;letter-spacing:.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(String(f.opponent).toUpperCase()) + '</div>' +
       (town ? '<div style="font-family:Arial;font-size:15px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(town) + '</div>' : '') +
     '</div>' +
     // KO + competition tag, right-aligned
@@ -5627,7 +5629,7 @@ function fwpCardHtml(ev) {
   h += '<div style="position:absolute;top:' + eyeY + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:26px;font-weight:800;letter-spacing:8px;color:' + A + '">' + escH(ev.eyebrow) + '</div>';
   h += '<div data-fit="' + bigPx + ':84" style="position:absolute;top:' + bigY + 'px;left:64px;right:64px;height:' + bigH + 'px;overflow:hidden;text-align:center;' + beb(bigPx, '#fff') + '">' + escH(ev.big) + '</div>';
   if (!isCard) h += '<div style="position:absolute;top:' + ruleY + 'px;left:' + ((W - 200) / 2) + 'px;width:200px;height:6px;background:' + A + ';border-radius:3px"></div>';
-  h += '<div style="position:absolute;top:' + subY + 'px;left:0;right:0;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:34px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(245,243,237,.85)">' + escH(ev.sub) + '</div>';
+  h += '<div style="position:absolute;top:' + subY + 'px;left:0;right:0;text-align:center;font-family:\'Manrope\',sans-serif;font-size:34px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(245,243,237,.85)">' + escH(ev.sub) + '</div>';
   // footer
   h += '<div style="position:absolute;bottom:0;left:0;right:0;height:12px;background:' + A + '"></div>';
   h += '<div style="position:absolute;bottom:28px;left:60px;font-family:Arial;font-size:18px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>';
@@ -7691,7 +7693,7 @@ function renderAnalyticsTable() {
 function anChartOpts(stacked) {
   return {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: '#F5F3ED', font: { family: 'Barlow Condensed' } } } },
+    plugins: { legend: { labels: { color: '#F5F3ED', font: { family: 'Manrope' } } } },
     scales: {
       x: { stacked: !!stacked, ticks: { color: '#888' }, grid: { color: '#2A2A2A' } },
       y: { stacked: !!stacked, beginAtZero: true, ticks: { color: '#888' }, grid: { color: '#2A2A2A' } }
@@ -7726,7 +7728,7 @@ function renderAnalyticsCharts() {
     var sums = analytics.reduce(function(a,m){ var t=m.takings||{}; a[0]+=t.entry||0; a[1]+=t.programmes||0; a[2]+=t.merch||0; a[3]+=t.other||0; return a; }, [0,0,0,0]);
     _anCharts.pie = new Chart(cP, { type:'doughnut',
       data:{ labels:['Gate','Programmes','Merch','Other'], datasets:[{ data:sums, backgroundColor:[Y,G,B,GR], borderColor:'#161616', borderWidth:2 }] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#F5F3ED', font:{ family:'Barlow Condensed' } } } } } });
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#F5F3ED', font:{ family:'Manrope' } } } } } });
   }
 }
 
