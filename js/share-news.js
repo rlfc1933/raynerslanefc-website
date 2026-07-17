@@ -458,13 +458,13 @@
           '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:1px;color:#F5F3ED">MATCH CARD</div>' +
           '<button id="rl-mc-x" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer">×</button>' +
         '</div>' +
-        '<div id="rl-mc-prev" style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;color:#666;font-family:Arial;font-size:13px">Building…</div>' +
+        '<div id="rl-mc-prev" style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;color:#666;font-family:Manrope,sans-serif;font-size:13px">Building…</div>' +
         '<div style="display:flex;gap:8px;margin-top:12px">' +
           '<button class="rl-mc-th" data-t="dark" style="flex:1">Dark</button>' +
           '<button class="rl-mc-th" data-t="yellow" style="flex:1">Yellow</button>' +
         '</div>' +
         '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Manrope\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
-        '<div style="font-family:Arial;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
+        '<div style="font-family:Manrope,sans-serif;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
       '</div>';
       document.body.appendChild(ov);
     }

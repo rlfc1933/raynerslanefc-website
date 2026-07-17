@@ -4937,7 +4937,7 @@ function psCutoutHero(W, H, X, ST, t, beb, topLabel, name, subLabel) {
   var yName = X ? H - 116 : (ST ? H - 250 : H - 196);
   if (topLabel) s += '<div style="position:absolute;top:' + (yName - (X ? 50 : 64)) + 'px;left:0;right:0;text-align:center;z-index:11;' + beb(X ? 38 : 52, t.accent) + '">' + topLabel + '</div>';
   s += '<div data-fit="' + (X ? 120 : 170) + ':46" style="position:absolute;top:' + yName + 'px;left:0;right:0;height:' + (X ? 86 : 122) + 'px;overflow:hidden;text-align:center;z-index:11;' + beb(X ? 120 : 170, '#fff') + '">' + name + '</div>';
-  if (subLabel) s += '<div style="position:absolute;top:' + (yName + (X ? 80 : 116)) + 'px;left:0;right:0;text-align:center;z-index:11;font-family:Arial;font-size:' + (X ? 20 : 26) + 'px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + subLabel + '</div>';
+  if (subLabel) s += '<div style="position:absolute;top:' + (yName + (X ? 80 : 116)) + 'px;left:0;right:0;text-align:center;z-index:11;font-family:Manrope,sans-serif;font-size:' + (X ? 20 : 26) + 'px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + subLabel + '</div>';
   return s;
 }
 // effective player: a selected profile OR the manually-typed name/position
@@ -4956,11 +4956,11 @@ function psBrand(t, s) {
   var pad = s.w < 1200 ? 46 : 56;
   return '<div style="position:absolute;top:' + pad + 'px;left:' + pad + 'px;display:flex;align-items:center;gap:14px">' +
     '<img src="img/badge.png" crossorigin="anonymous" style="width:62px;height:62px;object-fit:contain">' +
-    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:34px;letter-spacing:2px;color:#fff;line-height:.86">RAYNERS LANE FC<div style="font-family:Arial;font-size:12px;letter-spacing:3px;color:' + t.accent + ';font-weight:800;margin-top:3px">EST. 1933 · HARROW</div></div></div>';
+    '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:34px;letter-spacing:2px;color:#fff;line-height:.86">RAYNERS LANE FC<div style="font-family:Manrope,sans-serif;font-size:12px;letter-spacing:3px;color:' + t.accent + ';font-weight:800;margin-top:3px">EST. 1933 · HARROW</div></div></div>';
 }
 function psFooter(t, s) {
   return '<div style="position:absolute;bottom:0;left:0;right:0;height:14px;background:' + t.accent + (t.accent2 && t.accent2 !== t.accent ? ';background:linear-gradient(90deg,' + t.accent + ',' + t.accent2 + ')' : '') + '"></div>' +
-    '<div style="position:absolute;bottom:38px;left:0;right:0;text-align:center;font-family:Arial;font-size:17px;font-weight:800;letter-spacing:4px;color:rgba(255,255,255,.66)">RAYNERSLANEFC.CO.UK</div>';
+    '<div style="position:absolute;bottom:38px;left:0;right:0;text-align:center;font-family:Manrope,sans-serif;font-size:17px;font-weight:800;letter-spacing:4px;color:rgba(255,255,255,.66)">RAYNERSLANEFC.CO.UK</div>';
 }
 function psWM() { return '<div style="position:absolute;right:-130px;bottom:-110px;width:600px;height:600px;background:url(img/badge.png) center/contain no-repeat;opacity:.05"></div>'; }
 function psEyebrow(txt, t, top) {
@@ -4968,7 +4968,7 @@ function psEyebrow(txt, t, top) {
   // flex children, which dropped the banner text from the exported PNG.
   var ico = psIco(PS_TYPE_ICON[PS.type], 20, t.ink);
   return '<div style="position:absolute;top:' + top + 'px;left:0;right:0;text-align:center">' +
-    '<span style="display:inline-block;background:' + t.accent + ';color:' + t.ink + ';padding:9px 22px;border-radius:6px;font-family:Arial;font-size:20px;font-weight:800;letter-spacing:6px;white-space:nowrap">' +
+    '<span style="display:inline-block;background:' + t.accent + ';color:' + t.ink + ';padding:9px 22px;border-radius:6px;font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:6px;white-space:nowrap">' +
     '<span style="display:inline-block;vertical-align:middle;margin-right:10px">' + ico + '</span>' +
     '<span style="display:inline-block;vertical-align:middle">' + txt + '</span>' +
     '</span></div>';
@@ -5077,8 +5077,8 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (cy - 52) + 'px;left:0;right:0;text-align:center;' + beb(104, t.accent) + '">VS</div>';
     var by = X ? H - 150 : (ST ? H - 360 : H - 250);
     inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
-    inner += ctr(by + 76, '<span style="font-family:Arial;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
-    inner += ctr(by + 116, '<span style="font-family:Arial;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
+    inner += ctr(by + 76, '<span style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
+    inner += ctr(by + 116, '<span style="font-family:Manrope,sans-serif;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
   } else if (PS.type === 'preseason') {
     var awayP = d.ha === 'away';
     var czp = X ? 200 : 290, cyp = X ? midY - 30 : (ST ? 600 : 430);
@@ -5103,8 +5103,8 @@ function psRender() {
     // date · kick-off / venue / title
     var byp = X ? H - 150 : (ST ? H - 360 : H - 250);
     inner += ctr(byp, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 12 JUL')).toUpperCase() + '</span>');
-    inner += ctr(byp + 76, '<span style="font-family:Arial;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
-    inner += ctr(byp + 116, '<span style="font-family:Arial;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'PRE-SEASON FRIENDLY') + '</span>');
+    inner += ctr(byp + 76, '<span style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
+    inner += ctr(byp + 116, '<span style="font-family:Manrope,sans-serif;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'PRE-SEASON FRIENDLY') + '</span>');
   } else if (PS.type === 'kickoff') {
     var cz2 = X ? 190 : 270, cy2 = X ? midY - 20 : (ST ? 640 : 470);
     inner += psEyebrow('KICK OFF', t, ebTop);
@@ -5119,11 +5119,11 @@ function psRender() {
       inner += playerFrame(p, X ? 280 : 380, W / 2, ebTop + (X ? 210 : 280));
       var gy = X ? H - 150 : (ST ? H - 340 : H - 230);
       inner += ctr(gy, '<span style="' + beb(96, '#fff') + '">' + escH(psPlayerName()) + '</span>');
-      inner += ctr(gy + 96, '<span style="font-family:Arial;font-size:30px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
+      inner += ctr(gy + 96, '<span style="font-family:Manrope,sans-serif;font-size:30px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
     } else {
       inner += ctr(midY - (X ? 150 : 250), '<span style="' + beb(X ? 180 : 260, t.accent) + '">GOAL!</span>');
       inner += ctr(midY - (X ? 10 : 10), '<span style="' + beb(X ? 130 : 180, '#fff') + '">' + escH(psPlayerName()) + '</span>');
-      inner += ctr(midY + (X ? 130 : 180), '<span style="font-family:Arial;font-size:34px;font-weight:800;letter-spacing:4px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
+      inner += ctr(midY + (X ? 130 : 180), '<span style="font-family:Manrope,sans-serif;font-size:34px;font-weight:800;letter-spacing:4px;color:' + t.accent + '">' + escH(d.min || '23') + '\' &middot; ' + escH(d.score || '1-0') + (pos(p) ? ' &middot; ' + pos(p) : '') + '</span>');
     }
   } else if (PS.type === 'yellow' || PS.type === 'red') {
     var pc = psPlayerObj(); var col = PS.type === 'red' ? '#E5341F' : '#FFCB05';
@@ -5131,7 +5131,7 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (midY - (X ? 150 : 220)) + 'px;left:' + (W / 2 - (X ? 110 : 150)) + 'px;width:' + (X ? 220 : 300) + 'px;height:' + (X ? 300 : 420) + 'px;border-radius:22px;background:' + col + ';box-shadow:0 26px 64px -16px rgba(0,0,0,.85)"></div>';
     var cy3 = X ? H - 150 : (ST ? H - 350 : H - 240);
     inner += ctr(cy3, '<span style="' + beb(X ? 80 : 100, '#fff') + '">' + escH(psPlayerName()) + '</span>');
-    inner += ctr(cy3 + (X ? 84 : 104), '<span style="font-family:Arial;font-size:28px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '41') + '\'' + (pos(pc) ? ' &middot; ' + pos(pc) : '') + '</span>');
+    inner += ctr(cy3 + (X ? 84 : 104), '<span style="font-family:Manrope,sans-serif;font-size:28px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(d.min || '41') + '\'' + (pos(pc) ? ' &middot; ' + pos(pc) : '') + '</span>');
   } else if (PS.type === 'halftime' || PS.type === 'fulltime') {
     var cz4 = X ? 170 : 210, cyc = X ? midY - 20 : (ST ? 560 : 420);
     inner += psEyebrow(PS.type === 'fulltime' ? 'FULL-TIME' : 'HALF-TIME', t, ebTop);
@@ -5144,13 +5144,13 @@ function psRender() {
       // Goalscorers — single line, shrinks (never wraps/overflows) via data-fit.
       if (d.scorers) {
         var ftScY = cyc + cz4 / 2 + (X ? 62 : 80);
-        inner += '<div data-fit="' + (X ? 32 : 40) + ':14" style="position:absolute;top:' + ftScY + 'px;left:0;right:0;text-align:center;white-space:nowrap;overflow:hidden;padding:0 44px;font-family:Arial;font-weight:800;letter-spacing:2px;color:' + t.accent + ';font-size:' + (X ? 32 : 40) + 'px">' + escH((d.scorers || '')).toUpperCase() + '</div>';
+        inner += '<div data-fit="' + (X ? 32 : 40) + ':14" style="position:absolute;top:' + ftScY + 'px;left:0;right:0;text-align:center;white-space:nowrap;overflow:hidden;padding:0 44px;font-family:Manrope,sans-serif;font-weight:800;letter-spacing:2px;color:' + t.accent + ';font-size:' + (X ? 32 : 40) + 'px">' + escH((d.scorers || '')).toUpperCase() + '</div>';
       }
       // Manager's quote — fixed box near the bottom, wraps + shrinks to fit.
       if (d.mgrQuote) {
         var qTop = X ? H - 176 : (ST ? H - 430 : H - 302);
         var qBoxH = X ? 92 : (ST ? 244 : 190);
-        inner += '<div data-fit="' + (X ? 26 : 34) + ':15" style="position:absolute;top:' + qTop + 'px;left:80px;right:80px;height:' + qBoxH + 'px;overflow:hidden;text-align:center;font-family:Arial;font-style:italic;font-weight:600;line-height:1.3;color:#fff;font-size:' + (X ? 26 : 34) + 'px">&ldquo;' + escH(d.mgrQuote) + '&rdquo;</div>';
+        inner += '<div data-fit="' + (X ? 26 : 34) + ':15" style="position:absolute;top:' + qTop + 'px;left:80px;right:80px;height:' + qBoxH + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-style:italic;font-weight:600;line-height:1.3;color:#fff;font-size:' + (X ? 26 : 34) + 'px">&ldquo;' + escH(d.mgrQuote) + '&rdquo;</div>';
       }
     }
   } else if (PS.type === 'motm') {
@@ -5163,12 +5163,12 @@ function psRender() {
       if (mEff) inner += playerFrame({ photo: mEff }, X ? 300 : 420, W / 2, ebTop + (X ? 90 : 130));
       var my = X ? H - 150 : (ST ? H - 340 : H - 230);
       inner += ctr(mEff ? my : midY - 40, '<span style="' + beb(mEff ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(psPlayerName()) + '</span>');
-      inner += ctr(mEff ? my + 96 : midY + 110, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
+      inner += ctr(mEff ? my + 96 : midY + 110, '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + (pos(pm) || 'THE LANE') + (d.sponsor ? ' &middot; SPONSORED BY ' + escH(d.sponsor).toUpperCase() : '') + '</span>');
     }
   } else if (PS.type === 'potm') {
     var ep = psEff(), hasPp = !!ep.photo;
     inner += psEyebrow('PLAYER OF THE MONTH', t, ebTop);
-    inner += ctr(ebTop + (X ? 58 : 76), '<span style="font-family:Arial;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">' + escH((d.month || 'AUGUST')).toUpperCase() + '</span>');
+    inner += ctr(ebTop + (X ? 58 : 76), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">' + escH((d.month || 'AUGUST')).toUpperCase() + '</span>');
     if (d.useCut && d.pCut) {
       inner += psCutoutHero(W, H, X, ST, t, beb, '', escH(ep.surname), ep.position ? escH(ep.position).toUpperCase() : '');
     } else {
@@ -5176,7 +5176,7 @@ function psRender() {
       if (pEff) inner += playerFrame({ photo: pEff }, X ? 290 : 400, W / 2, ebTop + (X ? 95 : 150));
       var py = X ? H - 150 : (ST ? H - 340 : H - 235);
       inner += ctr(pEff ? py : midY - 30, '<span style="' + beb(pEff ? 96 : (X ? 150 : 200), '#fff') + '">' + escH(ep.surname) + '</span>');
-      if (ep.position) inner += ctr(pEff ? py + 96 : midY + 120, '<span style="font-family:Arial;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
+      if (ep.position) inner += ctr(pEff ? py + 96 : midY + 120, '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH(ep.position).toUpperCase() + '</span>');
     }
   } else if (PS.type === 'sponsorspot') {
     inner += psEyebrow('PROUDLY SPONSORED BY', t, ebTop);
@@ -5186,10 +5186,10 @@ function psRender() {
       if (d.logoWhite) inner += '<div style="position:absolute;left:' + (lcx - sc / 2 - 26) + 'px;top:' + (lcy - sc / 2 - 26) + 'px;width:' + (sc + 52) + 'px;height:' + (sc + 52) + 'px;background:#ffffff;border-radius:24px;box-shadow:0 20px 50px -16px rgba(0,0,0,.7)"></div>';
       inner += '<img src="' + d.logo + '" crossorigin="anonymous" style="position:absolute;left:' + (lcx - sc / 2) + 'px;top:' + (lcy - sc / 2) + 'px;width:' + sc + 'px;height:' + sc + 'px;object-fit:contain">';
     } else {
-      inner += ctr(midY - 30, '<span style="font-family:Arial;font-size:28px;color:rgba(255,255,255,.5)"><i class="ico ico-arrow-up"></i> upload the sponsor logo</span>');
+      inner += ctr(midY - 30, '<span style="font-family:Manrope,sans-serif;font-size:28px;color:rgba(255,255,255,.5)"><i class="ico ico-arrow-up"></i> upload the sponsor logo</span>');
     }
     inner += ctr(X ? H - 150 : (ST ? H - 340 : H - 230), '<span style="' + beb(X ? 70 : 90, t.accent) + '">' + escH((d.spName || 'YOUR SPONSOR')).toUpperCase() + '</span>');
-    if (d.spSub) inner += ctr(X ? H - 95 : (ST ? H - 265 : H - 158), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff">' + escH(d.spSub) + '</span>');
+    if (d.spSub) inner += ctr(X ? H - 95 : (ST ? H - 265 : H - 158), '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:600;color:#fff">' + escH(d.spSub) + '</span>');
   } else if (PS.type === 'birthday') {
     var eb2 = psEff(), bp = psPlayerObj();
     inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;">' + psIco('cake', X ? 90 : 140, t.accent) + '</div>';
@@ -5197,7 +5197,7 @@ function psRender() {
     if (bp && bp.photo) inner += playerFrame(bp, X ? 250 : 330, W / 2, ebTop + (X ? 150 : 230));
     var byy = (bp && bp.photo) ? (X ? H - 160 : (ST ? H - 360 : H - 250)) : midY - 10;
     inner += ctr(byy, '<span style="' + beb(X ? 120 : 160, '#fff') + '">' + escH(psPlayerName()) + (d.age ? ' <span style="color:' + t.accent + '">' + escH(d.age) + '</span>' : '') + '</span>');
-    if (d.bmsg) inner += ctr(byy + (X ? 96 : 130), '<span style="font-family:Arial;font-size:26px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.bmsg) + '</span>');
+    if (d.bmsg) inner += ctr(byy + (X ? 96 : 130), '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.bmsg) + '</span>');
   } else if (PS.type === 'signing') {
     var psn = psPlayerObj(), nm = escH(psPlayerName()), hasS = psn && psn.photo;
     inner += psEyebrow('NEW SIGNING', t, ebTop);
@@ -5224,7 +5224,7 @@ function psRender() {
     inner += xi.slice(0, 11).map(function (n, i) {
       return '<div style="position:absolute;top:' + (listTop + i * lh) + 'px;left:0;right:0;text-align:center;' + beb(fs, '#fff') + '"><span style="color:' + t.accent + '">' + (i + 1) + '</span>&nbsp; ' + escH(n.toUpperCase()) + '</div>';
     }).join('');
-    if (subs.length) inner += ctr(listTop + 11 * lh + 14, '<span style="font-family:Arial;font-size:' + (X ? 18 : 24) + 'px;font-weight:700;letter-spacing:2px;color:' + t.accent + '">SUBS: <span style="color:#fff">' + subs.map(function (n) { return escH(n); }).join(' · ') + '</span></span>');
+    if (subs.length) inner += ctr(listTop + 11 * lh + 14, '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 18 : 24) + 'px;font-weight:700;letter-spacing:2px;color:' + t.accent + '">SUBS: <span style="color:#fff">' + subs.map(function (n) { return escH(n); }).join(' · ') + '</span></span>');
   } else if (PS.type === 'countdown') {
     inner += psBig((d.days != null ? d.days : 3) + '', t, PS.size === 'x' ? 280 : 420, midY - (PS.size === 'x' ? 150 : 280));
     inner += '<div style="position:absolute;top:' + (midY + (PS.size === 'x' ? 110 : 170)) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:4px;color:' + t.accent + '">DAYS TO ' + escH((d.what || 'KICK OFF')).toUpperCase() + '</div>';
@@ -5232,19 +5232,19 @@ function psRender() {
     var occ = d.occ || 'Christmas'; var f = FESTIVE[occ];
     inner += '<div style="position:absolute;top:' + (midY - 240) + 'px;left:0;right:0;text-align:center;">' + psIco(f[2], X ? 150 : 230, t.accent) + '</div>';
     inner += '<div style="position:absolute;top:' + (midY - 30) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:96px;letter-spacing:2px;color:' + t.accent + ';padding:0 50px">' + f[0].toUpperCase() + '</div>';
-    inner += '<div style="position:absolute;top:' + (midY + 90) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:700;letter-spacing:1px;color:#fff;padding:0 80px">' + escH(f[1]) + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 90) + 'px;left:0;right:0;text-align:center;font-family:Manrope,sans-serif;font-size:30px;font-weight:700;letter-spacing:1px;color:#fff;padding:0 80px">' + escH(f[1]) + '</div>';
   } else if (PS.type === 'announce') {
     inner += psEyebrow('CLUB ANNOUNCEMENT', t, PS.size === 'x' ? 60 : 130);
     inner += '<div data-fit="104:46" style="position:absolute;top:' + (midY - 150) + 'px;left:0;right:0;height:190px;overflow:hidden;text-align:center;font-family:\'Bebas Neue\';font-size:104px;letter-spacing:2px;color:' + t.accent + ';line-height:.9;padding:0 50px">' + escH(d.title || 'IMPORTANT UPDATE').toUpperCase() + '</div>';
-    inner += '<div data-fit="30:15" style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;height:' + (H / 2 - 150) + 'px;overflow:hidden;text-align:center;font-family:Arial;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
+    inner += '<div data-fit="30:15" style="position:absolute;top:' + (midY + 50) + 'px;left:0;right:0;height:' + (H / 2 - 150) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-size:30px;font-weight:600;line-height:1.45;color:#fff;padding:0 90px">' + escH(d.body || '').replace(/\n/g, '<br>') + '</div>';
   } else if (PS.type === 'history') {
     inner += psEyebrow('ON THE LANE', t, PS.size === 'x' ? 60 : 130);
     inner += '<div style="position:absolute;top:' + (midY - 120) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:64px;letter-spacing:2px;color:#fff;line-height:1.05;padding:0 70px">' + escH(d.fact || HISTORY_FACTS[0]) + '</div>';
-    inner += '<div style="position:absolute;top:' + (midY + 150) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:22px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">SINCE 1933</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 150) + 'px;left:0;right:0;text-align:center;font-family:Manrope,sans-serif;font-size:22px;font-weight:800;letter-spacing:5px;color:' + t.accent + '">SINCE 1933</div>';
   } else if (PS.type === 'quote') {
     var q = Array.isArray(d.quote) ? d.quote : QUOTES[0];
     inner += '<div style="position:absolute;top:' + (midY - 150) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\';font-size:110px;letter-spacing:2px;color:' + t.accent + ';line-height:.92;padding:0 60px">' + escH(q[0]).toUpperCase() + '</div>';
-    inner += '<div style="position:absolute;top:' + (midY + 80) + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:30px;font-weight:600;font-style:italic;color:#fff;padding:0 90px">' + escH(q[1]) + '</div>';
+    inner += '<div style="position:absolute;top:' + (midY + 80) + 'px;left:0;right:0;text-align:center;font-family:Manrope,sans-serif;font-size:30px;font-weight:600;font-style:italic;color:#fff;padding:0 90px">' + escH(q[1]) + '</div>';
   } else if (PS.type === 'headline') {
     // Bold teaser title card — the AI hook drops in here. Big Bebas line that
     // makes people read the caption. Auto-sizes to the headline length.
@@ -5252,10 +5252,10 @@ function psRender() {
     var kick = (d.kicker == null ? 'RAYNERS LANE FC' : d.kicker);
     var hlen = hl.length;
     var hlSize = X ? (hlen > 22 ? 118 : hlen > 13 ? 158 : 208) : (hlen > 22 ? 150 : hlen > 13 ? 208 : 276);
-    if (kick) inner += ctr(midY - (X ? 148 : 232), '<span style="font-family:Arial;font-size:' + (X ? 24 : 30) + 'px;font-weight:800;letter-spacing:6px;color:' + t.accent + '">' + escH(kick).toUpperCase() + '</span>');
+    if (kick) inner += ctr(midY - (X ? 148 : 232), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 24 : 30) + 'px;font-weight:800;letter-spacing:6px;color:' + t.accent + '">' + escH(kick).toUpperCase() + '</span>');
     inner += '<div style="position:absolute;top:' + (midY - (X ? 92 : 148)) + 'px;left:0;right:0;text-align:center;font-family:\'Bebas Neue\',sans-serif;font-size:' + hlSize + 'px;letter-spacing:2px;color:#fff;line-height:.88;padding:0 60px">' + escH(hl) + '</div>';
     inner += '<div style="position:absolute;top:' + (midY + (X ? 66 : 120)) + 'px;left:50%;transform:translateX(-50%);width:' + (X ? 170 : 230) + 'px;height:8px;background:' + t.accent + ';border-radius:4px"></div>';
-    if (d.subline) inner += ctr(midY + (X ? 92 : 158), '<span style="font-family:Arial;font-size:' + (X ? 26 : 32) + 'px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.subline) + '</span>');
+    if (d.subline) inner += ctr(midY + (X ? 92 : 158), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 26 : 32) + 'px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.subline) + '</span>');
   }
   inner += psBrand(t, s) + psFooter(t, s);
   // Palette recolour, scoped to THIS card's HTML only: every white TEXT token →
@@ -5401,7 +5401,7 @@ function mfRow(f, y, h) {
   return '<div style="position:absolute;left:56px;right:56px;top:' + y + 'px;height:' + h + 'px;border-bottom:1px solid rgba(255,255,255,.08)">' +
     // date block
     '<div style="position:absolute;left:0;top:' + ((h - 62) / 2) + 'px;width:92px;text-align:center">' +
-      '<div style="font-family:Arial;font-size:15px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">' + wd + '</div>' +
+      '<div style="font-family:Manrope,sans-serif;font-size:15px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">' + wd + '</div>' +
       '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:46px;line-height:.9;color:#fff">' + day + '</div>' +
     '</div>' +
     // H / A pill
@@ -5410,12 +5410,12 @@ function mfRow(f, y, h) {
     // opponent name + town, auto-fit to the name box
     '<div style="position:absolute;left:' + cx + 'px;top:' + ((h - (town ? 58 : 40)) / 2) + 'px;width:' + nameW + 'px;height:' + (town ? 58 : 40) + 'px;overflow:hidden">' +
       '<div data-fit="40:22" style="height:40px;line-height:40px;font-family:\'Manrope\',sans-serif;font-weight:700;letter-spacing:.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(String(f.opponent).toUpperCase()) + '</div>' +
-      (town ? '<div style="font-family:Arial;font-size:15px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(town) + '</div>' : '') +
+      (town ? '<div style="font-family:Manrope,sans-serif;font-size:15px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escH(town) + '</div>' : '') +
     '</div>' +
     // KO + competition tag, right-aligned
     '<div style="position:absolute;right:0;top:' + ((h - 56) / 2) + 'px;width:150px;text-align:right">' +
       '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:34px;line-height:1;color:' + MF_YELLOW + '">' + koTxt + '</div>' +
-      '<div style="display:inline-block;margin-top:6px;font-family:Arial;font-size:12px;font-weight:800;letter-spacing:2px;color:#fff;background:' + comp.accent + ';padding:3px 8px;border-radius:4px">' + comp.label + '</div>' +
+      '<div style="display:inline-block;margin-top:6px;font-family:Manrope,sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;color:#fff;background:' + comp.accent + ';padding:3px 8px;border-radius:4px">' + comp.label + '</div>' +
     '</div>' +
   '</div>';
 }
@@ -5437,7 +5437,7 @@ function mfCardHtml(monthKey, fixtures) {
     '<div style="position:absolute;top:52px;left:56px;right:56px;height:74px">' +
       '<img src="img/badge.png" crossorigin="anonymous" style="position:absolute;left:0;top:0;width:74px;height:74px;object-fit:contain">' +
       '<div style="position:absolute;left:90px;top:8px;font-family:\'Bebas Neue\',sans-serif;font-size:32px;letter-spacing:2px;color:#fff;line-height:.9">RAYNERS LANE FC' +
-        '<div style="font-family:Arial;font-size:12px;letter-spacing:3px;color:' + MF_YELLOW + ';font-weight:800;margin-top:4px">EST. 1933 &middot; HARROW</div></div>' +
+        '<div style="font-family:Manrope,sans-serif;font-size:12px;letter-spacing:3px;color:' + MF_YELLOW + ';font-weight:800;margin-top:4px">EST. 1933 &middot; HARROW</div></div>' +
       '<div style="position:absolute;right:0;top:14px;font-family:\'Bebas Neue\',sans-serif;font-size:30px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + mfSeason() + '</div>' +
     '</div>' +
     // title: MONTH + FIXTURES
@@ -5449,8 +5449,8 @@ function mfCardHtml(monthKey, fixtures) {
     rows +
     // footer
     '<div style="position:absolute;bottom:0;left:0;right:0;height:14px;background:' + MF_YELLOW + '"></div>' +
-    '<div style="position:absolute;bottom:34px;left:56px;font-family:Arial;font-size:17px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>' +
-    '<div style="position:absolute;bottom:34px;right:56px;font-family:Arial;font-size:17px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">@RAYNERSLANEFC</div>';
+    '<div style="position:absolute;bottom:34px;left:56px;font-family:Manrope,sans-serif;font-size:17px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>' +
+    '<div style="position:absolute;bottom:34px;right:56px;font-family:Manrope,sans-serif;font-size:17px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">@RAYNERSLANEFC</div>';
 }
 
 function mfInit() {
@@ -5622,18 +5622,18 @@ function fwpCardHtml(ev) {
   h += '<div style="position:absolute;top:54px;left:60px;width:760px;height:84px">' +
     '<img src="img/badge.png" crossorigin="anonymous" style="position:absolute;left:0;top:0;width:84px;height:84px;object-fit:contain">' +
     '<div style="position:absolute;left:100px;top:6px;white-space:nowrap;' + beb(34, '#fff') + '">RAYNERS LANE FC' +
-    '<div style="font-family:Arial;font-size:13px;letter-spacing:3px;color:' + A + ';font-weight:800;margin-top:5px;white-space:nowrap">EST. 1933 &middot; HARROW</div></div></div>';
+    '<div style="font-family:Manrope,sans-serif;font-size:13px;letter-spacing:3px;color:' + A + ';font-weight:800;margin-top:5px;white-space:nowrap">EST. 1933 &middot; HARROW</div></div></div>';
   // eyebrow / headline / rule / sub
   var eyeY = isCard ? 470 : 322, bigY = isCard ? 512 : 372, bigH = isCard ? 150 : 220, ruleY = isCard ? 682 : 612, subY = isCard ? 706 : 638;
   var bigPx = isCard ? 170 : 250;
-  h += '<div style="position:absolute;top:' + eyeY + 'px;left:0;right:0;text-align:center;font-family:Arial;font-size:26px;font-weight:800;letter-spacing:8px;color:' + A + '">' + escH(ev.eyebrow) + '</div>';
+  h += '<div style="position:absolute;top:' + eyeY + 'px;left:0;right:0;text-align:center;font-family:Manrope,sans-serif;font-size:26px;font-weight:800;letter-spacing:8px;color:' + A + '">' + escH(ev.eyebrow) + '</div>';
   h += '<div data-fit="' + bigPx + ':84" style="position:absolute;top:' + bigY + 'px;left:64px;right:64px;height:' + bigH + 'px;overflow:hidden;text-align:center;' + beb(bigPx, '#fff') + '">' + escH(ev.big) + '</div>';
   if (!isCard) h += '<div style="position:absolute;top:' + ruleY + 'px;left:' + ((W - 200) / 2) + 'px;width:200px;height:6px;background:' + A + ';border-radius:3px"></div>';
   h += '<div style="position:absolute;top:' + subY + 'px;left:0;right:0;text-align:center;font-family:\'Manrope\',sans-serif;font-size:34px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(245,243,237,.85)">' + escH(ev.sub) + '</div>';
   // footer
   h += '<div style="position:absolute;bottom:0;left:0;right:0;height:12px;background:' + A + '"></div>';
-  h += '<div style="position:absolute;bottom:28px;left:60px;font-family:Arial;font-size:18px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>';
-  h += '<div style="position:absolute;bottom:28px;right:60px;font-family:Arial;font-size:18px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">@RAYNERSLANEFC</div>';
+  h += '<div style="position:absolute;bottom:28px;left:60px;font-family:Manrope,sans-serif;font-size:18px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,.7)">RAYNERSLANEFC.CO.UK</div>';
+  h += '<div style="position:absolute;bottom:28px;right:60px;font-family:Manrope,sans-serif;font-size:18px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55)">@RAYNERSLANEFC</div>';
   return h;
 }
 
