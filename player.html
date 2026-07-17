@@ -85,7 +85,7 @@ function renderPlayer(p) {
 
   var html = '<div class="player-hero">' +
     '<div class="player-hero-img">' +
-      '<div class="player-number">' + (p.number||'') + '</div>' +
+      '<div class="player-number" aria-hidden="true">' + (p.number||'') + '</div>' +
       (p.photo
         ? '<img src="' + p.photo + '" alt="' + p.name + '">'
         : '<img src="img/players/player-' + getIllustration(p.position) + '.svg" alt="' + (p.name||'') + '">') +

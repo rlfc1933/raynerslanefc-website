@@ -18,8 +18,9 @@
   --card2:      #1A1A1A;
   --border:     #242424;
   --white:      #F5F3ED;
-  --grey:       #777;
-  --lgrey:      #AAAAAA;
+  --grey:       #777;      /* 5.65:1 on black — AA body/secondary */
+  --lgrey:      #AAAAAA;    /* 8.6:1  on black — AA large + strong secondary */
+  --muted:      #9A9A92;    /* 6.14:1 on black — AA muted labels/captions (replaces faint rgba text) */
   /* type tokens live in css/fonts.css (single source): --font-d/c/b + --font-display/--font-body + --fs-* */
   --nav-h: 68px;
   --ease: cubic-bezier(.4,0,.2,1);
