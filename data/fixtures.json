@@ -17,22 +17,6 @@
       "shareHeadlineAuto": "HAYES & YEADING UNITED AT THE LANE"
     },
     {
-      "id": "friendly-cockfosters-20260718",
-      "date": "2026-07-18",
-      "kickoff": "15:00",
-      "opponent": "Cockfosters",
-      "oppCrest": "img/crests/cockfosters.svg",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
-      "shareHeadline": "COCKFOSTERS AT THE LANE",
-      "shareHeadlineAuto": "COCKFOSTERS AT THE LANE"
-    },
-    {
       "id": "friendly-met-police-20260725",
       "date": "2026-07-25",
       "kickoff": "15:00",
@@ -690,5 +674,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T15:57:39.406Z"
+  "updatedAt": "2026-07-18T15:59:59.148Z"
 }
