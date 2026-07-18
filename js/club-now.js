@@ -220,6 +220,9 @@
 
   function completedMatchday() {         // a finished match held in matchday.json
     if (!live || live.isLive) return null;
+    // When staff have taken the scoreboard down (state 'off'), show NO result —
+    // fall through to the next match. A result only shows for a genuine full-time.
+    if (live._state === 'off') return null;
     var hs = live.homeScore, as = live.awayScore;
     var done = /full|ft|final|result/i.test(live.status || '');
     if (!done || hs == null || as == null || !live.opponent) return null;

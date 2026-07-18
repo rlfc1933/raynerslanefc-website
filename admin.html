@@ -3745,6 +3745,16 @@ function setVal(id, val) {
 }
 
 // ── MATCH DAY ──
+// Read the live_match row straight from Supabase — the INSTANT source of truth
+// for the score. (admin.html loads supabase-config.js, so the key is available.)
+function mdReadSupabase(cb) {
+  var sb = window.RLFC_SUPABASE || {};
+  if (!sb.url || !sb.anonKey) { cb(null); return; }
+  fetch(sb.url + '/rest/v1/live_match?id=eq.1&select=*', { headers: { apikey: sb.anonKey } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rows) { cb(Array.isArray(rows) && rows.length ? rows[0] : null); })
+    .catch(function () { cb(null); });
+}
 function initMD() {
   setHA(isHome);
   updateLiveUI();
@@ -3769,6 +3779,20 @@ function initMD() {
     lsStatus = d.status || '';
     lsRefreshNames();
     lsRender();
+    // …then overlay the LIVE score from Supabase (instant source of truth). This
+    // is what stops a lagging matchday.json from showing 0-0 and letting a Save
+    // overwrite the real score. Supabase wins for score + home/away when present.
+    mdReadSupabase(function (row) {
+      if (!row) return;
+      if (typeof row.is_home === 'boolean') setHA(row.is_home);
+      var home = row.is_home !== false;
+      lsHome = home ? (row.home_score || 0) : (row.away_score || 0);
+      lsAway = home ? (row.away_score || 0) : (row.home_score || 0);
+      if (row.status) { lsStatus = row.status; }
+      if (row.scorers) setVal('md-scorers', row.scorers);
+      lsRefreshNames();
+      lsRender();
+    });
   });
 }
 function setHA(home) {
