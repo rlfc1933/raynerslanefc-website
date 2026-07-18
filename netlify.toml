@@ -62,7 +62,10 @@
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=0, stale-while-revalidate=86400"
+    # no-cache = the browser must revalidate every load (cheap 304 when unchanged).
+    # NOT stale-while-revalidate: that served up to a day-old copy, so live-match
+    # scoreboard fixes never reached phones during a game. Correctness > a 304.
+    Cache-Control = "no-cache"
 
 [[headers]]
   for = "/css/*"

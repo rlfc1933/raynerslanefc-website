@@ -942,6 +942,16 @@
     <!-- MATCH DAY -->
     <div class="panel" id="panel-matchday">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-dot-off"></i> Match Day</div></div>
+
+      <!-- FIX 1: the fixture is the source of truth for WHO + WHERE. Pick it here;
+           opponent / home-away / date / venue are filled from data/fixtures.json. -->
+      <div class="slbl"><i class="ico ico-calendar"></i> Which game? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the fixture; home/away comes from it</span></div>
+      <select id="md-fixture" onchange="mdPickFixture()" style="width:100%;background:var(--card);border:1px solid var(--bd);color:var(--w);font-family:var(--fb);font-size:15px;padding:12px;border-radius:9px;margin-bottom:10px"></select>
+
+      <!-- FIX 3: a live preview in the EXACT public format, so staff catch an
+           inversion before it ever hits the site. -->
+      <div id="md-preview" style="font-family:var(--fc);font-size:15px;letter-spacing:.02em;color:var(--gr);background:linear-gradient(135deg,#12261a,#0a160c);border:1px solid rgba(255,209,0,.25);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px">Pick the fixture to preview</div>
+
       <div id="s-live" class="stat live" style="display:none"><div class="sdot" style="animation:pulse 1.5s infinite"></div><div class="stxt">SCOREBOARD IS LIVE ON SITE</div></div>
       <div id="s-off" class="stat off"><div class="sdot"></div><div class="stxt">Scoreboard is off</div></div>
       <div class="tog-wrap">
@@ -3755,43 +3765,91 @@ function mdReadSupabase(cb) {
     .then(function (rows) { cb(Array.isArray(rows) && rows.length ? rows[0] : null); })
     .catch(function () { cb(null); });
 }
+// FIX 1: fixtures are the authority for who/where. Load them into the picker.
+var mdFixtures = [];
+function mdLoadFixtures(cb) {
+  fetchJSON('fixtures', function (d) {
+    mdFixtures = ((d && d.fixtures) || []).filter(function (f) { return f.id !== 'matchday-current'; })
+      .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    var sel = document.getElementById('md-fixture');
+    if (sel) {
+      sel.innerHTML = '<option value="">— Pick the fixture —</option>' + mdFixtures.map(function (f) {
+        var dd = new Date(f.date + 'T12:00:00');
+        var lbl = (isNaN(dd) ? f.date : dd.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) +
+          '  ·  ' + (f.isHome !== false ? 'HOME' : 'AWAY') + '  ·  ' + f.opponent;
+        return '<option value="' + escH(f.id) + '">' + escH(lbl) + '</option>';
+      }).join('');
+    }
+    if (cb) cb();
+  });
+}
+function mdCurrentFixture() { var sel = document.getElementById('md-fixture'); return sel ? mdFixtures.filter(function (f) { return f.id === sel.value; })[0] : null; }
+// Apply the picked fixture → opponent / home-away / date / kickoff / venue (locked to the fixture).
+function mdPickFixture() {
+  var f = mdCurrentFixture();
+  if (f) {
+    setHA(f.isHome !== false);
+    setVal('md-opp', f.opponent || '');
+    setVal('md-date', f.date || '');
+    setVal('md-ko', f.kickoff || '15:00');
+    setVal('md-venue', f.isHome !== false ? 'Tithe Farm Social Club' : (f.venue || ''));
+    if (f.competition) setVal('md-comp', f.competition);
+  }
+  mdPreview();
+}
+// FIX 3: preview line in the EXACT public format (home team left, home score first).
+function mdPreview() {
+  var el = document.getElementById('md-preview'); if (!el) return;
+  var opp = gv('md-opp');
+  if (!opp) { el.innerHTML = '<span style="color:var(--gr)">Pick the fixture to preview</span>'; return; }
+  var home = isHome;
+  var hs = home ? lsHome : lsAway, as = home ? lsAway : lsHome;   // homeScore / awayScore, as public maps
+  var L = (home ? 'RAYNERS LANE' : opp.toUpperCase()), R = (home ? opp.toUpperCase() : 'RAYNERS LANE');
+  el.innerHTML = '<b style="color:#fff">' + escH(L) + '</b> &nbsp;<b style="color:var(--y);font-size:18px">' + hs + ' – ' + as + '</b>&nbsp; <b style="color:#fff">' + escH(R) + '</b>' +
+    '<div style="font-size:11px;letter-spacing:.14em;color:var(--gr);margin-top:6px;text-transform:uppercase">' + (home ? 'HOME · Tithe Farm' : 'AWAY · ' + escH(gv('md-venue') || '')) + (lsStatus ? ' · ' + escH(lsStatus) : '') + (isLive ? ' · <span style="color:#EF4444">LIVE</span>' : '') + '</div>';
+}
+// Find the scheduled fixture this match belongs to (by date, then opponent),
+// else the soonest upcoming — so who/where always trace to a real fixture.
+function mdMatchFixture(d) {
+  if (!mdFixtures.length) return null;
+  var byDate = mdFixtures.filter(function (f) { return d && d.date && String(f.date) === String(d.date); });
+  if (byDate.length) {
+    var oppL = String((d && d.opponent) || '').trim().toLowerCase();
+    return byDate.filter(function (f) { return String(f.opponent || '').trim().toLowerCase() === oppL; })[0] || byDate[0];
+  }
+  var todayStr = new Date().toISOString().slice(0, 10);
+  return mdFixtures.filter(function (f) { return String(f.date) >= todayStr; })[0] || mdFixtures[mdFixtures.length - 1];
+}
 function initMD() {
-  setHA(isHome);
   updateLiveUI();
-  fetchJSON('matchday', function(d) {
-    if (!d) return;
-    // Reflect what's actually set on the site right now, so ANY staffer who opens
-    // Match Day sees the current state (armed / live / delayed / …) — not a reset.
-    if (typeof d.isHome === 'boolean') setHA(d.isHome);
-    setVal('md-opp', d.opponent || '');
-    setVal('md-date', d.date || '');
-    setVal('md-ko', d.kickoff || '15:00');
-    setVal('md-venue', d.venue || 'Tithe Farm Social Club');
-    setVal('md-comp', d.competition || 'Combined Counties Premier Division North');
-    setVal('md-scorers', d.scorers || '');
-    setVal('md-reason', d.stateReason || '');
-    var state = d.state || (d.isLive ? 'live' : (/full|ft|final/i.test(d.status || '') ? 'ft' : 'off'));
-    isLive = (state === 'live'); updateLiveUI();
-    setStateBtns(state);
-    // Map stored home/away scores back to "our/their" for the board
-    lsHome = isHome ? (d.homeScore || 0) : (d.awayScore || 0);
-    lsAway = isHome ? (d.awayScore || 0) : (d.homeScore || 0);
-    lsStatus = d.status || '';
-    lsRefreshNames();
-    lsRender();
-    // …then overlay the LIVE score from Supabase (instant source of truth). This
-    // is what stops a lagging matchday.json from showing 0-0 and letting a Save
-    // overwrite the real score. Supabase wins for score + home/away when present.
-    mdReadSupabase(function (row) {
-      if (!row) return;
-      if (typeof row.is_home === 'boolean') setHA(row.is_home);
-      var home = row.is_home !== false;
-      lsHome = home ? (row.home_score || 0) : (row.away_score || 0);
-      lsAway = home ? (row.away_score || 0) : (row.home_score || 0);
-      if (row.status) { lsStatus = row.status; }
-      if (row.scorers) setVal('md-scorers', row.scorers);
-      lsRefreshNames();
-      lsRender();
+  mdLoadFixtures(function () {
+    fetchJSON('matchday', function (d) {
+      d = d || {};
+      setVal('md-scorers', d.scorers || '');
+      setVal('md-reason', d.stateReason || '');
+      var state = d.state || (d.isLive ? 'live' : (/full|ft|final/i.test(d.status || '') ? 'ft' : 'off'));
+      isLive = (state === 'live'); updateLiveUI(); setStateBtns(state);
+      // WHO/WHERE from the fixture (never the stale matchday isHome/opponent).
+      var fx = mdMatchFixture(d);
+      if (fx) { var sel = document.getElementById('md-fixture'); if (sel) sel.value = fx.id; mdPickFixture(); }
+      else { setVal('md-opp', d.opponent || ''); setVal('md-date', d.date || ''); setVal('md-ko', d.kickoff || '15:00'); if (typeof d.isHome === 'boolean') setHA(d.isHome); }
+      // Score from matchday first, then overlaid by the live Supabase read below.
+      lsHome = isHome ? (d.homeScore || 0) : (d.awayScore || 0);
+      lsAway = isHome ? (d.awayScore || 0) : (d.homeScore || 0);
+      lsStatus = d.status || '';
+      lsRefreshNames(); lsRender(); mdPreview();
+      // Overlay the LIVE SCORE from Supabase (instant source of truth for the SCORE
+      // ONLY — home/away stays locked to the fixture, per Fix 1). Stops a lagging
+      // matchday.json from showing 0-0 and letting a Save clobber the real score.
+      mdReadSupabase(function (row) {
+        mdScoreTouched = false;   // freshly loaded from source — not a staff edit
+        if (!row) return;
+        lsHome = isHome ? (row.home_score || 0) : (row.away_score || 0);
+        lsAway = isHome ? (row.away_score || 0) : (row.home_score || 0);
+        if (row.status) lsStatus = row.status;
+        if (row.scorers) setVal('md-scorers', row.scorers);
+        lsRefreshNames(); lsRender(); mdPreview();
+      });
     });
   });
 }
@@ -3818,17 +3876,35 @@ function lsRefreshNames() {
   if (hn) hn.textContent = 'Rayners Lane';
   if (an) an.textContent = gv('md-opp') || 'Opposition';
 }
+var mdScoreTouched = false;  // did staff actually edit the score this session?
 function lsRender() {
   var h = document.getElementById('ls-home'), a = document.getElementById('ls-away');
   if (h) h.textContent = lsHome;
   if (a) a.textContent = lsAway;
   document.querySelectorAll('.ls-st').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-st') === lsStatus); });
+  if (typeof mdPreview === 'function') mdPreview();   // FIX 3: keep the public-format preview in step
 }
 function bumpScore(side, d) {
+  mdScoreTouched = true;   // an explicit edit — a resulting 0-0 is then intentional
   if (side === 'home') lsHome = Math.max(0, lsHome + d); else lsAway = Math.max(0, lsAway + d);
   lsRender();
 }
 function setStatus(st) { lsStatus = (lsStatus === st ? '' : st); lsRender(); }
+// FIX 2: never let a stale, untouched 0-0 board overwrite a real score. Before a
+// save, if the board reads 0-0 and staff didn't edit it, adopt the live score
+// from Supabase for the SAME game (never a different opponent's score).
+function mdGuardScore(cb) {
+  if (mdScoreTouched || lsHome || lsAway) { cb(); return; }
+  mdReadSupabase(function (row) {
+    var same = row && row.opponent && String(row.opponent).trim().toLowerCase() === String(gv('md-opp')).trim().toLowerCase();
+    if (same && (row.home_score || row.away_score)) {
+      lsHome = isHome ? (row.home_score || 0) : (row.away_score || 0);
+      lsAway = isHome ? (row.away_score || 0) : (row.home_score || 0);
+      lsRefreshNames(); lsRender();
+    }
+    cb();
+  });
+}
 // Map "our/their" goals onto home/away based on where we're playing.
 function applyScores(data) {
   data.homeScore = isHome ? lsHome : lsAway;
@@ -3913,13 +3989,16 @@ function mdData(state) {
 
 // Manual on/off (kept for one-tap "go live now" / deactivate).
 function saveMatchDay(activate) {
-  isLive = activate; updateLiveUI();
-  var data = mdData(activate ? 'live' : 'off');
-  pushLiveMatch(data);
-  pushToGitHub('matchday', data, 'dep-matchday');
-  mdUpsertFixture(data);
-  setStateBtns(activate ? 'live' : 'off');
-  toast(activate ? 'Scoreboard is LIVE' : 'Scoreboard off — next match saved');
+  if (activate && !gv('md-opp')) { toast('Pick the fixture first', true); return; }   // FIX 1
+  mdGuardScore(function () {                                                            // FIX 2
+    isLive = activate; updateLiveUI();
+    var data = mdData(activate ? 'live' : 'off');
+    pushLiveMatch(data);
+    pushToGitHub('matchday', data, 'dep-matchday');
+    mdUpsertFixture(data);
+    setStateBtns(activate ? 'live' : 'off');
+    toast(activate ? 'Scoreboard is LIVE' : 'Scoreboard off — next match saved');
+  });
 }
 
 // Game-day state: Confirm & Arm (auto-live at kick-off) / Delayed / Postponed /
@@ -3927,15 +4006,17 @@ function saveMatchDay(activate) {
 // public site computes that from state + kick-off, so nobody must be at their
 // phone at 3pm.
 function setMatchState(state) {
-  var data = mdData(state);
-  if (!data.opponent || !data.date) { toast('Add the opponent and date first', true); return; }
-  isLive = (state === 'live'); updateLiveUI();
-  pushLiveMatch(data);
-  pushToGitHub('matchday', data, 'dep-matchday');
-  mdUpsertFixture(data);
-  setStateBtns(state);
-  var msg = { armed: 'Armed ✓ goes live by itself at kick-off', delayed: 'Marked delayed', postponed: 'Marked postponed', cancelled: 'Marked cancelled', off: 'Cleared' }[state] || 'Saved';
-  toast(msg);
+  if (!gv('md-opp') || !gv('md-date')) { toast('Pick the fixture first', true); return; }   // FIX 1
+  mdGuardScore(function () {                                                                  // FIX 2
+    var data = mdData(state);
+    isLive = (state === 'live'); updateLiveUI();
+    pushLiveMatch(data);
+    pushToGitHub('matchday', data, 'dep-matchday');
+    mdUpsertFixture(data);
+    setStateBtns(state);
+    var msg = { armed: 'Armed ✓ goes live by itself at kick-off', delayed: 'Marked delayed', postponed: 'Marked postponed', cancelled: 'Marked cancelled', off: 'Cleared' }[state] || 'Saved';
+    toast(msg);
+  });
 }
 
 // Highlight the active state button + reveal the reason box for off-states.
