@@ -1,12 +1,12 @@
 {
-  "isLive": false,
+  "isLive": true,
   "isHome": false,
-  "opponent": "Punjab Utd FC",
-  "date": "2026-07-11",
-  "kickoff": "13:00",
-  "venue": "The Sports Ground, Dunkirk Cl, Gravesend, DA12 5ND",
+  "opponent": "Cockfosters",
+  "date": "2026-07-18",
+  "kickoff": "15:00",
+  "venue": "Tithe Farm",
   "competition": "Friendly",
-  "homeScore": 1,
+  "homeScore": 0,
   "awayScore": 0,
   "scorers": "",
   "status": "Full Time"
