@@ -83,10 +83,13 @@ async function readLiveMatch() {
   // game (is_live). A stale row (e.g. a mistaken 'Full Time') must not bleed onto
   // an armed auto-live game — that shows 0-0 · Kick Off from matchday.json.
   var useRow = !!(row && row.is_live);
+  // Take home/away + opponent from the SAME source as the score. When Supabase is
+  // driving the live game, its is_home/opponent must win — mixing it with a lagging
+  // matchday.json inverted the teams (showed the opponent at home with our score).
   return {
     isLive: live, _state: st,
-    isHome: (md.isHome != null ? md.isHome : (row ? row.is_home : true)),
-    opponent: md.opponent || (row ? row.opponent : ''),
+    isHome: useRow ? (row.is_home !== false) : (md.isHome != null ? md.isHome : (row ? row.is_home !== false : true)),
+    opponent: useRow ? (row.opponent || md.opponent || '') : (md.opponent || (row ? row.opponent : '')),
     homeScore: useRow ? (row.home_score || 0) : (md.homeScore || 0),
     awayScore: useRow ? (row.away_score || 0) : (md.awayScore || 0),
     status: useRow ? (row.status || 'Kick Off') : (md.status || (live ? 'Kick Off' : '')),
