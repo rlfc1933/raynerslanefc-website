@@ -26,8 +26,8 @@
       "venue": "Tithe Farm Sports & Social Club",
       "competition": "Pre-Season Friendly",
       "status": "played",
-      "us": null,
-      "them": null,
+      "us": 1,
+      "them": 0,
       "scorers": "",
       "shareHeadline": "COCKFOSTERS AT THE LANE",
       "shareHeadlineAuto": "COCKFOSTERS AT THE LANE"
@@ -690,5 +690,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T17:30:00.000Z"
+  "updatedAt": "2026-07-18T17:45:00.000Z"
 }
