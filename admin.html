@@ -756,6 +756,16 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2M19.1 4.9a10 10 0 0 1 0 14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4"/></svg></span>
           <div class="tile-name">Match Day</div><div class="tile-desc">Live scoreboard on/off</div>
         </button>
+        <button class="tile" style="--accent:#0EA5E9" onclick="openPanel('livesite')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+          <div class="tile-name">See What's Live</div><div class="tile-desc">The public site, exactly as fans see it</div>
+        </button>
+        <button class="tile" style="--accent:#F97316" onclick="openPanel('undo')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg></span>
+          <div class="tile-name">Undo / Stop</div><div class="tile-desc">Roll back a bad push · take the scoreboard down</div>
+        </button>
         <button class="tile" style="--accent:#3B82F6" onclick="openPanel('programme')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 4h13v16H4z"/><path d="M17 8h3v10a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg></span>
@@ -2846,6 +2856,32 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div></div>
     </div>
 
+    <!-- ══ SEE WHAT'S LIVE ══ -->
+    <div class="panel" id="panel-livesite">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-monitor"></i> See What's Live</div></div>
+      <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5;margin-bottom:12px">Exactly what fans see on the public site right now. Pick a page, tap Refresh after you save something to check it landed.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <select id="lsite-sel" onchange="lsiteLoad(this.value)" style="flex:1;min-width:160px;background:var(--card);border:1px solid var(--bd);color:var(--w);font-family:var(--fb);font-size:14px;padding:10px 12px;border-radius:9px"></select>
+        <button class="save sec" style="width:auto;margin:0;padding:10px 14px" onclick="lsiteLoad(document.getElementById('lsite-sel').value)"><i class="ico ico-refresh-cw"></i> Refresh</button>
+        <a id="lsite-open" class="save sec" style="width:auto;margin:0;padding:10px 14px;text-decoration:none;display:inline-flex;align-items:center" href="/index.html" target="_blank" rel="noopener"><i class="ico ico-external-link"></i> Open</a>
+      </div>
+      <div style="border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:#000">
+        <iframe id="lsite-frame" title="Live site preview" style="width:100%;height:70vh;border:0;display:block" loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- ══ UNDO / STOP ══ -->
+    <div class="panel" id="panel-undo">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-rotate-ccw"></i> Undo / Stop</div></div>
+      <div class="snote" style="border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.06)">
+        <p><b style="color:var(--w)"><i class="ico ico-alert-triangle"></i> Take the scoreboard down now</b> — if a live score is showing when it shouldn't be, one tap clears it from the site.</p>
+        <button class="save red" style="margin-top:10px" onclick="saveMatchDay(false); toast('Scoreboard taken down');">Take Scoreboard Down</button>
+        <div class="dep" id="dep-undo"></div>
+      </div>
+      <div class="slbl" style="margin-top:18px"><i class="ico ico-history"></i> Roll back a change <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— every save is snapshotted; restore any previous version</span></div>
+      <div id="undo-list" style="margin-top:8px"></div>
+    </div>
+
     <div class="panel" id="panel-settings">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-settings"></i>&#65039; Settings</div></div>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
@@ -3457,6 +3493,8 @@ function openPanel(name) {
   if (name === 'settings')  runSystemCheck();
   if (name === 'playbook')  { buildJumpNav(); loadIncomePlan(); loadWins(); }
   if (name === 'meetings')  { loadMeetings(); loadMeetingSnapshot(); }
+  if (name === 'livesite')  lsiteInit();
+  if (name === 'undo')      undoInit();
 }
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
@@ -4291,6 +4329,7 @@ function commitDomain(name, key, idField, arr, deletedIds, extra, depId, msg, on
   return next;
 }
 function _commitDomainOnce(name, key, idField, arr, deletedIds, extra, depId, msg, onMerged) {
+  undoSnapshot(name);
   var el = depId ? document.getElementById(depId) : null;
   if (el) showDep(el, 'loading', 'Saving to site…');
   return fetch('/.netlify/functions/save-data', {
@@ -6367,13 +6406,20 @@ function renderWins() {
   if (v) v.textContent = '£' + Math.round(total).toLocaleString('en-GB');
   if (p) p.textContent = Object.keys(people).length;
   list.innerHTML = wins.length
-    ? wins.map(function (w) {
+    ? wins.map(function (w, i) {
         var when = w.date ? new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
         return '<div class="wb-win"><span class="wb-ic"><i class="ico ico-heart"></i></span><div class="wb-m"><div class="wb-w">' + escH(w.what || '') + '</div>' +
           '<div class="wb-who">' + escH(w.who || 'Someone') + (when ? ' &middot; ' + when : '') + '</div></div>' +
-          (w.amt ? '<span class="wb-v">£' + Math.round(w.amt).toLocaleString('en-GB') + '</span>' : '') + '</div>';
+          (w.amt ? '<span class="wb-v">£' + Math.round(w.amt).toLocaleString('en-GB') + '</span>' : '') +
+          '<button class="li-del" style="margin-left:8px" onclick="removeWin(' + i + ')">Remove</button></div>';
       }).join('')
     : '<div class="wb-empty">The board\'s empty. Be the <b style="color:var(--y)">first name</b> on it — even a small one counts.</div>';
+}
+function removeWin(i) {
+  if (!confirm('Remove this win from the board?')) return;
+  wins.splice(i, 1); renderWins();
+  pushToGitHub('committee-wins', { wins: wins, updatedAt: new Date().toISOString() }, 'dep-wins');
+  toast('Removed from the board');
 }
 function addWin() {
   var who = gv('wb-who'), what = gv('wb-what'), amt = parseFloat(gv('wb-amt')) || 0;
@@ -8224,7 +8270,63 @@ function uploadImg(prefix, tok, cb) {
 
 // ── SAVE TO SITE (via secure Netlify function) ──
 // The GitHub token lives server-side as a Netlify env var, never in the browser.
+/* ══════════ STOP / UNDO — every save is snapshotted so a bad push can be
+   rolled back with one tap, no git and no developer. ══════════ */
+var UNDO_KEY = 'rlfc_undo_log';
+function undoLog() { try { return JSON.parse(localStorage.getItem(UNDO_KEY) || '[]'); } catch (e) { return []; } }
+function undoStore(log) { try { localStorage.setItem(UNDO_KEY, JSON.stringify(log.slice(0, 25))); } catch (e) {} }
+// Capture the current live version of data/<name>.json BEFORE we overwrite it.
+// (admin.html doesn't run the jsDelivr data-plane, so this reads the deployed file.)
+function undoSnapshot(name) {
+  if (!name) return;
+  fetch('data/' + name + '.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.text() : null; })
+    .then(function (txt) {
+      if (txt == null) return;
+      var log = undoLog();
+      if (log[0] && log[0].name === name && log[0].prev === txt) return; // no change → no dupe
+      log.unshift({ name: name, prev: txt, at: new Date().toISOString() });
+      undoStore(log);
+      var p = document.getElementById('panel-undo');
+      if (p && p.classList.contains('on')) undoInit();
+    }).catch(function () {});
+}
+function undoRestore(i) {
+  var log = undoLog(); var e = log[i]; if (!e) return;
+  if (!confirm('Roll ' + e.name + '.json back to ' + new Date(e.at).toLocaleString('en-GB') + '?\n\nThis overwrites what is on the site now (the current version is snapshotted first, so you can undo the undo).')) return;
+  var obj; try { obj = JSON.parse(e.prev); } catch (err) { toast('That snapshot is unreadable', true); return; }
+  pushToGitHub(e.name, obj, 'dep-undo'); // pushToGitHub snapshots the current first
+  toast('Rolling ' + e.name + '.json back — live in ~30s');
+}
+function undoInit() {
+  var el = document.getElementById('undo-list'); if (!el) return;
+  var log = undoLog();
+  if (!log.length) { el.innerHTML = '<div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.6;padding:14px;background:var(--card);border-radius:10px">No changes recorded on this device yet. From now on, every Save you make can be rolled back here.</div>'; return; }
+  el.innerHTML = log.map(function (e, i) {
+    var sz = Math.round((e.prev || '').length / 102.4) / 10;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--card)">' +
+      '<div><div style="font-family:var(--fc);font-weight:700;color:var(--w);font-size:14px">' + esc0(e.name) + '.json</div>' +
+      '<div style="font-family:var(--fb);font-size:11px;color:var(--gr)">' + new Date(e.at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · ' + sz + ' KB</div></div>' +
+      '<button class="save sec" style="width:auto;padding:8px 14px;margin:0" onclick="undoRestore(' + i + ')">Restore this</button></div>';
+  }).join('');
+}
+function esc0(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* ══════════ SEE WHAT'S LIVE — mirror the public site inside the portal ══════════ */
+var LSITE_PAGES = [['index.html', 'Home'], ['fixtures.html', 'Fixtures & Results'], ['squad.html', 'The Squad'], ['news.html', 'Newsroom'], ['programme.html', 'Programme'], ['gallery.html', 'Gallery'], ['membership.html', 'Membership'], ['fan-zone.html', 'Fan Zone'], ['about.html', 'The Club'], ['contact.html', 'Contact'], ['acerbis.html', 'Acerbis'], ['investment.html', 'Sponsorship'], ['history.html', 'History']];
+function lsiteInit() {
+  var sel = document.getElementById('lsite-sel');
+  if (sel && !sel.options.length) sel.innerHTML = LSITE_PAGES.map(function (p) { return '<option value="' + p[0] + '">' + p[1] + '</option>'; }).join('');
+  lsiteLoad(sel ? sel.value : 'index.html');
+}
+function lsiteLoad(page) {
+  var f = document.getElementById('lsite-frame'); if (!f) return;
+  f.src = '/' + page + '?preview=' + Date.now(); // same-origin = the real live site
+  var a = document.getElementById('lsite-open'); if (a) a.href = '/' + page;
+}
+
 function pushToGitHub(name, data, depId) {
+  undoSnapshot(name);
   var el = document.getElementById(depId);
   var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
