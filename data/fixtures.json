@@ -18,19 +18,17 @@
     },
     {
       "id": "matchday-current",
-      "date": "2026-07-11",
-      "kickoff": "13:00",
-      "opponent": "Punjab Utd FC",
+      "date": "2026-07-18",
+      "kickoff": "15:00",
+      "opponent": "Cockfosters",
       "oppCrest": "",
       "isHome": false,
-      "venue": "The Sports Ground, Dunkirk Cl, Gravesend, DA12 5ND",
+      "venue": "Tithe Farm",
       "competition": "Friendly",
       "status": "scheduled",
       "us": null,
       "them": null,
-      "scorers": "",
-      "shareHeadline": "THE LANE AT PUNJAB UTD FC",
-      "shareHeadlineAuto": "THE LANE AT PUNJAB UTD FC"
+      "scorers": ""
     },
     {
       "id": "friendly-cockfosters-20260718",
@@ -705,5 +703,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T14:10:30.061Z"
+  "updatedAt": "2026-07-18T14:13:37.084Z"
 }
