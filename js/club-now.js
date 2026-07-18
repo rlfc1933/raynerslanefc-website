@@ -73,9 +73,24 @@
         shaped = (typeof rlfcFixturesShape === 'function') ? rlfcFixturesShape(raw) : shapeLocal(raw);
       }).catch(function () { shaped = { next: null, results: [] }; });
   }
+  // Single source of truth: readLiveMatch() (js/main.js) resolves the effective
+  // state — including AUTO-LIVE (an armed game flips to live by itself at kick-off,
+  // UK time) and the instant Supabase score — so the command centre and the top
+  // live bar always agree. Falls back to a plain matchday.json read if main.js
+  // isn't present. state: off | armed | live | delayed | postponed | cancelled | ft
   function readLive() {
     if (typeof readLiveMatch === 'function') return readLiveMatch();
-    return fetch('data/matchday.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    return fetch('data/matchday.json?t=' + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (md) {
+        md = md || {};
+        var st = md.state || (md.isLive ? 'live' : (/full|ft|final/i.test(md.status || '') ? 'ft' : 'off'));
+        var ko = ukEpoch(md.date, md.kickoff);
+        if (st === 'armed' && !isNaN(ko) && Date.now() >= ko && Date.now() < ko + 150 * 60000) st = 'live';
+        md._state = st; md.isLive = (st === 'live');
+        return md;
+      });
   }
 
   // ── directions (only when the venue is VERIFIED with coordinates) ──
@@ -115,11 +130,21 @@
   }
   function venueLabel(m) { var v = venueFor(m); return m.venue || (v && v.ground) || (m.isHome !== false ? 'Tithe Farm, Harrow' : ''); }
 
+  // Opponent crest for the live/state views — matched from the real fixture by
+  // name, so the crest shows during the game too (not just on "next match").
+  function liveOppCrest() {
+    var opp = norm(live && live.opponent);
+    if (!opp) return '';
+    if (shaped && shaped.next && norm(shaped.next.opponent) === opp && shaped.next.oppCrest) return shaped.next.oppCrest;
+    var hit = (raw || []).filter(function (f) { return norm(f.opponent) === opp && f.oppCrest; })[0];
+    return hit ? hit.oppCrest : '';
+  }
+
   // ── LIVE primary ──
   function renderLive() {
-    var opp = live.opponent || 'Opposition', home = live.isHome !== false;
-    var L = home ? { n: 'Rayners Lane', c: 'img/badge.png' } : { n: opp, c: '' };
-    var R = home ? { n: opp, c: '' } : { n: 'Rayners Lane', c: 'img/badge.png' };
+    var opp = live.opponent || 'Opposition', home = live.isHome !== false, oc = liveOppCrest();
+    var L = home ? { n: 'Rayners Lane', c: 'img/badge.png' } : { n: opp, c: oc };
+    var R = home ? { n: opp, c: oc } : { n: 'Rayners Lane', c: 'img/badge.png' };
     var hs = live.homeScore || 0, as = live.awayScore || 0;
     elStatus.textContent = 'Live';
     elPrimary.innerHTML =
@@ -262,12 +287,39 @@
     return { label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) };
   }
 
+  // ── Delayed / Postponed / Cancelled banner ──
+  function renderState(st) {
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+    var opp = live.opponent || 'Opposition', home = live.isHome !== false;
+    var oc = liveOppCrest();
+    var L = home ? { n: 'Rayners Lane', c: 'img/badge.png' } : { n: opp, c: oc };
+    var R = home ? { n: opp, c: oc } : { n: 'Rayners Lane', c: 'img/badge.png' };
+    var label = st === 'delayed' ? 'Kick-off Delayed' : (st === 'postponed' ? 'Postponed' : 'Cancelled');
+    elStatus.textContent = label;
+    elPrimary.innerHTML =
+      '<div class="cn__eyebrow cn__eyebrow--live"><span class="cn__dot"></span> ' + esc(label) + '</div>' +
+      '<div class="cn__lock">' +
+        '<div class="cn__team">' + crestHTML(L.c, L.n) + '<span class="cn__nm">' + esc(L.n.toUpperCase()) + '</span></div>' +
+        '<div class="cn__mid"><span class="cn__vs">VS</span></div>' +
+        '<div class="cn__team">' + crestHTML(R.c, R.n) + '<span class="cn__nm">' + esc(R.n.toUpperCase()) + '</span></div>' +
+      '</div>' +
+      (live.stateReason ? '<div class="cn__meta">' + esc(live.stateReason) + '</div>' : '') +
+      '<div class="cn__cta"><a class="cn__btn cn__btn--ghost" href="fixtures.html">Fixtures &amp; Results</a></div>';
+  }
+
   // ── orchestration ──
   function renderPrimary() {
-    if (live && live.isLive) { if (cdTimer) { clearInterval(cdTimer); cdTimer = null; } renderLive(); }
-    else renderNext();
+    var st = live && live._state;
+    if (st === 'delayed' || st === 'postponed' || st === 'cancelled') { renderState(st); return; }
+    if (live && live.isLive) { if (cdTimer) { clearInterval(cdTimer); cdTimer = null; } renderLive(); return; }
+    renderNext();
   }
-  function sig() { return live && live.isLive ? ('L' + live.homeScore + '-' + live.awayScore + '|' + live.status) : ('N' + (shaped && shaped.next && shaped.next.opponent)); }
+  function sig() {
+    var st = (live && live._state) || 'off';
+    if (live && live.isLive) return 'L|' + live.homeScore + '-' + live.awayScore + '|' + live.status;
+    if (st === 'delayed' || st === 'postponed' || st === 'cancelled') return st + '|' + (live.stateReason || '');
+    return 'N|' + (shaped && shaped.next && shaped.next.opponent);
+  }
   function build() { renderPrimary(); renderStrip(); lastSig = sig(); }
 
   function refreshLive() {

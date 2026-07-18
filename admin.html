@@ -950,8 +950,18 @@
       </div>
       <div class="field" id="md-vf"><label class="fl">Venue</label><input type="text" id="md-venue" value="Tithe Farm Social Club"></div>
       <div class="field"><label class="fl">Competition</label><input type="text" id="md-comp" value="Combined Counties Premier Division North"></div>
-      <button class="save" onclick="saveMatchDay(true)">&#10003; Activate &amp; Go Live</button>
-      <button class="save red" onclick="saveMatchDay(false)">Deactivate Scoreboard</button>
+
+      <div class="slbl" style="margin-top:16px"><i class="ico ico-flag"></i> Game-day state <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— set it in the morning; an armed game goes live by itself at kick-off (UK time)</span></div>
+      <div class="ha" style="flex-wrap:wrap;gap:8px">
+        <button class="ha-btn" id="mst-armed" onclick="setMatchState('armed')" style="flex:1 1 100%"><i class="ico ico-check-circle"></i> Confirm &amp; Arm — go live at kick-off</button>
+        <button class="ha-btn" id="mst-delayed" onclick="setMatchState('delayed')" style="flex:1 1 28%"><i class="ico ico-clock"></i> Delayed</button>
+        <button class="ha-btn" id="mst-postponed" onclick="setMatchState('postponed')" style="flex:1 1 28%"><i class="ico ico-x-circle"></i> Postponed</button>
+        <button class="ha-btn" id="mst-cancelled" onclick="setMatchState('cancelled')" style="flex:1 1 28%"><i class="ico ico-slash"></i> Cancelled</button>
+      </div>
+      <div class="field" id="md-reason-f" style="display:none"><label class="fl">Reason / note <span style="color:var(--gr);font-weight:400">— shown to fans</span></label><input type="text" id="md-reason" placeholder="e.g. Waterlogged pitch — new date TBC"></div>
+
+      <button class="save" onclick="saveMatchDay(true)" style="margin-top:12px">&#10003; Go Live Now</button>
+      <button class="save red" onclick="saveMatchDay(false)">Take Scoreboard Down</button>
       <div class="dep" id="dep-matchday"></div>
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px;line-height:1.6">Saving here sets the home-page <strong style="color:var(--w)">Next Match</strong> badge and countdown too. For your full season schedule, results and the league spine, use the <strong style="color:var(--w)">Fixtures</strong> tile — that's the single source of truth.</p>
 
@@ -3698,12 +3708,19 @@ function initMD() {
   updateLiveUI();
   fetchJSON('matchday', function(d) {
     if (!d) return;
+    // Reflect what's actually set on the site right now, so ANY staffer who opens
+    // Match Day sees the current state (armed / live / delayed / …) — not a reset.
+    if (typeof d.isHome === 'boolean') setHA(d.isHome);
     setVal('md-opp', d.opponent || '');
     setVal('md-date', d.date || '');
     setVal('md-ko', d.kickoff || '15:00');
     setVal('md-venue', d.venue || 'Tithe Farm Social Club');
     setVal('md-comp', d.competition || 'Combined Counties Premier Division North');
     setVal('md-scorers', d.scorers || '');
+    setVal('md-reason', d.stateReason || '');
+    var state = d.state || (d.isLive ? 'live' : (/full|ft|final/i.test(d.status || '') ? 'ft' : 'off'));
+    isLive = (state === 'live'); updateLiveUI();
+    setStateBtns(state);
     // Map stored home/away scores back to "our/their" for the board
     lsHome = isHome ? (d.homeScore || 0) : (d.awayScore || 0);
     lsAway = isHome ? (d.awayScore || 0) : (d.homeScore || 0);
@@ -3789,52 +3806,79 @@ function mdFindFixture(opponent, date, fixtures) {
   return same.filter(function (f) { return String(f.date) === String(date); })[0] || same[0];
 }
 
-function saveMatchDay(activate) {
-  isLive = activate;
-  updateLiveUI();
+// Shared: keep data/fixtures.json tidy for the set match. If the opponent is
+// already scheduled (normal case) reuse that fixture (it carries the crest) and
+// clear any stale 'matchday-current'; only when the game isn't scheduled do we
+// keep a self-updating 'matchday-current', crest looked up from data/crests.json.
+function mdUpsertFixture(data) {
+  if (!data.opponent || !data.date) return;
+  fetchJSON('fixtures', function (fxd) {
+    var fixtures = (fxd && fxd.fixtures) || [];
+    fetchJSON('crests', function (crd) {
+      var crests = (crd && crd.crests) || [];
+      var real = mdFindFixture(data.opponent, data.date, fixtures);
+      var hasStale = fixtures.some(function (f) { return f.id === 'matchday-current'; });
+      if (real) {
+        if (hasStale) commitDomain('fixtures', 'fixtures', 'id', [], ['matchday-current'], null, 'dep-matchday', null);
+      } else {
+        var mdFix = {
+          id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
+          opponent: data.opponent, oppCrest: mdCrestFor(data.opponent, crests), isHome: data.isHome,
+          venue: data.venue, competition: data.competition,
+          status: 'scheduled', us: null, them: null, scorers: ''
+        };
+        commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
+      }
+    });
+  });
+}
+
+// Build the matchday.json payload from the form for a given state.
+function mdData(state) {
   var data = {
-    isLive: isLive, isHome: isHome,
-    opponent:    gv('md-opp'),
-    date:        gv('md-date'),
-    kickoff:     gv('md-ko'),
-    venue:       isHome ? 'Tithe Farm Social Club' : gv('md-venue'),
-    competition: gv('md-comp'),
+    state: state, isLive: state === 'live', isHome: isHome,
+    opponent: gv('md-opp'), date: gv('md-date'), kickoff: gv('md-ko'),
+    venue: isHome ? 'Tithe Farm Social Club' : gv('md-venue'),
+    competition: gv('md-comp'), stateReason: gv('md-reason') || ''
   };
   applyScores(data);
+  return data;
+}
+
+// Manual on/off (kept for one-tap "go live now" / deactivate).
+function saveMatchDay(activate) {
+  isLive = activate; updateLiveUI();
+  var data = mdData(activate ? 'live' : 'off');
   pushLiveMatch(data);
   pushToGitHub('matchday', data, 'dep-matchday');
-  // Item 4: the homepage "next match" badge is driven by data/fixtures.json
-  // (the single source of truth). So that the opponent/date set here is also
-  // authoritative on the homepage — even when the season schedule is empty — we
-  // upsert ONE self-updating fixture (id 'matchday-current') into fixtures.json.
-  // commitDomain merges by id, so every other fixture is left untouched.
-  // If today's opponent is already in the schedule (the normal case), DON'T
-  // create a parallel 'matchday-current' — that made a duplicate with no crest.
-  // Reuse the real fixture (it already carries the crest); only fall back to a
-  // self-updating 'matchday-current' when the game isn't scheduled, and then look
-  // its crest up from data/crests.json so the scoreboard is never crest-less.
-  if (data.opponent && data.date) {
-    fetchJSON('fixtures', function (fxd) {
-      var fixtures = (fxd && fxd.fixtures) || [];
-      fetchJSON('crests', function (crd) {
-        var crests = (crd && crd.crests) || [];
-        var real = mdFindFixture(data.opponent, data.date, fixtures);
-        var hasStale = fixtures.some(function (f) { return f.id === 'matchday-current'; });
-        if (real) {
-          if (hasStale) commitDomain('fixtures', 'fixtures', 'id', [], ['matchday-current'], null, 'dep-matchday', null);
-        } else {
-          var mdFix = {
-            id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
-            opponent: data.opponent, oppCrest: mdCrestFor(data.opponent, crests), isHome: data.isHome,
-            venue: data.venue, competition: data.competition,
-            status: 'scheduled', us: null, them: null, scorers: ''
-          };
-          commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
-        }
-      });
-    });
-  }
-  toast(activate ? 'Scoreboard is LIVE' : 'Next match saved — live in ~30s');
+  mdUpsertFixture(data);
+  setStateBtns(activate ? 'live' : 'off');
+  toast(activate ? 'Scoreboard is LIVE' : 'Scoreboard off — next match saved');
+}
+
+// Game-day state: Confirm & Arm (auto-live at kick-off) / Delayed / Postponed /
+// Cancelled. Armed games flip to live by themselves at kick-off (UK time) — the
+// public site computes that from state + kick-off, so nobody must be at their
+// phone at 3pm.
+function setMatchState(state) {
+  var data = mdData(state);
+  if (!data.opponent || !data.date) { toast('Add the opponent and date first', true); return; }
+  isLive = (state === 'live'); updateLiveUI();
+  pushLiveMatch(data);
+  pushToGitHub('matchday', data, 'dep-matchday');
+  mdUpsertFixture(data);
+  setStateBtns(state);
+  var msg = { armed: 'Armed ✓ goes live by itself at kick-off', delayed: 'Marked delayed', postponed: 'Marked postponed', cancelled: 'Marked cancelled', off: 'Cleared' }[state] || 'Saved';
+  toast(msg);
+}
+
+// Highlight the active state button + reveal the reason box for off-states.
+function setStateBtns(state) {
+  ['armed', 'delayed', 'postponed', 'cancelled'].forEach(function (s) {
+    var b = document.getElementById('mst-' + s); if (b) b.className = 'ha-btn' + (s === state ? ' on' : '');
+  });
+  var rf = document.getElementById('md-reason-f');
+  if (rf) rf.style.display = /delayed|postponed|cancelled/.test(state) ? 'block' : 'none';
 }
 
 // One-tap live update during the game (keeps it live, pushes the new score).

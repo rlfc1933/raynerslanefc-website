@@ -46,23 +46,53 @@ async function liveScoreboard() {
 // data/matchday.json so the bar behaves exactly as before until Supabase is set
 // up. Returns the normalised { isLive, isHome, opponent, homeScore, awayScore,
 // status, scorers } shape liveScoreboard() expects.
+// Epoch ms for a wall-clock kick-off in Europe/London (auto BST/GMT) — so a
+// game's kick-off is judged in UK time no matter where the viewer is.
+function _ukEpoch(dateStr, timeStr) {
+  if (!dateStr) return NaN;
+  var t = (timeStr || '15:00').slice(0, 5);
+  var a = new Date(dateStr + 'T' + t + ':00Z').getTime();
+  if (isNaN(a)) return NaN;
+  var lon = new Date(a).toLocaleString('en-US', { timeZone: 'Europe/London' });
+  var utc = new Date(a).toLocaleString('en-US', { timeZone: 'UTC' });
+  return a - (new Date(lon).getTime() - new Date(utc).getTime());
+}
+
 async function readLiveMatch() {
   var sb = window.RLFC_SUPABASE || {};
+  var md = null, row = null;
+  try { md = await (await fetch('data/matchday.json?t=' + Date.now())).json(); } catch (e) {}
+  md = md || {};
   if (sb.url && sb.anonKey) {
     try {
       var opt = { headers: { apikey: sb.anonKey } };
       if (window.AbortSignal && AbortSignal.timeout) opt.signal = AbortSignal.timeout(4000);
       var r = await fetch(sb.url + '/rest/v1/live_match?id=eq.1&select=*', opt);
-      if (r.ok) {
-        var rows = await r.json();
-        if (Array.isArray(rows) && rows.length) {
-          var x = rows[0];
-          return { isLive: !!x.is_live, isHome: x.is_home, opponent: x.opponent, homeScore: x.home_score, awayScore: x.away_score, status: x.status, scorers: x.scorers };
-        }
-      }
+      if (r.ok) { var rows = await r.json(); if (Array.isArray(rows) && rows.length) row = rows[0]; }
     } catch (e) {}
   }
-  try { return await (await fetch('data/matchday.json?t=' + Date.now())).json(); } catch (e) { return null; }
+  // Effective state (data/matchday.json is the authority for the STATE).
+  var st = md.state || (md.isLive ? 'live' : (/full|ft|final/i.test(md.status || '') ? 'ft' : 'off'));
+  var ko = _ukEpoch(md.date, md.kickoff);
+  if (st === 'armed' && !isNaN(ko) && Date.now() >= ko && Date.now() < ko + 150 * 60000) st = 'live';
+  // Instant manual go-live: a fresh Supabase is_live beats a lagging matchday.json
+  // — but never overrides an explicit off-state staff have set (postponed/etc).
+  if (row && row.is_live && (st === 'off' || st === 'armed' || st === 'live')) st = 'live';
+  var live = (st === 'live');
+  // Only trust the Supabase row's SCORE/status while it's actually driving a live
+  // game (is_live). A stale row (e.g. a mistaken 'Full Time') must not bleed onto
+  // an armed auto-live game — that shows 0-0 · Kick Off from matchday.json.
+  var useRow = !!(row && row.is_live);
+  return {
+    isLive: live, _state: st,
+    isHome: (md.isHome != null ? md.isHome : (row ? row.is_home : true)),
+    opponent: md.opponent || (row ? row.opponent : ''),
+    homeScore: useRow ? (row.home_score || 0) : (md.homeScore || 0),
+    awayScore: useRow ? (row.away_score || 0) : (md.awayScore || 0),
+    status: useRow ? (row.status || 'Kick Off') : (md.status || (live ? 'Kick Off' : '')),
+    scorers: useRow ? (row.scorers || '') : (md.scorers || ''),
+    stateReason: md.stateReason || '', date: md.date, kickoff: md.kickoff
+  };
 }
 
 async function loadMatchDay() {
