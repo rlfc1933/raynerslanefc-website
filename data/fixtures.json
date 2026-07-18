@@ -46,7 +46,8 @@
       "them": null,
       "scorers": "",
       "shareHeadline": "THE LANE AT METROPOLITAN POLICE FC",
-      "shareHeadlineAuto": "THE LANE AT METROPOLITAN POLICE FC"
+      "shareHeadlineAuto": "THE LANE AT METROPOLITAN POLICE FC",
+      "pinned": true
     },
     {
       "id": "fwp-578225",
@@ -689,5 +690,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T14:22:00.000Z"
+  "updatedAt": "2026-07-18T15:57:39.406Z"
 }
