@@ -2,14 +2,14 @@
   "state": "off",
   "isLive": false,
   "isHome": false,
-  "opponent": "",
-  "date": "",
+  "opponent": "Cockfosters",
+  "date": "2026-07-18",
   "kickoff": "15:00",
-  "venue": "Tithe Farm Social Club",
-  "competition": "Combined Counties Premier Division North",
+  "venue": "Tithe Farm",
+  "competition": "Friendly",
   "stateReason": "",
   "homeScore": 0,
   "awayScore": 0,
   "scorers": "",
-  "status": ""
+  "status": "Full Time"
 }
