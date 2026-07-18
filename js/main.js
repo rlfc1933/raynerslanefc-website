@@ -75,9 +75,18 @@ async function readLiveMatch() {
   var st = md.state || (md.isLive ? 'live' : (/full|ft|final/i.test(md.status || '') ? 'ft' : 'off'));
   var ko = _ukEpoch(md.date, md.kickoff);
   if (st === 'armed' && !isNaN(ko) && Date.now() >= ko && Date.now() < ko + 150 * 60000) st = 'live';
-  // Instant manual go-live: a fresh Supabase is_live beats a lagging matchday.json
-  // — but never overrides an explicit off-state staff have set (postponed/etc).
-  if (row && row.is_live && (st === 'off' || st === 'armed' || st === 'live')) st = 'live';
+  // Supabase is_live vs matchday state can disagree two opposite ways:
+  //   • instant go-live: Supabase just went live, matchday.json lags → show live
+  //   • take-down: staff just set state 'off'/postponed, Supabase row is stale → hide
+  // Resolve by RECENCY — whichever staff touched most recently wins. This is what
+  // makes "Take Scoreboard Down" actually remove the bar even if the Supabase row
+  // still says is_live.
+  if (row && row.is_live) {
+    var sbTime = row.updated_at ? Date.parse(row.updated_at) : 0;
+    var mdTime = md.updatedAt ? Date.parse(md.updatedAt) : 0;
+    var mdSaysOff = md.state && md.state !== 'live' && md.state !== 'armed';
+    if (st === 'live' || st === 'armed' || !(mdSaysOff && mdTime >= sbTime)) st = 'live';
+  }
   var live = (st === 'live');
   // Only trust the Supabase row's SCORE/status while it's actually driving a live
   // game (is_live). A stale row (e.g. a mistaken 'Full Time') must not bleed onto

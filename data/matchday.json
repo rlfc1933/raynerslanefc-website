@@ -1,5 +1,5 @@
 {
-  "isLive": true,
+  "isLive": false,
   "isHome": true,
   "opponent": "Cockfosters",
   "date": "2026-07-18",
@@ -9,5 +9,7 @@
   "homeScore": 1,
   "awayScore": 0,
   "scorers": "",
-  "status": "Full Time"
+  "status": "",
+  "state": "off",
+  "updatedAt": "2026-07-18T17:50:00.000Z"
 }

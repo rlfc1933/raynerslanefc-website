@@ -3981,7 +3981,8 @@ function mdData(state) {
     state: state, isLive: state === 'live', isHome: isHome,
     opponent: gv('md-opp'), date: gv('md-date'), kickoff: gv('md-ko'),
     venue: isHome ? 'Tithe Farm Social Club' : gv('md-venue'),
-    competition: gv('md-comp'), stateReason: gv('md-reason') || ''
+    competition: gv('md-comp'), stateReason: gv('md-reason') || '',
+    updatedAt: new Date().toISOString()   // recency: lets take-down beat a stale Supabase row
   };
   applyScores(data);
   return data;
