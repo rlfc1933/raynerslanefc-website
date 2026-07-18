@@ -3771,6 +3771,24 @@ function pushLiveMatch(data) {
   } catch (e) {}
 }
 
+// Resolve an opponent's crest from data/crests.json by name (case/space-insensitive).
+function mdCrestFor(opponent, crests) {
+  var key = String(opponent || '').trim().toLowerCase();
+  if (!key) return '';
+  var hit = (crests || []).filter(function (c) { return String(c.name || '').trim().toLowerCase() === key; })[0];
+  return hit ? hit.file : '';
+}
+// Find a real scheduled fixture for this opponent (prefer the exact date) so we
+// reuse it instead of cloning a duplicate crest-less 'matchday-current'.
+function mdFindFixture(opponent, date, fixtures) {
+  var key = String(opponent || '').trim().toLowerCase();
+  var same = (fixtures || []).filter(function (f) {
+    return f.id !== 'matchday-current' && String(f.opponent || '').trim().toLowerCase() === key;
+  });
+  if (!same.length) return null;
+  return same.filter(function (f) { return String(f.date) === String(date); })[0] || same[0];
+}
+
 function saveMatchDay(activate) {
   isLive = activate;
   updateLiveUI();
@@ -3790,14 +3808,31 @@ function saveMatchDay(activate) {
   // authoritative on the homepage — even when the season schedule is empty — we
   // upsert ONE self-updating fixture (id 'matchday-current') into fixtures.json.
   // commitDomain merges by id, so every other fixture is left untouched.
+  // If today's opponent is already in the schedule (the normal case), DON'T
+  // create a parallel 'matchday-current' — that made a duplicate with no crest.
+  // Reuse the real fixture (it already carries the crest); only fall back to a
+  // self-updating 'matchday-current' when the game isn't scheduled, and then look
+  // its crest up from data/crests.json so the scoreboard is never crest-less.
   if (data.opponent && data.date) {
-    var mdFix = {
-      id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
-      opponent: data.opponent, oppCrest: '', isHome: data.isHome,
-      venue: data.venue, competition: data.competition,
-      status: 'scheduled', us: null, them: null, scorers: ''
-    };
-    commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
+    fetchJSON('fixtures', function (fxd) {
+      var fixtures = (fxd && fxd.fixtures) || [];
+      fetchJSON('crests', function (crd) {
+        var crests = (crd && crd.crests) || [];
+        var real = mdFindFixture(data.opponent, data.date, fixtures);
+        var hasStale = fixtures.some(function (f) { return f.id === 'matchday-current'; });
+        if (real) {
+          if (hasStale) commitDomain('fixtures', 'fixtures', 'id', [], ['matchday-current'], null, 'dep-matchday', null);
+        } else {
+          var mdFix = {
+            id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
+            opponent: data.opponent, oppCrest: mdCrestFor(data.opponent, crests), isHome: data.isHome,
+            venue: data.venue, competition: data.competition,
+            status: 'scheduled', us: null, them: null, scorers: ''
+          };
+          commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
+        }
+      });
+    });
   }
   toast(activate ? 'Scoreboard is LIVE' : 'Next match saved — live in ~30s');
 }
