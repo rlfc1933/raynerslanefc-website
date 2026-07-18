@@ -17,20 +17,6 @@
       "shareHeadlineAuto": "HAYES & YEADING UNITED AT THE LANE"
     },
     {
-      "id": "matchday-current",
-      "date": "2026-07-18",
-      "kickoff": "15:00",
-      "opponent": "Cockfosters",
-      "oppCrest": "",
-      "isHome": false,
-      "venue": "Tithe Farm",
-      "competition": "Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": ""
-    },
-    {
       "id": "friendly-cockfosters-20260718",
       "date": "2026-07-18",
       "kickoff": "15:00",
@@ -703,5 +689,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T14:24:45.382Z"
+  "updatedAt": "2026-07-18T14:22:00.000Z"
 }
