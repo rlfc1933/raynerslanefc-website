@@ -672,7 +672,21 @@
       "scorers": "",
       "shareHeadline": "TWO CLUBS, ONE COLOUR",
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
+    },
+    {
+      "id": "matchday-current",
+      "date": "2026-07-18",
+      "kickoff": "15:00",
+      "opponent": "Cockfosters",
+      "oppCrest": "img/crests/cockfosters.svg",
+      "isHome": false,
+      "venue": "Tithe Farm",
+      "competition": "Friendly",
+      "status": "scheduled",
+      "us": null,
+      "them": null,
+      "scorers": ""
     }
   ],
-  "updatedAt": "2026-07-18T15:59:59.148Z"
+  "updatedAt": "2026-07-18T16:05:23.385Z"
 }
