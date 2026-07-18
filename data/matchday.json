@@ -1,6 +1,6 @@
 {
-  "state": "live",
-  "isLive": true,
+  "state": "armed",
+  "isLive": false,
   "isHome": true,
   "opponent": "Cockfosters",
   "date": "2026-07-18",
@@ -8,8 +8,8 @@
   "venue": "Tithe Farm Social Club",
   "competition": "Friendly",
   "stateReason": "",
-  "homeScore": 1,
+  "homeScore": 0,
   "awayScore": 0,
   "scorers": "",
-  "status": "2nd Half"
+  "status": "Full Time"
 }
