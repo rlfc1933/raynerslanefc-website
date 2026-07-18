@@ -2991,7 +2991,11 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').c
 // a one-tap "Update now" bar that reloads to the new version.
 (function () {
   var baseTag = null, prompted = false;
-  function stamp(res) { return res.headers.get('etag') || res.headers.get('last-modified') || null; }
+  // Compare the file's CONTENT LENGTH, not etag/last-modified. Every Save fires a
+  // Netlify rebuild, which re-stamps admin.html with a fresh etag even when the
+  // file is byte-identical — that made "A new version is ready" pop after every
+  // live-score tap. Content-length only changes when admin.html actually changes.
+  function stamp(res) { return res.headers.get('content-length') || res.headers.get('etag') || null; }
   function showReloadBar() {
     if (prompted || document.getElementById('rlfc-update-bar')) return;
     prompted = true;
