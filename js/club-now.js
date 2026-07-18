@@ -92,6 +92,19 @@
   }
 
   // ── formatting ──
+  // Epoch ms for a wall-clock kick-off in Europe/London (auto-handles BST/GMT),
+  // correct no matter what timezone the viewer's device is in. Fixes kick-offs
+  // reading ~7h out when the site is opened from outside the UK.
+  function ukEpoch(dateStr, timeStr) {
+    if (!dateStr) return NaN;
+    var t = (timeStr || '15:00').slice(0, 5);
+    var asUTC = new Date(dateStr + 'T' + t + ':00Z').getTime();
+    if (isNaN(asUTC)) return NaN;
+    var lon = new Date(asUTC).toLocaleString('en-US', { timeZone: 'Europe/London' });
+    var utc = new Date(asUTC).toLocaleString('en-US', { timeZone: 'UTC' });
+    return asUTC - (new Date(lon).getTime() - new Date(utc).getTime());
+  }
+
   function fmtDate(dateStr) {
     var d = new Date((String(dateStr).length === 10 ? dateStr + 'T12:00:00' : dateStr));
     return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -148,18 +161,18 @@
       '<div class="cn__meta"><i class="ico ico-map-pin" aria-hidden="true"></i> ' + esc(metaBits) + '</div>' +
       '<div class="cn__cta">' + dirBtn(n) + icsBtn() +
         '<a class="cn__btn cn__btn--ghost" href="fixtures.html">Match Centre</a></div>';
-    startCountdown((n.date || '') + 'T' + (n.kickoff || '15:00') + ':00');
+    startCountdown(n.date, n.kickoff);
   }
 
-  // ── countdown (own 1s tick; cleared on each rebuild) ──
-  function startCountdown(dateStr) {
+  // ── countdown (own 1s tick; cleared on each rebuild) — UK-time anchored ──
+  function startCountdown(dateStr, timeStr) {
     if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
     var el = document.getElementById('cn-countdown'); if (!el) return;
-    var target = new Date(dateStr);
-    if (isNaN(target.getTime())) { el.innerHTML = '<span class="cn__meta">Kick-off time to be confirmed</span>'; return; }
+    var targetMs = ukEpoch(dateStr, timeStr || '15:00');
+    if (isNaN(targetMs)) { el.innerHTML = '<span class="cn__meta">Kick-off time to be confirmed</span>'; return; }
     function tick() {
       var el2 = document.getElementById('cn-countdown'); if (!el2) { clearInterval(cdTimer); return; }
-      var diff = target - new Date();
+      var diff = targetMs - Date.now();
       if (diff <= 0) {
         if (diff > -3 * 3600000) el2.innerHTML = '<span class="cn__ko">KICK OFF</span>';
         else el2.innerHTML = '';
@@ -185,6 +198,12 @@
     var hs = live.homeScore, as = live.awayScore;
     var done = /full|ft|final|result/i.test(live.status || '');
     if (!done || hs == null || as == null || !live.opponent) return null;
+    // Guard against a mid-match "Full Time" misclick posting a fake historical
+    // result: only treat it as finished once the game has actually had time to
+    // end (kick-off + ~100 min, UK time). Before that, show nothing rather than
+    // a wrong 0-0. If we have no kick-off to check, fall through (legacy safe).
+    var ko = ukEpoch(live.date, live.kickoff);
+    if (!isNaN(ko) && Date.now() < ko + 100 * 60000) return null;
     var home = live.isHome !== false;
     return { opponent: live.opponent, isHome: live.isHome, us: home ? hs : as, them: home ? as : hs };
   }
