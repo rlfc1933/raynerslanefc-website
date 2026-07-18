@@ -1,13 +1,13 @@
 {
   "isLive": true,
-  "isHome": true,
+  "isHome": false,
   "opponent": "Cockfosters",
   "date": "2026-07-18",
   "kickoff": "15:00",
-  "venue": "Tithe Farm Social Club",
+  "venue": "Tithe Farm",
   "competition": "Friendly",
-  "homeScore": 1,
-  "awayScore": 0,
+  "homeScore": 0,
+  "awayScore": 1,
   "scorers": "",
-  "status": "2nd Half"
+  "status": "Full Time"
 }
