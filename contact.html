@@ -96,7 +96,7 @@
         <h2 style="font-family:var(--font-d);font-size:40px;letter-spacing:.04em;margin-bottom:32px">
           We'd love to <span style="color:var(--yellow)">hear from you</span>
         </h2>
-        <form class="contact-form" action="mailto:info@raynerslanefc.co.uk" method="GET" enctype="text/plain">
+        <form class="contact-form" onsubmit="return laneSubmit(this,'contact',{thanksMsg:'Thanks for getting in touch — we’ll reply as soon as we can.'})">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="field">
               <label for="cont-f1">First Name</label>

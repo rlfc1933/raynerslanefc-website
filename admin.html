@@ -838,6 +838,12 @@
 
       <div class="sect-lbl">Commercial &amp; Comms</div>
       <div class="tile-grid">
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('records')">
+          <span class="tile-arrow">&#8594;</span>
+          <span id="records-badge" class="tile-badge" style="display:none"></span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v5h8V4M8 13h8M8 16h5"/></svg></span>
+          <div class="tile-name">Records</div><div class="tile-desc">Every form submission in one inbox</div>
+        </button>
         <button class="tile" style="--accent:#EC4899" onclick="openPanel('sponsors')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg></span>
@@ -2939,6 +2945,96 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       </div>
     </div>
 
+    <!-- ══════════════ RECORDS — every form submission, one private inbox ══════════════ -->
+    <style>
+      .rec-subtabs{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 10px;margin-bottom:4px;scrollbar-width:none}
+      .rec-subtabs::-webkit-scrollbar{display:none}
+      .rec-st{flex:0 0 auto;position:relative;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 15px;border-radius:9px;border:1px solid var(--br);background:var(--c);color:var(--w);font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.02em;cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s}
+      .rec-st:hover{border-color:var(--gr)}
+      .rec-st.on{background:var(--y);color:#0d0d0d;border-color:var(--y)}
+      .rec-st .rec-ct{font-family:var(--fd);font-size:15px;line-height:1;opacity:.85}
+      .rec-st.on .rec-ct{opacity:1}
+      .rec-st .rec-unread{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--re);color:#fff;font-family:var(--fc);font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+      .rec-st.on .rec-unread{background:#0d0d0d;color:var(--y)}
+      .rec-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+      .rec-input{min-height:44px;background:var(--dk);border:1px solid var(--br);border-radius:8px;color:var(--w);font-family:var(--fc);font-size:14px;padding:0 12px}
+      #rec-search{flex:1 1 190px}
+      .rec-input:focus{outline:2px solid var(--y);outline-offset:1px;border-color:var(--y)}
+      .rec-check{display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:12.5px;color:var(--gr);cursor:pointer;min-height:44px}
+      .rec-check input{width:18px;height:18px;accent-color:var(--y)}
+      .rec-csv{margin:0;width:auto;flex:0 0 auto}
+      .rec-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--c);border:1px solid var(--br);border-radius:10px;margin-bottom:8px;cursor:pointer;text-align:left;width:100%;transition:border-color .15s}
+      .rec-row:hover{border-color:var(--gr)}
+      .rec-row.unread{border-left:3px solid var(--y)}
+      .rec-dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:var(--y);visibility:hidden}
+      .rec-row.unread .rec-dot{visibility:visible}
+      .rec-row-main{flex:1 1 auto;min-width:0}
+      .rec-row-name{font-family:var(--fc);font-size:14.5px;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .rec-row-sub{font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .rec-row-when{flex:0 0 auto;font-family:var(--fc);font-size:11px;color:var(--gr);text-align:right}
+      .rec-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.4}
+      .rec-pill.new{background:rgba(255,209,0,.16);color:var(--y)}
+      .rec-pill.contacted{background:rgba(59,130,246,.16);color:#7fb0ff}
+      .rec-pill.in_progress{background:rgba(139,92,246,.18);color:#c0a9ff}
+      .rec-pill.trialled{background:rgba(6,182,212,.16);color:#5fd6e8}
+      .rec-pill.signed{background:rgba(34,197,94,.18);color:var(--su)}
+      .rec-pill.declined{background:rgba(136,136,136,.18);color:var(--gr)}
+      .rec-pill.archived{background:rgba(136,136,136,.12);color:var(--gr)}
+      .rec-empty{text-align:center;padding:46px 20px;color:var(--gr);font-family:var(--fc)}
+      .rec-empty .rec-empty-ic{font-size:34px;color:var(--br);margin-bottom:10px}
+      .rec-empty b{display:block;color:var(--w);font-size:15px;margin-bottom:4px}
+      /* detail overlay */
+      .rec-detail{position:fixed;inset:0;z-index:60;background:rgba(6,6,6,.72);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center}
+      .rec-detail.on{display:flex}
+      .rec-sheet{width:100%;max-width:640px;max-height:92vh;overflow-y:auto;background:var(--dk);border:1px solid var(--br);border-radius:16px 16px 0 0;padding:18px 18px 26px}
+      @media(min-width:680px){.rec-detail{align-items:center}.rec-sheet{border-radius:16px}}
+      .rec-sheet-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+      .rec-sheet-name{font-family:var(--fd);font-size:26px;letter-spacing:.02em;color:var(--w);line-height:1.05}
+      .rec-x{flex:0 0 auto;width:40px;height:40px;border-radius:9px;border:1px solid var(--br);background:var(--c);color:var(--w);font-size:20px;cursor:pointer;line-height:1}
+      .rec-kv{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;font-family:var(--fc);font-size:13.5px;margin:14px 0;line-height:1.55}
+      .rec-kv dt{color:var(--gr)}
+      .rec-kv dd{color:var(--w);margin:0;word-break:break-word}
+      .rec-kv dd a{color:var(--y);text-decoration:underline}
+      .rec-health{border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.06);border-radius:9px;padding:11px 13px;margin:12px 0;font-family:var(--fc);font-size:13px;color:var(--w);line-height:1.55}
+      .rec-health b{display:block;color:#ff9a9a;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+      .rec-fl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gr);margin:12px 0 5px}
+      .rec-ta{width:100%;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--w);font-family:var(--fc);font-size:14px;padding:10px 12px;resize:vertical;min-height:70px}
+      .rec-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+      .rec-actions .save{margin:0;flex:1 1 auto;min-width:130px}
+      .rec-del{background:transparent;border:1px solid rgba(239,68,68,.5);color:#ff6b6b}
+      .rec-meta{font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:14px;text-align:center}
+    </style>
+    <div class="panel" id="panel-records">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-clipboard-list"></i> Records</div></div>
+      <div class="snote">
+        <p>Every application and message from the website lands here — private to the club, never lost to an inbox. <button onclick="loadRecords(true)" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0">Refresh <i class="ico ico-rotate-cw"></i></button></p>
+      </div>
+
+      <div id="rec-subtabs" class="rec-subtabs"></div>
+
+      <div class="rec-toolbar">
+        <input id="rec-search" class="rec-input" type="search" placeholder="Search name, email, phone…" oninput="recRender()" aria-label="Search records">
+        <select id="rec-status" class="rec-input" onchange="recRender()" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="new">New</option><option value="contacted">Contacted</option>
+          <option value="in_progress">In progress</option><option value="trialled">Trialled</option>
+          <option value="signed">Signed</option><option value="declined">Declined</option>
+          <option value="archived">Archived</option>
+        </select>
+        <select id="rec-sort" class="rec-input" onchange="recRender()" aria-label="Sort records">
+          <option value="new">Newest first</option><option value="old">Oldest first</option>
+          <option value="unread">Unread first</option>
+        </select>
+      </div>
+      <div class="rec-toolbar" style="justify-content:space-between">
+        <label class="rec-check"><input type="checkbox" id="rec-sensitive"> Include health / medical fields in export</label>
+        <button class="save sec rec-csv" onclick="recExportCSV()"><i class="ico ico-download"></i> Export CSV</button>
+      </div>
+
+      <div id="rec-list"></div>
+    </div>
+    <div id="rec-detail" class="rec-detail" onclick="if(event.target===this)recCloseDetail()"></div>
+
   </div>
 </div>
 
@@ -3500,6 +3596,7 @@ function openPanel(name) {
   if (name === 'sponsorhub') loadSponsorHub();
   if (name === 'radar')      rdrInit();
   if (name === 'trialists')  loadLeads();
+  if (name === 'records')    loadRecords();
   if (name === 'poststudio') loadPostStudio();
   if (name === 'monthlyfix') mfInit();
   if (name === 'fwp')        fwpInit();
@@ -3546,6 +3643,7 @@ function initDash() {
   loadDashFanCount();
   renderSeasonSetup();
   refreshNotifs();
+  if (PIN) recBadgeInit();   // prime the Records unread badge without opening the panel
 }
 
 // (Fix C) Season Setup — a one-screen checklist of the data that still needs
@@ -6021,6 +6119,326 @@ async function loadLeads() {
   } catch (e) {
     el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server. Tap Refresh.</div>';
   }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// RECORDS — one private inbox for every website form submission.
+// Reads Supabase via list-submissions (service_role, PIN-gated) — the anon key
+// can't touch this table (RLS). Trials / Volunteers / Sponsors / Contact /
+// Membership are editable (status, notes, handled-by, delete). Fans + Attendance
+// are read-only mirrors so staff have one place to look. Health data (injuries)
+// lives only here and is excluded from CSV unless a box is ticked.
+// ════════════════════════════════════════════════════════════════════════════
+var REC = { subs: [], fans: [], att: [], tab: 'trial', loaded: false, fansLoaded: false, attLoaded: false, current: null };
+var REC_TABS = [
+  { key: 'trial',      label: 'Trials',     ic: 'ico-football' },
+  { key: 'volunteer',  label: 'Volunteers', ic: 'ico-heart' },
+  { key: 'sponsor',    label: 'Sponsors',   ic: 'ico-handshake' },
+  { key: 'contact',    label: 'Contact',    ic: 'ico-mail' },
+  { key: 'membership', label: 'Membership', ic: 'ico-ticket' },
+  { key: 'fans',       label: 'Fans',       ic: 'ico-users', ro: true },
+  { key: 'attendance', label: 'Attendance', ic: 'ico-check', ro: true }
+];
+var REC_STATUS = { new: 'New', contacted: 'Contacted', in_progress: 'In progress', trialled: 'Trialled', signed: 'Signed', declined: 'Declined', archived: 'Archived' };
+var REC_SENSITIVE = /injur|medical|health|condition|medication/i;   // hidden from CSV unless ticked
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { var b = document.getElementById('rec-detail'); if (b && b.classList.contains('on')) recCloseDetail(); }
+});
+
+function recNow() { return new Date().toISOString(); }
+
+async function loadRecords(force) {
+  var el = document.getElementById('rec-list'); if (!el) return;
+  if (REC.loaded && !force) { recRenderSubtabs(); recRender(); return; }
+  el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:16px 2px">Loading records…</div>';
+  try {
+    var r = await fetch('/.netlify/functions/list-submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    if (r.status === 401) { el.innerHTML = recNotice('Session expired', 'Your PIN didn\'t match. Lock and sign in again.'); return; }
+    var d = await r.json();
+    if (!d.ok) {
+      if (d.error === 'no-supabase') { el.innerHTML = recNotice('Database not connected yet', 'Set <strong>SUPABASE_SERVICE_KEY</strong> + <strong>ADMIN_PIN</strong> in Netlify and run <code>supabase/submissions.sql</code> once. Submissions are safe in the meantime.'); return; }
+      el.innerHTML = recNotice('Couldn\'t load', 'Please tap Refresh (' + escH(d.error || 'error') + ').'); return;
+    }
+    REC.subs = (d.submissions || []).map(recNorm);
+    REC.loaded = true;
+    recRenderSubtabs(); recRender(); recUpdateBadge();
+  } catch (e) {
+    el.innerHTML = recNotice('Couldn\'t reach the server', 'Check your connection and tap Refresh.');
+  }
+}
+function recNorm(s) { s.payload = s.payload || {}; return s; }
+function recNotice(title, body) {
+  return '<div class="snote" style="border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)"><p><strong style="color:var(--w)">' + title + '.</strong> ' + body + '</p></div>';
+}
+
+async function recFetchFans() {
+  if (REC.fansLoaded) return;
+  try { var res = await loadMembers(); if (res && res.configured) { REC.fans = res.members || []; REC.fansLoaded = true; } } catch (e) {}
+}
+async function recFetchAtt() {
+  if (REC.attLoaded) return;
+  try {
+    var r = await fetch('/.netlify/functions/list-attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var d = await r.json(); if (d.ok) { REC.att = d.rows || []; REC.attLoaded = true; }
+  } catch (e) {}
+}
+
+function recSetTab(key) {
+  REC.tab = key;
+  var ro = key === 'fans' || key === 'attendance';
+  document.querySelectorAll('.rec-toolbar').forEach(function (t) { t.style.display = ro ? 'none' : ''; });
+  recRenderSubtabs();
+  recRender();   // render THIS tab straight away (loading state for lazy read-only tabs)
+  if (key === 'fans' && !REC.fansLoaded) { recFetchFans().then(function () { recRenderSubtabs(); recRender(); }); }
+  else if (key === 'attendance' && !REC.attLoaded) { recFetchAtt().then(function () { recRenderSubtabs(); recRender(); }); }
+}
+
+function recCount(key) {
+  if (key === 'fans') return REC.fansLoaded ? REC.fans.length : null;
+  if (key === 'attendance') return REC.attLoaded ? REC.att.length : null;
+  return REC.subs.filter(function (s) { return s.type === key; }).length;
+}
+function recUnread(key) {
+  if (key === 'fans' || key === 'attendance') return 0;
+  return REC.subs.filter(function (s) { return s.type === key && !s.read_at; }).length;
+}
+
+function recRenderSubtabs() {
+  var bar = document.getElementById('rec-subtabs'); if (!bar) return;
+  bar.innerHTML = REC_TABS.map(function (t) {
+    var ct = recCount(t.key), un = recUnread(t.key);
+    var ctHTML = ct == null ? '' : '<span class="rec-ct">' + ct + '</span>';
+    var unHTML = un > 0 ? '<span class="rec-unread">' + un + '</span>' : '';
+    return '<button class="rec-st' + (REC.tab === t.key ? ' on' : '') + '" onclick="recSetTab(\'' + t.key + '\')"><i class="ico ' + t.ic + '"></i> ' + t.label + ' ' + ctHTML + unHTML + '</button>';
+  }).join('');
+}
+
+function recCurrentList() {
+  if (REC.tab === 'fans') return REC.fans.slice();
+  if (REC.tab === 'attendance') return REC.att.slice();
+  return REC.subs.filter(function (s) { return s.type === REC.tab; });
+}
+
+function recRender() {
+  var el = document.getElementById('rec-list'); if (!el) return;
+  var tab = REC.tab, ro = tab === 'fans' || tab === 'attendance';
+  var list = recCurrentList();
+  var q = (document.getElementById('rec-search') || {}).value || '';
+  q = q.trim().toLowerCase();
+  var stat = (document.getElementById('rec-status') || {}).value || '';
+  var sort = (document.getElementById('rec-sort') || {}).value || 'new';
+
+  if (!ro) {
+    if (stat) list = list.filter(function (s) { return (s.status || 'new') === stat; });
+    if (q) list = list.filter(function (s) { return recHaystack(s).indexOf(q) >= 0; });
+    list.sort(function (a, b) {
+      if (sort === 'unread') { var au = a.read_at ? 1 : 0, bu = b.read_at ? 1 : 0; if (au !== bu) return au - bu; }
+      var ta = new Date(a.created_at || 0).getTime(), tb = new Date(b.created_at || 0).getTime();
+      return sort === 'old' ? ta - tb : tb - ta;
+    });
+  }
+
+  if (!list.length) {
+    if (tab === 'fans' && !REC.fansLoaded) { el.innerHTML = '<div class="rec-empty">Loading fans…</div>'; return; }
+    if (tab === 'attendance' && !REC.attLoaded) { el.innerHTML = '<div class="rec-empty">Loading attendance…</div>'; return; }
+    var lbl = (REC_TABS.filter(function (t) { return t.key === tab; })[0] || {}).label || 'records';
+    el.innerHTML = '<div class="rec-empty"><div class="rec-empty-ic"><i class="ico ico-inbox"></i></div><b>No ' + escH(lbl.toLowerCase()) + ' yet</b>' +
+      (ro ? 'They\'ll appear here as they come in.' : 'When someone submits the ' + escH(lbl.toLowerCase()) + ' form on the website, it lands here — safe and private.') + '</div>';
+    return;
+  }
+  if (tab === 'fans') { el.innerHTML = list.map(recFanRow).join(''); return; }
+  if (tab === 'attendance') { el.innerHTML = list.map(recAttRow).join(''); return; }
+  el.innerHTML = list.map(recRow).join('');
+}
+
+function recHaystack(s) {
+  var p = s.payload || {};
+  return [s.name, s.email, s.phone, s.guardian_name, s.guardian_email, p.company, p.contact, p.message, p.position, p.location].filter(Boolean).join(' ').toLowerCase();
+}
+function recWhen(iso) {
+  if (!iso) return '';
+  var d = new Date(iso); if (isNaN(d)) return '';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function recAgeDays(iso) {
+  if (!iso) return null; var d = new Date(iso); if (isNaN(d)) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function recRow(s) {
+  var p = s.payload || {};
+  var sub = s.email || s.phone || '';
+  if (s.type === 'sponsor' && p.company) sub = p.company + (s.email ? ' · ' + s.email : '');
+  if (s.type === 'trial' && p.position) sub = p.position + (s.email ? ' · ' + s.email : '');
+  if (s.type === 'contact' && p.subject) sub = p.subject;
+  var status = s.status || 'new';
+  return '<button class="rec-row' + (s.read_at ? '' : ' unread') + '" onclick="recOpenDetail(\'' + s.id + '\')">' +
+    '<span class="rec-dot" title="Unread"></span>' +
+    '<span class="rec-row-main"><span class="rec-row-name">' + escH(s.name || '—') + (s.is_minor ? ' <span style="color:var(--y);font-size:10px;font-weight:800">U18</span>' : '') + '</span>' +
+    '<span class="rec-row-sub">' + escH(sub || '—') + '</span></span>' +
+    '<span class="rec-row-when"><span class="rec-pill ' + status + '">' + escH(REC_STATUS[status] || status) + '</span><br>' + recWhen(s.created_at) + '</span></button>';
+}
+function recFanRow(f) {
+  return '<div class="rec-row" style="cursor:default"><span class="rec-dot"></span><span class="rec-row-main"><span class="rec-row-name">' + escH(f.name || f.username || '—') + '</span>' +
+    '<span class="rec-row-sub">' + escH(f.email || f.username || '') + (f.town ? ' · ' + escH(f.town) : '') + '</span></span>' +
+    '<span class="rec-row-when">' + recWhen(f.created_at || f.created) + '</span></div>';
+}
+function recAttRow(a) {
+  return '<div class="rec-row" style="cursor:default"><span class="rec-dot"></span><span class="rec-row-main"><span class="rec-row-name">Lane #' + escH(String(a.lane_no || '—')) + '</span>' +
+    '<span class="rec-row-sub">' + (a.home ? 'Home' : 'Away') + ' fixture</span></span>' +
+    '<span class="rec-row-when">' + recWhen(a.match_date) + '</span></div>';
+}
+
+function recFind(id) { for (var i = 0; i < REC.subs.length; i++) if (REC.subs[i].id === id) return REC.subs[i]; return null; }
+
+function recOpenDetail(id) {
+  var s = recFind(id); if (!s) return;
+  REC.current = id;
+  if (!s.read_at) recMarkRead(id);   // opening = read
+  var box = document.getElementById('rec-detail');
+  box.innerHTML = recDetailHTML(s);
+  box.classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function recCloseDetail() {
+  var box = document.getElementById('rec-detail'); box.classList.remove('on'); box.innerHTML = '';
+  REC.current = null; document.body.style.overflow = '';
+  recRenderSubtabs(); recRender();
+}
+
+function recDetailHTML(s) {
+  var p = s.payload || {}, rows = '';
+  function kv(k, v, isLink) {
+    if (v == null || v === '') return;
+    var val = isLink === 'mail' ? '<a href="mailto:' + encodeURIComponent(v) + '">' + escH(v) + '</a>'
+      : isLink === 'tel' ? '<a href="tel:' + escH(String(v).replace(/[^0-9+]/g, '')) + '">' + escH(v) + '</a>'
+      : escH(String(v));
+    rows += '<dt>' + escH(k) + '</dt><dd>' + val + '</dd>';
+  }
+  kv('Received', recWhen(s.created_at) + (recAgeDays(s.created_at) != null ? ' (' + recAgeDays(s.created_at) + ' days ago)' : ''));
+  kv('Email', s.email, 'mail');
+  kv('Phone', s.phone, 'tel');
+  if (s.is_minor) kv('Age', 'Under 18');
+  // payload fields (skip the health field — shown separately below)
+  Object.keys(p).forEach(function (k) {
+    if (REC_SENSITIVE.test(k)) return;
+    kv(recLabel(k), p[k]);
+  });
+  kv('Source', s.source_page);
+
+  var health = '';
+  Object.keys(p).forEach(function (k) {
+    if (REC_SENSITIVE.test(k) && p[k]) health += '<div class="rec-health"><b>' + escH(recLabel(k)) + ' — health data, club-eyes only</b>' + escH(String(p[k])) + '</div>';
+  });
+
+  var guardian = '';
+  if (s.is_minor || s.guardian_name || s.guardian_email) {
+    guardian = '<div class="rec-health" style="border-color:rgba(255,209,0,.4);background:rgba(255,209,0,.06)"><b style="color:var(--y)">Parent / guardian (applicant under 18)</b>' +
+      escH(s.guardian_name || '—') + (s.guardian_email ? ' · <a href="mailto:' + encodeURIComponent(s.guardian_email) + '" style="color:var(--y)">' + escH(s.guardian_email) + '</a>' : '') +
+      '<br><span style="font-size:11px;color:var(--gr)">Consent given: ' + (s.consent ? 'Yes' : 'No') + '</span></div>';
+  }
+
+  var status = s.status || 'new';
+  var statusOpts = Object.keys(REC_STATUS).map(function (k) { return '<option value="' + k + '"' + (k === status ? ' selected' : '') + '>' + REC_STATUS[k] + '</option>'; }).join('');
+
+  return '<div class="rec-sheet" onclick="event.stopPropagation()">' +
+    '<div class="rec-sheet-hdr"><div><div class="rec-sheet-name">' + escH(s.name || '—') + '</div>' +
+      '<div style="font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:3px;text-transform:capitalize">' + escH(s.type) + ' submission</div></div>' +
+      '<button class="rec-x" onclick="recCloseDetail()" aria-label="Close">&times;</button></div>' +
+    '<dl class="rec-kv">' + rows + '</dl>' +
+    guardian + health +
+    '<div class="rec-fl">Status</div><select id="rec-d-status" class="rec-input" style="width:100%">' + statusOpts + '</select>' +
+    '<div class="rec-fl">Handled by</div><input id="rec-d-handler" class="rec-input" style="width:100%" placeholder="Your name" value="' + escH(s.handled_by || '') + '">' +
+    '<div class="rec-fl">Staff notes <span style="text-transform:none;font-weight:400">(private)</span></div><textarea id="rec-d-notes" class="rec-ta" placeholder="Add a note…">' + escH(s.staff_notes || '') + '</textarea>' +
+    '<div class="rec-actions">' +
+      '<button class="save" onclick="recSaveDetail(\'' + s.id + '\')"><i class="ico ico-check"></i> Save</button>' +
+      (s.email ? '<a class="save sec" style="text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center" href="mailto:' + encodeURIComponent(s.email) + '"><i class="ico ico-mail"></i> Reply</a>' : '') +
+      '<button class="save sec rec-del" onclick="recDeleteDetail(\'' + s.id + '\')"><i class="ico ico-trash-2"></i> Delete</button>' +
+    '</div>' +
+    '<div class="rec-meta">Stored privately in Supabase · never shown on the public site.</div>' +
+  '</div>';
+}
+function recLabel(k) { return String(k).replace(/_/g, ' ').replace(/^./, function (c) { return c.toUpperCase(); }); }
+
+async function recMarkRead(id) {
+  var s = recFind(id); if (!s || s.read_at) return;
+  var ts = recNow(); s.read_at = ts;   // optimistic
+  recRenderSubtabs(); recUpdateBadge();
+  try { await fetch('/.netlify/functions/update-submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, id: id, patch: { read_at: ts } }) }); } catch (e) {}
+}
+
+async function recSaveDetail(id) {
+  var s = recFind(id); if (!s) return;
+  var patch = {
+    status: (document.getElementById('rec-d-status') || {}).value || 'new',
+    handled_by: (document.getElementById('rec-d-handler') || {}).value || '',
+    staff_notes: (document.getElementById('rec-d-notes') || {}).value || ''
+  };
+  try {
+    var r = await fetch('/.netlify/functions/update-submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, id: id, patch: patch }) });
+    var d = await r.json();
+    if (!d.ok) { toast('Couldn\'t save (' + (d.error || 'error') + ')', true); return; }
+    s.status = patch.status; s.handled_by = patch.handled_by; s.staff_notes = patch.staff_notes;
+    toast('Saved'); recCloseDetail();
+  } catch (e) { toast('Couldn\'t reach the server', true); }
+}
+
+async function recDeleteDetail(id) {
+  if (!confirm('Delete this record permanently? This cannot be undone.')) return;
+  try {
+    var r = await fetch('/.netlify/functions/update-submission', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, id: id, action: 'delete' }) });
+    var d = await r.json();
+    if (!d.ok) { toast('Couldn\'t delete (' + (d.error || 'error') + ')', true); return; }
+    REC.subs = REC.subs.filter(function (x) { return x.id !== id; });
+    toast('Record deleted'); recCloseDetail(); recUpdateBadge();
+  } catch (e) { toast('Couldn\'t reach the server', true); }
+}
+
+function recExportCSV() {
+  var tab = REC.tab;
+  if (tab === 'fans' || tab === 'attendance') { toast('Export is for form submissions', true); return; }
+  var list = REC.subs.filter(function (s) { return s.type === tab; });
+  if (!list.length) { toast('Nothing to export yet', true); return; }
+  var includeSensitive = (document.getElementById('rec-sensitive') || {}).checked;
+  // collect payload keys across the set, honouring the sensitive filter
+  var extraKeys = {};
+  list.forEach(function (s) { Object.keys(s.payload || {}).forEach(function (k) { if (includeSensitive || !REC_SENSITIVE.test(k)) extraKeys[k] = 1; }); });
+  var cols = ['created_at', 'name', 'email', 'phone', 'status', 'handled_by', 'is_minor', 'guardian_name', 'guardian_email', 'consent', 'source_page', 'staff_notes'].concat(Object.keys(extraKeys));
+  var rows = [cols.join(',')];
+  list.forEach(function (s) {
+    var p = s.payload || {};
+    rows.push(cols.map(function (c) {
+      var v = (c in s) ? s[c] : p[c];
+      return recCSV(v);
+    }).join(','));
+  });
+  var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rayners-lane-' + tab + '-' + recWhen(recNow()).replace(/ /g, '-').toLowerCase() + (includeSensitive ? '-with-health' : '') + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  toast('CSV downloaded' + (includeSensitive ? ' (includes health fields)' : ''));
+}
+function recCSV(v) {
+  if (v == null) return '';
+  var s = String(v);
+  if (/[",\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function recUpdateBadge() {
+  var b = document.getElementById('records-badge'); if (!b) return;
+  var un = REC.subs.filter(function (s) { return !s.read_at; }).length;
+  if (un > 0) { b.textContent = un + ' new'; b.style.display = ''; } else { b.style.display = 'none'; }
+}
+// Prime the dashboard tile badge once after sign-in (so unread shows without opening).
+async function recBadgeInit() {
+  try {
+    var r = await fetch('/.netlify/functions/list-submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
+    var d = await r.json(); if (!d.ok) return;
+    REC.subs = (d.submissions || []).map(recNorm); REC.loaded = true; recUpdateBadge();
+  } catch (e) {}
 }
 
 async function loadSponsorHub() {

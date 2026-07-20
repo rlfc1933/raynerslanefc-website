@@ -62,7 +62,7 @@
 
 <section style="padding:0 0 20px">
   <div class="container">
-    <form class="tr-form" name="player-trial" onsubmit="return trialApply(this)">
+    <form class="tr-form" name="player-trial" onsubmit="return trialSubmit(this)">
       <input type="hidden" name="lead_source" value="player">
       <input type="hidden" name="age_group" id="tr-agegroup">
       <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
@@ -98,13 +98,20 @@
 
       <!-- Shown + required automatically when the applicant is under 18 -->
       <div class="tr-guardian" id="tr-guardian">
-        <label for="tr-guardian-name" class="tr-l">Parent / guardian name *</label><input type="text" name="guardian" id="tr-guardian-name">
-        <label for="tr-guardian-contact" class="tr-l">Parent / guardian contact (phone or email) *</label><input type="text" name="guardian_contact" id="tr-guardian-contact">
+        <label for="tr-guardian-name" class="tr-l">Parent / guardian name *</label><input type="text" name="guardian_name" id="tr-guardian-name" autocomplete="off">
+        <label for="tr-guardian-email" class="tr-l">Parent / guardian email *</label><input type="email" name="guardian_email" id="tr-guardian-email" autocomplete="off">
+        <label for="tr-guardian-phone" class="tr-l">Parent / guardian phone</label><input type="tel" name="guardian_phone" id="tr-guardian-phone" autocomplete="off">
         <div class="tr-note">Required for applicants under 18 — safeguarding.</div>
       </div>
 
+      <!-- GDPR consent (health data — age + injuries; applicants can be children) -->
+      <label class="tr-consent" style="display:flex;gap:10px;align-items:flex-start;font-family:var(--font-b);font-size:12.5px;color:var(--lgrey);line-height:1.6;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-top:4px;cursor:pointer">
+        <input type="checkbox" name="consent" id="tr-consent" value="yes" style="width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--yellow)">
+        <span>I consent to Rayners Lane FC storing these details — including age and any injury information — to assess this trial application. Only club staff can see it, it’s kept for up to <strong style="color:var(--white)">24 months</strong>, and you can ask us to delete it any time at <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>. See our <a href="policies.html#privacy" style="color:var(--yellow);text-decoration:underline">privacy policy</a>.</span>
+      </label>
+
       <button type="submit" class="tr-submit">Register my interest</button>
-      <div class="tr-private"><i class="ico ico-lock"></i> Your details go privately to the club management team only, never shown on the site. We need your email and phone so someone from the club can get back to you.</div>
+      <div class="tr-private"><i class="ico ico-lock"></i> Your details go privately to the club management team only, never shown on the site. Health information is stored securely and never leaves the club.</div>
     </form>
   </div>
 </section>
@@ -126,94 +133,71 @@
   function trAge() {
     var a = trAgeYears();
     var g = document.getElementById('tr-guardian');
-    var gn = document.getElementById('tr-guardian-name'), gc = document.getElementById('tr-guardian-contact');
+    var gn = document.getElementById('tr-guardian-name'), ge = document.getElementById('tr-guardian-email');
     var bracket = a == null ? '' : (a < 18 ? 'Under 18' : (a < 24 ? '18–23' : (a < 30 ? '24–29' : '30+')));
     document.getElementById('tr-agegroup').value = bracket;
     var under = a != null && a < 18;
     g.classList.toggle('on', under);
-    gn.required = under; gc.required = under;
+    gn.required = under; ge.required = under;
   }
 
-  // ── Send it from THEIR email, not ours ────────────────────────────────
-  // This used to POST to the site, which needed an email service configured to
-  // tell anyone about it — and it wasn't, so every registration landed silently
-  // in a dashboard nobody opened. This is better and simpler: we build the
-  // message and hand it to the player's own email app. The club gets a normal
-  // email FROM the player, so hitting reply just works, and there's no key, no
-  // service and nothing to forget to switch on.
-  // Some people have no mail app wired up (webmail in a browser), so we always
-  // show the copy-and-paste version too. Nobody hits a dead end.
-  var TRIAL_TO = 'info@raynerslanefc.co.uk';
-  var TRIAL_CC = 'chairman@raynerslanefc.co.uk';
-
-  function trialCompose(form) {
-    var d = {};
-    new FormData(form).forEach(function (v, k) { d[k] = String(v || '').trim(); });
-    var rows = [
-      ['Name', d.name], ['Date of birth', d.dob], ['Position', d.position],
-      ['Where you live', d.location], ['Current / last club', d.current_club],
-      ['Email', d.email], ['Phone', d.phone], ['Availability', d.availability],
-      ['Previous injuries', d.injuries],
-      ['Parent / guardian', d.guardian], ['Guardian contact', d.guardian_contact]
-    ].filter(function (r) { return r[1]; });
-    var body =
-      "I'd like to be considered to play for Rayners Lane FC.\n\n" +
-      rows.map(function (r) { return r[0] + ': ' + r[1]; }).join('\n') +
-      "\n\nThanks,\n" + (d.name || '');
-    return {
-      subject: 'Player interest — ' + (d.name || 'Registration'),
-      body: body
-    };
+  // ── One door: every application is saved to the club's private records ──
+  // The old flow tried to open the player's own email app and hoped they
+  // pressed send. On phones with no mail app wired up, applications vanished.
+  // Now the form POSTs straight to Supabase (private, staff-only) via the
+  // submit-form Netlify function — the same door contact, volunteer, sponsor
+  // and membership use. Health data (age + injuries) is stored ONLY there;
+  // it never touches the public site or the repo, and HubSpot only ever gets
+  // the non-sensitive lead fields below.
+  function trErr(msg) {
+    var box = document.getElementById('tr-err');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'tr-err';
+      box.setAttribute('role', 'alert');
+      box.style.cssText = 'font-family:var(--font-b);font-size:13px;color:#ff6b6b;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:10px 13px;margin-top:10px;line-height:1.5';
+      var btn = document.querySelector('.tr-submit');
+      btn.parentNode.insertBefore(box, btn);
+    }
+    box.textContent = msg;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  function trialApply(form) {
-    trAge();
-    if (!form.checkValidity()) { form.reportValidity(); return false; }
-    var msg = trialCompose(form);
-    var href = 'mailto:' + TRIAL_TO +
-      '?cc=' + encodeURIComponent(TRIAL_CC) +
-      '&subject=' + encodeURIComponent(msg.subject) +
-      '&body=' + encodeURIComponent(msg.body);
-    // Open their mail app. If nothing is registered for mailto:, the page simply
-    // doesn't move — which is why the copy panel below is always shown, not a
-    // fallback we hope never fires.
-    try { window.location.href = href; } catch (e) {}
-    if (window.gtag) { try { gtag('event', 'generate_lead', { lead_type: 'player' }); } catch (e) {} }
-    trialThanks(form, msg);
-    return false;
-  }
-
-  function trialCopy(btn, text) {
-    navigator.clipboard.writeText(text).then(function () {
-      var o = btn.innerHTML;
-      btn.innerHTML = '<i class="ico ico-check"></i> Copied';
-      setTimeout(function () { btn.innerHTML = o; }, 1800);
-    }).catch(function () {
-      // clipboard blocked (http, old browser) — select it so they can copy by hand
-      var ta = document.getElementById('tr-copytext');
-      if (ta) { ta.focus(); ta.select(); }
+  // Map to HubSpot — non-sensitive fields ONLY. Injuries/health never sent.
+  function trialHS(p) {
+    var h = { lead_source: 'player' };
+    ['position', 'age_group', 'current_club', 'availability', 'phone', 'email', 'location'].forEach(function (k) {
+      if (p[k]) h[k] = p[k];
     });
+    h.name = p.name || '';
+    if (p.guardian_name) h.guardian = p.guardian_name;
+    if (p.guardian_email) h.guardian_contact = p.guardian_email;
+    return h;
   }
 
-  function trialThanks(form, msg) {
-    var full = msg.body;
-    var esc = function (t) { var e = document.createElement('div'); e.textContent = t; return e.innerHTML; };
-    form.innerHTML =
-      '<div style="text-align:center;padding:6px 0 18px">' +
-        '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:8px">Nearly there</div>' +
-        '<p style="font-family:var(--font-b);color:var(--lgrey);line-height:1.7;max-width:460px;margin:0 auto 6px">' +
-          'Your email app should have opened with everything filled in — <strong style="color:var(--white)">just press send</strong>.' +
-        '</p>' +
-        '<p style="font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.7;max-width:460px;margin:0 auto">' +
-          'Nothing opened? Copy the details below into an email to ' +
-          '<a href="mailto:' + TRIAL_TO + '" style="color:var(--yellow);text-decoration:underline">' + TRIAL_TO + '</a>.' +
-        '</p>' +
-      '</div>' +
-      '<textarea id="tr-copytext" readonly rows="10" style="width:100%;background:var(--black);border:1px solid var(--border);border-radius:8px;color:var(--lgrey);font-family:var(--font-b);font-size:13px;line-height:1.6;padding:12px 13px;resize:vertical">' + esc(full) + '</textarea>' +
-      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
-        '<button type="button" class="tr-submit" style="flex:1;margin-top:0" onclick="trialCopy(this, document.getElementById(\'tr-copytext\').value)"><i class="ico ico-clipboard-list"></i> Copy the details</button>' +
-        '<a class="tr-submit" style="flex:1;margin-top:0;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--yellow);color:var(--yellow)" href="mailto:' + TRIAL_TO + '?cc=' + encodeURIComponent(TRIAL_CC) + '&subject=' + encodeURIComponent(msg.subject) + '&body=' + encodeURIComponent(full) + '">Open email again</a>' +
-      '</div>';
+  function trialSubmit(form) {
+    trAge();
+    var a = trAgeYears();
+    var isMinor = (a != null && a < 18);
+    var consent = document.getElementById('tr-consent').checked;
+    var gName = (document.getElementById('tr-guardian-name').value || '').trim();
+    var gEmail = (document.getElementById('tr-guardian-email').value || '').trim();
+
+    // GDPR gates (health data — must be explicit; under-18 needs a guardian)
+    if (!consent) { trErr('Please tick the consent box so we can store your application.'); return false; }
+    if (isMinor && (!gName || !gEmail)) {
+      trErr('Applicants under 18 need a parent or guardian name and email before we can accept this.');
+      return false;
+    }
+    if (!form.checkValidity()) { form.reportValidity(); return false; }
+
+    return laneSubmit(form, 'trial', {
+      leadType: 'player',
+      hubspot: trialHS,
+      thanksTitle: 'Registered — nice one',
+      thanksMsg: 'Thanks for putting your name forward. The management team will be in touch about a trial. Everything you sent stays private to the club.',
+      extra: { is_minor: isMinor }
+    });
   }
 </script>
 </body>

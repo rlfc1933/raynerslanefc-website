@@ -21,13 +21,15 @@ exports.handler = async function (event) {
     var formName = sub.form_name || data['form-name'] || '';
     var key = process.env.RESEND_API_KEY;
     if (!key) return { statusCode: 200, body: 'not configured' };
+    // Resend is OFF by default. The staff-portal "Records" tab is the notification
+    // now; email is opt-in. Only send when NOTIFY_EMAIL is explicitly set — that
+    // address becomes the destination for every staff alert. (Code left in place
+    // so the club can switch email alerts back on any time.)
+    var notify = process.env.NOTIFY_EMAIL;
+    if (!notify) return { statusCode: 200, body: 'notify disabled' };
     var from = process.env.WELCOME_FROM || 'Rayners Lane FC <info@raynerslanefc.co.uk>';
-    var club = process.env.CLUB_INBOX || 'info@raynerslanefc.co.uk';
-    // Player and sponsor enquiries go to the chairman as well as the club inbox.
-    // One inbox is a single point of failure: if the person watching info@ is on
-    // holiday, a lad who wants to play for us waits a fortnight and signs
-    // somewhere else. Two addresses, so somebody always sees it.
-    var chairman = process.env.CHAIRMAN_INBOX || 'chairman@raynerslanefc.co.uk';
+    var club = notify;
+    var chairman = notify;
 
     // ── SPONSOR APPLICATION → alert the commercial team at info@ ──
     if (formName === 'sponsor-enquiry') {

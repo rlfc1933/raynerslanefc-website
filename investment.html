@@ -340,8 +340,7 @@
             Tell us about your business and what you're interested in. The commercial team reviews every application and replies within 48 hours with a tailored proposal.
           </p>
         </div>
-        <form name="sponsor-enquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sponsorApply(this)" class="spon-form">
-          <input type="hidden" name="form-name" value="sponsor-enquiry">
+        <form name="sponsor-enquiry" onsubmit="return laneSubmit(this,'sponsor',{leadType:'sponsor',hubspot:sponsorHS,thanksTitle:'Application received',thanksMsg:'Thank you for wanting to back The Lane. The commercial team will review it and get back to you within 48 hours with a tailored proposal.'})" class="spon-form">
           <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
           <div class="spon-row">
             <div><label for="inve-f1" class="spon-l">Company / Business name *</label><input id="inve-f1" type="text" name="company" required></div>
@@ -385,29 +384,15 @@
     function inv() { try { initComponents("investment.html"); } catch (e) {} }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inv); else inv();
   })();
-  // Sponsor application — submits privately to Netlify Forms (sponsor-enquiry),
-  // stays on the page, and shows a confirmation. submission-created.js emails
-  // info@raynerslanefc.co.uk so the commercial team is notified instantly.
-  function sponsorApply(form) {
-    var data = new FormData(form);
-    var body = new URLSearchParams();
-    data.forEach(function (v, k) { body.append(k, v); });
-    // 1) private record + email alert via Netlify Forms (submission-created.js)
-    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() })
-      .then(function () { sponsorThanks(form); })
-      .catch(function () { sponsorThanks(form); });
-    // 2) HubSpot contact + Sponsor deal (fire-and-forget; no-ops if HubSpot isn't set up)
-    var payload = { lead_source: 'sponsor' };
-    data.forEach(function (v, k) { payload[k] = v; });
-    if (!payload.name && payload.contact) payload.name = payload.contact;
-    try { fetch('/.netlify/functions/hs-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function () {}); } catch (e) {}
-    if (window.gtag) { try { gtag('event', 'generate_lead', { lead_type: 'sponsor' }); } catch (e) {} }
-    return false;
-  }
-  function sponsorThanks(form) {
-    form.innerHTML = '<div style="text-align:center;padding:24px">' +
-      '<div style="font-family:var(--font-d);font-size:32px;color:var(--yellow);margin-bottom:10px">Application received <i class="ico ico-heart"></i></div>' +
-      '<p style="font-family:var(--font-b);color:rgba(255,255,255,.7);line-height:1.7;max-width:420px;margin:0 auto">Thank you for wanting to back The Lane. The commercial team will review it and get back to you within 48 hours with a tailored proposal.</p></div>';
+  // Sponsor application → Supabase (record of truth) via laneSubmit, PLUS the
+  // existing HubSpot contact + deal as a bonus. If HubSpot fails, the Supabase
+  // write still succeeds (independent calls). This maps the form fields to the
+  // shape hs-lead.js expects.
+  function sponsorHS(p) {
+    var h = { lead_source: 'sponsor' };
+    ['company', 'contact', 'email', 'phone', 'package', 'budget', 'website', 'message'].forEach(function (k) { if (p[k]) h[k] = p[k]; });
+    h.name = p.name || p.contact || '';
+    return h;
   }
 
   // Current sponsors — rendered live from data/sponsors.json so this strip stays

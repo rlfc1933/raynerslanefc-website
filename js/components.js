@@ -56,6 +56,53 @@ var LANE_HS_CHAT  = '';
   var s = document.createElement('script'); s.src = 'js/a11y.js'; s.defer = true; document.head.appendChild(s);
 })();
 
+// ── ONE DOOR: every public form submits through here → Supabase (submit-form) ──
+// No more mailto/"copy these details" data-loss. Auto-collects the form's named
+// fields, POSTs them, shows an on-brand confirmation on success and an email
+// fallback on failure. Keeps gtag lead events + optional HubSpot (sponsor/trial).
+window.laneFormStart = Date.now();   // for the server-side minimum-time bot check
+function laneEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+window.laneSubmit = function (form, type, opts) {
+  opts = opts || {};
+  if (!form.checkValidity()) { form.reportValidity(); return false; }
+  var CLUB = 'info@raynerslanefc.co.uk';
+  var btn = form.querySelector('button[type="submit"], input[type="submit"], .lane-form-submit');
+  if (!btn) { var bs = form.querySelectorAll('button'); btn = bs[bs.length - 1]; }
+  var origBtn = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.dataset.busy = '1'; btn.innerHTML = 'Sending…'; }
+
+  var payload = { type: type, source_page: location.pathname, _elapsed: Date.now() - (window.laneFormStart || Date.now()) };
+  new FormData(form).forEach(function (v, k) { payload[k] = v; });
+  Object.keys(opts.extra || {}).forEach(function (k) { payload[k] = opts.extra[k]; });
+  // Some forms have no single "name" field — derive it so the record is never blank.
+  if (!payload.name) { var nm2 = ((payload.first_name || '') + ' ' + (payload.last_name || '')).trim(); payload.name = nm2 || payload.contact || ''; }
+
+  function fail() {
+    if (btn) { btn.disabled = false; btn.innerHTML = origBtn; delete btn.dataset.busy; }
+    var e = form.querySelector('.lane-form-err');
+    if (!e) { e = document.createElement('div'); e.className = 'lane-form-err'; e.setAttribute('role', 'alert'); e.style.cssText = 'font-family:var(--font-b);font-size:13px;color:#ff6b6b;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-radius:8px;padding:11px 13px;margin-top:12px;line-height:1.6'; if (btn && btn.parentNode) btn.parentNode.insertBefore(e, btn); else form.appendChild(e); }
+    e.innerHTML = 'Sorry — that didn’t send. Please email us at <a href="mailto:' + CLUB + '" style="color:var(--yellow);text-decoration:underline">' + CLUB + '</a> and we’ll pick it up straight away.';
+  }
+
+  fetch('/.netlify/functions/submit-form', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+    .then(function (d) {
+      if (!d || !d.ok) { fail(); return; }
+      if (window.gtag && opts.leadType) { try { gtag('event', 'generate_lead', { lead_type: opts.leadType }); } catch (e) {} }
+      if (opts.hubspot) { try { fetch('/.netlify/functions/hs-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts.hubspot(payload)) }).catch(function () {}); } catch (e) {} }
+      var nm = String(payload.name || payload.contact || payload.first_name || '').trim().split(' ')[0];
+      form.innerHTML =
+        '<div style="text-align:center;padding:26px 12px">' +
+          '<div style="font-family:var(--font-d);font-size:clamp(30px,5vw,40px);letter-spacing:.02em;color:var(--yellow);line-height:1;margin-bottom:12px">' +
+            (opts.thanksTitle || ('Thanks' + (nm ? ', ' + laneEsc(nm) : '') + ' — we’ve got it')) + '</div>' +
+          '<p style="font-family:var(--font-b);font-size:15px;color:var(--lgrey);line-height:1.7;max-width:460px;margin:0 auto">' +
+            (opts.thanksMsg || 'Someone from the club will be in touch. Up the Lane.') + '</p>' +
+        '</div>';
+    })
+    .catch(fail);
+  return false;
+};
+
 // Floating WhatsApp click-to-chat button (only if a number is configured).
 function initWhatsApp() {
   if (!LANE_WHATSAPP || document.getElementById('lane-wa')) return;

@@ -131,8 +131,7 @@
         <h2 style="font-family:var(--font-d);font-size:clamp(32px,5vw,52px);letter-spacing:.04em;color:var(--white);margin-bottom:8px">Register Your <span style="color:var(--yellow)">Interest</span></h2>
         <p style="font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em">2026-27 memberships open soon. Register now and you'll be first to know when they go on sale.</p>
       </div>
-      <form name="membership" method="POST" data-netlify="true" style="display:flex;flex-direction:column;gap:14px">
-        <input type="hidden" name="form-name" value="membership">
+      <form name="membership" onsubmit="return laneSubmit(this,'membership',{leadType:'membership',thanksMsg:'Welcome to The Lane — we’ll be in touch about your membership. Up the Lane.'})" style="display:flex;flex-direction:column;gap:14px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div>
             <label for="memb-f1" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:6px">Full Name</label>
