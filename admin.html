@@ -4854,7 +4854,11 @@ function psIco(key, px, color) {
   var p = PS_ICONS[key]; if (!p) return '';
   return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
 }
-var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
+var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', psoffer: 'medal', pscommunity: 'heart', psannounce: 'megaphone', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
+// The three player-sponsorship benefits + the community pitch — one source of
+// truth so the Studio field defaults and the rendered card can't drift apart.
+var PS_SPONSOR_BENEFITS = ['1× season ticket for the whole campaign', 'Your name recognised by the club against your player, all season', 'A dedicated social post announcing you as their sponsor'];
+var COMMUNITY_COPY = 'When you sponsor a Rayners Lane player, you\'re not buying advertising — you\'re keeping a community club that\'s stood since 1933 on its feet. The coaches. The kids coming through. The matchday that brings this corner of Harrow together every week. Your name sits with a player all season, and the club shouts about you for it. This is your club. Put your name on it.';
 var HISTORY_FACTS = [
   'Founded in 1933 — over 90 years at the heart of Harrow football.',
   'The Lane plays in yellow & green at Tithe Farm Sports & Social Club.',
@@ -4887,6 +4891,9 @@ function POST_TYPES() { return [
   { key: 'signing',   label: 'New Signing' },
   { key: 'lineup',    label: 'Starting XI' },
   { key: 'sponsorspot', label: 'Sponsor Spotlight' },
+  { key: 'psoffer',     label: 'Sponsor a Player' },
+  { key: 'pscommunity', label: 'More Than a Number' },
+  { key: 'psannounce',  label: 'Player Sponsor Reveal' },
   { key: 'birthday',  label: 'Birthday' },
   { key: 'countdown', label: 'Countdown' },
   { key: 'festive',   label: 'Festive' },
@@ -5097,6 +5104,21 @@ function psFieldDefs() {
         '<div class="ps-crestrow"><div class="field"><label class="fl">Move left ↔ right</label><input type="range" min="10" max="90" value="' + (d.logoX == null ? 50 : d.logoX) + '" oninput="psSet(\'logoX\',this.value)" style="width:100%"></div>' +
         '<div class="field"><label class="fl">Move up ↕ down</label><input type="range" min="18" max="78" value="' + (d.logoY == null ? 44 : d.logoY) + '" oninput="psSet(\'logoY\',this.value)" style="width:100%"></div></div>'
         : '<div style="font-family:var(--fc);font-size:11px;color:var(--gr)">Upload a logo and you can scale &amp; position it freely.</div>');
+    case 'psoffer': return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">The offer explainer — headline + the three sponsor benefits. Edit any line before you export.</div>' +
+      '<div class="field"><label class="fl">Headline</label><input type="text" value="' + escH(d.headline || 'BACK A PLAYER') + '" oninput="psSet(\'headline\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Benefit 1</label><input type="text" value="' + escH(d.b1 || PS_SPONSOR_BENEFITS[0]) + '" oninput="psSet(\'b1\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Benefit 2</label><input type="text" value="' + escH(d.b2 || PS_SPONSOR_BENEFITS[1]) + '" oninput="psSet(\'b2\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Benefit 3</label><input type="text" value="' + escH(d.b3 || PS_SPONSOR_BENEFITS[2]) + '" oninput="psSet(\'b3\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Call to action</label><input type="text" value="' + escH(d.cta || 'Back a player · info@raynerslanefc.co.uk') + '" oninput="psSet(\'cta\',this.value)"></div>';
+    case 'pscommunity': return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">The heart-strings card. The green palettes suit this one best — pick one above. Every line is editable.</div>' +
+      '<div class="field"><label class="fl">Headline</label><input type="text" value="' + escH(d.title || 'MORE THAN A SHIRT NUMBER') + '" oninput="psSet(\'title\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Body <span style="color:var(--gr);font-weight:400">— the community pitch. Auto-shrinks to fit.</span></label><textarea rows="8" oninput="psSet(\'body\',this.value)">' + escH(d.body || COMMUNITY_COPY) + '</textarea></div>' +
+      '<div class="field"><label class="fl">Button text</label><input type="text" value="' + escH(d.cta || 'BACK A PLAYER') + '" oninput="psSet(\'cta\',this.value)"></div>';
+    case 'psannounce': return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">The reveal — when a sponsor signs up, drop in both names and post it. Blank fields keep clear [PLACEHOLDERS] so nothing is ever invented.</div>' +
+      '<div class="field"><label class="fl">Sponsor name</label><input type="text" value="' + escH(d.sponsorName || '') + '" placeholder="[SPONSOR NAME]" oninput="psSet(\'sponsorName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Player <span style="color:var(--gr);font-weight:400">— pulls surname + framed photo from Player Profiles</span></label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select></div>' +
+      '<div class="field"><label class="fl">…or type a player name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="[PLAYER NAME]" oninput="psSet(\'manualName\',this.value)"></div>' +
+      '<div class="field"><label class="fl">Season</label><input type="text" value="' + escH(d.season || '2026/27') + '" oninput="psSet(\'season\',this.value)"></div>';
     case 'birthday': return '<div class="field"><label class="fl">Whose birthday? <span style="color:var(--gr);font-weight:400">— pick a player for their photo, or just type a name</span></label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select></div>' +
       '<div class="ps-crestrow"><div class="field"><label class="fl">Name (if typing)</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Sukh" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Age (optional)</label><input type="text" value="' + escH(d.age || '') + '" placeholder="21" oninput="psSet(\'age\',this.value)"></div></div>' +
@@ -5516,6 +5538,39 @@ function psRender() {
     }
     inner += ctr(X ? H - 150 : (ST ? H - 340 : H - 230), '<span style="' + beb(X ? 70 : 90, t.accent) + '">' + escH((d.spName || 'YOUR SPONSOR')).toUpperCase() + '</span>');
     if (d.spSub) inner += ctr(X ? H - 95 : (ST ? H - 265 : H - 158), '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:600;color:#fff">' + escH(d.spSub) + '</span>');
+  } else if (PS.type === 'psoffer') {
+    // "Sponsor a Player" — the offer explainer: headline + 3 numbered benefits + CTA.
+    inner += psEyebrow('SPONSOR A PLAYER', t, ebTop);
+    var poTop = ebTop + (X ? 56 : 92);
+    inner += ctr(poTop, '<span style="' + beb(X ? 92 : 148, t.accent) + '">' + escH((d.headline || 'BACK A PLAYER').toUpperCase()) + '</span>');
+    var poBens = [d.b1 || PS_SPONSOR_BENEFITS[0], d.b2 || PS_SPONSOR_BENEFITS[1], d.b3 || PS_SPONSOR_BENEFITS[2]];
+    var poListTop = poTop + (X ? 82 : 154), poRh = X ? 88 : (ST ? 156 : 130), poDia = X ? 46 : 58, poFs = X ? 30 : 40;
+    for (var poi = 0; poi < 3; poi++) {
+      var poy = poListTop + poi * poRh;
+      inner += '<div data-fit="' + poFs + ':16" style="position:absolute;top:' + poy + 'px;left:76px;right:76px;height:' + (X ? 66 : 92) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-size:' + poFs + 'px;font-weight:700;line-height:1.2;color:#fff">' +
+        '<span style="display:inline-block;vertical-align:middle;width:' + poDia + 'px;height:' + poDia + 'px;border-radius:50%;background:' + t.accent + ';margin-right:15px;text-align:center;' + beb(Math.round(poDia * 0.72), t.ink, 'line-height:' + poDia + 'px') + '">' + (poi + 1) + '</span>' +
+        '<span style="display:inline-block;vertical-align:middle;max-width:' + (X ? 620 : 780) + 'px">' + escH(poBens[poi]) + '</span></div>';
+    }
+    inner += ctr(X ? H - 116 : (ST ? H - 300 : H - 188), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 24 : 30) + 'px;font-weight:800;letter-spacing:2px;color:' + t.accent + '">' + escH(d.cta || 'Back a player · info@raynerslanefc.co.uk') + '</span>');
+  } else if (PS.type === 'pscommunity') {
+    // "More than a shirt number" — the emotive community card (best on green).
+    inner += psEyebrow('MORE THAN A NUMBER', t, X ? 60 : 130);
+    inner += '<div data-fit="' + (X ? 92 : 132) + ':40" style="position:absolute;top:' + (X ? 116 : (ST ? 300 : 236)) + 'px;left:0;right:0;height:' + (X ? 150 : 214) + 'px;overflow:hidden;text-align:center;' + beb(X ? 92 : 132, t.accent, 'line-height:.98') + ';padding:0 60px">' + escH((d.title || 'MORE THAN A SHIRT NUMBER').toUpperCase()) + '</div>';
+    inner += '<div data-fit="' + (X ? 26 : 34) + ':15" style="position:absolute;top:' + (X ? 300 : (ST ? 580 : 486)) + 'px;left:0;right:0;height:' + (X ? 300 : (ST ? 860 : 356)) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-size:' + (X ? 26 : 34) + 'px;font-weight:600;line-height:1.5;color:#fff;padding:0 90px">' + escH(d.body || COMMUNITY_COPY).replace(/\n/g, '<br>') + '</div>';
+    inner += ctr(X ? H - 118 : (ST ? H - 300 : H - 178), '<span style="display:inline-block;background:' + t.accent + ';padding:14px 34px;border-radius:8px;font-family:Manrope,sans-serif;font-size:' + (X ? 24 : 30) + 'px;font-weight:800;letter-spacing:3px;color:' + t.ink + '">' + escH((d.cta || 'BACK A PLAYER').toUpperCase()) + '</span>');
+  } else if (PS.type === 'psannounce') {
+    // "Your name. Their shirt." — the reveal. Blank fields keep clear [PLACEHOLDERS].
+    var apn = psPlayerObj();
+    var aPlayer = apn ? psSurname(apn) : (((d.manualName || '').trim().toUpperCase()) || '[PLAYER NAME]');
+    var aSponsor = ((d.sponsorName || '').trim()) || '[SPONSOR NAME]';
+    var aHasPhoto = apn && apn.photo;
+    inner += psEyebrow('PLAYER SPONSOR', t, ebTop);
+    if (aHasPhoto) inner += playerFrame(apn, X ? 240 : 320, W / 2, ebTop + (X ? 66 : 108));
+    var aTop = aHasPhoto ? (X ? H - 300 : (ST ? H - 560 : H - 430)) : midY - (X ? 150 : 208);
+    inner += '<div data-fit="' + (X ? 70 : 96) + ':28" style="position:absolute;top:' + aTop + 'px;left:0;right:0;height:' + (X ? 80 : 116) + 'px;overflow:hidden;text-align:center;' + beb(X ? 70 : 96, t.accent) + ';padding:0 50px">' + escH(aSponsor.toUpperCase()) + '</div>';
+    inner += ctr(aTop + (X ? 82 : 122), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 26 : 34) + 'px;font-weight:700;letter-spacing:4px;color:#fff">NOW SPONSORS</span>');
+    inner += '<div data-fit="' + (X ? 92 : 130) + ':40" style="position:absolute;top:' + (aTop + (X ? 128 : 182)) + 'px;left:0;right:0;height:' + (X ? 100 : 148) + 'px;overflow:hidden;text-align:center;' + beb(X ? 92 : 130, '#fff') + ';padding:0 50px">' + escH(aPlayer) + '</div>';
+    inner += ctr(aTop + (X ? 232 : 344), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:2px;color:' + t.accent + '">FOR THE ' + escH(d.season || '2026/27') + ' SEASON</span>');
   } else if (PS.type === 'birthday') {
     var eb2 = psEff(), bp = psPlayerObj();
     inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;">' + psIco('cake', X ? 90 : 140, t.accent) + '</div>';
