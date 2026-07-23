@@ -1,6 +1,19 @@
 {
   "articles": [
     {
+      "id": "article-preseason-met-police-2026",
+      "title": "One more before it's real: The Lane face Met Police to close out pre-season",
+      "category": "Pre-Season",
+      "date": "2026-07-23",
+      "author": "Rayners Lane FC",
+      "image": "img/news/news-matchday.svg",
+      "excerpt": "THE LANE CLOSE OUT PRE-SEASON AWAY TO METROPOLITAN POLICE THIS SATURDAY — OFF THE BACK OF ANOTHER PRE-SEASON WIN, THIS TIME OVER AYLESBURY UNITED",
+      "shareHeadline": "ONE MORE BEFORE IT COUNTS",
+      "body": "The countdown is on. With the 2026/27 season now just around the corner, Rayners Lane close out pre-season this Saturday with a final friendly away to Metropolitan Police — and the mood around the club could hardly be better.\n\nIt's been a promising summer, and Tuesday night added to it: another pre-season win, this time over Aylesbury United, sending the lads into the weekend on a real buzz. The performances are coming together, the new faces are bedding in, and the squad looks sharper every week.\n\nSaturday's hosts are proper opposition to test ourselves against. Metropolitan Police FC — founded in 1919 for officers and staff of the Met — are one of non-league's most established and characterful clubs. They play their football at Imber Court in East Molesey, a 3,000-capacity ground they've called home for decades, and they've long been a fixture of the Isthmian League. A team with over a century of history is exactly the kind of side you want in your final hit-out before the real thing.\n\nOne more friendly. One more chance to fine-tune. Then it counts.\n\nThis Saturday · Kick-off 3:00 PM · Imber Court, East Molesey · Pre-season friendly.\n\nGet behind the boys as we sign off pre-season the right way. Up the Lane. 💛💚",
+      "featured": true,
+      "_sources": "Metropolitan Police FC facts verified via en.wikipedia.org/wiki/Metropolitan_Police_F.C. — founded 1919 for members of the Metropolitan Police; home ground Imber Court, East Molesey (~3,000 capacity); long-time Isthmian League club. KO time, venue and home/away pulled from data/fixtures.json (friendly-met-police-20260725: 2026-07-25, 15:00, Imber Court, isHome:false). No score stated for the Aylesbury United friendly (reported only as a win) and none for Met Police — per club instruction, no scorelines invented."
+    },
+    {
       "id": "article-younique-community-partner",
       "title": "Welcome to You-Nique Training — Inclusive Fitness for All Abilities",
       "category": "Community",
