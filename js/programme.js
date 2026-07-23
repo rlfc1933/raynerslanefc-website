@@ -92,7 +92,7 @@ function formatNotes(text, fallback) {
 
 // ── FA STEP 5 PROGRAMME EXTRAS ───────────
 const PROG_DEFAULTS = {
-  admission: 'Adults £5 · Concessions £3 · Under 16s free',
+  admission: 'General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card',
   rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
   firstaid: 'First aid is available at the clubhouse — ask any committee member.',
   respect: "Rayners Lane FC proudly supports The FA's Respect programme. We ask every player, coach, supporter and official to back positive, respectful football — win, lose or draw.",
