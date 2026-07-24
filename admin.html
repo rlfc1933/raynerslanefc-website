@@ -301,9 +301,14 @@
     .tile-info-pop p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0}
     .tile-info-pop .x{position:absolute;top:9px;right:12px;color:var(--gr);font-family:var(--fc);font-size:16px;cursor:pointer;line-height:1}
     /* ── POST STUDIO ── */
-    .ps-types{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-    .ps-type{background:var(--c);border:1px solid var(--br);border-radius:9px;color:#ddd;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 12px;cursor:pointer;transition:.15s;-webkit-tap-highlight-color:transparent}
+    .ps-types{display:flex;flex-direction:column;gap:13px;margin-bottom:14px}
+    .ps-group-h{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:7px;padding-left:1px}
+    .ps-group-row{display:flex;flex-wrap:wrap;gap:7px}
+    .ps-type{display:inline-flex;align-items:center;gap:5px;background:var(--c);border:1px solid var(--br);border-radius:9px;color:#ddd;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 12px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s;-webkit-tap-highlight-color:transparent}
+    .ps-type:hover{border-color:var(--gr);color:#fff}
+    .ps-type:active{transform:scale(.96)}
     .ps-type.on{background:var(--y);color:#0d0d0d;border-color:var(--y)}
+    .ps-type.on:hover{color:#0d0d0d}
     .ps-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .ps-seg{display:inline-flex;background:var(--c);border:1px solid var(--br);border-radius:9px;overflow:hidden}
     .ps-seg button{background:none;border:none;color:var(--gr);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 12px;cursor:pointer}
@@ -4877,31 +4882,36 @@ var QUOTES = [
 ];
 
 // post type registry
+// The picker is grouped by `group` (see PS_GROUPS) so 23 templates read as a
+// short, scannable menu instead of one wall of buttons — you find "the goal card"
+// by thinking about WHEN in the matchday you need it. Grouping only; every key,
+// label, field and render branch is unchanged.
 function POST_TYPES() { return [
-  { key: 'matchday',  label: 'Match Day' },
-  { key: 'preseason', label: 'Pre-Season' },
-  { key: 'kickoff',   label: 'Kick Off' },
-  { key: 'goal',      label: 'GOAL!' },
-  { key: 'yellow',    label: 'Yellow Card' },
-  { key: 'red',       label: 'Red Card' },
-  { key: 'halftime',  label: 'Half-Time' },
-  { key: 'fulltime',  label: 'Full-Time' },
-  { key: 'motm',      label: 'Man of the Match' },
-  { key: 'potm',      label: 'Player of the Month' },
-  { key: 'signing',   label: 'New Signing' },
-  { key: 'lineup',    label: 'Starting XI' },
-  { key: 'sponsorspot', label: 'Sponsor Spotlight' },
-  { key: 'psoffer',     label: 'Sponsor a Player' },
-  { key: 'pscommunity', label: 'More Than a Number' },
-  { key: 'psannounce',  label: 'Player Sponsor Reveal' },
-  { key: 'birthday',  label: 'Birthday' },
-  { key: 'countdown', label: 'Countdown' },
-  { key: 'festive',   label: 'Festive' },
-  { key: 'announce',  label: 'Announcement' },
-  { key: 'headline',  label: 'Headline / Hook' },
-  { key: 'history',   label: 'Club History' },
-  { key: 'quote',     label: 'Motivation' }
+  { key: 'matchday',  label: 'Match Day',        group: 'Before Match' },
+  { key: 'preseason', label: 'Pre-Season',       group: 'Before Match' },
+  { key: 'countdown', label: 'Countdown',        group: 'Before Match' },
+  { key: 'lineup',    label: 'Starting XI',      group: 'Before Match' },
+  { key: 'kickoff',   label: 'Kick Off',         group: 'Live Match' },
+  { key: 'goal',      label: 'GOAL!',            group: 'Live Match' },
+  { key: 'yellow',    label: 'Yellow Card',      group: 'Live Match' },
+  { key: 'red',       label: 'Red Card',         group: 'Live Match' },
+  { key: 'halftime',  label: 'Half-Time',        group: 'Live Match' },
+  { key: 'fulltime',  label: 'Full-Time',        group: 'After Match' },
+  { key: 'motm',      label: 'Man of the Match',  group: 'After Match' },
+  { key: 'signing',   label: 'New Signing',      group: 'Players' },
+  { key: 'potm',      label: 'Player of the Month', group: 'Players' },
+  { key: 'birthday',  label: 'Birthday',         group: 'Players' },
+  { key: 'sponsorspot', label: 'Sponsor Spotlight',   group: 'Sponsors' },
+  { key: 'psoffer',     label: 'Sponsor a Player',    group: 'Sponsors' },
+  { key: 'pscommunity', label: 'More Than a Number',  group: 'Sponsors' },
+  { key: 'psannounce',  label: 'Player Sponsor Reveal', group: 'Sponsors' },
+  { key: 'announce',  label: 'Announcement',     group: 'Club Stories' },
+  { key: 'headline',  label: 'Headline / Hook',  group: 'Club Stories' },
+  { key: 'history',   label: 'Club History',     group: 'Club Stories' },
+  { key: 'quote',     label: 'Motivation',       group: 'Club Stories' },
+  { key: 'festive',   label: 'Festive',          group: 'Seasonal' }
 ]; }
+var PS_GROUPS = ['Before Match', 'Live Match', 'After Match', 'Players', 'Sponsors', 'Club Stories', 'Seasonal'];
 
 var psCrestCache = {};
 // Trim a crest's transparent edges + recentre it on an identical square canvas,
@@ -4966,7 +4976,17 @@ function psApplyFixture(id) {
   psFields(); psRender();
 }
 function psBuild() {
-  document.getElementById('ps-types').innerHTML = POST_TYPES().map(function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + psIco(PS_TYPE_ICON[t.key], 15) + ' ' + t.label + '</button>'; }).join('');
+  var types = POST_TYPES();
+  var btn = function (t) { return '<button class="ps-type" data-k="' + t.key + '" onclick="psSetType(\'' + t.key + '\')">' + psIco(PS_TYPE_ICON[t.key], 15) + ' ' + t.label + '</button>'; };
+  var html = PS_GROUPS.map(function (g) {
+    var items = types.filter(function (t) { return t.group === g; });
+    if (!items.length) return '';
+    return '<div class="ps-group"><div class="ps-group-h">' + g + '</div><div class="ps-group-row">' + items.map(btn).join('') + '</div></div>';
+  }).join('');
+  // any template without a known group still shows (future-proof), under "More"
+  var ungrouped = types.filter(function (t) { return PS_GROUPS.indexOf(t.group) < 0; });
+  if (ungrouped.length) html += '<div class="ps-group"><div class="ps-group-h">More</div><div class="ps-group-row">' + ungrouped.map(btn).join('') + '</div></div>';
+  document.getElementById('ps-types').innerHTML = html;
   psBuildPalettes();
   psSetType(PS.type);
 }
