@@ -311,7 +311,9 @@
     .ps-brief-btn{min-height:44px;background:var(--y);color:#0d0d0d;border:none;border-radius:8px;font-family:var(--fc);font-size:12.5px;font-weight:800;letter-spacing:.02em;padding:0 15px;cursor:pointer;transition:transform .08s,filter .15s;-webkit-tap-highlight-color:transparent}
     .ps-brief-btn:hover{filter:brightness(1.07)}
     .ps-brief-btn:active{transform:scale(.96)}
-    .ps-types{display:flex;flex-direction:column;gap:13px;margin-bottom:14px}
+    .ps-types{display:flex;flex-direction:column;gap:13px;margin-bottom:10px}
+    .ps-hint{font-family:var(--fc);font-size:12.5px;line-height:1.5;color:var(--gr);margin:0 1px 14px;min-height:19px}
+    .ps-hint:empty{margin:0;min-height:0}
     .ps-group-h{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:7px;padding-left:1px}
     .ps-group-row{display:flex;flex-wrap:wrap;gap:7px}
     .ps-type{display:inline-flex;align-items:center;gap:5px;background:var(--c);border:1px solid var(--br);border-radius:9px;color:#ddd;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 12px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s;-webkit-tap-highlight-color:transparent}
@@ -2066,6 +2068,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="slbl">1 &middot; Choose a post</div>
       <div class="ps-types" id="ps-types"></div>
+      <div class="ps-hint" id="ps-hint"></div>
 
       <div class="slbl">2 &middot; Fill it in</div>
       <div class="ps-opts">
@@ -5094,9 +5097,38 @@ function aiUseHook(hook) {
   var el = document.getElementById('ps-card-wrap'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   toast('Headline dropped in — pick a palette & save');
 }
+// One plain-English line per template — teaches what each post is for the moment
+// you pick it, so a first-time volunteer never needs a manual to understand them.
+var PS_TYPE_HINT = {
+  matchday: 'Announce the next fixture — opponent, date, kick-off and venue.',
+  preseason: 'A pre-season friendly card with the opponent’s crest.',
+  countdown: 'Build hype — “X days to go” to kick-off or a big date.',
+  lineup: 'Your starting XI (and subs) as a clean team sheet.',
+  kickoff: 'We’re underway — post it the moment the ref blows up.',
+  goal: 'Celebrate a goal — scorer, minute and the new score.',
+  yellow: 'A booking — pick the player and the minute.',
+  red: 'A sending-off — pick the player and the minute.',
+  halftime: 'The half-time score.',
+  fulltime: 'Full-time result, scorers and an optional manager’s quote.',
+  motm: 'Man of the Match — pick the player, add a sponsor.',
+  potm: 'Player of the Month with position and the month.',
+  signing: 'Unveil a new signing with a cinematic reveal.',
+  birthday: 'Wish a player a happy birthday.',
+  sponsorspot: 'Thank a sponsor — drop in their logo.',
+  psoffer: 'The “Sponsor a Player” offer and its three benefits.',
+  pscommunity: 'The emotive community pitch — looks best on a green palette.',
+  psannounce: 'Reveal who now sponsors which player.',
+  announce: 'A bold club announcement — headline plus a message.',
+  headline: 'A big teaser headline that makes people read the caption.',
+  history: 'An on-brand club fact / on-this-day.',
+  quote: 'A motivational line — generate one or write your own.',
+  festive: 'Seasonal greetings — Christmas, Eid, Diwali and more.'
+};
 function psSetType(k) {
   PS.type = k; PS.data = {};
   document.querySelectorAll('#ps-types .ps-type').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
+  var hint = document.getElementById('ps-hint');
+  if (hint) hint.textContent = PS_TYPE_HINT[k] || '';
   // Warm up the background-removal model in the background for player cards so
   // the first cutout doesn't pay the full download wait.
   if (['signing', 'motm', 'potm', 'goal', 'birthday'].indexOf(k) > -1) psCutout.preload();
