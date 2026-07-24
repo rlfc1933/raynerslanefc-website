@@ -301,6 +301,16 @@
     .tile-info-pop p{font-family:var(--fb);font-size:13.5px;color:#dcdcdc;line-height:1.6;margin:0}
     .tile-info-pop .x{position:absolute;top:9px;right:12px;color:var(--gr);font-family:var(--fc);font-size:16px;cursor:pointer;line-height:1}
     /* ── POST STUDIO ── */
+    .ps-brief{border:1px solid rgba(255,209,0,.35);background:linear-gradient(180deg,rgba(255,209,0,.09),rgba(255,209,0,.04));border-radius:12px;padding:13px 15px;margin-bottom:16px}
+    .ps-brief--empty{color:var(--gr);font-family:var(--fc);font-size:12.5px;background:none;border-style:dashed}
+    .ps-brief-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+    .ps-brief-tag{font-family:var(--fd);font-size:17px;letter-spacing:.04em;color:var(--y);white-space:nowrap}
+    .ps-brief-fx{font-family:var(--fc);font-size:13px;font-weight:700;color:var(--w)}
+    .ps-brief-cta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .ps-brief-lead{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-right:2px}
+    .ps-brief-btn{min-height:44px;background:var(--y);color:#0d0d0d;border:none;border-radius:8px;font-family:var(--fc);font-size:12.5px;font-weight:800;letter-spacing:.02em;padding:0 15px;cursor:pointer;transition:transform .08s,filter .15s;-webkit-tap-highlight-color:transparent}
+    .ps-brief-btn:hover{filter:brightness(1.07)}
+    .ps-brief-btn:active{transform:scale(.96)}
     .ps-types{display:flex;flex-direction:column;gap:13px;margin-bottom:14px}
     .ps-group-h{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:7px;padding-left:1px}
     .ps-group-row{display:flex;flex-wrap:wrap;gap:7px}
@@ -2039,6 +2049,11 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <div class="panel" id="panel-poststudio">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-post-studio"></i> Post Studio</div></div>
       <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p>Make <strong style="color:var(--w)">uniform, on-brand</strong> graphics in seconds — pick a post, fill the fields, choose Instagram or X sizing, and download a ready-to-post PNG. Bebas font, club colours, every time.</p></div>
+
+      <!-- Fixture-aware matchday brief — answers "what should I make today?" the
+           moment the Studio opens, and one tap starts a post pre-filled from the
+           next fixture. Rendered by psBrief() from psFixtures (already loaded). -->
+      <div id="ps-brief"></div>
 
       <div class="slbl"><i class="ico ico-pen-line"></i> Write &amp; reword for X <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— type a rough note, AI gives you ready tweets to copy + a headline card</span></div>
       <div class="field"><textarea id="ai-src" rows="3" placeholder="Type your rough tweet / note here… e.g. we beat harefield 3-1 great result, unbeaten in 5"></textarea></div>
@@ -4947,7 +4962,36 @@ function loadPostStudio() {
     psCrests.forEach(function (c) { psNormalizeCrest(c.file, function () { if (--pending <= 0) psRender(); }); });
   });
   fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
-  fetchJSON('fixtures', function (d) { psFixtures = (d && d.fixtures) || []; psFields(); });
+  fetchJSON('fixtures', function (d) { psFixtures = (d && d.fixtures) || []; psFields(); psBrief(); });
+}
+// Matchday brief: the next fixture + one-tap starts, so the Studio answers
+// "what should I make today?" on open. One tap sets the template AND pre-fills
+// it from the fixture (opponent, date, KO, venue) — the system already knows it.
+function psBrief() {
+  var el = document.getElementById('ps-brief'); if (!el) return;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var upcoming = (psFixtures || []).filter(function (f) {
+    if (!f.date) return false; var d = new Date(f.date + 'T12:00:00'); return d >= today;
+  }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  var f = upcoming[0];
+  if (!f) { el.innerHTML = '<div class="ps-brief ps-brief--empty">Add an upcoming fixture in <strong>Fixtures</strong> and your matchday quick-start appears here.</div>'; return; }
+  var d = new Date(f.date + 'T12:00:00');
+  var days = Math.round((d - today) / 86400000);
+  var when = days === 0 ? 'Today' : (days === 1 ? 'Tomorrow' : (days <= 7 ? d.toLocaleDateString('en-GB', { weekday: 'long' }) : fxFmtDate(f.date)));
+  var away = f.isHome === false;
+  var line = (away ? 'away to ' : 'vs ') + (f.opponent || 'TBC') + ' · ' + (f.kickoff || '15:00') + (away ? (f.venue ? ' · ' + f.venue : '') : ' · Tithe Farm');
+  var starts = [{ k: 'matchday', label: 'Match Day' }, { k: 'lineup', label: 'Starting XI' }, { k: 'countdown', label: 'Countdown' }];
+  el.innerHTML = '<div class="ps-brief"><div class="ps-brief-top">' +
+    '<span class="ps-brief-tag">' + psIco('ball', 16, '#FFD100') + ' ' + escH(when) + '</span>' +
+    '<span class="ps-brief-fx">' + escH(line) + '</span></div>' +
+    '<div class="ps-brief-cta"><span class="ps-brief-lead">Create for this match</span>' +
+    starts.map(function (s) { return '<button class="ps-brief-btn" onclick="psStartFor(\'' + s.k + '\',\'' + escH(f.id) + '\')">' + s.label + '</button>'; }).join('') +
+    '</div></div>';
+}
+function psStartFor(key, fxId) {
+  psSetType(key);
+  if (fxId) { try { psApplyFixture(fxId); psFields(); psRender(); } catch (e) {} }
+  var el = document.getElementById('ps-fields'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 // Pretty short date for cards/labels, e.g. "Sat 15 Aug"
 function fxFmtDate(iso) {
