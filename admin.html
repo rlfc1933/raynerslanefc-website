@@ -314,6 +314,10 @@
     .ps-types{display:flex;flex-direction:column;gap:13px;margin-bottom:10px}
     .ps-hint{font-family:var(--fc);font-size:12.5px;line-height:1.5;color:var(--gr);margin:0 1px 14px;min-height:19px}
     .ps-hint:empty{margin:0;min-height:0}
+    .ps-optlbl{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin:0 0 6px 1px}
+    .ps-optlbl span{font-weight:600;letter-spacing:.02em;text-transform:none;opacity:.8}
+    #ps-size small{font-weight:600;opacity:.6;font-size:10px;margin-left:1px}
+    #ps-size button.on small{opacity:.85}
     .ps-group-h{font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:7px;padding-left:1px}
     .ps-group-row{display:flex;flex-wrap:wrap;gap:7px}
     .ps-type{display:inline-flex;align-items:center;gap:5px;background:var(--c);border:1px solid var(--br);border-radius:9px;color:#ddd;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 12px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .08s;-webkit-tap-highlight-color:transparent}
@@ -321,7 +325,9 @@
     .ps-type:active{transform:scale(.96)}
     .ps-type.on{background:var(--y);color:#0d0d0d;border-color:var(--y)}
     .ps-type.on:hover{color:#0d0d0d}
-    .ps-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .ps-opts{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:14px}
+    .ps-opts .ps-optlbl{margin-top:6px}
+    .ps-opts .ps-optlbl:first-child{margin-top:0}
     .ps-seg{display:inline-flex;background:var(--c);border:1px solid var(--br);border-radius:9px;overflow:hidden}
     .ps-seg button{background:none;border:none;color:var(--gr);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.04em;padding:8px 12px;cursor:pointer}
     .ps-seg button.on{background:var(--y);color:#0d0d0d}
@@ -2072,11 +2078,13 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
       <div class="slbl">2 &middot; Fill it in</div>
       <div class="ps-opts">
+        <div class="ps-optlbl">Colour</div>
         <div class="ps-seg" id="ps-theme" style="flex-wrap:wrap"></div>
+        <div class="ps-optlbl">Size <span>— where you're posting it</span></div>
         <div class="ps-seg" id="ps-size">
-          <button data-size="ig" class="on" onclick="psSetSize('ig')">Instagram ▢</button>
-          <button data-size="story" onclick="psSetSize('story')">Story ▯</button>
-          <button data-size="x" onclick="psSetSize('x')">X ▭</button>
+          <button data-size="ig" class="on" onclick="psSetSize('ig')">Instagram ▢ <small>1080²</small></button>
+          <button data-size="story" onclick="psSetSize('story')">Story ▯ <small>9:16</small></button>
+          <button data-size="x" onclick="psSetSize('x')">X ▭ <small>16:9</small></button>
         </div>
       </div>
       <div class="ps-fields" id="ps-fields"></div>
