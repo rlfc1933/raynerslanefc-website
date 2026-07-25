@@ -33,23 +33,6 @@
       "shareHeadlineAuto": "COCKFOSTERS AT THE LANE"
     },
     {
-      "id": "friendly-met-police-20260725",
-      "date": "2026-07-25",
-      "kickoff": "15:00",
-      "opponent": "Metropolitan Police FC",
-      "oppCrest": "img/crests/metropolitan-police.png",
-      "isHome": false,
-      "venue": "Imber Court, East Molesey",
-      "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
-      "shareHeadline": "THE LANE AT METROPOLITAN POLICE FC",
-      "shareHeadlineAuto": "THE LANE AT METROPOLITAN POLICE FC",
-      "pinned": true
-    },
-    {
       "id": "fwp-578225",
       "date": "2026-08-01",
       "kickoff": "15:00",
@@ -690,5 +673,5 @@
       "shareHeadlineAuto": "TWO CLUBS, ONE COLOUR"
     }
   ],
-  "updatedAt": "2026-07-18T17:45:00.000Z"
+  "updatedAt": "2026-07-25T18:15:22.866Z"
 }
