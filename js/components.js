@@ -256,6 +256,7 @@ function buildNav(currentPage) {
     { label:'Gallery',     href:'gallery.html'    },
     { label:'History',     href:'history.html'    },
     { label:'Membership',  href:'membership.html' },
+    { label:'Season Tickets', href:'season-tickets.html' },
     { label:'Fan Zone',    href:'fan-zone.html'   },
     { label:'Volunteer',   href:'volunteer.html'  },
     { label:'The Club',    href:'about.html'      },
@@ -283,7 +284,7 @@ function buildNav(currentPage) {
   const menuGroups = [
     { h:'Matchday',     items:[['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
     { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['Technology & The Lane','innovation.html'],['News','news.html'],['Contact','contact.html']] },
-    { h:'Get Involved', items:[['Membership','membership.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
+    { h:'Get Involved', items:[['Membership','membership.html'],['Season Tickets','season-tickets.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
     { h:'Commercial',   items:[['Sponsorship','investment.html'],['Club Shop','shop.html']] },
   ];
   const mLink = function (label, href) {
