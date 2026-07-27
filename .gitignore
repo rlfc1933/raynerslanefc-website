@@ -27,3 +27,10 @@ _source/
 !THE-LANE.md
 !VISION.md
 !ROADMAP.md
+
+# docs/ is documentation that SHIPS — standards and runbooks volunteers actually
+# use, and the handover notes a future maintainer inherits (ROADMAP.md F4).
+# The internal briefs at the repo root stay ignored; those are working notes and
+# some name credentials. Nothing in docs/ may contain a secret.
+!docs/
+!docs/**

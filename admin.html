@@ -1418,11 +1418,16 @@
         </select>
       </div>
       <div class="field">
+        <label class="fl">Photographer</label>
+        <input type="text" id="gl-credit" placeholder="Who took it — they go in the record">
+      </div>
+      <div class="field">
         <label class="fl">Photo</label>
-        <div class="iup-wrap" id="gl-iw"><input type="file" accept="image/*" onchange="prevImg('gl',this)"><div class="iup-icon"><i class="ico ico-camera"></i></div><div class="iup-lbl">Tap to upload photo</div><div class="iup-sub">JPG, PNG — max 4MB</div></div>
+        <div class="iup-wrap" id="gl-iw"><input type="file" accept="image/*" onchange="prevImg('gl',this)"><div class="iup-icon"><i class="ico ico-camera"></i></div><div class="iup-lbl">Tap to upload photo</div><div class="iup-sub">Any size — it's resized before it's saved</div></div>
         <div class="iup-prev" id="gl-ip"><img id="gl-pi" src="" alt=""><button class="iup-rm" onclick="rmImg('gl')">&#10005; Remove</button></div>
       </div>
       <button class="save" onclick="addGalleryPhoto()">+ Add to Gallery</button>
+      <div class="snote" style="margin-top:10px"><p><i class="ico ico-camera"></i> <strong style="color:var(--w)">A whole match to add?</strong> Don't do them one at a time — that's one save each. Send the folder to whoever runs the site and it goes in as one batch, filed under the fixture, in a couple of minutes.</p></div>
       <div class="div"></div>
       <div class="slbl" id="gl-cnt">Gallery Photos</div>
       <div id="gl-list"></div>
@@ -8345,13 +8350,20 @@ var gallery = [];
 function addGalleryPhoto() {
   var caption = gv('gl-caption');
   var cat = gv('gl-cat');
-  if (!imgStore['gl'] && !caption) { toast('Add a photo or caption', true); return; }
+  var credit = gv('gl-credit');
+  if (!imgStore['gl']) { toast('Add a photo first', true); return; }
+  // The photographer is part of the record, not metadata — a gallery that can't
+  // say who took a picture loses the volunteer along with the moment.
+  // (ROADMAP.md F1; tools-archive-match.js enforces the same rule for batches.)
+  if (!credit) { toast('Who took the photo? Add a name', true); return; }
   var item = {
     id: 'photo-' + Date.now(),
-    src: imgStore['gl'] ? imgStore['gl'].dataUrl : 'img/news/news-matchday.svg',
+    src: imgStore['gl'].dataUrl,
     label: caption,
     cat: cat,
-    imgData: imgStore['gl'] ? {base64:imgStore['gl'].base64, filename:imgStore['gl'].filename} : null,
+    credit: credit,
+    date: new Date().toISOString().slice(0, 10),
+    imgData: {base64:imgStore['gl'].base64, filename:imgStore['gl'].filename},
   };
   gallery.push(item);
   renderGalleryList();
@@ -8971,23 +8983,79 @@ function finishScanner() {
 // ── SETTINGS ── (no setup needed — Netlify build hook is pre-configured)
 
 // ── IMAGE UPLOAD ──
+// Photographs are RESIZED IN THE BROWSER before they are committed. A phone
+// camera file is 3-5 MB and ~4000px wide; nothing on the site is displayed
+// wider than 1600. Sending the raw file put megabytes into the repo forever and
+// into every deploy after it (img/uploads/ already holds a 1.8 MB PNG shown at
+// card size). This costs a few hundred milliseconds and typically saves 90%.
+//
+// Same canvas approach Post Studio already uses for sponsor logos — kept here
+// rather than shared because the two want different maximum sizes.
+//
+// For a whole match's photographs use tools-archive-match.js instead: it files
+// them under the fixture, credits the photographer, and commits ONCE.
+var IMG_MAX = 1600;
 function prevImg(prefix, input) {
   var file = input.files[0];
   if (!file) return;
-  if (file.size > 4 * 1024 * 1024) { toast('Image too large — max 4MB', true); return; }
+  if (file.size > 12 * 1024 * 1024) { toast('Image too large — max 12MB', true); return; }
   var reader = new FileReader();
   reader.onload = function(e) {
-    var b64 = e.target.result;
-    imgStore[prefix] = {
-      base64: b64.split(',')[1],
-      dataUrl: b64,
-      filename: 'img/uploads/' + Date.now() + '-' + file.name.replace(/\s+/g,'-').toLowerCase(),
-      mime: file.type,
+    var raw = e.target.result;
+    var img = new Image();
+    img.onload = function () {
+      var w = img.width, h = img.height;
+      if (w > IMG_MAX || h > IMG_MAX) {
+        var s = IMG_MAX / Math.max(w, h);
+        w = Math.round(w * s); h = Math.round(h * s);
+      }
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // JPEG for photographs, PNG for anything with transparency — a logo or
+      // crest re-encoded as JPEG gains a white box behind it, which is exactly
+      // how one sponsor's mark ended up as a white rectangle on a black page.
+      //
+      // This ASKS the image rather than guessing from the file extension or
+      // which panel we're in: a .png photograph is still a photograph, and the
+      // panel labels aren't a reliable guide to what gets uploaded through them.
+      var hasAlpha = false;
+      try {
+        var d = ctx.getImageData(0, 0, w, h).data;
+        var step = Math.max(4, Math.floor(d.length / 4 / 40000) * 4);  // ≤40k samples
+        for (var i = 3; i < d.length; i += step) { if (d[i] < 250) { hasAlpha = true; break; } }
+      } catch (err) { hasAlpha = /png|svg/i.test(file.type); }   // tainted canvas: fall back to the type
+      var keepPng = hasAlpha;
+      var out = keepPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.84);
+      var ext = keepPng ? '.png' : '.jpg';
+      var stem = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 40) || 'photo';
+      imgStore[prefix] = {
+        base64: out.split(',')[1],
+        dataUrl: out,
+        filename: 'img/uploads/' + Date.now() + '-' + stem + ext,
+        mime: keepPng ? 'image/png' : 'image/jpeg',
+      };
+      document.getElementById(prefix + '-pi').src = out;
+      document.getElementById(prefix + '-ip').style.display = 'block';
+      document.getElementById(prefix + '-iw').style.display = 'none';
+      var savedKb = Math.max(0, Math.round((file.size - out.length * 0.75) / 1024));
+      toast(savedKb > 200 ? 'Photo ready — ' + savedKb + ' KB saved' : 'Image ready');
     };
-    document.getElementById(prefix + '-pi').src = b64;
-    document.getElementById(prefix + '-ip').style.display = 'block';
-    document.getElementById(prefix + '-iw').style.display = 'none';
-    toast('Image ready');
+    // If the browser can't decode it (HEIC on some desktops), keep the original
+    // rather than silently dropping the upload.
+    img.onerror = function () {
+      imgStore[prefix] = {
+        base64: raw.split(',')[1], dataUrl: raw,
+        filename: 'img/uploads/' + Date.now() + '-' + file.name.replace(/\s+/g,'-').toLowerCase(),
+        mime: file.type,
+      };
+      document.getElementById(prefix + '-pi').src = raw;
+      document.getElementById(prefix + '-ip').style.display = 'block';
+      document.getElementById(prefix + '-iw').style.display = 'none';
+      toast('Image ready (not resized — unusual format)');
+    };
+    img.src = raw;
   };
   reader.readAsDataURL(file);
 }
