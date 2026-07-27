@@ -119,8 +119,11 @@
 <section class="acb-hero">
   <div class="container">
     <div class="acb-hero__eyebrow">Official Kit Partner</div>
-    <img src="img/sponsors/acerbis-wordmark.png" alt="Acerbis — Official Kit Partner" class="acb-wordmark"
-         onerror="this.outerHTML='&lt;div class=&quot;acb-wordmark-txt&quot;&gt;ACERBIS&lt;/div&gt;'">
+    <!-- O4: artwork comes from data/sponsors.json like every other partner, so the
+         commercial team can change it from the portal instead of needing a
+         developer. Falls back to the club-type wordmark if there is no file —
+         a partner never renders as a gap. -->
+    <span class="acb-wordmark-txt" data-sponsor-logo="Acerbis" data-sponsor-class="acb-wordmark">ACERBIS</span>
     <h1 class="acb-hero__h1">Official Kit Partner of <span>Rayners Lane FC</span></h1>
     <p class="acb-hero__lead">
       Acerbis supply the yellow and green that The Lane wears every Saturday — our

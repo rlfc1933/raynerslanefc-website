@@ -333,8 +333,11 @@
   <div class="container kitp">
     <div class="kitp__brand">
       <span class="kitp__eyebrow"><i></i> Official Kit Partner</span>
-      <img src="img/sponsors/acerbis-wordmark.png" alt="Acerbis — Official Kit Partner" class="kitp__logo"
-           onerror="this.outerHTML='&lt;span class=&quot;kitp__logo-txt&quot;&gt;ACERBIS&lt;/span&gt;'">
+      <!-- O4: artwork comes from data/sponsors.json like every other partner, so the
+         commercial team can change it from the portal instead of needing a
+         developer. Falls back to the club-type wordmark if there is no file —
+         a partner never renders as a gap. -->
+    <span class="kitp__logo-txt" data-sponsor-logo="Acerbis" data-sponsor-class="kitp__logo">ACERBIS</span>
     </div>
     <p class="kitp__line">Acerbis supply the yellow &amp; green The Lane wears — our 2026&ndash;27 playing kit, provided free. An Italian family firm making sportswear since 1973.</p>
     <div class="kitp__cta">

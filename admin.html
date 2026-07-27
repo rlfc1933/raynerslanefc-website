@@ -3976,7 +3976,10 @@ function loadAll() {
     isLive = d.isLive || false;
     isHome = d.isHome !== false;
   });
-  fetchJSON('programme', applyProgrammeData);
+  fetchJSON('programme', function (d) {
+    applyProgrammeData(d);
+    prSeedFromNextFixture();     // O3 — runs AFTER the saved programme, never against it
+  });
 }
 function fetchJSON(name, cb) {
   fetch('data/' + name + '.json?t=' + Date.now())
@@ -4065,7 +4068,19 @@ function initMD() {
       var state = d.state || (d.isLive ? 'live' : (/full|ft|final/i.test(d.status || '') ? 'ft' : 'off'));
       isLive = (state === 'live'); updateLiveUI(); setStateBtns(state);
       // WHO/WHERE from the fixture (never the stale matchday isHome/opponent).
+      // O2: the stored matchday is the LAST game once it's finished. Opening the
+      // panel on a fixture that has been and gone is how a volunteer arms the
+      // wrong match — and it's the state right now (matchday.json still holds
+      // Cockfosters, 18 Jul, while the next game is 1 Aug). If the stored game
+      // is in the past and the scoreboard is off, move to the next fixture.
       var fx = mdMatchFixture(d);
+      var todayISO = new Date().toISOString().slice(0, 10);
+      var storedIsDone = fx && fx.date && fx.date < todayISO;
+      if (storedIsDone && state === 'off') {
+        var upcoming = (mdFixtures || []).filter(function (x) { return x.date && x.date >= todayISO; })
+          .sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
+        if (upcoming) fx = upcoming;
+      }
       if (fx) { var sel = document.getElementById('md-fixture'); if (sel) sel.value = fx.id; mdPickFixture(); }
       else { setVal('md-opp', d.opponent || ''); setVal('md-date', d.date || ''); setVal('md-ko', d.kickoff || '15:00'); if (typeof d.isHome === 'boolean') setHA(d.isHome); }
       // Score from matchday first, then overlaid by the live Supabase read below.
@@ -4183,6 +4198,51 @@ function mdFindFixture(opponent, date, fixtures) {
   return same.filter(function (f) { return String(f.date) === String(date); })[0] || same[0];
 }
 
+// ── O1: FINISHING A MATCH WRITES THE RESULT TO THE FIXTURE ───────────────────
+// The break in the chain. Until now the score lived in matchday.json and
+// Supabase live_match, and mdUpsertFixture explicitly wrote `us: null,
+// them: null` — so the fixture record never learned the score. The volunteer had
+// to walk to the Fixtures panel and type the same two numbers again.
+//
+// Evidence it wasn't happening: Cockfosters (18 Jul) carries 1-0 in BOTH files —
+// typed twice. Hayes & Yeading (4 Jul) carries it in neither, and has read
+// "Result to follow" on the public fixtures page for 23 days.
+//
+// Writes through the SAME merge-safe path the Fixtures panel uses, so the two
+// can never fight: commitDomain reads the live file from GitHub, merges by id,
+// and retries on conflict. Only the score fields are touched — the fixture's
+// crest, venue, competition and share headline are left exactly as they are.
+//
+// Deliberately NOT called when a match is armed, live, delayed, postponed or
+// cancelled. A result is only written when the game is genuinely finished, and
+// only when a human has entered a score. Nothing is inferred.
+function mdWriteResultToFixture(data, cb) {
+  var done = function () { if (typeof cb === 'function') cb(); };
+  if (!data || !data.opponent || !data.date) return done();
+  var hs = Number(data.homeScore), as = Number(data.awayScore);
+  if (!isFinite(hs) || !isFinite(as)) return done();
+
+  fetchJSON('fixtures', function (fxd) {
+    var fixtures = (fxd && fxd.fixtures) || [];
+    var f = mdFindFixture(data.opponent, data.date, fixtures);
+    // No matching fixture (a friendly nobody scheduled) → say so rather than
+    // inventing one. mdUpsertFixture already handles creating the placeholder.
+    if (!f) { toast('Score saved — but there is no fixture for ' + data.opponent + ' to attach it to', true); return done(); }
+
+    // us / them are OUR goals first, regardless of home or away.
+    var us   = data.isHome ? hs : as;
+    var them = data.isHome ? as : hs;
+    if (f.us === us && f.them === them && f.status === 'played') return done();  // already correct
+
+    var updated = Object.assign({}, f, {
+      us: us, them: them, status: 'played',
+      scorers: data.scorers || f.scorers || ''
+    });
+    commitDomain('fixtures', 'fixtures', 'id', [updated], [], null, 'dep-matchday',
+      'Result saved to the fixture — ' + us + '–' + them, function () { done(); });
+  });
+}
+
 // Shared: keep data/fixtures.json tidy for the set match. If the opponent is
 // already scheduled (normal case) reuse that fixture (it carries the crest) and
 // clear any stale 'matchday-current'; only when the game isn't scheduled do we
@@ -4232,8 +4292,11 @@ function saveMatchDay(activate) {
     pushLiveMatch(data);
     pushToGitHub('matchday', data, 'dep-matchday');
     mdUpsertFixture(data);
+    // Taking the scoreboard down IS finishing the match — write the score to the
+    // fixture now, so nobody has to type it a second time in the Fixtures panel.
+    if (!activate) mdWriteResultToFixture(data);
     setStateBtns(activate ? 'live' : 'off');
-    toast(activate ? 'Scoreboard is LIVE' : 'Scoreboard off — next match saved');
+    toast(activate ? 'Scoreboard is LIVE' : 'Scoreboard off — result saved to the fixture');
   });
 }
 
@@ -4249,6 +4312,9 @@ function setMatchState(state) {
     pushLiveMatch(data);
     pushToGitHub('matchday', data, 'dep-matchday');
     mdUpsertFixture(data);
+    // Only a genuinely finished game gets a result written. A postponed or
+    // cancelled match has no score, and armed/live/delayed are mid-flight.
+    if (state === 'ft' || state === 'off') mdWriteResultToFixture(data);
     setStateBtns(state);
     var msg = { armed: 'Armed ✓ goes live by itself at kick-off', delayed: 'Marked delayed', postponed: 'Marked postponed', cancelled: 'Marked cancelled', off: 'Cleared' }[state] || 'Saved';
     toast(msg);
@@ -4350,14 +4416,27 @@ function prFillCrests() {
 }
 function initProgramme() {
   fetchJSON('crests', function (d) { window._prCrests = (d && d.crests) || []; prFillCrests(); });
+  // O3: BOTH the fixture list and the saved programme must be loaded before we
+  // can decide whether to seed. Either alone is a race — an earlier attempt ran
+  // the seed from each callback separately and lost twice, in both directions.
+  var _prReady = { fixtures: false, programme: false };
+  function prMaybeSeed() {
+    if (_prReady.fixtures && _prReady.programme) prSeedFromNextFixture();
+  }
   fetchJSON('fixtures', function (d) {
     var list = (d && d.fixtures) || []; window._prFixtures = list;
-    var sel = document.getElementById('pr-fixture'); if (!sel) return;
-    sel.innerHTML = '<option value="">— pick a fixture —</option>' + list.map(function (f) {
-      return '<option value="' + esc(f.id) + '">' + esc((typeof fxFmtDate === 'function' ? fxFmtDate(f.date) : f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>';
-    }).join('');
+    var sel = document.getElementById('pr-fixture');
+    if (sel) {
+      sel.innerHTML = '<option value="">— pick a fixture —</option>' + list.map(function (f) {
+        return '<option value="' + esc(f.id) + '">' + esc((typeof fxFmtDate === 'function' ? fxFmtDate(f.date) : f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>';
+      }).join('');
+    }
+    _prReady.fixtures = true; prMaybeSeed();
   });
-  fetchJSON('programme', applyProgrammeData);
+  fetchJSON('programme', function (d) {
+    applyProgrammeData(d);
+    _prReady.programme = true; prMaybeSeed();
+  });
   // Live preview updates as the cover-affecting fields change.
   ['pr-opp', 'pr-comp', 'pr-venue', 'pr-date', 'pr-ko', 'pr-matchsponsor'].forEach(function (id) {
     var e = document.getElementById(id); if (e && !e._prBound) { e._prBound = 1; e.addEventListener('input', prRenderPreview); }
@@ -4365,6 +4444,30 @@ function initProgramme() {
   var ocb = document.getElementById('pr-oppcrest'); if (ocb && !ocb._prBound) { ocb._prBound = 1; ocb.addEventListener('change', prRenderPreview); }
   prRenderThemes(); prRenderPreview();
 }
+// O3: the programme is almost always for the NEXT game, so open on it rather
+// than on "— pick a fixture —" and five empty fields.
+//
+// Runs only AFTER fetchJSON('programme') has applied the saved data — an earlier
+// version raced it, and whichever fetch finished last won. Guards on the SAVED
+// state, not on whatever happens to be in the inputs at the time.
+//
+// Never touches a programme someone is part-way through: it only seeds when the
+// saved programme has no opponent, or is for a match that has already been
+// played. Editorial work is never overwritten.
+function prSeedFromNextFixture() {
+  var sel = document.getElementById('pr-fixture'); if (!sel) return;
+  var list = window._prFixtures || []; if (!list.length) return;
+  var todayISO = new Date().toISOString().slice(0, 10);
+  var savedOpp = gv('pr-opp'), savedDate = gv('pr-date');
+  var needsSeed = !savedOpp || (savedDate && savedDate < todayISO);
+  if (!needsSeed) return;
+  var next = list.filter(function (f) { return f.date && f.date >= todayISO; })
+    .sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
+  if (!next) return;
+  sel.value = next.id;
+  prProgFromFixture(next.id);
+}
+
 function prProgFromFixture(id) {
   if (!id) return;
   var f = (window._prFixtures || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
@@ -7601,7 +7704,18 @@ function addSponsor() {
     if (imgStore['sp']) rmImg('sp');
     saveSponsors(name + ' added <i class="ico ico-check"></i> — publishing to the site');
   }
-  if (imgStore['sp']) { toast('Uploading logo…'); uploadImg('sp', '', function(path){ finish(path || imgStore['sp'].dataUrl); }); }
+  if (imgStore['sp']) {
+    // O4: one predictable filename per sponsor instead of a timestamp + UUID.
+    // Ashwood's logo shipped as 1781696501761-998412e9-…jpeg, which nobody can
+    // recognise, replace or audit. Named after the sponsor, a human can see at a
+    // glance which artwork belongs to whom — and re-uploading replaces it
+    // cleanly instead of leaving the old file orphaned in the repo forever.
+    var ext = /png/i.test(imgStore['sp'].mime) ? '.png' : '.jpg';
+    var slug = name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    imgStore['sp'].filename = 'img/uploads/sponsor-' + slug + ext;
+    toast('Uploading logo…');
+    uploadImg('sp', '', function(path){ finish(path || imgStore['sp'].dataUrl); });
+  }
   else finish('');
 }
 function removeSponsor(name) {

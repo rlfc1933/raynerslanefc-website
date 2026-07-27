@@ -507,8 +507,12 @@ function buildFooter() {
             <!-- Official Kit Partner credit — site-wide -->
             <a href="acerbis.html" style="display:inline-flex;align-items:center;gap:12px;margin-top:22px;text-decoration:none">
               <span style="font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);line-height:1.4">Official<br>Kit Partner</span>
-              <img src="img/sponsors/acerbis-wordmark.png" alt="Acerbis — Official Kit Partner" style="height:26px;width:auto;max-width:130px;object-fit:contain;opacity:.9"
-                   onerror="this.outerHTML='&lt;span style=\'font-family:var(--font-d);font-size:24px;letter-spacing:.06em;color:var(--white)\'&gt;ACERBIS&lt;/span&gt;'">
+              <!-- O4: the THIRD hardcoded copy of this logo, and the one that made
+                   the 404 fire on every page of the site because the footer is
+                   injected everywhere. Now resolved from data/sponsors.json like
+                   every other partner. -->
+              <span data-sponsor-logo="Acerbis" data-sponsor-class="footer-kitpartner"
+                    style="font-family:var(--font-d);font-size:24px;letter-spacing:.06em;color:var(--white)">ACERBIS</span>
             </a>
           </div>
 
@@ -1065,3 +1069,43 @@ function initLaneCursor() {
   });
 }
 laneOnReady(initLaneCursor);
+
+// ── O4: sponsor artwork has ONE home — data/sponsors.json ────────────────────
+// Acerbis' logo was hardcoded as an <img> in index.html AND acerbis.html. When
+// the file went missing it 404'd on both, and the commercial team could not fix
+// it without a developer. Any element carrying data-sponsor-logo="<name>" now
+// resolves its artwork from sponsors.json at runtime.
+//
+// The element starts life as the club-type wordmark, so if there is no logo, the
+// artwork is missing, or the fetch fails, the partner still renders correctly —
+// a sponsor is never a gap on the page. Upgrade-only, never downgrade.
+(function () {
+  var SPONSOR_LOGO_STYLE = { 'footer-kitpartner': 'height:26px;width:auto;max-width:130px;object-fit:contain;opacity:.9' };
+  function initSponsorLogos() {
+    var slots = document.querySelectorAll('[data-sponsor-logo]');
+    if (!slots.length) return;
+    fetch('data/sponsors.json?t=' + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var list = (d && d.sponsors) || [];
+        slots.forEach(function (el) {
+          var want = String(el.getAttribute('data-sponsor-logo') || '').toLowerCase();
+          var s = list.filter(function (x) { return String(x.name || '').toLowerCase() === want; })[0];
+          if (!s || !s.logo) return;                       // no artwork -> keep the wordmark
+          var img = new Image();
+          img.onload = function () {
+            var variant = el.getAttribute('data-sponsor-class') || '';
+            if (SPONSOR_LOGO_STYLE[variant]) img.style.cssText = SPONSOR_LOGO_STYLE[variant];
+            else img.className = variant;
+            img.alt = s.name + (s.role ? ' \u2014 ' + s.role : '');
+            if (el.parentNode) el.parentNode.replaceChild(img, el);
+          };
+          img.onerror = function () {};                    // broken file -> keep the wordmark
+          img.src = s.logo;
+        });
+      })
+      .catch(function () {});                              // offline -> keep the wordmark
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSponsorLogos);
+  else initSponsorLogos();
+})();
