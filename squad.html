@@ -73,6 +73,37 @@
   <div class="container">
 
     <!-- Management strip -->
+
+
+    <!-- One view, no tabs. There was a second tab here linking out to the club's
+         old third-party platform; the club deleted that account, so it pointed at
+         a 404. The squad renders from the club's own squad.json / players.json
+         and that is now the only source. -->
+
+    <!-- TAB 1: Styled Player Cards (Google Sheet) -->
+    <div id="tab-cards">
+      <div style="background:var(--card);border:1px solid var(--border);padding:2px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
+
+          <div class="filter-tabs" style="margin:0">
+            <button class="filter-tab active" data-pos="all">All</button>
+            <button class="filter-tab" data-pos="goalkeeper">GK</button>
+            <button class="filter-tab" data-pos="defender">DEF</button>
+            <button class="filter-tab" data-pos="midfielder">MID</button>
+            <button class="filter-tab" data-pos="forward">FWD</button>
+          </div>
+        </div>
+        <div style="padding:2px">
+          <div class="squad-grid" id="squad-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Club officials. Moved BELOW the squad: the first faces on a page
+         called The Squad should be the players. This block also appears on
+         about.html — it is duplicated here deliberately for context, not as
+         the page's headline. -->
+    <h2 style="font-family:var(--font-d);font-size:clamp(28px,4vw,40px);letter-spacing:.03em;color:var(--white);margin:48px 0 14px">Club Officials</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px;margin-bottom:48px">
       <div style="background:var(--green);padding:24px 20px;border-top:3px solid var(--yellow)">
         <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Pete Singh</div>
@@ -100,30 +131,6 @@
         <p style="font-family:var(--font-c);font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.04em;margin-top:4px">Gary Pitt is building The Lane's 2026-27 squad. Wear the yellow. Play for Harrow. Register for trials at Tithe Farm.</p>
       </div>
       <a class="btn btn-primary" href="trials.html">Register Now</a>
-    </div>
-
-    <!-- One view, no tabs. There was a second tab here linking out to the club's
-         old third-party platform; the club deleted that account, so it pointed at
-         a 404. The squad renders from the club's own squad.json / players.json
-         and that is now the only source. -->
-
-    <!-- TAB 1: Styled Player Cards (Google Sheet) -->
-    <div id="tab-cards">
-      <div style="background:var(--card);border:1px solid var(--border);padding:2px">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
-
-          <div class="filter-tabs" style="margin:0">
-            <button class="filter-tab active" data-pos="all">All</button>
-            <button class="filter-tab" data-pos="goalkeeper">GK</button>
-            <button class="filter-tab" data-pos="defender">DEF</button>
-            <button class="filter-tab" data-pos="midfielder">MID</button>
-            <button class="filter-tab" data-pos="forward">FWD</button>
-          </div>
-        </div>
-        <div style="padding:2px">
-          <div class="squad-grid" id="squad-grid"></div>
-        </div>
-      </div>
     </div>
 
   </div>

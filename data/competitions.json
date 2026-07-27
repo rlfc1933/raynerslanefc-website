@@ -1,0 +1,62 @@
+{
+  "_note": "Every competition Rayners Lane enter this season, and HONESTLY where each one stands. A cup with no fixtures in fixtures.json is not a bug and must not look like one — it means the draw hasn't been made. `state` drives the wording on fixtures.html. Only edit this when the club KNOWS something changed; an out-of-date 'awaiting draw' is better than an invented fixture. Sources are recorded so the next person knows where to check.",
+  "season": "2026-27",
+  "competitions": [
+    {
+      "id": "ccl-prem-north",
+      "name": "Combined Counties Premier Division North",
+      "short": "Combined Counties Prem N",
+      "type": "league",
+      "state": "fixtures-published",
+      "note": "Step 5 of the National League System. The full season schedule is below.",
+      "seasonTicket": true,
+      "source": "https://www.combinedcountiesleague.co.uk",
+      "checkedAt": "2026-07-27"
+    },
+    {
+      "id": "ccl-league-cup",
+      "name": "Combined Counties League Cup",
+      "short": "CCL League Cup",
+      "type": "cup",
+      "state": "awaiting-draw",
+      "note": "The draw has not been published yet. Fixtures appear here as soon as the league confirms them.",
+      "seasonTicket": true,
+      "source": "https://www.combinedcountiesleague.co.uk",
+      "checkedAt": "2026-07-27"
+    },
+    {
+      "id": "middlesex-senior-cup",
+      "name": "Middlesex County Senior Cup",
+      "short": "Middlesex Senior Cup",
+      "type": "cup",
+      "state": "awaiting-draw",
+      "note": "The draw has not been published yet. Fixtures appear here as soon as Middlesex FA confirm them.",
+      "seasonTicket": true,
+      "source": "https://www.middlesexfa.com",
+      "checkedAt": "2026-07-27"
+    },
+    {
+      "id": "fa-cup",
+      "name": "Emirates FA Cup",
+      "short": "FA Cup",
+      "type": "cup",
+      "state": "fixtures-published",
+      "note": "Extra Preliminary Round tie confirmed. Later rounds depend on the result.",
+      "seasonTicket": false,
+      "source": "https://www.thefa.com/competitions/thefacup",
+      "checkedAt": "2026-07-27"
+    },
+    {
+      "id": "fa-vase",
+      "name": "Isuzu FA Vase",
+      "short": "FA Vase",
+      "type": "cup",
+      "state": "fixtures-published",
+      "note": "First Qualifying Round tie confirmed. Later rounds depend on the result.",
+      "seasonTicket": false,
+      "source": "https://www.thefa.com/competitions/thefavase",
+      "checkedAt": "2026-07-27"
+    }
+  ],
+  "updatedAt": "2026-07-27T00:00:00.000Z"
+}

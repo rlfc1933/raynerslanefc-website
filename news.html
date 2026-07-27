@@ -384,6 +384,15 @@ var allArticles = [];
 var displayCount = 12;
 var activeSource = 'all';
 var IMG_FALLBACK = 'img/news/news-default.svg';
+// Crest artwork lives in img/crests/. It is a badge on a transparent or flat
+// background — fine as a small thumbnail beside a headline, wrong as a
+// full-bleed hero. Anything from that folder is refused the featured slot.
+function newsHeroImage(a, featured) {
+  var src = a.image || '';
+  var isCrest = /(^|\/)img\/crests\//i.test(src);
+  if (featured && isCrest) return IMG_FALLBACK;
+  return src || IMG_FALLBACK;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   initComponents('news.html');
@@ -480,7 +489,12 @@ function makeCard(a, featured) {
   card.className = featured ? 'featured-card' : 'news-card';
 
   var img = document.createElement('img');
-  img.src = a.image || IMG_FALLBACK;
+  // An opponent CREST is not a photograph, and it must never fill the lead slot
+  // — the newsroom's most valuable image ends up advertising the other club,
+  // cropped so their name is the biggest thing on our page. The edge function
+  // (netlify/edge-functions/meta.js) already applies exactly this rule to
+  // og:image for the same reason; this is the on-page half of it.
+  img.src = newsHeroImage(a, featured);
   img.alt = a.title || '';
   img.className = featured ? 'featured-img' : 'news-card-img';
   img.loading = 'lazy';

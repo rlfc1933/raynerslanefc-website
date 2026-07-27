@@ -95,6 +95,11 @@
       <div id="fx-next"></div>
       <div data-at-the-gate style="margin:2px 0 20px"></div>
       <div id="fx-results"><div class="fx-loading">Loading results…</div></div>
+      <!-- Every competition we're in, and where each one stands. A cup with no
+           fixtures listed is not a gap in the data — it's a draw that hasn't
+           been made, and the page now says so instead of leaving supporters to
+           guess. Driven by data/competitions.json. -->
+      <div id="fx-comps"></div>
       <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
     </div>
     <div class="tab-panel" id="tab-table">
@@ -563,6 +568,8 @@ function renderFxSeason(list) {
   }
   document.getElementById('fx-results').innerHTML = html || '<div class="fx-empty">Fixtures are released soon — check back.</div>';
 
+  window._fxAll = sorted;          // so the competitions block can count per competition
+  renderCompetitions();
   renderFxForm({ results: played.slice().reverse() });
   var attr = document.querySelector('#tab-fixtures .fx-attr');
   if (attr) attr.textContent = 'Official Rayners Lane FC fixtures & results';
@@ -672,11 +679,70 @@ function renderFxTable(rows) {
   }).join('');
   el.innerHTML = '<table class="fx-table lt"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
 }
+
+// ── EVERY COMPETITION WE'RE IN, AND WHERE IT STANDS ──────────────────────────
+// The season ticket says it covers the Combined Counties League Cup and the
+// Middlesex Senior Cup. Neither has a single fixture in fixtures.json, because
+// neither draw has been made. Without saying so, the page leaves a supporter to
+// conclude either the fixture list is broken or the season ticket claim isn't
+// true. Both are worse than the truth, which is simply "the draw isn't out yet".
+//
+// Nothing here is inferred: it comes from data/competitions.json, which records
+// the official source for each competition and when a human last checked it.
+var FX_COMP_STATE = {
+  'fixtures-published': { lbl: 'Fixtures confirmed', cls: 'ok' },
+  'awaiting-draw':      { lbl: 'Draw not yet published', cls: 'wait' },
+  'awaiting-round':     { lbl: 'Next round to be drawn', cls: 'wait' },
+  'eliminated':         { lbl: 'Out', cls: 'out' },
+  'completed':          { lbl: 'Completed', cls: 'out' }
+};
+function renderCompetitions() {
+  var el = document.getElementById('fx-comps'); if (!el) return;
+  fetch('data/competitions.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var list = (d && d.competitions) || [];
+      if (!list.length) { el.innerHTML = ''; return; }
+      var counts = {};
+      (window._fxAll || []).forEach(function (f) {
+        var c = String(f.competition || '');
+        counts[c] = (counts[c] || 0) + 1;
+      });
+      el.innerHTML =
+        '<section class="fxm" style="margin-top:26px"><div class="fxm__h">' +
+          '<span class="fxm__m">COMPETITIONS ' + fxEsc(d.season || '') + '</span>' +
+          '<span class="fxm__c">' + list.length + '</span></div>' +
+        '<div class="fxcomp">' + list.map(function (c) {
+          var st = FX_COMP_STATE[c.state] || { lbl: c.state, cls: 'wait' };
+          var n = counts[c.short] || 0;
+          return '<div class="fxcomp__r">' +
+            '<div class="fxcomp__n">' + fxEsc(c.name) +
+              (c.seasonTicket ? '<span class="fxcomp__st" title="Covered by a 2026/27 season ticket">Season ticket</span>' : '') +
+            '</div>' +
+            '<div class="fxcomp__s fxcomp__s--' + st.cls + '">' + st.lbl +
+              (n ? ' &middot; ' + n + ' fixture' + (n === 1 ? '' : 's') + ' listed' : '') + '</div>' +
+            (c.note ? '<div class="fxcomp__note">' + fxEsc(c.note) + '</div>' : '') +
+          '</div>';
+        }).join('') + '</div></section>';
+    })
+    .catch(function () { el.innerHTML = ''; });
+}
 </script>
 <style>
   .fx-loading,.fx-empty{font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em;padding:28px 4px;text-align:center}
   .fx-attr{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.05em;margin-top:14px}
   .fx-attr a{color:var(--yellow)}
+  /* Competition states — deliberately quiet. This is reference, not a headline. */
+  .fxcomp{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)}
+  .fxcomp__r{padding:13px 16px;border-bottom:1px solid var(--border)}
+  .fxcomp__r:last-child{border-bottom:none}
+  .fxcomp__n{font-family:var(--font-d);font-size:20px;letter-spacing:.03em;color:var(--white);display:flex;align-items:center;gap:9px;flex-wrap:wrap;line-height:1.15}
+  .fxcomp__st{font-family:var(--font-c);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border-radius:4px;padding:3px 7px}
+  .fxcomp__s{font-family:var(--font-c);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+  .fxcomp__s--ok{color:#7fe0a3}
+  .fxcomp__s--wait{color:var(--yellow)}
+  .fxcomp__s--out{color:var(--grey)}
+  .fxcomp__note{font-family:var(--font-b);font-size:13px;color:var(--lgrey,#bbb);line-height:1.5;margin-top:5px}
   .fx-next{background:linear-gradient(135deg,var(--green),#06120a);border:1px solid #21402b;border-radius:14px;padding:22px 24px;margin-bottom:18px}
   .fx-next__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
   .fx-next__teams{font-family:var(--font-d);font-size:clamp(26px,4.5vw,38px);letter-spacing:.03em;color:#fff;line-height:1;margin-top:6px}

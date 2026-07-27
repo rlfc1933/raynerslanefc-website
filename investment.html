@@ -150,8 +150,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         Email Us Now
       </a>
-      <a class="btn btn-outline" href="investment.html">
-        Download Pitch Deck
+      <!-- Was href="investment.html" — the page linking to itself. A dead button
+           on the club's revenue page is discovered AFTER a business owner has
+           decided they're interested, which is the worst possible moment. There
+           is no deck to download, so this now goes to the packages that do
+           exist, further down the same page. Restore a download here the day
+           there is a real file to download, and not before. -->
+      <a class="btn btn-outline" href="#packages">
+        See the Packages
       </a>
     </div>
   </div>
@@ -178,16 +184,16 @@
           <div class="reach-lbl">Years in Harrow</div>
         </div>
         <div class="reach-stat">
-          <div class="reach-num">5K+</div>
-          <div class="reach-lbl">Social Followers</div>
+          <div class="reach-num">5</div>
+          <div class="reach-lbl">Competitions Entered</div>
         </div>
         <div class="reach-stat">
-          <div class="reach-num">300+</div>
-          <div class="reach-lbl">Match Day Fans</div>
-        </div>
-        <div class="reach-stat">
-          <div class="reach-num">18+</div>
+          <div class="reach-num">20</div>
           <div class="reach-lbl">Home Fixtures</div>
+        </div>
+        <div class="reach-stat">
+          <div class="reach-num">1982</div>
+          <div class="reach-lbl">League Champions</div>
         </div>
         <div class="reach-stat">
           <div class="reach-num">HA2</div>
@@ -335,7 +341,7 @@
       <div style="position:relative;z-index:1;max-width:640px;margin:0 auto">
         <div style="text-align:center;margin-bottom:30px">
           <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow)">Become a Partner</span>
-          <h2 style="font-family:var(--font-d);font-size:clamp(34px,5vw,60px);letter-spacing:.03em;color:var(--white);margin:8px 0 12px">Apply to Back The Lane</h2>
+          <h2 id="packages" style="font-family:var(--font-d);font-size:clamp(34px,5vw,60px);letter-spacing:.03em;color:var(--white);margin:8px 0 12px">Apply to Back The Lane</h2>
           <p style="font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.62);line-height:1.7;max-width:480px;margin:0 auto">
             Tell us about your business and what you're interested in. The commercial team reviews every application and replies within 48 hours with a tailored proposal.
           </p>

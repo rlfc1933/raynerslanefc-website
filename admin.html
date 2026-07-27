@@ -424,6 +424,12 @@
     .hq-live.on .dot{background:var(--re);animation:pulse 1.3s infinite;box-shadow:0 0 10px var(--re)}
     .hq-live.on{color:#fff;border-color:rgba(239,68,68,.5)}
 
+    .alltools-btn{width:100%;display:flex;align-items:center;gap:10px;background:var(--c);border:1px solid var(--br);border-radius:12px;color:var(--w);font-family:var(--fc);font-size:13px;font-weight:800;letter-spacing:.06em;padding:15px 16px;margin:22px 0 4px;cursor:pointer;min-height:52px;-webkit-tap-highlight-color:transparent}
+    .alltools-btn:active{transform:scale(.995)}
+    .alltools-hint{margin-left:auto;font-weight:600;font-size:11.5px;letter-spacing:.04em;color:var(--gr);text-align:right}
+    .alltools-chev{color:var(--y);transition:transform .18s}
+    .alltools-btn.on .alltools-chev{transform:rotate(180deg)}
+    .alltools[hidden]{display:none}
     .sect-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gr);margin:18px 2px 10px;display:flex;align-items:center;gap:10px}
     .sect-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--br),transparent)}
 
@@ -744,14 +750,6 @@
       <div id="season-setup"></div>
 
       <div class="tile-grid" style="margin-bottom:4px">
-        <button class="tile tile-hero" onclick="openPanel('playbook')">
-          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/><circle cx="12" cy="12" r="4" fill="rgba(255,209,0,.2)"/></svg></span>
-          <div class="tile-body">
-            <div class="tile-name"><i class="ico ico-banknote"></i> The Lane Business Playbook</div>
-            <div class="tile-desc">How we grow the club's income and stop relying on one Saturday gate. Real examples from clubs like us, honest steps — everyone has a part. Read this first.</div>
-          </div>
-          <span class="tile-badge">Start Here</span>
-        </button>
         <button class="tile tile-hero" style="background:linear-gradient(135deg,#1c1c1c,#0a0a0a 60%,#161208);border-color:rgba(255,209,0,.45)" onclick="openPanel('poststudio')">
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg></span>
           <div class="tile-body">
@@ -924,6 +922,15 @@
         </button>
       </div>
 
+      <!-- ALL TOOLS — everything that is real but not weekly. Collapsed by
+           default so the dashboard stops being a catalogue. One tap away, and
+           the disclosure state is remembered per device. -->
+      <button class="alltools-btn" id="alltools-btn" onclick="toggleAllTools()" aria-expanded="false" aria-controls="alltools">
+        <span><i class="ico ico-layers"></i> All tools</span>
+        <span class="alltools-hint">Boardroom, settings, guides &amp; admin</span>
+        <span class="alltools-chev" aria-hidden="true">&#9662;</span>
+      </button>
+      <div id="alltools" class="alltools" hidden>
       <div class="sect-lbl">Boardroom</div>
       <div class="tile-grid">
         <button class="tile tile-wide" style="--accent:#34D399" onclick="openPanel('clubstats')">
@@ -966,7 +973,9 @@
           <span class="tile-badge">Chairman</span>
         </button>
       </div>
-    </div>
+    
+      </div><!-- /alltools -->
+</div>
 
     <!-- MATCH DAY -->
     <div class="panel" id="panel-matchday">
@@ -3605,6 +3614,23 @@ async function loadStaffLogins() {
 }
 
 // ── NAVIGATION ──
+function toggleAllTools() {
+  var box = document.getElementById('alltools'), btn = document.getElementById('alltools-btn');
+  if (!box || !btn) return;
+  var open = box.hasAttribute('hidden');
+  if (open) box.removeAttribute('hidden'); else box.setAttribute('hidden', '');
+  btn.classList.toggle('on', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  try { localStorage.setItem('rlfc_alltools', open ? '1' : '0'); } catch (e) {}
+}
+// Remember the choice — a volunteer who lives in the Boardroom shouldn't have
+// to open it every Saturday, and one who never goes there shouldn't see it.
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    try { if (localStorage.getItem('rlfc_alltools') === '1') toggleAllTools(); } catch (e) {}
+  });
+})();
+
 function openPanel(name) {
   if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
   if (name === 'users') initUsers();
@@ -3766,8 +3792,71 @@ async function buildNotifs() {
       todos.push({ i:'<i class="ico ico-clipboard-list"></i>', t:'Post the Match Report & Man of the Match from the last game.', a:'matchreport' });
     }
   }
+
+  // ── Work the club can SEE is outstanding, from its own data ────────────────
+  // Each of these was previously invisible: you only found out when a supporter
+  // told you. None of them guesses — every one is a fact already in the JSON.
+  var fxd = await new Promise(function (res) { fetchJSON('fixtures', res); });
+  var fixtures = (fxd && fxd.fixtures) || [];
+
+  // 1. Games that have been played with no score entered. The public page is
+  //    honest about it ("Result to follow") — which is exactly why it's
+  //    embarrassing to leave sitting there.
+  var noResult = fixtures.filter(function (f) {
+    return f.date && f.date < todayStr && (f.us == null || f.them == null);
+  });
+  if (noResult.length) {
+    var oldest = noResult.sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
+    var daysOld = Math.floor((new Date(todayStr) - new Date(oldest.date)) / 86400000);
+    todos.push({ i:'<i class="ico ico-clipboard-list"></i>',
+      t: noResult.length + ' fixture' + (noResult.length > 1 ? 's have' : ' has') + ' no result — ' +
+         (oldest.opponent || 'a game') + ' has been waiting ' + daysOld + ' day' + (daysOld === 1 ? '' : 's') +
+         '. The site says "Result to follow".', a:'fixtures' });
+  }
+
+  // 2. Match previews still telling supporters about a game that's been played.
+  var nwd = await new Promise(function (res) { fetchJSON('news', res); });
+  var arts = (nwd && nwd.articles) || [];
+  var stale = arts.filter(function (a) {
+    if (!/this saturday|this weekend|on saturday/i.test(String(a.excerpt || '') + String(a.body || ''))) return false;
+    var when = String(a.date || '').slice(0, 10);
+    return when && when < todayStr && (new Date(todayStr) - new Date(when)) > 2 * 86400000;
+  });
+  if (stale.length) {
+    todos.push({ i:'<i class="ico ico-newspaper"></i>',
+      t: stale.length + ' news article' + (stale.length > 1 ? 's' : '') + ' still say' + (stale.length > 1 ? '' : 's') +
+         ' "this Saturday" about a game that has been played. Archive or update ' +
+         (stale.length > 1 ? 'them' : 'it') + '.', a:'news' });
+  }
+
+  // 3. Squad information the club can fix in one sitting — and which every
+  //    graphic, profile and programme depends on.
+  var pld = await new Promise(function (res) { fetchJSON('players', res); });
+  var players = (pld && pld.players) || [];
+  if (players.length) {
+    var noNum = players.filter(function (p) { return !Number(p.number); }).length;
+    var noPhoto = players.filter(function (p) { return !p.photo; }).length;
+    if (noNum === players.length) {
+      todos.push({ i:'<i class="ico ico-user"></i>', t:'No squad numbers set — every player shows blank on cards and the programme.', a:'players' });
+    }
+    if (noPhoto) {
+      todos.push({ i:'<i class="ico ico-camera"></i>', t: noPhoto + ' player' + (noPhoto > 1 ? 's have' : ' has') + ' no photograph — they fall back to an illustration.', a:'players' });
+    }
+  }
+
+  // 4. A deadline the club has published and can miss.
+  var cfg = await new Promise(function (res) { fetchJSON('config', res); });
+  var eb = cfg && cfg.seasonTicket && cfg.seasonTicket.earlyBird;
+  if (eb && eb.deadline) {
+    var left = Math.ceil((new Date(eb.deadline + 'T23:59:59') - now) / 86400000);
+    if (left >= 0 && left <= 7) {
+      todos.push({ i:'<i class="ico ico-ticket"></i>',
+        t:'Season ticket early bird ends in ' + (left === 0 ? 'less than a day' : left + ' day' + (left === 1 ? '' : 's')) + ' — last push?', a:'news' });
+    }
+  }
+
   info.push({ i:'<i class="ico ico-calendar-days"></i>', t:'Twice-a-week season: keep BOTH Saturday and Tuesday games set up.' });
-  info.push({ i:'<i class="ico ico-heart"></i>', t:'New fan & staff sign-ups land in Netlify → Forms — check for birthdays to celebrate.' });
+  info.push({ i:'<i class="ico ico-heart"></i>', t:'Enquiries from the website — trials, volunteers, sponsors — arrive in the Enquiries panel.' });
   return { todos: todos, info: info };
 }
 // ── WHAT'S NEW (feature announcements; seen/dismissed kept per device) ──
@@ -3818,7 +3907,15 @@ function clearAllNews() {
 async function refreshNotifs() {
   var data = await buildNotifs();
   var badge = document.getElementById('bell-badge');
-  var count = data.todos.length + unseenNews().length;
+  // THE BADGE COUNTS WORK, NOT ANNOUNCEMENTS.
+  // It used to be todos + unseen release notes. There are 22 release notes, so
+  // it read "24" permanently and the two things that actually needed doing —
+  // "it's MATCH DAY, activate the scoreboard", "the programme is still set for
+  // last week's opponent" — were buried under a changelog. A red badge that is
+  // mostly marketing teaches people to ignore red badges, including the one
+  // that matters at 2:45 on a Saturday. The release notes are still there,
+  // still readable, still dismissible — they just don't cry wolf.
+  var count = data.todos.length;
   if (badge) {
     if (count) { badge.style.display = 'flex'; badge.textContent = count; }
     else { badge.style.display = 'none'; }
@@ -4895,7 +4992,7 @@ function psIco(key, px, color) {
   var p = PS_ICONS[key]; if (!p) return '';
   return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
 }
-var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', psoffer: 'medal', pscommunity: 'heart', psannounce: 'megaphone', seasonticket: 'ticket', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
+var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', psoffer: 'medal', pscommunity: 'heart', psannounce: 'megaphone', seasonticket: 'ticket', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote', offstate: 'megaphone' };
 var psSeason = null;   // data/config.json → seasonTicket, loaded by loadPostStudio (auto-fills the Season Ticket template)
 // The three player-sponsorship benefits + the community pitch — one source of
 // truth so the Studio field defaults and the rendered card can't drift apart.
@@ -4928,6 +5025,7 @@ function POST_TYPES() { return [
   { key: 'preseason', label: 'Pre-Season',       group: 'Before Match' },
   { key: 'countdown', label: 'Countdown',        group: 'Before Match' },
   { key: 'lineup',    label: 'Starting XI',      group: 'Before Match' },
+  { key: 'offstate',  label: 'Called Off',       group: 'Before Match' },
   { key: 'kickoff',   label: 'Kick Off',         group: 'Live Match' },
   { key: 'goal',      label: 'GOAL!',            group: 'Live Match' },
   { key: 'yellow',    label: 'Yellow Card',      group: 'Live Match' },
@@ -5010,10 +5108,23 @@ function psNextFixture() {
     return d >= today;
   }).sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0] || null;
 }
+// The most recent game with a score. An AFTER-match card seeded from the NEXT
+// fixture is a result card with no result in it — which is what Full-Time did.
+function psLastResult() {
+  return (psFixtures || []).filter(function (f) {
+    return f.date && f.us != null && f.them != null;
+  }).sort(function (a, b) { return a.date > b.date ? -1 : 1; })[0] || null;
+}
 // Templates whose card states a fixture. These must never be exported guessing.
 var PS_FIXTURE_TYPES = ['matchday', 'preseason', 'kickoff', 'goal', 'yellow', 'red',
-                        'halftime', 'fulltime', 'lineup', 'countdown'];
+                        'halftime', 'fulltime', 'lineup', 'countdown', 'offstate'];
+// Cards about a game that has already been played — these look BACKWARDS.
+var PS_RESULT_TYPES = ['fulltime', 'motm'];
 function psNeedsFixture(k) { return PS_FIXTURE_TYPES.indexOf(k || PS.type) > -1; }
+function psFixtureFor(k) {
+  if (PS_RESULT_TYPES.indexOf(k) > -1) return psLastResult() || psNextFixture();
+  return psNextFixture();
+}
 
 function psBrief() {
   var el = document.getElementById('ps-brief'); if (!el) return;
@@ -5054,9 +5165,10 @@ function psApplyFixture(id) {
   // correct data, wrong voice. prTo12 is the same converter the programme uses.
   d.date = fxFmtDate(f.date); d.ko = prTo12(f.kickoff || '15:00');
   if (f.venue) d.venue = f.venue; if (f.competition) d.comp = f.competition;
-  if (T === 'matchday') {
+  if (T === 'matchday' || T === 'offstate') {
     d.ha = away ? 'away' : 'home';
     if (f.oppCrest) d.oppCrest = f.oppCrest;
+    if (T === 'offstate' && !d.offstate) d.offstate = 'Postponed';
   } else {
     d.homeCrest = away ? (f.oppCrest || RL) : RL;
     d.awayCrest = away ? RL : (f.oppCrest || RL);
@@ -5145,6 +5257,7 @@ function aiUseHook(hook) {
 // One plain-English line per template — teaches what each post is for the moment
 // you pick it, so a first-time volunteer never needs a manual to understand them.
 var PS_TYPE_HINT = {
+  offstate: 'Game called off — postponed, cancelled or abandoned. Tells supporters before they travel.',
   matchday: 'Announce the next fixture — opponent, date, kick-off and venue.',
   preseason: 'A pre-season friendly card with the opponent’s crest.',
   countdown: 'Build hype — “X days to go” to kick-off or a big date.',
@@ -5176,8 +5289,8 @@ function psSetType(k) {
   // volunteer sees. Both routes into a template — the brief's buttons and the
   // picker below — now start from the same match.
   PS._fixture = null;
-  if (psNeedsFixture(k)) {
-    var nf = psNextFixture();
+  if (psNeedsFixture(k) || PS_RESULT_TYPES.indexOf(k) > -1) {
+    var nf = psFixtureFor(k);
     if (nf) { PS._fixture = nf; try { psApplyFixture(nf.id); } catch (e) { PS._fixture = null; } }
   }
   document.querySelectorAll('#ps-types .ps-type').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
@@ -5225,6 +5338,15 @@ function psFieldDefs() {
       '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psSet(\'comp\',this.value)"></div>' +
       '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off time</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div><div class="field"><label class="fl">Date &amp; day</label><input type="text" value="' + escH(d.date || 'Sat 15 Aug') + '" placeholder="Sat 15 Aug" oninput="psSet(\'date\',this.value)"></div></div>' +
       '<div class="field"><label class="fl">Location / venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
+    case 'offstate': return homeAway +
+      '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">The fixture is filled in from the schedule. Say what happened and, if you know it, why \u2014 supporters would rather read \u201cwaterlogged pitch\u201d than nothing.</div>' +
+      '<div class="field"><label class="fl">What happened</label><div class="ps-seg">' +
+        ['Postponed','Cancelled','Abandoned'].map(function (s) {
+          return '<button class="' + ((d.offstate || 'Postponed') === s ? 'on' : '') + '" onclick="psVal(\'offstate\',\'' + s + '\')">' + s + '</button>';
+        }).join('') + '</div></div>' +
+      '<div class="field"><label class="fl">Opponent</label><select onchange="psVal(\'oppCrest\',this.value)">' + psCrestOptions(d.oppCrest) + '</select></div>' +
+      '<div class="field"><label class="fl">Reason <span style="color:var(--gr);font-weight:400">\u2014 optional, and only if you know it</span></label><input type="text" value="' + escH(d.offreason || '') + '" placeholder="Waterlogged pitch" oninput="psSet(\'offreason\',this.value)"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Date</label><input type="text" value="' + escH(d.date || '') + '" oninput="psSet(\'date\',this.value)"></div><div class="field"><label class="fl">Kick-off</label><input type="text" value="' + escH(d.ko || '') + '" oninput="psSet(\'ko\',this.value)"></div></div>';
     case 'preseason': return homeAway +
       '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side we\'re on, then upload the other team\'s crest.</div>' +
       '<div class="field"><label class="fl">Opponent name <span style="color:var(--gr);font-weight:400">— shown under their crest</span></label><input type="text" value="' + escH(d.oppName || '') + '" placeholder="e.g. Wealdstone FC" oninput="psSet(\'oppName\',this.value)"></div>' +
@@ -5635,6 +5757,28 @@ function psRender() {
     inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
     inner += ctr(by + 76, '<span style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
     inner += ctr(by + 116, '<span style="font-family:Manrope,sans-serif;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
+  } else if (PS.type === 'offstate') {
+    // CALLED OFF. The match state already exists in matchday.json (postponed /
+    // cancelled / delayed) and there was no way to post it — so a supporter
+    // could be on a train to a game that isn't happening. Deliberately plain
+    // and high-contrast: this card exists to be read fast, not admired.
+    var offReason = (d.offreason || '').toUpperCase();
+    var offWord = (d.offstate || 'POSTPONED').toUpperCase();
+    var czo = X ? 150 : 210, cyo = X ? midY - 40 : (ST ? 560 : 400);
+    var oHcx = W * 0.30, oAcx = W * 0.70;
+    var oAway = d.ha === 'away';
+    var oOpp = d.oppCrest || '';
+    inner += psEyebrow('MATCH UPDATE', t, ebTop);
+    inner += '<div style="position:absolute;top:' + (cyo - czo / 2) + 'px;left:' + ((oAway ? oAcx : oHcx) - czo / 2) + 'px">' + psImg('img/badge.png', czo) + '</div>';
+    if (oOpp) inner += '<div style="position:absolute;top:' + (cyo - czo / 2) + 'px;left:' + ((oAway ? oHcx : oAcx) - czo / 2) + 'px">' + psImg(oOpp, czo) + '</div>';
+    inner += ctr(cyo + czo / 2 + 40, '<span style="' + beb(X ? 96 : 132, '#EF4444') + '">' + escH(offWord) + '</span>');
+    inner += ctr(cyo + czo / 2 + (X ? 150 : 190), '<span style="' + beb(X ? 44 : 58, '#fff') + '">' +
+      escH(((oAway ? 'AWAY TO ' : '') + (crestName(oOpp) || d.opp || '')).toUpperCase()) + '</span>');
+    var oby = X ? H - 150 : (ST ? H - 330 : H - 230);
+    inner += ctr(oby, '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:800;letter-spacing:2px;color:' + t.accent + '">' +
+      escH((d.date || '').toUpperCase()) + (d.ko ? ' &middot; ' + escH(d.ko) : '') + '</span>');
+    if (offReason) inner += ctr(oby + 52, '<span style="font-family:Manrope,sans-serif;font-size:22px;letter-spacing:1px;color:rgba(255,255,255,.72)">' + escH(offReason) + '</span>');
+    inner += ctr(oby + (offReason ? 100 : 56), '<span style="font-family:Manrope,sans-serif;font-size:19px;letter-spacing:1px;color:rgba(255,255,255,.55)">A NEW DATE WILL BE CONFIRMED</span>');
   } else if (PS.type === 'preseason') {
     var awayP = d.ha === 'away';
     var czp = X ? 200 : 290, cyp = X ? midY - 30 : (ST ? 600 : 430);

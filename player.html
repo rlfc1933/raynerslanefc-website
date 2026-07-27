@@ -18,6 +18,7 @@
     .player-hero-img img { width:100%; height:100%; object-fit:cover; object-position:top; }
     .player-hero-img .player-number { position:absolute; top:-20px; right:-10px; font-family:var(--font-d); font-size:200px; color:rgba(255,209,0,.08); line-height:1; }
     .player-hero-info { padding:48px 40px; display:flex; flex-direction:column; justify-content:flex-end; }
+    .stat-empty{font-family:var(--font-b);font-size:14px;color:var(--grey);line-height:1.6;max-width:520px;margin-top:22px;padding-left:14px;border-left:2px solid rgba(255,209,0,.35)}
     .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:2px; margin-top:32px; }
     .stat-card { background:var(--card); padding:20px; text-align:center; }
     .stat-num { font-family:var(--font-d); font-size:48px; letter-spacing:.04em; color:var(--yellow); line-height:1; }
@@ -98,12 +99,13 @@ function renderPlayer(p) {
       '<h1 style="font-family:var(--font-d);font-size:clamp(48px,7vw,90px);letter-spacing:.03em;color:var(--white);line-height:.9;margin:0 0 8px">' + (p.name||'') + '</h1>' +
       (p.nickname ? '<div style="font-family:var(--font-c);font-size:16px;color:var(--yellow);letter-spacing:.08em;margin-bottom:16px">"' + p.nickname + '"</div>' : '') +
       (p.bio ? '<div style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.75;max-width:540px">' + p.bio + '</div>' : '') +
-      '<div class="stat-grid">' +
-        statCard(p.apps || 0, 'Appearances') +
-        statCard(p.goals || 0, 'Goals') +
-        statCard(p.assists || 0, 'Assists') +
-        statCard(p.number || '-', 'Squad No.') +
-      '</div>' +
+      // Statistics the club has not recorded are shown as "–", never as 0.
+      // A zero is a claim — "he has played no games" — and right now the club
+      // simply hasn't counted. The squad modal (js/squad.js pmStat) has always
+      // done this; the full profile was the one place still printing noughts.
+      // The whole block hides when there is nothing real to show at all, rather
+      // than presenting a row of dashes as though it were a record.
+      statBlock(p) +
     '</div>' +
   '</div>' +
   '<div style="background:var(--dark);padding:16px 0;border-bottom:1px solid var(--border)">' +
@@ -115,6 +117,22 @@ function renderPlayer(p) {
 
 function statCard(val, label) {
   return '<div class="stat-card"><div class="stat-num">' + val + '</div><div class="stat-lbl">' + label + '</div></div>';
+}
+// A number the club has actually recorded, or an em-dash. Never a fabricated 0.
+function statVal(v) { return (v == null || Number(v) === 0) ? '&ndash;' : v; }
+function statBlock(p) {
+  var has = [p.apps, p.goals, p.assists, p.number].some(function (v) { return Number(v) > 0; });
+  if (!has) {
+    // Nothing recorded yet. Say that, in the club's voice, rather than printing
+    // four noughts that read as "this player has done nothing".
+    return '<div class="stat-empty">Appearances and goals start counting from the first game of the season.</div>';
+  }
+  return '<div class="stat-grid">' +
+    statCard(statVal(p.apps), 'Appearances') +
+    statCard(statVal(p.goals), 'Goals') +
+    statCard(statVal(p.assists), 'Assists') +
+    statCard(statVal(p.number), 'Squad No.') +
+  '</div>';
 }
 
 function getIllustration(pos) {
