@@ -332,3 +332,78 @@ authority into Supabase, or rebuilds the publishing pipeline. The Git-JSON model
 is working and is the right choice for a volunteer club.
 
 Detail, risk and test plan follow in implementation.
+
+---
+
+## 9 · Object census
+
+Every authoritative object, with real consumer counts measured from the codebase.
+
+**"Player pipeline"** means the full chain:
+`create → verify → Supabase (authoritative) → publish step → generated artefact
+→ consumers`.
+
+**Not every object should have one.** An object with no public face — an enquiry,
+a fan account, match takings — is correctly Supabase-only. Adding a publish step
+would leak private data into a public repo. The census marks those **N/A**, not
+"missing".
+
+| # | Object | Created in | Published to | Consumers | Player pipeline? | If not, why |
+|---|---|---|---|---|---|---|
+| 1 | **Player** | Portal → `la_players` | `players.json` + `squad.json` | **7** | ✅ **Yes — the reference** | — |
+| 2 | **Squad** | derived from Player | `squad.json` | 3 | ✅ Yes (same chain) | — |
+| 3 | **Fixture** | Portal / FWP import | `fixtures.json` direct | **6** | ❌ No | Written straight to Git. No Supabase record, so no verify step and no server-side validation |
+| 4 | **Result** | Match Day panel | `fixtures.json` (**since `efecee7`**) | 6 | ⚠️ Half | Now reaches the fixture automatically, but still Git-direct and still dual-written to `live_match` |
+| 5 | **Matchday state** | Match Day panel | `matchday.json` **and** `live_match` | 6 | ❌ No | **Two stores, no reconciliation.** The only genuine split-brain left |
+| 6 | **Competition** | Hand-edited | `competitions.json` | 1 | ❌ No | Changes ~5×/season; a pipeline would cost more than it saves. **Justified as-is** |
+| 7 | **Venue** | Portal | `venues.json` | 6 | ❌ No | Git-direct, but single-writer and "verified or empty". **Working — leave it** |
+| 8 | **Crest** | Portal | `crests.json` | 2 | ❌ No | Single-writer, changes rarely. **Justified** |
+| 9 | **Opponent (editorial)** | `tools-build-opponents.js` | `opponents.json` | 2 | ⚠️ Has a publish step, no store | Baked by a script run by hand. Reaches only `hooks.js` — **21 clubs of good writing with almost no consumer** |
+| 10 | **Sponsor** | Portal | `sponsors.json` (**one home since `efecee7`**) | 5 | ❌ No | Git-direct. Artwork now single-sourced; the record still isn't |
+| 11 | **News article** | Portal | `news.json` | **8** | ❌ No | Highest-consumer object with no pipeline |
+| 12 | **Match report** | Portal | `news.json` (an article) | 8 | ❌ No | Not a distinct object — it's an article with no binding to its fixture |
+| 13 | **Gallery / Photo** | Portal **or** `tools-archive-match.js` | `gallery.json` + 5 folders | **1** | ❌ No | **Two writers, five storage locations, one consumer.** Worst ratio in the club |
+| 14 | **Programme** | Portal | `programme.json` | 2 | ❌ No | Single-match only; no archive of past programmes' content |
+| 15 | **Programme archive** | Portal | `programmes.json` | 2 | ❌ No | — |
+| 16 | **Committee member** | Portal | `committee.json` + `officials.json` | 3 | ❌ No | **Two files for overlapping people** |
+| 17 | **Honour** | **`tools-bake-schema.js` constant** | JSON-LD in **22 pages** + `llms.txt` + `history.html` | **23** | ⚠️ Publish step, no store | **The most duplicated fact in the club.** Three hand-synced copies, source of truth is a line in a build script |
+| 18 | **Config / prices** | Portal | `config.json` | 6 | ❌ No | Single-writer. **Working** |
+| 19 | **Enquiry** | Public form | — (private) | 6 | **N/A** | Supabase-authoritative, correctly never published |
+| 20 | **Fan account** | Fan Zone | — (private) | 3 | **N/A** | Supabase-authoritative. ⚠️ table defined in no SQL file in the repo |
+| 21 | **Attendance** | Gate scan | — (private) | 4 | **N/A** | Supabase-authoritative |
+| 22 | **Match finances** | Analytics panel | — (private) | 1 | **N/A** | Supabase-authoritative, chairman-gated |
+| 23 | **Availability / Selection** | Lane App | — (private) | 5 | **N/A** | Supabase-authoritative |
+| 24 | **Season** | — | — | 0 | ❌ **Does not exist** | No `season` field on fixtures, no rollover, no archive. Every other object silently assumes one |
+
+### What the census shows
+
+**24 objects. 1 has the full pipeline. 5 are correctly private. 2 have a publish
+step but no store. 15 are written straight to Git. 1 doesn't exist.**
+
+**Three objects where the absence is justified and I would not change it:**
+Competition (changes 5×/season), Crest, Config — single-writer, low-churn,
+Git-direct is cheaper than a pipeline.
+
+**Three where it costs real money or trust:**
+
+- **Honour (23 consumers, 3 hand-synced copies, source = a build-script
+  constant).** Highest fan-out in the club and the least governed. A wrong
+  honour propagates to 22 pages and to every AI that reads `llms.txt`.
+- **Gallery/Photo (2 writers, 5 folders, 1 consumer).** The club's archive — the
+  thing `THE-LANE.md` argues is the whole point — has the weakest pipeline.
+- **Matchday state (2 stores, no reconciliation).** The last genuine split-brain.
+
+**One structural absence:** there is no **Season** object. Everything assumes one
+implicitly. That is what makes rollover a manual afternoon every summer, and it
+is the prerequisite for the Historical Publishing pipeline.
+
+### Pipeline status
+
+| Pipeline | Objects | Status |
+|---|---|---|
+| **1 · Fixture Publishing** | Fixture, Competition, Venue, Crest | Mostly complete — no store, but single-writer and working |
+| **2 · Result Publishing** | Result, Matchday state | **Nearly complete** — `efecee7` closed the write-back; the dual store remains |
+| **3 · Player Publishing** | Player, Squad | ✅ **Complete — the blueprint** |
+| **4 · Media Publishing** | Photo, Gallery, Programme | **Weakest.** Two writers, five folders, one consumer |
+| **5 · Commercial Publishing** | Sponsor, Config, Enquiry | Artwork unified; the sponsor record and pipeline are not |
+| **6 · Historical Publishing** | Honour, Season, Archive | **Barely exists.** No Season object; honours hand-copied three ways |
