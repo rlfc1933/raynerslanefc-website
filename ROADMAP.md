@@ -535,3 +535,70 @@ often enough.
 ---
 
 *This plan removes more than it adds. That is the point.*
+
+---
+
+# Release log
+
+## 2026-07-27 · Opening Season Readiness — **shipped and accepted**
+
+`519515f..1bdb032` · Netlify deploy `6a67bebe148e900008755c9e` · published 13:25
+BST, built in 10s · **one build, no previews** · production healthy, accepted.
+
+**Delivered** (what actually shipped, not what was predicted):
+
+- F1 archive tooling — `tools-archive-match.js`, browser-side upload resize,
+  photographer credit required, `docs/matchday-photography.md`.
+- Post Studio fixture integrity — one authoritative `psNextFixture()`, after-match
+  templates seed from `psLastResult()`, fixture chip, export refused without a
+  fixture. New **Called Off** template (postponed/cancelled/abandoned), a state
+  that existed in `matchday.json` with no way to publish it.
+- `data/competitions.json` — all five competitions with honest states. The two
+  cups the season ticket covers now say "draw not yet published" instead of
+  looking like missing data.
+- Removed two unprovable commercial claims ("300+ Match Day Fans", "5K+ Social
+  Followers"). The attendance figure contradicted `llms.txt`, which tells AI the
+  club has never published one.
+- No fabricated player statistics — zeros render as "–", or an honest sentence.
+- Squad page: players above officials above trials.
+- Newsroom lead slot refuses opposition crest artwork.
+- Notification badge counts **work only**: 24 → 7, all real. 22 release notes
+  moved out of the urgent count.
+- Constitution tracked and served with `X-Robots-Tag: noindex`.
+
+**Corrections to earlier claims in this document and the audit:**
+
+- Dashboard reduction reached **38 → 30 visible**, not the 38 → 14 projected in
+  `SIMPLIFICATION.md`. Only the safe, reversible part shipped: the Business
+  Playbook hero demoted and the Boardroom set moved behind a remembered
+  "All tools" disclosure. The six-graphics-tools merge did not ship.
+- `fixtures.html` was **already** honest about past fixtures with no score —
+  `fxCard` renders "Result to follow". The audit was wrong about that page.
+- The Acerbis logo already degraded to a styled text lockup via `onerror` on both
+  pages. The audit overstated it as a broken image. It needs artwork, not code.
+- Early-bird auto-expiry already existed in `season-tickets.html`.
+- Supabase RLS is enabled on **all 24 tables** with no write policies. An earlier
+  draft claimed 19 were unprotected; that was a parsing error, not a finding.
+
+**Content dependencies discovered — the club must supply these**
+(collected in `docs/CLUB-INPUT-SHEET.md`):
+
+1. Hayes & Yeading (4 Jul) result — public as "Result to follow" for 23 days.
+2. Metropolitan Police (25 Jul) and Aylesbury fixtures + results — referenced in
+   news, absent from `fixtures.json`.
+3. Editorial decision on three articles still saying "this Saturday".
+4. `matchday.json` still set to Cockfosters (18 Jul).
+5. Squad numbers (0 of 24), photographs (6 missing), bios (0 of 24).
+6. Acerbis artwork.
+
+**Deployment lessons:**
+
+- `[skip ci]` is evaluated against the **head commit of the push**, not per
+  commit. The tag on `0af0b15` had no effect because it was not head. One push =
+  one build regardless of how many commits it carries.
+- Production HTML is **not** byte-identical to source — Netlify's Pretty URLs
+  post-processing rewrites `href="x.html"` to `href='/x'` and normalises attribute
+  quotes. Byte-comparison is not a valid verification method; functional checks
+  are. It touches `href` attributes only, never script contents.
+- Browser login is not git authentication. Pushing needed a collaborator with
+  CLI credentials; a GitHub session in Chrome cannot authorise `git push`.
