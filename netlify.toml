@@ -32,6 +32,31 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# The governance documents (THE-LANE.md, VISION.md, ROADMAP.md) and docs/ are
+# tracked ON PURPOSE — a constitution that lives on one laptop is a private
+# opinion, and standards nobody can read aren't standards. Netlify publishes the
+# repo root, so they are also SERVED at the domain.
+#
+# They must not be INDEXED. They contain candid internal assessment — which tools
+# nobody uses, where the club depends on one person, what a claim was before it
+# was corrected. Meanwhile llms.txt deliberately invites sixteen AI crawlers to
+# read this site and cite it as authoritative about the club. An indexed roadmap
+# is a sentence like "the Boardroom has never been used" quoted back as a fact
+# about Rayners Lane FC.
+#
+# Nothing links to them and they are not in the sitemap, so discovery is already
+# unlikely — this makes it impossible, at no cost. Readable by a human who is
+# handed the URL; invisible to search and answer engines.
+[[headers]]
+  for = "/*.md"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/docs/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 # HTML must always revalidate so staff/fans see updates immediately
 # (no more "I saved it but still see the old version").
 [[headers]]
