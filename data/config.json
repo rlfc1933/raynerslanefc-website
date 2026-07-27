@@ -10,5 +10,19 @@
       { "label": "Under 10s", "price": "Free" }
     ]
   },
-  "updatedAt": "2026-07-23T00:00:00.000Z"
+  "seasonTicket": {
+    "season": "2026/27",
+    "prices": [
+      { "label": "Adults", "price": "£65", "note": "Ages 18–64" },
+      { "label": "Concessions", "price": "£55", "note": "Over-65s" },
+      { "label": "Under 16s", "price": "£15", "note": "" },
+      { "label": "Under 10s", "price": "Free", "note": "" }
+    ],
+    "earlyBird": { "prices": "£60 / £50 / £12", "deadline": "2026-07-31", "label": "before 31 July 2026" },
+    "includes": ["Combined Counties Premier North", "Combined Counties League Cup", "Middlesex County Senior Cup"],
+    "excludes": "Not valid for FA competitions — the Emirates FA Cup & Isuzu FA Vase",
+    "contactEmail": "info@raynerslanefc.co.uk",
+    "enquireSubject": "Season Ticket 2026/27"
+  },
+  "updatedAt": "2026-07-27T00:00:00.000Z"
 }
