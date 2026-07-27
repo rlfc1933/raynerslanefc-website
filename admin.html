@@ -2080,6 +2080,9 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="slbl">1 &middot; Choose a post</div>
       <div class="ps-types" id="ps-types"></div>
       <div class="ps-hint" id="ps-hint"></div>
+      <!-- Which match this card is about. Always visible before export, so a
+           wrong fixture is caught on screen rather than on Instagram. -->
+      <div id="ps-fxchip"></div>
 
       <div class="slbl">2 &middot; Fill it in</div>
       <div class="ps-opts">
@@ -4988,13 +4991,34 @@ function loadPostStudio() {
 // Matchday brief: the next fixture + one-tap starts, so the Studio answers
 // "what should I make today?" on open. One tap sets the template AND pre-fills
 // it from the fixture (opponent, date, KO, venue) — the system already knows it.
+// ── THE fixture the Studio is working on. One function, one answer. ──
+// There used to be two: this panel's brief computed the next fixture correctly,
+// while the template renderers fell back to hardcoded defaults — the second
+// entry in crests.json (alphabetically Abingdon United) and the literal string
+// 'SAT 15 AUG'. So clicking a template in the picker, rather than the button in
+// the brief, produced a finished, on-brand, publication-ready card for a match
+// that did not exist. Right club, wrong date is the version that actually gets
+// posted, because it looks correct.
+//
+// Everything that needs "the next fixture" now asks here. If a second copy of
+// this logic ever appears, that is the bug.
+function psNextFixture() {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  return (psFixtures || []).filter(function (f) {
+    if (!f.date) return false;
+    var d = new Date(f.date + 'T12:00:00');
+    return d >= today;
+  }).sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0] || null;
+}
+// Templates whose card states a fixture. These must never be exported guessing.
+var PS_FIXTURE_TYPES = ['matchday', 'preseason', 'kickoff', 'goal', 'yellow', 'red',
+                        'halftime', 'fulltime', 'lineup', 'countdown'];
+function psNeedsFixture(k) { return PS_FIXTURE_TYPES.indexOf(k || PS.type) > -1; }
+
 function psBrief() {
   var el = document.getElementById('ps-brief'); if (!el) return;
   var today = new Date(); today.setHours(0, 0, 0, 0);
-  var upcoming = (psFixtures || []).filter(function (f) {
-    if (!f.date) return false; var d = new Date(f.date + 'T12:00:00'); return d >= today;
-  }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
-  var f = upcoming[0];
+  var f = psNextFixture();
   if (!f) { el.innerHTML = '<div class="ps-brief ps-brief--empty">Add an upcoming fixture in <strong>Fixtures</strong> and your matchday quick-start appears here.</div>'; return; }
   var d = new Date(f.date + 'T12:00:00');
   var days = Math.round((d - today) / 86400000);
@@ -5025,7 +5049,10 @@ function psApplyFixture(id) {
   if (!id) return;
   var f = psFixtures.filter(function (x) { return x.id === id; })[0]; if (!f) return;
   var d = PS.data, T = PS.type, RL = 'img/badge.png', away = f.isHome === false;
-  d.date = fxFmtDate(f.date); d.ko = f.kickoff || '15:00';
+  // fixtures.json stores 24h ("19:45"); the cards have always read 12h
+  // ("7:45 PM"). Seeding straight from the fixture put 24h on the graphic —
+  // correct data, wrong voice. prTo12 is the same converter the programme uses.
+  d.date = fxFmtDate(f.date); d.ko = prTo12(f.kickoff || '15:00');
   if (f.venue) d.venue = f.venue; if (f.competition) d.comp = f.competition;
   if (T === 'matchday') {
     d.ha = away ? 'away' : 'home';
@@ -5144,6 +5171,15 @@ var PS_TYPE_HINT = {
 };
 function psSetType(k) {
   PS.type = k; PS.data = {};
+  // Seed from the REAL next fixture before anything renders, so the hardcoded
+  // fallbacks further down (kept as a last resort) can never be what a
+  // volunteer sees. Both routes into a template — the brief's buttons and the
+  // picker below — now start from the same match.
+  PS._fixture = null;
+  if (psNeedsFixture(k)) {
+    var nf = psNextFixture();
+    if (nf) { PS._fixture = nf; try { psApplyFixture(nf.id); } catch (e) { PS._fixture = null; } }
+  }
   document.querySelectorAll('#ps-types .ps-type').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
   var hint = document.getElementById('ps-hint');
   if (hint) hint.textContent = PS_TYPE_HINT[k] || '';
@@ -5267,7 +5303,49 @@ function psFieldDefs() {
   }
   return '';
 }
-function psFields() { document.getElementById('ps-fields').innerHTML = psFieldDefs(); }
+function psFields() {
+  document.getElementById('ps-fields').innerHTML = psFieldDefs();
+  psFixtureChip();
+}
+// States the match this card is about — or says plainly that there isn't one.
+// A card with no fixture behind it cannot be exported (see psBuildBlob): the
+// club does not publish what it cannot verify, and that applies to a graphic
+// exactly as much as it applies to a fixture import.
+function psFixtureChip() {
+  var el = document.getElementById('ps-fxchip'); if (!el) return;
+  if (!psNeedsFixture()) { el.innerHTML = ''; return; }
+  var f = PS._fixture;
+  if (!f) {
+    el.innerHTML = '<div style="border:1px dashed var(--re);background:rgba(239,68,68,.08);border-radius:10px;padding:11px 13px;margin-bottom:14px">' +
+      '<div style="font-family:var(--fc);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--re);margin-bottom:4px">No fixture to build from</div>' +
+      '<div style="font-family:var(--fb);font-size:13px;color:var(--lg,#ccc);line-height:1.5">This card states a date and an opponent, and there is no upcoming fixture to take them from. Add the game in <strong style="color:var(--w)">Fixtures</strong> first — download stays off until then, so nothing goes out guessing.</div></div>';
+    return;
+  }
+  var away = f.isHome === false;
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;border:1px solid rgba(255,209,0,.3);background:rgba(255,209,0,.06);border-radius:10px;padding:9px 12px;margin-bottom:14px">' +
+    '<span style="font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gr)">This card is about</span>' +
+    '<span style="font-family:var(--fc);font-size:13px;font-weight:700;color:var(--w)">' +
+      escH((away ? 'Away to ' : 'v ') + (f.opponent || 'TBC')) + '</span>' +
+    '<span style="font-family:var(--fb);font-size:12.5px;color:var(--gr)">' +
+      escH(fxFmtDate(f.date) + ' · ' + (f.kickoff || '15:00')) + '</span>' +
+    '<button onclick="psPickFixture()" style="margin-left:auto;min-height:32px;background:none;border:1px solid var(--br);color:var(--y);font-family:var(--fc);font-size:11px;font-weight:700;padding:0 11px;border-radius:7px;cursor:pointer">Different match</button>' +
+    '</div>';
+}
+// Switch the card to another fixture without losing the template.
+function psPickFixture() {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var list = (psFixtures || []).filter(function (f) { return f.date; })
+    .sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  if (!list.length) { toast('No fixtures yet — add them in Fixtures', true); return; }
+  var lines = list.slice(0, 20).map(function (f, i) {
+    return (i + 1) + ')  ' + fxFmtDate(f.date) + '  ' + (f.isHome === false ? 'away to ' : 'v ') + f.opponent;
+  }).join('\n');
+  var pick = prompt('Which match is this card about?\n\n' + lines + '\n\nType a number:', '1');
+  var n = parseInt(pick, 10);
+  if (!n || n < 1 || n > Math.min(20, list.length)) return;
+  PS._fixture = list[n - 1];
+  psApplyFixture(list[n - 1].id);
+}
 function psVal(k, v) { PS.data[k] = v; psFields(); psRender(); }
 /* live typing: update data + preview only — never rebuild the form (that was stealing focus after one keystroke) */
 function psSet(k, v) { PS.data[k] = v; var lbl = document.getElementById('pslbl-' + k); if (lbl) lbl.textContent = v + 'px'; psRender(); }
@@ -5835,6 +5913,15 @@ function psFname() { return 'rayners-lane-' + PS.type + '-' + PS.size + '.png'; 
 // just a capture of the current DOM) is what makes that swap clean.
 function psBuildBlob(cb) {
   if (typeof html2canvas === 'undefined') { toast('Still loading — try again in a second', true); return; }
+  // A card that states a date and an opponent does not leave this screen unless
+  // both came from a real fixture. This is the same rule import-fixtures.js
+  // applies to a season it can't verify: refuse, don't guess.
+  if (psNeedsFixture() && !PS._fixture) {
+    toast('Add the fixture first — this card can\'t say when the game is', true);
+    var chip = document.getElementById('ps-fxchip');
+    if (chip) chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   toast('Building your post…');
   PS._exporting = true; psRender();                      // rebuild with hints stripped
   var card = document.getElementById('ps-card');
