@@ -2083,6 +2083,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <div class="ps-optlbl">Size <span>— where you're posting it</span></div>
         <div class="ps-seg" id="ps-size">
           <button data-size="ig" class="on" onclick="psSetSize('ig')">Instagram ▢ <small>1080²</small></button>
+          <button data-size="pt" onclick="psSetSize('pt')">Portrait ▯ <small>4:5</small></button>
           <button data-size="story" onclick="psSetSize('story')">Story ▯ <small>9:16</small></button>
           <button data-size="x" onclick="psSetSize('x')">X ▭ <small>16:9</small></button>
         </div>
@@ -4822,7 +4823,7 @@ function savePerks(msg) {
 /* ════════════════════ POST STUDIO ════════════════════ */
 var PS = { type: 'matchday', theme: 'yellow', size: 'ig', data: {} };
 var psCrests = [], psPlayers = [], psFixtures = [];
-var PS_SIZES = { ig: { w: 1080, h: 1080 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
+var PS_SIZES = { ig: { w: 1080, h: 1080 }, pt: { w: 1080, h: 1350 }, story: { w: 1080, h: 1920 }, x: { w: 1600, h: 900 } };
 // Palette table. `text`/`soft` = text on the background; `ink` = text on the
 // accent; `accent2` (≠ accent) draws a gradient footer bar. psRender recolours
 // every white text token to `text`/`soft`, so ALL card types honour the palette
@@ -4861,6 +4862,7 @@ var PS_ICONS = {
   whistle: '<path d="M3 10h9l3-2v5.5a4.5 4.5 0 1 1-9 0V10H3z"/><path d="M15 8V5h4"/><circle cx="8" cy="14" r="1.1" fill="currentColor" stroke="none"/>',
   ball: '<circle cx="12" cy="12" r="9"/><path d="M12 7.2l3.6 2.6-1.4 4.3H9.8L8.4 9.8z"/><path d="M12 7.2V3.2M15.6 9.8l3.4-1.4M14.2 14.1l2.4 3M9.8 14.1l-2.4 3M8.4 9.8L5 8.4"/>',
   card: '<rect x="6.5" y="2.5" width="11" height="16.5" rx="2.2" fill="currentColor" stroke="none"/>',
+  ticket: '<path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M14 6v1M14 11v1M14 16v1"/>',
   star: '<path d="M12 2.5l2.9 6.2 6.8.7-5.1 4.6 1.4 6.7L12 17.6l-6 3.1 1.4-6.7L2.3 9.4l6.8-.7z" fill="currentColor" stroke="none"/>',
   medal: '<circle cx="12" cy="15" r="6"/><path d="M9 9.8L6 2.5M15 9.8l3-7.3"/><path d="M12 12.6l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2L9.1 14.8l2-.3z" fill="currentColor" stroke="none"/>',
   pen: '<path d="M15.5 3.2l5.3 5.3L8 21.3H2.7v-5.3z"/><path d="M13.5 5.2l5.3 5.3"/>',
@@ -4885,7 +4887,8 @@ function psIco(key, px, color) {
   var p = PS_ICONS[key]; if (!p) return '';
   return '<span style="display:inline-block;width:' + px + 'px;height:' + px + 'px;vertical-align:-' + Math.round(px * 0.14) + 'px;color:' + (color || 'currentColor') + '"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg></span>';
 }
-var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', psoffer: 'medal', pscommunity: 'heart', psannounce: 'megaphone', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
+var PS_TYPE_ICON = { matchday: 'calendar', preseason: 'whistle', kickoff: 'whistle', goal: 'ball', yellow: 'card', red: 'card', halftime: 'whistle', fulltime: 'whistle', motm: 'star', potm: 'medal', signing: 'pen', lineup: 'list', sponsorspot: 'heart', psoffer: 'medal', pscommunity: 'heart', psannounce: 'megaphone', seasonticket: 'ticket', birthday: 'cake', countdown: 'hourglass', festive: 'firework', announce: 'megaphone', headline: 'megaphone', history: 'scroll', quote: 'quote' };
+var psSeason = null;   // data/config.json → seasonTicket, loaded by loadPostStudio (auto-fills the Season Ticket template)
 // The three player-sponsorship benefits + the community pitch — one source of
 // truth so the Studio field defaults and the rendered card can't drift apart.
 var PS_SPONSOR_BENEFITS = ['1× season ticket for the whole campaign', 'Your name recognised by the club against your player, all season', 'A dedicated social post announcing you as their sponsor'];
@@ -4935,6 +4938,7 @@ function POST_TYPES() { return [
   { key: 'headline',  label: 'Headline / Hook',  group: 'Club Stories' },
   { key: 'history',   label: 'Club History',     group: 'Club Stories' },
   { key: 'quote',     label: 'Motivation',       group: 'Club Stories' },
+  { key: 'seasonticket', label: 'Season Ticket',  group: 'Seasonal' },
   { key: 'festive',   label: 'Festive',          group: 'Seasonal' }
 ]; }
 var PS_GROUPS = ['Before Match', 'Live Match', 'After Match', 'Players', 'Sponsors', 'Club Stories', 'Seasonal'];
@@ -4974,6 +4978,7 @@ function loadPostStudio() {
   });
   fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
   fetchJSON('fixtures', function (d) { psFixtures = (d && d.fixtures) || []; psFields(); psBrief(); });
+  fetchJSON('config', function (d) { psSeason = (d && d.seasonTicket) || null; if (PS.type === 'seasonticket') { psFields(); psRender(); } });
 }
 // Matchday brief: the next fixture + one-tap starts, so the Studio answers
 // "what should I make today?" on open. One tap sets the template AND pre-fills
@@ -5140,6 +5145,9 @@ function psSetType(k) {
   // Warm up the background-removal model in the background for player cards so
   // the first cutout doesn't pay the full download wait.
   if (['signing', 'motm', 'potm', 'goal', 'birthday'].indexOf(k) > -1) psCutout.preload();
+  // Season Ticket opens in its natural shape (portrait 4:5) on the club's dark
+  // green palette — matching the reference graphic. Staff can still change both.
+  if (k === 'seasonticket') { psSetSize('pt'); psSetTheme('greenflood'); }
   psFields(); psRender();
 }
 function psSetTheme(t) { PS.theme = t; document.querySelectorAll('#ps-theme button').forEach(function (b) { b.classList.toggle('on', b.dataset.theme === t); }); document.getElementById('ps-size'); psRender(); }
@@ -5223,6 +5231,19 @@ function psFieldDefs() {
       '<div class="field"><label class="fl">Player <span style="color:var(--gr);font-weight:400">— pulls surname + framed photo from Player Profiles</span></label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select></div>' +
       '<div class="field"><label class="fl">…or type a player name</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="[PLAYER NAME]" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Season</label><input type="text" value="' + escH(d.season || '2026/27') + '" oninput="psSet(\'season\',this.value)"></div>';
+    case 'seasonticket': {
+      var stc = psSeason || {};
+      var stp = (stc.prices && stc.prices.length) ? stc.prices : [{ label: 'Adults', price: '£65', note: 'Ages 18–64' }, { label: 'Concessions', price: '£55', note: 'Over-65s' }, { label: 'Under 16s', price: '£15', note: '' }, { label: 'Under 10s', price: 'Free', note: '' }];
+      var stEarlyDef = stc.earlyBird ? ('Early bird ' + stc.earlyBird.prices + ' ' + (stc.earlyBird.label || '')) : '';
+      return '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Auto-filled from your season-ticket prices in <strong>config</strong>. Edit any line before export — changing the prices in config updates the public page and this card together.</div>' +
+        '<div class="field"><label class="fl">Season</label><input type="text" value="' + escH(d.stSeason || stc.season || '2026/27') + '" oninput="psSet(\'stSeason\',this.value)"></div>' +
+        stp.slice(0, 4).map(function (p, i) {
+          return '<div class="ps-crestrow"><div class="field"><label class="fl">' + escH(p.label || ('Tier ' + (i + 1))) + '</label><input type="text" value="' + escH(d['stP' + i] != null ? d['stP' + i] : (p.price || '')) + '" oninput="psSet(\'stP' + i + '\',this.value)"></div>' +
+            '<div class="field"><label class="fl">Note</label><input type="text" value="' + escH(d['stN' + i] != null ? d['stN' + i] : (p.note || '')) + '" placeholder="optional" oninput="psSet(\'stN' + i + '\',this.value)"></div></div>';
+        }).join('') +
+        '<div class="field"><label class="fl">Early-bird line <span style="color:var(--gr);font-weight:400">— clear it to hide the band</span></label><input type="text" value="' + escH(d.stEarly != null ? d.stEarly : stEarlyDef) + '" oninput="psSet(\'stEarly\',this.value)"></div>' +
+        '<div class="field"><label class="fl">Contact</label><input type="text" value="' + escH(d.stContact || stc.contactEmail || 'info@raynerslanefc.co.uk') + '" oninput="psSet(\'stContact\',this.value)"></div>';
+    }
     case 'birthday': return '<div class="field"><label class="fl">Whose birthday? <span style="color:var(--gr);font-weight:400">— pick a player for their photo, or just type a name</span></label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select></div>' +
       '<div class="ps-crestrow"><div class="field"><label class="fl">Name (if typing)</label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Sukh" oninput="psSet(\'manualName\',this.value)"></div>' +
       '<div class="field"><label class="fl">Age (optional)</label><input type="text" value="' + escH(d.age || '') + '" placeholder="21" oninput="psSet(\'age\',this.value)"></div></div>' +
@@ -5675,6 +5696,47 @@ function psRender() {
     inner += ctr(aTop + (X ? 82 : 122), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 26 : 34) + 'px;font-weight:700;letter-spacing:4px;color:#fff">NOW SPONSORS</span>');
     inner += '<div data-fit="' + (X ? 92 : 130) + ':40" style="position:absolute;top:' + (aTop + (X ? 128 : 182)) + 'px;left:0;right:0;height:' + (X ? 100 : 148) + 'px;overflow:hidden;text-align:center;' + beb(X ? 92 : 130, '#fff') + ';padding:0 50px">' + escH(aPlayer) + '</div>';
     inner += ctr(aTop + (X ? 232 : 344), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 22 : 28) + 'px;font-weight:800;letter-spacing:2px;color:' + t.accent + '">FOR THE ' + escH(d.season || '2026/27') + ' SEASON</span>');
+  } else if (PS.type === 'seasonticket') {
+    // Season ticket — auto-filled from config.seasonTicket (psSeason), every line
+    // editable. Portrait 4:5 by default (matches the reference); also works at 1:1.
+    var PT = PS.size === 'pt';
+    var stc = psSeason || {};
+    var stSeason = d.stSeason || stc.season || '2026/27';
+    var stCfg = (stc.prices && stc.prices.length) ? stc.prices : [];
+    var stDefL = ['Adults', 'Concessions', 'Under 16s', 'Under 10s'], stDefP = ['£65', '£55', '£15', 'Free'], stDefN = ['Ages 18–64', 'Over-65s', '', ''];
+    var stP = [];
+    for (var si = 0; si < 4; si++) {
+      var cp = stCfg[si] || {};
+      stP.push({ label: cp.label || stDefL[si], price: (d['stP' + si] != null ? d['stP' + si] : (cp.price || stDefP[si])), note: (d['stN' + si] != null ? d['stN' + si] : (cp.note || stDefN[si])) });
+    }
+    var stEarly = d.stEarly != null ? d.stEarly : (stc.earlyBird ? ('Early bird ' + stc.earlyBird.prices + ' ' + (stc.earlyBird.label || '')) : '');
+    var stInc = (stc.includes && stc.includes.length) ? stc.includes : ['Combined Counties Premier North', 'Combined Counties League Cup', 'Middlesex County Senior Cup'];
+    var stExc = stc.excludes || 'Not valid for FA competitions — the Emirates FA Cup & Isuzu FA Vase';
+    var stContact = d.stContact || stc.contactEmail || 'info@raynerslanefc.co.uk';
+    var L = X ? { t: 92, off: 150, rh: 62, eb: 48, ft: 92, fl: 24, fn: 13, fp: 44, cy: H - 92 }
+      : ST ? { t: 270, off: 360, rh: 112, eb: 66, ft: 150, fl: 31, fn: 16, fp: 58, cy: H - 350 }
+        : PT ? { t: 152, off: 300, rh: 118, eb: 70, ft: 146, fl: 31, fn: 16, fp: 58, cy: H - 150 }
+          : { t: 120, off: 210, rh: 96, eb: 60, ft: 132, fl: 27, fn: 14, fp: 50, cy: H - 150 };
+    var stRw = (X ? 0.68 : 0.84) * W, stRx = (W - stRw) / 2;
+    inner += '<div style="position:absolute;top:' + (X ? 58 : 62) + 'px;right:' + (X ? 58 : 54) + 'px;' + beb(X ? 52 : 64, t.accent) + '">' + escH(stSeason) + '</div>';
+    inner += '<div style="position:absolute;top:' + L.t + 'px;left:0;right:0;text-align:center;' + beb(L.ft, '#fff', 'line-height:.82') + '">SEASON<br>TICKETS</div>';
+    var rowsTop = L.t + L.off, cardH = L.rh - 10;
+    stP.forEach(function (p, i) {
+      var ry = rowsTop + i * L.rh, free = /free/i.test(p.price);
+      inner += '<div style="position:absolute;left:' + stRx + 'px;top:' + ry + 'px;width:' + stRw + 'px;height:' + cardH + 'px;background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.14);border-radius:14px"></div>';
+      inner += '<div style="position:absolute;left:' + (stRx + 24) + 'px;top:' + (ry + cardH / 2 - (p.note ? L.fl : L.fl * 0.6)) + 'px;font-family:Manrope,sans-serif;font-size:' + L.fl + 'px;font-weight:800;color:#fff;line-height:1.04">' + escH(p.label) + (p.note ? '<span style="display:block;font-size:' + L.fn + 'px;font-weight:600;color:rgba(255,255,255,.55)">' + escH(p.note) + '</span>' : '') + '</div>';
+      inner += '<div data-fit="' + L.fp + ':22" style="position:absolute;left:' + (stRx + stRw - 244) + 'px;top:' + (ry + cardH / 2 - L.fp * 0.62) + 'px;width:220px;height:' + (L.fp + 12) + 'px;overflow:hidden;text-align:right;' + beb(L.fp, free ? '#fff' : t.accent) + '">' + escH(p.price) + '</div>';
+    });
+    var cur = rowsTop + stP.length * L.rh + (X ? 4 : 10);
+    if (stEarly) {
+      inner += '<div style="position:absolute;left:' + stRx + 'px;top:' + cur + 'px;width:' + stRw + 'px;height:' + L.eb + 'px;background:' + t.accent + ';border-radius:12px"></div>';
+      inner += '<div data-fit="' + (X ? 22 : 30) + ':13" style="position:absolute;left:' + (stRx + 20) + 'px;top:' + (cur + (L.eb - (X ? 24 : 34)) / 2) + 'px;width:' + (stRw - 40) + 'px;height:' + (X ? 24 : 34) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-weight:800;font-size:' + (X ? 22 : 30) + 'px;color:' + t.ink + '">' + escH(stEarly) + '</div>';
+      cur += L.eb + (X ? 10 : 16);
+    }
+    inner += '<div data-fit="' + (X ? 20 : 26) + ':12" style="position:absolute;left:' + stRx + 'px;top:' + cur + 'px;width:' + stRw + 'px;height:' + (X ? 30 : 42) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-size:' + (X ? 20 : 26) + 'px;font-weight:700;color:#fff">' + escH('Every home game · ' + stInc.join(' · ')) + '</div>';
+    cur += (X ? 34 : 50);
+    inner += '<div data-fit="' + (X ? 16 : 20) + ':11" style="position:absolute;left:' + stRx + 'px;top:' + cur + 'px;width:' + stRw + 'px;height:' + (X ? 22 : 30) + 'px;overflow:hidden;text-align:center;font-family:Manrope,sans-serif;font-size:' + (X ? 16 : 20) + 'px;font-weight:600;color:rgba(255,255,255,.6)">' + escH(stExc) + '</div>';
+    inner += '<div style="position:absolute;left:0;right:0;top:' + L.cy + 'px;text-align:center;font-family:Manrope,sans-serif;font-size:' + (X ? 20 : 26) + 'px;font-weight:800;letter-spacing:1px;color:' + t.accent + '">' + escH(stContact) + '</div>';
   } else if (PS.type === 'birthday') {
     var eb2 = psEff(), bp = psPlayerObj();
     inner += '<div style="position:absolute;top:' + (ebTop - 6) + 'px;left:0;right:0;text-align:center;">' + psIco('cake', X ? 90 : 140, t.accent) + '</div>';
