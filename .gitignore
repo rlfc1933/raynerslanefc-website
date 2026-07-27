@@ -17,3 +17,13 @@ _source/
 # contain the staff PIN and references to service keys. This is a PUBLIC repo.
 *.md
 !README.md
+
+# The constitution. These three govern every product decision and MUST be
+# inherited by whoever runs the club next — a constitution that lives on one
+# laptop is a private opinion, not a framework. They contain no secrets.
+#   THE-LANE.md  why the club exists · rituals, culture, institutional memory
+#   VISION.md    the principles we refuse to compromise
+#   ROADMAP.md   the practical route, organised by information lifecycle
+!THE-LANE.md
+!VISION.md
+!ROADMAP.md
