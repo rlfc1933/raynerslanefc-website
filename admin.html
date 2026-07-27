@@ -4956,7 +4956,46 @@ function removeMember(i) {
   renderCommittee();
   saveCommittee(m.name + ' removed — publishing to the site');
 }
+// One edit, both artefacts. committee.json is the source; officials.json is
+// GENERATED from it by role. They used to be two hand-maintained files holding
+// overlapping people, and they had already drifted — officials.json names Pete
+// Singh as chairman while committee.json's member list doesn't contain him.
+// Same shape as the player pipeline: edit the source, the artefact follows.
+var OFFICIAL_ROLES = {
+  chairman:       [/^chair(man|person|)$/i, /club chairman/i],
+  secretary:      [/club secretary/i, /^secretary$/i],
+  welfareOfficer: [/welfare/i, /safeguard/i]
+};
+function officialsFromCommittee(members) {
+  var out = {};
+  Object.keys(OFFICIAL_ROLES).forEach(function (key) {
+    var hit = (members || []).filter(function (m) {
+      return OFFICIAL_ROLES[key].some(function (re) { return re.test(String(m.role || '')); });
+    })[0];
+    if (hit && hit.name) out[key] = String(hit.name).replace(/\s+/g, ' ').trim();
+  });
+  return out;
+}
 function saveCommittee(msg) {
+  // Derive the three policy names, but NEVER blank one the committee list can't
+  // account for — a missing welfare officer on policies.html is worse than a
+  // stale one, and the club must fix the list rather than lose the name.
+  var derived = officialsFromCommittee(committee);
+  fetchJSON('officials', function (cur) {
+    cur = cur || {};
+    var merged = {
+      welfareOfficer: derived.welfareOfficer || cur.welfareOfficer || '',
+      chairman:       derived.chairman       || cur.chairman       || '',
+      secretary:      derived.secretary      || cur.secretary      || '',
+      updatedAt: new Date().toISOString()
+    };
+    var changed = ['welfareOfficer','chairman','secretary'].some(function (k) { return merged[k] !== cur[k]; });
+    if (changed) pushToGitHub('officials', merged, 'dep-committee');
+    var missing = ['chairman','secretary','welfareOfficer'].filter(function (k) { return !derived[k]; });
+    if (missing.length) {
+      toast('Saved. ' + missing.join(', ') + ' could not be read from the committee list — add the role there so the policy pages stay right.', true);
+    }
+  });
   commitDomain('committee', 'members', 'name', committee, committeeDeleted, null, 'dep-committee', msg || 'Committee saved <i class="ico ico-check"></i> — live in ~30s');
 }
 // Key officials — named automatically across the Policies page.

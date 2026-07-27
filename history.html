@@ -81,119 +81,46 @@
   <div class="container">
     <div class="timeline">
 
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">1933</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right">
-          <div class="tl-badge">Founded</div>
-          <div class="tl-title">Rayners Lane FC is Born</div>
-          <div class="tl-body">Rayners Lane Football Club is established in the Harrow area of Middlesex. The club takes its name from the local district, setting up home in the community that would define its identity for generations.</div>
-        </div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">1960s</div>
-          <div class="tl-title">Spartan League</div>
-          <div class="tl-body">The club joins the Spartan League, beginning their journey through the non-league pyramid and establishing themselves as a competitive force in Middlesex football.</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right"></div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left"></div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right">
-          <div class="tl-year">1978</div>
-          <div class="tl-badge green">Hellenic League</div>
-          <div class="tl-title">Joining the Hellenic</div>
-          <div class="tl-body">The club joins the Hellenic Football League Division One, marking a new chapter in their development and ambition.</div>
-        </div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">1982</div>
-          <div class="tl-badge">Champions</div>
-          <div class="tl-title">Hellenic League Division One Champions</div>
-          <div class="tl-body">One of the proudest moments in the club's history — winning the Hellenic League Division One title and earning promotion to the Premier Division. The Lane are champions.</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot" style="background:var(--yellow);width:18px;height:18px;margin-top:-2px"></div></div>
-        <div class="tl-right"></div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left"></div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right">
-          <div class="tl-year">1992-93</div>
-          <div class="tl-title">FA Cup Second Qualifying Round</div>
-          <div class="tl-body">The club makes their deepest ever run in the FA Cup, reaching the Second Qualifying Round — a significant achievement for a club of Rayners Lane's level.</div>
-        </div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">1994</div>
-          <div class="tl-title">Relegated — No Floodlights</div>
-          <div class="tl-body">The club is relegated from the Hellenic Premier Division — not on the pitch, but due to the absence of floodlights at Tithe Farm. A frustrating setback for a team that had competed well.</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot" style="background:var(--grey)"></div></div>
-        <div class="tl-right"></div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left"></div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right">
-          <div class="tl-year">1998</div>
-          <div class="tl-title">Chiltonian League</div>
-          <div class="tl-body">The club joins the Chiltonian League Premier Division, continuing their journey through the Middlesex non-league scene and rebuilding toward future ambitions.</div>
-        </div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">2000s</div>
-          <div class="tl-title">Back to the Hellenic</div>
-          <div class="tl-body">After the Chiltonian League merges with the Hellenic League, Rayners Lane find themselves back in familiar territory, placed in Division One East and continuing to push forward.</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right"></div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left"></div>
-        <div class="tl-center"><div class="tl-dot"></div></div>
-        <div class="tl-right">
-          <div class="tl-year">2024-25</div>
-          <div class="tl-title">Isthmian League South Central</div>
-          <div class="tl-body">The club competes in the Isthmian League South Central Division, finishing 11th of 22 clubs before being transferred to the Combined Counties League ahead of the 2025-26 season.</div>
-        </div>
-      </div>
-
-      <div class="tl-item">
-        <div class="tl-left">
-          <div class="tl-year">2026</div>
-        </div>
-        <div class="tl-center"><div class="tl-dot green" style="width:18px;height:18px;margin-top:-2px"></div></div>
-        <div class="tl-right">
-          <div class="tl-badge green">New Era</div>
-          <div class="tl-title">Pete Singh, Gary Pitt &amp; A New Chapter</div>
-          <div class="tl-body">Under the chairmanship of Pete Singh and with Gary Pitt appointed as First Team Manager, Rayners Lane FC enter the Combined Counties Premier Division North with renewed ambition, a completely rebuilt digital presence, and the belief that The Lane can go further than ever before.</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
+      <!-- Timeline renders from data/honours.json — the single source for the
+           club's history. It used to be ten hand-written blocks here, a second
+           copy in llms.txt and a third as a constant in tools-bake-schema.js.
+           A wrong honour used to need three edits; now it needs one. -->
+      <div id="tl-list"></div>
 </section>
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
 <script>document.addEventListener("DOMContentLoaded",()=>initComponents("history.html"));</script>
+
+<script>
+// ── Pipeline 6: the club's history has ONE source ────────────────────────────
+// data/honours.json → this timeline, the JSON-LD `award` on every page (baked by
+// tools-bake-schema.js) and llms.txt. Previously three hand-synced copies with
+// 23 consumers and no owner: a wrong honour needed three edits and usually got
+// one. Renders nothing rather than a placeholder if the file can't be read —
+// an empty timeline is honest, an invented one is not.
+(function () {
+  var el = document.getElementById('tl-list'); if (!el) return;
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  fetch('data/honours.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var list = (d && d.timeline) || [];
+      if (!list.length) return;
+      el.innerHTML = list.map(function (e) {
+        return '<div class="tl-item">' +
+          '<div class="tl-left"><div class="tl-year">' + esc(e.year) + '</div></div>' +
+          '<div class="tl-center"><div class="tl-dot"></div></div>' +
+          '<div class="tl-right">' +
+            (e.tag ? '<div class="tl-badge">' + esc(e.tag) + '</div>' : '') +
+            '<h3 class="tl-title">' + esc(e.title) + '</h3>' +
+            '<div class="tl-body">' + esc(e.body) + '</div>' +
+          '</div></div>';
+      }).join('');
+    })
+    .catch(function () {});
+})();
+</script>
 </body>
 </html>

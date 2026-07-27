@@ -27,8 +27,13 @@ const ORG = {
   sport: 'Soccer',
   foundingDate: '1933',
   foundingLocation: { '@type': 'Place', name: 'Harrow, Middlesex, England' },
-  award: ['Hellenic League Division One Champions (1982)',
-          'FA Cup Second Qualifying Round (1992-93)'],
+  // Honours come from data/honours.json — the single source. They used to be a
+  // constant here, which meant the club's proudest facts were owned by a build
+  // script and hand-copied into llms.txt and history.html as well. 23 consumers,
+  // no owner. Edit the JSON; re-run this; everything follows.
+  award: require('./data/honours.json').timeline
+           .filter(function (e) { return e.honour && e.award; })
+           .map(function (e) { return e.award; }),
   url: ORIGIN + '/',
   logo: ORIGIN + '/img/badge.png',
   image: ORIGIN + '/img/og-card.jpg',

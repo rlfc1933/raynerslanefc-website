@@ -36,6 +36,8 @@
     .gallery-item:hover .gallery-item-overlay { background:rgba(0,0,0,.4); }
     .gallery-item-label { font-family:var(--font-c); font-size:13px; font-weight:700; color:white; padding:12px 14px; opacity:0; transition:opacity .3s; letter-spacing:.06em; }
     .gallery-item:hover .gallery-item-label { opacity:1; }
+    .gallery-item-credit { font-family:var(--font-c); font-size:11px; font-weight:600; color:rgba(255,255,255,.72); padding:0 14px 12px; opacity:0; transition:opacity .3s; letter-spacing:.04em; }
+    .gallery-item:hover .gallery-item-credit { opacity:1; }
     /* Lightbox */
     #lightbox { position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:1000; display:none; align-items:center; justify-content:center; }
     #lightbox.open { display:flex; }
@@ -161,14 +163,24 @@ function renderGallery() {
     grid.innerHTML = '<div class="gallery-empty" style="grid-column:1/-1;padding:60px 24px;text-align:center"><div style="font-family:var(--font-d);font-size:28px;color:var(--white)">No photos yet</div><div style="font-family:var(--font-c);font-size:14px;color:var(--grey);margin-top:8px">Send us your match day photos!</div></div>';
     return;
   }
-  grid.innerHTML = filtered.map(item =>
-    `<div class="gallery-item" onclick="openLightbox('${item.src}','${item.label||""}')">
-      <img src="${item.src}" alt="${item.label||"Rayners Lane FC match day photo"}" loading="lazy">
-      <div class="gallery-item-overlay">
-        <div class="gallery-item-label">${item.label||""}</div>
-      </div>
-    </div>`
-  ).join("");
+  // Pipeline 4: the photographer's name is part of the record, not metadata.
+  // Both writers (the portal and tools-archive-match.js) have required a credit
+  // since 4a19edb — and nothing has ever displayed it. A volunteer who gives up
+  // a Saturday to photograph a game should see their name under the photograph.
+  // Thumbnails are used where the archive generated them: a 480px file in a grid
+  // cell instead of a 1600px one.
+  var esc = function (s) { return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); };
+  grid.innerHTML = filtered.map(function (item) {
+    var full  = item.src;
+    var thumb = item.thumb || item.src;
+    var label = item.label || "";
+    var credit = item.credit ? '<div class="gallery-item-credit">\u{1F4F7} ' + esc(item.credit) + '</div>' : "";
+    return '<div class="gallery-item" onclick="openLightbox(' + JSON.stringify(full).replace(/"/g,"&quot;") + ',' + JSON.stringify(label).replace(/"/g,"&quot;") + ')">' +
+      '<img src="' + esc(thumb) + '" alt="' + esc(label || "Rayners Lane FC match day photo") + '" loading="lazy">' +
+      '<div class="gallery-item-overlay">' +
+        '<div class="gallery-item-label">' + esc(label) + '</div>' + credit +
+      '</div></div>';
+  }).join("");
 }
 
 function openLightbox(src, label) {
