@@ -326,11 +326,12 @@
   var _mani = null;
   function manifest() { if (_mani) return _mani; _mani = fetch('data/partners.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); return _mani; }
 
-  // Presented Matchday themes — mirror the Studio. Home = green, Away = baby-blue
-  // (the club's away-kit colours). Auto-selected from the fixture's home/away.
+  // VISUAL STYLE themes — colour only. These do NOT decide home/away: the fixture
+  // does that (sponsors + crest order come from f.isHome). A style is just a look
+  // the staffer can pick. Default is green for home fixtures, blue for away.
   var MC_THEMES = {
-    home: {
-      label: 'Home', ink: W_, sub: 'rgba(245,243,237,.75)', accent: Y, vs: Y, foot: ['#FFD100', '#2a8048'],
+    green: {
+      label: 'Green', sub: 'rgba(245,243,237,.75)', accent: Y, vs: Y, foot: ['#FFD100', '#2a8048'],
       bg: function (x, W, H) {
         x.fillStyle = '#050505'; x.fillRect(0, 0, W, H);
         var g = x.createRadialGradient(W * 0.26, H * 0.12, 0, W * 0.26, H * 0.12, H * 1.05);
@@ -338,12 +339,30 @@
         x.fillStyle = g; x.fillRect(0, 0, W, H);
       }
     },
-    away: {
-      label: 'Away', ink: W_, sub: 'rgba(245,243,237,.78)', accent: Y, vs: Y, foot: ['#FFD100', '#7fc4ff'],
+    blue: {   // the club's baby-blue away-kit colours
+      label: 'Blue', sub: 'rgba(245,243,237,.78)', accent: Y, vs: Y, foot: ['#FFD100', '#7fc4ff'],
       bg: function (x, W, H) {
         x.fillStyle = '#050a12'; x.fillRect(0, 0, W, H);
         var g = x.createRadialGradient(W * 0.26, H * 0.12, 0, W * 0.26, H * 0.12, H * 1.08);
         g.addColorStop(0, '#2f6ea8'); g.addColorStop(0.44, '#123b63'); g.addColorStop(1, '#050a12');
+        x.fillStyle = g; x.fillRect(0, 0, W, H);
+      }
+    },
+    acerbis: {   // hyper-yellow / illuminous-lime Acerbis energy
+      label: 'Acerbis', sub: 'rgba(245,243,237,.78)', accent: '#C6FF3A', vs: '#C6FF3A', foot: ['#C6FF3A', '#FFD100'],
+      bg: function (x, W, H) {
+        x.fillStyle = '#070a05'; x.fillRect(0, 0, W, H);
+        var g = x.createRadialGradient(W * 0.26, H * 0.12, 0, W * 0.26, H * 0.12, H * 1.05);
+        g.addColorStop(0, '#33500f'); g.addColorStop(0.44, '#151f08'); g.addColorStop(1, '#050703');
+        x.fillStyle = g; x.fillRect(0, 0, W, H);
+      }
+    },
+    night: {   // clean dark
+      label: 'Night', sub: 'rgba(245,243,237,.72)', accent: Y, vs: Y, foot: ['#FFD100', '#3a3a3a'],
+      bg: function (x, W, H) {
+        x.fillStyle = '#080808'; x.fillRect(0, 0, W, H);
+        var g = x.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, H * 1.0);
+        g.addColorStop(0, '#1c1c1c'); g.addColorStop(1, '#050505');
         x.fillStyle = g; x.fillRect(0, 0, W, H);
       }
     }
@@ -371,8 +390,8 @@
   // Uses the SHARED SponsorRail component for identical geometry to the Studio.
   // themeKey overrides home/away; default derives from the fixture.
   async function matchCardPng(f, themeKey) {
-    var home = themeKey ? themeKey === 'home' : (f.isHome !== false);
-    var t = home ? MC_THEMES.home : MC_THEMES.away;
+    var home = f.isHome !== false;                       // sponsors + crest order: ALWAYS from the fixture
+    var t = MC_THEMES[themeKey] || (home ? MC_THEMES.green : MC_THEMES.blue);   // theme = look only
     try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('700 26px "Manrope"'); await document.fonts.ready; } } catch (e) {}
 
     var W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -462,7 +481,9 @@
   // The overlay: preview + theme toggle + Share/Save. Blob for the current theme
   // is always pre-built, so the Share tap stays inside the user gesture (iOS).
   window.rlMatchCard = function (f) {
-    var st = { theme: (f && f.isHome === false) ? 'away' : 'home', blobs: {}, urls: {} };
+    // Home/away (sponsors, crest order) is fixed by the fixture. The theme just
+    // picks the LOOK — default green for home fixtures, blue for away.
+    var st = { theme: (f && f.isHome === false) ? 'blue' : 'green', blobs: {}, urls: {} };
     var ov = document.getElementById('rl-mc-ov');
     if (!ov) {
       ov = document.createElement('div'); ov.id = 'rl-mc-ov';
@@ -473,9 +494,11 @@
           '<button id="rl-mc-x" type="button" aria-label="Close" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;width:44px;height:44px;border-radius:8px;font-size:16px;cursor:pointer">×</button>' +
         '</div>' +
         '<div id="rl-mc-prev" style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;color:#666;font-family:Manrope,sans-serif;font-size:13px">Building…</div>' +
-        '<div style="display:flex;gap:8px;margin-top:12px">' +
-          '<button class="rl-mc-th" data-t="home" style="flex:1">Home</button>' +
-          '<button class="rl-mc-th" data-t="away" style="flex:1">Away</button>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">' +
+          '<button class="rl-mc-th" data-t="green">Green</button>' +
+          '<button class="rl-mc-th" data-t="blue">Blue</button>' +
+          '<button class="rl-mc-th" data-t="acerbis">Acerbis</button>' +
+          '<button class="rl-mc-th" data-t="night">Night</button>' +
         '</div>' +
         '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Manrope\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
         '<div style="font-family:Manrope,sans-serif;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
