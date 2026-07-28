@@ -47,6 +47,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="js/sponsor-rail.js"></script>
   <!-- Leaflet — free maps with OpenStreetMap tiles (no Google Maps billing). Used by Sponsor Radar. -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -5227,6 +5228,7 @@ function loadPostStudio() {
   fetchJSON('players', function (d) { psPlayers = (d && (d.players || d)) || []; psFields(); });
   fetchJSON('fixtures', function (d) { psFixtures = (d && d.fixtures) || []; psFields(); psBrief(); });
   fetchJSON('config', function (d) { psSeason = (d && d.seasonTicket) || null; if (PS.type === 'seasonticket') { psFields(); psRender(); } });
+  fetchJSON('partners', function (d) { if (d && d.contexts) { psPartners = d; psRender(); } });
 }
 // Matchday brief: the next fixture + one-tap starts, so the Studio answers
 // "what should I make today?" on open. One tap sets the template AND pre-fills
@@ -5849,9 +5851,39 @@ function psAutoFit(root) {
     }
   }
 }
+// ── SPONSOR RAIL (canonical) ─────────────────────────────────────────────────
+// Delegates entirely to the shared js/sponsor-rail.js component so the Studio,
+// the public share cards and the QC contact sheet produce identical layouts.
+// Football-first: the rail is a reserved bottom zone (templates shift bottom
+// content up by psBandH(H) via H2). CONTEXT-driven (home/away kit vs neutral),
+// fixed order, NO labels on exports. Logos are <img> (palette-recolour safe),
+// white on dark palettes / colour on light. Export is blocked if the rail's
+// collision gate fails (psLastRail.ok === false) — see psBuildBlob.
+var psPartners = null, psLastRail = null;
+// Rail is enabled per-template only after that template's bottom content has been
+// re-anchored to H2 (so football never collides with the rail). Verified: matchday.
+// Others roll out one at a time under the same QC gate.
+var PS_BAND_TYPES = { matchday:1 };
+var PS_KIT_TYPES  = { lineup:1, motm:1, signing:1, potm:1, birthday:1, goal:1, yellow:1, red:1 };  // player/kit content → home/away
+function psBandFormat(){ return { ig:'square', pt:'portrait', story:'story', x:'landscape' }[PS.size] || 'square'; }
+function psBandContext(){ if (PS_KIT_TYPES[PS.type]) return (PS.data && PS.data.kit === 'away') ? 'away' : 'home'; return 'neutral'; }
+function psHasBand(){ return !!(window.SponsorRail && psPartners && psPartners.contexts && PS_BAND_TYPES[PS.type]); }
+function psBandH(H){ var f = psBandFormat(); var pct = (psPartners && psPartners.railPct && psPartners.railPct[f]) || 0.14; return Math.round(H * pct); }
+function psRailLayout(W, H){ return psHasBand() ? SponsorRail.layout({ W:W, H:H, format:psBandFormat(), context:psBandContext(), manifest:psPartners }) : null; }
+function psPartnerBand(W, H, light){
+  var L = psRailLayout(W, H); psLastRail = L; if (!L) return '';
+  var line = light ? 'rgba(0,0,0,.13)' : 'rgba(255,255,255,.14)';
+  var out = '<div style="position:absolute;left:' + L.pad + 'px;right:' + L.pad + 'px;top:' + L.railTop + 'px;height:2px;background:' + line + '"></div>';
+  L.cells.forEach(function(c){
+    var src = SponsorRail.asset(c, light ? 'light' : 'dark');
+    out += '<img src="' + src + '" crossorigin="anonymous" style="position:absolute;left:' + c.x + 'px;top:' + c.y + 'px;width:' + c.w + 'px;height:' + c.h + 'px;object-fit:contain">';
+  });
+  return out;
+}
 function psRender() {
   var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
   var X = PS.size === 'x', ST = PS.size === 'story';
+  var H2 = H - (psHasBand() ? psBandH(H) : 0);   // bottom-content anchor: templates shift up to reserve the band
   var card = document.getElementById('ps-card'); if (!card) return;
   card.style.cssText = 'position:relative;width:' + W + 'px;height:' + H + 'px;background:' + psCardBg(PS.theme) + ';background-size:cover;overflow:hidden;color:' + t.text;
   var inner = psWM();
@@ -5895,7 +5927,7 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (mRlCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">RAYNERS LANE</div>';
     inner += '<div style="position:absolute;top:' + (cy + cz / 2 + 12) + 'px;left:' + (mOpCx - 190) + 'px;width:380px;text-align:center;' + beb(40, '#fff') + '">' + escH(crestName(mOpp)) + '</div>';
     inner += '<div style="position:absolute;top:' + (cy - 52) + 'px;left:0;right:0;text-align:center;' + beb(104, t.accent) + '">VS</div>';
-    var by = X ? H - 150 : (ST ? H - 360 : H - 250);
+    var by = X ? H2 - 150 : (ST ? H2 - 360 : H2 - 250);
     inner += ctr(by, '<span style="' + beb(64, '#fff') + '">' + escH(d.ko || '3:00 PM') + ' &middot; ' + escH((d.date || 'SAT 15 AUG')).toUpperCase() + '</span>');
     inner += ctr(by + 76, '<span style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">' + escH((d.venue || 'TITHE FARM, HARROW')).toUpperCase() + '</span>');
     inner += ctr(by + 116, '<span style="font-family:Manrope,sans-serif;font-size:18px;letter-spacing:2px;color:rgba(255,255,255,.6)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
@@ -6173,6 +6205,7 @@ function psRender() {
     inner += '<div style="position:absolute;top:' + (midY + (X ? 66 : 120)) + 'px;left:50%;transform:translateX(-50%);width:' + (X ? 170 : 230) + 'px;height:8px;background:' + t.accent + ';border-radius:4px"></div>';
     if (d.subline) inner += ctr(midY + (X ? 92 : 158), '<span style="font-family:Manrope,sans-serif;font-size:' + (X ? 26 : 32) + 'px;font-weight:600;color:#fff;padding:0 80px;display:inline-block">' + escH(d.subline) + '</span>');
   }
+  if (psHasBand()) inner += psPartnerBand(s.w, s.h, PS.theme === 'yellowflood' || PS.theme === 'light');
   inner += psBrand(t, s) + psFooter(t, s);
   // Palette recolour, scoped to THIS card's HTML only: every white TEXT token →
   // the palette ink/soft, so every card type stays legible on light OR dark.

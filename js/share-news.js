@@ -322,22 +322,29 @@
   //  the headline share card above; opened by the "Match Card" button on a
   //  fixture. On brand, with raynerslanefc.co.uk and #UpTheLane in the footer.
   // ══════════════════════════════════════════════════════════════════════════
+  // Partner manifest (cached once) — drives the presenting sponsor + the rail.
+  var _mani = null;
+  function manifest() { if (_mani) return _mani; _mani = fetch('data/partners.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); return _mani; }
+
+  // Presented Matchday themes — mirror the Studio. Home = green, Away = baby-blue
+  // (the club's away-kit colours). Auto-selected from the fixture's home/away.
   var MC_THEMES = {
-    dark: {
-      label: 'Dark', ink: W_, sub: 'rgba(245,243,237,.72)', accent: Y, vs: Y,
-      tagBg: Y, tagInk: '#0d0d0d', panel: 'rgba(255,255,255,.05)', rule: Y, url: Y, tag: W_,
+    home: {
+      label: 'Home', ink: W_, sub: 'rgba(245,243,237,.75)', accent: Y, vs: Y, foot: ['#FFD100', '#2a8048'],
       bg: function (x, W, H) {
-        x.fillStyle = BK; x.fillRect(0, 0, W, H);
-        var g = x.createRadialGradient(W * 0.5, H * 0.32, 0, W * 0.5, H * 0.32, H * 0.95);
-        g.addColorStop(0, '#1e3a24'); g.addColorStop(1, BK); x.fillStyle = g; x.fillRect(0, 0, W, H);
+        x.fillStyle = '#050505'; x.fillRect(0, 0, W, H);
+        var g = x.createRadialGradient(W * 0.26, H * 0.12, 0, W * 0.26, H * 0.12, H * 1.05);
+        g.addColorStop(0, '#1f6b3c'); g.addColorStop(0.46, '#0d3b21'); g.addColorStop(1, '#050505');
+        x.fillStyle = g; x.fillRect(0, 0, W, H);
       }
     },
-    yellow: {
-      label: 'Yellow', ink: '#0d0d0d', sub: 'rgba(13,13,13,.68)', accent: G, vs: G,
-      tagBg: '#0d0d0d', tagInk: Y, panel: 'rgba(0,0,0,.06)', rule: G, url: '#0d0d0d', tag: G,
+    away: {
+      label: 'Away', ink: W_, sub: 'rgba(245,243,237,.78)', accent: Y, vs: Y, foot: ['#FFD100', '#7fc4ff'],
       bg: function (x, W, H) {
-        var g = x.createLinearGradient(0, 0, 0, H);
-        g.addColorStop(0, '#FFDE42'); g.addColorStop(1, '#EFC200'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+        x.fillStyle = '#050a12'; x.fillRect(0, 0, W, H);
+        var g = x.createRadialGradient(W * 0.26, H * 0.12, 0, W * 0.26, H * 0.12, H * 1.08);
+        g.addColorStop(0, '#2f6ea8'); g.addColorStop(0.44, '#123b63'); g.addColorStop(1, '#050a12');
+        x.fillStyle = g; x.fillRect(0, 0, W, H);
       }
     }
   };
@@ -358,75 +365,82 @@
     return { dateLine: (d + ' · ' + ko).toUpperCase(), venue: venue, home: home };
   }
 
+  // PRESENTED MATCHDAY — public share card that mirrors the Studio theme:
+  // Acerbis top-left (kit supplier) · presenting shirt sponsor top-centre +
+  // PRESENTS (HDL home / McCafferty's away) · VS hero · Ashwood·King·AHiQ rail.
+  // Uses the SHARED SponsorRail component for identical geometry to the Studio.
+  // themeKey overrides home/away; default derives from the fixture.
   async function matchCardPng(f, themeKey) {
-    var t = MC_THEMES[themeKey] || MC_THEMES.dark;
-    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('600 26px "Manrope"'); await document.fonts.load('700 26px "Manrope"'); await document.fonts.ready; } } catch (e) {}
+    var home = themeKey ? themeKey === 'home' : (f.isHome !== false);
+    var t = home ? MC_THEMES.home : MC_THEMES.away;
+    try { if (document.fonts) { await document.fonts.load('400 96px "Bebas Neue"'); await document.fonts.load('700 26px "Manrope"'); await document.fonts.ready; } } catch (e) {}
 
     var W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
     var x = c.getContext('2d');
     t.bg(x, W, H);
 
-    var home = f.isHome !== false, opp = (f.opponent || 'TBC').toUpperCase();
+    var M = await manifest();
+    var pad = Math.round(W * 0.055);
+    var L = (window.SponsorRail && M) ? SponsorRail.layout({ W: W, H: H, format: 'square', context: 'presented', manifest: M }) : null;
+    var cH = L ? L.railTop : H - 120;                     // football lives above the rail
+
+    var opp = (f.opponent || 'TBC').toUpperCase();
     var RL = 'img/badge.png', OPP = f.oppCrest || f.image || 'img/badge.png';
     var leftCrest = home ? RL : OPP, rightCrest = home ? OPP : RL;
     var leftName = home ? 'RAYNERS LANE' : opp, rightName = home ? opp : 'RAYNERS LANE';
-    var leftHA = home ? 'HOME' : 'AWAY', rightHA = home ? 'AWAY' : 'HOME';
 
-    // header lockup
-    var badge = await loadImg('img/badge.png');
-    if (badge && badge.naturalWidth) x.drawImage(badge, 60, 52, 86, 86);
-    x.textAlign = 'left';
-    x.fillStyle = t.ink; x.font = "700 27px 'Manrope', sans-serif";
-    x.fillText('RAYNERS LANE FC', 160, 90);
-    x.fillStyle = t.sub; x.font = "400 18px 'Manrope', sans-serif";
-    x.fillText('EST. 1933 · HARROW', 160, 118);
-    // competition tag, top-right
-    var comp = /friendly/i.test(f.competition || '') ? 'PRE-SEASON' : /vase/i.test(f.competition || '') ? 'FA VASE' : /fa cup/i.test(f.competition || '') ? 'FA CUP' : 'MATCHDAY';
-    x.font = "700 20px 'Manrope', sans-serif";
-    var tw = x.measureText(comp).width + 32;
-    x.fillStyle = t.tagBg; x.fillRect(W - 60 - tw, 60, tw, 42);
-    x.fillStyle = t.tagInk; x.fillText(comp, W - 60 - tw + 16, 88);
+    // faint crest watermark
+    var wm = await loadImg('img/badge.png');
+    if (wm && wm.naturalWidth) { x.save(); x.globalAlpha = 0.05; var ws = W * 0.5; x.drawImage(wm, W * 0.62, H * 0.44 - ws / 2, ws, ws); x.restore(); }
 
-    // crests + VS
-    var cy = 400, lx = 300, rx = 780;
+    // ── Acerbis top-left (subtle technical-partner mark) ──
+    if (M) { var acA = await loadImg(M.sponsors.acerbis.white); if (acA && acA.naturalWidth) { var ah = Math.round(H * 0.05), aw = Math.round(ah * M.sponsors.acerbis.ar); x.drawImage(acA, pad, Math.round(H * 0.058), aw, ah); } }
+
+    // ── presenting sponsor top-centre + PRESENTS ──
+    if (M) {
+      var presId = home ? M.presents.home : M.presents.away, ps = M.sponsors[presId];
+      var pImg = await loadImg(ps.white), ptop = Math.round(H * 0.05), plh = Math.round(H * 0.055), plw = Math.round(plh * ps.ar);
+      if (pImg && pImg.naturalWidth) x.drawImage(pImg, (W - plw) / 2, ptop, plw, plh);
+      x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,.72)'; x.font = '800 ' + Math.max(12, Math.round(H * 0.014)) + 'px "Manrope", sans-serif';
+      try { x.letterSpacing = Math.round(H * 0.006) + 'px'; } catch (e) {}
+      x.fillText('PRESENTS', W / 2, ptop + plh + Math.round(H * 0.036));
+      try { x.letterSpacing = '0px'; } catch (e) {}
+    }
+
+    // ── MATCHDAY headline ──
+    x.textAlign = 'center'; x.fillStyle = W_; x.font = '400 ' + Math.round(H * 0.10) + 'px "Bebas Neue", sans-serif';
+    x.fillText('MATCHDAY', W / 2, Math.round(H * 0.28));
+
+    // ── VS crests ──
+    var cz = Math.round(H * 0.165), cy = Math.round(cH * 0.55), lx = Math.round(W * 0.30), rx = Math.round(W * 0.70);
     async function crest(src, cx) {
       var img = await loadImg(src);
-      x.fillStyle = t.panel; x.beginPath(); x.arc(cx, cy, 156, 0, Math.PI * 2); x.fill();
-      if (img && img.naturalWidth) {
-        var ar = img.naturalWidth / img.naturalHeight, S = 250, w = ar >= 1 ? S : S * ar, h = ar >= 1 ? S / ar : S;
-        x.drawImage(img, cx - w / 2, cy - h / 2, w, h);
-      }
+      if (img && img.naturalWidth) { var ar = img.naturalWidth / img.naturalHeight, S = cz, w = ar >= 1 ? S : S * ar, h = ar >= 1 ? S / ar : S; x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 22; x.shadowOffsetY = 8; x.drawImage(img, cx - w / 2, cy - h / 2, w, h); x.restore(); }
     }
     await crest(leftCrest, lx); await crest(rightCrest, rx);
-    x.textAlign = 'center'; x.fillStyle = t.vs; x.font = "400 104px 'Bebas Neue', sans-serif";
-    x.fillText('VS', W / 2, cy + 36);
+    x.textAlign = 'center'; x.fillStyle = t.vs; x.font = '400 ' + Math.round(H * 0.075) + 'px "Bebas Neue", sans-serif';
+    x.fillText('VS', W / 2, cy + Math.round(H * 0.026));
 
-    // names + HOME/AWAY
-    x.fillStyle = t.ink;
-    [[leftName, lx], [rightName, rx]].forEach(function (n) {
-      var s = fitFont(x, n[0], 430, 56, "'Bebas Neue', sans-serif");
-      x.fillText(n[0], n[1], cy + 250);
-    });
-    x.fillStyle = t.sub; x.font = "700 19px 'Manrope', sans-serif";
-    x.fillText(leftHA, lx, cy + 288); x.fillText(rightHA, rx, cy + 288);
+    // ── team names ──
+    x.fillStyle = W_;
+    [[leftName, lx], [rightName, rx]].forEach(function (n) { var s = fitFont(x, n[0], W * 0.34, Math.round(H * 0.03), '"Bebas Neue", sans-serif'); x.font = '400 ' + s + 'px "Bebas Neue", sans-serif'; x.fillText(n[0], n[1], Math.round(cH * 0.76)); });
 
-    // detail band — date · kick-off, then venue
-    var by = 762, det = mcDetails(f);
-    x.fillStyle = t.panel; x.fillRect(60, by, W - 120, 148);
-    x.fillStyle = t.rule; x.fillRect(60, by, 6, 148);
-    x.textAlign = 'center';
-    x.fillStyle = t.accent; x.font = "400 46px 'Bebas Neue', sans-serif";
-    x.fillText(det.dateLine, W / 2, by + 68);
-    x.fillStyle = t.ink; var vs = fitFont(x, det.venue, W - 200, 30, "'Manrope', sans-serif");
-    x.font = "600 " + vs + "px 'Manrope', sans-serif";
-    x.fillText(det.venue, W / 2, by + 116);
+    // ── date · KO · venue ──
+    var det = mcDetails(f);
+    x.fillStyle = t.accent; x.font = '400 ' + Math.round(H * 0.032) + 'px "Bebas Neue", sans-serif';
+    x.fillText(det.dateLine, W / 2, Math.round(cH * 0.86));
+    x.fillStyle = t.sub; x.font = '600 ' + Math.round(H * 0.02) + 'px "Manrope", sans-serif';
+    x.fillText(det.venue.toUpperCase(), W / 2, Math.round(cH * 0.92));
 
-    // footer — site + #UpTheLane
-    x.fillStyle = t.rule; x.globalAlpha = .9; x.fillRect(0, H - 92, W, 4); x.globalAlpha = 1;
-    x.textAlign = 'left'; x.fillStyle = t.url; x.font = "700 27px 'Manrope', sans-serif";
-    x.fillText('raynerslanefc.co.uk', 64, H - 34);
-    x.textAlign = 'right'; x.fillStyle = t.tag; x.font = "400 40px 'Bebas Neue', sans-serif";
-    x.fillText('#UPTHELANE', W - 64, H - 30);
+    // ── the sponsor rail (identical geometry to the Studio) ──
+    if (L) {
+      x.strokeStyle = 'rgba(255,255,255,.14)'; x.lineWidth = 2; x.beginPath(); x.moveTo(L.pad, L.railTop); x.lineTo(W - L.pad, L.railTop); x.stroke();
+      for (var i = 0; i < L.cells.length; i++) { var cc = L.cells[i], im = await loadImg(SponsorRail.asset(cc, 'dark')); if (im && im.naturalWidth) x.drawImage(im, cc.x, cc.y, cc.w, cc.h); }
+    }
+
+    // footer accent bar
+    var fg = x.createLinearGradient(0, 0, W, 0); fg.addColorStop(0, t.foot[0]); fg.addColorStop(1, t.foot[1]);
+    x.fillStyle = fg; x.fillRect(0, H - 12, W, 12);
 
     return new Promise(function (res) { c.toBlob(res, 'image/png'); });
   }
@@ -448,7 +462,7 @@
   // The overlay: preview + theme toggle + Share/Save. Blob for the current theme
   // is always pre-built, so the Share tap stays inside the user gesture (iOS).
   window.rlMatchCard = function (f) {
-    var st = { theme: 'dark', blobs: {}, urls: {} };
+    var st = { theme: (f && f.isHome === false) ? 'away' : 'home', blobs: {}, urls: {} };
     var ov = document.getElementById('rl-mc-ov');
     if (!ov) {
       ov = document.createElement('div'); ov.id = 'rl-mc-ov';
@@ -460,8 +474,8 @@
         '</div>' +
         '<div id="rl-mc-prev" style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#0a0a0a;display:flex;align-items:center;justify-content:center;color:#666;font-family:Manrope,sans-serif;font-size:13px">Building…</div>' +
         '<div style="display:flex;gap:8px;margin-top:12px">' +
-          '<button class="rl-mc-th" data-t="dark" style="flex:1">Dark</button>' +
-          '<button class="rl-mc-th" data-t="yellow" style="flex:1">Yellow</button>' +
+          '<button class="rl-mc-th" data-t="home" style="flex:1">Home</button>' +
+          '<button class="rl-mc-th" data-t="away" style="flex:1">Away</button>' +
         '</div>' +
         '<button id="rl-mc-share" style="width:100%;margin-top:10px;background:#FFD100;color:#0d0d0d;border:none;border-radius:10px;padding:13px;font-family:\'Manrope\',sans-serif;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Share / Save card</button>' +
         '<div style="font-family:Manrope,sans-serif;font-size:11px;color:#888;text-align:center;margin-top:8px">Pick a theme, then share to WhatsApp / Instagram or save to your device.</div>' +
