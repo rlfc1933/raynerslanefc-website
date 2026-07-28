@@ -1,0 +1,17 @@
+{
+  "_note": "Central partner-band registry — drives the uniform sponsor band on every shareable graphic (Studio templates + public fixture/match share cards). Isolated from data/sponsors.json (the homepage partner wall) on purpose, so band changes never regress the wall. Each partner has a colour and a mono-white asset; the band uses white on dark cards and colour on light cards. `optical` eases wide wordmarks so no logo visually dominates (equal optical height, not equal width).",
+  "band": {
+    "kit": [
+      { "name": "Acerbis",            "role": "Kit Supplier",     "colour": "img/sponsors/band/acerbis.png",     "white": "img/sponsors/band/acerbis-white.png",     "optical": 1.0 },
+      { "name": "Hanlon Dry Lining",  "role": "Home Kit Sponsor", "colour": "img/sponsors/band/hdl.png",         "white": "img/sponsors/band/hdl-white.png",         "optical": 1.0 },
+      { "name": "McCafferty's",       "role": "Away Kit Sponsor", "colour": "img/sponsors/band/mccaffertys.png", "white": "img/sponsors/band/mccaffertys-white.png", "optical": 0.8 }
+    ],
+    "club": [
+      { "name": "Ashwood Builders Merchants", "role": "Club Partner", "colour": "img/sponsors/band/ashwood.png", "white": "img/sponsors/band/ashwood-white.png", "optical": 0.78 },
+      { "name": "The King, Denham",           "role": "Club Partner", "colour": "img/sponsors/band/king.png",    "white": "img/sponsors/band/king-white.png",    "optical": 1.0 },
+      { "name": "AHiQ",                       "role": "Club Partner", "colour": "img/sponsors/band/ahiq.svg",    "white": "img/sponsors/band/ahiq-white.svg",    "optical": 0.9 }
+    ]
+  },
+  "labels": { "kit": "Kit Partners", "club": "Club Partners" },
+  "updatedAt": "2026-07-28T00:00:00.000Z"
+}
