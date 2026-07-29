@@ -285,7 +285,18 @@
       "apps": 0,
       "goals": 0,
       "photo": ""
+    },
+    {
+      "id": "player-tobi-bolago",
+      "no": 0,
+      "name": "Tobi Bolago",
+      "pos": "Midfielder",
+      "role": "",
+      "age": 0,
+      "apps": 0,
+      "goals": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-29T17:09:53.392Z"
+  "updatedAt": "2026-07-29T17:10:33.733Z"
 }
