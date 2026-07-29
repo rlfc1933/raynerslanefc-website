@@ -331,21 +331,6 @@
       "photo": "/img/players/ruben-santangelo.webp"
     },
     {
-      "id": "player-alvin-walters",
-      "number": 0,
-      "name": "Alvin Walters",
-      "position": "Midfielder",
-      "role": "Defensive Midfield",
-      "age": 28,
-      "nationality": "",
-      "nickname": "",
-      "bio": "",
-      "apps": 0,
-      "goals": 0,
-      "assists": 0,
-      "photo": ""
-    },
-    {
       "id": "player-casey-yousuff-phillips",
       "number": 0,
       "name": "Casey Yousuff-Phillips",
@@ -359,7 +344,52 @@
       "goals": 0,
       "assists": 0,
       "photo": "/img/players/casey-yousuff-phillips.webp"
+    },
+    {
+      "id": "player-daniel-ezeigwe-udanoh",
+      "number": 0,
+      "name": "Daniel Ezeigwe Udanoh",
+      "position": "Defender",
+      "role": "",
+      "age": 0,
+      "nationality": "",
+      "nickname": "",
+      "bio": "",
+      "apps": 0,
+      "goals": 0,
+      "assists": 0,
+      "photo": ""
+    },
+    {
+      "id": "player-tobi-bolagi",
+      "number": 0,
+      "name": "Tobi Bolagi",
+      "position": "Midfielder",
+      "role": "",
+      "age": 0,
+      "nationality": "",
+      "nickname": "",
+      "bio": "",
+      "apps": 0,
+      "goals": 0,
+      "assists": 0,
+      "photo": ""
+    },
+    {
+      "id": "player-beau-pryce",
+      "number": 0,
+      "name": "Beau Pryce",
+      "position": "Forward",
+      "role": "",
+      "age": 0,
+      "nationality": "",
+      "nickname": "",
+      "bio": "",
+      "apps": 0,
+      "goals": 0,
+      "assists": 0,
+      "photo": ""
     }
   ],
-  "updatedAt": "2026-07-14T23:16:53.213Z"
+  "updatedAt": "2026-07-29T17:09:53.392Z"
 }
