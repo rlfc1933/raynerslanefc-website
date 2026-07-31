@@ -1,40 +1,6 @@
 {
   "fixtures": [
     {
-      "id": "friendly-hayes-yeading-20260704",
-      "date": "2026-07-04",
-      "kickoff": "15:00",
-      "opponent": "Hayes & Yeading United",
-      "oppCrest": "",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Pre-Season Friendly",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
-      "shareHeadline": "HAYES & YEADING UNITED AT THE LANE",
-      "shareHeadlineAuto": "HAYES & YEADING UNITED AT THE LANE",
-      "season": "2026-27"
-    },
-    {
-      "id": "friendly-cockfosters-20260718",
-      "date": "2026-07-18",
-      "kickoff": "15:00",
-      "opponent": "Cockfosters",
-      "oppCrest": "img/crests/cockfosters.svg",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Pre-Season Friendly",
-      "status": "played",
-      "us": 1,
-      "them": 0,
-      "scorers": "",
-      "shareHeadline": "COCKFOSTERS AT THE LANE",
-      "shareHeadlineAuto": "COCKFOSTERS AT THE LANE",
-      "season": "2026-27"
-    },
-    {
       "id": "fwp-578225",
       "date": "2026-08-01",
       "kickoff": "15:00",
@@ -755,5 +721,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-07-31T00:18:58.121Z"
+  "updatedAt": "2026-07-31T02:13:39.901Z"
 }
