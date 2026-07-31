@@ -179,6 +179,9 @@ function buildRow(m, fixture) {
   };
 }
 
+// Exported for the test suite — pure functions, no network, no database.
+exports._internal = { matchFixture, buildRow, norm, pence };
+
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   if (event.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
