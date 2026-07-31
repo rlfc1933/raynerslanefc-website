@@ -1,0 +1,265 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MATCH DAY OPERATIONS
+
+   Built to the interaction standard of scan.html, not the old Analytics form.
+   This is used outdoors, on a phone, in daylight, by someone wearing gloves
+   with a queue in front of them. Every choice below follows from that.
+
+   · minimum 48px touch targets, 64px on the tally controls
+   · 16px+ inputs so iOS never zooms on focus
+   · high contrast: the tally numbers are the largest thing on the screen
+   · nothing important behind a hover state
+   · a persistent save indicator, never a silent write
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#panel-mdops {
+  --md-ok:   #34D399;
+  --md-warn: #F59E0B;
+  --md-bad:  #EF4444;
+  --md-info: #38BDF8;
+}
+
+/* ── SAVE STATE ─────────────────────────────────────────────────────────────
+   Sticky, always visible while counting. A volunteer must never have to guess
+   whether the number in their hand is safe. */
+.md-savebar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin: -4px -2px 12px;
+  background: var(--c2, #1a1a1a); border: 1px solid var(--br, #2a2a2a);
+  border-radius: 10px;
+  font-family: var(--fc, system-ui); font-size: 12px; letter-spacing: .04em;
+}
+.md-savebar__dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px;
+  background: var(--md-ok);
+}
+.md-savebar[data-state="saving"]  .md-savebar__dot { background: var(--md-info); animation: md-pulse 1s infinite; }
+.md-savebar[data-state="dirty"]   .md-savebar__dot { background: var(--md-warn); }
+.md-savebar[data-state="offline"] .md-savebar__dot { background: var(--md-warn); }
+.md-savebar[data-state="error"]   .md-savebar__dot { background: var(--md-bad); }
+.md-savebar__txt { color: var(--w, #f5f3ed); font-weight: 700; }
+.md-savebar__sub { color: var(--gr, #8F8F8F); margin-left: auto; text-align: right; font-weight: 600; }
+@keyframes md-pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+/* ── SUMMARY TILES ──────────────────────────────────────────────────────── */
+.md-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+@media (min-width: 620px) { .md-summary { grid-template-columns: repeat(4, 1fr); } }
+.md-stat {
+  background: var(--c, #161616); border: 1px solid var(--br, #2a2a2a);
+  border-radius: 10px; padding: 12px; text-align: left;
+  min-height: 68px; display: flex; flex-direction: column; justify-content: center;
+  cursor: pointer; width: 100%; font: inherit; color: inherit;
+  border-left: 3px solid var(--accent, var(--gr));
+}
+.md-stat:focus-visible { outline: 3px solid var(--y, #FFD100); outline-offset: 2px; }
+.md-stat[aria-pressed="true"] { background: rgba(255,209,0,.08); border-color: rgba(255,209,0,.4); }
+.md-stat__num { font-family: var(--fd, system-ui); font-size: 26px; line-height: 1; color: var(--w, #fff); }
+.md-stat__lbl { font-family: var(--fc, system-ui); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gr, #8F8F8F); margin-top: 5px; }
+
+/* ── TODAY ──────────────────────────────────────────────────────────────── */
+.md-today {
+  border: 1px solid rgba(255,209,0,.45); background: linear-gradient(135deg, rgba(255,209,0,.10), transparent 60%);
+  border-radius: 12px; padding: 14px; margin-bottom: 14px;
+}
+.md-today__eyebrow { font-family: var(--fc); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--y, #FFD100); font-weight: 800; }
+.md-today__opp { font-family: var(--fd); font-size: 22px; color: var(--w); margin: 4px 0 2px; line-height: 1.1; }
+.md-today__meta { font-family: var(--fb); font-size: 12.5px; color: var(--gr); }
+
+/* ── SEASON TABLE ───────────────────────────────────────────────────────────
+   A real table on desktop; on a phone each row becomes a card, because a
+   10-column table on a 375px screen is unreadable. */
+.md-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.md-table { width: 100%; border-collapse: collapse; font-family: var(--fb); font-size: 13px; }
+.md-table th {
+  font-family: var(--fc); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gr); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--br); white-space: nowrap;
+}
+.md-table td { padding: 10px; color: var(--w); border-bottom: 1px solid var(--br); vertical-align: middle; }
+.md-table tbody tr:hover { background: rgba(255,255,255,.03); }
+.md-table .md-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 700px) {
+  .md-table, .md-table tbody, .md-table tr, .md-table td { display: block; width: 100%; }
+  .md-table thead { display: none; }
+  .md-table tr {
+    border: 1px solid var(--br); border-radius: 10px; margin-bottom: 8px; padding: 4px 0;
+    background: var(--c);
+  }
+  .md-table td { border: none; padding: 5px 12px; display: flex; justify-content: space-between; gap: 12px; }
+  .md-table td::before {
+    content: attr(data-label);
+    font-family: var(--fc); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--gr); flex: 0 0 auto;
+  }
+  .md-table td.md-cell-action { justify-content: stretch; padding: 8px 12px 12px; }
+  .md-table td.md-cell-action::before { content: none; }
+  .md-table .md-num { text-align: right; }
+}
+
+/* ── STATUS PILLS ───────────────────────────────────────────────────────── */
+.md-pill {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-family: var(--fc); font-size: 10px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; white-space: nowrap;
+  border: 1px solid currentColor;
+}
+.md-pill--upcoming    { color: #9CA3AF; }
+.md-pill--ready       { color: var(--md-info); }
+.md-pill--in_progress { color: var(--y, #FFD100); }
+.md-pill--awaiting_reconciliation { color: var(--md-warn); }
+.md-pill--completed   { color: var(--md-ok); }
+.md-pill--locked      { color: var(--md-ok); background: rgba(52,211,153,.12); }
+.md-pill--cancelled, .md-pill--postponed { color: #9CA3AF; }
+.md-pill--abandoned   { color: var(--md-bad); }
+.md-pill--legacy      { color: #A78BFA; }
+
+/* ── THE TALLY ──────────────────────────────────────────────────────────────
+   The reason this module exists. Big, unambiguous, thumb-reachable. */
+.md-tally { display: flex; flex-direction: column; gap: 8px; }
+.md-tally__row {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  background: var(--c); border: 1px solid var(--br); border-radius: 12px; padding: 10px 12px;
+}
+.md-tally__row--primary { border-color: rgba(255,209,0,.4); background: rgba(255,209,0,.05); }
+/* The label column must be allowed to shrink, or its min-content width pushes
+   the 64px controls off a narrow screen. */
+.md-tally__row > div:first-child { min-width: 0; }
+.md-tally__label { font-family: var(--fc); font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--w); overflow-wrap: break-word; }
+.md-tally__price { font-family: var(--fb); font-size: 11.5px; color: var(--gr); margin-top: 2px; }
+.md-tally__ctrls { display: flex; align-items: center; gap: 8px; }
+.md-tally__btn {
+  width: 64px; height: 64px; min-width: 64px; border-radius: 14px;
+  background: var(--c2, #1f1f1f); border: 1px solid var(--br);
+  color: var(--w); font-size: 30px; line-height: 1; font-weight: 300;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  user-select: none;
+}
+.md-tally__btn:active { transform: scale(.94); background: var(--y, #FFD100); color: #111; }
+.md-tally__btn:focus-visible { outline: 3px solid var(--y, #FFD100); outline-offset: 2px; }
+.md-tally__btn[disabled] { opacity: .3; cursor: not-allowed; }
+.md-tally__btn--plus { background: rgba(255,209,0,.15); border-color: rgba(255,209,0,.45); }
+.md-tally__count {
+  min-width: 68px; text-align: center;
+  font-family: var(--fd, system-ui); font-size: 34px; line-height: 1; color: var(--w);
+  font-variant-numeric: tabular-nums;
+}
+.md-tally__count input {
+  width: 100%; background: transparent; border: none; color: inherit;
+  font: inherit; text-align: center; padding: 0; -moz-appearance: textfield;
+}
+.md-tally__count input::-webkit-outer-spin-button,
+.md-tally__count input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.md-tally__count input:focus { outline: 2px solid var(--y); border-radius: 6px; }
+
+/* On a phone the label and the three 64px controls cannot share a row: the
+   label column collapses and the text wraps one letter per line. Stack them
+   instead — label above, controls below at full width. The buttons are NOT
+   shrunk to make a one-line row fit, because a target that works with cold
+   hands matters more than a compact layout. */
+@media (max-width: 560px) {
+  .md-tally__row { grid-template-columns: 1fr; gap: 10px; }
+  .md-tally__ctrls { justify-content: space-between; }
+  .md-tally__count { flex: 1; }
+}
+
+/* Running totals — sticky at the bottom so they are always in view. */
+.md-running {
+  position: sticky; bottom: 0; z-index: 30;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--br); border: 1px solid var(--br); border-radius: 12px;
+  overflow: hidden; margin-top: 14px;
+}
+.md-running__cell { background: var(--c2, #1a1a1a); padding: 12px; text-align: center; }
+.md-running__num { font-family: var(--fd); font-size: 28px; color: var(--y, #FFD100); line-height: 1; font-variant-numeric: tabular-nums; }
+.md-running__lbl { font-family: var(--fc); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gr); margin-top: 4px; }
+
+/* ── RECONCILIATION ─────────────────────────────────────────────────────────
+   The arithmetic is shown, not asserted. Staff must be able to see WHY the
+   system says there is a discrepancy. */
+.md-sum { background: var(--c); border: 1px solid var(--br); border-radius: 10px; padding: 12px; margin: 10px 0; }
+.md-sum__row {
+  display: flex; justify-content: space-between; gap: 14px; padding: 6px 0;
+  font-family: var(--fb); font-size: 13px; color: var(--w);
+}
+.md-sum__row span:first-child { color: var(--gr); }
+.md-sum__row--total { border-top: 1px solid var(--br); margin-top: 6px; padding-top: 10px; font-weight: 700; }
+.md-sum__row .md-money { font-variant-numeric: tabular-nums; }
+.md-var { border-radius: 10px; padding: 12px; margin: 10px 0; font-family: var(--fb); font-size: 13px; line-height: 1.5; }
+.md-var--ok   { background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.35); color: #A7F3D0; }
+.md-var--warn { background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.40); color: #FCD9A0; }
+.md-var--bad  { background: rgba(239,68,68,.10);  border: 1px solid rgba(239,68,68,.40);  color: #FCA5A5; }
+.md-var b { color: var(--w); }
+
+/* ── AUDIT ──────────────────────────────────────────────────────────────── */
+.md-audit { display: flex; flex-direction: column; gap: 8px; }
+.md-audit__item {
+  border-left: 2px solid var(--br); padding: 6px 0 6px 12px;
+  font-family: var(--fb); font-size: 12.5px; color: var(--gr); line-height: 1.5;
+}
+.md-audit__item b { color: var(--w); font-weight: 700; }
+.md-audit__when { font-family: var(--fc); font-size: 10.5px; letter-spacing: .06em; color: var(--gr); }
+
+/* ── ARCHIVE (3 levels, never one giant dropdown) ───────────────────────── */
+.md-arch__season, .md-arch__comp {
+  border: 1px solid var(--br); border-radius: 10px; margin-bottom: 8px; overflow: hidden;
+}
+.md-arch__head {
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+  background: var(--c); border: none; color: var(--w); font: inherit;
+  padding: 14px; min-height: 52px; cursor: pointer;
+}
+.md-arch__head:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; }
+.md-arch__ttl { font-family: var(--fd); font-size: 17px; letter-spacing: .03em; }
+.md-arch__meta { margin-left: auto; font-family: var(--fc); font-size: 11px; color: var(--gr); text-align: right; }
+.md-arch__body { padding: 0 10px 10px; }
+.md-arch__comp { margin: 8px 0 0; }
+.md-arch__comp .md-arch__head { background: var(--c2, #1a1a1a); min-height: 46px; padding: 10px 12px; }
+.md-arch__comp .md-arch__ttl { font-size: 14px; }
+
+/* ── EMPTY / LOADING / ERROR ────────────────────────────────────────────── */
+.md-empty, .md-loading, .md-error {
+  text-align: center; padding: 26px 16px; border-radius: 10px;
+  font-family: var(--fb); font-size: 13.5px; line-height: 1.6; border: 1px dashed var(--br);
+  color: var(--gr);
+}
+.md-error { border-style: solid; border-color: rgba(239,68,68,.4); background: rgba(239,68,68,.06); color: #FCA5A5; }
+.md-empty b, .md-error b { color: var(--w); display: block; margin-bottom: 4px; font-family: var(--fc); letter-spacing: .04em; }
+.md-denied {
+  border: 1px solid rgba(245,158,11,.4); background: rgba(245,158,11,.07);
+  border-radius: 10px; padding: 14px; font-family: var(--fb); font-size: 13px;
+  line-height: 1.6; color: #FCD9A0;
+}
+.md-denied b { color: var(--w); }
+
+/* ── SUB-NAV ────────────────────────────────────────────────────────────── */
+.md-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 2px; }
+.md-tabs button {
+  flex: 0 0 auto; min-height: 44px; padding: 10px 15px; border-radius: 9px;
+  background: var(--c); border: 1px solid var(--br); color: var(--gr);
+  font-family: var(--fc); font-size: 12px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; cursor: pointer; white-space: nowrap;
+}
+.md-tabs button[aria-selected="true"] { background: var(--y, #FFD100); border-color: var(--y); color: #111; }
+.md-tabs button:focus-visible { outline: 3px solid var(--y); outline-offset: 2px; }
+
+/* ── PRINT: the match-day sheet ─────────────────────────────────────────────
+   A volunteer with no signal still needs a sheet on a clipboard. */
+@media print {
+  body * { visibility: hidden !important; }
+  #md-print, #md-print * { visibility: visible !important; }
+  #md-print {
+    position: absolute; inset: 0; width: 100%;
+    background: #fff !important; color: #000 !important;
+    font-family: Georgia, 'Times New Roman', serif; padding: 18mm;
+  }
+  #md-print table { width: 100%; border-collapse: collapse; }
+  #md-print th, #md-print td { border: 1px solid #999; padding: 6px 8px; text-align: left; color: #000 !important; }
+  #md-print h1 { font-size: 20pt; margin: 0 0 2mm; }
+  #md-print h2 { font-size: 12pt; margin: 6mm 0 2mm; border-bottom: 2px solid #000; padding-bottom: 1mm; }
+  #md-print .md-print__rule { height: 8mm; }
+  .md-noprint { display: none !important; }
+}
+#md-print { display: none; }
+@media print { #md-print { display: block; } }

@@ -11,6 +11,7 @@
        categories and every calculation. The SAME file the server requires, so
        the phone and the database can never disagree about the arithmetic. -->
   <script src="js/matchday-core.js"></script>
+  <script src="js/matchday-ops.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -63,6 +64,7 @@
   <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
+  <link rel="stylesheet" href="css/matchday-ops.css">
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:var(--font-display);--fc:var(--font-body);--fb:var(--font-body)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -400,6 +402,21 @@
     .bell-btn{position:relative;background:none;border:1px solid var(--br);color:var(--w);border-radius:8px;width:38px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
     .bell-btn:active{transform:scale(.94)}
     .bell-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:999px;background:var(--re);color:#fff;font-family:var(--fc);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px}
+    /* The header is a 7-item flex row that could not shrink, so on a phone it
+       pushed ~100px past the viewport and the WHOLE PORTAL scrolled sideways.
+       That is felt worst exactly where it matters least to have it: outdoors,
+       one-handed, at the gate. The title now truncates instead of shoving, and
+       below 480px the paddings tighten and the Install label drops to its icon. */
+    .app-hdr{flex-wrap:nowrap}
+    .app-ttl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #staff-who{min-width:0;overflow:hidden;text-overflow:ellipsis}
+    @media (max-width:480px){
+      .app-hdr{padding:10px 12px;gap:8px}
+      .install-btn{padding:7px 9px}
+      .install-btn span{display:none}
+      .app-ttl{font-size:18px}
+      #staff-who{max-width:96px}
+    }
     .notif{position:fixed;top:56px;right:10px;left:10px;max-width:420px;margin-left:auto;z-index:9500;background:linear-gradient(180deg,var(--c),var(--dk));border:1px solid var(--br);border-top:3px solid var(--y);border-radius:14px;box-shadow:0 24px 60px -24px rgba(0,0,0,.9);display:none;max-height:75vh;overflow:auto}
     .notif.on{display:block}
     .notif__hdr{padding:14px 16px;border-bottom:1px solid var(--br);font-family:var(--fd);font-size:18px;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between}
@@ -774,6 +791,10 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2M14 18h2"/></svg></span>
           <div class="tile-name">Fixtures</div><div class="tile-desc">Season schedule &amp; results</div>
         </button>
+        <button class="tile" style="--accent:#FFD100" onclick="openPanel('mdops')">
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M3 8h18M6 3v3M18 3v3"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 12h3M8 16h3M14 12h2M14 16h2"/></svg></span>
+          <div class="tile-name">Match Day Ops</div><div class="tile-desc">Gate, attendance &amp; takings &mdash; every home game</div>
+        </button>
         <button class="tile" style="--accent:#10B981" onclick="openPanel('venues')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.7-7-11a7 7 0 1 1 14 0c0 5.3-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></span>
@@ -1065,6 +1086,21 @@
     </div>
 
     <!-- FIXTURES (Season Schedule — the Match Engine spine) -->
+    <!-- MATCH DAY OPERATIONS — every home fixture, its gate, its money.
+         Sits in the Match Day section of the dashboard, one tap in, open to
+         every committee member. Sensitive ACTIONS are permission-gated
+         server-side; the tile itself is not hidden, because the person on the
+         gate on a Saturday must be able to find it. -->
+    <div class="panel" id="panel-mdops">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-ticket"></i> Match Day Ops</div></div>
+      <div class="snote">
+        <p><strong style="color:var(--w)">Every home game, start to finish.</strong> Fixtures come straight from your
+        season schedule &mdash; you never enter a match twice. Prepare it, count the gate on your phone, reconcile the
+        money, then a senior officer approves and locks it.</p>
+      </div>
+      <div id="mdops-body"><div class="md-loading">Loading&hellip;</div></div>
+    </div>
+
     <div class="panel" id="panel-fixtures">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-calendar"></i> Fixtures</div></div>
       <div style="font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.5;margin-bottom:14px">One season schedule that powers the <b style="color:var(--w)">Fixtures page</b>, the <b style="color:var(--w)">home countdown</b>, the <b style="color:var(--w)">calendar feed</b> and <b style="color:var(--w)">Post Studio</b>. Add a fixture, then add the score once it&rsquo;s played.</div>
@@ -3271,6 +3307,7 @@ function applyStaffIdentity() {
 var TILE_INFO = {
   playbook:   ['The Lane Business Playbook', 'The big one — how the club grows its income. Real examples, an income calculator, a pitch generator, the Wins Board and every role\'s job. Start here.'],
   matchday:   ['Match Day', 'Turn the live scoreboard on/off and tap the score during a game — fans see it within seconds on the home page.'],
+  mdops:      ['Match Day Ops', 'Every home fixture, from your season schedule. Prepare the gate, count admissions on your phone, reconcile cash and card, then a senior officer approves and locks the record. Open to all committee — the money figures and approval need your own staff password.'],
   programme:  ['Programme', 'Set the match-day programme notes & preview that appear on the Programme page.'],
   matchreport:['Match Report', 'Write the post-match report that goes to the News page.'],
   gallery:    ['Gallery', 'Upload match-day and squad photos to the public Gallery.'],
@@ -3449,6 +3486,11 @@ async function submitRoleLogin() {
   if (!ok && !serverRejected) ok = (pass === STAFF_DEFAULT_PW);
   if (!ok) { document.getElementById('role-err').textContent = 'Wrong password — try again'; setVal('role-pass', ''); return; }
   try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, at: Date.now() })); } catch (e) {}
+  // Mint the signed Match Day Ops identity NOW, while the password is still in
+  // hand. That is what lets Match Day Ops open in one tap with no second
+  // password, while every entry it writes is still attributed server-side.
+  // Best-effort: it must never block getting into the portal.
+  try { if (window.MDOps) MDOps.mintSession(PIN, username, pass); } catch (e) {}
   // Record the sign-in (every login, including the default password) so the
   // chairman sees the full history. Best-effort — never blocks getting in.
   try {
@@ -3656,6 +3698,7 @@ function openPanel(name) {
   if (name === 'news')      renderNews();
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
+  if (name === 'mdops')     MDOps.init();
   if (name === 'venues')    vnInit();
   if (name === 'signoff')   soInit();
   if (name === 'programme') initProgramme();
