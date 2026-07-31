@@ -548,11 +548,13 @@ test('every fixture row is clickable, not just the action button', () => {
 
 test('the action column cannot be clipped out of reach', () => {
   const css = fs.readFileSync(path.join(ROOT, 'css/matchday-ops.css'), 'utf8');
-  // Below 1100px the table becomes cards, where the action button is full width.
-  assert.ok(/@media \(max-width: 1100px\)/.test(css),
-    'the table must become cards well before a laptop width');
-  // Above that, the action cell is pinned to the right edge.
-  assert.ok(/@media \(min-width: 1101px\)[\s\S]{0,400}td\.md-cell-action \{[\s\S]{0,120}position: sticky/.test(css),
-    'the action cell must be sticky so horizontal scroll cannot hide it');
+  // The panel is a ~700px content column at EVERY viewport width, so a
+  // viewport media query was the wrong measurement entirely. Cards always.
+  assert.ok(!/@media \([^)]*width[^)]*\)\s*\{[^}]*\.md-table, \.md-table tbody/.test(css),
+    'the card layout must not be behind a viewport media query');
+  assert.ok(/\.md-table, \.md-table tbody, \.md-table tr, \.md-table td \{ display: block/.test(css),
+    'rows must be cards unconditionally');
+  assert.ok(/\.md-table td\.md-cell-action \{ justify-content: stretch/.test(css),
+    'the action button must be full width in every card');
   assert.ok(/\.md-row \{ cursor: pointer; \}/.test(css), 'the row must look clickable');
 });
