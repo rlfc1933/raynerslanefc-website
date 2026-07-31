@@ -284,18 +284,30 @@
 
   function viewAreas() {
     var chair = isChairman();
+    // COMPACT BY DEFAULT. Previously every area rendered its full grid of tool
+    // cards, which made the mobile home over four screens tall. An area is now
+    // a single readable row — the club question, the job people usually want,
+    // and a count — and the tools appear only when it is opened. Nothing is
+    // hidden: everything is one tap away, and the desktop layout is unchanged
+    // in substance, just tighter.
     var h = '<section class="ph-sec" aria-labelledby="ph-areas-h">' +
       '<h2 class="ph-h" id="ph-areas-h">Club areas</h2>' +
-      '<p class="ph-sub">Everything the portal can do, grouped the way the club works.</p>' +
+      '<p class="ph-sub">Everything the portal can do, grouped the way the club works. Tap an area to see its tools.</p>' +
       '<div class="ph-areas">';
     T.AREAS.forEach(function (a) {
-      if (a.key === 'system' && !chair) { /* still shown, but flagged */ }
       var tools = T.byArea(a.key).filter(function (t) { return !t.chairman || chair; });
       if (!tools.length) return;
-      h += '<details class="ph-area"' + (a.key === 'match' ? ' open' : '') + '>' +
-        '<summary class="ph-area__head"><span class="ph-area__name">' + esc(a.name) + '</span>' +
-        '<span class="ph-area__count">' + tools.length + '</span></summary>' +
-        '<p class="ph-area__blurb">' + esc(a.blurb) + '</p>' +
+      var danger = a.key === 'system';
+      h += '<details class="ph-area' + (danger ? ' ph-area--care' : '') + '">' +
+        '<summary class="ph-area__head">' +
+          '<span class="ph-area__txt">' +
+            '<span class="ph-area__name">' + esc(a.name) + '</span>' +
+            '<span class="ph-area__ask">' + esc(a.ask) + '</span>' +
+          '</span>' +
+          '<span class="ph-area__count">' + tools.length + '</span>' +
+          '<span class="ph-area__chev" aria-hidden="true">&#9662;</span>' +
+        '</summary>' +
+        '<p class="ph-area__blurb">' + esc(a.likely) + '</p>' +
         '<div class="ph-tools">' + tools.map(toolCard).join('') + '</div></details>';
     });
     return h + '</div></section>';

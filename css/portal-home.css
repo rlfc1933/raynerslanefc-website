@@ -143,26 +143,42 @@
   color: var(--y, #FFD100); white-space: nowrap;
 }
 
-/* ── CLUB AREAS ──────────────────────────────────────────────────────────── */
+/* ── CLUB AREAS ──────────────────────────────────────────────────────────
+   Compact rows, closed by default. Every area used to render its whole grid of
+   tool cards, which pushed the mobile home past four screens. Each area is now
+   one readable row carrying the question a volunteer actually asks, so they can
+   choose where to go without knowing any tool names. */
 .ph-areas { display: flex; flex-direction: column; gap: 8px; }
 .ph-area { border: 1px solid var(--br); border-radius: 12px; background: var(--dk, #0F0F0F); overflow: hidden; }
 .ph-area__head {
   display: flex; align-items: center; gap: 12px;
-  padding: 16px 18px; min-height: 56px; cursor: pointer; list-style: none;
+  padding: 14px 16px; min-height: 64px; cursor: pointer; list-style: none;
 }
 .ph-area__head::-webkit-details-marker { display: none; }
 .ph-area__head:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; }
-.ph-area__name { font-family: var(--fd); font-size: 18px; letter-spacing: .04em; color: var(--w); }
+.ph-area__txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1 1 auto; }
+.ph-area__name { font-family: var(--fd); font-size: 18px; letter-spacing: .04em; color: var(--w); line-height: 1.1; }
+/* The club question does the orientation work, so it is readable, not a hint. */
+.ph-area__ask { font-family: var(--fb); font-size: 14px; line-height: 1.4; color: var(--gr); }
 .ph-area__count {
-  margin-left: auto; font-family: var(--fc); font-size: 12px; font-weight: 700;
+  flex: 0 0 auto; font-family: var(--fc); font-size: 12px; font-weight: 700;
   color: var(--gr); border: 1px solid var(--br); border-radius: 999px; padding: 3px 10px;
 }
+.ph-area__chev { flex: 0 0 auto; color: var(--y, #FFD100); transition: transform .18s; font-size: 13px; }
+.ph-area[open] .ph-area__chev { transform: rotate(180deg); }
 .ph-area[open] .ph-area__head { border-bottom: 1px solid var(--br); }
 .ph-area__blurb {
-  font-family: var(--fb); font-size: 14px; color: var(--gr);
-  margin: 0; padding: 14px 18px 4px;
+  font-family: var(--fb); font-size: 14px; line-height: 1.5; color: var(--gr);
+  margin: 0; padding: 14px 16px 2px;
 }
 .ph-area .ph-tools { padding: 10px 14px 16px; }
+/* System is not routine work and should not read as though it is. */
+.ph-area--care { border-color: rgba(239,68,68,.35); }
+.ph-area--care .ph-area__name { color: #FCA5A5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-area__chev { transition: none; }
+}
 
 /* ── VIEW ALL ────────────────────────────────────────────────────────────── */
 .ph-allbtn {
@@ -213,3 +229,24 @@
   .ph-att { padding: 14px; }
   .ph-att__go { width: 100%; }
 }
+
+/* ── QUICK ANSWERS (Help) ────────────────────────────────────────────────
+   Short enough that somebody will actually read it. Nine questions a committee
+   member genuinely asks, not a documentation system. */
+.ph-help { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.ph-faq { border: 1px solid var(--br); border-radius: 10px; background: var(--c, #161616); }
+.ph-faq summary {
+  padding: 15px 16px; min-height: 52px; cursor: pointer; list-style: none;
+  display: flex; align-items: center;
+  font-family: var(--fc, system-ui); font-size: 15px; font-weight: 700;
+  letter-spacing: .02em; color: var(--w);
+}
+.ph-faq summary::-webkit-details-marker { display: none; }
+.ph-faq summary::after { content: '+'; margin-left: auto; color: var(--y, #FFD100); font-size: 20px; line-height: 1; }
+.ph-faq[open] summary::after { content: '\2212'; }
+.ph-faq summary:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; border-radius: 10px; }
+.ph-faq p {
+  margin: 0; padding: 0 16px 16px;
+  font-family: var(--fb, system-ui); font-size: 15px; line-height: 1.6; color: var(--gr, #8F8F8F);
+}
+.ph-faq p b { color: var(--w); }

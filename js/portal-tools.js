@@ -28,14 +28,31 @@
 (function (global) {
   'use strict';
 
+  // Each area leads with the question a committee member actually asks, and
+  // names the job they most often want, so nobody has to know a tool name
+  // before choosing where to go.
   var AREAS = [
-    { key: 'match',      name: 'Match Days',                 blurb: 'Everything for a game — before, during and after.' },
-    { key: 'team',       name: 'Team and Players',           blurb: 'The squad, profiles and the people who run the club.' },
-    { key: 'website',    name: 'Website and Communications', blurb: 'What supporters read, see and are told.' },
-    { key: 'commercial', name: 'Commercial',                 blurb: 'Sponsors, enquiries and money coming in.' },
-    { key: 'supporters', name: 'Supporters',                 blurb: 'Fans, members and match-day check-in.' },
-    { key: 'admin',      name: 'Club Administration',        blurb: 'Meetings, plans, records and guides.' },
-    { key: 'system',     name: 'System',                     blurb: 'Website health and emergency controls.' }
+    { key: 'match',      name: 'Match Days',
+      ask: 'Are you preparing for a match?',
+      likely: 'Most often: check the fixture, then fill in the attendance and takings.' },
+    { key: 'team',       name: 'Team and Players',
+      ask: 'Do you need to update a player?',
+      likely: 'Most often: add someone to the squad, or update a profile photograph.' },
+    { key: 'website',    name: 'Website and Communications',
+      ask: 'Are you publishing something to the website?',
+      likely: 'Most often: write a news story or add match photographs.' },
+    { key: 'commercial', name: 'Commercial',
+      ask: 'Are you checking sponsors or club income?',
+      likely: 'Most often: read new enquiries, or update the sponsor board.' },
+    { key: 'supporters', name: 'Supporters',
+      ask: 'Are you helping supporters?',
+      likely: 'Most often: check members in on a match day, or add an offer.' },
+    { key: 'admin',      name: 'Club Administration',
+      ask: 'Are you managing internal club records?',
+      likely: 'Most often: write up a meeting, or look something up in the handbook.' },
+    { key: 'system',     name: 'System',
+      ask: 'Are you fixing or restoring something?',
+      likely: 'Only if something has gone wrong. Most people never need this.' }
   ];
 
   var TOOLS = [
