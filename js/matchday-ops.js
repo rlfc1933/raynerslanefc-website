@@ -235,9 +235,12 @@
 
     h += '<div class="div"></div>' +
       '<button class="save sec" onclick="MDOps.go(\'reports\')"><i class="ico ico-chart-column"></i> Reports</button>' +
-      '<button class="save sec" style="margin-top:8px" onclick="MDOps.go(\'archive\')"><i class="ico ico-archive"></i> Archive</button>' +
-      (has('can_matchday_prices')
-        ? '<button class="save sec" style="margin-top:8px" onclick="MDOps.go(\'prices\')"><i class="ico ico-ticket"></i> Ticket prices</button>' : '');
+      '<button class="save sec" style="margin-top:8px" onclick="MDOps.go(\'archive\')"><i class="ico ico-archive"></i> Archive</button>';
+    // Deliberately NO price-management screen. Season admission prices are site
+    // content, edited once on the main site, and read from there.
+    h += '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.55;margin-top:12px">' +
+      'Admission prices come from your published gate prices (Settings &rarr; site config). ' +
+      'Change them there and every match here follows — there is nothing to keep in step.</div>';
     return h;
   }
 
@@ -377,17 +380,24 @@
     }
 
     h += '<div class="div"></div><div class="slbl">Prices for this match</div>';
-    h += '<div class="md-sum"><div class="md-sum__row"><span>Price list</span><span>' +
-      esc((rec.price_snapshot && rec.price_snapshot.source) || (S.priceList && S.priceList.source) || 'season default') + '</span></div>';
-    cats.filter(function (c) { return c.enabled !== false; }).forEach(function (c) {
-      h += '<div class="md-sum__row"><span>' + esc(c.label) + (c.counts ? '' : ' <em>(not counted)</em>') +
-        '</span><span class="md-money">' + (c.revenue ? money(c.price_pence) : 'Free') + '</span></div>';
-    });
-    h += '</div>';
+    var src = (rec.price_snapshot && rec.price_snapshot.source) || (S.priceList && S.priceList.source) || '';
+    var isOverride = /override/i.test(src);
+    h += '<div class="md-var ' + (isOverride ? 'md-var--warn' : 'md-var--ok') + '">' +
+      (isOverride
+        ? '<b>Fixture-specific prices are in force for this match.</b><br>' + esc(src)
+        : '<b>Standard season admission prices.</b><br>Taken from your published gate prices on the website, so they are the same numbers a supporter sees before they travel.') +
+      '</div>';
+    h += priceTable(cats);
     h += '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin-bottom:12px">' +
-      'These are the prices this record will use. They are frozen onto the record when it is submitted, so a later ' +
-      'price change can never rewrite what this match was expected to take.' +
-      (has('can_matchday_prices') ? ' Change them in <b style="color:var(--w)">Ticket prices</b>.' : '') + '</div>';
+      'These prices are frozen onto the record when it is submitted, so a later change can never rewrite what this ' +
+      'match was expected to take.' +
+      (has('can_matchday_prices') && !ro
+        ? ' If <b style="color:var(--w)">this one fixture</b> is genuinely priced differently — a cup instruction, a charity match, a promotion — you can override it below. The season prices on the website are not affected.'
+        : '') + '</div>';
+    if (has('can_matchday_prices') && !ro) {
+      h += '<button class="save sec" onclick="MDOps.go(\'prices\')"><i class="ico ico-ticket"></i> ' +
+        (isOverride ? 'Review this fixture&rsquo;s prices' : 'Price this fixture differently (rare)') + '</button>';
+    }
 
     if (S.canMoney) {
       h += '<div class="div"></div><div class="slbl">Stock on hand</div>';
@@ -405,6 +415,32 @@
     h += '<button class="save sec" style="margin-top:8px" onclick="window.print()"><i class="ico ico-printer"></i> Print the match-day sheet</button>';
     h += printSheet(rec, cats);
     return h;
+  }
+
+  // Paid and non-paid are shown as two separate groups everywhere. A volunteer
+  // must be able to see at a glance that the guest list costs nothing — and a
+  // treasurer must never read a long guest list as missing money.
+  function isPaid(c) { return c.paid !== false && c.revenue; }
+  function splitCats(cats) {
+    var live = (cats || []).filter(function (c) { return c.enabled !== false; })
+      .sort(function (a, b) { return (a.order || 99) - (b.order || 99); });
+    return { paid: live.filter(isPaid), free: live.filter(function (c) { return !isPaid(c); }), all: live };
+  }
+
+  function priceTable(cats) {
+    var g = splitCats(cats);
+    var h = '<div class="md-sum">';
+    h += '<div class="md-sum__row md-sum__row--total"><span>Paid admission</span><span></span></div>';
+    g.paid.forEach(function (c) {
+      h += '<div class="md-sum__row"><span>' + esc(c.label) + (c.hint ? ' <em class="md-hint">' + esc(c.hint) + '</em>' : '') +
+        '</span><span class="md-money">' + money(c.price_pence) + '</span></div>';
+    });
+    h += '<div class="md-sum__row md-sum__row--total"><span>Free admission &mdash; counts as attendance, no gate money</span><span></span></div>';
+    g.free.forEach(function (c) {
+      h += '<div class="md-sum__row"><span>' + esc(c.label) + (c.hint ? ' <em class="md-hint">' + esc(c.hint) + '</em>' : '') +
+        '</span><span class="md-money">Free</span></div>';
+    });
+    return h + '</div>';
   }
 
   function qtyOf(rec, k) { var l = (rec.sales || {})[k]; return l && l.qty ? l.qty : ''; }
@@ -428,34 +464,56 @@
     if (rec.status === 'locked') return '<div class="md-denied">This record is locked. Reopen it to change the count.</div>';
     if (!has('can_matchday_record')) return '<div class="md-denied"><b>You do not have permission to record.</b></div>';
 
-    var cats = ((rec.price_snapshot && rec.price_snapshot.categories) || S.priceList.categories || [])
-      .filter(function (c) { return c.enabled !== false; })
-      .sort(function (a, b) { return (a.order || 99) - (b.order || 99); });
+    var cats = (rec.price_snapshot && rec.price_snapshot.categories) || S.priceList.categories || [];
+    var g = splitCats(cats);
     var t = draft().attendance || {};
 
-    var h = '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin-bottom:12px">' +
+    // ── WHO IS ON THE GATE ─────────────────────────────────────────────────
+    // One box, at the very top, every match day. If a figure is ever queried
+    // weeks later, the club can say who counted it — and the person counting
+    // knows their name is against it.
+    var h = '<div class="md-operator' + (rec.operator ? '' : ' md-operator--empty') + '">' +
+      '<label class="md-operator__lbl" for="md-operator-live">Who is on the turnstile today?</label>' +
+      '<input id="md-operator-live" type="text" autocomplete="name" value="' + esc(rec.operator || '') +
+        '" placeholder="Your name" onchange="MDOps.setOperator(this.value)">' +
+      '<div class="md-operator__hint">' +
+        (rec.operator
+          ? 'This match is being counted by <b>' + esc(rec.operator) + '</b>.'
+          : 'Put your name in before you start counting — every figure on this record is recorded against it.') +
+      '</div></div>';
+
+    h += '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin:12px 0">' +
       'Tap as people come through. Every tap is saved on this phone straight away and synced when there is signal — ' +
       'you cannot lose the count by locking the screen or losing reception.</div>';
 
-    h += '<div class="md-tally">';
-    cats.forEach(function (c, i) {
-      var n = Number(t[c.key] || 0);
-      h += '<div class="md-tally__row' + (i < 2 ? ' md-tally__row--primary' : '') + '">' +
-        '<div><div class="md-tally__label">' + esc(c.label) + '</div>' +
-        '<div class="md-tally__price">' + (c.revenue ? money(c.price_pence) : 'No charge') +
-          (c.counts ? '' : ' · not counted in attendance') + '</div></div>' +
-        '<div class="md-tally__ctrls">' +
-        '<button class="md-tally__btn" aria-label="One fewer ' + esc(c.label) + '" onclick="MDOps.bump(\'' + esc(c.key) + '\',-1)"' + (n <= 0 ? ' disabled' : '') + '>&minus;</button>' +
-        '<div class="md-tally__count"><input type="number" inputmode="numeric" min="0" aria-label="' + esc(c.label) + ' count" value="' + n + '" onchange="MDOps.setCount(\'' + esc(c.key) + '\',this.value)"></div>' +
-        '<button class="md-tally__btn md-tally__btn--plus" aria-label="One more ' + esc(c.label) + '" onclick="MDOps.bump(\'' + esc(c.key) + '\',1)">+</button>' +
-        '</div></div>';
-    });
-    h += '</div>';
+    function rows(list, primary) {
+      return list.map(function (c, i) {
+        var n = Number(t[c.key] || 0);
+        return '<div class="md-tally__row' + (primary && i < 2 ? ' md-tally__row--primary' : '') +
+          (c.paid === false ? ' md-tally__row--free' : '') + '">' +
+          '<div><div class="md-tally__label">' + esc(c.label) + '</div>' +
+          '<div class="md-tally__price">' + (isPaid(c) ? money(c.price_pence) : 'Free &mdash; counts, no money') +
+            (c.hint ? ' · ' + esc(c.hint) : '') + '</div></div>' +
+          '<div class="md-tally__ctrls">' +
+          '<button class="md-tally__btn" aria-label="One fewer ' + esc(c.label) + '" onclick="MDOps.bump(\'' + esc(c.key) + '\',-1)"' + (n <= 0 ? ' disabled' : '') + '>&minus;</button>' +
+          '<div class="md-tally__count"><input type="number" inputmode="numeric" min="0" aria-label="' + esc(c.label) + ' count" value="' + n + '" onchange="MDOps.setCount(\'' + esc(c.key) + '\',this.value)"></div>' +
+          '<button class="md-tally__btn md-tally__btn--plus" aria-label="One more ' + esc(c.label) + '" onclick="MDOps.bump(\'' + esc(c.key) + '\',1)">+</button>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    h += '<div class="md-grouphdr">Paying at the gate</div>';
+    h += '<div class="md-tally">' + rows(g.paid, true) + '</div>';
+    h += '<div class="md-grouphdr md-grouphdr--free">Admitted free ' +
+      '<span>counts towards attendance &middot; no gate money expected</span></div>';
+    h += '<div class="md-tally">' + rows(g.free, false) + '</div>';
 
     var counted = MDC.calcAttendance(cats, t);
     var expected = MDC.calcExpectedPence(cats, t);
+    var freeCount = g.free.reduce(function (a, c) { return a + Number(t[c.key] || 0); }, 0);
     h += '<div class="md-running">' +
-      '<div class="md-running__cell"><div class="md-running__num">' + counted + '</div><div class="md-running__lbl">Through the gate</div></div>' +
+      '<div class="md-running__cell"><div class="md-running__num">' + counted + '</div>' +
+        '<div class="md-running__lbl">Through the gate' + (freeCount ? ' &middot; ' + freeCount + ' free' : '') + '</div></div>' +
       (S.canMoney
         ? '<div class="md-running__cell"><div class="md-running__num">' + money(expected) + '</div><div class="md-running__lbl">Expected gate</div></div>'
         : '<div class="md-running__cell"><div class="md-running__num">&mdash;</div><div class="md-running__lbl">Gate hidden</div></div>') +
@@ -474,18 +532,41 @@
     var merged = Object.assign({}, rec, d, { price_snapshot: { categories: cats } });
     var calc = MDC.derive(merged);
 
+    var g = splitCats(cats);
+    var att = d.attendance || {};
+    var nOf = function (c) { return Number(att[c.key] || 0); };
+    var paidHeads = g.paid.reduce(function (a, c) { return a + nOf(c); }, 0);
+    var freeHeads = g.free.reduce(function (a, c) { return a + nOf(c); }, 0);
+
     var h = '<div class="slbl">Attendance</div>';
     h += '<div class="md-sum">';
-    cats.filter(function (c) { return c.enabled !== false && Number((d.attendance || {})[c.key] || 0) > 0; })
-      .forEach(function (c) {
-        var n = Number(d.attendance[c.key]);
-        h += '<div class="md-sum__row"><span>' + esc(c.label) + ' × ' + n +
-          (c.revenue ? ' @ ' + money(c.price_pence) : '') + '</span><span class="md-money">' +
-          (c.revenue ? money(n * c.price_pence) : '—') + '</span></div>';
-      });
+    h += '<div class="md-sum__row md-sum__row--total"><span>Paid admission</span><span></span></div>';
+    g.paid.filter(nOf).forEach(function (c) {
+      var n = nOf(c);
+      h += '<div class="md-sum__row"><span>' + esc(c.label) + ' × ' + n + ' @ ' + money(c.price_pence) +
+        '</span><span class="md-money">' + money(n * c.price_pence) + '</span></div>';
+    });
+    if (!paidHeads) h += '<div class="md-sum__row"><span>None counted</span><span>—</span></div>';
+    h += '<div class="md-sum__row"><span><b>Paid subtotal</b></span><span><b>' + paidHeads + '</b></span></div>';
+
+    // Free admissions are shown as their OWN block with their own subtotal.
+    // Never folded into "other", never hidden — a treasurer reading this must
+    // see immediately why 40 more people came through than money suggests.
+    h += '<div class="md-sum__row md-sum__row--total"><span>Admitted free</span><span></span></div>';
+    g.free.filter(nOf).forEach(function (c) {
+      h += '<div class="md-sum__row"><span>' + esc(c.label) + ' × ' + nOf(c) +
+        '</span><span class="md-money">£0.00</span></div>';
+    });
+    if (!freeHeads) h += '<div class="md-sum__row"><span>None</span><span>—</span></div>';
+    h += '<div class="md-sum__row"><span><b>Free subtotal</b></span><span><b>' + freeHeads + '</b></span></div>';
+
     h += '<div class="md-sum__row md-sum__row--total"><span>Counted through the gate</span><span>' + calc.attendance_calculated + '</span></div>';
-    if (S.canMoney) h += '<div class="md-sum__row md-sum__row--total"><span>Expected gate revenue</span><span class="md-money">' + money(calc.expected_gate_pence) + '</span></div>';
+    if (S.canMoney) h += '<div class="md-sum__row md-sum__row--total"><span>Expected gate revenue <em class="md-hint">(paid admissions only)</em></span><span class="md-money">' + money(calc.expected_gate_pence) + '</span></div>';
     h += '</div>';
+    if (freeHeads) {
+      h += '<div class="md-var md-var--ok"><b>' + freeHeads + ' free admission(s)</b> are counted in the attendance figure and ' +
+        'correctly produce <b>no</b> expected gate money. This is not a shortfall.</div>';
+    }
 
     h += field('Declared official attendance', 'md-att-official',
       rec.attendance_official != null ? rec.attendance_official : '', String(calc.attendance_calculated), ro, 'number');
@@ -592,7 +673,7 @@
     } else {
       h += '<div class="md-audit">' + S.audit.map(function (a) {
         return '<div class="md-audit__item"><b>' + esc(a.action) + '</b> — ' + esc(a.actor) +
-          (a.actor_role ? ' <span style="opacity:.7">(' + esc(a.actor_role) + ')</span>' : '') +
+          (a.actor_role ? ' <span class="md-hint">(' + esc(a.actor_role) + ')</span>' : '') +
           '<div class="md-audit__when">' + esc(new Date(a.at).toLocaleString('en-GB')) + '</div>' +
           (a.reason ? '<div style="margin-top:3px">“' + esc(a.reason) + '”</div>' : '') + '</div>';
       }).join('') + '</div>';
@@ -604,14 +685,20 @@
   // ── PRINT SHEET ──────────────────────────────────────────────────────────
   function printSheet(rec, cats) {
     var f = rec.fixture_snapshot || S.fixture || {};
-    var rows = cats.filter(function (c) { return c.enabled !== false; }).map(function (c) {
-      return '<tr><td>' + esc(c.label) + '</td><td>' + (c.revenue ? money(c.price_pence) : 'Free') +
-        '</td><td class="md-print__rule"></td><td class="md-print__rule"></td></tr>';
-    }).join('');
+    var pg = splitCats(cats);
+    var rowsFor = function (list, priced) {
+      return list.map(function (c) {
+        return '<tr><td>' + esc(c.label) + '</td><td>' + (priced ? money(c.price_pence) : 'Free') +
+          '</td><td class="md-print__rule"></td><td class="md-print__rule"></td></tr>';
+      }).join('');
+    };
+    var rows = '<tr><th colspan="4">Paying at the gate</th></tr>' + rowsFor(pg.paid, true) +
+               '<tr><th colspan="4">Admitted free \u2014 counts as attendance, no money</th></tr>' + rowsFor(pg.free, false);
     return '<div id="md-print"><h1>Rayners Lane FC — Match Day Sheet</h1>' +
       '<p><b>' + esc(f.opponent || '') + '</b> · ' + esc(f.date || '') + ' · ' + esc(f.kickoff || '') +
       ' · ' + esc(f.competition || '') + '</p>' +
-      '<p>Operator: ' + esc(rec.operator || '________________') + '　　Weather: ________________</p>' +
+      '<p><b>On the turnstile:</b> ' + esc(rec.operator || '________________________') +
+      '　　Weather: ________________</p>' +
       '<h2>Admissions</h2><table><thead><tr><th>Category</th><th>Price</th><th>Count</th><th>Value</th></tr></thead><tbody>' +
       rows + '</tbody></table>' +
       '<h2>Sales</h2><table><tbody>' +
@@ -684,6 +771,25 @@
     render();
     queueSync();
   }
+  /** The turnstile accountability box. Saves immediately — not on a debounce. */
+  function setOperator(name) {
+    var v = String(name || '').trim().slice(0, 120);
+    if (!S.record) return;
+    S.saveState = 'saving'; render();
+    api('save', { fixture_id: S.fixtureId, version: S.record.version, patch: { operator: v } })
+      .then(function (j) {
+        if (j.ok) {
+          S.record = j.record; S.saveState = 'idle'; S.lastSavedAt = Date.now();
+          if (typeof global.toast === 'function' && v) global.toast('Turnstile: ' + v);
+        } else {
+          S.saveState = 'error'; S.saveMsg = j.error;
+          if (j.conflict && j.current) S.record = j.current;
+        }
+        render();
+      })
+      .catch(function () { S.saveState = 'offline'; S.saveMsg = 'Saved on this phone'; render(); });
+  }
+
   function resetTally() {
     if (!confirm('Reset the count for this match back to zero?\n\nThis clears every category on this phone. It cannot be undone.')) return;
     setDraft({ attendance: {} });
@@ -891,9 +997,21 @@
     if (!r.byCompetition.length) h += '<div class="md-sum__row"><span>No completed records yet</span><span></span></div>';
     h += '</div>';
 
+    h += '<div class="slbl">Attendance make-up</div><div class="md-sum">' +
+      sumRow('Paid admissions', r.attendance.paid) +
+      sumRow('Admitted free', r.attendance.free) +
+      sumRow('&nbsp;&nbsp;of which Guest List / Complimentary', r.attendance.guestList) +
+      sumRow('&nbsp;&nbsp;of which season ticket', r.attendance.seasonTicket) + '</div>';
+
     h += '<div class="slbl">Ticket categories</div><div class="md-sum">';
+    var lastFree = null;
     r.ticketCategories.forEach(function (c) {
-      h += '<div class="md-sum__row"><span>' + esc(c.key) + '</span><span>' + c.total + '</span></div>';
+      if (c.free !== lastFree) {
+        h += '<div class="md-sum__row md-sum__row--total"><span>' +
+          (c.free ? 'Admitted free — counts as attendance, no gate money' : 'Paying at the gate') + '</span><span></span></div>';
+        lastFree = c.free;
+      }
+      h += '<div class="md-sum__row"><span>' + esc(c.label || c.key) + '</span><span>' + c.total + '</span></div>';
     });
     if (!r.ticketCategories.length) h += '<div class="md-sum__row"><span>Nothing counted yet</span><span></span></div>';
     h += '</div>';
@@ -992,38 +1110,95 @@
   }
   function arch(key) { archOpen[key] = !archOpen[key]; render(); }
 
-  // ── PRICES ───────────────────────────────────────────────────────────────
+  // ── PRICING (view + the RARE single-fixture exception) ───────────────────
+  // There is no season price editor here on purpose. The season prices are the
+  // ones published on the website; this screen shows them, and lets a chairman
+  // price ONE fixture differently when the competition genuinely requires it.
   var priceData = null;
   function viewPrices() {
-    var h = backBar();
-    if (!has('can_matchday_prices')) {
-      return h + '<div class="md-denied"><b>Changing ticket prices needs the chairman\'s permission level</b>, ' +
-        'and a personal staff password rather than the shared committee one.</div>';
-    }
+    var h = '<button class="save sec" style="margin:0 0 12px" onclick="MDOps.go(\'fixture\')">&#8592; Back to the match</button>';
     if (!priceData) { loadPrices(); return h + '<div class="md-loading">Loading prices…</div>'; }
-    h += '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin-bottom:12px">' +
-      'One standard price list per season, with overrides for a competition where the club charges differently ' +
-      '(a cup tie, a friendly, a special event). A record freezes the prices it actually used, so changing these ' +
-      'never rewrites a past match.</div>';
-    priceData.forEach(function (l) {
-      h += '<div class="md-sum"><div class="md-sum__row md-sum__row--total"><span>' +
-        esc(l.label || (l.competition_id ? l.competition_id + ' override' : 'Season default')) +
-        '</span><span>from ' + esc(l.effective_from) + '</span></div>';
-      (l.categories || []).forEach(function (c) {
-        h += '<div class="md-sum__row"><span>' + esc(c.label) + '</span><span class="md-money">' +
-          (c.revenue ? money(c.price_pence) : 'Free') + '</span></div>';
-      });
-      h += '</div>';
+
+    var p = priceData.pricing || {};
+    var cats = p.categories || [];
+    h += '<div class="slbl">Prices for this fixture</div>';
+    h += '<div class="md-var ' + (p.isOverride ? 'md-var--warn' : 'md-var--ok') + '">' +
+      (p.isOverride
+        ? '<b>This fixture is priced differently.</b><br>' + esc(p.source)
+        : '<b>Standard season admission.</b><br>' + esc(p.source)) + '</div>';
+    h += priceTable(cats);
+
+    h += '<div class="md-var md-var--ok"><b>Where these come from</b><br>' +
+      'Season admission prices are website content — the same block that shows on the fixtures and contact pages. ' +
+      'They are fixed for the season and edited once, on the site. Match Day Ops reads them, so there is nothing ' +
+      'to keep in step and no second price list to drift.' +
+      (priceData.seasonPrices
+        ? '<div style="margin-top:8px">' + priceData.seasonPrices.map(function (r) {
+            return esc(r.label) + ' ' + esc(r.price); }).join(' &middot; ') + '</div>'
+        : '') + '</div>';
+
+    if (!has('can_matchday_prices')) {
+      h += '<div class="md-denied">Pricing a fixture differently needs chairman or vice-chairman permission, ' +
+        'and a personal staff password rather than the shared committee one.</div>';
+      return h;
+    }
+
+    h += '<div class="div"></div><div class="slbl">Price this one fixture differently</div>';
+    h += '<div style="font-family:var(--fb);font-size:12.5px;color:var(--gr);line-height:1.55;margin-bottom:10px">' +
+      'Only for a fixture that genuinely is different — a cup instruction, a charity match, a promotion or a special ' +
+      'event. It applies to <b style="color:var(--w)">this fixture alone</b>, is recorded against your name with your ' +
+      'reason, and does <b style="color:var(--w)">not</b> change the season prices on the website.</div>';
+
+    var g = splitCats(cats);
+    h += '<div class="md-sum">';
+    g.paid.forEach(function (c) {
+      h += '<div class="md-sum__row"><span><label for="ov-' + esc(c.key) + '">' + esc(c.label) + '</label></span>' +
+        '<span><input id="ov-' + esc(c.key) + '" type="number" inputmode="decimal" step="0.01" min="0" ' +
+        'style="width:96px;text-align:right" value="' + pounds(c.price_pence) + '"></span></div>';
     });
-    if (!priceData.length) h += '<div class="md-empty">No price list stored yet — the built-in defaults are in use.</div>';
-    h += '<div class="md-var md-var--warn">Editing price lists in the portal is the next step. ' +
-      'For now they are seeded from your published gate prices and can be adjusted in the database.</div>';
+    h += '<div class="md-sum__row"><span style="color:var(--gr)">Free categories (Guest List, season tickets, officials, scouts…) always stay at £0 and cannot be priced.</span><span></span></div>';
+    h += '</div>';
+    h += area('Why is this fixture priced differently?', 'ov-reason', (p.isOverride && priceData.overrideReason) || '',
+      'e.g. Middlesex FA instruction: £12 / £8 for the Senior Cup quarter-final', false);
+    h += '<button class="save" onclick="MDOps.saveOverride()">Apply to this fixture only</button>';
+    if (p.isOverride) {
+      h += '<button class="save sec" style="margin-top:8px" onclick="MDOps.clearOverride()">Remove the override &mdash; go back to season prices</button>';
+    }
     return h;
   }
   function loadPrices() {
-    api('prices-get', { season: S.season }).then(function (j) {
-      if (j.ok) { priceData = j.lists || []; render(); }
-      else { S.loadErr = j.error; render(); }
+    api('prices-get', { fixture_id: S.fixtureId }).then(function (j) {
+      if (j.ok) {
+        priceData = j;
+        priceData.overrideReason = (j.pricing && /override — (.*)$/.exec(j.pricing.source || '') || [])[1] || '';
+        render();
+      } else { S.loadErr = j.error; render(); }
+    });
+  }
+  function saveOverride() {
+    var cats = ((priceData.pricing || {}).categories || []).map(function (c) {
+      if (!isPaid(c) && c.price_pence === 0 && c.paid === false) return c;
+      var el = $('ov-' + c.key);
+      if (!el) return c;
+      var p = toP(el.value);
+      return Object.assign({}, c, { price_pence: p, revenue: p > 0, paid: true });
+    });
+    var reason = val('ov-reason');
+    if (reason.trim().length < 10) { alert('Please give a fuller reason — at least 10 characters. It goes into the audit history.'); return; }
+    api('price-override', { fixture_id: S.fixtureId, categories: cats, reason: reason.trim() }).then(function (j) {
+      if (!j.ok) { alert(j.error); return; }
+      priceData = null;
+      if (typeof global.toast === 'function') global.toast('Prices set for this fixture only');
+      open(S.fixtureId);
+    });
+  }
+  function clearOverride() {
+    if (!confirm('Remove this fixture\'s special prices and go back to the season prices from the website?')) return;
+    api('price-override-clear', { fixture_id: S.fixtureId }).then(function (j) {
+      if (!j.ok) { alert(j.error); return; }
+      priceData = null;
+      if (typeof global.toast === 'function') global.toast('Back to season prices');
+      open(S.fixtureId);
     });
   }
 
@@ -1034,6 +1209,7 @@
     if (view === 'reports') reportData = null;
     if (view === 'archive') archiveData = null;
     if (view === 'prices') priceData = null;
+    if (view === 'fixture' && S.fixtureId) { render(); return; }
     render();
   }
   function filter(k) { S.filter = k; render(); }
@@ -1064,7 +1240,8 @@
     init: init, load: load, go: go, filter: filter, tab: tab, open: open, arch: arch,
     prepare: prepare, savePrepare: savePrepare, saveReconcile: saveReconcile,
     submit: submit, approve: approve, lock: lock, reopen: reopen,
-    bump: bump, setCount: setCount, resetTally: resetTally,
+    bump: bump, setCount: setCount, resetTally: resetTally, setOperator: setOperator,
+    saveOverride: saveOverride, clearOverride: clearOverride,
     exportCsv: exportCsv, reauth: reauth, mintSession: mintSession,
     _state: S
   };

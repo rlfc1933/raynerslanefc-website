@@ -30,49 +30,72 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 
 
--- ── 1 · PRICE LISTS ────────────────────────────────────────────────────────
--- Season-level admission pricing with controlled per-competition overrides.
--- Prices are NOT hardcoded onto each fixture: a record points at the list that
--- applied, and SNAPSHOTS the categories it actually used when it is submitted.
+-- ── 1 · FIXTURE PRICE OVERRIDES (the rare exception ONLY) ──────────────────
 --
--- competition_id NULL  = the season default (the standard league price list)
--- competition_id set   = an override for that competition (cup, friendly…)
+-- THE SEASON PRICES ARE NOT STORED HERE. They live in data/config.json →
+-- `admission`, which is the block the public website already renders at the
+-- gate. That is the single source of truth: what the volunteer sees on the
+-- phone is, by construction, what the supporter sees on the website. Match Day
+-- Ops reads it live and snapshots it onto the record.
 --
--- `categories` is an array of objects, each:
---   { key, label, price_pence, counts, revenue, order, enabled }
---     key      stable identifier, never changes ('adults', 'u16'…)
---     label    what a volunteer reads on the phone
+-- Keeping a second season price list in this database would mean two places to
+-- update and two prices to disagree — the club charging one and reconciling
+-- against another. So this table holds ONLY the rare, deliberate, audited
+-- exception for ONE fixture: a cup instruction, a charity match, a promotion.
+--
+-- One row per fixture, a reason is mandatory, and the actor is recorded. It
+-- never alters the season-wide website prices.
+--
+-- `categories` is an array of:
+--   { key, label, price_pence, counts, revenue, paid, order, enabled }
+--     key      stable identifier, never changes ('adults', 'guest_list'…)
 --     counts   does it count toward OFFICIAL attendance?
 --     revenue  does it contribute to EXPECTED gate revenue?
--- A complimentary or season-ticket admission counts as attendance but produces
--- no gate cash — which is exactly why declared receipts are reconciled against
--- expected revenue and never against the headcount.
+-- Guest List / Complimentary, season tickets, officials and scouts all COUNT
+-- as attendance and produce NO revenue — which is exactly why declared receipts
+-- are reconciled against expected revenue and never against the headcount. A
+-- long guest list must never read as a cash shortfall.
 create table if not exists public.md_price_lists (
   id             bigint generated always as identity primary key,
-  season         text not null,
+  fixture_id     text not null unique,          -- ONE override per fixture
+  season         text,
   competition_id text,
   label          text,
+  reason         text not null,                 -- why this fixture is different
   categories     jsonb not null default '[]'::jsonb,
   effective_from date not null default current_date,
   created_by     text,
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now(),
-  constraint md_price_lists_categories_is_array check (jsonb_typeof(categories) = 'array')
+  constraint md_price_lists_categories_is_array check (jsonb_typeof(categories) = 'array'),
+  constraint md_price_lists_reason_required check (btrim(reason) <> '')
 );
 
--- One list per (season, competition, effective date). A NULL competition_id is
--- the season default; two partial indexes are needed because NULL never equals
--- NULL in a plain unique constraint, which would let duplicate defaults in.
-create unique index if not exists md_price_lists_default_uq
-  on public.md_price_lists (season, effective_from)
-  where competition_id is null;
+create index if not exists md_price_lists_season_idx on public.md_price_lists (season);
 
-create unique index if not exists md_price_lists_override_uq
-  on public.md_price_lists (season, competition_id, effective_from)
-  where competition_id is not null;
-
-create index if not exists md_price_lists_season_idx
-  on public.md_price_lists (season, effective_from desc);
+-- Migrating a database that already ran the FIRST version of this file (which
+-- was season-scoped and had no fixture_id). Nothing is dropped: the old season
+-- rows are simply no longer read, because data/config.json is now the source.
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_schema='public' and table_name='md_price_lists' and column_name='fixture_id') then
+    alter table public.md_price_lists add column fixture_id text;
+    alter table public.md_price_lists add column reason text;
+    -- Retire any season-default rows from the earlier design so they can never
+    -- be mistaken for the price source. They are kept, not deleted.
+    update public.md_price_lists
+       set reason = coalesce(reason, 'Superseded: season prices now come from data/config.json'),
+           fixture_id = coalesce(fixture_id, 'retired-season-list-' || id::text)
+     where fixture_id is null;
+    alter table public.md_price_lists alter column fixture_id set not null;
+    alter table public.md_price_lists alter column reason set not null;
+    create unique index if not exists md_price_lists_fixture_uq on public.md_price_lists (fixture_id);
+  end if;
+  -- The old season-scoped indexes, if present, no longer describe this table.
+  drop index if exists public.md_price_lists_default_uq;
+  drop index if exists public.md_price_lists_override_uq;
+end $$;
 
 
 -- ── 2 · MATCH DAY RECORDS ──────────────────────────────────────────────────
@@ -347,34 +370,13 @@ begin
 end $$;
 
 
--- ── 7 · SEED THE DEFAULT PRICE LIST ────────────────────────────────────────
--- Seeded from data/config.json's `admission` block, which is what the public
--- site already shows at the gate: General £9, Concessions £6, U16 £2, U10 free.
--- Categories that walk through the gate but pay nothing on the day
--- (complimentary, season ticket, officials, scouts) count toward attendance
--- and contribute nothing to expected revenue.
+-- ── 7 · NO PRICE SEED ──────────────────────────────────────────────────────
+-- Deliberately nothing to seed. The season admission prices are NOT stored in
+-- this database: they are read live from data/config.json → `admission`, the
+-- same block the public site renders at the gate. Seeding a copy here is
+-- exactly the second source of truth this design exists to avoid.
 --
--- Staff edit this in the portal afterwards; this only stops the first match of
--- the season starting from an empty list.
-insert into public.md_price_lists (season, competition_id, label, categories, effective_from, created_by)
-select '2026-27', null, 'Standard admission 2026-27', $json$[
-  {"key":"adults",       "label":"Adults",           "price_pence":900,"counts":true,"revenue":true, "order":1, "enabled":true},
-  {"key":"concessions",  "label":"Concessions",      "price_pence":600,"counts":true,"revenue":true, "order":2, "enabled":true},
-  {"key":"seniors",      "label":"Senior citizens",  "price_pence":600,"counts":true,"revenue":true, "order":3, "enabled":true},
-  {"key":"students",     "label":"Students",         "price_pence":600,"counts":true,"revenue":true, "order":4, "enabled":true},
-  {"key":"u16",          "label":"Under 16s",        "price_pence":200,"counts":true,"revenue":true, "order":5, "enabled":true},
-  {"key":"u10",          "label":"Under 10s",        "price_pence":0,  "counts":true,"revenue":false,"order":6, "enabled":true},
-  {"key":"complimentary","label":"Complimentary",    "price_pence":0,  "counts":true,"revenue":false,"order":7, "enabled":true},
-  {"key":"season_ticket","label":"Season ticket",    "price_pence":0,  "counts":true,"revenue":false,"order":8, "enabled":true},
-  {"key":"officials",    "label":"Match officials",  "price_pence":0,  "counts":true,"revenue":false,"order":9, "enabled":true},
-  {"key":"scouts",       "label":"Scouts",           "price_pence":0,  "counts":true,"revenue":false,"order":10,"enabled":true},
-  {"key":"away",         "label":"Away supporters",  "price_pence":900,"counts":true,"revenue":true, "order":11,"enabled":true},
-  {"key":"other",        "label":"Other",            "price_pence":0,  "counts":true,"revenue":false,"order":12,"enabled":true}
-]$json$::jsonb, date '2026-07-01', 'migration'
-where not exists (
-  select 1 from public.md_price_lists
-  where season = '2026-27' and competition_id is null
-);
+-- md_price_lists stays empty until someone deliberately overrides ONE fixture.
 
 
 -- ── DONE ───────────────────────────────────────────────────────────────────

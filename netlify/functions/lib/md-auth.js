@@ -34,11 +34,63 @@
 
 const crypto = require('crypto');
 
-// Signing key. Prefers a dedicated secret; falls back to ADMIN_PIN so the
-// module still works on a site that has not set one. Fails CLOSED if neither
-// is configured — the same discipline as lib/pin.js.
+// ── SIGNING KEY ────────────────────────────────────────────────────────────
+// MD_TOKEN_SECRET and nothing else, in production.
+//
+// This used to fall back to ADMIN_PIN. That was wrong twice over: the PIN is a
+// short shared number typed into a phone at a turnstile, which is far too weak
+// to sign an authorisation token with, and it is a value that a great many
+// people already know. Anyone holding the PIN could have minted a token
+// claiming to be the chairman.
+//
+// So production now FAILS CLOSED: no MD_TOKEN_SECRET means no tokens are
+// minted, no tokens verify, and Match Day Ops refuses to write anything. That
+// is the safe direction — the alternative is a system that silently accepts
+// forged identities.
+//
+// A development fallback exists ONLY when NODE_ENV is explicitly a non-production
+// value AND MD_ALLOW_DEV_SECRET is set. It is loud, it is never reachable by
+// accident, and it cannot activate on Netlify, where NODE_ENV is 'production'.
+const DEV_SECRET = 'dev-only-insecure-matchday-secret';
+let _devWarned = false;
+
+function isProduction() {
+  // Absent NODE_ENV is treated as PRODUCTION. Failing closed on an unset
+  // variable is the only safe default for a money system.
+  const env = String(process.env.NODE_ENV || '').toLowerCase();
+  return env !== 'development' && env !== 'test';
+}
+
 function signingKey() {
-  return process.env.MD_TOKEN_SECRET || process.env.ADMIN_PIN || '';
+  const secret = process.env.MD_TOKEN_SECRET;
+  if (secret && String(secret).length >= 16) return secret;
+
+  if (secret && String(secret).length < 16) {
+    console.error('[matchday] MD_TOKEN_SECRET is set but shorter than 16 characters — refusing to use it.');
+    return '';
+  }
+  if (isProduction()) {
+    console.error('[matchday] MD_TOKEN_SECRET is not set. Match Day Ops is disabled — no tokens will be minted or accepted.');
+    return '';
+  }
+  if (!process.env.MD_ALLOW_DEV_SECRET) {
+    console.error('[matchday] MD_TOKEN_SECRET is not set. Set MD_ALLOW_DEV_SECRET=1 for local development only.');
+    return '';
+  }
+  if (!_devWarned) {
+    _devWarned = true;
+    console.warn('[matchday] ★ USING THE INSECURE DEVELOPMENT SIGNING KEY ★ — NODE_ENV=' +
+      process.env.NODE_ENV + '. This must never appear in production logs.');
+  }
+  return DEV_SECRET;
+}
+
+/** Why Match Day Ops is unavailable, for an honest error rather than a 500. */
+function configError() {
+  if (signingKey()) return null;
+  return isProduction()
+    ? 'Match Day Ops is not configured on this site: MD_TOKEN_SECRET is missing. Set it in Netlify → Site configuration → Environment variables.'
+    : 'MD_TOKEN_SECRET is not set. For local development set MD_ALLOW_DEV_SECRET=1 with NODE_ENV=development.';
 }
 
 const TTL_MS = 12 * 60 * 60 * 1000;   // 12h — one match day, not a standing key
@@ -165,5 +217,5 @@ function actorOf(session) {
 
 module.exports = {
   CAP, ELEVATED, ROLE_CAPS, TTL_MS,
-  capabilitiesFor, issue, verify, has, actorOf, signingKey,
+  capabilitiesFor, issue, verify, has, actorOf, signingKey, configError, isProduction,
 };

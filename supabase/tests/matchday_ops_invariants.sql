@@ -186,33 +186,51 @@ begin
     raise notice '  ✓ 18 record with audit history cannot be deleted';
   end;
 
-  -- ── 19 · only ONE season-default price list ───────────────────────────
+  -- ── 19 · a price override is keyed to ONE fixture ─────────────────────
+  -- The SEASON prices are NOT stored in this database at all: they live in
+  -- data/config.json, the same block the public website renders at the gate.
+  -- This table holds only the rare, deliberate, audited single-fixture
+  -- exception, so there is exactly one price source and nothing to drift.
+  insert into public.md_price_lists (fixture_id, season, reason, categories, effective_from)
+  values ('test-fx-1', '2026-27', 'Middlesex FA instruction for the cup tie', '[]'::jsonb, date '2026-07-01');
   begin
-    insert into public.md_price_lists (season, competition_id, categories, effective_from)
-    values ('2026-27', null, '[]'::jsonb, date '2026-07-01');
-    raise exception 'FAIL 19: a second season-default price list was accepted';
+    insert into public.md_price_lists (fixture_id, season, reason, categories, effective_from)
+    values ('test-fx-1', '2026-27', 'a second override for the same match', '[]'::jsonb, date '2026-07-02');
+    raise exception 'FAIL 19: a second override was accepted for one fixture';
   exception when unique_violation then
-    raise notice '  ✓ 19 only one default price list per season/effective date';
+    raise notice '  ✓ 19 only one price override per fixture';
   end;
 
-  -- ── 20 · a per-competition OVERRIDE is allowed alongside the default ──
-  insert into public.md_price_lists (season, competition_id, label, categories, effective_from)
-  values ('2026-27', 'fa-cup', 'FA Cup pricing', '[]'::jsonb, date '2026-07-01');
-  raise notice '  ✓ 20 per-competition price override coexists with the default';
+  -- ── 20 · an override CANNOT be stored without a reason ────────────────
+  begin
+    insert into public.md_price_lists (fixture_id, season, reason, categories, effective_from)
+    values ('test-fx-2', '2026-27', '   ', '[]'::jsonb, current_date);
+    raise exception 'FAIL 20: an override without a reason was accepted';
+  exception when check_violation then
+    raise notice '  ✓ 20 a price override requires a reason';
+  end;
+  begin
+    insert into public.md_price_lists (fixture_id, season, categories, effective_from)
+    values ('test-fx-3', '2026-27', '[]'::jsonb, current_date);
+    raise exception 'FAIL 20b: a null reason was accepted';
+  exception when not_null_violation then
+    raise notice '  ✓ 20b a null reason is refused';
+  end;
 
-  -- ── 21 · the migration seed is idempotent (ran twice, one row) ────────
-  select count(*) into n from public.md_price_lists
-   where season = '2026-27' and competition_id is null;
-  if n <> 1 then raise exception 'FAIL 21: expected exactly 1 seeded default price list, found %', n; end if;
-  raise notice '  ✓ 21 migration seed idempotent after two runs (1 default list)';
+  -- ── 21 · NO season price list is seeded ───────────────────────────────
+  -- The migration must not plant a copy of the website prices here. A seeded
+  -- season list is precisely the second source of truth this design removes.
+  select count(*) into n from public.md_price_lists where fixture_id not like 'test-fx-%';
+  if n <> 0 then raise exception 'FAIL 21: % price row(s) were seeded — the season prices must come from data/config.json', n; end if;
+  raise notice '  ✓ 21 no season price list seeded — config.json is the only source';
 
   -- ── 22 · categories must be a JSON array ──────────────────────────────
   begin
-    insert into public.md_price_lists (season, competition_id, categories, effective_from)
-    values ('2027-28', 'x', '{"not":"an array"}'::jsonb, current_date);
+    insert into public.md_price_lists (fixture_id, season, reason, categories, effective_from)
+    values ('test-fx-4', '2027-28', 'a reason long enough', '{"not":"an array"}'::jsonb, current_date);
     raise exception 'FAIL 22: a non-array categories value was accepted';
   exception when check_violation then
-    raise notice '  ✓ 22 price-list categories must be an array';
+    raise notice '  ✓ 22 price override categories must be an array';
   end;
 
   -- ── 23 · RLS is ON for all three tables ───────────────────────────────

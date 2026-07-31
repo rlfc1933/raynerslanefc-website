@@ -14,14 +14,18 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-process.env.MD_TOKEN_SECRET = 'test-secret-for-tests-only';
+process.env.NODE_ENV = 'test';
+process.env.MD_TOKEN_SECRET = 'test-secret-for-tests-only-long-enough';
 
 const MDC = require('../js/matchday-core.js');
 const AUTH = require('../netlify/functions/lib/md-auth.js');
 const OPS = require('../netlify/functions/matchday-ops.js');
 const { buildReports, cleanTally, cleanSales, cleanReceipts, derivedColumns, qty, pence, present } = OPS._internal;
 
-const CATS = MDC.DEFAULT_CATEGORIES;
+// Categories now come from the MAIN SITE admission config — one source.
+const CONFIG = require('../data/config.json');
+const CATS = MDC.categoriesFromAdmission(CONFIG.admission);
+const K = Object.fromEntries(CATS.map(c => [c.key, c]));
 
 // ── SEASON ─────────────────────────────────────────────────────────────────
 test('season turns over on 1 July', () => {
@@ -112,7 +116,7 @@ test('no totals are ever carried forward from a previous match', () => {
 
 // ── TEST 7 · calculated attendance counts only what it should ──────────────
 test('calculated attendance includes only categories configured to count', () => {
-  const tallies = { adults: 100, u16: 20, complimentary: 5, season_ticket: 30, officials: 4 };
+  const tallies = { adults: 100, u16: 20, guest_list: 5, season_ticket: 30, officials: 4 };
   assert.strictEqual(MDC.calcAttendance(CATS, tallies), 159, 'everyone through the gate counts');
 
   // A category configured NOT to count is excluded.
@@ -126,10 +130,10 @@ test('calculated attendance includes only categories configured to count', () =>
 
 // ── TEST 5 · expected revenue uses SNAPSHOT prices ─────────────────────────
 test('expected gate revenue is calculated from snapshotted prices', () => {
-  const tallies = { adults: 100, concessions: 10, u16: 20, u10: 15, complimentary: 5, season_ticket: 30 };
+  const tallies = { adults: 100, concessions: 10, u16: 20, u10: 15, guest_list: 5, season_ticket: 30 };
   // 100×900 + 10×600 + 20×200 = 90000 + 6000 + 4000 = 100000
   assert.strictEqual(MDC.calcExpectedPence(CATS, tallies), 100000);
-  // u10, complimentary and season ticket walk in but pay nothing at the gate.
+  // u10, guest list and season ticket walk in but pay nothing at the gate.
   assert.strictEqual(MDC.calcAttendance(CATS, tallies), 180, 'they still COUNT as attendance');
 });
 
@@ -460,14 +464,19 @@ test('fixture ids are unique — a record keys on them', () => {
   assert.strictEqual(new Set(ids).size, ids.length, 'duplicate fixture ids would break the unique record constraint');
 });
 
-test('the seeded price list matches the published gate prices in data/config.json', () => {
-  const cfg = require('../data/config.json');
-  const published = Object.fromEntries(cfg.admission.prices.map(p => [p.label, MDC.toPence(p.price)]));
-  const byLabel = Object.fromEntries(MDC.DEFAULT_CATEGORIES.map(c => [c.label, c.price_pence]));
-  assert.strictEqual(byLabel['Concessions'], published['Concessions'], 'concession price must match the public site');
-  assert.strictEqual(byLabel['Under 16s'], published['Under 16s']);
-  assert.strictEqual(byLabel['Under 10s'], published['Under 10s']);
-  assert.strictEqual(byLabel['Adults'], published['General Admission'], 'adult price must match "General Admission"');
+test('prices ARE the published gate prices — there is no second source to drift', () => {
+  const published = CONFIG.admission.prices;
+  published.forEach(p => {
+    const key = MDC.paidKeyFor(p.label);
+    assert.ok(K[key], `published category "${p.label}" must appear in Match Day Ops`);
+    assert.strictEqual(K[key].price_pence, MDC.toPence(p.price),
+      `${p.label} must charge exactly what the website says`);
+    assert.strictEqual(K[key].label, p.label, 'the label shown is the label published');
+  });
+  // Change the website config and the categories change with it, with no
+  // second list to update.
+  const raised = MDC.categoriesFromAdmission({ prices: [{ label: 'General Admission', price: '£12' }] });
+  assert.strictEqual(raised.find(c => c.key === 'adults').price_pence, 1200);
 });
 
 // ── SANITISERS ─────────────────────────────────────────────────────────────

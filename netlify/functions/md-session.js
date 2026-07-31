@@ -54,7 +54,8 @@ exports.handler = async function (event) {
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
   if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
-  if (!AUTH.signingKey()) return resp(200, { ok: false, error: 'not-configured' });
+  const cfgErr = AUTH.configError();
+  if (cfgErr) return resp(503, { ok: false, error: cfgErr, misconfigured: true });
 
   const username = String(b.username || '').trim().slice(0, 60);
   const password = String(b.password || '');

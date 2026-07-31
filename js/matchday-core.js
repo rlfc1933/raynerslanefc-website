@@ -163,28 +163,113 @@
   function isLocked(status) { return status === 'locked'; }
 
   // ── TICKET CATEGORIES ───────────────────────────────────────────────────
-  // Every category is CONFIGURABLE. These are only the seed defaults used when
-  // a season has no price list yet. `counts` = counts toward official
-  // attendance. `revenue` = contributes to expected gate revenue.
   //
-  // Complimentary, season-ticket, officials and scouts all walk through the
-  // gate (so they count as attendance) but produce no gate cash on the day —
-  // which is precisely why declared receipts must be compared against expected
-  // revenue and not against the headcount.
-  var DEFAULT_CATEGORIES = [
-    { key: 'adults',        label: 'Adults',                 price_pence: 900, counts: true,  revenue: true,  order: 1,  enabled: true },
-    { key: 'concessions',   label: 'Concessions',            price_pence: 600, counts: true,  revenue: true,  order: 2,  enabled: true },
-    { key: 'seniors',       label: 'Senior citizens',        price_pence: 600, counts: true,  revenue: true,  order: 3,  enabled: true },
-    { key: 'students',      label: 'Students',               price_pence: 600, counts: true,  revenue: true,  order: 4,  enabled: true },
-    { key: 'u16',           label: 'Under 16s',              price_pence: 200, counts: true,  revenue: true,  order: 5,  enabled: true },
-    { key: 'u10',           label: 'Under 10s',              price_pence: 0,   counts: true,  revenue: false, order: 6,  enabled: true },
-    { key: 'complimentary', label: 'Complimentary',          price_pence: 0,   counts: true,  revenue: false, order: 7,  enabled: true },
-    { key: 'season_ticket', label: 'Season ticket',          price_pence: 0,   counts: true,  revenue: false, order: 8,  enabled: true },
-    { key: 'officials',     label: 'Match officials',        price_pence: 0,   counts: true,  revenue: false, order: 9,  enabled: true },
-    { key: 'scouts',        label: 'Scouts',                 price_pence: 0,   counts: true,  revenue: false, order: 10, enabled: true },
-    { key: 'away',          label: 'Away supporters',        price_pence: 900, counts: true,  revenue: true,  order: 11, enabled: true },
-    { key: 'other',         label: 'Other',                  price_pence: 0,   counts: true,  revenue: false, order: 12, enabled: true }
+  // THERE IS ONE PRICE SOURCE: data/config.json → `admission.prices`. That is
+  // the block the public site already renders at the gate (js/components.js →
+  // initGate), so what a volunteer sees on the phone is what a supporter sees
+  // on the website and on the programme. Match Day Ops does NOT keep a second
+  // season price list, and there is no price-management screen to keep in step
+  // with the website — a second source is how the two drift apart and the club
+  // ends up charging one price and reconciling against another.
+  //
+  // PAID categories are derived from that config, live.
+  // NON-PAID categories are an operational list, fixed here, always £0. They
+  // are not prices — nobody publishes "officials: free" — they are ways of
+  // walking through the turnstile without paying.
+  //
+  //   counts  = goes toward the official attendance figure
+  //   revenue = contributes to EXPECTED gate revenue
+  //
+  // Everyone who comes through the gate counts. Only those who hand over money
+  // create an expectation of money. That distinction is the whole reason
+  // declared receipts are reconciled against expected revenue and never against
+  // the headcount — a big guest list is not a cash shortfall.
+
+  // Stable keys. A record stores the KEY, so a label change on the website
+  // must never orphan an existing count. Unknown labels fall back to a slug.
+  var PAID_KEY_ALIASES = {
+    'general admission': 'adults', 'general': 'adults', 'adults': 'adults', 'adult': 'adults',
+    'concessions': 'concessions', 'concession': 'concessions',
+    'senior citizens': 'seniors', 'seniors': 'seniors', 'over 65s': 'seniors', 'over-65s': 'seniors',
+    'students': 'students', 'student': 'students',
+    'under 16s': 'u16', 'under 16': 'u16', 'u16': 'u16',
+    'under 10s': 'u10', 'under 10': 'u10', 'u10': 'u10'
+  };
+
+  function slugify(label) {
+    return String(label || '').toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'category';
+  }
+  function paidKeyFor(label) {
+    var n = String(label || '').toLowerCase().trim().replace(/\s+/g, ' ');
+    return PAID_KEY_ALIASES[n] || slugify(label);
+  }
+
+  // NON-PAID admission. Always £0, always counted, never revenue.
+  // "Guest List / Complimentary" is deliberately spelled out: a volunteer on
+  // the gate needs to know instantly that this is the box for someone the club
+  // is letting in free, and the wording has to survive being read in the rain.
+  var FREE_CATEGORIES = [
+    { key: 'season_ticket',   label: 'Season ticket',              hint: 'Holder shows their card — already paid for the season', order: 50 },
+    { key: 'guest_list',      label: 'Guest List / Complimentary', hint: 'Club guests admitted free — sponsors, family, invited guests', order: 51 },
+    { key: 'officials',       label: 'Match officials',            hint: 'Referee and assistants', order: 52 },
+    { key: 'scouts',          label: 'Scouts',                     hint: 'Club and academy scouts', order: 53 },
+    { key: 'away_allocation', label: 'Away club allocation',       hint: 'Free places given to the visiting club — NOT away supporters who pay at the gate', order: 54 },
+    { key: 'other_free',      label: 'Other non-paying',           hint: 'Anyone else admitted free — say who in the notes', order: 55 }
   ];
+
+  /**
+   * Build the category list for a fixture from the MAIN SITE admission config.
+   * @param admission  data/config.json → `admission` ({ prices: [{label, price, note}] })
+   * Returns paid categories (priced, in the order the website lists them)
+   * followed by the fixed non-paid categories.
+   */
+  function categoriesFromAdmission(admission) {
+    var prices = (admission && admission.prices) || [];
+    var paid = prices.map(function (p, i) {
+      var pence = toPence(p.price);
+      if (pence == null) pence = 0;
+      return {
+        key: paidKeyFor(p.label),
+        label: p.label,
+        hint: p.note || '',
+        price_pence: pence,
+        counts: true,
+        // A £0 published category (Under 10s are free) is still a published
+        // admission category — it just cannot create an expectation of money.
+        revenue: pence > 0,
+        paid: true,
+        order: i + 1,
+        enabled: true
+      };
+    });
+    // Guard against a config with two rows that normalise to one key.
+    var seen = {};
+    paid = paid.filter(function (c) {
+      if (seen[c.key]) return false;
+      seen[c.key] = true;
+      return true;
+    });
+    var free = FREE_CATEGORIES.map(function (c) {
+      return {
+        key: c.key, label: c.label, hint: c.hint,
+        price_pence: 0, counts: true, revenue: false, paid: false,
+        order: c.order, enabled: true
+      };
+    });
+    return paid.concat(free);
+  }
+
+  // Used only when the admission config cannot be read at all, so a match can
+  // still be counted. Mirrors the published prices at the time of writing.
+  var FALLBACK_ADMISSION = {
+    prices: [
+      { label: 'General Admission', price: '£9' },
+      { label: 'Concessions', price: '£6', note: 'Over-65s, students' },
+      { label: 'Under 16s', price: '£2' },
+      { label: 'Under 10s', price: 'Free' }
+    ]
+  };
 
   // ── MONEY ───────────────────────────────────────────────────────────────
   // Parse a human "£9", "9.50", "Free" into integer pence. Returns null when
@@ -326,7 +411,11 @@
     TRANSITIONS: TRANSITIONS,
     canTransition: canTransition,
     isLocked: isLocked,
-    DEFAULT_CATEGORIES: DEFAULT_CATEGORIES,
+    PAID_KEY_ALIASES: PAID_KEY_ALIASES,
+    FREE_CATEGORIES: FREE_CATEGORIES,
+    FALLBACK_ADMISSION: FALLBACK_ADMISSION,
+    categoriesFromAdmission: categoriesFromAdmission,
+    paidKeyFor: paidKeyFor,
     NOTE_KEYS: NOTE_KEYS,
     toPence: toPence,
     fmtGBP: fmtGBP,

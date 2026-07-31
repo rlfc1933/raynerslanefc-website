@@ -190,6 +190,9 @@ exports.handler = async function (event) {
   try { b = JSON.parse(event.body || '{}'); } catch (e) { return resp(400, { ok: false, error: 'Bad JSON' }); }
   if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
+  const cfgErr = AUTH.configError();
+  if (cfgErr) return resp(503, { ok: false, error: cfgErr, misconfigured: true });
+
   const session = AUTH.verify(b.token);
   if (!session) return resp(401, { ok: false, error: 'Your session has expired — sign in again.', reauth: true });
   // Migrating historical finances is a chairman-level act.

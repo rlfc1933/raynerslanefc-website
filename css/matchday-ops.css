@@ -114,6 +114,48 @@
 .md-pill--abandoned   { color: var(--md-bad); }
 .md-pill--legacy      { color: #A78BFA; }
 
+/* ── WHO IS ON THE TURNSTILE ────────────────────────────────────────────────
+   One box, at the top of the tally, filled in every match day. Accountability
+   has to be the first thing you see, not a field buried in a settings tab. */
+.md-operator {
+  border: 1px solid rgba(255,209,0,.45); background: rgba(255,209,0,.06);
+  border-radius: 12px; padding: 12px 14px;
+}
+.md-operator--empty { border-color: var(--md-warn); background: rgba(245,158,11,.09); }
+.md-operator__lbl {
+  display: block; font-family: var(--fc); font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--y, #FFD100); margin-bottom: 8px;
+}
+.md-operator input {
+  width: 100%; min-height: 52px; font-size: 17px; padding: 12px 14px;
+  background: var(--bg, #0d0d0d); border: 1px solid var(--br); border-radius: 9px; color: var(--w);
+  font-family: var(--fb, system-ui);
+}
+.md-operator input:focus { outline: 3px solid var(--y); outline-offset: 1px; border-color: var(--y); }
+.md-operator__hint {
+  font-family: var(--fb); font-size: 12px; color: var(--gr); line-height: 1.5; margin-top: 8px;
+}
+.md-operator__hint b { color: var(--w); }
+
+/* ── CATEGORY GROUP HEADERS ─────────────────────────────────────────────────
+   Paid and free are two visibly different blocks. A volunteer must never have
+   to work out whether a category charges, and a treasurer must never read a
+   long guest list as missing money. */
+.md-grouphdr {
+  font-family: var(--fc); font-size: 11px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--y, #FFD100);
+  margin: 18px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--br);
+}
+.md-grouphdr--free { color: var(--md-info); }
+.md-grouphdr span {
+  display: block; font-size: 10.5px; font-weight: 600; letter-spacing: .04em;
+  text-transform: none; color: var(--gr); margin-top: 3px;
+}
+.md-tally__row--free { border-style: dashed; }
+.md-tally__row--free .md-tally__btn--plus {
+  background: rgba(56,189,248,.15); border-color: rgba(56,189,248,.45);
+}
+
 /* ── THE TALLY ──────────────────────────────────────────────────────────────
    The reason this module exists. Big, unambiguous, thumb-reachable. */
 .md-tally { display: flex; flex-direction: column; gap: 8px; }
@@ -191,6 +233,14 @@
 .md-var--warn { background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.40); color: #FCD9A0; }
 .md-var--bad  { background: rgba(239,68,68,.10);  border: 1px solid rgba(239,68,68,.40);  color: #FCA5A5; }
 .md-var b { color: var(--w); }
+
+/* Secondary explanatory text. NOT an opacity on top of an already-grey colour:
+   that took it to 3.15:1, under the 4.5:1 AA floor, on exactly the sentence
+   that tells a volunteer what the Guest List box is for. */
+.md-hint {
+  color: var(--gr, #8F8F8F); font-style: normal; font-size: 12px;
+}
+.md-sum__row .md-hint { display: block; margin-top: 2px; }
 
 /* ── AUDIT ──────────────────────────────────────────────────────────────── */
 .md-audit { display: flex; flex-direction: column; gap: 8px; }

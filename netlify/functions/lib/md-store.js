@@ -109,45 +109,96 @@ function snapshotFixture(f) {
   };
 }
 
-// ── PRICE LISTS ────────────────────────────────────────────────────────────
-/**
- * The price list that applies to a season + competition, newest effective date
- * first. A competition-specific override wins over the season default; if
- * neither exists the seeded defaults from the core module are used, so a match
- * can always be prepared.
- */
-async function priceListFor(season, competitionId) {
-  if (!configured()) return { id: null, categories: MDC.DEFAULT_CATEGORIES, source: 'built-in defaults' };
-  const rows = await sb('md_price_lists?season=eq.' + encodeURIComponent(season) +
-                        '&select=*&order=effective_from.desc');
-  const list = Array.isArray(rows) ? rows : [];
-  const today = new Date().toISOString().slice(0, 10);
-  const live = list.filter(r => !r.effective_from || r.effective_from <= today);
-  const pool = live.length ? live : list;
+// ── PRICING ────────────────────────────────────────────────────────────────
+//
+// ONE SOURCE: data/config.json → `admission`. That is the block the public site
+// already renders at the gate, so the price on the volunteer's phone is by
+// construction the price on the website. There is no second season price list
+// and no price-management screen, because two sources drift and then the club
+// charges one price and reconciles against another.
+//
+// The ONLY exception is a rare, audited, single-fixture override — a cup
+// instruction, a charity match, a promotion. It never touches the season
+// config, and it is stored against ONE fixture.
 
-  if (competitionId) {
-    const override = pool.filter(r => r.competition_id === competitionId)[0];
-    if (override) return { id: override.id, categories: override.categories || [], source: override.label || 'competition override' };
+let _admissionCache = null;
+let _admissionCacheAt = 0;
+const ADMISSION_TTL = 60 * 1000;
+
+/** Read `admission` from the canonical main-site config. */
+async function fetchAdmission(force) {
+  const now = Date.now();
+  if (!force && _admissionCache && (now - _admissionCacheAt) < ADMISSION_TTL) return _admissionCache;
+
+  const origins = [];
+  if (process.env.URL) origins.push(process.env.URL.replace(/\/$/, '') + '/data/config.json');
+  if (process.env.DEPLOY_URL) origins.push(process.env.DEPLOY_URL.replace(/\/$/, '') + '/data/config.json');
+  origins.push('https://raw.githubusercontent.com/rlfc1933/raynerslanefc-website/main/data/config.json');
+
+  for (const url of origins) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(7000) });
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d && d.admission && Array.isArray(d.admission.prices) && d.admission.prices.length) {
+        _admissionCache = d.admission;
+        _admissionCacheAt = now;
+        return d.admission;
+      }
+    } catch (e) { /* try the next origin */ }
   }
-  const def = pool.filter(r => !r.competition_id)[0];
-  if (def) return { id: def.id, categories: def.categories || [], source: def.label || 'season default' };
-  return { id: null, categories: MDC.DEFAULT_CATEGORIES, source: 'built-in defaults' };
+  // Never block a match day on a config fetch. Fall back, and SAY so — the
+  // source string travels with the snapshot so a record is never ambiguous
+  // about where its prices came from.
+  return null;
 }
 
-async function listPriceLists(season) {
-  if (!configured()) return [];
-  const rows = await sb('md_price_lists?season=eq.' + encodeURIComponent(season) + '&select=*&order=effective_from.desc');
-  return Array.isArray(rows) ? rows : [];
+/**
+ * The categories and prices that apply to one fixture.
+ *   normal   → derived live from the main-site admission config
+ *   override → a rare, audited, single-fixture exception
+ */
+async function pricingFor(fixtureId) {
+  let override = null;
+  if (configured() && fixtureId) {
+    try {
+      const rows = await sb('md_price_lists?fixture_id=eq.' + encodeURIComponent(fixtureId) + '&select=*');
+      override = (Array.isArray(rows) && rows[0]) || null;
+    } catch (e) { /* an override lookup must never block preparing a match */ }
+  }
+  if (override && Array.isArray(override.categories) && override.categories.length) {
+    return {
+      categories: override.categories,
+      source: 'Fixture-specific override — ' + (override.reason || 'no reason recorded'),
+      isOverride: true,
+      overrideId: override.id,
+      overrideBy: override.created_by,
+      overrideAt: override.created_at,
+    };
+  }
+  const admission = await fetchAdmission();
+  if (admission) {
+    return {
+      categories: MDC.categoriesFromAdmission(admission),
+      source: 'Season admission prices (data/config.json — the same prices shown on the website)',
+      isOverride: false,
+    };
+  }
+  return {
+    categories: MDC.categoriesFromAdmission(MDC.FALLBACK_ADMISSION),
+    source: 'Built-in fallback — the site admission config could not be read',
+    isOverride: false,
+    degraded: true,
+  };
 }
 
-async function upsertPriceList(row) {
-  const existing = await sb('md_price_lists?season=eq.' + encodeURIComponent(row.season) +
-    (row.competition_id ? '&competition_id=eq.' + encodeURIComponent(row.competition_id) : '&competition_id=is.null') +
-    '&effective_from=eq.' + encodeURIComponent(row.effective_from) + '&select=id');
+/** Store a single-fixture override. Chairman / V Chairman only, reason required. */
+async function saveOverride(row) {
+  const existing = await sb('md_price_lists?fixture_id=eq.' + encodeURIComponent(row.fixture_id) + '&select=id');
   if (Array.isArray(existing) && existing.length) {
     const out = await sb('md_price_lists?id=eq.' + existing[0].id, {
       method: 'PATCH', headers: { Prefer: 'return=representation' },
-      body: { categories: row.categories, label: row.label },
+      body: { categories: row.categories, reason: row.reason, label: row.label, created_by: row.created_by },
     });
     return Array.isArray(out) ? out[0] : out;
   }
@@ -155,6 +206,12 @@ async function upsertPriceList(row) {
     method: 'POST', headers: { Prefer: 'return=representation' }, body: row,
   });
   return Array.isArray(out) ? out[0] : out;
+}
+
+async function clearOverride(fixtureId) {
+  return sb('md_price_lists?fixture_id=eq.' + encodeURIComponent(fixtureId), {
+    method: 'DELETE', headers: { Prefer: 'return=minimal' },
+  });
 }
 
 // ── RECORDS ────────────────────────────────────────────────────────────────
@@ -232,7 +289,7 @@ async function legacyFinances() {
 module.exports = {
   configured, sb,
   fetchFixtures, fixtureById, homeFixtures, snapshotFixture,
-  priceListFor, listPriceLists, upsertPriceList,
+  fetchAdmission, pricingFor, saveOverride, clearOverride,
   recordByFixture, recordsForSeason, allRecords,
   insertRecord, updateRecord, findByIdempotencyKey,
   audit, auditFor,

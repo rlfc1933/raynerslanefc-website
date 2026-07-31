@@ -268,7 +268,7 @@ async function actionGet(b, session) {
   const f = await requireHomeFixture(fixtureId);
   const rec = S.configured() ? await S.recordByFixture(fixtureId) : null;
   const season = f.season || MDC.seasonOf(f.date);
-  const priceList = await S.priceListFor(season, f.competitionId || '');
+  const priceList = await S.pricingFor(fixtureId);
   const history = rec && AUTH.has(session, AUTH.CAP.FINANCE) ? await S.auditFor(rec.id) : [];
   return ok({
     fixture: f,
@@ -301,7 +301,8 @@ async function actionPrepare(b, session) {
   if (existing) return ok({ record: present(existing, session), created: false });
 
   const season = f.season || MDC.seasonOf(f.date);
-  const priceList = await S.priceListFor(season, f.competitionId || '');
+  // Prices come from the MAIN SITE admission config, not a second list here.
+  const priceList = await S.pricingFor(fixtureId);
 
   const row = Object.assign({
     fixture_id: fixtureId,
@@ -309,7 +310,7 @@ async function actionPrepare(b, session) {
     competition_id: f.competitionId || null,
     competition_label: f.competition || null,
     fixture_snapshot: S.snapshotFixture(f),
-    price_list_id: priceList.id,
+    price_list_id: priceList.overrideId || null,
     // The snapshot is taken now so the prepare screen shows what will be used,
     // and re-taken at submit so a mid-week price correction is picked up.
     price_snapshot: { categories: priceList.categories, source: priceList.source, at: new Date().toISOString() },
@@ -355,7 +356,8 @@ async function actionSave(b, session) {
   requireUnlocked(rec);
 
   const patch = b.patch || {};
-  const cats = (rec.price_snapshot && rec.price_snapshot.categories) || MDC.DEFAULT_CATEGORIES;
+  const cats = (rec.price_snapshot && rec.price_snapshot.categories)
+    || (await S.pricingFor(rec.fixture_id)).categories;
   const next = {};
 
   if (patch.attendance != null)  next.attendance = cleanTally(patch.attendance, cats);
@@ -405,13 +407,27 @@ async function actionSubmit(b, session) {
   requireCap(session, AUTH.CAP.RECORD, 'submit a match-day record');
   if (!S.configured()) throw new HttpError(503, 'Match Day Ops storage is not configured on this site.');
 
+  const fixtureId = text(b.fixture_id, 120);
+  if (!fixtureId) throw new HttpError(400, 'fixture_id required');
+
+  // Replay protection, SCOPED TO THE FIXTURE. The key is unique across the
+  // whole table, so a key that belongs to a different match must be treated as
+  // a collision and refused — returning that other record would report a
+  // successful submission for a match nobody submitted, and silently skip
+  // every discrepancy check on this one.
   const key = text(b.idempotency_key, 120);
   if (key) {
     const already = await S.findByIdempotencyKey(key);
-    if (already) return ok({ record: present(already, session), duplicate: true });
+    if (already) {
+      if (already.fixture_id === fixtureId) {
+        return ok({ record: present(already, session), duplicate: true });
+      }
+      throw new HttpError(409,
+        'That submission reference has already been used for a different match. Reload the record and submit again.',
+        { collision: true });
+    }
   }
 
-  const fixtureId = text(b.fixture_id, 120);
   const rec = await S.recordByFixture(fixtureId);
   if (!rec) throw new HttpError(404, 'No match-day record to submit.');
   requireUnlocked(rec);
@@ -420,7 +436,7 @@ async function actionSubmit(b, session) {
   // Freeze the prices ACTUALLY used at the moment of submission.
   const snapshot = rec.price_snapshot && rec.price_snapshot.categories
     ? rec.price_snapshot
-    : { categories: (await S.priceListFor(rec.season, rec.competition_id)).categories, at: new Date().toISOString() };
+    : { categories: (await S.pricingFor(rec.fixture_id)).categories, source: (await S.pricingFor(rec.fixture_id)).source, at: new Date().toISOString() };
 
   const merged = Object.assign({}, rec, { price_snapshot: snapshot });
   const derived = derivedColumns(merged);
@@ -558,51 +574,134 @@ async function actionSetStatus(b, session) {
   return ok({ record: present(saved, session) });
 }
 
-// ── PRICES ─────────────────────────────────────────────────────────────────
+// ── PRICING ────────────────────────────────────────────────────────────────
+// There is NO price-management screen. The season prices live in
+// data/config.json → `admission`, edited on the main site like any other site
+// content, and Match Day Ops reads them. What follows is only the rare,
+// audited, single-fixture exception.
+
+/** Show what a fixture will be priced at, and where that came from. */
 async function actionPricesGet(b, session) {
-  const season = text(b.season, 20) || (await currentSeason());
-  const lists = await S.listPriceLists(season);
-  return ok({ season, lists, defaults: MDC.DEFAULT_CATEGORIES });
+  const fixtureId = text(b.fixture_id, 120);
+  const pricing = await S.pricingFor(fixtureId);
+  const admission = await S.fetchAdmission();
+  return ok({
+    pricing,
+    seasonSource: 'data/config.json → admission (the prices published on the website)',
+    seasonPrices: admission ? admission.prices : null,
+    canOverride: AUTH.has(session, AUTH.CAP.PRICES),
+  });
 }
 
-async function actionPricesSave(b, session) {
-  requireCap(session, AUTH.CAP.PRICES, 'change ticket prices');
-  const season = text(b.season, 20);
-  if (!season) throw new HttpError(400, 'season required');
+/**
+ * Override the prices for ONE fixture. Chairman / V Chairman only, reason
+ * mandatory, fully audited. It does NOT touch data/config.json, so the season
+ * prices on the website are unaffected.
+ */
+async function actionPriceOverride(b, session) {
+  requireCap(session, AUTH.CAP.PRICES, 'set a fixture-specific price');
+  const fixtureId = text(b.fixture_id, 120);
+  if (!fixtureId) throw new HttpError(400, 'fixture_id required');
+  const reason = text(b.reason, 2000);
+  if (!reason || reason.length < 10) {
+    throw new HttpError(400,
+      'A fixture-specific price needs a reason of at least 10 characters — a cup instruction, a charity match, a promotion. It goes into the audit history.',
+      { needs: 'reason' });
+  }
+  const f = await requireHomeFixture(fixtureId);
+
+  const rec = S.configured() ? await S.recordByFixture(fixtureId) : null;
+  if (rec && ['completed', 'locked'].indexOf(rec.status) > -1) {
+    throw new HttpError(409,
+      'That record is already ' + rec.status + '. Its prices are part of the historical record and cannot be changed.');
+  }
+
   const cats = Array.isArray(b.categories) ? b.categories : null;
-  if (!cats) throw new HttpError(400, 'categories must be a list');
+  if (!cats || !cats.length) throw new HttpError(400, 'categories must be a list');
 
   const clean = cats.slice(0, 40).map((c, i) => {
     const key = text(c.key, 40);
-    if (!key || !/^[a-z0-9_]+$/.test(key)) throw new HttpError(400, `Category ${i + 1} needs a simple key (lowercase letters, numbers, underscores).`);
+    if (!key || !/^[a-z0-9_]+$/.test(key)) {
+      throw new HttpError(400, `Category ${i + 1} needs a simple key (lowercase letters, numbers, underscores).`);
+    }
+    const price = pence(c.price_pence, `${key} price`);
+    const isFree = MDC.FREE_CATEGORIES.some(fc => fc.key === key);
+    if (isFree && price !== 0) {
+      // Guest List, season tickets, officials and scouts are non-paying by
+      // definition. Letting one carry a price would put revenue against people
+      // who never handed over money and invent a shortfall.
+      throw new HttpError(400, `"${key}" is a non-paying category and must stay at £0.`);
+    }
     return {
       key,
       label: text(c.label, 80) || key,
-      price_pence: pence(c.price_pence, `${key} price`),
+      hint: text(c.hint, 160) || '',
+      price_pence: isFree ? 0 : price,
       counts: c.counts !== false,
-      revenue: !!c.revenue,
+      revenue: isFree ? false : price > 0,
+      paid: !isFree,
       order: qty(c.order == null ? i + 1 : c.order, 'order'),
       enabled: c.enabled !== false,
     };
   });
-  const keys = new Set(clean.map(c => c.key));
-  if (keys.size !== clean.length) throw new HttpError(400, 'Two categories share the same key.');
-
-  const row = {
-    season,
-    competition_id: text(b.competition_id, 60),
-    label: text(b.label, 120),
-    categories: clean,
-    effective_from: text(b.effective_from, 10) || new Date().toISOString().slice(0, 10),
-    created_by: AUTH.actorOf(session),
-  };
-  const saved = await S.upsertPriceList(row);
-  await S.audit({
-    record_id: null, fixture_id: null,
-    actor: AUTH.actorOf(session), actor_role: session.role, action: 'price_override',
-    after: { season, competition_id: row.competition_id, effective_from: row.effective_from, categories: clean.length },
+  if (new Set(clean.map(c => c.key)).size !== clean.length) {
+    throw new HttpError(400, 'Two categories share the same key.');
+  }
+  // Every non-paying category must still be present, or a volunteer loses the
+  // Guest List box on exactly the fixture most likely to have one.
+  MDC.FREE_CATEGORIES.forEach(fc => {
+    if (!clean.some(c => c.key === fc.key)) {
+      clean.push({ key: fc.key, label: fc.label, hint: fc.hint, price_pence: 0,
+                   counts: true, revenue: false, paid: false, order: fc.order, enabled: true });
+    }
   });
-  return ok({ list: saved });
+
+  const before = await S.pricingFor(fixtureId);
+  const saved = await S.saveOverride({
+    fixture_id: fixtureId,
+    season: f.season || MDC.seasonOf(f.date),
+    competition_id: f.competitionId || null,
+    label: text(b.label, 120) || 'Fixture-specific pricing',
+    reason,
+    categories: clean,
+    effective_from: new Date().toISOString().slice(0, 10),
+    created_by: AUTH.actorOf(session),
+  });
+
+  // If the record already exists and is still editable, re-snapshot so the
+  // tally screen immediately shows what will actually be charged.
+  if (rec) {
+    const merged = Object.assign({}, rec, { price_snapshot: { categories: clean, source: 'Fixture-specific override — ' + reason, at: new Date().toISOString() } });
+    await S.updateRecord(rec.id, rec.version, Object.assign(
+      { price_snapshot: merged.price_snapshot }, derivedColumns(merged)));
+  }
+
+  await S.audit({
+    record_id: rec ? rec.id : null, fixture_id: fixtureId,
+    actor: AUTH.actorOf(session), actor_role: session.role, action: 'price_override', reason,
+    before: { source: before.source, categories: before.categories },
+    after: { categories: clean },
+  });
+  return ok({ override: saved, pricing: await S.pricingFor(fixtureId) });
+}
+
+/** Remove a fixture override and fall back to the season website prices. */
+async function actionPriceOverrideClear(b, session) {
+  requireCap(session, AUTH.CAP.PRICES, 'remove a fixture-specific price');
+  const fixtureId = text(b.fixture_id, 120);
+  const rec = S.configured() ? await S.recordByFixture(fixtureId) : null;
+  if (rec && ['completed', 'locked'].indexOf(rec.status) > -1) {
+    throw new HttpError(409, 'That record is already ' + rec.status + ' — its prices are historical.');
+  }
+  const before = await S.pricingFor(fixtureId);
+  await S.clearOverride(fixtureId);
+  await S.audit({
+    record_id: rec ? rec.id : null, fixture_id: fixtureId,
+    actor: AUTH.actorOf(session), actor_role: session.role, action: 'price_override_cleared',
+    reason: text(b.reason, 2000),
+    before: { categories: before.categories }, after: { source: 'season website prices' },
+  });
+  return ok({ pricing: await S.pricingFor(fixtureId) });
 }
 
 // ── AUDIT + REPORTS ────────────────────────────────────────────────────────
@@ -645,13 +744,23 @@ function buildReports(season, records, fixtures) {
     byComp[k].receipts_pence += Number(r.declared_pence) || 0;
   });
 
-  // Ticket-category trend
+  // Ticket-category trend. Free categories are ALWAYS listed, even at zero, so
+  // Guest List / Complimentary is a visible line in every report rather than
+  // something that only appears once somebody has used it.
+  const freeKeys = MDC.FREE_CATEGORIES.map(c => c.key);
+  const freeLabel = {};
+  MDC.FREE_CATEGORIES.forEach(c => { freeLabel[c.key] = c.label; });
   const catTotals = {};
+  freeKeys.forEach(k => { catTotals[k] = 0; });
   counted.forEach(r => {
     Object.keys(r.attendance || {}).forEach(k => {
       catTotals[k] = (catTotals[k] || 0) + (Number(r.attendance[k]) || 0);
     });
   });
+  const freeTotal = freeKeys.reduce((a, k) => a + (catTotals[k] || 0), 0);
+  const paidTotal = Object.keys(catTotals)
+    .filter(k => freeKeys.indexOf(k) === -1)
+    .reduce((a, k) => a + catTotals[k], 0);
 
   const salesQty = (key) => counted.reduce((a, r) => a + (Number(((r.sales || {})[key] || {}).qty) || 0), 0);
   const receipts = (key) => counted.reduce((a, r) => a + (Number((r.receipts || {})[key]) || 0), 0);
@@ -668,6 +777,10 @@ function buildReports(season, records, fixtures) {
       average: n ? Math.round(totalAtt / n) : 0,
       highest: n ? Math.max(...attendances) : 0,
       lowest: n ? Math.min(...attendances) : 0,
+      paid: paidTotal,
+      free: freeTotal,
+      guestList: catTotals.guest_list || 0,
+      seasonTicket: catTotals.season_ticket || 0,
     },
     money: {
       total_receipts_pence: gate,
@@ -685,7 +798,12 @@ function buildReports(season, records, fixtures) {
       sales_pence: sum(r => r.sales_pence),
     },
     byCompetition: Object.values(byComp).sort((a, b) => b.receipts_pence - a.receipts_pence),
-    ticketCategories: Object.keys(catTotals).map(k => ({ key: k, total: catTotals[k] })).sort((a, b) => b.total - a.total),
+    ticketCategories: Object.keys(catTotals).map(k => ({
+      key: k,
+      label: freeLabel[k] || k,
+      free: freeKeys.indexOf(k) > -1,
+      total: catTotals[k],
+    })).sort((a, b) => (a.free === b.free) ? b.total - a.total : (a.free ? 1 : -1)),
     exceptions: {
       // A home fixture that has been played but has no completed record.
       missingRecords: fixtures
@@ -746,26 +864,49 @@ async function actionExport(b, session) {
   requireCap(session, AUTH.CAP.FINANCE, 'export match-day data');
   const season = text(b.season, 20) || (await currentSeason());
   const records = await S.recordsForSeason(season);
+  // Every ticket category that appears anywhere in the season gets its own
+  // column, so Guest List / Complimentary is explicit in the export and can
+  // never be lost inside a total. Paid categories first, then the free ones.
+  const seenKeys = new Set();
+  records.forEach(r => Object.keys(r.attendance || {}).forEach(k => seenKeys.add(k)));
+  MDC.FREE_CATEGORIES.forEach(c => seenKeys.add(c.key));   // always present, even at zero
+  const freeKeys = MDC.FREE_CATEGORIES.map(c => c.key);
+  const paidKeys = [...seenKeys].filter(k => freeKeys.indexOf(k) === -1).sort();
+  const catKeys = paidKeys.concat(freeKeys);
+
   const cols = [
-    'date', 'opponent', 'competition', 'record_status', 'attendance_calculated',
-    'attendance_official', 'attendance_variance', 'expected_gate_pence', 'sales_pence',
+    'date', 'opponent', 'competition', 'record_status', 'turnstile_operator',
+  ].concat(catKeys.map(k => 'att_' + k))
+   .concat([
+    'attendance_paid_total', 'attendance_free_total',
+    'attendance_calculated', 'attendance_official', 'attendance_variance', 'attendance_variance_note',
+    'price_source', 'expected_gate_pence', 'sales_pence',
     'expected_pence', 'cash_pence', 'card_pence', 'online_pence', 'other_pence',
-    'declared_pence', 'financial_variance_pence', 'float_open_pence', 'float_close_pence',
+    'declared_pence', 'financial_variance_pence', 'reconciliation_note',
+    'float_open_pence', 'float_close_pence',
     'completed_by', 'approved_by', 'updated_at',
-  ];
+  ]);
   const esc = (v) => {
     const s = v == null ? '' : String(v);
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
   const rows = records.map(r => {
-    const fs = r.fixture_snapshot || {}, rc = r.receipts || {};
+    const fs = r.fixture_snapshot || {}, rc = r.receipts || {}, att = r.attendance || {};
+    const freeTotal = freeKeys.reduce((a, k) => a + (Number(att[k]) || 0), 0);
+    const paidTotal = paidKeys.reduce((a, k) => a + (Number(att[k]) || 0), 0);
     return [
-      fs.date, fs.opponent, r.competition_label, r.status, r.attendance_calculated,
-      r.attendance_official, r.attendance_variance, r.expected_gate_pence, r.sales_pence,
+      fs.date, fs.opponent, r.competition_label, r.status, r.operator,
+    ].concat(catKeys.map(k => Number(att[k]) || 0))
+     .concat([
+      paidTotal, freeTotal,
+      r.attendance_calculated, r.attendance_official, r.attendance_variance, r.attendance_variance_note,
+      (r.price_snapshot && r.price_snapshot.source) || '',
+      r.expected_gate_pence, r.sales_pence,
       r.expected_pence, rc.cash_pence || 0, rc.card_pence || 0, rc.online_pence || 0, rc.other_pence || 0,
-      r.declared_pence, r.financial_variance_pence, r.float_open_pence, r.float_close_pence,
+      r.declared_pence, r.financial_variance_pence, r.reconciliation_note,
+      r.float_open_pence, r.float_close_pence,
       r.completed_by, r.approved_by, r.updated_at,
-    ].map(esc).join(',');
+    ]).map(esc).join(',');
   });
   return ok({ season, csv: [cols.join(',')].concat(rows).join('\r\n'), count: records.length });
 }
@@ -782,7 +923,8 @@ const ACTIONS = {
   reopen: actionReopen,
   status: actionSetStatus,
   'prices-get': actionPricesGet,
-  'prices-save': actionPricesSave,
+  'price-override': actionPriceOverride,
+  'price-override-clear': actionPriceOverrideClear,
   audit: actionAudit,
   reports: actionReports,
   archive: actionArchive,
@@ -800,6 +942,11 @@ exports.handler = async function (event) {
   if (!adminOk(b.pin)) return bad(401, 'Unauthorized');
 
   // Gate 2 — a signed identity. Capabilities come from HERE, never the body.
+  // Fail closed and SAY WHY if the signing secret is missing, rather than
+  // telling a volunteer their session expired when it never could be minted.
+  const cfgErr = AUTH.configError();
+  if (cfgErr) return bad(503, cfgErr, { misconfigured: true });
+
   const session = AUTH.verify(b.token);
   if (!session) return bad(401, 'Your session has expired — sign in again.', { reauth: true });
 

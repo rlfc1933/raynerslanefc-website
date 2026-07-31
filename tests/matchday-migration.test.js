@@ -213,11 +213,25 @@ test('the migration is additive — it drops no table, column or data', () => {
   assert.ok(!/drop column/i.test(sql), 'no column may be dropped');
   assert.ok(!/truncate/i.test(sql), 'nothing may be truncated');
   assert.ok(!/delete from/i.test(sql), 'nothing may be deleted');
-  // Dropping and recreating a TRIGGER/POLICY by name is how the file stays re-runnable.
+  // Dropping and recreating a TRIGGER/POLICY by name is how the file stays
+  // re-runnable, and an INDEX carries no data — dropping one loses nothing.
+  // A table, a column or a row is a different matter and is forbidden above.
   const drops = sql.match(/drop (\w+)/gi).map(s => s.toLowerCase());
   drops.forEach(d => {
-    assert.ok(/drop (trigger|policy)/.test(d), `unexpected: ${d}`);
+    assert.ok(/drop (trigger|policy|index)/.test(d), `unexpected destructive drop: ${d}`);
   });
+});
+
+test('the migration never stores season prices — config.json is the only source', () => {
+  const sql = fs.readFileSync(path.join(ROOT, 'supabase/migrations/20260730000000_matchday_ops.sql'), 'utf8');
+  // The earlier design seeded a season price list into the database. That was
+  // a second source of truth and is gone: nothing may INSERT prices here.
+  assert.ok(!/insert into public\.md_price_lists/i.test(sql),
+    'no price list may be seeded — the season prices live in data/config.json');
+  assert.ok(/fixture_id\s+text not null unique/i.test(sql),
+    'the override table must be keyed to ONE fixture');
+  assert.ok(/md_price_lists_reason_required/i.test(sql),
+    'an override must carry a mandatory reason');
 });
 
 // ── REGRESSION (test 28) ───────────────────────────────────────────────────
