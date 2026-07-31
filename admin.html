@@ -12,6 +12,10 @@
        the phone and the database can never disagree about the arithmetic. -->
   <script src="js/matchday-core.js"></script>
   <script src="js/matchday-ops.js"></script>
+  <!-- Release 1: the attention-led front door. Navigation only — it does not
+       touch a single save function, API call or data path. -->
+  <script src="js/portal-tools.js"></script>
+  <script src="js/portal-home.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -65,6 +69,25 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/matchday-ops.css">
+  <link rel="stylesheet" href="css/portal-home.css">
+  <style>
+    /* A public change deserves a confirmation you can actually read. */
+    .portal-said{position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483000;
+      display:none;align-items:center;gap:12px;justify-content:space-between;
+      background:#0f2a1a;border:1px solid #34D399;color:#D1FAE5;border-radius:12px;
+      padding:14px 16px;font-family:var(--fb),system-ui;font-size:15px;line-height:1.45;
+      box-shadow:0 12px 40px rgba(0,0,0,.6);max-width:640px;margin:0 auto}
+    .portal-said.on{display:flex}
+    .portal-said--err{background:#2a0f0f;border-color:#EF4444;color:#FEE2E2}
+    .portal-said button{flex:0 0 auto;min-height:44px;padding:10px 16px;border:none;border-radius:8px;
+      background:#34D399;color:#062B1B;font-family:var(--fc),system-ui;font-size:13px;font-weight:800;
+      letter-spacing:.06em;cursor:pointer}
+    .portal-said--err button{background:#EF4444;color:#fff}
+    /* Help sits in the header, always in the same place. */
+    .hlp-btn{background:none;border:1px solid var(--br);color:var(--gr);border-radius:8px;
+      min-width:38px;height:34px;font-family:var(--fc);font-size:13px;font-weight:800;cursor:pointer}
+    .hlp-btn:hover{border-color:var(--y);color:var(--y)}
+  </style>
   <style>
     :root{--y:#FFD100;--g:#1A5C32;--bk:#080808;--dk:#0F0F0F;--c:#161616;--c2:#1E1E1E;--br:#2A2A2A;--w:#F5F3ED;--gr:#888;--re:#EF4444;--su:#22C55E;--bl:#3B82F6;--fd:var(--font-display);--fc:var(--font-body);--fb:var(--font-body)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -673,12 +696,20 @@
       <span>Install</span>
     </button>
     <a href="index.html" style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;border-radius:6px;text-decoration:none"><i class="ico ico-house"></i></a>
+    <button class="hlp-btn" onclick="openPanel('siteguide')" title="Guides and Handbook" aria-label="Guides and Handbook">?</button>
     <button class="lock-btn" onclick="lock()">Lock</button>
   </div>
   <div class="dash">
 
-    <!-- DASHBOARD -->
-    <div id="dash-home">
+    <!-- ═══ PORTAL HOME (Release 1) ═══════════════════════════════════════
+         Answers "what needs doing" before showing the tool inventory. The
+         classic 31-tile list below is preserved untouched and is revealed by
+         "View all club tools", so nothing became unreachable. -->
+    <div id="portal-home"></div>
+
+    <!-- DASHBOARD — the classic full tool list. Hidden by default; shown by
+         PortalHome.toggleAll(). Every tile, panel id and hash still works. -->
+    <div id="dash-home" style="display:none">
       <div class="hq-hero">
         <div class="hq-eyebrow">Rayners Lane FC &middot; Staff HQ</div>
         <div class="hq-greet" id="hq-greet">Welcome to The Lane</div>
@@ -757,7 +788,7 @@
           </label>
 
           <input type="hidden" id="nm-id">
-          <button class="nm-save" id="nm-savebtn" onclick="nmSave()">Save &mdash; goes live in ~30s</button>
+          <button class="nm-save" id="nm-savebtn" onclick="nmSave()">Save and publish next match</button>
           <div class="nm-status" id="nm-status"></div>
           <div class="nm-actions">
             <button class="nm-ghost" onclick="nmCancel()">Cancel</button>
@@ -1135,7 +1166,7 @@
       <div class="div"></div>
       <div class="slbl" id="fx-cnt">Season Schedule</div>
       <div id="fx-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveFixtures()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveFixtures()">&#10003; Save and publish fixtures</button>
       <div class="dep" id="dep-fixtures"></div>
     </div>
 
@@ -1174,7 +1205,7 @@
       <div class="div"></div>
       <div class="slbl" id="vn-cnt">Venue Book</div>
       <div id="vn-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveVenues()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveVenues()">&#10003; Save and publish venues</button>
       <div class="dep" id="dep-venues"></div>
     </div>
 
@@ -1327,7 +1358,7 @@
       <div class="div"></div>
       <div class="slbl" id="sq-cnt">Current Squad</div>
       <div id="sq-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveSquad()">&#10003; Save Squad to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveSquad()">&#10003; Save and publish squad</button>
       <div class="dep" id="dep-squad"></div>
     </div>
 
@@ -1416,7 +1447,7 @@
       <div class="div"></div>
       <div class="slbl" id="cm-cnt">Current Roles</div>
       <div id="cm-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveCommittee()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveCommittee()">&#10003; Save and publish committee</button>
       <div class="dep" id="dep-committee"></div>
 
       <div class="div"></div>
@@ -1449,7 +1480,7 @@
       <div class="div"></div>
       <div class="slbl" id="sp-cnt">Current Sponsors</div>
       <div id="sp-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveSponsors()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveSponsors()">&#10003; Save and publish sponsors</button>
       <div class="dep" id="dep-sponsors"></div>
     </div>
 
@@ -1483,7 +1514,7 @@
       <div class="div"></div>
       <div class="slbl" id="gl-cnt">Gallery Photos</div>
       <div id="gl-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveGallery()">&#10003; Save Gallery to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveGallery()">&#10003; Save and publish gallery</button>
       <div class="dep" id="dep-gallery"></div>
     </div>
 
@@ -1561,7 +1592,7 @@
       </div>
       <button class="save sec" onclick="addEmailAccount()">+ Add / update account</button>
       <div id="em-list" style="margin-top:10px"></div>
-      <button class="save" style="margin-top:10px" onclick="saveEmails()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveEmails()">&#10003; Save to club portal</button>
       <div class="dep" id="dep-emails"></div>
       <div class="div"></div>
 
@@ -1598,7 +1629,7 @@
       <div class="div"></div>
       <div class="slbl" id="mm-cnt">Previous Winners</div>
       <div id="mm-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveMotm()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveMotm()">&#10003; Publish to the home page</button>
       <div class="dep" id="dep-motm"></div>
     </div>
 
@@ -1622,7 +1653,7 @@
       <div class="div"></div>
       <div class="slbl" id="sg-cnt">Recent Signings</div>
       <div id="sg-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveSigning()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveSigning()">&#10003; Publish to the home page</button>
       <div class="dep" id="dep-signing"></div>
     </div>
 
@@ -1947,7 +1978,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="div"></div>
       <div class="slbl" id="so-cnt">Planned Posts</div>
       <div id="so-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveSocial()">&#10003; Save Planner to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveSocial()">&#10003; Save to club portal</button>
       <div class="dep" id="dep-social"></div>
     </div>
 
@@ -1971,7 +2002,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       .an-chart-card canvas{height:210px!important;width:100%!important}
     </style>
     <div class="panel" id="panel-analytics">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-chart-column"></i> Match Day Analytics</div></div>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-archive"></i> Historic Match-Day Takings</div></div>
 
       <!-- RETIRED (Stage 9). This ledger was one Supabase row holding the whole
            history as a JSON array: every save overwrote the lot, so two staff
@@ -1983,7 +2014,16 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
            has checked it against the migrated records — nothing has been
            deleted — but new match days are recorded in Match Day Ops, so there
            is only ever ONE place taking writes. -->
-      <div class="md-var md-var--warn" style="margin-bottom:14px">
+      <div class="ph-retired">
+        <b>Historic Match-Day Takings &mdash; archived, read-only.</b><br>
+        Historic takings recorded before Match-Day Attendance and Takings. Nothing here can be edited, and no
+        new match should be recorded here.<br><br>
+        <b>New matches go in Match-Day Attendance and Takings</b> (Home &rsaquo; Match Days), which links each
+        record to the real fixture, counts admissions by ticket category, reconciles cash and card and keeps an
+        audit trail.
+        <div style="margin-top:12px"><button class="save sec" style="margin:0" onclick="back();openPanel('mdops')">Open Match-Day Attendance and Takings &#8594;</button></div>
+      </div>
+      <div class="md-var md-var--warn" style="margin-bottom:14px;display:none">
         <b>This tab is now read-only — history only.</b><br>
         Record new match days in <b>Match Day Ops</b> (Dashboard &rarr; Match Day). It links each record to the
         real fixture, counts admissions by ticket category, reconciles cash and card, and keeps an audit trail.
@@ -2038,7 +2078,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="an-chart-card"><div class="an-chart-ttl">Takings per Match (&pound;)</div><canvas id="an-chart-tak" height="170"></canvas></div>
       <div class="an-chart-card"><div class="an-chart-ttl">Total Income Breakdown</div><canvas id="an-chart-pie" height="200"></canvas></div>
 
-      <button class="save" style="margin-top:14px" onclick="saveAnalytics()">&#10003; Save Analytics to Site</button>
+      <button class="save" style="margin-top:14px" onclick="saveAnalytics()">Archived &mdash; read-only</button>
       <button class="save sec" style="margin-top:8px" onclick="changeAnalyticsPassword()"><i class="ico ico-key"></i> About the Analytics Password</button>
       <div class="dep" id="dep-analytics"></div>
     </div>
@@ -2067,7 +2107,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="div"></div>
       <div class="slbl" id="fp-cnt">Patrons</div>
       <div id="fp-list"></div>
-      <button class="save" style="margin-top:10px" onclick="savePatrons()">&#10003; Save to Site</button>
+      <button class="save" style="margin-top:10px" onclick="savePatrons()">&#10003; Save and publish patrons</button>
       <div class="dep" id="dep-fanclub"></div>
 
       <div class="div"></div>
@@ -2086,7 +2126,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="div"></div>
       <div class="slbl" id="at-cnt">Matches Logged</div>
       <div id="at-list"></div>
-      <button class="save" style="margin-top:10px" onclick="saveAttendance()">&#10003; Save Hearts to Site</button>
+      <button class="save" style="margin-top:10px" onclick="saveAttendance()">&#10003; Save and publish hearts</button>
       <div class="dep" id="dep-attendance"></div>
 
       <div class="div"></div>
@@ -2123,7 +2163,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="slbl" id="mn-cnt">Member News</div>
       <div id="mn-list"></div>
 
-      <button class="save" style="margin-top:14px" onclick="savePerks()">&#10003; Save Perks to Site</button>
+      <button class="save" style="margin-top:14px" onclick="savePerks()">&#10003; Save and publish offers</button>
       <div class="dep" id="dep-perks"></div>
     </div>
 
@@ -2364,13 +2404,13 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <div class="field"><label class="fl">Account Number</label><input type="text" id="bk-acc" placeholder="00000000"></div>
         <div class="field"><label class="fl">Payment Reference format</label><input type="text" id="bk-ref" placeholder="RLFC-[Company]"></div>
       </div>
-      <button class="save sec" onclick="saveBank()">&#10003; Save Payment Details</button>
+      <button class="save sec" onclick="saveBank()">&#10003; Save to club portal</button>
 
       <div class="div"></div>
       <div class="slbl">Applications <button onclick="loadSponsorHub()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh <i class="ico ico-rotate-cw"></i></button></div>
       <div id="sh-radar" style="margin-bottom:16px"></div>
       <div id="sh-list"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Tap Refresh to load applications.</div></div>
-      <button class="save" style="margin-top:12px" onclick="saveSponsorCrm()">&#10003; Save Pipeline to Site</button>
+      <button class="save" style="margin-top:12px" onclick="saveSponsorCrm()">&#10003; Save to club portal</button>
       <div class="dep" id="dep-sponsorcrm"></div>
     </div>
 
@@ -2579,7 +2619,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
           <div class="ib-row"><label>Grants won per year (£)<span class="ib-u">lumpy — don't bank on it</span></label><input type="number" min="0" data-unit="1" value="0" oninput="calcIncome()"><span class="ib-amt" data-amt></span></div>
           <div class="ib-tot"><div class="l">Your projected income<small>You choose the figures — make them honest</small></div><div class="v"><span id="ib-year">£0</span><small><span id="ib-month">£0</span> / month</small></div></div>
         </div>
-        <button class="save" style="margin-top:12px" onclick="saveIncomePlan()"><i class="ico ico-save"></i> Save this plan (shared with the committee)</button>
+        <button class="save" style="margin-top:12px" onclick="saveIncomePlan()"><i class="ico ico-save"></i> Save to club portal</button>
         <p style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:8px 2px 0">Saved plans load for everyone and show in the Committee Meetings tab — perfect for talking through the target together.</p>
         <div class="dep" id="dep-plan"></div>
       </div></details>
@@ -2637,7 +2677,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
           <div class="field"><label class="fl">Next of Kin (phone)</label><input type="tel" name="next_of_kin_phone"></div>
         </div>
         <div class="field"><label class="fl">Health conditions / allergies (for emergencies)</label><textarea name="health" rows="2" placeholder="e.g. asthma, allergic to penicillin — or 'none'"></textarea></div>
-        <button class="save" type="submit"><i class="ico ico-lock"></i> Save My Profile (private)</button>
+        <button class="save" type="submit"><i class="ico ico-lock"></i> Save to club portal (private)</button>
       </form>
       <div class="div"></div>
       <div class="snote"><p>Profiles arrive <strong style="color:var(--w)">privately</strong> at <strong>Netlify &rarr; your site &rarr; Forms &rarr; "staff-profile"</strong>. Only people with Netlify access can see them. Nothing here ever appears on the public website.</p></div>
@@ -2657,7 +2697,25 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       .ld-q{font-family:var(--fb);font-style:italic;font-size:13.5px;color:var(--lgrey,#bbb);line-height:1.5;padding:6px 0 6px 14px;border-left:2px solid rgba(255,209,0,.4);margin-bottom:6px}
     </style>
     <div class="panel" id="panel-siteguide">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-library"></i> Site Guide</div></div>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-library"></i> Site Guide</div>
+      <div class="snote">
+        <p><strong style="color:var(--w)">Everything in one place.</strong> Three guides used to live in three
+        different tiles. They are all here now.</p>
+      </div>
+      <div class="ph-tools" style="margin-bottom:18px">
+        <button class="ph-tool" onclick="location.href='staff-guide.html'">
+          <span class="ph-tool__name">How To Run The Site</span>
+          <span class="ph-tool__desc">Step-by-step instructions for the jobs the committee does most.</span>
+          <span class="ph-tool__foot"><span class="ph-badge">Information</span><span class="ph-tool__open">Open</span></span>
+        </button>
+        <button class="ph-tool" onclick="back();openPanel('lowdown')">
+          <span class="ph-tool__name">The Lane Lowdown</span>
+          <span class="ph-tool__desc">Club facts, history and talking points.</span>
+          <span class="ph-tool__foot"><span class="ph-badge">Information</span><span class="ph-tool__open">Open</span></span>
+        </button>
+      </div>
+      <div class="slbl">Every section of the website, explained</div>
+</div>
       <div class="snote" style="border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.06)"><p>What every part of the website is — in plain English. The <strong style="color:var(--w)">who / what / why / when / where / how</strong> of each section.</p></div>
 
       <div class="sg-card" style="border-left-color:var(--y);background:rgba(255,209,0,.05)"><h4><i class="ico ico-hand"></i> Welcome to the Lane Staff Portal <span style="font-family:var(--fb);font-size:11px;font-weight:700;color:var(--y);background:rgba(255,209,0,.12);padding:2px 7px;border-radius:5px;letter-spacing:.04em">START HERE</span></h4>
@@ -2997,7 +3055,17 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 
     <!-- ══ UNDO / STOP ══ -->
     <div class="panel" id="panel-undo">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-rotate-ccw"></i> Undo / Stop</div></div>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-rotate-ccw"></i> Emergency Controls</div>
+      <div class="ph-danger">
+        <div class="ph-danger__h">&#9888; Use only if something has gone wrong</div>
+        <p><b>Take the scoreboard down</b> &mdash; removes the live score from the home page immediately.
+        Supporters stop seeing a live game. Use this if the scoreboard was left on after full time.</p>
+        <p><b>Restore a previous update</b> &mdash; rolls the website back to an earlier saved version.
+        Anything saved since then is replaced. This cannot be undone from here.</p>
+        <p style="margin:0"><b>Please note:</b> the rollback history is stored <b>on this device only</b>.
+        It is not shared with other committee members and it is lost if this browser's data is cleared.</p>
+      </div>
+</div>
       <div class="snote" style="border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.06)">
         <p><b style="color:var(--w)"><i class="ico ico-alert-triangle"></i> Take the scoreboard down now</b> — if a live score is showing when it shouldn't be, one tap clears it from the site.</p>
         <button class="save red" style="margin-top:10px" onclick="saveMatchDay(false); toast('Scoreboard taken down');">Take Scoreboard Down</button>
@@ -3322,6 +3390,7 @@ function enterApp() {
   loadAll();
   initDash();
   addTileInfos();
+  try { if (window.PortalHome) PortalHome.init(); } catch (e) {}
   restoreReturnPanel();
 }
 // After an "Update now" reload, put the user back on the screen they were on.
@@ -3732,11 +3801,16 @@ function toggleAllTools() {
 function openPanel(name) {
   if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
   if (name === 'users') initUsers();
-  if (name === 'analytics' && !analyticsUnlocked) { showAnalyticsGate(); return; }
+  // Historic Match-Day Takings is RETIRED and read-only. Asking for a password
+  // just to read the notice explaining it is retired was pure friction, so the
+  // panel opens; the figures themselves stay behind the existing gate.
   document.getElementById('dash-home').style.display = 'none';
+  var _ph = document.getElementById('portal-home');
+  if (_ph) _ph.style.display = 'none';
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
   var p = document.getElementById('panel-' + name);
   if (p) p.classList.add('on');
+  paintCrumb(name, p);
   window.scrollTo(0, 0);
   // Push a history entry so the phone's back gesture (and the browser back
   // button) returns to the dashboard instead of leaving the admin entirely.
@@ -3772,12 +3846,37 @@ function openPanel(name) {
   if (name === 'livesite')  lsiteInit();
   if (name === 'undo')      undoInit();
 }
+// Breadcrumb: a volunteer must never wonder where they are. Rendered into the
+// panel's existing header, so no panel markup changed and the back button,
+// URL hash and bookmarking all behave exactly as before.
+function paintCrumb(name, panel) {
+  if (!panel || !window.PortalTools) return;
+  var tool = PortalTools.byId(name);
+  var area = PortalTools.areaOf(name);
+  var hdr = panel.querySelector('.phdr');
+  if (!hdr) return;
+  var old = panel.querySelector('.ph-crumb');
+  if (old) old.remove();
+  var el = document.createElement('nav');
+  el.className = 'ph-crumb';
+  el.setAttribute('aria-label', 'You are here');
+  el.innerHTML = '<button onclick="back()">Home</button>' +
+    (area ? '<span class="ph-crumb__sep">&rsaquo;</span><span>' + area.name + '</span>' : '') +
+    '<span class="ph-crumb__sep">&rsaquo;</span>' +
+    '<span class="ph-crumb__here">' + ((tool && tool.name) || name) + '</span>';
+  hdr.insertAdjacentElement('afterend', el);
+}
+
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  var ph = document.getElementById('portal-home');
+  if (ph) ph.style.display = 'block';
+  // The classic list only reappears if the user asked for it.
   var dh = document.getElementById('dash-home');
-  if (dh) dh.style.display = 'block';
+  if (dh) dh.style.display = (window.PortalHome && PortalHome._state.showAll) ? 'block' : 'none';
   initDash();
+  try { if (window.PortalHome) PortalHome.refresh(); } catch (e) {}
 }
 // The in-app "← Back" button: pop the history entry so the device back button
 // stays in sync; fall back to just showing the dashboard.
@@ -4985,13 +5084,13 @@ function publishArticle() {
       commitArticle(art, 'dep-news', function() {
         setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc',''); setVal('nw-hook','');
         rmImg('nw');
-        toast('Article published');
+        portalSaid('published', 'News story published to the website.');
       });
     });
   } else {
     commitArticle(art, 'dep-news', function() {
       setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
-      toast('Article published');
+      portalSaid('published', 'News story published to the website.');
     });
   }
 }
@@ -6840,13 +6939,21 @@ async function loadLeads() {
       return;
     }
     if (!d.leads.length) { el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">No trialists yet — they appear here when someone registers on the Trials page.</div>'; return; }
-    el.innerHTML = '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' applicant' + (d.count === 1 ? '' : 's') + '</div>' +
+    el.innerHTML = '<div class="snote" style="margin-bottom:10px"><p>Applications are received here. <strong style="color:var(--w)">Contact and status are managed in HubSpot</strong> — this list is read-only, so nothing you do here changes an applicant\'s progress.</p></div>' +
+      '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.06em;margin-bottom:6px">' + d.count + ' applicant' + (d.count === 1 ? '' : 's') + '</div>' +
       d.leads.map(function (L) {
         var when = L.created ? new Date(L.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
         var firstLine = (L.detail || '').split('\n')[0];
-        return '<div class="li"><span class="li-num"><i class="ico ico-football"></i></span><div class="li-main"><div class="li-name">' + escH(L.name || '—') + '</div>' +
-          '<div class="li-sub">' + escH(firstLine) + (L.stage ? ' &middot; ' + escH(L.stage) : '') + '</div></div>' +
-          '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span></div>';
+        // Real actions only. Status lives in HubSpot and cannot be written from
+        // here, so we never show a button that would not persist.
+        var mail = (L.email || '').trim();
+        var acts = mail
+          ? '<a class="save sec" style="margin:0;padding:9px 12px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none" href="mailto:' + escH(mail) + '">Email</a>'
+          : '';
+        return '<div class="li" style="flex-wrap:wrap"><span class="li-num"><i class="ico ico-football"></i></span><div class="li-main"><div class="li-name">' + escH(L.name || '—') + '</div>' +
+          '<div class="li-sub">' + escH(firstLine) + (L.stage ? ' &middot; ' + escH(L.stage) : '') + (mail ? ' &middot; ' + escH(mail) : '') + '</div></div>' +
+          '<span style="font-family:var(--fc);font-size:10px;color:var(--gr);white-space:nowrap">' + when + '</span>' +
+          (acts ? '<div style="flex:0 0 auto;margin-left:8px">' + acts + '</div>' : '') + '</div>';
       }).join('');
   } catch (e) {
     el.innerHTML = '<div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:8px 0">Couldn\'t reach the server. Tap Refresh.</div>';
@@ -8692,7 +8799,7 @@ function addFixture() {
   fixtures.push(fx);
   fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
   renderFixtures(); fxClearForm();
-  saveFixtures('Fixture saved <i class="ico ico-check"></i> — publishing to the site');
+  saveFixtures('Fixture saved'); portalSaid('published', 'Fixture published. It will appear on the Fixtures page and the home page countdown shortly.');
 }
 function fxEdit(id) {
   var f = fixtures.filter(function (x) { return x.id === id; })[0]; if (!f) return;
@@ -9703,10 +9810,18 @@ function undoSnapshot(name) {
 }
 function undoRestore(i) {
   var log = undoLog(); var e = log[i]; if (!e) return;
-  if (!confirm('Roll ' + e.name + '.json back to ' + new Date(e.at).toLocaleString('en-GB') + '?\n\nThis overwrites what is on the site now (the current version is snapshotted first, so you can undo the undo).')) return;
+  // Rolling the live website back is the most consequential button in the
+  // portal. A tap-through confirm is not enough — the volunteer types the word.
+  var typed = prompt('RESTORE A PREVIOUS UPDATE\n\n' +
+    'This replaces the live ' + e.name + ' information with the version saved at ' +
+    new Date(e.at).toLocaleString('en-GB') + '.\n\n' +
+    'Anything saved since then will be replaced on the public website.\n' +
+    '(The current version is snapshotted first, so this can itself be undone.)\n\n' +
+    'Type RESTORE to continue:');
+  if (String(typed || '').trim().toUpperCase() !== 'RESTORE') { toast('Nothing was changed'); return; }
   var obj; try { obj = JSON.parse(e.prev); } catch (err) { toast('That snapshot is unreadable', true); return; }
   pushToGitHub(e.name, obj, 'dep-undo'); // pushToGitHub snapshots the current first
-  toast('Rolling ' + e.name + '.json back — live in ~30s');
+  portalSaid('published', 'Restored the previous version. The website will update in about 30 seconds.');
 }
 function undoInit() {
   var el = document.getElementById('undo-list'); if (!el) return;
@@ -9778,6 +9893,43 @@ function gv(id) { var el=document.getElementById(id); return el ? el.value.trim(
 function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 // HTML-escape for TEXT content (esc above is for JS-string/onclick contexts only).
 function escH(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+/**
+ * Say what actually happened, in plain English, and keep it on screen long
+ * enough to read. A three-second disappearing toast was the ONLY proof that a
+ * structural change had reached the public website — so people re-pressed
+ * Save, or assumed it had failed.
+ *
+ *   portalSaid('draft')      → "Draft saved at 14:32."
+ *   portalSaid('internal')   → "Saved to the club portal. This is not public."
+ *   portalSaid('published')  → stays until dismissed
+ *   portalSaid('download')   → "Downloaded to this device."
+ *   portalSaid('device')     → saved locally only
+ *   portalSaid('failed')     → what to do next
+ */
+function portalSaid(kind, detail) {
+  var t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  var map = {
+    draft:     { txt: detail || ('Draft saved at ' + t + '.'),                  sticky: false, err: false },
+    internal:  { txt: detail || 'Saved to the club portal. This is not public.', sticky: false, err: false },
+    published: { txt: detail || 'Published. It will appear on the website shortly.', sticky: true,  err: false },
+    download:  { txt: detail || 'Downloaded to this device.',                   sticky: false, err: false },
+    device:    { txt: detail || 'Saved on this device only.',                   sticky: false, err: false },
+    failed:    { txt: detail || 'Not saved. Check your connection and try again.', sticky: true, err: true }
+  };
+  var m = map[kind] || map.internal;
+  if (!m.sticky) { toast(m.txt, m.err); return; }
+  var el = document.getElementById('portal-said');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'portal-said';
+    document.body.appendChild(el);
+  }
+  el.className = 'portal-said' + (m.err ? ' portal-said--err' : '');
+  el.innerHTML = '<span>' + m.txt + '</span>' +
+    '<button aria-label="Dismiss" onclick="this.parentNode.classList.remove(\'on\')">Got it</button>';
+  requestAnimationFrame(function () { el.classList.add('on'); });
+}
+
 function toast(msg, err) {
   var t = document.getElementById('toast');
   t.textContent = msg;
