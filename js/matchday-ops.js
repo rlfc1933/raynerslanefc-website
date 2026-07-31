@@ -102,8 +102,28 @@
       body: JSON.stringify(payload)
     }).then(function (r) {
       return r.json().catch(function () { return { ok: false, error: 'Bad response from the server' }; })
-        .then(function (j) { j._status = r.status; return j; });
+        .then(function (j) {
+          j._status = r.status;
+          // A REJECTED token is not a retryable error — retrying sends the same
+          // dead token and fails identically, forever. This happened for real:
+          // the signing secret was rotated, every existing session became
+          // invalid, and the panel showed "session expired" with a Try again
+          // button that could never succeed and NO fixtures to click. Drop the
+          // dead token so the very next render offers the sign-in route out.
+          if (j.reauth || (r.status === 401 && !j.misconfigured)) dropToken();
+          return j;
+        });
     });
+  }
+
+  /** Forget a token the server has rejected. */
+  function dropToken() {
+    try {
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY + '_caps');
+      sessionStorage.removeItem(TOKEN_KEY + '_auth');
+    } catch (e) {}
+    S.caps = [];
   }
 
   // ── ENTRY ────────────────────────────────────────────────────────────────
@@ -142,13 +162,21 @@
   }
 
   function needSignIn() {
-    return '<div class="md-error"><b>Sign in again to use Match Day Ops</b>' +
-      'This tab needs a signed staff session so every entry can be attributed to a person. ' +
-      'Your session predates that, or the sign-in could not reach the server.' +
-      '<div style="margin-top:12px"><button class="save sec" onclick="MDOps.reauth()">Sign in again</button></div></div>';
+    return '<div class="md-error"><b>Sign in again to open Match Day Ops</b>' +
+      'Match Day Ops needs a signed staff session so every figure is recorded against a person. ' +
+      'Yours has expired, or it was ended when the club\'s security key was changed. ' +
+      'Nothing has been lost &mdash; sign in again and your fixtures come straight back.' +
+      '<div style="margin-top:12px"><button class="save" onclick="MDOps.reauth()">Sign in again</button></div></div>';
   }
 
+  /**
+   * Send the user back to the role sign-in, which re-mints the token. This is
+   * the ONLY escape from a rejected session, so it must always be offered — a
+   * "Try again" that replays the same dead token is a trap, not a recovery.
+   */
   function reauth() {
+    dropToken();
+    S.loadErr = '';
     try { sessionStorage.removeItem('rlfc_staff'); } catch (e) {}
     if (typeof global.showRoleLogin === 'function') global.showRoleLogin();
     else location.reload();
@@ -185,8 +213,11 @@
   }
 
   function viewHome() {
+    // Always offer the sign-in route as well as a retry. A retry alone is a
+    // dead end whenever the cause is the session rather than the network.
     if (S.loadErr) return '<div class="md-error"><b>Could not load Match Day Ops</b>' + esc(S.loadErr) +
-      '<div style="margin-top:12px"><button class="save sec" onclick="MDOps.load()">Try again</button></div></div>';
+      '<div style="margin-top:12px"><button class="save sec" onclick="MDOps.load()">Try again</button>' +
+      '<button class="save sec" style="margin-top:8px" onclick="MDOps.reauth()">Sign in again</button></div></div>';
     if (!S.rows.length) {
       return '<div class="md-empty"><b>No home fixtures for ' + esc(S.season) + ' yet</b>' +
         'Match Day Ops lists every home fixture from your season schedule. Add fixtures in the ' +
@@ -1243,6 +1274,13 @@
     bump: bump, setCount: setCount, resetTally: resetTally, setOperator: setOperator,
     saveOverride: saveOverride, clearOverride: clearOverride,
     exportCsv: exportCsv, reauth: reauth, mintSession: mintSession,
+    // True while a record is open with work that is not safely on the server.
+    // The portal's update bar checks this so a deploy never reloads the page
+    // out from under a volunteer who is mid-count.
+    isBusy: function () {
+      return S.view === 'fixture' && !!S.record &&
+        ['dirty', 'saving', 'offline', 'error'].indexOf(S.saveState) > -1;
+    },
     _state: S
   };
 }(window));

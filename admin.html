@@ -3213,12 +3213,27 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').c
   function stamp(res) { return res.headers.get('content-length') || res.headers.get('etag') || null; }
   function showReloadBar() {
     if (prompted || document.getElementById('rlfc-update-bar')) return;
+    // NEVER interrupt someone mid-count. Match Day Ops holds a gate tally with
+    // unsynced taps; throwing an "Update now" bar over that — which reloads —
+    // is how a volunteer loses the crowd figure. Ask again once they are saved.
+    try { if (window.MDOps && MDOps.isBusy && MDOps.isBusy()) { setTimeout(check, 60000); return; } } catch (e) {}
     prompted = true;
     var bar = document.createElement('div');
     bar.id = 'rlfc-update-bar';
     bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:#FFD100;color:#080808;font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;padding:13px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer';
     bar.innerHTML = '<span><i class="ico ico-refresh-cw"></i> A new version of Lane HQ is ready</span><span style="background:#080808;color:#FFD100;padding:6px 12px;border-radius:8px;white-space:nowrap">Update now</span>';
-    bar.addEventListener('click', function () { location.reload(); });
+    // Remember where the user was so the reload puts them back on the SAME
+    // screen. Landing on the dashboard every time an update lands is what made
+    // this feel like being kicked out of the app.
+    bar.addEventListener('click', function () {
+      try {
+        var open = document.querySelector('.panel.on');
+        if (open && open.id && open.id.indexOf('panel-') === 0) {
+          sessionStorage.setItem('rlfc_return_panel', open.id.slice(6));
+        }
+      } catch (e) {}
+      location.reload();
+    });
     document.body.appendChild(bar);
   }
   function check() {
@@ -3307,6 +3322,23 @@ function enterApp() {
   loadAll();
   initDash();
   addTileInfos();
+  restoreReturnPanel();
+}
+// After an "Update now" reload, put the user back on the screen they were on.
+// Being dumped on the dashboard every time a deploy lands reads as the app
+// throwing you out, and on a match day that is genuinely disruptive.
+function restoreReturnPanel() {
+  var name = null;
+  try {
+    name = sessionStorage.getItem('rlfc_return_panel');
+    sessionStorage.removeItem('rlfc_return_panel');
+  } catch (e) {}
+  if (!name && location.hash && /^#[a-z]+$/.test(location.hash)) name = location.hash.slice(1);
+  if (!name) return;
+  if (!document.getElementById('panel-' + name)) return;
+  // The chairman-gated panel must still ask for its password, so skip it.
+  if (name === 'analytics') return;
+  setTimeout(function () { try { openPanel(name); } catch (e) {} }, 60);
 }
 // Show who's logged in + reveal chairman-only tiles for the chairman.
 function applyStaffIdentity() {

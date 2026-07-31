@@ -267,6 +267,45 @@ test('a submission key from another fixture is a collision, not a duplicate', ()
     'fixture_id must be known before the idempotency key is looked up');
 });
 
+// ── REGRESSION: a rejected session must never become a dead end ────────────
+// Found in PRODUCTION by a committee member, not by any test here. The signing
+// secret was rotated, which correctly invalidated every existing token. The
+// panel then showed "Your session has expired" with ZERO fixture rows and a
+// single "Try again" button that replayed the same dead token and failed
+// identically — forever. The user could not click any match because there were
+// no matches on screen and no route back to a sign-in.
+test('a rejected token is discarded so the sign-in route is offered', () => {
+  const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+
+  // The API layer must drop a token the server rejected.
+  assert.ok(/if \(j\.reauth \|\| \(r\.status === 401 && !j\.misconfigured\)\) dropToken\(\);/.test(ui),
+    'a 401/reauth response must drop the dead token');
+  assert.ok(/function dropToken\(\)/.test(ui), 'dropToken must exist');
+  assert.ok(/sessionStorage\.removeItem\(TOKEN_KEY\)/.test(ui),
+    'dropToken must clear the stored token');
+
+  // render() short-circuits to the sign-in view when there is no token, so
+  // dropping it is what surfaces the escape hatch.
+  assert.ok(/if \(!token\(\)\) \{ el\.innerHTML = needSignIn\(\); return; \}/.test(ui),
+    'render must show the sign-in view when no token is held');
+
+  // The error view must ALSO offer sign-in, not just a retry.
+  assert.ok(/Could not load Match Day Ops[\s\S]{0,400}MDOps\.reauth\(\)/.test(ui),
+    'the load-error view must offer a sign-in route, not only Try again');
+
+  // reauth must clear both the token and the stale error.
+  assert.ok(/function reauth\(\)\s*\{\s*dropToken\(\);\s*S\.loadErr = '';/.test(ui),
+    'reauth must clear the dead token and the stale error state');
+});
+
+test('a misconfigured server (503) does NOT wipe the session', () => {
+  const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  // MD_TOKEN_SECRET missing is a server problem, not the user's session.
+  // Dropping their token there would send them round a pointless sign-in loop.
+  assert.ok(/!j\.misconfigured/.test(ui),
+    'a misconfigured-server response must not be treated as an expired session');
+});
+
 // ── THE TURNSTILE ACCOUNTABILITY BOX ───────────────────────────────────────
 test('the tally screen asks who is on the turnstile, and saves it immediately', () => {
   const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
@@ -414,4 +453,29 @@ test('the signing secret never reaches the browser', () => {
     assert.ok(!/MD_TOKEN_SECRET/.test(src), `${f} must not mention the signing secret`);
     assert.ok(!/createHmac/.test(src), `${f} must not sign anything client-side`);
   });
+});
+
+// ── REGRESSION: the update bar must not throw you out mid-count ────────────
+// Reported from production: after any deploy an "Update now" bar appears at the
+// bottom, and tapping it reloads to the DASHBOARD — losing the screen you were
+// on. On a match day that is not a small annoyance; it interrupts a live gate
+// count and the volunteer has to navigate all the way back in.
+test('an update reload returns the user to the screen they were on', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'admin.html'), 'utf8');
+  assert.ok(/rlfc_return_panel/.test(admin), 'the open panel must be remembered before reloading');
+  assert.ok(/function restoreReturnPanel\(\)/.test(admin), 'and restored after boot');
+  assert.ok(/restoreReturnPanel\(\);/.test(admin), 'restoreReturnPanel must be called from enterApp');
+  // The chairman-gated panel must still demand its password after a reload.
+  assert.ok(/if \(name === 'analytics'\) return;/.test(admin),
+    'the password-gated panel must not auto-open after a reload');
+});
+
+test('the update bar defers while a gate count is unsaved', () => {
+  const admin = fs.readFileSync(path.join(ROOT, 'admin.html'), 'utf8');
+  assert.ok(/MDOps\.isBusy && MDOps\.isBusy\(\)/.test(admin),
+    'the update bar must check whether Match Day Ops is mid-count');
+  const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  assert.ok(/isBusy: function \(\)/.test(ui), 'MDOps must expose isBusy');
+  assert.ok(/\['dirty', 'saving', 'offline', 'error'\]\.indexOf\(S\.saveState\)/.test(ui),
+    'isBusy must be true whenever work is not safely on the server');
 });
