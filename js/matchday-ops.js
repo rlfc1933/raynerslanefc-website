@@ -264,9 +264,12 @@
         }).join(', ') + '</div>';
     }
 
-    h += '<div class="div"></div>' +
-      '<button class="save sec" onclick="MDOps.go(\'reports\')"><i class="ico ico-chart-column"></i> Reports</button>' +
-      '<button class="save sec" style="margin-top:8px" onclick="MDOps.go(\'archive\')"><i class="ico ico-archive"></i> Archive</button>';
+    h += '<div class="div"></div>';
+    // Season-wide reporting is the restricted view; recording a match is not.
+    if (has('can_matchday_finance')) {
+      h += '<button class="save sec" onclick="MDOps.go(\'reports\')"><i class="ico ico-chart-column"></i> Reports</button>' +
+        '<button class="save sec" style="margin-top:8px" onclick="MDOps.go(\'archive\')"><i class="ico ico-archive"></i> Archive</button>';
+    }
     // Deliberately NO price-management screen. Season admission prices are site
     // content, edited once on the main site, and read from there.
     h += '<div style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.55;margin-top:12px">' +
@@ -700,7 +703,7 @@
 
     h += '<div class="div"></div><div class="slbl">Audit history</div>';
     if (!S.audit.length) {
-      h += '<div class="md-empty">' + (S.canMoney ? 'Nothing recorded yet.' : 'Audit history needs financial permission.') + '</div>';
+      h += '<div class="md-empty">' + 'Nothing recorded yet.' + '</div>';
     } else {
       h += '<div class="md-audit">' + S.audit.map(function (a) {
         return '<div class="md-audit__item"><b>' + esc(a.action) + '</b> — ' + esc(a.actor) +

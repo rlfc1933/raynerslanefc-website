@@ -143,10 +143,21 @@ function derivedColumns(record) {
   };
 }
 
-/** Shape a record for the client — money stays out unless the actor may see it. */
+/**
+ * Shape a record for the client.
+ *
+ * WHO MAY SEE THIS MATCH'S MONEY: anyone who may RECORD it. The committee
+ * member on the turnstile is the person counting the cash, selling the
+ * programmes and closing the float — hiding those fields from them removed the
+ * entire point of the module. That was the original mistake here.
+ *
+ * `can_matchday_finance` is a different thing: it gates SEASON-WIDE reporting,
+ * the archive and CSV export — the aggregate view of what the club takes.
+ * One match's own figures belong to whoever is working that match.
+ */
 function present(rec, session) {
   if (!rec) return null;
-  const canMoney = AUTH.has(session, AUTH.CAP.FINANCE);
+  const canMoney = AUTH.has(session, AUTH.CAP.RECORD) || AUTH.has(session, AUTH.CAP.FINANCE);
   const base = {
     id: rec.id,
     fixture_id: rec.fixture_id,
@@ -252,7 +263,13 @@ async function actionList(b, session) {
   const fixtureIds = new Set(fixtures.map(f => f.id));
   const orphans = records.filter(r => !fixtureIds.has(r.fixture_id)).map(r => present(r, session));
 
-  return ok({ season, rows, orphans, canMoney: AUTH.has(session, AUTH.CAP.FINANCE) });
+  return ok({
+    season, rows, orphans,
+    // Whoever may RECORD a match may see and enter that match's money — they
+    // are the one holding the cash tin. Season-wide reporting is separate.
+    canMoney: AUTH.has(session, AUTH.CAP.RECORD) || AUTH.has(session, AUTH.CAP.FINANCE),
+    canReports: AUTH.has(session, AUTH.CAP.FINANCE),
+  });
 }
 
 async function currentSeason() {
@@ -706,7 +723,9 @@ async function actionPriceOverrideClear(b, session) {
 
 // ── AUDIT + REPORTS ────────────────────────────────────────────────────────
 async function actionAudit(b, session) {
-  requireCap(session, AUTH.CAP.FINANCE, 'view audit history');
+  // A recorder may see the history of the record they are working on. Hiding
+  // who changed what from the person doing the work helps nobody.
+  requireCap(session, AUTH.CAP.RECORD, 'view audit history');
   const rec = await S.recordByFixture(text(b.fixture_id, 120));
   if (!rec) return ok({ audit: [] });
   return ok({ audit: await S.auditFor(rec.id) });

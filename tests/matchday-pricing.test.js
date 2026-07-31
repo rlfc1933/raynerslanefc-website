@@ -479,3 +479,53 @@ test('the update bar defers while a gate count is unsaved', () => {
   assert.ok(/\['dirty', 'saving', 'offline', 'error'\]\.indexOf\(S\.saveState\)/.test(ui),
     'isBusy must be true whenever work is not safely on the server');
 });
+
+// ── REGRESSION: a committee member must be able to record the money ────────
+// Found in production. An ordinary Committee session resolves to
+// can_matchday_record only, and every money field was gated on
+// can_matchday_finance — so the volunteer on the turnstile could count heads
+// but could NOT enter the float, programmes, badges, merchandise, hospitality,
+// sponsorship, cash, card or online receipts, nor see the reconciliation.
+// That removed the entire purpose of the module for the person who actually
+// runs the gate. Recording a match and viewing season-wide finance are two
+// different rights and must stay separate.
+test('a Committee (record-only) session can see and enter this match\'s money', () => {
+  const AUTH = require('../netlify/functions/lib/md-auth.js');
+  const { present } = require('../netlify/functions/matchday-ops.js')._internal;
+  const caps = AUTH.capabilitiesFor('Committee', false, 'shared');
+  assert.deepStrictEqual(caps, [AUTH.CAP.RECORD], 'precondition: a shared committee login records only');
+
+  const rec = { id: 1, fixture_id: 'f1', season: '2026-27', status: 'in_progress',
+    attendance: { adults: 10 }, attendance_calculated: 10,
+    declared_pence: 9000, receipts: { cash_pence: 9000 },
+    sales: { programmes: { qty: 40, unit_pence: 200 } },
+    float_open_pence: 5000, expected_pence: 9000, financial_variance_pence: 0 };
+  const view = present(rec, { capabilities: caps });
+
+  assert.strictEqual(view.finance_hidden, undefined, 'money must NOT be hidden from a recorder');
+  assert.strictEqual(view.receipts.cash_pence, 9000, 'cash receipts must be visible');
+  assert.strictEqual(view.sales.programmes.qty, 40, 'programme sales must be visible');
+  assert.strictEqual(view.float_open_pence, 5000, 'the float must be visible');
+  assert.strictEqual(view.financial_variance_pence, 0, 'the reconciliation must be visible');
+
+  const ops = fs.readFileSync(path.join(ROOT, 'netlify/functions/matchday-ops.js'), 'utf8');
+  assert.ok(/canMoney: AUTH\.has\(session, AUTH\.CAP\.RECORD\) \|\| AUTH\.has\(session, AUTH\.CAP\.FINANCE\)/.test(ops),
+    'the list action must report canMoney for recorders');
+});
+
+test('season-wide reporting stays restricted to the finance capability', () => {
+  const AUTH = require('../netlify/functions/lib/md-auth.js');
+  const caps = AUTH.capabilitiesFor('Committee', false, 'shared');
+  assert.ok(!caps.includes(AUTH.CAP.FINANCE), 'committee must not hold the finance capability');
+  const ops = fs.readFileSync(path.join(ROOT, 'netlify/functions/matchday-ops.js'), 'utf8');
+  ['view match-day reports', 'view the archive', 'export match-day data'].forEach(what => {
+    assert.ok(new RegExp(`requireCap\\(session, AUTH\\.CAP\\.FINANCE, '${what}'\\)`).test(ops),
+      `${what} must remain finance-gated`);
+  });
+  const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  const gate = ui.indexOf("if (has('can_matchday_finance'))");
+  assert.ok(gate > -1, 'the UI must gate the season-wide buttons on the finance capability');
+  const block = ui.slice(gate, gate + 400);
+  assert.ok(/reports/.test(block) && /archive/.test(block),
+    'the Reports and Archive buttons must sit inside that finance gate');
+});

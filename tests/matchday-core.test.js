@@ -338,19 +338,25 @@ test('the server recalculates every derived figure and ignores what the client s
 });
 
 // ── FINANCIAL VISIBILITY ───────────────────────────────────────────────────
-test('money is withheld from a session without the finance capability', () => {
+test('this match\'s money belongs to whoever may record it', () => {
   const rec = {
     id: 1, fixture_id: 'f1', season: '2026-27', status: 'completed',
     attendance: { adults: 10 }, attendance_calculated: 10,
     declared_pence: 9000, receipts: { cash_pence: 9000 }, sales: {},
   };
-  const noMoney = present(rec, { capabilities: [AUTH.CAP.RECORD] });
-  assert.strictEqual(noMoney.finance_hidden, true);
-  assert.strictEqual(noMoney.declared_pence, undefined, 'takings must not leak to a role without finance rights');
-  assert.strictEqual(noMoney.attendance_calculated, 10, 'attendance is still visible');
+  // A committee member on the turnstile counts the cash, sells the programmes
+  // and closes the float. Hiding the money from them removes the whole point
+  // of the module — this was a real defect found in production.
+  const recorder = present(rec, { capabilities: [AUTH.CAP.RECORD] });
+  assert.strictEqual(recorder.finance_hidden, undefined, 'a recorder must see this match\'s money');
+  assert.strictEqual(recorder.declared_pence, 9000);
+  assert.strictEqual(recorder.receipts.cash_pence, 9000);
 
-  const withMoney = present(rec, { capabilities: [AUTH.CAP.RECORD, AUTH.CAP.FINANCE] });
-  assert.strictEqual(withMoney.declared_pence, 9000);
+  // Someone with neither capability sees attendance only.
+  const neither = present(rec, { capabilities: [] });
+  assert.strictEqual(neither.finance_hidden, true);
+  assert.strictEqual(neither.declared_pence, undefined);
+  assert.strictEqual(neither.attendance_calculated, 10, 'attendance is still visible');
 });
 
 // ── REPORTS (tests 16, 17) ─────────────────────────────────────────────────
