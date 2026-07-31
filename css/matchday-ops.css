@@ -79,7 +79,7 @@
 .md-table tbody tr:hover { background: rgba(255,255,255,.03); }
 .md-table .md-num { text-align: right; font-variant-numeric: tabular-nums; }
 
-@media (max-width: 700px) {
+@media (max-width: 1100px) {
   .md-table, .md-table tbody, .md-table tr, .md-table td { display: block; width: 100%; }
   .md-table thead { display: none; }
   .md-table tr {
@@ -95,6 +95,24 @@
   .md-table td.md-cell-action { justify-content: stretch; padding: 8px 12px 12px; }
   .md-table td.md-cell-action::before { content: none; }
   .md-table .md-num { text-align: right; }
+}
+
+/* The whole row opens the match. Adding the Gate receipts column for recorders
+   pushed the action button past the right edge of the table's own scroll
+   container — rendered, but unreachable with a mouse. A clickable row is robust
+   to that at any width; the button stays for clarity and for keyboards. */
+.md-row { cursor: pointer; }
+.md-row:hover { background: rgba(255,209,0,.06) !important; }
+.md-row:focus-visible { outline: 3px solid var(--y, #FFD100); outline-offset: -3px; }
+
+/* On wide screens pin the action cell to the right edge, so horizontal scroll
+   inside the table can never hide it again. */
+@media (min-width: 1101px) {
+  .md-table th:last-child, .md-table td.md-cell-action {
+    position: sticky; right: 0; background: var(--c, #161616);
+    box-shadow: -10px 0 12px -8px rgba(0,0,0,.85); min-width: 118px;
+  }
+  .md-row:hover td.md-cell-action { background: #1d1b12; }
 }
 
 /* ── STATUS PILLS ───────────────────────────────────────────────────────── */

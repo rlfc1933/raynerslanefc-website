@@ -295,7 +295,15 @@
     var body = rows.map(function (r) {
       var f = r.fixture, rec = r.record;
       var att = rec ? (rec.attendance_official != null ? rec.attendance_official : rec.attendance_calculated) : null;
-      return '<tr>' +
+      // The WHOLE ROW opens the match. The action button alone was not enough:
+      // once the Gate receipts column appeared for recorders the table grew
+      // wider than its scroll container and the button was clipped off the
+      // right-hand edge — visible in the markup, unreachable with a mouse.
+      // Clicking anywhere on the match now works, at any width.
+      return '<tr class="md-row" tabindex="0" role="button" ' +
+        'aria-label="Open ' + esc(f.opponent) + ', ' + esc(fmtDate(f.date)) + '" ' +
+        'onclick="MDOps.open(\'' + esc(f.id) + '\')" ' +
+        'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();MDOps.open(\'' + esc(f.id) + '\')}">' +
         td('Date', esc(fmtDate(f.date))) +
         td('Kick-off', esc(f.kickoff)) +
         td('Opposition', '<b>' + esc(f.opponent) + '</b>') +
@@ -306,8 +314,9 @@
         (S.canMoney ? td('Gate receipts', rec && rec.declared_pence != null ? money(rec.declared_pence) : '—', 'md-num') : '') +
         td('Completed by', esc((rec && rec.completed_by) || '—')) +
         td('Updated', esc(rec ? fmtWhen(rec.updated_at) : '—')) +
-        '<td class="md-cell-action"><button class="save sec" style="margin:0;width:100%" onclick="MDOps.open(\'' +
-          esc(f.id) + '\')">' + (rec ? 'Open' : 'Prepare') + '</button></td>' +
+        '<td class="md-cell-action"><button class="save sec" style="margin:0;width:100%" ' +
+          'onclick="event.stopPropagation();MDOps.open(\'' + esc(f.id) + '\')">' +
+          (rec ? 'Open' : 'Prepare') + '</button></td>' +
         '</tr>';
     }).join('');
     return '<div class="md-tablewrap"><table class="md-table">' + head + '<tbody>' + body + '</tbody></table></div>';

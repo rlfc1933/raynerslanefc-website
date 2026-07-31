@@ -529,3 +529,30 @@ test('season-wide reporting stays restricted to the finance capability', () => {
   assert.ok(/reports/.test(block) && /archive/.test(block),
     'the Reports and Archive buttons must sit inside that finance gate');
 });
+
+// ── REGRESSION: the match must be clickable ────────────────────────────────
+// Reported from production: "you cant physically click on any matches". Making
+// the Gate receipts column visible to recorders widened the season table past
+// its own scroll container, so the action button was rendered but clipped off
+// the right-hand edge and could not be reached with a mouse.
+test('every fixture row is clickable, not just the action button', () => {
+  const ui = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  assert.ok(/<tr class="md-row" tabindex="0" role="button"/.test(ui),
+    'the row itself must be an operable control');
+  assert.ok(/onclick="MDOps\.open\(/.test(ui), 'the row must open the fixture');
+  assert.ok(/onkeydown="if\(event\.key===/.test(ui), 'the row must be keyboard-operable');
+  assert.ok(/aria-label="Open /.test(ui), 'the row needs an accessible name');
+  assert.ok(/onclick="event\.stopPropagation\(\);MDOps\.open\(/.test(ui),
+    'the inner button must not double-fire the row handler');
+});
+
+test('the action column cannot be clipped out of reach', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'css/matchday-ops.css'), 'utf8');
+  // Below 1100px the table becomes cards, where the action button is full width.
+  assert.ok(/@media \(max-width: 1100px\)/.test(css),
+    'the table must become cards well before a laptop width');
+  // Above that, the action cell is pinned to the right edge.
+  assert.ok(/@media \(min-width: 1101px\)[\s\S]{0,400}td\.md-cell-action \{[\s\S]{0,120}position: sticky/.test(css),
+    'the action cell must be sticky so horizontal scroll cannot hide it');
+  assert.ok(/\.md-row \{ cursor: pointer; \}/.test(css), 'the row must look clickable');
+});
