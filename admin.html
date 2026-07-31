@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <!-- No maximum-scale: pinch-zoom must work. Volunteers use this outdoors, on a
+       phone, in daylight. Locking zoom is a WCAG 2.1 AA failure (1.4.4 Resize Text). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin | Rayners Lane FC</title>
   <script src="js/hooks.js"></script>
+  <!-- Match Day Operations core: season derivation, competition mapping, ticket
+       categories and every calculation. The SAME file the server requires, so
+       the phone and the database can never disagree about the arithmetic. -->
+  <script src="js/matchday-core.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -4263,7 +4269,9 @@ function mdUpsertFixture(data) {
           id: 'matchday-current', date: data.date, kickoff: data.kickoff || '15:00',
           opponent: data.opponent, oppCrest: mdCrestFor(data.opponent, crests), isHome: data.isHome,
           venue: data.venue, competition: data.competition,
-          status: 'scheduled', us: null, them: null, scorers: ''
+          status: 'scheduled', us: null, them: null, scorers: '',
+          season: fxSeasonOf(data.date),
+          competitionId: fxCompetitionId(data.competition) || undefined
         };
         commitDomain('fixtures', 'fixtures', 'id', [mdFix], [], null, 'dep-matchday', null);
       }
@@ -8279,6 +8287,10 @@ function nmSave() {
     venue: (document.getElementById('nm-venue').value || '').trim(),
     competition: gv('nm-comp') || 'Pre-Season Friendly',
     pinned: pinned || undefined,          // absent rather than false — keeps the file clean
+    // Same stamping as every other fixture write path — a late-arranged
+    // friendly is still a fixture Match Day Ops has to be able to find.
+    season: fxSeasonOf(date),
+    competitionId: fxCompetitionId(gv('nm-comp') || 'Pre-Season Friendly') || undefined,
   });
 
   // Only one game can be pinned, or "the next match" is ambiguous.
@@ -8481,11 +8493,29 @@ function saveVenues(msg) {
 var fixtures = [];
 var fxCrests = [];
 var fxHome = true;
+var fxCompetitions = [];   // data/competitions.json → the competition registry
+var fxSeasonsCfg = null;   // data/seasons.json      → the current season
+
+// Season + competition derivation come from the SHARED core (js/matchday-core.js),
+// which the Match Day Ops server functions require too. One owner, one answer.
+function fxSeasonOf(iso) {
+  if (window.MatchdayCore) return MatchdayCore.seasonOf(iso);
+  return (fxSeasonsCfg && fxSeasonsCfg.current) || '';
+}
+function fxCurrentSeason() {
+  return (fxSeasonsCfg && fxSeasonsCfg.current) || fxSeasonOf(new Date().toISOString().slice(0, 10));
+}
+function fxCompetitionId(label) {
+  return window.MatchdayCore ? MatchdayCore.competitionIdFor(label, fxCompetitions) : '';
+}
+
 function fxInit() {
   fetchJSON('crests', function (d) { fxCrests = (d && d.crests) || []; fxFillOpp(); });
   fetchJSON('fixtures', function (d) { fixtures = (d && d.fixtures) || []; renderFixtures(); });
   // The venue book, so the ground fills itself in as you pick the opponent.
   fetchJSON('venues', function (d) { venues = (d && d.venues) || []; fxAutoVenue(); });
+  fetchJSON('competitions', function (d) { fxCompetitions = (d && d.competitions) || []; });
+  fetchJSON('seasons', function (d) { fxSeasonsCfg = d || null; });
   var opp = document.getElementById('fx-opp');
   if (opp && !opp.dataset.vwired) { opp.dataset.vwired = '1'; opp.addEventListener('input', fxAutoVenue); }
   fxClearForm();
@@ -8544,14 +8574,28 @@ function addFixture() {
   var us = gv('fx-us'), them = gv('fx-them');
   var played = us !== '' && them !== '';
   var id = gv('fx-id') || ('f' + Date.now());
+  var prev = fixtures.filter(function (x) { return x.id === id; })[0] || {};
+  var compLabel = gv('fx-comp');
   var fx = {
     id: id, date: date, kickoff: gv('fx-ko') || '15:00',
     opponent: oppName, oppCrest: oppFile, isHome: fxHome,
-    venue: gv('fx-venue'), competition: gv('fx-comp'),
-    status: played ? 'ft' : 'scheduled',
+    venue: gv('fx-venue'), competition: compLabel,
+    // 'played', never 'ft'. Two spellings of one state meant nothing could
+    // filter on it; Match Day Ops needs a status it can trust.
+    status: played ? 'played' : 'scheduled',
     us: played ? Number(us) : null, them: played ? Number(them) : null,
-    scorers: gv('fx-scorers')
+    scorers: gv('fx-scorers'),
+    // A fixture with no season is invisible to every season-scoped view. This
+    // was silently dropped on every manual add until now.
+    season: fxSeasonOf(date),
+    // Stable key for reporting. '' is an honest "not a registered competition"
+    // (a friendly is not one) — never a guess. The human label above is what
+    // the public site shows and is never rewritten.
+    competitionId: fxCompetitionId(compLabel)
   };
+  // Preserve anything the fixture already carried that this form doesn't edit
+  // (shareHeadline, pinned, fwpId…) so editing a fixture never strips it.
+  Object.keys(prev).forEach(function (k) { if (!(k in fx)) fx[k] = prev[k]; });
   fixtures = fixtures.filter(function (f) { return f.id !== id; });
   fixtures.push(fx);
   fixtures.sort(function (a, b) { return (a.date + a.kickoff).localeCompare(b.date + b.kickoff); });
@@ -8644,6 +8688,13 @@ function importFromFWP() {
           // Backfill a MISSING ground from the venue book — but never overwrite
           // one that's already there; a staff member may have set it by hand.
           if (!existing.venue && imp.venue) { existing.venue = imp.venue; changed = true; }
+          // Backfill season + competitionId on fixtures that predate them, and
+          // keep competitionId honest when FWP renames a competition. Additive
+          // only — never touches us/them/scorers/status/id/date/opponent.
+          var wantSeason = fxSeasonOf(existing.date);
+          if (wantSeason && existing.season !== wantSeason) { existing.season = wantSeason; changed = true; }
+          var wantCid = fxCompetitionId(existing.competition);
+          if (wantCid && existing.competitionId !== wantCid) { existing.competitionId = wantCid; changed = true; }
           // Never touch us/them/scorers/status/id — those are the staff's.
           changed ? updated++ : unchanged++;
         } else {
@@ -8654,7 +8705,11 @@ function importFromFWP() {
             opponent: imp.opponent, oppCrest: crest ? crest.file : '',
             isHome: imp.isHome, venue: imp.venue || (imp.isHome ? 'Tithe Farm Sports & Social Club' : ''),
             competition: imp.competition || '', status: 'scheduled',
-            us: null, them: null, scorers: ''
+            us: null, them: null, scorers: '',
+            // Imported fixtures got no season either — same silent gap as the
+            // manual add. Both paths now stamp it at the point of creation.
+            season: fxSeasonOf(imp.date),
+            competitionId: fxCompetitionId(imp.competition || '')
           });
           added++;
         }
