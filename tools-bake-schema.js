@@ -69,10 +69,75 @@ const SKIP = ['admin.html', 'staff-guide.html', 'playermanager1933.html', '_icon
   'The-Lane-Portal-Guide.html', 'lane-app-prototype.html', 'programme-print.html',
   '404.html', 'scan.html'];
 
+// ── Breadcrumbs ──────────────────────────────────────────────────────────────
+// The trail Google prints in place of a raw URL, and a cheap structural hint for
+// answer engines working out how the site fits together.
+//
+// This site is FLAT: every public page sits at the root and the nav has no
+// sections, so the honest trail is Home › Page. Inventing "Home › Commercial ›
+// Sponsors" to look deeper would describe a hierarchy that doesn't exist and
+// that no link on the site backs up.
+//
+// The two exceptions are real containment, not decoration: news.html lists the
+// articles and squad.html lists the players, so an article/profile genuinely
+// sits under its listing page.
+//
+// Names come from each page's own <title>. A page missing here gets no
+// breadcrumb rather than a guessed one.
+//
+// The id is deliberately 'lane-breadcrumb' — the SAME id components.js uses for
+// the copy it injects at runtime. injectJSONLD() bails when the id is already
+// present, so baking this makes the runtime copy stand down and the page keeps
+// exactly ONE BreadcrumbList. Rename it and you get two, which is worse than
+// having none.
+const CRUMB_PARENT = {
+  'news-article.html': ['Newsroom', 'news.html'],
+  'player.html': ['The Squad', 'squad.html']
+};
+const CRUMB_NAME = {
+  'about.html': 'The Club',
+  'acerbis.html': 'Acerbis — Official Kit Partner',
+  'contact.html': 'Contact',
+  'fan-zone.html': 'Fan Zone',
+  'fixtures.html': 'Fixtures & Results',
+  'gallery.html': 'Gallery',
+  'history.html': 'Club History',
+  'innovation.html': 'Technology & The Lane',
+  'investment.html': 'Investment & Sponsorship',
+  'media.html': 'Media',
+  'membership.html': 'Membership',
+  'news-article.html': 'News Article',
+  'news.html': 'Newsroom',
+  'player.html': 'Player Profile',
+  'policies.html': 'Policies & Legal',
+  'programme.html': 'Match Day Programme',
+  'programmes.html': 'Match Programmes — Archive',
+  'season-tickets.html': '2026/27 Season Tickets',
+  'shop.html': 'Club Shop',
+  'squad.html': 'The Squad',
+  'trials.html': 'First-Team Trials & Registration',
+  'volunteer.html': 'Get Involved'
+};
+
+function crumbFor(file) {
+  if (file === 'index.html' || !CRUMB_NAME[file]) return null;
+  const items = [{ name: 'Home', url: ORIGIN + '/' }];
+  const parent = CRUMB_PARENT[file];
+  if (parent) items.push({ name: parent[0], url: ORIGIN + '/' + parent[1] });
+  items.push({ name: CRUMB_NAME[file], url: ORIGIN + '/' + file });
+  return {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    '@id': ORIGIN + '/' + file + '#breadcrumb',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem', position: i + 1, name: it.name, item: it.url
+    }))
+  };
+}
+
 const MARK_START = '<!-- lane-schema:start -->';
 const MARK_END = '<!-- lane-schema:end -->';
 
-const block = MARK_START + `
+const blockFor = (file) => MARK_START + `
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
        (it renders JS) and the AI crawlers mostly do not. Since being cited by
@@ -82,20 +147,26 @@ const block = MARK_START + `
        ⛔ Regenerate with scratchpad/bake-schema.js — don't hand-edit, and never
        add a fact that isn't on the club's own pages. -->
   <script type="application/ld+json" id="lane-org">${JSON.stringify(ORG)}</script>
-  <script type="application/ld+json" id="lane-site">${JSON.stringify(SITE)}</script>
+  <script type="application/ld+json" id="lane-site">${JSON.stringify(SITE)}</script>` +
+  (crumbFor(file)
+    ? `\n  <script type="application/ld+json" id="lane-breadcrumb">${JSON.stringify(crumbFor(file))}</script>`
+    : '') + `
   ` + MARK_END;
 
-let done = 0, replaced = 0, missed = [];
+let done = 0, replaced = 0, missed = [], crumbed = 0;
 fs.readdirSync('.').filter(f => /\.html$/.test(f) && !SKIP.includes(f)).forEach(f => {
   let s = fs.readFileSync(f, 'utf8');
+  const block = blockFor(f);
+  if (crumbFor(f)) crumbed++;
   if (s.includes(MARK_START)) {
-    s = s.replace(new RegExp(MARK_START + '[\\s\\S]*?' + MARK_END), block);
+    s = s.replace(new RegExp(MARK_START + '[\\s\\S]*?' + MARK_END), () => block);
     replaced++;
   } else if (s.includes('</head>')) {
-    s = s.replace('</head>', '  ' + block + '\n</head>');
+    s = s.replace('</head>', () => '  ' + block + '\n</head>');
     done++;
   } else { missed.push(f); return; }
   fs.writeFileSync(f, s);
 });
-console.log(`baked into ${done} pages, refreshed ${replaced}` + (missed.length ? `, NO </head>: ${missed}` : ''));
-console.log(`block size: ${(block.length / 1024).toFixed(1)} KB per page`);
+console.log(`baked into ${done} pages, refreshed ${replaced}, breadcrumbs on ${crumbed}` +
+  (missed.length ? `, NO </head>: ${missed}` : ''));
+console.log(`block size: ~${(blockFor('about.html').length / 1024).toFixed(1)} KB per page`);

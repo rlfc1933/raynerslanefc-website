@@ -17,6 +17,10 @@ var PAGES = [
   ['/squad.html', 'weekly', '0.8'],
   ['/trials.html', 'monthly', '0.8'],
   ['/membership.html', 'monthly', '0.7'],
+  // Season tickets sat in the nav and on the homepage but never in the sitemap,
+  // so the one page that actually takes money was the one crawlers weren't told
+  // about. Priority matches membership — same job, same importance.
+  ['/season-tickets.html', 'monthly', '0.7'],
   ['/about.html', 'monthly', '0.7'],
   ['/contact.html', 'monthly', '0.7'],
   ['/history.html', 'monthly', '0.6'],
