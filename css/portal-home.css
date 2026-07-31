@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PORTAL HOME — the club's front door.
+
+   Written for the people who actually use it: committee volunteers, roughly
+   45–60, some very comfortable with technology and some who would rather have
+   a printed sheet. That means larger body text and descriptions than a typical
+   admin tool, generous targets, and one obvious action per card.
+
+   It does NOT mean making it look basic. This is the club's professional
+   internal home: same typeface, same yellow, same black. Confidence comes from
+   clarity and consistency, not from making everything huge.
+
+   Sizes here are deliberate minimums, not defaults to drift from:
+     body text        15px   (was 13px)
+     descriptions     14px   (was 11–12px)
+     primary targets  48px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#portal-home {
+  --ph-red:   #EF4444;
+  --ph-amber: #F59E0B;
+  --ph-good:  #34D399;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.ph-h {
+  font-family: var(--fd, system-ui);
+  font-size: 21px; letter-spacing: .04em; color: var(--w, #F5F3ED);
+  margin: 0 0 4px;
+}
+.ph-sub {
+  font-family: var(--fb, system-ui); font-size: 14px; line-height: 1.55;
+  color: var(--gr, #8F8F8F); margin: 0 0 14px;
+}
+.ph-sub--center { text-align: center; margin-top: 10px; }
+.ph-sub b { color: var(--w); }
+.ph-sec { margin: 26px 0; }
+.ph-sec--all { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--br, #2A2A2A); }
+
+/* ── TODAY AT THE CLUB ───────────────────────────────────────────────────── */
+.ph-today {
+  border: 1px solid rgba(255,209,0,.4);
+  background: linear-gradient(135deg, rgba(255,209,0,.10), transparent 62%);
+  border-radius: 14px; padding: 20px; margin-bottom: 22px;
+}
+.ph-today .ph-h { color: var(--y, #FFD100); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; }
+.ph-today__big {
+  font-family: var(--fd); font-size: 30px; line-height: 1.05;
+  color: var(--w); margin: 8px 0 6px;
+}
+.ph-today__line { font-family: var(--fb); font-size: 15px; line-height: 1.55; color: var(--gr); }
+.ph-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.ph-chip {
+  font-family: var(--fc, system-ui); font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  color: var(--gr); border: 1px solid var(--br); border-radius: 999px; padding: 7px 13px;
+}
+.ph-chip--live { color: #111; background: var(--y, #FFD100); border-color: var(--y); }
+.ph-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #111; margin-right: 6px; animation: ph-pulse 1.2s infinite;
+}
+@keyframes ph-pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+
+/* ── NEEDS ATTENTION ─────────────────────────────────────────────────────── */
+.ph-atts { display: flex; flex-direction: column; gap: 10px; }
+.ph-att {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  border: 1px solid var(--br); border-left: 4px solid var(--gr);
+  background: var(--c, #161616); border-radius: 12px; padding: 15px 16px;
+}
+/* Red is reserved for overdue or failed. Amber is upcoming. Nothing else. */
+.ph-att--red   { border-left-color: var(--ph-red);   background: rgba(239,68,68,.06); }
+.ph-att--amber { border-left-color: var(--ph-amber); background: rgba(245,158,11,.06); }
+.ph-att__body { flex: 1 1 260px; min-width: 0; }
+.ph-att__title {
+  font-family: var(--fc); font-size: 15px; font-weight: 800; letter-spacing: .02em;
+  color: var(--w); line-height: 1.35;
+}
+.ph-att__why {
+  font-family: var(--fb); font-size: 14px; line-height: 1.5;
+  color: var(--gr); margin-top: 4px;
+}
+/* Exactly one visually dominant action per card. */
+.ph-att__go {
+  flex: 0 0 auto; min-height: 48px; padding: 12px 20px;
+  background: var(--y, #FFD100); color: #0d0d0d; border: none; border-radius: 10px;
+  font-family: var(--fc); font-size: 14px; font-weight: 800; letter-spacing: .05em;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ph-att__go:active { transform: scale(.98); }
+.ph-att__go:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.ph-more {
+  width: 100%; min-height: 48px; margin-top: 10px;
+  background: none; border: 1px solid var(--br); border-radius: 10px; color: var(--gr);
+  font-family: var(--fc); font-size: 14px; font-weight: 700; letter-spacing: .05em; cursor: pointer;
+}
+
+/* ── EMPTY STATES — reassuring, never blank ──────────────────────────────── */
+.ph-empty {
+  border: 1px dashed var(--br); border-radius: 12px; padding: 22px;
+  font-family: var(--fb); font-size: 15px; line-height: 1.6; color: var(--gr);
+}
+.ph-empty b { display: block; color: var(--w); font-family: var(--fc); letter-spacing: .03em; margin-bottom: 5px; }
+.ph-empty--good { border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.05); }
+
+/* ── TOOL CARDS ──────────────────────────────────────────────────────────── */
+.ph-tools { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 760px)  { .ph-tools { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1180px) { .ph-tools { grid-template-columns: repeat(3, 1fr); } }
+
+.ph-tool {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  width: 100%; min-height: 112px; padding: 16px;
+  background: var(--c, #161616); border: 1px solid var(--br); border-radius: 12px;
+  text-align: left; cursor: pointer; font: inherit; color: inherit;
+  transition: border-color .15s, background .15s;
+}
+.ph-tool:hover { border-color: rgba(255,209,0,.45); background: #191919; }
+.ph-tool:focus-visible { outline: 3px solid var(--y, #FFD100); outline-offset: 2px; }
+.ph-tool__name {
+  font-family: var(--fd, system-ui); font-size: 19px; letter-spacing: .03em;
+  color: var(--w); line-height: 1.15;
+}
+.ph-tool__desc {
+  font-family: var(--fb); font-size: 14px; line-height: 1.5; color: var(--gr);
+  flex: 1 1 auto;
+}
+.ph-tool__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; width: 100%; margin-top: 6px;
+}
+.ph-badge {
+  font-family: var(--fc); font-size: 11px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--gr);
+  border: 1px solid var(--br); border-radius: 999px; padding: 4px 9px;
+}
+/* "Changes the website" is the single most important thing a volunteer needs
+   to know before pressing anything, so it is the one badge that is coloured. */
+.ph-badge--public { color: var(--y, #FFD100); border-color: rgba(255,209,0,.45); }
+.ph-tool__open {
+  font-family: var(--fc); font-size: 13px; font-weight: 800; letter-spacing: .08em;
+  color: var(--y, #FFD100); white-space: nowrap;
+}
+
+/* ── CLUB AREAS ──────────────────────────────────────────────────────────── */
+.ph-areas { display: flex; flex-direction: column; gap: 8px; }
+.ph-area { border: 1px solid var(--br); border-radius: 12px; background: var(--dk, #0F0F0F); overflow: hidden; }
+.ph-area__head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px; min-height: 56px; cursor: pointer; list-style: none;
+}
+.ph-area__head::-webkit-details-marker { display: none; }
+.ph-area__head:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; }
+.ph-area__name { font-family: var(--fd); font-size: 18px; letter-spacing: .04em; color: var(--w); }
+.ph-area__count {
+  margin-left: auto; font-family: var(--fc); font-size: 12px; font-weight: 700;
+  color: var(--gr); border: 1px solid var(--br); border-radius: 999px; padding: 3px 10px;
+}
+.ph-area[open] .ph-area__head { border-bottom: 1px solid var(--br); }
+.ph-area__blurb {
+  font-family: var(--fb); font-size: 14px; color: var(--gr);
+  margin: 0; padding: 14px 18px 4px;
+}
+.ph-area .ph-tools { padding: 10px 14px 16px; }
+
+/* ── VIEW ALL ────────────────────────────────────────────────────────────── */
+.ph-allbtn {
+  width: 100%; min-height: 52px; padding: 15px;
+  background: var(--c2, #1A1A1A); border: 1px solid var(--br); border-radius: 12px;
+  color: var(--w); font-family: var(--fc); font-size: 14px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+}
+.ph-allbtn:hover { border-color: rgba(255,209,0,.45); }
+.ph-allbtn:focus-visible { outline: 3px solid var(--y); outline-offset: 2px; }
+
+/* ── BREADCRUMB (inside every tool) ──────────────────────────────────────── */
+.ph-crumb {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-family: var(--fb); font-size: 13px; color: var(--gr);
+  margin: 0 0 12px;
+}
+.ph-crumb button {
+  background: none; border: none; padding: 6px 2px; min-height: 34px;
+  color: var(--y, #FFD100); font: inherit; font-size: 13px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.ph-crumb button:focus-visible { outline: 2px solid var(--y); outline-offset: 2px; border-radius: 4px; }
+.ph-crumb__sep { opacity: .5; }
+.ph-crumb__here { color: var(--w); font-weight: 600; }
+
+/* ── EMERGENCY CONTROLS — must never look like routine work ──────────────── */
+.ph-danger {
+  border: 2px solid var(--ph-red); background: rgba(239,68,68,.08);
+  border-radius: 12px; padding: 16px; margin-bottom: 16px;
+}
+.ph-danger__h {
+  font-family: var(--fc); font-size: 13px; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: #FCA5A5; margin-bottom: 8px;
+}
+.ph-danger p { font-family: var(--fb); font-size: 15px; line-height: 1.6; color: #FECACA; margin: 0 0 10px; }
+
+/* ── RETIRED / ARCHIVE NOTICE ────────────────────────────────────────────── */
+.ph-retired {
+  border: 1px solid rgba(167,139,250,.45); background: rgba(167,139,250,.07);
+  border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  font-family: var(--fb); font-size: 15px; line-height: 1.6; color: #DDD6FE;
+}
+.ph-retired b { color: #fff; }
+
+@media (max-width: 520px) {
+  .ph-today__big { font-size: 25px; }
+  .ph-att { padding: 14px; }
+  .ph-att__go { width: 100%; }
+}
