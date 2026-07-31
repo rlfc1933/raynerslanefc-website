@@ -1973,13 +1973,30 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <div class="panel" id="panel-analytics">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-chart-column"></i> Match Day Analytics</div></div>
 
+      <!-- RETIRED (Stage 9). This ledger was one Supabase row holding the whole
+           history as a JSON array: every save overwrote the lot, so two staff
+           saving in the same window destroyed each other's work. It had no
+           fixture link, no season, no ticket categories, no reconciliation, no
+           status, no actor and no audit trail.
+
+           It is READ-ONLY now. The history stays visible here until the club
+           has checked it against the migrated records — nothing has been
+           deleted — but new match days are recorded in Match Day Ops, so there
+           is only ever ONE place taking writes. -->
+      <div class="md-var md-var--warn" style="margin-bottom:14px">
+        <b>This tab is now read-only — history only.</b><br>
+        Record new match days in <b>Match Day Ops</b> (Dashboard &rarr; Match Day). It links each record to the
+        real fixture, counts admissions by ticket category, reconciles cash and card, and keeps an audit trail.
+        <div style="margin-top:10px"><button class="save sec" style="margin:0" onclick="back();openPanel('mdops')">Open Match Day Ops &#8594;</button></div>
+      </div>
+
       <div class="an-stats" id="an-summary"></div>
 
       <div class="div"></div>
-      <div class="slbl">Log a Match Day</div>
+      <div class="slbl">Log a Match Day <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">&mdash; retired</span></div>
       <div class="row2">
-        <div class="field"><label class="fl">Date</label><input type="date" id="an-date"></div>
-        <div class="field"><label class="fl">Opposition</label><input type="text" id="an-opp" placeholder="Harefield United"></div>
+        <div class="field"><label class="fl">Date</label><input type="date" id="an-date" disabled></div>
+        <div class="field"><label class="fl">Opposition</label><input type="text" id="an-opp" placeholder="Harefield United" disabled></div>
       </div>
       <div class="row2">
         <div class="field"><label class="fl">Home / Away</label><select id="an-ha"><option value="home">Home</option><option value="away">Away</option></select></div>
@@ -8958,6 +8975,7 @@ function renderAnalytics() {
   renderAnalyticsSummary();
   renderAnalyticsTable();
   renderAnalyticsCharts();
+  analyticsLockDown();
 }
 
 // ── Analytics password gate (chairman) ──
@@ -9013,7 +9031,32 @@ function getChecked(containerId) {
     .map(function(c){ return c.value; });
 }
 
+// ── RETIRED WRITE PATH (Stage 9) ──
+// The old ledger no longer accepts writes. Two systems both taking match-day
+// money entries is how a club ends up with two different answers to "what did
+// we take against Hilltop", and there is no correct way to reconcile that after
+// the fact. Reads still work so the history stays visible until it has been
+// checked against the migrated records; nothing has been deleted.
+var ANALYTICS_RETIRED = true;
+function analyticsRetired() {
+  alert('Match Day Analytics is now read-only.\n\n' +
+        'Record match days in Match Day Ops (Dashboard → Match Day). It links each record to the real ' +
+        'fixture, counts admissions by ticket category, reconciles cash and card, and keeps an audit trail.\n\n' +
+        'This history stays here, untouched, until it has been checked against the migrated records.');
+  return true;
+}
+// Disable every control in the retired panel, whatever the markup says.
+function analyticsLockDown() {
+  var p = document.getElementById('panel-analytics'); if (!p) return;
+  p.querySelectorAll('input, textarea, select').forEach(function (el) { el.disabled = true; });
+  p.querySelectorAll('button').forEach(function (b) {
+    var oc = b.getAttribute('onclick') || '';
+    if (/addMatchRecord|removeMatchRecord|saveAnalytics/.test(oc)) { b.disabled = true; b.style.opacity = '.45'; }
+  });
+}
+
 function addMatchRecord() {
+  if (ANALYTICS_RETIRED) return analyticsRetired();
   var opp = gv('an-opp'), date = gv('an-date');
   if (!date || !opp) { toast('Enter a date and opposition', true); return; }
   analytics.push({
@@ -9043,6 +9086,7 @@ function addMatchRecord() {
 }
 
 function removeMatchRecord(id) {
+  if (ANALYTICS_RETIRED) return analyticsRetired();
   if (!confirm('Remove this match from the log?')) return;
   analytics = analytics.filter(function(m){ return m.id !== id; });
   analyticsDeleted.push(id);
@@ -9133,8 +9177,10 @@ function renderAnalyticsCharts() {
   }
 }
 
-// Saves match finances to the PRIVATE Blobs store (not the public repo).
+// RETIRED (Stage 9). The single writer for match-day money is now
+// matchday-ops.js. This refuses rather than competing with it.
 function saveAnalytics(msg) {
+  if (ANALYTICS_RETIRED) return analyticsRetired();
   var el = document.getElementById('dep-analytics');
   if (el) showDep(el, 'loading', 'Saving privately…');
   fetch('/.netlify/functions/analytics-data', {

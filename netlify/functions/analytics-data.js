@@ -34,15 +34,27 @@ exports.handler = async function (event) {
   const headers = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
   try {
     if (event.httpMethod === 'POST') {
-      const matches = Array.isArray(b.matches) ? b.matches : [];
-      const r = await fetch(URL + '/rest/v1/match_finances?id=eq.1', {
-        method: 'PATCH',
-        headers: Object.assign({}, headers, { Prefer: 'return=minimal' }),
-        body: JSON.stringify({ matches: matches, updated_at: new Date().toISOString() }),
-        signal: AbortSignal.timeout(9000),
+      // ── RETIRED (Stage 9) ────────────────────────────────────────────────
+      // This used to overwrite the ENTIRE match history with whatever array the
+      // browser sent, so two staff saving in the same window silently destroyed
+      // each other's work — and nothing recorded who did it.
+      //
+      // Match-day money now has exactly ONE writer: matchday-ops.js, which
+      // writes a normalised row per fixture, recalculates every figure
+      // server-side, checks a version to refuse a stale write, and audits the
+      // actor. Leaving this endpoint writable would let a stale browser tab
+      // resurrect the old array and give the club two different answers to
+      // "what did we take against Hilltop". There is no correct way to
+      // reconcile that afterwards, so the write path is closed.
+      //
+      // READS below still work: the history stays visible until the club has
+      // checked it against the migrated records. match_finances is NOT deleted.
+      return resp(410, {
+        ok: false,
+        error: 'The Match Day Analytics ledger is retired and no longer accepts writes. Record match days in Match Day Ops.',
+        retired: true,
+        replacement: '/.netlify/functions/matchday-ops',
       });
-      if (!r.ok) return resp(200, { ok: false, error: 'patch ' + r.status });
-      return resp(200, { ok: true, count: matches.length });
     }
     const r = await fetch(URL + '/rest/v1/match_finances?id=eq.1&select=matches', { headers, signal: AbortSignal.timeout(9000) });
     if (!r.ok) return resp(200, { ok: false, error: 'read ' + r.status, matches: [] });
