@@ -222,7 +222,14 @@ async function syncOne(fixture, now) {
   // Full time already confirmed — nothing more to poll for.
   if (state.is_final) return { fixtureId, outcome: 'complete' };
 
-  const r = await client.fetchMatch(pathFor(fixture, extId, null), state.sync_cursor);
+  // If the fixture still owes us a result, ask for the WHOLE page rather than a
+  // delta. Once a match ends the provider stops changing, so every cursored
+  // poll comes back 204 with no body — and 204 returns before anything is
+  // parsed, so the score could never be written. Dropping the cursor forces a
+  // full response we can actually read.
+  const owesResult = fixture.us == null || fixture.them == null;
+  const cursor = (state.is_final && owesResult) ? null : state.sync_cursor;
+  const r = await client.fetchMatch(pathFor(fixture, extId, null), cursor);
 
   if (r.outcome === 'no_change') {
     await store.updateState(fixtureId, {
@@ -254,6 +261,20 @@ async function syncOne(fixture, now) {
     }, null);
     await store.log({ fixture_id: fixtureId, outcome: 'rejected', http_status: r.status, detail: check.errors.join('; ').slice(0, 300), duration_ms: r.durationMs });
     return { fixtureId, outcome: 'rejected', detail: check.errors };
+  }
+
+  // Put the final score on the fixture. This MUST happen before the
+  // unchanged-payload shortcut below: once a match is over the provider stops
+  // changing, so every later poll is a no-change and an early return meant the
+  // result was never written at all. Condition is "final AND the fixture has no
+  // score yet", which is idempotent by construction and also backfills a match
+  // that finished before this code shipped.
+  if (parsed.isFinal && (fixture.us == null || fixture.them == null)) {
+    const w = await writeResultToFixture(fixture, parsed);
+    await store.log({
+      fixture_id: fixtureId, outcome: w.ok ? 'result_written' : 'result_write_failed',
+      detail: (w.error || w.detail || '') + ' ' + parsed.homeScore + '-' + parsed.awayScore,
+    });
   }
 
   const hash = fingerprint(parsed);
@@ -309,27 +330,11 @@ async function syncOne(fixture, now) {
     .map((row) => row.dedupe_key);
   if (gone.length) await store.retractEvents(fixtureId, gone);
 
-  // The moment the match becomes final — and only that moment — put the score
-  // on the fixture so nobody has to type it again.
-  var resultWrite = '';
-  // Condition is "final AND the fixture still has no score" rather than "the
-  // moment it turned final". That is naturally idempotent — once us/them are
-  // written it cannot fire again — and it also backfills a match that finished
-  // before this code shipped, which is exactly what happened on 1 August.
-  if (parsed.isFinal && (fixture.us == null || fixture.them == null)) {
-    const w = await writeResultToFixture(fixture, parsed);
-    resultWrite = w.ok ? ' result written to fixture' : (' result NOT written: ' + (w.error || w.detail || '?'));
-    await store.log({
-      fixture_id: fixtureId, outcome: w.ok ? 'result_written' : 'result_write_failed',
-      detail: (w.error || w.detail || '') + ' ' + parsed.homeScore + '-' + parsed.awayScore,
-    });
-  }
-
   await store.log({
     fixture_id: fixtureId, outcome: 'ok', http_status: r.status,
     parsed_score: parsed.homeScore + '-' + parsed.awayScore,
     parsed_period: parsed.period,
-    detail: (fresh.length ? fresh.length + ' new event(s)' : '') + (gone.length ? ' ' + gone.length + ' retracted' : '') + resultWrite,
+    detail: (fresh.length ? fresh.length + ' new event(s)' : '') + (gone.length ? ' ' + gone.length + ' retracted' : '') ,
     duration_ms: Date.now() - started,
   });
 
