@@ -23,13 +23,50 @@ test('both squads become line-up rows in provider order', () => {
   assert.ok(home.rows.every((r) => r.provider_player_name), 'every row keeps the provider name verbatim');
 });
 
-test('starters and substitutes are distinguished, not guessed', () => {
-  const home = I.lineupRows(parsed, 'home', 1, {});
-  const starters = home.rows.filter((r) => r.lineup_role === 'starter');
-  const subs = home.rows.filter((r) => r.lineup_role === 'substitute');
-  assert.ok(starters.length >= 9 && starters.length <= 11, 'starters: ' + starters.length);
-  assert.ok(subs.length >= 5, 'substitutes: ' + subs.length);
-  assert.strictEqual(starters.length + subs.length, 16);
+test('both sides field exactly eleven starters', () => {
+  // The provider's class="playing" means "on the pitch RIGHT NOW", not
+  // "started". It is dropped when a player is withdrawn AND when one is sent
+  // off, so reading the class alone gave Rayners Lane a starting ten.
+  for (const side of ['home', 'away']) {
+    const rows = I.lineupRows(parsed, side, 1, {}).rows;
+    const starters = rows.filter((r) => r.lineup_role === 'starter');
+    assert.strictEqual(starters.length, 11, side + ' should start eleven, got ' + starters.length);
+    assert.strictEqual(rows.length, 16, side + ' squad size');
+  }
+});
+
+test('a withdrawn starter is a starter, with the minute he came off', () => {
+  const home = I.lineupRows(parsed, 'home', 1, {}).rows;
+  const chevannes = home.find((r) => /Chevannes/.test(r.provider_player_name));
+  assert.strictEqual(chevannes.lineup_role, 'starter', 'he started and was booked before coming off');
+  assert.strictEqual(chevannes.exited_minute, 70);
+  assert.strictEqual(chevannes.entered_minute, null);
+});
+
+test('a SENT-OFF player still counts as a starter', () => {
+  // Beau Pryce started and was dismissed on 30. The provider drops his class
+  // exactly as it does for a substituted player, leaving him indistinguishable
+  // from an unused substitute — which is how the eleven became ten.
+  const home = I.lineupRows(parsed, 'home', 1, {}).rows;
+  const pryce = home.find((r) => /Pryce/.test(r.provider_player_name));
+  assert.strictEqual(pryce.lineup_role, 'starter');
+  assert.strictEqual(pryce.entered_minute, null, 'he did not come on');
+  assert.strictEqual(pryce.exited_minute, null, 'he was not substituted');
+});
+
+test('a player who came on is a substitute, with the minute he entered', () => {
+  const home = I.lineupRows(parsed, 'home', 1, {}).rows;
+  const fuma = home.find((r) => /Fuma/.test(r.provider_player_name));
+  assert.strictEqual(fuma.lineup_role, 'substitute');
+  assert.strictEqual(fuma.entered_minute, 54);
+});
+
+test('an unused substitute is recorded as unused, not as having played', () => {
+  const away = I.lineupRows(parsed, 'away', 2, {}).rows;
+  const unused = away.filter((r) => r.lineup_role === 'unused');
+  assert.strictEqual(unused.length, 1, 'the away side left one substitute on the bench');
+  assert.strictEqual(unused[0].entered_minute, null);
+  assert.strictEqual(unused[0].exited_minute, null);
 });
 
 test('the captain is flagged and his name is not carrying "(C)"', () => {

@@ -38,10 +38,54 @@ function resolvePlayer(providerName, teamId, index) {
   return { player: null, status: 'new', key: key };
 }
 
+/**
+ * starter   — on the pitch at kick-off
+ * substitute— came on during the match
+ * unused    — named but never played
+ *
+ * class="playing" only means "on the pitch right now", so it is the timeline
+ * that distinguishes a withdrawn starter from an unused substitute.
+ */
+function roleFor(p, cameOff, cameOn, appeared) {
+  const key = N.playerKey(p.name);
+  if (cameOn[key] != null) return 'substitute';   // came on: definitely not a starter
+  if (cameOff[key] != null) return 'starter';     // came off: definitely was one
+  if (p.role === 'playing') return 'starter';     // still on at the end
+  // Anyone who DID something in the match was on the pitch. This catches the
+  // sent-off player: Beau Pryce started, was dismissed on 30, and the provider
+  // dropped his class exactly as it does for a withdrawn player — leaving him
+  // indistinguishable from an unused substitute and the starting eleven at ten.
+  if (appeared[key]) return 'starter';
+  return 'unused';                                // named, never appeared
+}
+
 /** Line-up rows for one side, in the order the provider listed them. */
 function lineupRows(parsed, side, teamId, playerIndex) {
   const squad = (side === 'home' ? parsed.home.lineUp : parsed.away.lineUp) || [];
   const unresolved = [];
+
+  // A player who STARTED and was withdrawn is not a substitute.
+  //
+  // The provider marks the players currently on the pitch with class="playing"
+  // and drops it the moment someone is taken off — so Le'Kai Chevannes, who
+  // started, was booked on 45+3 and came off on 70, looked identical in the
+  // markup to an unused substitute. Reading the class alone would have recorded
+  // him as never having started, and every appearance statistic built on that
+  // would be wrong.
+  //
+  // The timeline settles it: whoever is named as the player REPLACED was on the
+  // pitch, and whoever came ON was not in the starting eleven.
+  const cameOff = {}, cameOn = {}, appeared = {};
+  (parsed.events || []).forEach((e) => {
+    if (e.type === 'substitution') {
+      if (e.assistant) cameOff[N.playerKey(e.assistant)] = e.minute;
+      if (e.player) cameOn[N.playerKey(e.player)] = e.minute;
+      return;
+    }
+    // A goal, a booking or a sending-off all prove the player was on the pitch.
+    if (e.player && !e.isSummary) appeared[N.playerKey(e.player)] = true;
+  });
+
   const rows = squad.map((p, i) => {
     const r = resolvePlayer(p.name, teamId, playerIndex);
     if (r.status !== 'matched') unresolved.push({ name: p.name, key: r.key, status: r.status, teamId: teamId });
@@ -49,9 +93,9 @@ function lineupRows(parsed, side, teamId, playerIndex) {
       player_id: r.player ? r.player.id : null,
       provider_player_name: p.name,
       shirt_number: p.number || null,
-      // The provider marks the used starters with class="playing"; unused subs
-      // and a sent-off player carry no class at all.
-      lineup_role: p.role === 'playing' ? 'starter' : 'substitute',
+      lineup_role: roleFor(p, cameOff, cameOn, appeared),
+      entered_minute: cameOn[N.playerKey(p.name)] != null ? cameOn[N.playerKey(p.name)] : null,
+      exited_minute: cameOff[N.playerKey(p.name)] != null ? cameOff[N.playerKey(p.name)] : null,
       is_captain: !!p.isCaptain,
       is_goalkeeper: !!p.isKeeper,
       sort_order: i,
