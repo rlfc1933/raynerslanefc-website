@@ -158,9 +158,13 @@ async function writeResultToFixture(fixture, parsed) {
 
   // Our scorers, in order, as the fixtures page already formats them.
   const usSide = view.isHome ? 'home' : 'away';
+  // An own goal counts on OUR scoreline but was scored by THEIR player, so
+  // printing the name unqualified credits an opponent as a Rayners Lane
+  // scorer. Marked (og), the way a results page has always written it.
   const scorers = parsed.events
     .filter((e) => e.type === 'goal' && e.side === usSide && e.minute != null)
-    .map((e) => e.player + " " + e.minute + (e.stoppage ? '+' + e.stoppage : '') + "'")
+    .map((e) => e.player + (e.ownGoal ? ' (og)' : '')
+      + ' ' + e.minute + (e.stoppage ? '+' + e.stoppage : '') + "'")
     .join(', ');
 
   const upsert = {
