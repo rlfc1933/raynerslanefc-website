@@ -1,0 +1,58 @@
+// Identity normalisation — the difference between "the same club" and "a
+// different club", in one place.
+//
+// Every comparison of a club or person name across Football Web Pages, our
+// fixtures file and the crest library must go through here. Two spellings of
+// one club must collapse to one key; two genuinely different sides must not.
+'use strict';
+
+/**
+ * Club key. "Punjab Utd FC" and "Punjab United" are one club; "Wallingford &
+ * Crowmarsh" and "Wallingford and Crowmarsh" are one club.
+ *
+ * Reserve and development sides are deliberately NOT collapsed into the first
+ * team — dropping the suffix would file a reserve result against the first
+ * team's record.
+ */
+function clubKey(s) {
+  var t = String(s || '').toLowerCase().trim();
+  var suffix = '';
+  if (/\b(reserves?|res|development|dev|u\d{2}|academy|youth|women|ladies|a|b)\b\s*$/i.test(t)) {
+    suffix = '|' + t.match(/\b(reserves?|res|development|dev|u\d{2}|academy|youth|women|ladies|a|b)\b\s*$/i)[1]
+      .replace(/^res$/, 'reserves').replace(/^dev$/, 'development');
+    t = t.replace(/\b(reserves?|res|development|dev|u\d{2}|academy|youth|women|ladies|a|b)\b\s*$/i, '');
+  }
+  t = t
+    .replace(/\bf\.?\s?c\.?\b/g, ' ')
+    .replace(/\ba\.?f\.?c\.?\b/g, ' ')
+    .replace(/\butd\b/g, 'united')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]/g, '');
+  return t + suffix;
+}
+
+/** Person key. Folds the curly apostrophe and the "(C)" the line-ups append. */
+function playerKey(s) {
+  return String(s || '')
+    .replace(/\s*\((?:c|gk|capt|captain|vc)\)\s*$/i, '')
+    .toLowerCase()
+    .replace(/[‘’ʼ]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Are these the same club? Never a substring test — "Hayes" ≠ "AFC Hayes". */
+function sameClub(a, b) {
+  var ka = clubKey(a), kb = clubKey(b);
+  return !!ka && ka === kb;
+}
+
+/** URL-safe slug, matching the provider's own path style. */
+function slug(s) {
+  return String(s || '').toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+module.exports = { clubKey, playerKey, sameClub, slug };
