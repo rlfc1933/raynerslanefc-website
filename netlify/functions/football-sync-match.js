@@ -113,6 +113,7 @@ async function writeLineup(fixtureId, teamId, rows, sourceUpdatedAt) {
       lineup_id: lineup.id, player_id: r.player_id,
       provider_player_name: r.provider_player_name,
       shirt_number: r.shirt_number, lineup_role: r.lineup_role,
+      entered_minute: r.entered_minute, exited_minute: r.exited_minute,
       is_captain: r.is_captain, is_goalkeeper: r.is_goalkeeper, sort_order: r.sort_order,
     })),
     headers: { Prefer: 'return=minimal' },

@@ -190,6 +190,11 @@ create table if not exists public.football_lineup_players (
   lineup_role   text not null default 'starter'
     check (lineup_role in ('starter','substitute','unused','manager','official')),
   position      text,
+  -- When a player entered or left the pitch, derived from the timeline. The
+  -- provider's line-up markup cannot distinguish a withdrawn starter from an
+  -- unused substitute on its own, so these come from the substitution events.
+  entered_minute int,
+  exited_minute  int,
   is_captain    bool not null default false,
   is_goalkeeper bool not null default false,
   sort_order    int,
