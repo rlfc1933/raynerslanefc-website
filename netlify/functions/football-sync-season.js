@@ -1,0 +1,225 @@
+// GATE 2 — season fixture registry, in shadow.
+//
+// Reads the club's season from Football Web Pages, reconciles it against
+// data/fixtures.json, and writes the result into the football_* registry.
+//
+// SHADOW BY DEFAULT. It populates the registry and records disagreements; it
+// changes nothing the public site reads. The live scoreboard, the homepage and
+// data/fixtures.json are untouched. Pass ?apply=1 with the PIN once shadow
+// output has been reviewed — and even then it only writes the registry, never
+// the committed JSON.
+//
+// Nothing in here decides to overwrite a fact. Where the provider and the club
+// disagree, it records a conflict for a human. Silently accepting the provider
+// is how a wrong score becomes the club's permanent record.
+
+'use strict';
+
+const adminOk = require('./lib/pin');
+const F = require('./lib/fwp');
+const R = require('./lib/football/reconcile');
+const S = require('./lib/football/store');
+const MT = require('../../js/match-time');
+
+const SEASON = process.env.FWP_SEASON || '2026-2027';
+const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://raynerslanefc.co.uk';
+
+function resp(code, obj) {
+  return {
+    statusCode: code,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    body: JSON.stringify(obj, null, 1),
+  };
+}
+
+async function loadInternalFixtures() {
+  const urls = [
+    'https://raw.githubusercontent.com/rlfc1933/raynerslanefc-website/main/data/fixtures.json',
+    SITE_ORIGIN + '/data/fixtures.json?t=' + Date.now(),
+  ];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { signal: AbortSignal.timeout(9000) });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && j.fixtures && j.fixtures.length) return j.fixtures;
+    } catch (e) { /* next */ }
+  }
+  return [];
+}
+
+/** Our season label ('2026-27') from the provider's ('2026-2027'). */
+function clubSeason(providerSeason) {
+  const m = String(providerSeason).match(/^(\d{4})-(\d{4})$/);
+  return m ? m[1] + '-' + m[2].slice(2) : providerSeason;
+}
+
+function competitionType(name) {
+  const c = String(name || '');
+  if (/friendly/i.test(c)) return 'friendly';
+  if (/\bfa (cup|vase|trophy)\b/i.test(c)) return 'fa_competition';
+  if (/county|middlesex/i.test(c)) return 'county_cup';
+  if (/\bcup\b|\bvase\b|\btrophy\b|\bshield\b/i.test(c)) return 'league_cup';
+  return 'league';
+}
+
+async function ensureTeam(name, opts) {
+  const key = F.clubKey(name);
+  const existingAlias = await S.findOne('football_team_aliases', 'normalised=eq.' + encodeURIComponent(key));
+  if (existingAlias) {
+    return await S.findOne('football_teams', 'id=eq.' + existingAlias.team_id);
+  }
+  const team = await S.upsert('football_teams', {
+    canonical_name: name,
+    display_name: name,
+    slug: F.slug(name),
+    external_provider: 'fwp',
+    external_team_id: (opts && opts.providerSlug) || F.slug(name),
+    provider_name: name,
+    crest_asset_path: (opts && opts.crest) || null,
+    is_rayners_lane: F.sameClub(name, R.CLUB),
+    active: true,
+  }, 'external_provider,external_team_id');
+  if (team) {
+    await S.upsert('football_team_aliases', {
+      team_id: team.id, alias: name, normalised: key,
+      source: 'fwp', confidence: 'confirmed',
+    }, 'normalised');
+  }
+  return team;
+}
+
+async function ensureCompetition(name, providerSlug) {
+  if (!name) return null;
+  const existing = await S.findOne('football_competitions',
+    'external_competition_id=eq.' + encodeURIComponent(providerSlug || F.slug(name)) +
+    '&season=eq.' + encodeURIComponent(SEASON));
+  if (existing) return existing;
+  return await S.upsert('football_competitions', {
+    external_provider: 'fwp',
+    external_competition_id: providerSlug || F.slug(name),
+    canonical_name: name, provider_name: name, display_name: name,
+    slug: F.slug(name), season: SEASON,
+    competition_type: competitionType(name),
+    active: true,
+  }, 'external_provider,external_competition_id,season');
+}
+
+exports.handler = async function (event) {
+  const q = (event && event.queryStringParameters) || {};
+  let body = {};
+  try { body = JSON.parse((event && event.body) || '{}'); } catch (e) { /* GET */ }
+
+  // Applying requires the PIN. Shadow does not: it writes only to registry
+  // tables nothing reads yet, and being able to inspect it freely is the point.
+  const apply = q.apply === '1' || body.apply === true;
+  if (apply && !adminOk(body.pin || q.pin)) {
+    return resp(401, { ok: false, error: 'Applying requires sign-in' });
+  }
+  if (!F.isEnabled()) {
+    return resp(200, { ok: true, enabled: false, reason: 'FWP_SYNC_ENABLED is not true' });
+  }
+  if (!S.configured()) return resp(200, { ok: false, error: 'supabase not configured' });
+
+  const run = await S.startRun('season', !apply, null);
+  const counters = { request_count: 1, records_created: 0, records_updated: 0, warning_count: 0, error_count: 0 };
+
+  try {
+    const listRes = await F.fetchFixtureList();
+    if (!listRes.ok) {
+      await S.finishRun(run && run.id, { status: 'failed', final_error: listRes.error || 'fetch failed', error_count: 1 });
+      return resp(200, { ok: false, error: listRes.error || 'could not reach the provider' });
+    }
+    const parsed = F.parseFixtureList(listRes.body);
+    const valid = F.validateFixtureList(parsed, SEASON);
+    if (!valid.ok) {
+      // The season guard. Importing the wrong year over the right one is the
+      // single most destructive thing this function could do.
+      await S.finishRun(run && run.id, { status: 'failed', final_error: valid.errors.join('; '), error_count: 1 });
+      return resp(200, { ok: false, error: 'rejected: ' + valid.errors.join('; ') });
+    }
+
+    const internal = await loadInternalFixtures();
+    const rec = R.reconcileSeason(parsed.fixtures, internal);
+
+    const written = [];
+    for (const m of rec.matched) {
+      const p = m.provider;
+      const homeName = p.isHome ? R.CLUB : p.opponent;
+      const awayName = p.isHome ? p.opponent : R.CLUB;
+      const homeTeam = await ensureTeam(homeName, { providerSlug: p.homeSlug });
+      const awayTeam = await ensureTeam(awayName, { providerSlug: p.awaySlug });
+      const comp = await ensureCompetition(p.competition, p.competitionSlug);
+
+      // The authoritative instant. A played fixture reports no kick-off time,
+      // so fall back to the club's own record rather than inventing 15:00.
+      const koTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
+      const koEpoch = koTime ? MT.parseLondonKickoff(p.date, koTime) : NaN;
+
+      const row = {
+        internal_fixture_id: m.internal ? m.internal.id : null,
+        external_provider: 'fwp',
+        external_fixture_id: p.externalFixtureId,
+        season: SEASON,
+        competition_id: comp ? comp.id : null,
+        home_team_id: homeTeam ? homeTeam.id : null,
+        away_team_id: awayTeam ? awayTeam.id : null,
+        scheduled_kickoff_at: isFinite(koEpoch) ? new Date(koEpoch).toISOString() : null,
+        club_timezone: 'Europe/London',
+        original_provider_date: p.date,
+        original_provider_time: p.providerKoCell || null,
+        venue: (m.internal && m.internal.venue) || null,
+        fixture_status: p.played ? 'played' : 'scheduled',
+        is_home_fixture: p.isHome,
+        first_team: true,
+        programme_eligible: R.programmeEligible(p),
+        source_updated_at: new Date().toISOString(),
+        last_synced_at: new Date().toISOString(),
+        sync_status: 'ok',
+        source_confidence: m.confidence,
+      };
+      const saved = await S.upsert('football_fixtures', row, 'external_provider,external_fixture_id,season');
+      if (saved) { counters.records_created++; written.push(saved.external_fixture_id); }
+    }
+
+    // Disagreements go to a human, never to an automatic overwrite.
+    for (const c of rec.conflicts) {
+      await S.recordConflict({
+        entity_type: 'fixture', entity_ref: c.fixtureId, field_name: c.field,
+        internal_value: String(c.internal), provider_value: String(c.provider),
+        severity: c.severity,
+      });
+      if (c.severity === 'critical') counters.warning_count++;
+    }
+    for (const u of rec.unmatchedProvider) {
+      await S.recordConflict({
+        entity_type: 'fixture', entity_ref: 'fwp:' + u.provider.externalFixtureId,
+        field_name: 'match', internal_value: null,
+        provider_value: u.provider.date + ' v ' + u.provider.opponent,
+        severity: u.confidence === 'rejected' ? 'critical' : 'review',
+      });
+      counters.warning_count++;
+    }
+
+    await S.finishRun(run && run.id, Object.assign({ status: 'ok' }, counters));
+
+    return resp(200, {
+      ok: true,
+      shadow: !apply,
+      season: SEASON,
+      summary: rec.summary,
+      fixturesWritten: written.length,
+      unmatchedProvider: rec.unmatchedProvider.map((u) => ({
+        date: u.provider.date, opponent: u.provider.opponent,
+        id: u.provider.externalFixtureId, confidence: u.confidence, reasons: u.reasons,
+      })),
+      unmatchedInternal: rec.unmatchedInternal.map((f) => ({ id: f.id, date: f.date, opponent: f.opponent })),
+      conflicts: rec.conflicts,
+    });
+  } catch (e) {
+    await S.finishRun(run && run.id, { status: 'failed', final_error: String(e && e.message || e), error_count: 1 });
+    return resp(200, { ok: false, error: String(e && e.message || e) });
+  }
+};
+
+exports._internal = { clubSeason, competitionType };
