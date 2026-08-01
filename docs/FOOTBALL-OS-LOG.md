@@ -177,3 +177,71 @@ reads any of it.
 shadow, compared against the live `match_state` that is already working.
 
 ---
+
+## Gate 3 — match state, events and line-ups (shadow)
+
+**SHA in / out:** `0ee9fc8` → `5e6369d`
+**Public behaviour:** unchanged.
+
+### Two jobs, treated differently
+
+**Line-ups and players are written for real** — nothing in production stores
+them, so there is nothing to conflict with.
+
+**Match state and events are NOT written a second time.** `match_state` and
+`match_events` already work and carried a live match. This gate builds the rows
+it *would* have written and reports the difference. Two systems writing a score
+on a Saturday is the failure the architecture exists to prevent.
+
+### Parity, verified in production
+
+| | |
+|---|---|
+| Match state | **identical** |
+| Events | 21 live vs 21 shadow — **identical** |
+| Line-ups | 16 + 16 written, 0 unresolved |
+| Players | 32 created, all `provisional` |
+
+### Three defects found inside the gate
+
+**Rayners Lane fielded ten men.** `class="playing"` means *on the pitch right
+now*, not *started* — the provider drops it when a player is withdrawn **and**
+when one is sent off. So Le'Kai Chevannes (started, booked 45+3, off on 70) was
+filed as a substitute, and Beau Pryce (started, dismissed on 30) as an unused
+substitute. The timeline settles both: whoever is named as REPLACED was on the
+pitch, whoever came ON was not in the eleven, and anyone who scored, was booked
+or was dismissed was plainly playing. Now **22 starters (11 each), 9 used
+substitutes, 1 unused**.
+
+This matters well beyond the line-up page — appearances and minutes are built on
+these roles, so a withdrawn captain would have gone down as never having started
+all season.
+
+**Minutes were computed and thrown away.** `entered_minute` / `exited_minute`
+were derived, attached to the row and silently dropped: the columns did not
+exist and PostgREST ignores fields it has no column for. No error. Columns added;
+18 players now carry the minute they came on or off.
+
+**A wait-loop that invoked what it was waiting for.** Polling the sync endpoint
+until it returned 200 *ran the sync*, so the measured call was the second run and
+reported "0 players created" on what looked like a first run.
+
+### Player identity
+
+A provider name is not a person. A name resolves only on an exact key within the
+**same club**. A matching name at another club returns
+`name_used_at_another_club` and creates nothing; a similar name is a new person,
+never a fuzzy merge. Everything new lands `provisional` or `needs_review` — never
+`confirmed` from a provider string.
+
+**Tests:** 17 new. Full suite **251 pass, 0 fail**.
+
+**Rollback:** truncate `football_lineups`, `football_lineup_players`,
+`football_players`, `football_player_aliases`; delete
+`netlify/functions/football-sync-match.js` and `lib/football/match-ingest.js`.
+No public consumer reads any of it.
+
+**Next:** Gate 4 — migrate the fixtures, results and league-table consumers onto
+the registry, after parity proof.
+
+---
