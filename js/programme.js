@@ -296,7 +296,8 @@ async function loadProgrammeLiveData() {
       var fx = await (await fetch('/.netlify/functions/fetch-fixtures')).json();
       var html = '';
       if (fx && fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
-        var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
+        var _ko = MatchTime.kickoffEpoch(fx.next);
+        var d = isFinite(_ko) ? new Date(_ko) : null;
         var ds = d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
         html += '<div class="mag-res"><span style="color:var(--yellow)">Next &middot; Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + progEsc(fx.next.opponent) + '</span><span style="color:var(--grey)">' + ds + ' ' + (fx.next.kickoff || '15:00') + '</span></div>';
       }

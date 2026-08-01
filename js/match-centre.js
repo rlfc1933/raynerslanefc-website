@@ -99,11 +99,19 @@
     var usSide = row.is_home !== false ? 'home' : 'away';
     var ours = e.side === usSide;
     var teamName = e.team || '';
+    // A substitution is two people; showing only the one coming on tells half
+    // the story. A half-time/full-time marker is nobody, so it gets no name.
+    var who = esc(e.player || '');
+    var what = esc(w.what);
+    if (e.event_type === 'substitution' && e.assistant) {
+      what = 'On for ' + esc(e.assistant);
+    }
+    if (!e.player) { who = what; what = ''; }
     return '<li class="mc-ev mc-ev--' + (ours ? 'us' : 'them') + (w.cls ? ' mc-ev--' + w.cls : '') + '">' +
       '<span class="mc-ev__min">' + esc(minuteLabel(e)) + '</span>' +
       '<span class="mc-ev__icon">' + w.icon + '</span>' +
-      '<span><span class="mc-ev__who">' + esc(e.player || '') + '</span>' +
-        '<span class="mc-ev__what">' + esc(w.what) + '</span></span>' +
+      '<span><span class="mc-ev__who">' + who + '</span>' +
+        (what ? '<span class="mc-ev__what">' + what + '</span>' : '') + '</span>' +
       '<span class="mc-ev__team">' + esc(teamName) + '</span>' +
     '</li>';
   }

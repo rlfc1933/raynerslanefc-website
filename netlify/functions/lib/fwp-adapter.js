@@ -258,15 +258,22 @@ function parseLineUp(html, side) {
 // FWP writes plain English verbs. We map to our own vocabulary and never store
 // the provider's phrasing as the thing we render — the public site builds its
 // own wording from event_type (see js/match-centre.js renderEvent()).
+// Order matters: the provider writes "X replaced Y" for a substitution, and a
+// summary line "Half-time: Rayners Lane 2-1 ..." with no minute at all. Both
+// were previously falling through to a generic 'info' row or, worse, storing the
+// whole summary sentence as a player's name.
 const VERBS = [
-  [/\bsent off\b|\bred card\b/i,            'red_card'],
-  [/\bcautioned\b|\bbooked\b|\byellow\b/i,  'yellow_card'],
-  [/\bscores\b|\bgoal\b/i,                  'goal'],
-  [/\bsubstitut|\breplaced by\b|\bon for\b/i, 'substitution'],
-  [/\bpenalty missed\b|\bmisses penalty\b/i, 'penalty_missed'],
-  [/\bhalf[\s-]?time\b/i,                   'half_time'],
-  [/\bfull[\s-]?time\b/i,                   'full_time'],
+  [/\bsent off\b|\bred card\b/i,             'red_card'],
+  [/\bcautioned\b|\bbooked\b|\byellow\b/i,   'yellow_card'],
+  [/\bpenalty missed\b|\bmisses penalty\b/i,  'penalty_missed'],
+  [/\bscores\b|\bgoal\b/i,                   'goal'],
+  [/\breplaced\b|\bsubstitut|\bon for\b/i,    'substitution'],
+  [/\bhalf[\s-]?time\b/i,                     'half_time'],
+  [/\bfull[\s-]?time\b/i,                     'full_time'],
 ];
+// Lines that describe the match rather than a person. They carry a scoreline,
+// not a player, and must never put a sentence in the player field.
+const SUMMARY_RE = /^(half[\s-]?time|full[\s-]?time|extra[\s-]?time)\s*:/i;
 
 function parseEvents(html) {
   const ul = html.match(/<ul class="match-events[^"]*"[^>]*>([\s\S]*?)<\/ul>/i);
@@ -287,15 +294,27 @@ function parseEvents(html) {
     // verb when a name happens to contain a keyword.
     if (/\bclass="[^"]*\bgoal\b/i.test(attrs)) type = 'goal';
     const ownGoal = /\(og\)|own goal/i.test(text);
-    // The player is the sentence minus the verb phrase.
-    const player = clean(text
+    const isSummary = SUMMARY_RE.test(text);
+    // The player is the sentence minus the verb phrase. A summary line has no
+    // player at all — storing "Half-time: Rayners Lane 2-1 ..." as a name is how
+    // that sentence ended up rendered as a person on the public timeline.
+    const player = isSummary ? '' : clean(text
       .replace(/\s*\(og\)|\s*\(pen\)/gi, '')
       .replace(/\b(scores|sent off|cautioned|booked|substituted|replaced).*$/i, ''));
+    // "Godwin Fuma replaced Alfie Campbell" — the first name comes ON, the
+    // second goes OFF. Both are worth keeping.
+    let assistant = '';
+    if (type === 'substitution') {
+      const sub = text.match(/^(.*?)\s+replaced\s+(.*)$/i);
+      if (sub) assistant = clean(sub[2]);
+    }
     out.push({
       sequence: seq++,
       type,
       minute, stoppage,
       player,
+      assistant,
+      isSummary,
       ownGoal,
       penalty: /\(pen\)|penalty/i.test(text),
       text,                       // kept for audit only — never rendered

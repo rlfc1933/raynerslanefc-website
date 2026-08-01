@@ -308,3 +308,42 @@ test('the same match parsed at three points keeps one identity and one timeline 
     assert.ok(x.homeScore >= 2, 'home score went backwards: ' + x.homeScore);
   });
 });
+
+test('substitutions are read as two players, not a generic note', () => {
+  // The provider writes "Godwin Fuma replaced Alfie Campbell". Matching only
+  // "replaced by" left every substitution filed as an anonymous info row.
+  const p = A.parseMatch(read('match-subs.html'));
+  const subs = p.events.filter((e) => e.type === 'substitution');
+  assert.strictEqual(subs.length, 4, 'expected four substitutions');
+  const first = subs[0];
+  assert.strictEqual(first.player, 'Godwin Fuma', 'player coming on');
+  assert.strictEqual(first.assistant, 'Alfie Campbell', 'player going off');
+  assert.strictEqual(first.team, 'Rayners Lane');
+  // An away substitution must attribute to the away side.
+  const theirs = subs.find((e) => e.player === 'Ty Hamilton');
+  assert.strictEqual(theirs.team, 'Wallingford & Crowmarsh');
+});
+
+test('a half-time summary line is not a person', () => {
+  // "Half-time: Rayners Lane 2-1 Wallingford & Crowmarsh" was being stored as a
+  // player name and rendered on the public timeline as if someone was called that.
+  const p = A.parseMatch(read('match-subs.html'));
+  const ht = p.events.filter((e) => e.type === 'half_time');
+  assert.ok(ht.length >= 1, 'half-time marker present');
+  ht.forEach((e) => {
+    assert.strictEqual(e.player, '', 'summary lines carry no player');
+    assert.strictEqual(e.isSummary, true);
+  });
+  // And no event anywhere should have a scoreline sitting in the player field.
+  p.events.forEach((e) => {
+    assert.ok(!/\d\s*-\s*\d/.test(e.player || ''), 'scoreline leaked into a name: ' + e.player);
+  });
+});
+
+test('the later score is parsed correctly as the match progresses', () => {
+  const p = A.parseMatch(read('match-subs.html'));
+  assert.strictEqual(p.homeScore, 3);
+  assert.strictEqual(p.awayScore, 2);
+  assert.strictEqual(p.period, 'second_half');
+  assert.strictEqual(p.isLive, true);
+});

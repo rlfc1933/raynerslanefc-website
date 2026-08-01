@@ -55,7 +55,7 @@
   }
   function shapeLocal(list) {   // fallback if main.js's shaper isn't present
     var now = Date.now();
-    function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
+    function dt(f) { return MatchTime.fixtureSortKey(f); }
     var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
     var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
     var up = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
@@ -110,15 +110,8 @@
   // Epoch ms for a wall-clock kick-off in Europe/London (auto-handles BST/GMT),
   // correct no matter what timezone the viewer's device is in. Fixes kick-offs
   // reading ~7h out when the site is opened from outside the UK.
-  function ukEpoch(dateStr, timeStr) {
-    if (!dateStr) return NaN;
-    var t = (timeStr || '15:00').slice(0, 5);
-    var asUTC = new Date(dateStr + 'T' + t + ':00Z').getTime();
-    if (isNaN(asUTC)) return NaN;
-    var lon = new Date(asUTC).toLocaleString('en-US', { timeZone: 'Europe/London' });
-    var utc = new Date(asUTC).toLocaleString('en-US', { timeZone: 'UTC' });
-    return asUTC - (new Date(lon).getTime() - new Date(utc).getTime());
-  }
+  // One parser for the whole site — see js/match-time.js.
+  function ukEpoch(dateStr, timeStr) { return MatchTime.parseLondonKickoff(dateStr, timeStr); }
 
   function fmtDate(dateStr) {
     var d = new Date((String(dateStr).length === 10 ? dateStr + 'T12:00:00' : dateStr));
@@ -283,8 +276,8 @@
     var now = Date.now();
     var comp = raw.filter(function (f) {
       var c = f.competition || '';
-      return !/friendly|pre-?season|testimonial/i.test(c) && new Date(f.date + 'T00:00').getTime() > now - 864e5;
-    }).sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+      return !/friendly|pre-?season|testimonial/i.test(c) && MatchTime.fixtureSortKey(f) > now - 864e5;
+    }).sort(function (a, b) { return MatchTime.fixtureSortKey(a) - MatchTime.fixtureSortKey(b); });
     if (!comp.length) return null;
     var d = new Date(comp[0].date + 'T12:00:00');
     return { label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) };

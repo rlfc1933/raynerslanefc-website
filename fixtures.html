@@ -196,6 +196,7 @@
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
+<script src="js/match-time.js"></script>
 <script src="js/components.js"></script>
 <script>
 (function () {
@@ -273,7 +274,7 @@ function injectFixtureEvents(list) {
     var ev = {
       '@type': 'SportsEvent', sport: 'Soccer',
       name: home ? ('Rayners Lane FC vs ' + (f.opponent || 'TBC')) : ((f.opponent || 'TBC') + ' vs Rayners Lane FC'),
-      startDate: f.date + 'T' + (f.kickoff || '15:00') + ':00',
+      startDate: fxISO(f),
       eventStatus: 'https://schema.org/' + (ST[f.status] || 'EventScheduled'),
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       homeTeam: home ? TEAM : opp,
@@ -348,7 +349,13 @@ function fxVenueInfo(f) {
   return { v: v, usable: usable, ground: ground, addr: addr, groundshare: groundshare };
 }
 function fxVenue(f) { return fxVenueInfo(f).ground; }   // label only
-function fxDate(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00'); }
+// This page used to carry its OWN copy of the kick-off rule, parsing an
+// offset-less string in the viewer's timezone. One parser now, shared with the
+// homepage — a fixture cannot be on a different day here than there.
+function fxDate(f) { var ms = MatchTime.kickoffEpoch(f); return isFinite(ms) ? new Date(ms) : new Date(NaN); }
+// Absolute ISO for structured data. "2026-08-01T15:00:00" with no offset is
+// ambiguous to a search engine as well as to a browser.
+function fxISO(f) { var ms = MatchTime.kickoffEpoch(f); return isFinite(ms) ? new Date(ms).toISOString() : ''; }
 function fxLock(f) {
   var home = f.isHome !== false;
   var OP = { name: f.opponent || 'TBC', crest: f.oppCrest || '' };
@@ -590,7 +597,7 @@ function fxInjectSchema(list) {
     var e = {
       '@type': 'SportsEvent',
       'name': home + ' vs ' + awayT,
-      'startDate': f.date + 'T' + (f.kickoff || '15:00') + ':00',
+      'startDate': fxISO(f),
       'eventStatus': 'https://schema.org/EventScheduled',
       'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
       'sport': 'Association football',
@@ -613,7 +620,8 @@ function fxInjectSchema(list) {
 function renderFxResults(fx) {
   var nextEl = document.getElementById('fx-next'), resEl = document.getElementById('fx-results');
   if (fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
-    var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
+    var _k = MatchTime.kickoffEpoch(fx.next);
+    var d = isFinite(_k) ? new Date(_k) : null;
     var ds = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
     nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
       '<div class="fx-next__teams">' + fxEsc(fx.next.isHome ? ('Rayners Lane vs ' + fx.next.opponent) : (fx.next.opponent + ' vs Rayners Lane')) + '</div>' +

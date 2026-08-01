@@ -51,14 +51,10 @@ async function liveScoreboard() {
 // status, scorers } shape liveScoreboard() expects.
 // Epoch ms for a wall-clock kick-off in Europe/London (auto BST/GMT) — so a
 // game's kick-off is judged in UK time no matter where the viewer is.
+// Kept as a name because several callers use it; the maths now lives in ONE
+// place (js/match-time.js) so there is no second, slightly different parser.
 function _ukEpoch(dateStr, timeStr) {
-  if (!dateStr) return NaN;
-  var t = (timeStr || '15:00').slice(0, 5);
-  var a = new Date(dateStr + 'T' + t + ':00Z').getTime();
-  if (isNaN(a)) return NaN;
-  var lon = new Date(a).toLocaleString('en-US', { timeZone: 'Europe/London' });
-  var utc = new Date(a).toLocaleString('en-US', { timeZone: 'UTC' });
-  return a - (new Date(lon).getTime() - new Date(utc).getTime());
+  return MatchTime.parseLondonKickoff(dateStr, timeStr);
 }
 
 // The automatic Football Web Pages feed, mapped onto the shape every existing
@@ -252,8 +248,16 @@ async function loadMatchDay() {
     }
   }
 
-  // Countdown
-  startCountdown(m.date);
+  // Countdown — but ONLY when nothing trustworthy says the match is under way.
+  // A live source always outranks the clock: showing "starts in..." (or a stuck
+  // "KICK OFF") while the game is being played is the defect this release fixed.
+  var _t = MatchTime.temporalState({ date: m.date }, m._row || (m.isLive ? { is_live: true, period: 'in_play' } : null));
+  if (_t.showCountdown) {
+    startCountdown(m.date);
+  } else {
+    var _cd = document.getElementById('countdown');
+    if (_cd) _cd.style.display = 'none';
+  }
 
   // Live results from the feed (TheSportsDB)
   renderHomeFixtures(window._rlfcFixtures);
@@ -265,7 +269,12 @@ async function loadMatchDay() {
       var ev = {
         '@context': 'https://schema.org', '@type': 'SportsEvent',
         'name': m.homeTeam + ' vs ' + m.awayTeam,
-        'startDate': m.date,
+        // Absolute, with an offset. An offset-less startDate is as ambiguous to
+        // a search engine as it was to the browser.
+        'startDate': (function () {
+          var ms = MatchTime.kickoffEpoch({ date: m.date });
+          return isFinite(ms) ? new Date(ms).toISOString() : m.date;
+        })(),
         'eventStatus': 'https://schema.org/EventScheduled',
         'sport': 'Association football',
         'homeTeam': { '@type': 'SportsTeam', 'name': m.homeTeam },
@@ -287,8 +296,8 @@ function renderHomeFixtures(fx) {
   if (!el || !fx) return;
   var rows = '';
   if (fx.next && fx.next.opponent && fx.next.opponent !== 'TBC') {
-    var d = fx.next.date ? new Date(fx.next.date + 'T' + (fx.next.kickoff || '15:00') + ':00') : null;
-    var ds = d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+    var koMs = MatchTime.kickoffEpoch(fx.next);
+    var ds = isFinite(koMs) ? MatchTime.formatDateClub(koMs) : '';
     rows += '<div class="fixture-row" style="grid-template-columns:1fr auto;align-items:center">' +
       '<div><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px">Next Match</div>' +
       '<div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:#fff">Rayners Lane ' + (fx.next.isHome ? 'vs ' : '@ ') + fix_esc(fx.next.opponent) + '</div></div>' +
@@ -315,7 +324,7 @@ function fix_esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').r
 // form the home + fixtures renderers already expect.
 function rlfcFixturesShape(list) {
   var now = Date.now();
-  function dt(f) { return new Date(f.date + 'T' + (f.kickoff || '15:00') + ':00').getTime(); }
+  function dt(f) { return MatchTime.fixtureSortKey(f); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
   var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
   var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
@@ -352,13 +361,17 @@ function startCountdown(dateStr) {
     el.innerHTML = '<span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Fixtures releasing soon</span>';
     return;
   }
-  var target = new Date(dateStr);
-  if (isNaN(target.getTime())) {
+  // Was `new Date(dateStr)`. dateStr is "2026-08-01T15:00:00" with no offset,
+  // which every browser reads in ITS OWN timezone — the homepage told Los
+  // Angeles the match started in seven hours while it was in the second half.
+  var targetMs = MatchTime.kickoffEpoch({ date: dateStr });
+  var target = new Date(targetMs);
+  if (isNaN(targetMs)) {
     el.innerHTML = '<span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Fixtures releasing soon</span>';
     return;
   }
   function tick() {
-    var diff = target - new Date();
+    var diff = targetMs - Date.now();
     if (diff <= 0) {
       el.innerHTML = '<span style="font-family:var(--font-d);color:var(--yellow);font-size:20px;letter-spacing:.04em">KICK OFF</span>';
       return;

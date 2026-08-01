@@ -122,6 +122,7 @@ function eventRow(fixtureId, p, e) {
     side: e.side || null,
     team: e.team || null,
     player: e.player || null,
+    assistant: e.assistant || null,
     player_side: e.playerSide || null,
     minute: e.minute,
     stoppage_minute: e.stoppage || 0,
