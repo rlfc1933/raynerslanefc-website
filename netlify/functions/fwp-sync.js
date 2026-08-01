@@ -137,6 +137,56 @@ function eventRow(fixtureId, p, e) {
   };
 }
 
+
+/**
+ * Write the final score onto the fixture, once, when the match finishes.
+ *
+ * Without this the club's own fixtures.json never learns the result: the
+ * fixtures page keeps saying "result to follow", the homepage decides the
+ * season has not started, and the hero offers the match that has just been
+ * played back as the "next match". A volunteer then retypes a score the system
+ * already knows.
+ *
+ * Uses save-data's MERGE mode, which re-reads the file from GitHub, applies
+ * only this fixture and retries on conflict — so it cannot clobber a
+ * simultaneous edit in the portal. One commit per match, at full time only.
+ */
+async function writeResultToFixture(fixture, parsed) {
+  if (!process.env.GITHUB_TOKEN || !process.env.ADMIN_PIN) return { ok: false, error: 'not configured' };
+  const view = adapter.ourView(parsed);
+  if (view.us == null || view.them == null) return { ok: false, error: 'no score' };
+
+  // Our scorers, in order, as the fixtures page already formats them.
+  const usSide = view.isHome ? 'home' : 'away';
+  const scorers = parsed.events
+    .filter((e) => e.type === 'goal' && e.side === usSide && e.minute != null)
+    .map((e) => e.player + " " + e.minute + (e.stoppage ? '+' + e.stoppage : '') + "'")
+    .join(', ');
+
+  const upsert = {
+    id: fixture.id,
+    us: view.us, them: view.them,
+    status: 'played',
+    scorers: scorers || fixture.scorers || '',
+  };
+  try {
+    const saveData = require('./save-data');
+    const res = await saveData.handler({
+      httpMethod: 'POST',
+      body: JSON.stringify({
+        pin: process.env.ADMIN_PIN,
+        merge: true, domain: 'fixtures', key: 'fixtures', idField: 'id',
+        upserts: [upsert], deletedIds: [],
+      }),
+    });
+    let body = {};
+    try { body = JSON.parse(res.body || '{}'); } catch (e) { /* non-JSON */ }
+    return { ok: res.statusCode === 200 && body.ok !== false, detail: body.error || '' };
+  } catch (e) {
+    return { ok: false, error: String(e && e.message || e) };
+  }
+}
+
 async function syncOne(fixture, now) {
   const started = Date.now();
   const fixtureId = fixture.id;
@@ -259,11 +309,27 @@ async function syncOne(fixture, now) {
     .map((row) => row.dedupe_key);
   if (gone.length) await store.retractEvents(fixtureId, gone);
 
+  // The moment the match becomes final — and only that moment — put the score
+  // on the fixture so nobody has to type it again.
+  var resultWrite = '';
+  // Condition is "final AND the fixture still has no score" rather than "the
+  // moment it turned final". That is naturally idempotent — once us/them are
+  // written it cannot fire again — and it also backfills a match that finished
+  // before this code shipped, which is exactly what happened on 1 August.
+  if (parsed.isFinal && (fixture.us == null || fixture.them == null)) {
+    const w = await writeResultToFixture(fixture, parsed);
+    resultWrite = w.ok ? ' result written to fixture' : (' result NOT written: ' + (w.error || w.detail || '?'));
+    await store.log({
+      fixture_id: fixtureId, outcome: w.ok ? 'result_written' : 'result_write_failed',
+      detail: (w.error || w.detail || '') + ' ' + parsed.homeScore + '-' + parsed.awayScore,
+    });
+  }
+
   await store.log({
     fixture_id: fixtureId, outcome: 'ok', http_status: r.status,
     parsed_score: parsed.homeScore + '-' + parsed.awayScore,
     parsed_period: parsed.period,
-    detail: (fresh.length ? fresh.length + ' new event(s)' : '') + (gone.length ? ' ' + gone.length + ' retracted' : ''),
+    detail: (fresh.length ? fresh.length + ' new event(s)' : '') + (gone.length ? ' ' + gone.length + ' retracted' : '') + resultWrite,
     duration_ms: Date.now() - started,
   });
 

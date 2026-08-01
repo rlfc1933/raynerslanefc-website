@@ -268,6 +268,14 @@
   function wdl(r) { return r.us > r.them ? 'w' : (r.us === r.them ? 'd' : 'l'); }
   function chip(c) { return '<span class="cn__wdl cn__wdl--' + c + '">' + c.toUpperCase() + '</span>'; }
 
+  /** What to call the match we have just played, from its own competition. */
+  function lastLabel(m) {
+    var c = String((m && m.competition) || '');
+    if (/friendly|pre-?season|testimonial/i.test(c)) return 'Last friendly';
+    if (/cup|vase|trophy|shield/i.test(c)) return 'Last cup tie';
+    return 'Last result';
+  }
+
   function completedMatchday() {         // a finished match held in matchday.json
     if (!live || live.isLive) return null;
     // When staff have taken the scoreboard down (state 'off'), show NO result —
@@ -283,7 +291,8 @@
     var ko = ukEpoch(live.date, live.kickoff);
     if (!isNaN(ko) && Date.now() < ko + 100 * 60000) return null;
     var home = live.isHome !== false;
-    return { opponent: live.opponent, isHome: live.isHome, us: home ? hs : as, them: home ? as : hs };
+    return { opponent: live.opponent, isHome: live.isHome, us: home ? hs : as, them: home ? as : hs,
+             competition: live.competition || '' };
   }
 
   function positionData() {
@@ -323,7 +332,10 @@
     half += '<div class="cn__tile' + (cmd ? '' : ' cn__tile--full') + '">' +
       '<div class="cn__tile-num">' + (start ? esc(start.label) : 'Soon') + '</div>' +
       '<div class="cn__tile-lbl">' + (start ? 'Season kicks off' : 'New season loading') + '</div></div>';
-    if (cmd) half += resultTile(cmd, 'Last friendly · v ' + (cmd.opponent || ''));
+    // This said "Last friendly" no matter what, because it was written when the
+    // only results were pre-season friendlies. It then described the opening
+    // Combined Counties league fixture as a friendly. Ask the competition.
+    if (cmd) half += resultTile(cmd, lastLabel(cmd) + ' · v ' + (cmd.opponent || ''));
     elStrip.style.gridTemplateColumns = cmd ? 'repeat(2,1fr)' : '1fr';
     elStrip.innerHTML = half;
   }
