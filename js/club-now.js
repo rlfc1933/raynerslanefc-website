@@ -151,6 +151,46 @@
       '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="match-centre.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a></div>';
   }
 
+  // ── FULL TIME primary ──────────────────────────────────────────────────
+  // For 24 hours after the whistle the result leads the hero, with the next
+  // fixture counting down underneath it. Before this, the whole block simply
+  // vanished at full time and supporters lost the score they came for.
+  function renderResult() {
+    var opp = live.opponent || 'Opposition', home = live.isHome !== false, oc = liveOppCrest();
+    var L = home ? { n: 'Rayners Lane', c: 'img/badge.png' } : { n: opp, c: oc };
+    var R = home ? { n: opp, c: oc } : { n: 'Rayners Lane', c: 'img/badge.png' };
+    var hs = live.homeScore || 0, as = live.awayScore || 0;
+    var us = home ? hs : as, them = home ? as : hs;
+    var verdict = us > them ? 'Won' : (us === them ? 'Drew' : 'Lost');
+    elStatus.textContent = 'Full Time';
+
+    var n = shaped && shaped.next;
+    var nextBlock = '';
+    if (n && n.opponent) {
+      nextBlock =
+        '<div class="cn__after">' +
+          '<div class="cn__after-lbl">Next up · ' + esc(n.isHome !== false ? 'Home' : 'Away') +
+            ' v ' + esc(n.opponent) + '</div>' +
+          '<div class="cn__countdown" id="cn-countdown"></div>' +
+        '</div>';
+    }
+
+    elPrimary.innerHTML =
+      '<div class="cn__eyebrow cn__eyebrow--ft">Full Time' + (live.competition ? ' · ' + esc(live.competition) : '') + '</div>' +
+      '<div class="cn__lock">' +
+        '<div class="cn__team">' + crestHTML(L.c, L.n) + '<span class="cn__nm">' + esc(L.n.toUpperCase()) + '</span></div>' +
+        '<div class="cn__mid"><span class="cn__score">' + hs + ' – ' + as + '</span></div>' +
+        '<div class="cn__team">' + crestHTML(R.c, R.n) + '<span class="cn__nm">' + esc(R.n.toUpperCase()) + '</span></div>' +
+      '</div>' +
+      '<div class="cn__verdict">' + esc(verdict) + '</div>' +
+      (live.scorers ? '<div class="cn__scorers"><i class="ico ico-football" aria-hidden="true"></i> ' + esc(live.scorers) + '</div>' : '') +
+      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="match-centre.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a>' +
+        '<a class="cn__btn cn__btn--ghost" href="fixtures.html">Fixtures &amp; Results</a></div>' +
+      nextBlock;
+
+    if (n && n.opponent) startCountdown(n.date, n.kickoff);
+  }
+
   // ── NEXT MATCH primary ──
   function renderNext() {
     var n = shaped && shaped.next;
@@ -308,11 +348,15 @@
     var st = live && live._state;
     if (st === 'delayed' || st === 'postponed' || st === 'cancelled') { renderState(st); return; }
     if (live && live.isLive) { if (cdTimer) { clearInterval(cdTimer); cdTimer = null; } renderLive(); return; }
+    // A result that is still today's news leads; once the hold expires this
+    // falls through and the next fixture takes the hero back.
+    if (live && live._result) { renderResult(); return; }
     renderNext();
   }
   function sig() {
     var st = (live && live._state) || 'off';
     if (live && live.isLive) return 'L|' + live.homeScore + '-' + live.awayScore + '|' + live.status;
+    if (live && live._result) return 'FT|' + live.homeScore + '-' + live.awayScore + '|' + (shaped && shaped.next && shaped.next.opponent);
     if (st === 'delayed' || st === 'postponed' || st === 'cancelled') return st + '|' + (live.stateReason || '');
     return 'N|' + (shaped && shaped.next && shaped.next.opponent);
   }

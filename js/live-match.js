@@ -25,6 +25,7 @@
   // telling supporters about rather than quietly showing a stale number.
   var STALE_MS = (CFG.staleAfterSeconds || 180) * 1000;
   var POLL_MS = (CFG.pollSeconds || 15) * 1000;
+  var HOLD_MS = (CFG.resultHoldHours == null ? 24 : CFG.resultHoldHours) * 3600000;
 
   function enabled() { return !!CFG.useV2 && !!(SB.url && SB.anonKey); }
 
@@ -54,7 +55,17 @@
     if (p === 'cancelled')  return { state: 'cancelled', label: 'Cancelled' };
     if (p === 'abandoned')  return { state: 'abandoned', label: 'Abandoned' };
     if (p === 'delayed')    return { state: 'delayed', label: 'Kick-off delayed' };
-    if (row.is_final || p === 'full_time') return { state: 'full_time', label: 'Full Time' };
+    if (row.is_final || p === 'full_time') {
+      // A finished match holds the hero for a day, then stands aside for the
+      // next fixture. `held` is what the homepage uses to decide which.
+      var endedAt = row.source_updated_at ? Date.parse(row.source_updated_at)
+        : (row.last_synced_at ? Date.parse(row.last_synced_at) : 0);
+      var heldFor = endedAt ? (now - endedAt) : Infinity;
+      return {
+        state: 'full_time', label: 'Full Time',
+        held: heldFor < HOLD_MS, endedAt: endedAt, heldFor: heldFor,
+      };
+    }
     if (p === 'pre_match' || p === 'unknown') {
       if (!row.is_live) return { state: 'pre_match', label: 'Kick-off soon' };
     }
@@ -139,7 +150,9 @@
     if (!rows || !rows.length) return null;
     var live = rows.filter(function (r) { return r.is_live; });
     if (live.length) return live[0];
-    var done = rows.filter(function (r) { return r.is_final; })
+    // Only a result still inside its hold window may lead. Once the day has
+    // passed it stops being news and the next fixture takes the hero.
+    var done = rows.filter(function (r) { return r.is_final && assess(r).held; })
       .sort(function (a, b) { return Date.parse(b.last_synced_at || 0) - Date.parse(a.last_synced_at || 0); });
     return done[0] || null;
   }
@@ -180,5 +193,6 @@
     ago: ago,
     subscribe: subscribe,
     STALE_MS: STALE_MS,
+    HOLD_MS: HOLD_MS,
   };
 })(window);

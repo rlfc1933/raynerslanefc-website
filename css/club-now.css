@@ -169,3 +169,27 @@
   .cn__lock { gap:8px; }
   .hero__right.hero__right--cn { margin:0 14px 6px; }
 }
+
+/* ── FULL TIME on the hero ────────────────────────────────────────────────
+   For 24 hours after the whistle the result leads, with the next fixture
+   counting down beneath it. Green rather than the live red: the match is over,
+   and a pulsing red dot on a finished game reads as "still playing". */
+.cn__eyebrow--ft {
+  color: #6FCF97;
+  font-family: var(--font-c); font-size: 11px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+}
+.cn__verdict {
+  text-align: center; margin-top: 10px;
+  font-family: var(--font-d); font-size: 20px; letter-spacing: .06em;
+  color: var(--white);
+}
+.cn__after {
+  margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.cn__after-lbl {
+  text-align: center; margin-bottom: 10px;
+  font-family: var(--font-c); font-size: 11px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--yellow);
+}

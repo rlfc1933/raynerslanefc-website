@@ -347,3 +347,39 @@ test('the later score is parsed correctly as the match progresses', () => {
   assert.strictEqual(p.period, 'second_half');
   assert.strictEqual(p.isLive, true);
 });
+
+test('FULL TIME: the score does not vanish when the whistle goes', () => {
+  // The provider stops advertising a status at full time — it rewrites the
+  // heading to "Today's Result" and DELETES the status span. Reading only the
+  // span gave period 'unknown', neither live nor final, and the score
+  // disappeared from the website the moment the match ended.
+  const html = read('match-fulltime.html');
+  assert.ok(!/<span class="status"/i.test(html), 'fixture should have no status span');
+  assert.match(html, /Today&#39;s Result|Today's Result/, 'heading should say Result');
+
+  const p = A.parseMatch(html);
+  assert.strictEqual(p.period, 'full_time');
+  assert.strictEqual(p.isFinal, true);
+  assert.strictEqual(p.isLive, false);
+  assert.strictEqual(p.homeScore, 3);
+  assert.strictEqual(p.awayScore, 3, 'they equalised late — the final score is 3-3');
+});
+
+test('the full-time timeline keeps every event', () => {
+  const p = A.parseMatch(read('match-fulltime.html'));
+  assert.ok(p.events.length >= 20, 'expected the complete timeline, got ' + p.events.length);
+  assert.ok(p.events.some((e) => e.type === 'red_card'), 'red card retained');
+  assert.ok(p.events.filter((e) => e.type === 'substitution').length >= 7, 'substitutions retained');
+  assert.ok(p.events.filter((e) => e.type === 'goal').length >= 5, 'all goals retained');
+  // No event may end up unattributed once the match is over.
+  assert.deepStrictEqual(p.events.filter((e) => !e.team && !e.isSummary).map((e) => e.player), []);
+});
+
+test('a heading with no result word is still not treated as final', () => {
+  // Guard the guard: "Today's Match" with no status must stay unknown, never
+  // silently become full time.
+  const s = A.parseStatus('<p class="match-heading" id="fwp-heading">Today\'s Match - </p>');
+  assert.strictEqual(s.period, 'unknown');
+  assert.strictEqual(s.isFinal, false);
+  assert.strictEqual(s.isLive, false);
+});

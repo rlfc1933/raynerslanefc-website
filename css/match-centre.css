@@ -162,3 +162,11 @@
   letter-spacing: .12em; text-transform: uppercase; opacity: .92;
 }
 .livebar--stale { filter: saturate(.45); }
+
+/* Full-time variant of the homepage bar. No pulsing dot — the match has ended,
+   and an animated live indicator on a finished game is simply untrue. */
+.livebar--ft { filter: none; }
+.livebar__badge--ft {
+  background: rgba(26,92,50,.35) !important;
+  color: #6FCF97 !important;
+}

@@ -20,6 +20,9 @@
 window.RLFC_LIVE = {
   useV2: true,
   pollSeconds: 15,        // how often the browser asks OUR database (not the provider)
-  staleAfterSeconds: 180, // after this, a live score is labelled "Updates delayed"
+  staleAfterSeconds: 180,
+  // How long a finished match keeps the hero after full time. The result is
+  // the news for the rest of the day; the next fixture takes over afterwards.
+  resultHoldHours: 24, // after this, a live score is labelled "Updates delayed"
   attribution: 'Match data supplied by Football Web Pages'
 };

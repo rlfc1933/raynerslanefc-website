@@ -119,7 +119,21 @@ const LIVE_PERIODS = ['first_half', 'half_time', 'second_half', 'extra_time', 'p
 
 function parseStatus(html) {
   const m = html.match(/<span class="status"[^>]*>([\s\S]*?)<\/span>/i);
-  const text = m ? clean(m[1]) : '';
+  let text = m ? clean(m[1]) : '';
+
+  // FULL TIME LOOKS LIKE NOTHING.
+  // While a match is on, the heading is: Today's Match - <span class="status">
+  // Second Half - 64'</span>. The moment it ends, the provider rewrites the
+  // heading to "Today's Result" and DELETES the status span altogether.
+  // Reading only the span therefore produced period 'unknown' — neither live
+  // nor final — and the score vanished from the website the instant the
+  // referee blew up. The heading is the signal at that point.
+  if (!text) {
+    const hd = html.match(/<p class="match-heading"[^>]*id="fwp-heading"[^>]*>([\s\S]*?)<\/p>/i);
+    const heading = hd ? clean(hd[1]) : '';
+    if (/\bresult\b/i.test(heading)) text = 'Full Time';
+  }
+
   let period = 'unknown';
   for (const [re, name] of PERIODS) if (re.test(text)) { period = name; break; }
   // A bare clock with no period word ("67'") still means the game is running.

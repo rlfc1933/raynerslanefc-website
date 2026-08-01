@@ -19,8 +19,11 @@ async function liveScoreboard() {
   try {
     var m = await readLiveMatch();
     if (!m) { bar.style.display = 'none'; return; }
-    var live = m.isLive || new URLSearchParams(location.search).get('live') === '1';
-    if (!live) { bar.style.display = 'none'; return; }
+    var live = m.isLive;
+    // A finished match does NOT empty the bar. The score is the story for the
+    // rest of the day — it used to disappear the second the whistle went.
+    var result = !!m._result;
+    if (!live && !result) { bar.style.display = 'none'; return; }
     var RLFC = 'Rayners Lane', opp = m.opponent || 'Opposition';
     var homeTeam = m.isHome === false ? opp : RLFC;
     var awayTeam = m.isHome === false ? RLFC : opp;
@@ -29,7 +32,9 @@ async function liveScoreboard() {
     // old bar was a dead end: it showed a score and offered nowhere to go.
     bar.innerHTML =
       '<a class="livebar__in" href="match-centre.html">' +
-        '<span class="livebar__badge"><span class="d"></span>' + (m._stale ? 'Delayed' : 'Live') + '</span>' +
+        '<span class="livebar__badge' + (result ? ' livebar__badge--ft' : '') + '">' +
+          (result ? '' : '<span class="d"></span>') +
+          (result ? 'Full Time' : (m._stale ? 'Delayed' : 'Live')) + '</span>' +
         '<span class="livebar__teams">' +
           '<span class="livebar__t">' + homeTeam + '</span>' +
           '<span class="livebar__sc">' + hs + '</span>' +
@@ -39,7 +44,7 @@ async function liveScoreboard() {
         (m.status ? '<span class="livebar__status">' + m.status + '</span>' : '') +
         (m.scorers ? '<span class="livebar__scorers"><i class="ico ico-football"></i> ' + m.scorers + '</span>' : '') +
       '</a>';
-    bar.className = 'livebar' + (m._stale ? ' livebar--stale' : '');
+    bar.className = 'livebar' + (m._stale ? ' livebar--stale' : '') + (result ? ' livebar--ft' : '');
     bar.style.display = 'block';
   } catch (e) {}
 }
@@ -74,12 +79,16 @@ async function readLiveMatchV2() {
   // 'live' here means "live AND fresh". A score we can no longer confirm is
   // handed back as not-live rather than sitting under a pulsing red dot.
   var live = (a.state === 'live' || a.state === 'manual');
+  var heldResult = (a.state === 'full_time' && a.held);
   var state = live ? 'live'
     : (row.is_final ? 'ft'
       : (row.period === 'postponed' || row.period === 'cancelled' || row.period === 'delayed' || row.period === 'abandoned')
         ? row.period : (a.state === 'delayed_updates' ? 'live' : 'off'));
   return {
     isLive: live, _state: state, _v2: true, _row: row,
+    _result: heldResult,          // finished, but still today's news
+    _endedAt: a.endedAt || null,
+    competition: row.competition || '',
     isHome: row.is_home !== false,
     opponent: view.opponent || '',
     homeScore: row.home_score || 0,
