@@ -2,21 +2,10 @@
   "fixtures": [
     {
       "id": "fwp-578225",
-      "date": "2026-08-01",
-      "kickoff": "15:00",
-      "opponent": "Wallingford & Crowmarsh",
-      "oppCrest": "img/crests/wallingford-and-crowmarsh.png",
-      "isHome": true,
-      "venue": "Tithe Farm Sports & Social Club",
-      "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
-      "shareHeadline": "THE WAIT IS OVER",
-      "shareHeadlineAuto": "THE WAIT IS OVER",
-      "season": "2026-27",
-      "competitionId": "ccl-prem-north"
+      "us": 3,
+      "them": 3,
+      "status": "played",
+      "scorers": "Harry Bonner 13', Keiran Barnard-White 41', Jenyo Balogun 66'"
     },
     {
       "id": "fwp-578227",
@@ -721,5 +710,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-07-31T02:13:39.901Z"
+  "updatedAt": "2026-08-01T16:41:29.464Z"
 }
