@@ -63,46 +63,87 @@ function competitionType(name) {
   return 'league';
 }
 
-async function ensureTeam(name, opts) {
-  const key = F.clubKey(name);
-  const existingAlias = await S.findOne('football_team_aliases', 'normalised=eq.' + encodeURIComponent(key));
-  if (existingAlias) {
-    return await S.findOne('football_teams', 'id=eq.' + existingAlias.team_id);
-  }
-  const team = await S.upsert('football_teams', {
-    canonical_name: name,
-    display_name: name,
-    slug: F.slug(name),
-    external_provider: 'fwp',
-    external_team_id: (opts && opts.providerSlug) || F.slug(name),
-    provider_name: name,
-    crest_asset_path: (opts && opts.crest) || null,
-    is_rayners_lane: F.sameClub(name, R.CLUB),
-    active: true,
-  }, 'external_provider,external_team_id');
-  if (team) {
-    await S.upsert('football_team_aliases', {
-      team_id: team.id, alias: name, normalised: key,
-      source: 'fwp', confidence: 'confirmed',
-    }, 'normalised');
-  }
-  return team;
+// ── caches ──────────────────────────────────────────────────────────────────
+// The first version did two team lookups, a competition lookup and a write PER
+// FIXTURE — roughly 160 sequential round-trips for a 40-match season. It ran in
+// 26.1 seconds against a 26-second ceiling, which is not a margin, it is a coin
+// toss. Everything is now loaded once and written in one batch.
+async function loadCaches() {
+  const [teams, aliases, comps] = await Promise.all([
+    S.rest('football_teams?select=id,canonical_name,external_team_id'),
+    S.rest('football_team_aliases?select=team_id,normalised'),
+    S.rest('football_competitions?select=id,external_competition_id,season'),
+  ]);
+  const teamByKey = {};
+  (aliases || []).forEach((a) => { teamByKey[a.normalised] = a.team_id; });
+  const compByKey = {};
+  (comps || []).forEach((c) => { compByKey[c.external_competition_id + '|' + c.season] = c.id; });
+  return { teamByKey, compByKey, teamCount: (teams || []).length };
 }
 
-async function ensureCompetition(name, providerSlug) {
-  if (!name) return null;
-  const existing = await S.findOne('football_competitions',
-    'external_competition_id=eq.' + encodeURIComponent(providerSlug || F.slug(name)) +
-    '&season=eq.' + encodeURIComponent(SEASON));
-  if (existing) return existing;
-  return await S.upsert('football_competitions', {
-    external_provider: 'fwp',
-    external_competition_id: providerSlug || F.slug(name),
-    canonical_name: name, provider_name: name, display_name: name,
-    slug: F.slug(name), season: SEASON,
-    competition_type: competitionType(name),
-    active: true,
-  }, 'external_provider,external_competition_id,season');
+/** Create any team we have not seen before, in ONE round-trip for the season. */
+async function ensureTeams(names, cache) {
+  const missing = [];
+  const seen = {};
+  for (const n of names) {
+    const key = F.clubKey(n.name);
+    if (cache.teamByKey[key] || seen[key]) continue;
+    seen[key] = true;
+    missing.push({ name: n.name, key: key, providerSlug: n.providerSlug });
+  }
+  if (!missing.length) return 0;
+
+  const rows = missing.map((m) => ({
+    canonical_name: m.name, display_name: m.name, slug: F.slug(m.name),
+    external_provider: 'fwp', external_team_id: m.providerSlug || F.slug(m.name),
+    provider_name: m.name,
+    is_rayners_lane: F.sameClub(m.name, R.CLUB), active: true,
+  }));
+  const saved = await S.rest('football_teams?on_conflict=external_provider,external_team_id', {
+    method: 'POST', body: rows,
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+  }) || [];
+
+  const aliasRows = [];
+  saved.forEach((t) => {
+    const m = missing.filter((x) => (x.providerSlug || F.slug(x.name)) === t.external_team_id)[0];
+    const key = m ? m.key : F.clubKey(t.canonical_name);
+    cache.teamByKey[key] = t.id;
+    aliasRows.push({ team_id: t.id, alias: t.canonical_name, normalised: key, source: 'fwp', confidence: 'confirmed' });
+  });
+  if (aliasRows.length) {
+    await S.rest('football_team_aliases?on_conflict=normalised', {
+      method: 'POST', body: aliasRows,
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    });
+  }
+  return saved.length;
+}
+
+async function ensureCompetitions(list, cache) {
+  const missing = [];
+  const seen = {};
+  for (const c of list) {
+    if (!c.name) continue;
+    const ext = c.providerSlug || F.slug(c.name);
+    const key = ext + '|' + SEASON;
+    if (cache.compByKey[key] || seen[key]) continue;
+    seen[key] = true;
+    missing.push({ name: c.name, ext: ext, key: key });
+  }
+  if (!missing.length) return 0;
+  const saved = await S.rest('football_competitions?on_conflict=external_provider,external_competition_id,season', {
+    method: 'POST',
+    body: missing.map((m) => ({
+      external_provider: 'fwp', external_competition_id: m.ext,
+      canonical_name: m.name, provider_name: m.name, display_name: m.name,
+      slug: F.slug(m.name), season: SEASON,
+      competition_type: competitionType(m.name), active: true,
+    })),
+    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+  }) || [];
+  saved.forEach((c) => { cache.compByKey[c.external_competition_id + '|' + c.season] = c.id; });
+  return saved.length;
 }
 
 exports.handler = async function (event) {
@@ -142,28 +183,35 @@ exports.handler = async function (event) {
     const internal = await loadInternalFixtures();
     const rec = R.reconcileSeason(parsed.fixtures, internal);
 
-    const written = [];
+    // One pass to collect identities, one batch to write them.
+    const teamNames = [];
+    const comps = [];
     for (const m of rec.matched) {
+      const p = m.provider;
+      teamNames.push({ name: p.isHome ? R.CLUB : p.opponent, providerSlug: p.homeSlug });
+      teamNames.push({ name: p.isHome ? p.opponent : R.CLUB, providerSlug: p.awaySlug });
+      comps.push({ name: p.competition, providerSlug: p.competitionSlug });
+    }
+    const cache = await loadCaches();
+    counters.records_created += await ensureTeams(teamNames, cache);
+    counters.records_created += await ensureCompetitions(comps, cache);
+
+    const fixtureRows = rec.matched.map((m) => {
       const p = m.provider;
       const homeName = p.isHome ? R.CLUB : p.opponent;
       const awayName = p.isHome ? p.opponent : R.CLUB;
-      const homeTeam = await ensureTeam(homeName, { providerSlug: p.homeSlug });
-      const awayTeam = await ensureTeam(awayName, { providerSlug: p.awaySlug });
-      const comp = await ensureCompetition(p.competition, p.competitionSlug);
-
-      // The authoritative instant. A played fixture reports no kick-off time,
-      // so fall back to the club's own record rather than inventing 15:00.
+      // A played fixture reports no kick-off time, so fall back to the club's
+      // own record rather than inventing 15:00.
       const koTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
       const koEpoch = koTime ? MT.parseLondonKickoff(p.date, koTime) : NaN;
-
-      const row = {
+      return {
         internal_fixture_id: m.internal ? m.internal.id : null,
         external_provider: 'fwp',
         external_fixture_id: p.externalFixtureId,
         season: SEASON,
-        competition_id: comp ? comp.id : null,
-        home_team_id: homeTeam ? homeTeam.id : null,
-        away_team_id: awayTeam ? awayTeam.id : null,
+        competition_id: cache.compByKey[(p.competitionSlug || F.slug(p.competition)) + '|' + SEASON] || null,
+        home_team_id: cache.teamByKey[F.clubKey(homeName)] || null,
+        away_team_id: cache.teamByKey[F.clubKey(awayName)] || null,
         scheduled_kickoff_at: isFinite(koEpoch) ? new Date(koEpoch).toISOString() : null,
         club_timezone: 'Europe/London',
         original_provider_date: p.date,
@@ -178,9 +226,13 @@ exports.handler = async function (event) {
         sync_status: 'ok',
         source_confidence: m.confidence,
       };
-      const saved = await S.upsert('football_fixtures', row, 'external_provider,external_fixture_id,season');
-      if (saved) { counters.records_created++; written.push(saved.external_fixture_id); }
-    }
+    });
+    const savedFixtures = await S.rest('football_fixtures?on_conflict=external_provider,external_fixture_id,season', {
+      method: 'POST', body: fixtureRows,
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, timeout: 15000,
+    });
+    counters.records_updated += fixtureRows.length;
+    const written = fixtureRows.map((f) => f.external_fixture_id);
 
     // Disagreements go to a human, never to an automatic overwrite.
     for (const c of rec.conflicts) {
