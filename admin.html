@@ -10136,9 +10136,20 @@ function toast(msg, err) {
   };
   window.fwpRetry = function () {
     if (typeof toast === 'function') toast('Checking the feed…');
-    fetch('/.netlify/functions/fwp-sync').then(function () {
-      setTimeout(window.fwpRefresh, 1500);
-    }).catch(function () { if (typeof toast === 'function') toast('Could not reach the sync', true); });
+    // fwp-sync itself is a SCHEDULED function and Netlify refuses direct HTTP
+    // calls to it (403). fwp-sync-now is the PIN-gated button version.
+    fetch('/.netlify/functions/fwp-sync-now', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (typeof toast === 'function') {
+          if (j && j.ok) toast('Feed checked');
+          else toast((j && j.error) || 'Could not check the feed', true);
+        }
+        setTimeout(window.fwpRefresh, 1200);
+      })
+      .catch(function (e) { if (typeof toast === 'function') toast('Network error: ' + e.message, true); });
   };
   window.fwpOverride = function (fixtureId) {
     var why = prompt('Why are you taking manual control?\n\nThis pauses the automatic Football Web Pages updates so your entries are not overwritten.\n\nFor example: "Feed is stuck on 1-0, we are 2-0 up".');
