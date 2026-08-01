@@ -194,7 +194,12 @@
   function paint(rows) {
     if (!RLFCLive.enabled()) { root.innerHTML = empty('off'); return; }
     var row = RLFCLive.primary(rows);
-    if (!row) { root.innerHTML = empty(); return; }
+    // NO rows at all means the sync has never written anything — which is not
+    // the same as "there is no match today", and we must not claim it is. Only
+    // once we can see the sync has been working may this page say there is no
+    // match on. Getting this wrong once put "NO MATCH IN PROGRESS" on the site
+    // while the team was playing.
+    if (!row) { root.innerHTML = empty(rows && rows.length ? 'none' : 'off'); return; }
     RLFCLive.eventsFor(row.fixture_id).then(function (evs) {
       root.innerHTML = renderMatch(row, evs);
     });
