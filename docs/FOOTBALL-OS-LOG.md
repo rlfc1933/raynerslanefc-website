@@ -109,3 +109,71 @@ internally but `571321` at the provider. Reconciliation must match on more than
 the id prefix.
 
 ---
+
+## Gate 2 — season registry and reconciliation (shadow)
+
+**SHA in / out:** `8b38fad` → `8df3efa`
+**Public behaviour:** unchanged. No `js/`, `css/` or `*.html` touched;
+`data/fixtures.json` not written; the live scoreboard untouched.
+
+### Result, verified in production
+
+| | |
+|---|---|
+| Provider fixtures | 40 |
+| Club fixtures | 40 |
+| Matched | **40** — 38 on the provider's id, 2 by strong agreement |
+| Unmatched either side | 0 |
+| Critical conflicts | 0 |
+| Registry rows | 22 teams · 3 competitions · 40 fixtures |
+| Runtime | 2.3s (was 26.1s) |
+
+The two `strong` matches are the FA Cup and FA Vase ties, whose internal ids
+(`facup-ep-london-lions-20260808`) predate the provider import and carry no
+provider id. They matched on date + opponent + venue together.
+
+Kick-offs are stored as absolute instants: `2026-08-01T14:00Z` = 15:00 BST,
+`2026-08-04T18:45Z` = 19:45 BST.
+
+### The rule
+
+An external id is an identity; everything else is a guess. `strong` requires
+date **and** opponent **and** venue to agree — three independent facts. Refused
+outright: home/away disagreement (accepting it inverts the scoreline), two
+fixtures on one day against the same club, a different opponent on the same
+date, and one internal fixture claimed twice.
+
+Nothing overwrites a fact. Disagreements become rows in
+`football_source_conflicts` for a human.
+
+### Two defects found and fixed inside this gate
+
+**A completed match hides its score in brackets.** The provider rewrites the
+cell a second time at the end: `"3 - 1"` while playing becomes `"(2) 3 - 3 (1)"`
+once final — full time, with each side's half-time score bracketed. The regex
+required a bare score, so a finished fixture parsed as *not played* and its
+result was dropped. That also made the first "zero conflicts" report hollow: it
+compared nothing, because it had no score to compare. Now handled, and the
+half-time score is captured as a by-product.
+
+**26.1 seconds against a 26-second ceiling.** Two team lookups, a competition
+lookup and a write per fixture — ~160 sequential round-trips. Now three parallel
+reads, one batch per entity type, one batched fixture write.
+
+### Tests
+
+28 new across `tests/fwp-layer.test.js` and `tests/football-reconcile.test.js`,
+run against the real 40-fixture season. Full suite: **234 pass, 0 fail.**
+
+A mid-match capture (2-1) is kept deliberately as a fixture so conflict
+detection is *proved* rather than asserted — it raises both score fields against
+the final 3-3 while still matching the fixture.
+
+**Rollback:** truncate the `football_*` tables and delete
+`netlify/functions/football-sync-season.js` + `lib/football/`. Nothing public
+reads any of it.
+
+**Next:** Gate 3 — match state, events and line-ups into the registry, in
+shadow, compared against the live `match_state` that is already working.
+
+---
