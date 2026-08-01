@@ -164,7 +164,24 @@
     var verdict = us > them ? 'Won' : (us === them ? 'Drew' : 'Lost');
     elStatus.textContent = 'Full Time';
 
+    // The fixture we have just played still has no score in data/fixtures.json,
+    // so the shaper happily offers it back as the "next match" — the hero ended
+    // up counting down to the game that had only just finished. Take the first
+    // fixture that kicks off AFTER this one instead.
+    var playedAt = MatchTime.kickoffEpoch(
+      (live._row && live._row.scheduled_kickoff) ? { scheduled_kickoff: live._row.scheduled_kickoff }
+                                                 : { date: live.date, kickoff: live.kickoff });
     var n = shaped && shaped.next;
+    if (n && isFinite(playedAt)) {
+      var later = (raw || []).filter(function (f) {
+        var k = MatchTime.kickoffEpoch(f);
+        return isFinite(k) && k > playedAt && !(f.us != null && f.them != null);
+      }).sort(function (a, b) { return MatchTime.kickoffEpoch(a) - MatchTime.kickoffEpoch(b); })[0];
+      n = later ? {
+        opponent: later.opponent, date: later.date, kickoff: later.kickoff,
+        isHome: later.isHome, competition: later.competition,
+      } : null;
+    }
     var nextBlock = '';
     if (n && n.opponent) {
       nextBlock =
