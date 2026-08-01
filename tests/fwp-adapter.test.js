@@ -383,3 +383,39 @@ test('a heading with no result word is still not treated as final', () => {
   assert.strictEqual(s.isFinal, false);
   assert.strictEqual(s.isLive, false);
 });
+
+test('the result write-back must never send a partial fixture', () => {
+  // save-data's merge replaces the whole object by id, so a partial upsert
+  // silently deletes every other field. That is exactly what happened in
+  // production: the Wallingford fixture lost its date, opponent, venue, crest,
+  // competition and season, leaving five fields behind.
+  const src = fs.readFileSync(path.join(__dirname, '..', 'netlify', 'functions', 'fwp-sync.js'), 'utf8');
+  assert.match(src, /Object\.assign\(\{\},\s*fixture,/,
+    'the upsert must start from the whole fixture, not build a new object');
+  assert.match(src, /refusing to write an incomplete fixture record/,
+    'there must be a guard against writing a fixture with no identity');
+  // And the guard must check the fields whose loss was actually observed.
+  assert.match(src, /!upsert\.id \|\| !upsert\.date \|\| !upsert\.opponent/);
+});
+
+test('every fixture on record keeps its identifying fields', () => {
+  const fx = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'fixtures.json'), 'utf8')).fixtures;
+  const broken = fx.filter((f) => !f.date || !f.opponent || f.isHome === undefined);
+  assert.deepStrictEqual(broken.map((f) => f.id), [],
+    'fixtures stripped of identity: ' + broken.map((f) => f.id).join(', '));
+});
+
+test('an own goal is credited to us but never listed as one of our scorers', () => {
+  const fx = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'fixtures.json'), 'utf8')).fixtures;
+  const f = fx.find((x) => x.id === 'fwp-578225');
+  assert.ok(f, 'the reference fixture exists');
+  assert.strictEqual(f.us, 3);
+  assert.strictEqual(f.them, 3);
+  assert.match(f.scorers, /Harry Bonner \(og\)/, 'the own goal must be marked (og)');
+  // Bonner is a Wallingford player — the marker is what stops the club record
+  // crediting an opponent with a Rayners Lane goal.
+  const p = A.parseMatch(read('match-fulltime.html'));
+  const og = p.events.find((e) => e.ownGoal && /Bonner/.test(e.player));
+  assert.strictEqual(og.team, 'Rayners Lane', 'the goal counts for us');
+  assert.strictEqual(og.playerTeam, 'Wallingford & Crowmarsh', 'the player is theirs');
+});

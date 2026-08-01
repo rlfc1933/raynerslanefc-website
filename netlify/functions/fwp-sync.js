@@ -167,12 +167,23 @@ async function writeResultToFixture(fixture, parsed) {
       + ' ' + e.minute + (e.stoppage ? '+' + e.stoppage : '') + "'")
     .join(', ');
 
-  const upsert = {
-    id: fixture.id,
+  // save-data's merge is a WHOLE-RECORD upsert: mergeArray() does
+  // `map[it[idField]] = it`, replacing the object outright. The admin panel
+  // always posts complete fixtures so this never showed up — until this
+  // function sent five fields and wiped the date, opponent, venue, crest,
+  // competition and season off the fixture in production.
+  //
+  // Send the entire fixture, changing only the result fields.
+  const upsert = Object.assign({}, fixture, {
     us: view.us, them: view.them,
     status: 'played',
     scorers: scorers || fixture.scorers || '',
-  };
+  });
+  // Refuse to write a record that has lost its identity — belt and braces
+  // against ever shipping a partial fixture again.
+  if (!upsert.id || !upsert.date || !upsert.opponent) {
+    return { ok: false, error: 'refusing to write an incomplete fixture record' };
+  }
   try {
     const saveData = require('./save-data');
     const res = await saveData.handler({
