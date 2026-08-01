@@ -34,10 +34,31 @@ function toISODate(d) {
   if (p.length !== 3 || !/^\d{4}$/.test(p[2])) return '';
   return p[2] + '-' + p[1].padStart(2, '0') + '-' + p[0].padStart(2, '0');
 }
-/** "3 - 1" → {home:3, away:1}; a kick-off time → null. */
+/**
+ * The kick-off/score cell, once the match has been played.
+ *
+ * Two shapes, and the second only appears once the game is COMPLETE:
+ *   "3 - 1"              in progress or shortly after
+ *   "(2) 3 - 3 (1)"      final, with each side's half-time score in brackets
+ *
+ * The bracketed form broke the original regex, so a finished match parsed as
+ * "not played" and its score vanished — which also made a season reconciliation
+ * report zero conflicts because it never compared the scores at all.
+ *
+ * @returns {{home:number, away:number, htHome:number|null, htAway:number|null}|null}
+ */
 function parseScore(s) {
-  const m = String(s || '').match(/^\s*(\d+)\s*-\s*(\d+)\s*$/);
-  return m ? { home: Number(m[1]), away: Number(m[2]) } : null;
+  const t = String(s || '').trim();
+  const withHt = t.match(/^\((\d+)\)\s*(\d+)\s*-\s*(\d+)\s*\((\d+)\)$/);
+  if (withHt) {
+    return {
+      home: Number(withHt[2]), away: Number(withHt[3]),
+      htHome: Number(withHt[1]), htAway: Number(withHt[4]),
+    };
+  }
+  const plain = t.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (plain) return { home: Number(plain[1]), away: Number(plain[2]), htHome: null, htAway: null };
+  return null;
 }
 
 /**
@@ -89,6 +110,8 @@ function parseFixtureList(html) {
       played: !!score,
       homeScore: score ? score.home : null,
       awayScore: score ? score.away : null,
+      htHomeScore: score ? score.htHome : null,
+      htAwayScore: score ? score.htAway : null,
       scorers: scorers || '',
       attendance: attendance || '',
       providerTitle: title,

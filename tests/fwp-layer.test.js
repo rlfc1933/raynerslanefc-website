@@ -154,3 +154,31 @@ test('the permission gate still governs every provider call', () => {
   if (before === undefined) delete process.env.FWP_SYNC_ENABLED;
   else process.env.FWP_SYNC_ENABLED = before;
 });
+
+test('a COMPLETED match reports its score with half-time in brackets', () => {
+  // Once a game is fully complete the provider rewrites the cell from "3 - 1"
+  // to "(2) 3 - 3 (1)" — full time with each side's half-time score bracketed.
+  // The original regex required a bare score, so a finished match parsed as
+  // "not played" and its result vanished. Worse, it made the season
+  // reconciliation report zero conflicts because it never compared scores.
+  const P = require('../netlify/functions/lib/fwp/parse-fixtures');
+  assert.deepStrictEqual(P.parseScore('(2) 3 - 3 (1)'),
+    { home: 3, away: 3, htHome: 2, htAway: 1 });
+  assert.deepStrictEqual(P.parseScore('3 - 1'),
+    { home: 3, away: 1, htHome: null, htAway: null });
+  // Kick-off times must never be mistaken for scores.
+  for (const t of ['3pm', '7.45pm', '2:00pm', '', 'TBC']) {
+    assert.strictEqual(P.parseScore(t), null, 'should not read a score from ' + JSON.stringify(t));
+  }
+
+  const r = F.parseFixtureList(read('fixtures-results.html'));
+  const played = r.fixtures.filter((f) => f.played);
+  assert.ok(played.length >= 1, 'the completed fixture must be recognised as played');
+  const w = r.fixtures.find((f) => f.externalFixtureId === '578225');
+  assert.strictEqual(w.played, true);
+  assert.strictEqual(w.homeScore, 3);
+  assert.strictEqual(w.awayScore, 3);
+  assert.strictEqual(w.htHomeScore, 2, 'half-time score captured');
+  assert.strictEqual(w.htAwayScore, 1);
+  assert.strictEqual(w.kickoff, null, 'a played fixture reports no kick-off time');
+});
