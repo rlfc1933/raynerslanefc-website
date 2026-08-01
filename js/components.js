@@ -250,6 +250,7 @@ function buildNav(currentPage) {
   const links = [
     { label:'Home',        href:'index.html'      },
     { label:'News',        href:'news.html'       },
+    { label:'Match Centre',href:'match-centre.html'},
     { label:'Fixtures',    href:'fixtures.html'   },
     { label:'The Squad',   href:'squad.html'      },
     { label:'Programme',   href:'programme.html'  },
@@ -532,6 +533,7 @@ function buildFooter() {
             <h4>Match Day</h4>
             <ul>
               <li><a href="fixtures.html">All Fixtures</a></li>
+              <li><a href="match-centre.html">Match Centre</a></li>
               <li><a href="fixtures.html#fx-results">Results</a></li>
               <li><a href="fixtures.html#calendar">Sync to Phone</a></li>
               <li><a href="programme.html">Programme</a></li>

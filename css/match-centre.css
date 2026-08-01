@@ -1,0 +1,164 @@
+/* ════════════════════════════════════════════════════════════════════════
+   RAYNERS LANE FC — Match Centre
+
+   Built entirely from the club's own tokens in css/style.css and css/fonts.css:
+   yellow #FFD100, green #1A5C32, black, Bebas display + Manrope body. Nothing
+   here imitates the data provider — no provider colours, fonts, table styling,
+   badges or chrome. The provider supplies facts; this file is the club's.
+
+   Rules that matter:
+     • the SCORE is the loudest thing on the page
+     • the clock and state are readable at a glance, at arm's length, outdoors
+     • a stale score is visibly not-live — never a confident number that lies
+     • mobile first: this is read standing up, on a phone, in the cold
+   ════════════════════════════════════════════════════════════════════════ */
+
+.mc { max-width: 1080px; margin: 0 auto; padding: 0 16px 72px; }
+
+/* ── status band ─────────────────────────────────────────────────────────── */
+.mc-status {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px; border-radius: 4px; margin-bottom: 18px;
+  background: var(--card); border: 1px solid var(--border);
+  font-family: var(--font-c); font-size: 12px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+}
+.mc-status--live      { background: rgba(239,68,68,.10); border-color: rgba(248,113,113,.45); color: #F87171; }
+.mc-status--delayed   { background: rgba(255,209,0,.09);  border-color: rgba(255,209,0,.42);  color: var(--yellow); }
+.mc-status--ft        { background: rgba(26,92,50,.18);   border-color: rgba(35,107,60,.55);  color: #6FCF97; }
+.mc-status--off       { color: var(--grey); }
+
+.mc-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+.mc-status--live .mc-dot { animation: mcPulse 1.6s ease-in-out infinite; }
+@keyframes mcPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+@media (prefers-reduced-motion: reduce) { .mc-status--live .mc-dot { animation: none; } }
+
+.mc-status__note {
+  font-family: var(--font-b); font-size: 12px; font-weight: 500;
+  letter-spacing: .02em; text-transform: none; color: var(--muted); margin-left: auto;
+}
+
+/* ── the scoreline ───────────────────────────────────────────────────────── */
+.mc-board {
+  background: linear-gradient(160deg, #12261a 0%, var(--card) 55%, var(--dark) 100%);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 28px 20px 24px; margin-bottom: 22px;
+}
+.mc-comp {
+  text-align: center; font-family: var(--font-c); font-size: 11px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--yellow); margin-bottom: 18px;
+}
+.mc-lock {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px;
+}
+.mc-team { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; min-width: 0; }
+.mc-crest { width: 68px; height: 68px; object-fit: contain; }
+.mc-crest--ini {
+  width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--card2); border: 1px solid var(--border);
+  font-family: var(--font-d); font-size: 24px; letter-spacing: .04em; color: var(--muted);
+}
+.mc-name {
+  font-family: var(--font-d); font-size: clamp(15px, 3.6vw, 22px); letter-spacing: .03em;
+  line-height: 1.05; color: var(--white); overflow-wrap: anywhere;
+}
+.mc-team--us .mc-name { color: var(--yellow); }
+.mc-ha {
+  font-family: var(--font-c); font-size: 9px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 2px; padding: 2px 7px;
+}
+
+/* The single loudest element on the page. */
+.mc-score {
+  font-family: var(--font-d); font-size: clamp(52px, 15vw, 104px); line-height: .86;
+  letter-spacing: .02em; color: var(--white); white-space: nowrap;
+}
+.mc-vs { font-family: var(--font-d); font-size: clamp(22px, 6vw, 34px); color: var(--muted); letter-spacing: .06em; }
+
+.mc-clock {
+  margin-top: 12px; text-align: center;
+  font-family: var(--font-c); font-size: 13px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--white);
+}
+.mc-clock--live { color: #F87171; }
+.mc-meta {
+  margin-top: 14px; text-align: center; font-family: var(--font-b); font-size: 13px;
+  color: var(--grey); line-height: 1.7;
+}
+
+/* ── event timeline ──────────────────────────────────────────────────────── */
+.mc-h {
+  font-family: var(--font-d); font-size: 26px; letter-spacing: .04em;
+  color: var(--white); margin: 30px 0 14px;
+}
+.mc-events { display: flex; flex-direction: column; gap: 2px; }
+.mc-ev {
+  display: grid; grid-template-columns: 56px 26px 1fr auto; align-items: center; gap: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 3px;
+  padding: 12px 14px;
+}
+.mc-ev--us { border-left: 3px solid var(--yellow); }
+.mc-ev--them { border-left: 3px solid var(--border); }
+.mc-ev__min {
+  font-family: var(--font-d); font-size: 19px; letter-spacing: .03em; color: var(--white);
+}
+.mc-ev__icon { font-size: 15px; line-height: 1; text-align: center; color: var(--muted); }
+.mc-ev--goal .mc-ev__icon { color: var(--yellow); }
+.mc-ev--red .mc-ev__icon { color: #F87171; }
+.mc-ev--yellow .mc-ev__icon { color: var(--yellow); }
+.mc-ev__who { font-family: var(--font-b); font-size: 14px; font-weight: 600; color: var(--white); }
+.mc-ev__what {
+  font-family: var(--font-c); font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); display: block; margin-top: 2px;
+}
+.mc-ev__team {
+  font-family: var(--font-c); font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--grey); text-align: right; max-width: 110px;
+}
+
+/* Yellow/red cards drawn as cards, not borrowed icons — the icon set has no
+   card glyph, and a small rectangle reads correctly at any size. */
+.mc-card { display:inline-block; width:11px; height:15px; border-radius:2px; vertical-align:middle; }
+.mc-card--y { background:var(--yellow); }
+.mc-card--r { background:#E23B3B; }
+.mc-mid { display:flex; align-items:center; justify-content:center; }
+
+/* ── line-ups ────────────────────────────────────────────────────────────── */
+.mc-lineups { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 720px) { .mc-lineups { grid-template-columns: 1fr 1fr; } }
+.mc-xi { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.mc-xi__h {
+  font-family: var(--font-c); font-size: 11px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--yellow); margin-bottom: 12px;
+}
+.mc-xi__row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-family: var(--font-b); font-size: 14px; color: var(--white); }
+.mc-xi__no {
+  min-width: 24px; font-family: var(--font-d); font-size: 15px; color: var(--muted); text-align: right;
+}
+.mc-xi__sub { color: var(--grey); }
+.mc-xi__mark { font-size: 11px; letter-spacing: .1em; }
+.mc-xi__mark--c { color: var(--muted); font-family: var(--font-c); font-weight: 700; }
+
+/* ── empty / waiting ─────────────────────────────────────────────────────── */
+.mc-empty {
+  background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+  padding: 44px 24px; text-align: center;
+}
+.mc-empty__h { font-family: var(--font-d); font-size: 28px; letter-spacing: .03em; color: var(--white); margin-bottom: 10px; }
+.mc-empty__p { font-family: var(--font-b); font-size: 15px; color: var(--grey); line-height: 1.7; max-width: 460px; margin: 0 auto 20px; }
+
+/* ── attribution ─────────────────────────────────────────────────────────── */
+/* Credit, stated plainly and quietly. Not provider branding — the club's own
+   type, the club's own muted colour, at the foot of the club's own page. */
+.mc-credit {
+  margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-family: var(--font-b); font-size: 12px; color: var(--muted); text-align: center;
+}
+
+/* ── homepage live bar additions ─────────────────────────────────────────── */
+.livebar__min {
+  font-family: var(--font-c); font-size: 12px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; opacity: .92;
+}
+.livebar--stale { filter: saturate(.45); }

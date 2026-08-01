@@ -1,0 +1,11 @@
+HTTP/2 200 
+date: Sat, 01 Aug 2026 14:50:24 GMT
+content-type: application/json;charset=utf-8
+server: cloudflare
+set-cookie: JSESSIONID=1EEAA0C8808D5DA720DDAA4C97DCC686; Path=/; Secure; HttpOnly
+fwp-last-loaded: 1785595824235
+cf-cache-status: DYNAMIC
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=Q5CugNJsVC3DQM7d%2F22M90%2B1i3maAlqpL3KGKKpQEbhI%2FNFG5h%2FStAWz%2B2SFLRrFU5hq8UZ5Sa5jusmXj2o80c32awr0Bn%2BBANypbfH8icAEQCQfYZZAcQYLtp1HRU3z9PWalmCxz%2FflyHsFxMtti7Qv6sN9jqIW"}]}
+cf-ray: a245a7aa6a3fff3c-LAX
+

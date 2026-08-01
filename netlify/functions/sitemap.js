@@ -13,6 +13,7 @@ var PAGES = [
   ['/', 'weekly', '1.0'],
   ['/innovation.html', 'yearly', '0.7'],
   ['/fixtures.html', 'daily', '0.9'],
+  ['/match-centre.html', 'daily', '0.8'],
   ['/news.html', 'daily', '0.9'],
   ['/squad.html', 'weekly', '0.8'],
   ['/trials.html', 'monthly', '0.8'],

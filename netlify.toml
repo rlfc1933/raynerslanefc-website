@@ -25,6 +25,23 @@
   status = 200
   force = true
 
+# ── LIVE MATCH SYNC (Football Web Pages) ────────────────────────────────────
+# Pulls the live score, clock and match events server-side so no supporter's
+# browser ever calls the data provider, and so a goal never triggers a build.
+#
+# CADENCE: the provider's own page refreshes every 30s (their refresh.min.js
+# sets CHECKFORREFRESHEVERYSECS = 30). Netlify's scheduler cannot go below one
+# minute, so this runs every minute — deliberately LIGHTER than the provider's
+# own client, which is the defensible side to err on. A goal reaches the site
+# within 60s worst case, and an unchanged poll costs a 204 with no body.
+#
+# The function refuses to call the provider at all unless FWP_SYNC_ENABLED is
+# "true". That flag stays unset until Football Web Pages confirm the club may
+# poll its own match embed. Scheduling it now is harmless: every run returns
+# immediately with {enabled:false}.
+[functions."fwp-sync"]
+  schedule = "* * * * *"
+
 # Pin a stable Node LTS so the cloud install is deterministic. Cloud builds
 # started failing (exit 2 in "building site") after edf8e44 while local builds
 # passed — classic floating-toolchain drift. A committed package-lock.json

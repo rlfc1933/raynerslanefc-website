@@ -104,6 +104,7 @@ const CRUMB_NAME = {
   'history.html': 'Club History',
   'innovation.html': 'Technology & The Lane',
   'investment.html': 'Investment & Sponsorship',
+  'match-centre.html': 'Match Centre',
   'media.html': 'Media',
   'membership.html': 'Membership',
   'news-article.html': 'News Article',

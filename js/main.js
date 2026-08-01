@@ -25,9 +25,11 @@ async function liveScoreboard() {
     var homeTeam = m.isHome === false ? opp : RLFC;
     var awayTeam = m.isHome === false ? RLFC : opp;
     var hs = m.homeScore || 0, as = m.awayScore || 0;
+    // Whole bar links to the Match Centre — the full-detail destination. The
+    // old bar was a dead end: it showed a score and offered nowhere to go.
     bar.innerHTML =
-      '<div class="livebar__in">' +
-        '<span class="livebar__badge"><span class="d"></span>Live</span>' +
+      '<a class="livebar__in" href="match-centre.html">' +
+        '<span class="livebar__badge"><span class="d"></span>' + (m._stale ? 'Delayed' : 'Live') + '</span>' +
         '<span class="livebar__teams">' +
           '<span class="livebar__t">' + homeTeam + '</span>' +
           '<span class="livebar__sc">' + hs + '</span>' +
@@ -36,7 +38,8 @@ async function liveScoreboard() {
         '</span>' +
         (m.status ? '<span class="livebar__status">' + m.status + '</span>' : '') +
         (m.scorers ? '<span class="livebar__scorers"><i class="ico ico-football"></i> ' + m.scorers + '</span>' : '') +
-      '</div>';
+      '</a>';
+    bar.className = 'livebar' + (m._stale ? ' livebar--stale' : '');
     bar.style.display = 'block';
   } catch (e) {}
 }
@@ -58,7 +61,49 @@ function _ukEpoch(dateStr, timeStr) {
   return a - (new Date(lon).getTime() - new Date(utc).getTime());
 }
 
+// The automatic Football Web Pages feed, mapped onto the shape every existing
+// caller already expects. Putting the switch HERE means the homepage live bar
+// and the Club Now panel both change source together and can never disagree —
+// they are the two surfaces that used to be wired separately.
+//
+// Returns null when the new source has nothing, so the caller falls through to
+// the manual path below. Controlled by js/live-config.js → useV2.
+async function readLiveMatchV2() {
+  if (!window.RLFCLive || !RLFCLive.enabled()) return null;
+  var rows = await RLFCLive.currentMatches();
+  var row = RLFCLive.primary(rows);
+  if (!row) return null;
+  var a = RLFCLive.assess(row);
+  var view = RLFCLive.ourView(row);
+  // 'live' here means "live AND fresh". A score we can no longer confirm is
+  // handed back as not-live rather than sitting under a pulsing red dot.
+  var live = (a.state === 'live' || a.state === 'manual');
+  var state = live ? 'live'
+    : (row.is_final ? 'ft'
+      : (row.period === 'postponed' || row.period === 'cancelled' || row.period === 'delayed' || row.period === 'abandoned')
+        ? row.period : (a.state === 'delayed_updates' ? 'live' : 'off'));
+  return {
+    isLive: live, _state: state, _v2: true, _row: row,
+    isHome: row.is_home !== false,
+    opponent: view.opponent || '',
+    homeScore: row.home_score || 0,
+    awayScore: row.away_score || 0,
+    // The club's own clock, e.g. "Second Half · 67'" — this is what the manual
+    // system could never show, because nothing was measuring it.
+    status: RLFCLive.clockLabel(row) || (live ? 'Live' : ''),
+    scorers: '',
+    stateReason: a.state === 'delayed_updates' ? (a.note || 'Updates delayed') : '',
+    date: row.scheduled_kickoff ? String(row.scheduled_kickoff).slice(0, 10) : '',
+    kickoff: '',
+    _stale: a.state === 'delayed_updates',
+  };
+}
+
 async function readLiveMatch() {
+  try {
+    var v2 = await readLiveMatchV2();
+    if (v2) return v2;
+  } catch (e) { /* fall through to the manual path — never break the scoreboard */ }
   var sb = window.RLFC_SUPABASE || {};
   var md = null, row = null;
   try { md = await (await fetch('data/matchday.json?t=' + Date.now())).json(); } catch (e) {}

@@ -1045,6 +1045,15 @@
     <div class="panel" id="panel-matchday">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-dot-off"></i> Match Day</div></div>
 
+      <!-- ── AUTOMATIC LIVE UPDATES ───────────────────────────────────────────
+           The normal state. When Football Web Pages is driving the scoreboard
+           nobody should have to touch anything below this box, so it sits at the
+           very top and says so in plain words. Technical detail (cursors, URLs,
+           row ids) is deliberately NOT here — it lives behind Diagnostics. -->
+      <div id="fwp-status" class="fwp-box">
+        <div class="fwp-box__load">Checking the live match feed…</div>
+      </div>
+
       <!-- FIX 1: the fixture is the source of truth for WHO + WHERE. Pick it here;
            opponent / home-away / date / venue are filled from data/fixtures.json. -->
       <div class="slbl"><i class="ico ico-calendar"></i> Which game? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the fixture; home/away comes from it</span></div>
@@ -9994,5 +10003,178 @@ function toast(msg, err) {
 }
 </script>
 <script src="js/t.js"></script>
+
+<style>
+/* Automatic live-updates panel — committee-facing. Calm, large, plain. */
+.fwp-box{border:1px solid var(--bd);border-radius:12px;padding:16px 18px;margin-bottom:16px;background:var(--c2)}
+.fwp-box--ok{border-color:rgba(34,120,63,.55);background:rgba(26,92,50,.14)}
+.fwp-box--warn{border-color:rgba(255,209,0,.45);background:rgba(255,209,0,.08)}
+.fwp-box--man{border-color:rgba(248,113,113,.5);background:rgba(239,68,68,.10)}
+.fwp-box__load{font-family:var(--fb);font-size:14px;color:var(--gr)}
+.fwp-hd{display:flex;align-items:center;gap:9px;font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.fwp-hd--ok{color:#6FCF97}.fwp-hd--warn{color:var(--y)}.fwp-hd--man{color:#F87171}.fwp-hd--off{color:var(--gr)}
+.fwp-dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+.fwp-score{font-family:var(--fd);font-size:34px;letter-spacing:.02em;color:var(--w);line-height:1;margin:6px 0}
+.fwp-teams{font-family:var(--fb);font-size:15px;color:var(--w);font-weight:600}
+.fwp-when{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:4px}
+.fwp-lines{font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.85;margin-top:10px}
+.fwp-none{font-family:var(--fb);font-size:14px;color:var(--gr);line-height:1.7}
+.fwp-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fwp-btn{font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;min-height:42px;border-radius:8px;border:1px solid var(--bd);background:var(--c);color:var(--w);cursor:pointer}
+.fwp-btn:hover{border-color:var(--y);color:var(--y)}
+.fwp-btn--warn{border-color:rgba(248,113,113,.5);color:#F87171}
+.fwp-diag{margin-top:12px}
+.fwp-diag>summary{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);cursor:pointer;padding:6px 0}
+.fwp-diag pre{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gr);background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
+</style>
+<script>
+/* ── Automatic live updates: the committee's view ──────────────────────────
+   Reads the club's OWN match_state table. Says one of four things, in words a
+   volunteer can act on:
+     • Automatic live updates are working  → no action required
+     • Updates are delayed                 → we cannot reach the feed
+     • You are updating this manually      → automatic is paused, on purpose
+     • Automatic updates are switched off  → awaiting provider permission      */
+(function () {
+  var box = document.getElementById('fwp-status');
+  if (!box) return;
+  var timer = null;
+
+  function sb() { return window.RLFC_SUPABASE || {}; }
+  function get(path) {
+    var c = sb(); if (!c.url || !c.anonKey) return Promise.resolve(null);
+    return fetch(c.url + '/rest/v1/' + path, { headers: { apikey: c.anonKey } })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  function ago(ms) {
+    if (!isFinite(ms) || ms < 0) return '';
+    var s = Math.round(ms / 1000);
+    if (s < 10) return 'just now';
+    if (s < 60) return s + ' seconds ago';
+    var m = Math.round(s / 60);
+    if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago');
+    var h = Math.round(m / 60); return h + (h === 1 ? ' hour ago' : ' hours ago');
+  }
+  var PER = { first_half:'First Half', half_time:'Half Time', second_half:'Second Half',
+    extra_time:'Extra Time', penalties:'Penalties', full_time:'Full Time', in_play:'In Play',
+    pre_match:'Kick-off soon', postponed:'Postponed', cancelled:'Cancelled',
+    abandoned:'Abandoned', delayed:'Delayed', unknown:'' };
+
+  function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function paint(row, log) {
+    if (!row) {
+      box.className = 'fwp-box';
+      box.innerHTML = '<div class="fwp-hd fwp-hd--off"><span class="fwp-dot"></span>Automatic updates</div>' +
+        '<div class="fwp-none">No match is being tracked right now. On a match day this box fills in by itself about half an hour before kick-off.<br><br>' +
+        'If a game is under way and this stays empty, use <b style="color:#fff">Emergency Manual Override</b> below and enter the score by hand.</div>' + diag(log);
+      return;
+    }
+    var manual = !!row.manual_override;
+    var live = !!row.is_live, fin = !!row.is_final;
+    var age = row.last_synced_at ? Date.now() - Date.parse(row.last_synced_at) : Infinity;
+    var stale = live && age > 180000;
+    var failing = row.sync_status === 'failing';
+
+    var kind = manual ? 'man' : ((stale || failing) ? 'warn' : 'ok');
+    var head = manual ? 'You are updating this match manually'
+      : failing ? 'We cannot reach the match feed'
+      : stale ? 'Updates are running late'
+      : fin ? 'Full time — final score saved'
+      : live ? 'Automatic live updates are working'
+      : 'Match ready — waiting for kick-off';
+
+    var us = row.is_home !== false ? row.home_score : row.away_score;
+    var them = row.is_home !== false ? row.away_score : row.home_score;
+    var opp = row.is_home !== false ? row.away_team : row.home_team;
+    var when = PER[row.period] || '';
+    if (row.match_minute != null) when += (when ? ' · ' : '') + row.match_minute + (row.stoppage_minute ? '+' + row.stoppage_minute : '') + "'";
+
+    var lines = [];
+    if (row.last_synced_at) lines.push('Last update from Football Web Pages: <b style="color:#fff">' + esc(ago(age)) + '</b>');
+    if (row.updated_at) lines.push('Website updated: <b style="color:#fff">' + esc(ago(Date.now() - Date.parse(row.updated_at))) + '</b>');
+    if (manual && row.manual_override_reason) lines.push('Reason: ' + esc(row.manual_override_reason));
+    if (manual && row.manual_override_by) lines.push('Set by: ' + esc(row.manual_override_by));
+
+    var advice = manual
+      ? 'Automatic updates are paused so your entries are not overwritten. Press Return to Automatic when the game is over.'
+      : (failing || stale)
+        ? 'The score below may be behind. Supporters are being told the same thing — the website will not pretend it is live.'
+        : (live ? 'No action required. The score, clock and events are updating on their own.' : '');
+
+    box.className = 'fwp-box fwp-box--' + kind;
+    box.innerHTML =
+      '<div class="fwp-hd fwp-hd--' + kind + '"><span class="fwp-dot"></span>' + esc(head) + '</div>' +
+      '<div class="fwp-teams">Rayners Lane v ' + esc(opp || '') + (row.is_home === false ? ' (away)' : '') + '</div>' +
+      ((us != null && them != null) ? '<div class="fwp-score">' + esc(us) + ' – ' + esc(them) + '</div>' : '') +
+      (when ? '<div class="fwp-when">' + esc(when) + '</div>' : '') +
+      (lines.length ? '<div class="fwp-lines">' + lines.join('<br>') + '</div>' : '') +
+      (advice ? '<div class="fwp-lines" style="color:var(--w)">' + esc(advice) + '</div>' : '') +
+      '<div class="fwp-acts">' +
+        '<button class="fwp-btn" onclick="fwpRetry()">Retry sync</button>' +
+        '<a class="fwp-btn" href="match-centre.html" target="_blank" rel="noopener">View public Match Centre</a>' +
+        (manual
+          ? '<button class="fwp-btn" onclick="fwpAuto(\'' + esc(row.fixture_id) + '\')">Return to automatic</button>'
+          : '<button class="fwp-btn fwp-btn--warn" onclick="fwpOverride(\'' + esc(row.fixture_id) + '\')">Emergency manual override</button>') +
+      '</div>' + diag(log, row);
+  }
+
+  function diag(log, row) {
+    var body = { state: row || null, recentSync: (log || []).slice(0, 8) };
+    return '<details class="fwp-diag"><summary>Technical details (for whoever maintains the site)</summary>' +
+      '<pre>' + esc(JSON.stringify(body, null, 1)) + '</pre></details>';
+  }
+
+  window.fwpRefresh = function () {
+    Promise.all([
+      get('match_state?select=*&order=scheduled_kickoff.desc&limit=1'),
+      get('match_sync_log?select=*&order=created_at.desc&limit=8')
+    ]).then(function (r) {
+      var rows = r[0] || [];
+      paint(rows[0] || null, r[1] || []);
+    });
+  };
+  window.fwpRetry = function () {
+    if (typeof toast === 'function') toast('Checking the feed…');
+    fetch('/.netlify/functions/fwp-sync').then(function () {
+      setTimeout(window.fwpRefresh, 1500);
+    }).catch(function () { if (typeof toast === 'function') toast('Could not reach the sync', true); });
+  };
+  window.fwpOverride = function (fixtureId) {
+    var why = prompt('Why are you taking manual control?\n\nThis pauses the automatic Football Web Pages updates so your entries are not overwritten.\n\nFor example: "Feed is stuck on 1-0, we are 2-0 up".');
+    if (why == null || !String(why).trim()) return;
+    var who = prompt('Your name, so the club has a record of who took control:');
+    if (who == null || !String(who).trim()) return;
+    fetch('/.netlify/functions/match-override', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, fixture_id: fixtureId, on: true, reason: String(why).trim(), by: String(who).trim() })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (typeof toast === 'function') toast(j && j.ok ? 'Manual control on — automatic updates paused' : ((j && j.error) || 'Could not switch to manual'), !(j && j.ok));
+        window.fwpRefresh();
+      }).catch(function (e) { if (typeof toast === 'function') toast('Network error: ' + e.message, true); });
+  };
+  window.fwpAuto = function (fixtureId) {
+    if (!confirm('Hand this match back to automatic updates?\n\nFootball Web Pages will take over the score again on the next check.')) return;
+    fetch('/.netlify/functions/match-override', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, fixture_id: fixtureId, on: false })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (typeof toast === 'function') toast(j && j.ok ? 'Back on automatic updates' : ((j && j.error) || 'Could not switch back'), !(j && j.ok));
+        window.fwpRefresh();
+      }).catch(function (e) { if (typeof toast === 'function') toast('Network error: ' + e.message, true); });
+  };
+
+  // Refresh while the panel is open; stop when it is not.
+  function tick() {
+    var panel = document.getElementById('panel-matchday');
+    if (panel && panel.style.display !== 'none') window.fwpRefresh();
+  }
+  window.fwpRefresh();
+  timer = setInterval(tick, 20000);
+})();
+</script>
+
 </body>
 </html>

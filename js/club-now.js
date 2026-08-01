@@ -155,7 +155,7 @@
         '<div class="cn__team">' + crestHTML(R.c, R.n) + '<span class="cn__nm">' + esc(R.n.toUpperCase()) + '</span></div>' +
       '</div>' +
       (live.scorers ? '<div class="cn__scorers"><i class="ico ico-football" aria-hidden="true"></i> ' + esc(live.scorers) + '</div>' : '') +
-      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="fixtures.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a></div>';
+      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="match-centre.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a></div>';
   }
 
   // ── NEXT MATCH primary ──
@@ -185,7 +185,7 @@
       '<div class="cn__countdown" id="cn-countdown"></div>' +
       '<div class="cn__meta"><i class="ico ico-map-pin" aria-hidden="true"></i> ' + esc(metaBits) + '</div>' +
       '<div class="cn__cta">' + dirBtn(n) + icsBtn() +
-        '<a class="cn__btn cn__btn--ghost" href="fixtures.html">Match Centre</a></div>';
+        '<a class="cn__btn cn__btn--ghost" href="match-centre.html">Match Centre</a></div>';
     startCountdown(n.date, n.kickoff);
   }
 
