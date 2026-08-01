@@ -12,12 +12,13 @@
    it is a one-line edit any future maintainer can find, and rolling back is the
    same edit in reverse. No build, no function redeploy, no database change.
 
-   Kept FALSE until (a) Football Web Pages have confirmed the club may poll
-   their match embed, and (b) the sync has been watched through a full real
-   fixture. See the release notes.
+   Switched TRUE on 1 August 2026: Football Web Pages confirmed the club may
+   use their feed and actively encouraged it. Set this back to false to return
+   the whole site to the manual scoreboard — no build, no function change, no
+   database change.
    ════════════════════════════════════════════════════════════════════════ */
 window.RLFC_LIVE = {
-  useV2: false,
+  useV2: true,
   pollSeconds: 15,        // how often the browser asks OUR database (not the provider)
   staleAfterSeconds: 180, // after this, a live score is labelled "Updates delayed"
   attribution: 'Match data supplied by Football Web Pages'

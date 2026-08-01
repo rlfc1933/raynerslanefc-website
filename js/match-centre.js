@@ -170,7 +170,20 @@
       '<p class="mc-credit">' + esc((window.RLFC_LIVE && window.RLFC_LIVE.attribution) || '') + '</p>';
   }
 
-  function empty() {
+  /* Two DIFFERENT empty states, because they mean different things and only one
+     of them is entitled to make a claim about the football.
+
+     When live coverage is switched off this page has checked nothing, so it must
+     not say "no match in progress" — it said exactly that during a real game once,
+     which is how this distinction came to exist. */
+  function empty(reason) {
+    if (reason === 'off') {
+      return '<div class="mc-empty">' +
+        '<div class="mc-empty__h">Live coverage is coming soon</div>' +
+        '<p class="mc-empty__p">Automatic live scores are being switched on. Until then, follow the score on the fixtures page.</p>' +
+        '<a class="btn btn-primary" href="fixtures.html">Fixtures &amp; Results</a>' +
+      '</div>';
+    }
     return '<div class="mc-empty">' +
       '<div class="mc-empty__h">No match in progress</div>' +
       '<p class="mc-empty__p">When The Lane are playing, the live score, the clock and every goal appear here automatically.</p>' +
@@ -179,7 +192,7 @@
   }
 
   function paint(rows) {
-    if (!RLFCLive.enabled()) { root.innerHTML = empty(); return; }
+    if (!RLFCLive.enabled()) { root.innerHTML = empty('off'); return; }
     var row = RLFCLive.primary(rows);
     if (!row) { root.innerHTML = empty(); return; }
     RLFCLive.eventsFor(row.fixture_id).then(function (evs) {
@@ -188,7 +201,7 @@
   }
 
   loadCrests().then(verifyCrests).then(function () {
-    if (!RLFCLive.enabled()) { root.innerHTML = empty(); return; }
+    if (!RLFCLive.enabled()) { root.innerHTML = empty('off'); return; }
     stop = RLFCLive.subscribe(function (rows, unchangedOnly) {
       if (unchangedOnly) {
         // Only the "updated N ago" line needs to move; repainting the whole
