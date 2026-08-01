@@ -219,15 +219,20 @@ async function syncOne(fixture, now) {
     state = await store.getState(fixtureId);
   }
 
-  // Full time already confirmed — nothing more to poll for.
-  if (state.is_final) return { fixtureId, outcome: 'complete' };
+  // Does the club's own fixture record still not know the score?
+  const owesResult = fixture.us == null || fixture.them == null;
+
+  // Full time confirmed AND the result is safely on the fixture — nothing left
+  // to do. This guard used to fire on is_final alone, which returned before the
+  // fetch and made the whole result write-back unreachable. The score was never
+  // going to be written for any match.
+  if (state.is_final && !owesResult) return { fixtureId, outcome: 'complete' };
 
   // If the fixture still owes us a result, ask for the WHOLE page rather than a
   // delta. Once a match ends the provider stops changing, so every cursored
   // poll comes back 204 with no body — and 204 returns before anything is
   // parsed, so the score could never be written. Dropping the cursor forces a
   // full response we can actually read.
-  const owesResult = fixture.us == null || fixture.them == null;
   const cursor = (state.is_final && owesResult) ? null : state.sync_cursor;
   const r = await client.fetchMatch(pathFor(fixture, extId, null), cursor);
 
