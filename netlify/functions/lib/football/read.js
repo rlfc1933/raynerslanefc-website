@@ -41,6 +41,8 @@ function shapeFixture(f, teams) {
     status: f.fixture_status,
     programmeEligible: !!f.programme_eligible,
     confidence: f.source_confidence,
+    _homeTeamId: f.home_team_id,
+    _awayTeamId: f.away_team_id,
   };
 }
 
@@ -185,7 +187,88 @@ async function leagueTable() {
   };
 }
 
+
+/**
+ * Everything one permanent match page needs, for ANY fixture — past, present or
+ * future. The same record drives the upcoming state, the live state and the
+ * permanent result, because they are one page that changes, not three pages.
+ */
+async function fixtureDetail(fixtureId) {
+  if (!fixtureId) return null;
+  const list = await season(null);
+  const idx = list.findIndex((f) => f.id === fixtureId || f.externalId === String(fixtureId));
+  if (idx === -1) return null;
+  const f = list[idx];
+
+  // Live state and events live in the protected tables the scoreboard uses.
+  const [states, events, lineupRows] = await Promise.all([
+    S.rest('match_state?fixture_id=eq.' + encodeURIComponent(f.id) + '&select=*'),
+    S.rest('match_events?fixture_id=eq.' + encodeURIComponent(f.id) +
+      '&retracted_at=is.null&select=*&order=minute.asc,stoppage_minute.asc'),
+    S.rest('football_lineups?select=*,football_lineup_players(*)&fixture_id=eq.' +
+      (await fixtureRowId(f.id))),
+  ]);
+  const state = (states && states[0]) || null;
+
+  const us = state ? (f.isHome ? state.home_score : state.away_score) : null;
+  const them = state ? (f.isHome ? state.away_score : state.home_score) : null;
+
+  return Object.assign({}, f, {
+    us, them,
+    homeScore: state ? state.home_score : null,
+    awayScore: state ? state.away_score : null,
+    period: state ? state.period : null,
+    matchMinute: state ? state.match_minute : null,
+    stoppageMinute: state ? state.stoppage_minute : null,
+    isLive: !!(state && state.is_live),
+    isFinal: !!(state && state.is_final),
+    referee: state ? state.referee : null,
+    lastSyncedAt: state ? state.last_synced_at : null,
+    events: (events || []).map((e) => ({
+      type: e.event_type, side: e.side, team: e.team,
+      player: e.player, assistant: e.assistant,
+      minute: e.minute, stoppage: e.stoppage_minute,
+      ownGoal: e.own_goal, cardColour: e.card_colour,
+    })),
+    lineups: shapeLineups(lineupRows, f),
+    previous: list[idx - 1] ? { id: list[idx - 1].id, opponent: list[idx - 1].opponent, kickoffAt: list[idx - 1].kickoffAt } : null,
+    next: list[idx + 1] ? { id: list[idx + 1].id, opponent: list[idx + 1].opponent, kickoffAt: list[idx + 1].kickoffAt } : null,
+  });
+}
+
+/** Registry row id for a fixture, needed to join the line-up tables. */
+async function fixtureRowId(internalId) {
+  const rows = await S.rest('football_fixtures?internal_fixture_id=eq.' +
+    encodeURIComponent(internalId) + '&select=id&limit=1');
+  return (rows && rows[0]) ? rows[0].id : 0;
+}
+
+function shapeLineups(rows, fixture) {
+  if (!rows || !rows.length) return { home: null, away: null, confirmed: false };
+  const out = { home: null, away: null, confirmed: false };
+  rows.forEach((l) => {
+    const players = (l.football_lineup_players || [])
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((p) => ({
+        name: p.provider_player_name, number: p.shirt_number,
+        role: p.lineup_role, isCaptain: p.is_captain,
+        enteredMinute: p.entered_minute, exitedMinute: p.exited_minute,
+      }));
+    const side = { status: l.status, players,
+      starters: players.filter((p) => p.role === 'starter'),
+      substitutes: players.filter((p) => p.role === 'substitute' || p.role === 'unused') };
+    // Which side is which comes from the fixture, not from row order.
+    if (String(l.team_id) === String(fixture._homeTeamId)) out.home = side; else out.away = side;
+  });
+  // Fall back to positional assignment when the ids were not carried through.
+  if (!out.home && !out.away && rows.length === 2) { out.home = null; out.away = null; }
+  out.confirmed = !!(out.home && out.away &&
+    out.home.starters.length === 11 && out.away.starters.length === 11 &&
+    out.home.status === 'confirmed' && out.away.status === 'confirmed');
+  return out;
+}
+
 module.exports = {
-  CLUB, shapeFixture, season, results, leagueTable,
+  CLUB, shapeFixture, season, results, leagueTable, fixtureDetail, shapeLineups,
   nextFrom, currentFrom, previousFrom, nextProgrammeFrom, formFrom,
 };

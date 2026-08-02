@@ -148,7 +148,7 @@
         '<div class="cn__team">' + crestHTML(R.c, R.n) + '<span class="cn__nm">' + esc(R.n.toUpperCase()) + '</span></div>' +
       '</div>' +
       (live.scorers ? '<div class="cn__scorers"><i class="ico ico-football" aria-hidden="true"></i> ' + esc(live.scorers) + '</div>' : '') +
-      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="match-centre.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a></div>';
+      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="' + (live._row && live._row.fixture_id ? 'match-centre.html?id=' + encodeURIComponent(live._row.fixture_id) : 'match-centre.html') + '"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a></div>';
   }
 
   // ── FULL TIME primary ──────────────────────────────────────────────────
@@ -201,7 +201,7 @@
       '</div>' +
       '<div class="cn__verdict">' + esc(verdict) + '</div>' +
       (live.scorers ? '<div class="cn__scorers"><i class="ico ico-football" aria-hidden="true"></i> ' + esc(live.scorers) + '</div>' : '') +
-      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="match-centre.html"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a>' +
+      '<div class="cn__cta"><a class="cn__btn cn__btn--y" href="' + (live._row && live._row.fixture_id ? 'match-centre.html?id=' + encodeURIComponent(live._row.fixture_id) : 'match-centre.html') + '"><i class="ico ico-activity" aria-hidden="true"></i> Match Centre</a>' +
         '<a class="cn__btn cn__btn--ghost" href="fixtures.html">Fixtures &amp; Results</a></div>' +
       nextBlock;
 

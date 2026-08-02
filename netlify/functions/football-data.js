@@ -38,6 +38,12 @@ exports.handler = async function (event) {
       return resp(200, { ok: true, table: t }, 120);
     }
 
+    if (what === 'fixture') {
+      const d = await READ.fixtureDetail(q.id);
+      if (!d) return resp(404, { ok: false, error: 'no such fixture' });
+      return resp(200, { ok: true, fixture: d }, d.isLive ? 10 : 120);
+    }
+
     const list = await READ.season(SEASON);
     if (what === 'fixtures') return resp(200, { ok: true, season: SEASON, fixtures: list }, 120);
 
