@@ -798,3 +798,62 @@ derived from the fixture.
 result it was published alongside. Full time is now captured **into** the
 edition rather than read live — otherwise an archived programme would show the
 current score the moment the next match kicked off.
+
+### The programme incident had SIX causes, not one
+
+Getting one edition published took six separate defects out of the way. Each was
+invisible on its own, and every one of them presented as the same symptom —
+"waiting for matchday" — which is why none had ever been found.
+
+**1. Publication could only happen ON matchday.** Any fixture whose day passed
+waited for a date in the past, for ever. Fixed by the recovery lifecycle.
+
+**2. `loadJson('committee')` fetched `/data/committee` — no `.json`.** That
+404s. So committee and sponsors were always null, `staffGroups` and
+`sponsorTiers` always empty, and both are MANDATORY sections. **The engine had
+never been able to publish anything since it was written.** My Gate 6 report
+called it complete. It was not, and I had no evidence that it was.
+
+**3. The decision used the PREVIOUS run's content validity.** `decide()` reads
+`edition.mandatory_content_valid`, and `edition` is the row as it was before the
+run. A programme that had just become complete was judged on a stale answer.
+Publication was permanently one run behind.
+
+**4. An automatic withhold latched the edition shut for ever.** `decide()`
+treated `withheld_reason` as "a human said no" — the same field the sync writes
+for ordinary technical reasons. Once written, every later run returned at the
+first guard, wrote the reason back with another `withheld: ` in front, and never
+re-evaluated. Four stacked prefixes is what gave it away.
+
+**5. `publication_source = 'recovery'` violated a check constraint.** That
+column has existed since Gate 6 and allows only
+`automatic|emergency_teamsheet|manual`; the new values belong in
+`publication_source_detail`. The whole run aborted with a Postgres 23514 and,
+from a supporter's point of view, nothing happened at all.
+
+**6. The public filter had never matched anything.** PostgREST's `in.()` takes
+BARE values — single quotes become part of the value. So
+`state=in.('archived', …)` looked for a state literally equal to the quoted
+text. Nobody could tell, because no edition had ever published to exercise it.
+The moment one did, the endpoint said *"no published programme for that
+fixture"* about a programme sitting right there, published, with its version and
+its full-time snapshot.
+
+Two more found in verification: every edition shared one canonical URL, and the
+library called a played match "Today at The Lane".
+
+### The pattern
+
+Every one of these failed **silently and legibly**. A 404 returning null looks
+like an empty section. An initials shield looks like a design decision. "Waiting
+for matchday" looks like patience. A filter that matches nothing looks like
+nothing to show.
+
+Not one of them raised an error, and 477 tests were green throughout, because
+every test asserted that the code *had* a fallback and none asserted that the
+fallback was not being used for everything at once.
+
+The tests added by this incident assert the opposite thing: not "is there a
+path" but "is the real path being taken" — every active club has a crest, the
+publication filter matches a real published row, every column the sync writes
+exists and accepts the value it is given.
