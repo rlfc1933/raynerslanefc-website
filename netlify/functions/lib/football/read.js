@@ -75,18 +75,37 @@ async function season(seasonLabel) {
 }
 
 /**
- * The next fixture: the earliest one that has NOT been played and whose
- * kick-off has not already passed by more than a match length.
+ * The NEXT fixture — strictly one that has not kicked off yet.
  *
- * Deliberately excludes anything already played, because a fixture with no
- * score in the legacy file is exactly how the site offered the match it had
- * just finished as "next up".
+ * "Next" and "happening now" are different questions and were originally one
+ * function with a 150-minute grace window, which meant a match in progress was
+ * still being offered as the next match. currentFrom() answers the other one.
+ *
+ * Excludes anything already played: a played fixture with no score in the
+ * legacy file is exactly how the site came to count down to the game it had
+ * just finished.
  */
 function nextFrom(list, nowMs) {
   const now = nowMs == null ? Date.now() : nowMs;
   return list
-    .filter((f) => f.status === 'scheduled' && f.kickoffAt && Date.parse(f.kickoffAt) > now - 150 * 60000)
+    .filter((f) => f.status === 'scheduled' && f.kickoffAt && Date.parse(f.kickoffAt) > now)
     .sort((a, b) => Date.parse(a.kickoffAt) - Date.parse(b.kickoffAt))[0] || null;
+}
+
+/**
+ * The fixture happening NOW — kicked off, not yet recorded as played, and
+ * within a plausible match length. This is what the homepage leads with; the
+ * live match state decides what it says.
+ */
+function currentFrom(list, nowMs) {
+  const now = nowMs == null ? Date.now() : nowMs;
+  return list
+    .filter((f) => f.status === 'scheduled' && f.kickoffAt)
+    .filter((f) => {
+      const ko = Date.parse(f.kickoffAt);
+      return ko <= now && now < ko + 150 * 60000;
+    })
+    .sort((a, b) => Date.parse(b.kickoffAt) - Date.parse(a.kickoffAt))[0] || null;
 }
 
 /** The most recently completed fixture. */
@@ -168,5 +187,5 @@ async function leagueTable() {
 
 module.exports = {
   CLUB, shapeFixture, season, results, leagueTable,
-  nextFrom, previousFrom, nextProgrammeFrom, formFrom,
+  nextFrom, currentFrom, previousFrom, nextProgrammeFrom, formFrom,
 };

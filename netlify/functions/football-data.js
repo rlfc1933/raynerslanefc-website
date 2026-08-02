@@ -49,12 +49,14 @@ exports.handler = async function (event) {
     // summary — what the homepage needs, in one request
     const [res, table] = await Promise.all([READ.results(SEASON), READ.leagueTable()]);
     const next = READ.nextFrom(list);
+    const current = READ.currentFrom(list);
     const previous = READ.previousFrom(list);
     const prevWithScore = previous ? res.filter((r) => r.id === previous.id)[0] || previous : null;
     return resp(200, {
       ok: true,
       season: SEASON,
       next,
+      current,
       previous: prevWithScore,
       nextProgramme: READ.nextProgrammeFrom(list),
       form: READ.formFrom(res, { limit: 5 }),
