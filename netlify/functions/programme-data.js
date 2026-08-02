@@ -7,17 +7,32 @@
 'use strict';
 
 const S = require('./lib/football/store');
+const FAN = require('./lib/fan/members');
 
-function resp(code, obj, seconds) {
-  return {
-    statusCode: code,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=' + (seconds || 120) + ', stale-while-revalidate=600',
-    },
-    body: JSON.stringify(obj),
+/**
+ * @param {number} code
+ * @param {object} obj
+ * @param {number} [seconds] public cache lifetime
+ * @param {boolean} [personal] true when the body depends on WHO is asking
+ *
+ * A member's programme must never be cached by a CDN. `public, max-age` on a
+ * response that varies by Authorization is how one supporter's entitled copy
+ * gets served to the next logged-out visitor who asks for the same URL — the
+ * gate would hold in the function and leak at the edge.
+ */
+function resp(code, obj, seconds, personal) {
+  const cache = personal
+    ? 'private, no-store, max-age=0'
+    : 'public, max-age=' + (seconds || 120) + ', stale-while-revalidate=600';
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cache-Control': cache,
   };
+  // Even where a cache is allowed, the answer depends on the token.
+  if (personal) headers.Vary = 'Authorization';
+  return { statusCode: code, headers, body: JSON.stringify(obj) };
 }
 
 // The ONE list of states the public may read. It appears in three places —
@@ -53,6 +68,48 @@ exports.handler = async function (event) {
         '&published_at=not.is.null&select=*&order=version.desc&limit=1');
       const v = vs && vs[0];
       if (!v) return resp(404, { ok: false, error: 'no published version' });
+
+      /* ── THE MEMBER GATE ─────────────────────────────────────────────────
+         The programme is free. It is also a reason to join, so the complete
+         edition goes only to a signed-in Fan Zone member.
+
+         Checked SERVER-SIDE, against Supabase, on every request. Not a
+         client-side boolean, not an obscure URL, not hidden markup — a
+         logged-out request for the payload is refused here, before the
+         payload is assembled, so there is nothing to find in the response.
+
+         What the public still gets is everything that makes the edition worth
+         opening: the cover, who we played, when, and how it finished. */
+      const gate = await FAN.context(event);
+      if (!gate.entitled) {
+        return resp(200, {
+          ok: true,
+          locked: true,
+          reason: gate.user
+            ? (gate.member ? 'membership_' + gate.member.membership_status : 'membership_incomplete')
+            : 'not_signed_in',
+          edition: {
+            fixtureId: ed.internal_fixture_id, slug: ed.slug, state: ed.state,
+            season: ed.season, kickoffAt: ed.scheduled_kickoff_at, venue: ed.venue,
+            publishedAt: ed.published_at,
+            afterFullTime: !!ed.published_after_full_time,
+          },
+          // Cover only — the shelf, not the contents.
+          cover: (v.payload && v.payload.sections && v.payload.sections.cover) || null,
+          finalMatch: v.final_match_snapshot ? {
+            homeTeam: v.final_match_snapshot.homeTeam, awayTeam: v.final_match_snapshot.awayTeam,
+            homeScore: v.final_match_snapshot.homeScore, awayScore: v.final_match_snapshot.awayScore,
+            status: v.final_match_snapshot.status,
+          } : null,
+        }, 0, true);
+      }
+
+      // An entitled member is reading it. Record it once per edition per day.
+      if (gate.member) {
+        FAN.record(gate.member.id, 'programme_opened',
+          { fixtureId: ed.internal_fixture_id, programmeId: ed.id, source: 'reader' }).catch(() => null);
+      }
+
       return resp(200, {
         ok: true,
         edition: {
@@ -71,7 +128,7 @@ exports.handler = async function (event) {
         // Stored with the version, not resolved now — an archived edition must
         // show the footer that was current when it was published.
         legal: v.legal_footer || null,
-      }, ed.state === 'archived' ? 3600 : 60);
+      }, 0, true);
     }
 
     // The library: every published edition, newest first.

@@ -265,3 +265,51 @@
 .pr-legal__links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 14px; }
 .pr-legal__links a { color: var(--lgrey); border-bottom: 1px solid rgba(255,255,255,.18); }
 .pr-legal__links a:hover, .pr-legal__links a:focus-visible { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+/* ── THE MEMBER GATE ───────────────────────────────────────────────────────
+   The programme is free. This is an invitation, not a paywall — so it reads
+   like the club talking to a supporter, not a checkout. */
+.pr-gate { display: grid; gap: 28px; align-items: center; padding: 8px 0 40px; }
+@media (min-width: 820px) { .pr-gate { grid-template-columns: minmax(0, 300px) 1fr; gap: 44px; } }
+.pr-gate__cover { max-width: 300px; margin-inline: auto; width: 100%; }
+.pr-gate__eyebrow {
+  font-family: var(--font-c); font-size: 11px; font-weight: 800;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--yellow); margin: 0 0 10px;
+}
+.pr-gate__h {
+  font-family: var(--font-d); font-size: clamp(28px, 5vw, 44px);
+  line-height: 1.02; letter-spacing: .02em; color: var(--white); margin: 0 0 14px;
+}
+.pr-gate__p {
+  font-family: var(--font-b); font-size: 15px; line-height: 1.7;
+  color: var(--lgrey); margin: 0 0 18px; max-width: 46ch;
+}
+.pr-gate__list {
+  list-style: none; padding: 0; margin: 0 0 22px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px,100%), 1fr)); gap: 8px 18px;
+}
+.pr-gate__list li {
+  font-family: var(--font-c); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--white);
+  padding-left: 18px; position: relative;
+}
+.pr-gate__list li::before {
+  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 7px; height: 7px; border-radius: 50%; background: var(--yellow);
+}
+.pr-gate__cta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.pr-gate__score, .pr-gate__mc {
+  font-family: var(--font-b); font-size: 13px; color: var(--muted); margin: 0 0 4px;
+}
+.pr-gate__mc a { color: var(--lgrey); border-bottom: 1px solid rgba(255,255,255,.2); }
+.pr-gate__mc a:hover { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+/* A locked card is not a lesser card — same cover, same detail. The only
+   difference is what it promises when you press it. */
+.pl-card__cta {
+  display: inline-block; margin-top: 8px;
+  font-family: var(--font-c); font-size: 10px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--yellow);
+}
+.pl-card--locked .pl-card__cta { color: var(--yellow); }
+.pl-card--locked .pl-card__cta::before { content: '★ '; }

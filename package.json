@@ -9,7 +9,8 @@
     "test:db": "psql -v ON_ERROR_STOP=1 -d rlfc_mdops_test -f supabase/migrations/20260730000000_matchday_ops.sql && psql -v ON_ERROR_STOP=1 -d rlfc_mdops_test -f supabase/tests/matchday_ops_invariants.sql",
     "fixtures:check": "node tools-fixture-integrity.js",
     "smoke": "node tools/smoke.js",
-    "viewports": "node tools/viewport-check.js"
+    "viewports": "node tools/viewport-check.js",
+    "consent": "node tools/consent-check.js"
   },
   "dependencies": {
     "@netlify/blobs": "^8.1.0",

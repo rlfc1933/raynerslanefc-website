@@ -90,8 +90,19 @@ test('the anon key is never used for a write path in the functions', () => {
   };
   walk(dir, '', []).forEach(([name, src]) => {
     if (!/ANON_KEY|anonKey|PUBLISHABLE/.test(src)) return;
-    assert.ok(!/method:\s*'(POST|PATCH|DELETE)'/.test(src),
-      name + ' writes while holding an anon key');
+    // The anon key legitimately appears as the `apikey` on Supabase's
+    // /auth/v1/user call — that is how a supporter's token is VERIFIED, and
+    // verification is a read. What must never happen is the anon key being
+    // the credential on a write.
+    const anonReadOnly = /\/auth\/v1\/user/.test(src);
+    const writes = /method:\s*'(POST|PATCH|DELETE)'/.test(src);
+    if (anonReadOnly && writes) {
+      // Writes in such a file must go through the service-key helper.
+      assert.match(src, /require\(['"][^'"]*football\/store['"]\)/,
+        name + ' writes without the service-key store');
+      return;
+    }
+    assert.ok(!writes, name + ' writes while holding an anon key');
   });
 });
 

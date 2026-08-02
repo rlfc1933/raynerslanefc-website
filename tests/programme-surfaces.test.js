@@ -37,8 +37,11 @@ test('RLS restricts the tables as well as the endpoint', () => {
 test('the reader renders from the stored version, never from live club data', () => {
   const s = R('js/programme-reader.js');
   // Everything comes from one fetch of the immutable version.
-  const fetches = s.match(/fetch\(/g) || [];
-  assert.strictEqual(fetches.length, 1, 'exactly one request — the edition itself');
+  // One network CALL SITE. The reader now goes through LaneFan.authedFetch so
+  // the server can tell a member from a visitor, which changes the spelling of
+  // the call but not the invariant: one request, for the stored edition.
+  const sites = (s.match(/authedFetch : fetch\)\(|(?<![.\w])fetch\(/g) || []);
+  assert.strictEqual(sites.length, 1, 'exactly one request — the edition itself');
   assert.match(s, /programme-data\?id=/);
   // It must not reach for anything current.
   for (const live of ['football-data', 'crests.json', 'sponsors.json', 'committee.json', 'match_state']) {
@@ -116,7 +119,7 @@ test('the reader and library are cache-versioned', () => {
   // exact value so a legitimate bump does not fail the suite — it is the
   // FORGOTTEN bump this is here to catch.
   const v = Number((sw.match(/CACHE = 'rlfc-v(\d+)'/) || [])[1]);
-  assert.ok(v >= 13, 'service-worker cache name must be at least rlfc-v13, found v' + v);
+  assert.ok(v >= 14, 'service-worker cache name must be at least rlfc-v14, found v' + v);
 });
 
 test('the reader page has one h1 and semantic sections', () => {

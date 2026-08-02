@@ -193,12 +193,33 @@ function dismissPWA() {
 }
 
 function acceptCookies() {
+  // The real decision. LaneConsent loads analytics; the flag below is only
+  // kept so an older cached page does not re-show the banner.
+  if (window.LaneConsent) window.LaneConsent.set(true, 'banner');
   localStorage.setItem('rlfc_cookies_accepted', '1');
   var b = document.getElementById('cookie-banner');
   if (b) b.remove();
   document.body.classList.remove('has-cookie-banner');
 }
+/* Cookie Settings — a persistent way to change your mind. Reopens the banner
+   so the same two buttons make the decision, rather than a second UI that
+   could drift out of step with the first. */
+function openCookieSettings() {
+  var existing = document.getElementById('cookie-banner');
+  if (existing) { existing.scrollIntoView({ block: 'center' }); return; }
+  try { localStorage.removeItem('rlfc_cookies_accepted'); } catch (e) {}
+  if (window.LaneConsent) {
+    // Keep the current choice active until they actually change it.
+    var s = window.LaneConsent.read();
+    if (s) { try { localStorage.removeItem('rlfc_consent_v2'); } catch (e) {} }
+  }
+  if (typeof laneCookieBanner === 'function') laneCookieBanner();
+}
+window.openCookieSettings = openCookieSettings;
+
 function declineCookies() {
+  // Declining must actually stop analytics, not just hide the banner.
+  if (window.LaneConsent) window.LaneConsent.set(false, 'banner');
   localStorage.setItem('rlfc_cookies_accepted', '0');
   var b = document.getElementById('cookie-banner');
   if (b) b.remove();
@@ -206,17 +227,12 @@ function declineCookies() {
 }
 
 // ── GOOGLE ANALYTICS 4 ──────────────────
-(function() {
-  var s1 = document.createElement('script');
-  s1.async = true;
-  s1.src = 'https://www.googletagmanager.com/gtag/js?id=G-F79MK3P0SR';
-  document.head.appendChild(s1);
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-F79MK3P0SR');
-  window.gtag = gtag;
-})();
+// REMOVED FROM HERE. This block loaded gtag at parse time on every page, so a
+// supporter who pressed Decline was measured exactly as much as one who
+// pressed Accept — the button recorded a choice and honoured nothing.
+//
+// Analytics now lives in js/consent.js and loads only after an explicit yes.
+// Nothing is fetched from Google before then. See that file for the reasoning.
 
 /* ─────────────────────────────────────────
    RAYNERS LANE FC — Shared Components
@@ -239,7 +255,7 @@ const TICKER_ITEMS = [
   "Gary Pitt appointed First Team Manager — new era at Tithe Farm",
   "Summer Trials 2026 open — register on our Trials page",
   "Harrow's club since 1933. Yellow & Green. Always.",
-  "Fully integrated members section of Tithe Farm Sports & Social Club LTD",
+  "Harrow's community football club — free digital programmes in Fan Zone",
   "Club vacancies — join the backroom team",
   "Get fixtures straight to your iPhone or Android — Fixtures page",
   "Affiliated: Middlesex County FA · The FA · FA Charter Standard",
@@ -517,8 +533,9 @@ function buildFooter() {
               </form>
             </div>
             <p class="footer__brand-sub">
-              Est. 1933. A fully integrated members section of Tithe Farm Sports &amp; Social Club LTD.<br>
-              151 Rayners Lane, Harrow, Middlesex HA2 0XH.<br>
+              A community football club serving Harrow since 1933.<br>
+              Operated by <strong>Rayners Lane Football Club Limited</strong> &middot; Company No. 17110511.<br>
+              Tithe Farm Sports &amp; Social Club, 151 Rayners Lane, Harrow, Middlesex HA2 0XH.<br>
               Affiliated to Middlesex County FA &middot; The FA &middot; FA Charter Standard.
             </p>
             <div class="footer__social">
@@ -586,7 +603,14 @@ function buildFooter() {
 
         <div class="footer__bottom">
           <p class="footer__legal">
-            &copy; 2026 Rayners Lane FC. Tithe Farm Sports &amp; Social Club LTD. All rights reserved. &middot; <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow);text-decoration:underline'>info@raynerslanefc.co.uk</a> &middot; <a href='admin.html' style='color:var(--grey);font-size:11px;letter-spacing:.06em;text-decoration:underline'>Staff Admin</a>
+            &copy; 2026 Rayners Lane Football Club Limited (Company No. 17110511). All rights reserved.<br>
+            <a href='policies.html' style='color:var(--grey);text-decoration:underline'>Privacy</a> &middot;
+            <button type="button" onclick="openCookieSettings()" style="background:none;border:none;padding:0;font:inherit;color:var(--grey);text-decoration:underline;cursor:pointer">Cookie Settings</button> &middot;
+            <a href='policies.html#fan-zone-terms' style='color:var(--grey);text-decoration:underline'>Fan Zone Terms</a> &middot;
+            <a href='policies.html#safeguarding' style='color:var(--grey);text-decoration:underline'>Safeguarding</a> &middot;
+            <a href='contact.html' style='color:var(--grey);text-decoration:underline'>Contact</a> &middot;
+            <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow);text-decoration:underline'>info@raynerslanefc.co.uk</a> &middot;
+            <a href='admin.html' style='color:var(--grey);font-size:11px;letter-spacing:.06em;text-decoration:underline'>Staff Admin</a>
           </p>
           <div class="affils">
             <span class="affil-item">FA Charter Standard</span>
@@ -992,7 +1016,11 @@ function initComponents(currentPage) {
   }
 
   // ── COOKIE BANNER ──
-  if (!localStorage.getItem('rlfc_cookies_accepted')) {
+  // Ask again whenever no decision has been recorded — including in a fresh
+  // or incognito window, where nothing is remembered and nothing is tracked
+  // until the supporter answers. Named so Cookie Settings can reopen the
+  // SAME banner rather than a second UI that could drift out of step.
+  window.laneCookieBanner = function () {
     var banner = document.createElement('div');
     banner.id = 'cookie-banner';
     // box-sizing and min-width:0 are load-bearing. The text block carried
@@ -1013,6 +1041,10 @@ function initComponents(currentPage) {
     // ON TOP of this banner's Accept button — a consent control partly covered
     // by another control. Flag the banner so the launcher can move clear.
     document.body.classList.add('has-cookie-banner');
+  };
+  if (window.LaneConsent ? !window.LaneConsent.decided()
+                         : !localStorage.getItem('rlfc_cookies_accepted')) {
+    window.laneCookieBanner();
   }
 
 }

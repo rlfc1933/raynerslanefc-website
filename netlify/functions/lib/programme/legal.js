@@ -27,10 +27,13 @@
 // RULE 8.14 — the programme must exist and carry the visiting club's details:
 //
 //   "The home Club is responsible for publishing a full match programme
-//    acceptable to the Board for each of its Competition matches. [A full match
-//    programme available electronically only shall be acceptable providing that
-//    each Club has approval from the Board before the commencement of the
-//    Playing Season…] A Team Sheet will not be considered sufficient…"
+//    acceptable to the Board for each of its Competition matches. … A Team
+//    Sheet will not be considered sufficient…"
+//
+// The bracketed electronic-only clause in the Standardised Rules is OPTIONAL —
+// square brackets mean a Competition may adopt it. The club has confirmed no
+// separate electronic-only approval is required for its Step 5 operation, so
+// nothing here treats that as outstanding and nothing blocks on it.
 //
 //   "Clubs will be responsible for all comments in their match day programme in
 //    respect of the Competition, the Company or other member Clubs,
@@ -40,18 +43,19 @@
 // The rules say in terms that such a disclaimer does not work, so printing one
 // would be decoration that misleads the reader about the club's position.
 //
-// ── WHAT IS DELIBERATELY MISSING ───────────────────────────────────────────
-// Rule 2.15 also requires the club's legal FORM and any identifier. The club
-// publishes its legal name ("Rayners Lane Football Club") but has never
-// published its form or a company number anywhere this system can read.
+// ── THE CLUB'S CONFIRMED IDENTITY ──────────────────────────────────────────
+// Supplied by the club, so Rule 2.15 is now satisfied in full:
 //
-// That is not something to guess. "Unincorporated association" is the common
-// case for a club of this size and it would very likely be right — and a very
-// likely guess printed as a legal statement is exactly the kind of thing this
-// project does not do. The field stays empty and the portal asks for it.
+//   Brand   Rayners Lane Football Club
+//   Entity  Rayners Lane Football Club Limited
+//   Number  17110511
+//
+// The brand and the company are kept visibly separate. "Community business" is
+// a description the club may use publicly; it is not the registered form, and
+// it does not appear here where a legal form is what is being stated.
 'use strict';
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 
 /**
  * The footer for an edition.
@@ -59,29 +63,33 @@ const VERSION = 'v2';
  * @param {Object} club  { legalName, legalForm, identifier, website, contact }
  * @returns {Object} the block a programme version stores, plus its compliance state
  */
+const CLUB = {
+  brand: 'Rayners Lane Football Club',
+  entity: 'Rayners Lane Football Club Limited',
+  identifier: 'Company No. 17110511',
+};
+
 function build(club) {
   const c = club || {};
-  const legalName = c.legalName || 'Rayners Lane Football Club';
-  const legalForm = (c.legalForm || '').trim();
-  const identifier = (c.identifier || '').trim();
+  const brand = c.legalName || CLUB.brand;
+  const entity = c.legalForm || CLUB.entity;
+  const identifier = (c.identifier || CLUB.identifier).trim();
 
-  // Rule 2.15 is satisfied only when the form is stated too.
+  // Rule 2.15 wants name, form and identifier. All three are now known.
   const missing = [];
-  if (!legalForm) missing.push('legal form');
-  // An identifier is required only where one exists — an unincorporated
-  // association has none, so it cannot be demanded before the form is known.
-  if (legalForm && /limited|plc|cic|company|incorporat/i.test(legalForm) && !identifier) {
-    missing.push('company number');
-  }
+  if (!entity) missing.push('legal entity');
+  if (!identifier) missing.push('company number');
 
   const lines = [];
-  // The identity line, in the order the rule lists it.
-  lines.push([legalName, legalForm, identifier].filter(Boolean).join(' · '));
-  lines.push('Official website: raynerslanefc.co.uk');
-  lines.push('Contact: info@raynerslanefc.co.uk');
+  lines.push(brand);
+  lines.push('A community football club serving Harrow since 1933.');
+  lines.push('Operated by ' + entity + ' · ' + identifier);
+  lines.push('Tithe Farm Sports & Social Club, 151 Rayners Lane, Harrow, Middlesex HA2 0XH');
+  lines.push('Affiliated to Middlesex County FA and The Football Association.');
+  lines.push('Official website: raynerslanefc.co.uk · info@raynerslanefc.co.uk');
   lines.push('Match information was correct at the time of publication.');
   lines.push('Fixtures, results, line-ups and match events are supplied by Football Web Pages.');
-  lines.push('© ' + new Date().getUTCFullYear() + ' ' + legalName);
+  lines.push('© ' + new Date().getUTCFullYear() + ' ' + entity);
 
   return {
     version: VERSION,
@@ -100,8 +108,7 @@ function build(club) {
       missing: missing,
       // Said plainly for the portal, not in rule-speak.
       note: missing.length
-        ? 'The programme must also state the club\'s ' + missing.join(' and ') +
-          '. Nobody has supplied it, and it is not something to guess at.'
+        ? 'The programme must also state the club\'s ' + missing.join(' and ') + '.'
         : null,
     },
   };

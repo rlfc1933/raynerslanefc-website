@@ -247,9 +247,15 @@
   function programmeBlock(f, t) {
     if (!f.isHome || !f.programmeEligible) return '';
     if (f.programmePublished) {
+      // The programme is a Fan Zone benefit, so the wording depends on whether
+      // this supporter already has it. Never "buy" — it is free either way.
+      var member = !!(window.LaneFan && window.LaneFan.state && window.LaneFan.state.entitled);
+      var after = t.state === 'full_time';
+      var words = member
+        ? (after ? 'Read the matchday programme' : 'Read today’s programme')
+        : (after ? 'Unlock matchday programme — free' : 'Unlock today’s programme — free');
       return '<div class="mc-prog"><a class="cn__btn cn__btn--y" href="programme.html?id=' +
-        encodeURIComponent(f.id) + '">' +
-        (t.state === 'full_time' ? 'Read the matchday programme' : 'Read today’s programme') + '</a></div>';
+        encodeURIComponent(f.id) + '">' + words + '</a></div>';
     }
     if (t.state === 'upcoming' || t.state === 'awaiting') {
       // "today's" is only true ON matchday. Said days ahead it reads as though

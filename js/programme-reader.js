@@ -230,6 +230,50 @@
     if (og) og.setAttribute('content', href);
   }
 
+  /* The member gate. The programme is free — this is the reason to join, not
+     a price. No "buy", no "subscribe", no "premium". */
+  function gate(d) {
+    var e = d.edition || {};
+    var c = d.cover || {};
+    var fm = d.finalMatch;
+    var score = fm ? (fm.homeScore + '–' + fm.awayScore) : '';
+    var signedIn = !!(window.LaneFan && window.LaneFan.state && window.LaneFan.state.member);
+    var suspended = d.reason && d.reason.indexOf('membership_suspended') === 0;
+
+    if (suspended) {
+      return '<div class="pr-gate"><h2 class="pr-gate__h">Your membership needs attention</h2>' +
+        '<p class="pr-gate__p">We cannot open programmes on this account at the moment. ' +
+        'Email <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a> and we will sort it out.</p></div>';
+    }
+
+    return '<div class="pr-gate">' +
+      (RLFCCover ? '<div class="pr-gate__cover">' + RLFCCover.render({
+        homeTeam: c.homeTeam, awayTeam: c.awayTeam,
+        homeCrest: c.homeCrest, awayCrest: c.awayCrest,
+        competition: c.competition, kickoffAt: e.kickoffAt, season: e.season,
+      }, { as: 'div' }) + '</div>' : '') +
+      '<div class="pr-gate__body">' +
+        '<p class="pr-gate__eyebrow">Free for Fan Zone members</p>' +
+        '<h2 class="pr-gate__h">The programme is free.<br>The Lane family gets the key.</h2>' +
+        '<p class="pr-gate__p">Join Fan Zone once and unlock every Rayners Lane home programme, ' +
+        'your Lane Card, match check-ins and supporter rewards.</p>' +
+        '<ul class="pr-gate__list">' +
+          '<li>One account</li><li>Every home programme</li>' +
+          '<li>Your match history</li><li>Your Lane Card</li>' +
+        '</ul>' +
+        '<div class="pr-gate__cta">' +
+          '<a class="btn btn-primary" href="fan-zone.html?join=1&amp;return=' +
+            encodeURIComponent(location.pathname + location.search) + '">Join Fan Zone — free</a>' +
+          (signedIn ? '' : '<a class="btn" href="fan-zone.html?signin=1&amp;return=' +
+            encodeURIComponent(location.pathname + location.search) + '">Already a member? Sign in</a>') +
+        '</div>' +
+        (score ? '<p class="pr-gate__score">Final score · ' + esc(c.homeTeam || '') + ' ' +
+          esc(score) + ' ' + esc(c.awayTeam || '') + '</p>' : '') +
+        (e.fixtureId ? '<p class="pr-gate__mc"><a href="match-centre.html?id=' +
+          encodeURIComponent(e.fixtureId) + '">See the match in the Match Centre</a></p>' : '') +
+      '</div></div>';
+  }
+
   function render(d) {
     var p = d.programme || {};
     var s = p.sections || {};
@@ -302,7 +346,10 @@
       'Choose an edition from the programme library.');
     return;
   }
-  fetch('/.netlify/functions/programme-data?id=' + encodeURIComponent(id))
+  // Authenticated where possible: the token decides whether the server sends
+  // the edition or the member gate. The page never decides for itself.
+  (window.LaneFan ? window.LaneFan.authedFetch : fetch)(
+    '/.netlify/functions/programme-data?id=' + encodeURIComponent(id))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       // A draft, a waiting edition or a withheld one is simply not public. The
@@ -310,6 +357,19 @@
       if (!d || !d.ok) {
         unavailable('This programme is not available',
           'Programmes are published on matchday once both official teams are confirmed.');
+        return;
+      }
+      // The server sent the gate, not the edition. It knows who asked; this
+      // page only renders what it was given — there is no payload here to
+      // reveal, because the payload was never sent.
+      if (d.locked) {
+        var t = (d.cover && d.cover.homeTeam && d.cover.awayTeam)
+          ? d.cover.homeTeam + ' v ' + d.cover.awayTeam : 'Matchday Programme';
+        var h1 = document.getElementById('pr-title');
+        if (h1) h1.textContent = t;
+        document.title = t + ' | Matchday Programme | Rayners Lane FC';
+        setCanonical((d.edition || {}).fixtureId);
+        root.innerHTML = gate(d);
         return;
       }
       render(d);

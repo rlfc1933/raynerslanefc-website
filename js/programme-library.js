@@ -31,15 +31,20 @@
     var url = 'programme.html?id=' + encodeURIComponent(e.fixtureId);
     var score = (e.homeScore != null && e.awayScore != null)
       ? '<span class="pl-card__score">' + e.homeScore + '–' + e.awayScore + '</span>' : '';
+    var member = isMember();
     var label = e.homeTeam + ' versus ' + e.awayTeam + ', ' + dateLong(e.kickoffAt) +
-      '. Read the matchday programme.';
+      (member ? '. Read the matchday programme.' : '. Unlock free in Fan Zone.');
+    // The card always shows the cover, the fixture, the date and the score.
+    // What changes is the promise it makes about opening it.
     return '<article>' +
-      '<a class="pl-card" href="' + esc(url) + '" aria-label="' + esc(label) + '">' +
+      '<a class="pl-card' + (member ? '' : ' pl-card--locked') + '" href="' + esc(url) +
+        '" aria-label="' + esc(label) + '">' +
         '<div class="pl-card__cover">' + RLFCCover.render(e, { as: 'div' }) + '</div>' +
         '<div class="pl-card__t">' + esc(e.homeTeam) + ' v ' + esc(e.awayTeam) + '</div>' +
         '<div class="pl-card__m">' + esc(dateLong(e.kickoffAt)) +
           (e.competition ? ' · ' + esc(e.competition) : '') + '</div>' +
         score +
+        '<span class="pl-card__cta">' + (member ? 'Read programme' : 'Unlock free in Fan Zone') + '</span>' +
       '</a></article>';
   }
 
@@ -53,6 +58,17 @@
     var fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
       year: 'numeric', month: '2-digit', day: '2-digit' });
     return fmt.format(new Date(ms)) === fmt.format(new Date());
+  }
+
+  /* The library is public on purpose: it is how a supporter discovers the
+     collection. Only the CONTENT is the member benefit, so the shelf stays
+     open and the call to action changes depending on who is looking. */
+  function isMember() {
+    return !!(window.LaneFan && window.LaneFan.state && window.LaneFan.state.entitled);
+  }
+  function memberCTA(live) {
+    if (isMember()) return live ? 'Read today’s programme' : 'Read the programme';
+    return 'Unlock free in Fan Zone';
   }
 
   function featured(e) {
@@ -69,7 +85,7 @@
           (e.homeScore != null ? ' · ' + e.homeScore + '–' + e.awayScore : '') + '</p>' +
         '<div class="pl-actions">' +
           '<a class="btn btn-primary" href="programme.html?id=' + encodeURIComponent(e.fixtureId) + '">' +
-            (live ? 'Read today’s programme' : 'Read the programme') + '</a>' +
+            (memberCTA(live)) + '</a>' +
           '<a class="btn" href="match-centre.html?id=' + encodeURIComponent(e.fixtureId) + '">Match Centre</a>' +
         '</div>' +
       '</div></section>';
@@ -158,7 +174,13 @@
     ? window.LaneCrest.load().catch(function () {})
     : Promise.resolve();
 
-  crestsReady.then(function () { return fetch('/.netlify/functions/programme-data'); })
+  // Wait for the session too: a member who lands on the library should never
+  // be told to unlock something they already have.
+  var sessionReady = (window.LaneFan && window.LaneFan.refresh)
+    ? window.LaneFan.refresh().catch(function () {}) : Promise.resolve();
+
+  Promise.all([crestsReady, sessionReady])
+    .then(function () { return fetch('/.netlify/functions/programme-data'); })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       ALL = (d && d.ok && d.editions) ? d.editions : [];
