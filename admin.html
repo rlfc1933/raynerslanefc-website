@@ -10408,9 +10408,14 @@ function toast(msg, err) {
         return '<div class="ident-row">' +
           '<div class="ident-name">' + esc(q.name) +
             '<span class="ident-why">' + esc(WORD[q.status] || q.status) + '</span></div>' +
-          '<select class="ident-pick" id="ident-pick-' + q.id + '">' + opts + '</select>' +
-          '<button class="fwp-btn" onclick="identConfirm(' + q.id + ')">Confirm</button>' +
-          '<button class="fwp-btn fwp-btn--warn" onclick="identReject(' + q.id + ')">Not one of ours</button>' +
+          // Named for a screen reader: a row of unlabelled selects and repeated
+          // "Confirm" buttons is unusable without the visual context.
+          '<select class="ident-pick" id="ident-pick-' + q.id + '" ' +
+            'aria-label="Which of our players is ' + esc(q.name) + '?">' + opts + '</select>' +
+          '<button class="fwp-btn" onclick="identConfirm(' + q.id + ')" ' +
+            'aria-label="Confirm ' + esc(q.name) + '">Confirm</button>' +
+          '<button class="fwp-btn fwp-btn--warn" onclick="identReject(' + q.id + ')" ' +
+            'aria-label="' + esc(q.name) + ' is not one of our players">Not one of ours</button>' +
         '</div>';
       }).join('');
 

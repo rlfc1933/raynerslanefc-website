@@ -150,3 +150,21 @@ test('a missing total is not a zero total', () => {
   const assumed = RP.shapeTotals({ minutes_played: 810, minutes_confidence: 'system_derived_partial' });
   assert.strictEqual(assumed.minutesExact, false, 'ninety was assumed, and it says so');
 });
+
+test('the identity controls are named for somebody who cannot see the row', () => {
+  // A column of unlabelled selects and twenty identical "Confirm" buttons is
+  // unusable without the visual context of which row you are on.
+  const s = R('admin.html');
+  const panel = s.slice(s.indexOf('window.identRefresh'), s.indexOf('window.healthRefresh'));
+  assert.match(panel, /aria-label="Which of our players is/);
+  assert.match(panel, /aria-label="Confirm '/);
+  assert.match(panel, /is not one of our players/);
+});
+
+test('the emergency fold is a real disclosure, keyboard and all', () => {
+  const s = R('admin.html');
+  assert.match(s, /<details class="emerg">\s*\n\s*<summary>/,
+    'native details/summary — a div with a click handler is not keyboard-reachable');
+  assert.match(s, /\.emerg>summary\{[^}]*min-height:44px/,
+    'the target must be big enough to hit on a phone on a touchline');
+});
