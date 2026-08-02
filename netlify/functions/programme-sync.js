@@ -315,7 +315,12 @@ exports.handler = async function (event) {
           ? RULES.STATES.PUBLISHED_RECOVERY
           : (decision.late ? RULES.STATES.PUBLISHED_LATE : RULES.STATES.PUBLISHED_MATCHDAY);
         if (decision.recovery) {
-          patch.publication_source = decision.retrospective ? 'retrospective' : 'recovery';
+          // publication_source_detail, NOT publication_source. The original
+          // column allows only automatic|emergency_teamsheet|manual, so writing
+          // 'recovery' to it violated a check constraint and the whole run
+          // failed with a Postgres 23514 — silently, from a supporter's point
+          // of view, because the edition simply stayed unpublished.
+          patch.publication_source_detail = decision.retrospective ? 'retrospective' : 'recovery';
           // Why the normal moment was missed, kept with the edition.
           patch.recovery_reason = decision.reasons.join('; ');
           patch.published_after_full_time = !!decision.afterFullTime;

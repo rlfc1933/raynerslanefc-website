@@ -256,7 +256,7 @@ test('the sync records WHY the normal moment was missed', () => {
   const fs = require('fs');
   const path = require('path');
   const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
-  assert.match(s, /publication_source = decision\.retrospective \? 'retrospective' : 'recovery'/);
+  assert.match(s, /publication_source_detail = decision\.retrospective \? 'retrospective' : 'recovery'/);
   assert.match(s, /recovery_reason = decision\.reasons\.join/);
   assert.match(s, /published_after_full_time = !!decision\.afterFullTime/);
 });
@@ -440,4 +440,59 @@ test('the migration clears the latch it created', () => {
   assert.match(sql, /add column if not exists withheld_by text/);
   assert.match(sql, /update public\.programme_editions\s*\n\s*set withheld_reason = null/,
     'existing latched editions must be released');
+});
+
+test('EVERY COLUMN THE SYNC WRITES EXISTS AND ACCEPTS THE VALUE', () => {
+  // A 23514 check-constraint violation failed the whole run and, from a
+  // supporter's point of view, looked like nothing at all: the edition just
+  // stayed unpublished. `publication_source` allows only
+  // automatic|emergency_teamsheet|manual; the recovery values belong in
+  // publication_source_detail.
+  const fs = require('fs');
+  const path = require('path');
+  const ROOT = path.join(__dirname, '..');
+  const sync = fs.readFileSync(path.join(ROOT, 'netlify/functions/programme-sync.js'), 'utf8');
+  const schema = fs.readFileSync(path.join(ROOT,
+    'supabase/migrations/20260802060000_programme_editions.sql'), 'utf8')
+    + fs.readFileSync(path.join(ROOT,
+    'supabase/migrations/20260803120000_programme_recovery.sql'), 'utf8');
+
+  // Every patch.<column> the sync assigns must exist in the schema.
+  const cols = [...new Set((sync.match(/patch\.([a-z_]+)\s*=/g) || [])
+    .map((m) => m.slice(6).replace(/\s*=$/, '')))];
+  assert.ok(cols.length >= 5, 'expected the sync to write several columns');
+  cols.forEach((c) => {
+    assert.ok(new RegExp('\\b' + c + '\\b').test(schema),
+      'the sync writes a column the schema does not have: ' + c);
+  });
+
+  // And the constrained one must not be handed a recovery value.
+  assert.ok(!/patch\.publication_source\s*=/.test(sync),
+    'publication_source only allows automatic|emergency_teamsheet|manual');
+  assert.match(sync, /patch\.publication_source_detail\s*=/);
+
+  // The values written to publication_source_detail must be allowed by it.
+  const allowed = (schema.match(/publication_source_detail in\s*\n?\s*\(([^)]*)\)/) || [])[1] || '';
+  ['recovery', 'retrospective'].forEach((v) => {
+    assert.ok(allowed.includes("'" + v + "'"), v + ' is not an allowed detail value');
+  });
+});
+
+test('every state the sync writes is a legal state', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const ROOT = path.join(__dirname, '..');
+  const sync = fs.readFileSync(path.join(ROOT, 'netlify/functions/programme-sync.js'), 'utf8');
+  const sql = fs.readFileSync(path.join(ROOT,
+    'supabase/migrations/20260803120000_programme_recovery.sql'), 'utf8');
+  const allowed = (sql.match(/state in \(([\s\S]*?)\)\)/) || [])[1] || '';
+  // Which STATES constants the sync assigns.
+  const used = [...new Set((sync.match(/RULES\.STATES\.([A-Z_]+)/g) || [])
+    .map((m) => m.split('.').pop()))];
+  const R2 = require('../netlify/functions/lib/programme/publish-rules');
+  used.forEach((k) => {
+    const v = R2.STATES[k];
+    assert.ok(v, 'unknown state constant: ' + k);
+    assert.ok(allowed.includes("'" + v + "'"), 'the database would reject state ' + v);
+  });
 });
