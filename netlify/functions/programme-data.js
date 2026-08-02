@@ -25,7 +25,17 @@ function resp(code, obj, seconds) {
 // they must agree, or an edition gets listed and then refuses to open.
 // 'published_recovery' is public: it IS published. What differs is when, and
 // the edition says so itself rather than hiding it.
-const PUBLIC_STATES = "('published_matchday','published_late','full_time_current','archived','published_recovery')";
+// PostgREST's in.() takes BARE values. Single quotes are not string delimiters
+// here — they become part of the value, so `state=in.('archived')` looks for a
+// state literally equal to 'archived' WITH the quotes and matches nothing.
+//
+// This filter had never matched anything, and nobody could tell, because no
+// edition had ever published to exercise it. The moment one did, the endpoint
+// answered "no published programme for that fixture" about a programme that
+// was sitting right there, published.
+const PUBLIC_STATE_LIST = ['published_matchday', 'published_late',
+  'full_time_current', 'archived', 'published_recovery'];
+const PUBLIC_STATES = '(' + PUBLIC_STATE_LIST.join(',') + ')';
 
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};

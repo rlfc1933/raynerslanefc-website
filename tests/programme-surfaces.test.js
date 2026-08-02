@@ -13,8 +13,15 @@ const R = (f) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
 
 test('the public read endpoint serves published and archived editions only', () => {
   const s = R('netlify/functions/programme-data.js');
-  assert.match(s, /published_matchday','published_late','full_time_current','archived'/,
-    'the public state list must be explicit');
+  // The list is explicit and BARE — PostgREST's in.() does not take quoted
+  // values, and quoting them made this filter match nothing at all.
+  assert.match(s, /const PUBLIC_STATE_LIST = \[/, 'the public state list must be explicit');
+  ['published_matchday', 'published_late', 'full_time_current', 'archived',
+   'published_recovery'].forEach((st) => {
+    assert.ok(s.includes("'" + st + "'"), 'missing public state: ' + st);
+  });
+  assert.match(s, /PUBLIC_STATES = '\(' \+ PUBLIC_STATE_LIST\.join\(','\) \+ '\)'/,
+    'the filter must be built from bare values');
   // A draft must not be reachable by guessing a URL.
   assert.ok(!/draft_hidden|waiting_for_lineups|withheld/.test(
     s.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')),

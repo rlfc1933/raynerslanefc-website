@@ -207,10 +207,17 @@ test('EVERY PLACE THAT DECIDES "PUBLIC" AGREES', () => {
   const matchCentre = read('netlify/functions/lib/football/read.js');
   const sql = read('supabase/migrations/20260803120000_programme_recovery.sql');
 
+  // The endpoint holds them as JS strings; the Match Centre builds a bare
+  // PostgREST filter. Both must list the same states.
   expected.forEach((st) => {
     assert.ok(endpoint.includes("'" + st + "'"), 'endpoint missing ' + st);
-    assert.ok(matchCentre.includes("'" + st + "'"), 'match centre missing ' + st);
+    assert.ok(new RegExp('[(,]' + st + '[,)]').test(matchCentre),
+      'match centre missing ' + st);
   });
+  // And the Match Centre filter must be bare, like every other in() we build.
+  const mcFilter = (matchCentre.match(/state=in\.\([^)]*\)/) || [])[0] || '';
+  assert.ok(mcFilter, 'the match centre programme check is missing');
+  assert.ok(!/'/.test(mcFilter), 'the match centre filter quotes its values: ' + mcFilter);
   // Both policies moved together.
   const editions = sql.slice(sql.indexOf('create policy programme_editions_public_read'));
   const versions = sql.slice(sql.indexOf('create policy programme_versions_public_read'));
@@ -242,7 +249,7 @@ test('A RETROSPECTIVE CANDIDATE IS NOT PUBLIC', () => {
   });
 
   const endpoint = fs.readFileSync(path.join(ROOT, 'netlify/functions/programme-data.js'), 'utf8');
-  const list = endpoint.match(/const PUBLIC_STATES = "\(([^)]*)\)"/)[1];
+  const list = endpoint.match(/const PUBLIC_STATE_LIST = \[([\s\S]*?)\]/)[1];
   ['retrospective_candidate', 'draft_hidden', 'withheld', 'waiting_for_matchday',
    'waiting_for_lineups', 'ready_to_publish'].forEach((st) => {
     assert.ok(!list.includes(st), 'the endpoint would serve ' + st);
@@ -538,4 +545,51 @@ test('a repeated run creates no second edition and no second version', () => {
     'an edition must be looked up before one is created');
   assert.match(s, /if \(decision\.canPublish && !edition\.published_at\)/,
     'an already-published edition must never be republished');
+});
+
+test('POSTGREST in() FILTERS USE BARE VALUES, NOT QUOTED ONES', () => {
+  // Single quotes are not string delimiters in a PostgREST filter — they become
+  // part of the value. `state=in.(<quote>archived<quote>)` looks for a state
+  // literally equal to the quoted text, and matches nothing.
+  //
+  // This filter had never matched, and nobody could tell, because no edition
+  // had ever published to exercise it. The moment one did, the endpoint said
+  // "no published programme for that fixture" about a programme sitting right
+  // there, published.
+  const fs = require('fs');
+  const path = require('path');
+  const ROOT = path.join(__dirname, '..');
+  // Comments first. An earlier test in this project failed on its own prose,
+  // and the lesson was written down; this is that lesson applied.
+  const code = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ['netlify/functions/programme-data.js', 'netlify/functions/lib/football/read.js'].forEach((f) => {
+    const s = code(f);
+    (s.match(/=in\.\([^)]*\)/g) || []).forEach((flt) => {
+      assert.ok(!/'[a-z_]+'/.test(flt), f + ' quotes values inside a PostgREST in(): ' + flt);
+    });
+  });
+});
+
+test('the whole codebase agrees on that', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const ROOT = path.join(__dirname, '..', 'netlify/functions');
+  const offenders = [];
+  const walk = (dir, prefix) => {
+    fs.readdirSync(dir).forEach((f) => {
+      const full = path.join(dir, f);
+      if (fs.statSync(full).isDirectory()) return walk(full, prefix + f + '/', offenders);
+      if (!f.endsWith('.js')) return;
+      const src = fs.readFileSync(full, 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+      // A QUOTED VALUE is 'word' inside the parens. A lone quote is JavaScript
+      // string concatenation building the filter, which is fine.
+      (src.match(/=in\.\([^)]*\)/g) || []).forEach((m) => {
+        if (/'[a-z_][a-z0-9_]*'/i.test(m)) offenders.push(prefix + f + ': ' + m.slice(0, 70));
+      });
+    });
+  };
+  walk(ROOT, '');
+  assert.deepStrictEqual(offenders, [], 'quoted values inside PostgREST in() filters');
 });
