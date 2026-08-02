@@ -202,10 +202,32 @@ test('seasons, competitions and teams never bleed into each other', () => {
     rec({ fixtureId: 'd', competitionType: 'friendly' }),
     rec({ fixtureId: 'e', teamId: 2 }),
   ];
-  assert.strictEqual(P.aggregate(rows, { season: '2026-27' })[0].appearances, 4);
-  assert.strictEqual(P.aggregate(rows, { season: '2026-27', competitionType: 'league' })[0].appearances, 2);
-  assert.strictEqual(P.aggregate(rows, { teamId: 1 })[0].appearances, 4);
-  assert.strictEqual(P.aggregate(rows, { excludeFriendlies: true })[0].appearances, 4);
+  const total = (opts) => P.aggregate(rows, opts).reduce((n, a) => n + a.appearances, 0);
+  assert.strictEqual(total({ season: '2026-27' }), 4, 'last season stays in last season');
+  assert.strictEqual(total({ season: '2026-27', competitionType: 'league' }), 2);
+  assert.strictEqual(total({ teamId: 1 }), 4, 'the reserves are a different record');
+  assert.strictEqual(total({ excludeFriendlies: true }), 4);
+  assert.strictEqual(total({ competitionTypes: ['fa_competition', 'friendly'] }), 2, 'cup scope');
+});
+
+test('TWO CLUBS\' JOHN SMITHS ARE TWO PEOPLE', () => {
+  // Without a registry id, a name only identifies somebody within one club.
+  // Grouping on the name alone would hand one Smith the other's goals.
+  const rows = [
+    rec({ fixtureId: 'a', name: 'John Smith', teamId: 1, goals: 2 }),
+    rec({ fixtureId: 'b', name: 'John Smith', teamId: 2, goals: 1 }),
+  ];
+  const out = P.aggregate(rows, {});
+  assert.strictEqual(out.length, 2, 'they must not be merged');
+  assert.deepStrictEqual(out.map((a) => a.goals).sort(), [1, 2]);
+
+  // And a registry id is what says they ARE one person.
+  const same = P.aggregate([
+    rec({ fixtureId: 'a', name: 'John Smith', playerId: 7, teamId: 1, goals: 2 }),
+    rec({ fixtureId: 'b', name: 'J Smith', playerId: 7, teamId: 1, goals: 1 }),
+  ], {});
+  assert.strictEqual(same.length, 1);
+  assert.strictEqual(same[0].goals, 3);
 });
 
 test('a corrected event changes the total on the next recompute', () => {

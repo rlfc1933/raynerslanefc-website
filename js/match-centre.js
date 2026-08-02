@@ -198,9 +198,14 @@
   function lineupSide(side, name) {
     if (!side || !side.players || !side.players.length) return '';
     function row(p) {
+      // A player's name is a link only where the club has confirmed who he is.
+      // A provisional provider string stays plain text — inventing a page for a
+      // name nobody has stood behind is how the wrong person gets a record.
+      var nm = esc(p.name);
+      if (p.playerPage) nm = '<a class="mc-xi__link" href="' + esc(p.playerPage) + '">' + nm + '</a>';
       return '<li class="mc-xi__row">' +
         '<span class="mc-xi__no">' + esc(p.number || '') + '</span>' +
-        '<span>' + esc(p.name) + (p.isCaptain ? ' <span class="mc-xi__mark mc-xi__mark--c">(C)</span>' : '') + '</span>' +
+        '<span>' + nm + (p.isCaptain ? ' <span class="mc-xi__mark mc-xi__mark--c">(C)</span>' : '') + '</span>' +
         (p.exitedMinute != null ? '<span class="mc-xi__mark">↓ ' + p.exitedMinute + "'</span>" : '') +
         (p.enteredMinute != null ? '<span class="mc-xi__mark">↑ ' + p.enteredMinute + "'</span>" : '') +
       '</li>';

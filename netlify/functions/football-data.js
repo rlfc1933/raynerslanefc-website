@@ -9,6 +9,7 @@
 'use strict';
 
 const READ = require('./lib/football/read');
+const RP = require('./lib/football/read-players');
 const S = require('./lib/football/store');
 
 const SEASON = process.env.FWP_SEASON || '2026-2027';
@@ -36,6 +37,22 @@ exports.handler = async function (event) {
     if (what === 'table') {
       const t = await READ.leagueTable();
       return resp(200, { ok: true, table: t }, 120);
+    }
+
+    // GATE 7 — the squad's computed record, keyed by the club's own roster id.
+    // The roster itself is data/players.json and stays the club's; this adds
+    // only what the matches say, and only for identities a human has confirmed.
+    if (what === 'squad' || what === 'playerstats') {
+      const stats = await RP.statsByClubPlayer(q.season || SEASON, q.scope || 'all');
+      return resp(200, { ok: true, season: q.season || SEASON, scope: q.scope || 'all', players: stats }, 300);
+    }
+
+    if (what === 'player') {
+      // A provisional identity has no page. Asking for one by slug or by id
+      // returns nothing, because there is nothing the club has stood behind.
+      const d = await RP.playerDetail(q.p || q.slug, q.season || SEASON);
+      if (!d) return resp(404, { ok: false, error: 'no such player page' });
+      return resp(200, { ok: true, player: d }, 300);
     }
 
     if (what === 'fixture') {

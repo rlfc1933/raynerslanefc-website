@@ -147,6 +147,7 @@ function aggregate(records, opts) {
   var rows = records.filter(function (r) {
     if (o.season && r.season !== o.season) return false;
     if (o.competitionType && r.competitionType !== o.competitionType) return false;
+    if (o.competitionTypes && o.competitionTypes.indexOf(r.competitionType) < 0) return false;
     if (o.excludeFriendlies && r.competitionType === 'friendly') return false;
     if (o.teamId != null && String(r.teamId) !== String(o.teamId)) return false;
     return true;
@@ -154,9 +155,14 @@ function aggregate(records, opts) {
 
   var by = {};
   rows.forEach(function (r) {
-    var k = r.playerKey || norm(r.name);
+    // A registry id identifies a person. Without one, a name identifies a person
+    // only WITHIN a club — two clubs' John Smiths are two people, and grouping
+    // them together would hand one of them the other's goals.
+    var k = r.playerId != null ? 'id:' + r.playerId
+      : 'name:' + (r.teamId == null ? '' : r.teamId) + '|' + (r.playerKey || norm(r.name));
     var a = by[k] || (by[k] = {
-      key: k, name: r.name, playerId: r.playerId || null,
+      key: k, name: r.name, playerId: r.playerId == null ? null : r.playerId,
+      teamId: r.teamId == null ? null : r.teamId,
       appearances: 0, starts: 0, substituteAppearances: 0, unusedSubstitute: 0,
       goals: 0, ownGoals: 0, yellowCards: 0, redCards: 0,
       minutesPlayed: 0, minutesConfidence: CONF.PROVIDER, fixtures: [],

@@ -23,6 +23,13 @@
     .stat-card { background:var(--card); padding:20px; text-align:center; }
     .stat-num { font-family:var(--font-d); font-size:48px; letter-spacing:.04em; color:var(--yellow); line-height:1; }
     .stat-lbl { font-family:var(--font-c); font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--grey); margin-top:4px; }
+    .match-list { display:flex; flex-direction:column; gap:2px; }
+    .match-row { display:grid; grid-template-columns:120px 1fr auto; gap:16px; align-items:center; background:var(--card); padding:14px 18px; text-decoration:none; border-left:3px solid transparent; }
+    a.match-row:hover { border-left-color:var(--yellow); }
+    .mr-date { font-family:var(--font-c); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--grey); }
+    .mr-opp { font-family:var(--font-b); font-size:15px; color:var(--white); }
+    .mr-what { font-family:var(--font-c); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--yellow); text-align:right; }
+    @media(max-width:640px) { .match-row { grid-template-columns:1fr; gap:4px; } .mr-what { text-align:left; } }
     @media(max-width:768px) { .player-hero { grid-template-columns:1fr; } .player-hero-img { min-height:300px; } .player-hero-info { padding:24px; } }
   </style>
   <!-- lane-schema:start -->
@@ -51,26 +58,51 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
+<script src="js/player-record.js?v=7"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   initComponents('player.html');
   loadPlayer();
 });
 
+// GATE 7 — the page answers to two addresses.
+//   ?id=player-beau-pryce   the club's own roster id, which every existing
+//                           link on the site already uses.
+//   ?p=beau-pryce           the confirmed identity's permanent slug.
+// Both land on the same person. Neither invents one: a slug with no confirmed
+// identity behind it returns nothing and the visitor goes back to the squad.
 async function loadPlayer() {
-  var id = new URLSearchParams(window.location.search).get('id');
-  if (!id) { window.location.href = 'squad.html'; return; }
+  var qs = new URLSearchParams(window.location.search);
+  var id = qs.get('id');
+  var slug = qs.get('p');
+  if (!id && !slug) { window.location.href = 'squad.html'; return; }
 
   try {
+    var record = slug && window.LaneRecord ? await window.LaneRecord.detail(slug) : null;
+    if (slug && !record && !id) { window.location.href = 'squad.html'; return; }
+    if (record && record.clubPlayerId) id = record.clubPlayerId;
+
     var r = await fetch('data/players.json?t=' + Date.now());
     var d = await r.json();
     var player = (d.players || []).find(function(p) { return p.id === id; });
+    if (!player && record) {
+      // Confirmed, but not in the roster file — a player who has left. His
+      // record still stands; it is his, and the club does not delete it.
+      player = { id: record.clubPlayerId, name: record.name, photo: record.portrait || '', bio: record.bio || '' };
+    }
     if (!player) { window.location.href = 'squad.html'; return; }
-    renderPlayer(player);
+
+    if (!record && window.LaneRecord) {
+      var season = await window.LaneRecord.season();
+      var s = season[player.id];
+      if (s && s.playerPage) record = await window.LaneRecord.detail(s.playerPage.split('p=')[1]);
+      else if (s) record = { currentSeason: { all: s }, matches: [] };
+    }
+    renderPlayer(player, record);
   } catch(e) { window.location.href = 'squad.html'; }
 }
 
-function renderPlayer(p) {
+function renderPlayer(p, record) {
   var _pImg = p.photo ? (/^https?:/.test(p.photo) ? p.photo : 'https://raynerslanefc.co.uk/' + p.photo.replace(/^\//, '')) : 'https://raynerslanefc.co.uk/img/og-card.jpg';
   var _pCanon = 'https://raynerslanefc.co.uk/player.html?id=' + encodeURIComponent(p.id || '');
   setPageSEO({
@@ -106,12 +138,13 @@ function renderPlayer(p) {
       // done this; the full profile was the one place still printing noughts.
       // The whole block hides when there is nothing real to show at all, rather
       // than presenting a row of dashes as though it were a record.
-      statBlock(p) +
+      statBlock(p, record) +
     '</div>' +
   '</div>' +
   '<div style="background:var(--dark);padding:16px 0;border-bottom:1px solid var(--border)">' +
     '<div class="container"><a href="squad.html" style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">&larr; Back to Squad</a></div>' +
-  '</div>';
+  '</div>' +
+  matchBlock(record);
 
   document.getElementById('player-content').innerHTML = html;
 }
@@ -121,7 +154,26 @@ function statCard(val, label) {
 }
 // A number the club has actually recorded, or an em-dash. Never a fabricated 0.
 function statVal(v) { return (v == null || Number(v) === 0) ? '&ndash;' : v; }
-function statBlock(p) {
+function statBlock(p, record) {
+  // The computed record outranks the hand-maintained figures. It is derived
+  // from the matches themselves, so it follows every correction; the numbers in
+  // players.json do not, and cannot.
+  var s = record && record.currentSeason && (record.currentSeason.all || record.currentSeason);
+  if (window.LaneRecord && window.LaneRecord.hasRecord(s)) {
+    var mins = window.LaneRecord.minutes(s);
+    return '<div class="stat-grid">' +
+      statCard(s.appearances, 'Appearances') +
+      statCard(s.goals, 'Goals') +
+      statCard(s.starts, 'Starts') +
+      // Minutes appear only where the match record supports a figure. A season
+      // containing one match whose substitutions were never recorded has no
+      // defensible total, so it is not given one.
+      (mins != null ? statCard(mins, 'Minutes') : '') +
+      (s.yellowCards ? statCard(s.yellowCards, 'Bookings') : '') +
+      (s.redCards ? statCard(s.redCards, 'Red Cards') : '') +
+      statCard(statVal(p.number), 'Squad No.') +
+    '</div>';
+  }
   var has = [p.apps, p.goals, p.assists, p.number].some(function (v) { return Number(v) > 0; });
   if (!has) {
     // Nothing recorded yet. Say that, in the club's voice, rather than printing
@@ -134,6 +186,31 @@ function statBlock(p) {
     statCard(statVal(p.assists), 'Assists') +
     statCard(statVal(p.number), 'Squad No.') +
   '</div>';
+}
+
+/* Every match he has been named in, most recent first. Unused substitute
+   appearances are shown as exactly that — being named is not an appearance,
+   but it is part of his season and hiding it would be its own distortion. */
+function matchBlock(record) {
+  var games = (record && record.matches) || [];
+  if (!games.length) return '';
+  var rows = games.map(function (m) {
+    var when = m.date ? new Date(m.date).toLocaleDateString('en-GB',
+      { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' }) : '';
+    var line = window.LaneRecord.describe(m);
+    var label = (m.home ? 'v ' : 'away at ') + (m.opponent || 'Opponent');
+    var inner = '<span class="mr-date">' + when + '</span>' +
+      '<span class="mr-opp">' + label + '</span>' +
+      '<span class="mr-what">' + line + '</span>';
+    return m.matchCentre
+      ? '<a class="match-row" href="' + m.matchCentre + '">' + inner + '</a>'
+      : '<div class="match-row">' + inner + '</div>';
+  }).join('');
+  return '<div style="background:var(--dark);padding:40px 0;border-bottom:1px solid var(--border)">' +
+    '<div class="container">' +
+      '<h2 style="font-family:var(--font-d);font-size:32px;letter-spacing:.04em;color:var(--white);margin:0 0 18px">Every Match</h2>' +
+      '<div class="match-list">' + rows + '</div>' +
+    '</div></div>';
 }
 
 function getIllustration(pos) {

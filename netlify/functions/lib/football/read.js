@@ -205,7 +205,7 @@ async function fixtureDetail(fixtureId) {
     S.rest('match_state?fixture_id=eq.' + encodeURIComponent(f.id) + '&select=*'),
     S.rest('match_events?fixture_id=eq.' + encodeURIComponent(f.id) +
       '&retracted_at=is.null&select=*&order=minute.asc,stoppage_minute.asc'),
-    S.rest('football_lineups?select=*,football_lineup_players(*)&fixture_id=eq.' +
+    S.rest('football_lineups?select=*,football_lineup_players(*,football_players(id,identity_status,public_slug,merged_into_id))&fixture_id=eq.' +
       (await fixtureRowId(f.id))),
   ]);
   const state = (states && states[0]) || null;
@@ -260,11 +260,20 @@ function shapeLineups(rows, fixture) {
   rows.forEach((l) => {
     const players = (l.football_lineup_players || [])
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      .map((p) => ({
-        name: p.provider_player_name, number: p.shirt_number,
-        role: p.lineup_role, isCaptain: p.is_captain,
-        enteredMinute: p.entered_minute, exitedMinute: p.exited_minute,
-      }));
+      .map((p) => {
+        // GATE 7 — a name links to a page only where a human has confirmed who
+        // it belongs to. Everyone else is plain text, which is honest: the club
+        // has not said who that is.
+        const reg = p.football_players || null;
+        const linkable = !!(reg && reg.identity_status === 'confirmed'
+          && !reg.merged_into_id && reg.public_slug);
+        return {
+          name: p.provider_player_name, number: p.shirt_number,
+          role: p.lineup_role, isCaptain: p.is_captain,
+          enteredMinute: p.entered_minute, exitedMinute: p.exited_minute,
+          playerPage: linkable ? '/player.html?p=' + reg.public_slug : null,
+        };
+      });
     const side = { status: l.status, players,
       starters: players.filter((p) => p.role === 'starter'),
       substitutes: players.filter((p) => p.role === 'substitute' || p.role === 'unused') };

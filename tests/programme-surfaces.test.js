@@ -104,7 +104,12 @@ test('the reader and library are cache-versioned', () => {
     assert.match(s, /programme-cover\.js\?v=\d+/, page + ' script is versioned');
   }
   const sw = R('sw.js');
-  assert.match(sw, /CACHE = 'rlfc-v10'/, 'service-worker cache name bumped');
+  // The cache name must move forward whenever shipped assets change, or
+  // returning visitors keep the old ones. Asserted as a floor rather than an
+  // exact value so a legitimate bump does not fail the suite — it is the
+  // FORGOTTEN bump this is here to catch.
+  const v = Number((sw.match(/CACHE = 'rlfc-v(\d+)'/) || [])[1]);
+  assert.ok(v >= 11, 'service-worker cache name must be at least rlfc-v11, found v' + v);
 });
 
 test('the reader page has one h1 and semantic sections', () => {

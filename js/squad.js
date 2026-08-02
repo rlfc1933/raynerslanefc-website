@@ -91,7 +91,10 @@ function renderSquad(players) {
       var name = p.name || 'TBC';
       var num  = p.number || p.no || '';
       var img  = p.photo || POS_IMG[pos] || FALLBACK_IMG;
-      var id   = 'player-' + name.toLowerCase().replace(/\s+/g, '-');
+      // The roster's own id, which is what the registry is keyed on. Deriving
+      // one from the name breaks on apostrophes and hyphens and would quietly
+      // detach a player from his record.
+      var id   = p.id || ('player-' + name.toLowerCase().replace(/\s+/g, '-'));
 
       var card = document.createElement('a');
       card.href = 'player.html?id=' + id;
@@ -152,7 +155,13 @@ function renderSquad(players) {
 
 /* ── PLAYER PROFILE POP-UP ── */
 var _profiles = {};
+// GATE 7 — the club's computed record, keyed by the same player id the roster
+// uses. The roster stays data/players.json; this only adds what the matches say.
+var _record = {};
 (function(){
+  if (window.LaneRecord) {
+    window.LaneRecord.season().then(function (m) { _record = m || {}; });
+  }
   fetch('data/players.json?t=' + Date.now())
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){ if (d && d.players) d.players.forEach(function(p){ _profiles[p.id] = p; }); })
@@ -180,7 +189,8 @@ var _profiles = {};
     '.pm-stat b{display:block;font-family:var(--font-d);font-size:26px;color:var(--yellow);line-height:1}' +
     '.pm-stat span{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}' +
     '.pm-close{position:absolute;top:14px;right:14px;z-index:3;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;line-height:1}' +
-    '.pm-empty{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:14px;letter-spacing:.04em}';
+    '.pm-empty{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:14px;letter-spacing:.04em}' +
+    '.pm-full{display:inline-block;margin-top:16px;font-family:var(--font-c);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);text-decoration:none;border-bottom:1px solid rgba(255,209,0,.4);padding-bottom:3px}';
   document.head.appendChild(st);
   var ov = document.createElement('div');
   ov.className = 'pm-overlay'; ov.id = 'pm-overlay';
@@ -194,6 +204,8 @@ function pmEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</
 /* Stats engine lands in Phase 2 — until a game is actually recorded, show '–'
    rather than a 0 that looks like a real (bad) statistic. */
 function pmStat(v){ return (v == null || Number(v) === 0) ? '–' : v; }
+/* A number the matches have established, or an em-dash. Never a fabricated 0. */
+function pmRec(v){ return (v == null) ? '–' : String(v); }
 function closePlayerModal(){ var o=document.getElementById('pm-overlay'); if(o) o.classList.remove('on'); document.body.style.overflow=''; }
 
 function openPlayerModal(id, basic) {
@@ -208,17 +220,34 @@ function openPlayerModal(id, basic) {
     : '<img class="pm-photo" src="'+pmEsc(basic.fallback||'')+'" alt="'+pmEsc(name)+'" onerror="this.style.display=\'none\'">';
   var role = p.role || basic.role || '';
   var age  = p.age || basic.age || '';
-  var hasProfile = !!(p.bio || p.nickname || p.nationality || p.role || p.age || p.apps || p.goals || p.assists);
-  var stats = hasProfile
+  // The computed record outranks the hand-maintained figures: it is derived
+  // from the matches themselves and follows every correction.
+  var rec = _record[id] || null;
+  var hasRec = window.LaneRecord && window.LaneRecord.hasRecord(rec);
+  var hasProfile = hasRec || !!(p.bio || p.nickname || p.nationality || p.role || p.age || p.apps || p.goals || p.assists);
+  var mins = (window.LaneRecord && window.LaneRecord.minutes(rec));
+  var stats = hasRec
     ? '<div class="pm-stats">' +
-        // Stats haven't started (season kicks off 1 Aug). Show an honest dash —
-        // a hard 0 reads as "played and scored nothing", which isn't true.
-        '<div class="pm-stat"><b>'+pmStat(p.apps)+'</b><span>Apps</span></div>' +
-        '<div class="pm-stat"><b>'+pmStat(p.goals)+'</b><span>Goals</span></div>' +
-        '<div class="pm-stat"><b>'+pmStat(p.assists)+'</b><span>Assists</span></div>' +
+        '<div class="pm-stat"><b>'+pmRec(rec.appearances)+'</b><span>Apps</span></div>' +
+        '<div class="pm-stat"><b>'+pmRec(rec.goals)+'</b><span>Goals</span></div>' +
+        // Minutes only where the match record supports a figure. Where it does
+        // not, the slot shows the squad number rather than a guess.
+        (mins != null
+          ? '<div class="pm-stat"><b>'+mins+'</b><span>Minutes</span></div>'
+          : '<div class="pm-stat"><b>'+pmRec(rec.starts)+'</b><span>Starts</span></div>') +
         '<div class="pm-stat"><b>'+(num||'–')+'</b><span>Squad No</span></div>' +
-      '</div>'
-    : '';
+      '</div>' +
+      (rec.playerPage ? '<a class="pm-full" href="'+pmEsc(rec.playerPage)+'">Full record &rarr;</a>' : '')
+    : (hasProfile
+      ? '<div class="pm-stats">' +
+          // Nothing has been recorded yet. An honest dash — a hard 0 reads as
+          // "played and scored nothing", which is a different claim.
+          '<div class="pm-stat"><b>'+pmStat(p.apps)+'</b><span>Apps</span></div>' +
+          '<div class="pm-stat"><b>'+pmStat(p.goals)+'</b><span>Goals</span></div>' +
+          '<div class="pm-stat"><b>'+pmStat(p.assists)+'</b><span>Assists</span></div>' +
+          '<div class="pm-stat"><b>'+(num||'–')+'</b><span>Squad No</span></div>' +
+        '</div>'
+      : '');
   var body = '<div class="pm-body">' +
     (p.nickname ? '<div class="pm-nick">"'+pmEsc(p.nickname)+'"</div>' : '') +
     (p.bio ? '<div class="pm-bio">'+pmEsc(p.bio)+'</div>' : (hasProfile ? '' : '<div class="pm-empty">Full profile coming soon.</div>')) +
