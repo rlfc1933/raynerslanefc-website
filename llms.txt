@@ -61,6 +61,23 @@ Only what the club records. Nothing else should be attributed to Rayners Lane FC
 
 **How do I sponsor the club?** Email info@raynerslanefc.co.uk. Shirt, matchball and board sponsorship are available.
 
+## Where the match information comes from
+
+Fixtures, results, the league table, team sheets and match events are taken
+from Football Web Pages, which publishes the Combined Counties League's own
+record, and are used with their agreement. The club credits them wherever their
+data appears.
+
+Appearances, goals, cards and minutes are worked out from those matches rather
+than typed in, and they are recalculated from the full record rather than
+counted up — so a correction at the league changes the club's figures too.
+
+Two things are deliberately not claimed. A player's minutes are shown only when
+both ends of his match are on record; where they are not, the figure is absent
+rather than estimated. And a name on a team sheet becomes one of the club's
+players only when a committee member confirms who it is — until then it is
+carried as text, with no profile page attached to it.
+
 ## Pages
 
 - [Home](https://raynerslanefc.co.uk/): next fixture, live countdown, club news
