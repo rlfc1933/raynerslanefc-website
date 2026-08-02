@@ -100,24 +100,31 @@ async function json(url) {
   }
   const ed = await json(FN + '/programme-data?id=fwp-578225');
   const E = ed.body || {};
-  check('the Wallingford edition opens publicly', ed.status === 200 && E.ok === true);
-  if (E.ok) {
-    check('it has exactly one immutable version', E.edition.version === 1, 'v' + E.edition.version);
-    check('it is not backdated',
-      Date.parse(E.edition.publishedAt) > Date.parse('2026-08-01T17:00:00Z'));
-    check('it records that it came after full time', E.edition.afterFullTime === true);
-    check('both starting elevens are complete',
-      (E.lineups.home.starters || []).length === 11 && (E.lineups.away.starters || []).length === 11);
-    check('the cover is not blank',
-      !!(E.programme.sections.cover && E.programme.sections.cover.homeTeam));
-    check('the full-time record is stored with the edition',
-      !!(E.finalMatch && E.finalMatch.homeScore === 3 && E.finalMatch.awayScore === 3));
-    // The Wallingford edition was published BEFORE the footer existed and is
-    // immutable, so it legitimately has none. What must never happen is a
-    // footer that is present but malformed.
-    check('any stored legal footer is well formed',
-      E.legal == null || (Array.isArray(E.legal.lines) && E.legal.lines.length > 0));
-  }
+  check('the Wallingford edition answers publicly', ed.status === 200 && E.ok === true);
+
+  /* THE MEMBER GATE, from a logged-out request.
+     The programme is free and members-only, so what a visitor gets is the
+     cover, the fixture and the score — enough to want it — and nothing of the
+     edition itself. These are the checks that would catch the payload
+     leaking back out. */
+  check('a logged-out request is LOCKED', E.locked === true, 'reason: ' + E.reason);
+  check('no programme payload is sent', !E.programme);
+  check('no line-ups are sent', !E.lineups);
+  check('no league table is sent', !E.table);
+  check('no legal footer is sent', !E.legal);
+  check('the cover IS sent', !!E.cover);
+  check('the score IS sent', !!(E.finalMatch && E.finalMatch.homeScore != null));
+  check('the edition is not backdated',
+    !!(E.edition && Date.parse(E.edition.publishedAt) > Date.parse('2026-08-01T17:00:00Z')));
+  check('it records that it came after full time', !!(E.edition && E.edition.afterFullTime));
+
+  // A member payload must never be cached by a CDN.
+  const hdr = await fetch(FN + '/programme-data?id=fwp-578225');
+  const cc = (hdr.headers.get('cache-control') || '').toLowerCase();
+  check('member responses are not publicly cacheable',
+    /private/.test(cc) && /no-store/.test(cc), cc);
+  check('member responses vary on Authorization',
+    /authorization/i.test(hdr.headers.get('vary') || ''), hdr.headers.get('vary'));
 
   // Drafts stay private.
   const draft = await fetch(FN + '/programme-data?id=fwp-578229');

@@ -934,3 +934,71 @@ Hundreds of tests were green while every crest was missing and the programme
 engine had never published anything, because they asserted a fallback *existed*.
 `tools/smoke.js` and `tools/viewport-check.js` check a running site and take a
 URL, so they run against a preview before a release and not only after one.
+
+---
+
+## Supporter membership, programme access and cookie consent
+
+### The cookie banner was theatre
+
+Google Analytics loaded at parse time on every page. Decline set a localStorage
+flag and removed the banner. **A supporter who pressed Decline was measured
+exactly as much as one who pressed Accept.**
+
+That is worse than having no button at all: it recorded a choice, and honoured
+nothing, so a supporter who wanted out believed they were out.
+
+Nothing analytics-related is now fetched before an explicit yes. Consent Mode
+defaults to denied before anything Google could execute, Accept loads it once,
+and withdrawal stops it and clears what this origin can clear. Proved with the
+browser's own network log — `tools/consent-check.js`, 14 checks, in production —
+not by reading the code and believing it.
+
+Declining breaks nothing. Fan Zone, login and programme access never consult
+analytics consent, and a test enforces that they never start.
+
+### One supporter, one record
+
+A supporter could exist three times over: a `fans` profile, a HubSpot lead fired
+at signup, and the footer newsletter form. Nothing joined them, so the same
+person joining twice became two people and their loyalty history split between
+them.
+
+Everything now keys on the **normalised email**. `fans` is untouched — it holds
+the Lane Cards supporters already have, and rewriting it would put existing
+membership numbers at risk. `fan_members` sits alongside it and carries what the
+Lane Card was never designed to hold: consent, attribution, activity.
+
+An existing record is **claimed, never duplicated**, and the Lane Card number
+carries across so nobody's membership number changes underneath them.
+
+### The gate is on the server
+
+The complete programme is decided server-side, before the payload is assembled.
+A logged-out request receives the cover, the fixture and the score — enough to
+want it — and nothing of the edition.
+
+The subtle half is the cache. `public, max-age` on a body that varies by
+`Authorization` is how one member's entitled copy gets handed to the next
+logged-out visitor by the CDN: the gate holds in the function and leaks at the
+edge. Member responses are `private, no-store` with `Vary: Authorization`.
+
+### Legal identity
+
+The site said the club was *"a fully integrated members section of Tithe Farm
+Sports & Social Club LTD"* — in the homepage meta description, the About page,
+the footer, the ticker, the portal and the print programme. That is not the
+operating entity.
+
+Now, consistently: **Rayners Lane Football Club**, operated by **Rayners Lane
+Football Club Limited, Company No. 17110511**. Tithe Farm remains where the club
+plays and where its history is; only the legal claim changed.
+
+That also completes FA Standardised Rule 2.15, which the previous release had to
+leave incomplete because the club had not published a legal form.
+
+### Copy that no longer promises what the club does not do
+
+The shop advertised a printed programme *"available at every home game"* and
+*"at Tithe Farm on match day"*. The club publishes a digital edition. Promising
+print is a promise to a supporter who turns up expecting one.
