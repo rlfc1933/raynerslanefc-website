@@ -165,6 +165,25 @@ async function send(row) {
 async function drain(opts) {
   const o = opts || {};
   const limit = o.limit || 25;
+
+  /* No provider configured, by decision rather than by accident.
+     Resend and custom SMTP are deferred: Wix blocks the DNS a verified sender
+     needs, and the club recognises new members through the portal instead.
+     Retrying a send that CANNOT succeed produces a retry storm and an alarming
+     failure count for something nobody chose to break. So the events are parked
+     honestly and kept for whenever a provider does exist. */
+  if (!process.env.RESEND_API_KEY) {
+    try {
+      await S.rest('fan_notification_outbox?status=eq.pending', {
+        method: 'PATCH',
+        body: { status: 'disabled_unconfigured',
+                last_error: 'No email provider configured — deferred by decision.' },
+        headers: { Prefer: 'return=minimal' },
+      });
+    } catch (e) { /* nothing to park */ }
+    return { ok: true, deferred: true, sent: 0, failed: 0,
+             note: 'Email delivery deferred; events preserved.' };
+  }
   let due = [];
   try {
     due = await S.rest('fan_notification_outbox?status=eq.pending&next_attempt_at=lte.' +

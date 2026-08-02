@@ -268,6 +268,15 @@ exports.handler = async function (event) {
     newest = rows && rows[0] ? rows[0].joined_at : null;
   } catch (e) {}
 
+  // WhatsApp progress, so the portal reads one number from one definition.
+  let whatsapp = { eligible: 0, target: 50 };
+  try {
+    const rows = await S.rest('fan_whatsapp_eligible?select=member_id&limit=5000');
+    whatsapp.eligible = (rows || []).length;
+  } catch (e) { /* view not deployed yet */ }
+  whatsapp.status = whatsapp.eligible >= 50 ? 'Ready to prepare launch'
+    : whatsapp.eligible >= 40 ? 'Nearly ready' : 'Building the community';
+
   const healthy = checks.every((c) => c.ok);
   return resp(200, {
     ok: true,
@@ -275,6 +284,15 @@ exports.handler = async function (event) {
     headline: healthy ? 'FAN ZONE HEALTHY' : 'FAN ZONE NEEDS ATTENTION',
     checks: checks,
     latestMember: newest,
+    // Deferred things are reported as deferred, not as failures. An amber panel
+    // that is amber for something nobody chose to fix is an amber panel people
+    // learn to ignore.
+    delivery: {
+      authenticationEmail: { state: 'Active', detail: 'Supabase default delivery' },
+      brandedClubEmail: { state: 'Deferred', detail: 'Custom SMTP required' },
+      signupNotifications: { state: 'Portal activity active', detail: 'Email alerts deferred' },
+    },
+    whatsapp: whatsapp,
     action: healthy ? 'No action required'
       : checks.filter((c) => !c.ok).map((c) => c.name).join(', ') + ' need attention',
   });
