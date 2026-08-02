@@ -270,3 +270,27 @@ test('full time is CAPTURED into the edition, not looked up when read', () => {
   assert.match(s, /isFinal: !!\(state && state\.is_final\)/,
     'isFinal was hardcoded false, so no edition could ever be enriched');
 });
+
+test('NOTHING CALLS A PAST MATCH "TODAY"', () => {
+  // A recovered edition is not archived, so a state check labelled yesterday's
+  // programme "Today at The Lane" and offered "Read today's programme".
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'js/programme-library.js'), 'utf8');
+  assert.match(s, /function isToday\(kickoffAt\)/,
+    '"today" must be decided from the kick-off, not from the edition state');
+  assert.match(s, /timeZone: 'Europe\/London'/, 'and at the ground, not in the viewer\'s timezone');
+  assert.ok(!/var live = e\.state !== 'archived'/.test(s),
+    'the state check is what caused the wrong label');
+  // The honest alternative wording exists.
+  assert.match(s, /Inaugural digital edition/);
+});
+
+test('the library card knows an edition came after full time', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-data.js'), 'utf8');
+  assert.match(s, /afterFullTime: !!r\.published_after_full_time/);
+  assert.match(s, /published_after_full_time,publication_source_detail/,
+    'it must select the columns it reads');
+});

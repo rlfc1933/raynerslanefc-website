@@ -43,19 +43,33 @@
       '</a></article>';
   }
 
+  /* Is this fixture TODAY, at the ground? Decided from the kick-off instant in
+     Europe/London — never from the edition's state. A recovered edition for
+     yesterday's match is not archived, so a state check called it "Today at The
+     Lane" and offered "Read today's programme" for a game already played. */
+  function isToday(kickoffAt) {
+    var ms = Date.parse(kickoffAt);
+    if (!isFinite(ms)) return false;
+    var fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
+      year: 'numeric', month: '2-digit', day: '2-digit' });
+    return fmt.format(new Date(ms)) === fmt.format(new Date());
+  }
+
   function featured(e) {
-    var live = e.state !== 'archived';
+    var live = isToday(e.kickoffAt);
+    var afterFullTime = !!e.afterFullTime;
     return '<section class="pl-featured" aria-labelledby="pl-feat-h">' +
       '<div>' + RLFCCover.render(e, { as: 'div' }) + '</div>' +
       '<div class="pl-featured__meta">' +
-        '<span class="label">' + (live ? 'Today at The Lane' : 'Latest edition') + '</span>' +
+        '<span class="label">' + (live ? 'Today at The Lane'
+          : (afterFullTime ? 'Inaugural digital edition' : 'Latest edition')) + '</span>' +
         '<h2 class="pl-featured__title" id="pl-feat-h">' + esc(e.homeTeam) + ' v ' + esc(e.awayTeam) + '</h2>' +
         '<p class="pl-featured__sub">' + esc(dateLong(e.kickoffAt)) +
           (e.competition ? ' · ' + esc(e.competition) : '') +
           (e.homeScore != null ? ' · ' + e.homeScore + '–' + e.awayScore : '') + '</p>' +
         '<div class="pl-actions">' +
           '<a class="btn btn-primary" href="programme.html?id=' + encodeURIComponent(e.fixtureId) + '">' +
-            (live ? 'Read today’s programme' : 'Read programme') + '</a>' +
+            (live ? 'Read today’s programme' : 'Read the programme') + '</a>' +
           '<a class="btn" href="match-centre.html?id=' + encodeURIComponent(e.fixtureId) + '">Match Centre</a>' +
         '</div>' +
       '</div></section>';

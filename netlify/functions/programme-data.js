@@ -63,7 +63,8 @@ exports.handler = async function (event) {
 
     // The library: every published edition, newest first.
     const rows = await S.rest('programme_editions?state=in.' + PUBLIC_STATES +
-      '&select=internal_fixture_id,slug,season,scheduled_kickoff_at,venue,state,published_at,home_team_id,away_team_id,competition_id' +
+      '&select=internal_fixture_id,slug,season,scheduled_kickoff_at,venue,state,published_at,' +
+      'published_after_full_time,publication_source_detail,home_team_id,away_team_id,competition_id' +
       '&order=scheduled_kickoff_at.desc') || [];
     const [teams, comps] = await Promise.all([
       S.rest('football_teams?select=id,canonical_name,crest_asset_path'),
@@ -97,6 +98,10 @@ exports.handler = async function (event) {
           awayScore: st ? st.away_score : null,
           isFinal: st ? st.is_final : false,
           isCurrent: r.state !== 'archived',
+          publishedAt: r.published_at,
+          // So a card can say what it is without the page guessing from state.
+          afterFullTime: !!r.published_after_full_time,
+          publicationSource: r.publication_source_detail || 'automatic',
         };
       }),
     }, 120);
