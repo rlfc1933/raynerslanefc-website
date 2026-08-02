@@ -343,3 +343,40 @@ test('a freshly complete programme publishes on the SAME run', () => {
   assert.strictEqual(stale.canPublish, false, 'the stale flag withholds it');
   assert.strictEqual(fresh.canPublish, true, 'the fresh one publishes it');
 });
+
+/* ── the bug that meant NO edition could ever publish ─────────────────────── */
+
+test('CLUB DATA FILES ARE REQUESTED WITH THEIR EXTENSION', () => {
+  // loadJson('committee') fetched /data/committee — no .json — which 404s.
+  // committee and sponsors were therefore always null, staff and sponsors are
+  // both MANDATORY, and mandatory_content_valid could never be true. The
+  // programme engine could not publish anything, ever, and reported "waiting
+  // for matchday" while doing it.
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+  assert.match(s, /replace\(\/\\\.json\$\/i, ''\) \+ '\.json'/,
+    'the extension must be normalised on, not left to the caller');
+  // No call site may build a bare path.
+  const calls = s.match(/loadJson\('[^']+'\)/g) || [];
+  assert.ok(calls.length >= 2, 'expected the committee and sponsor loads');
+  // And the fetch must use the normalised name.
+  assert.match(s, /SITE \+ '\/data\/' \+ file \+ '\?t='/);
+  assert.ok(!/SITE \+ '\/data\/' \+ path \+ '\?t='/.test(s), 'the unnormalised path is still in use');
+});
+
+test('a missing club file is reported, not swallowed', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+  assert.match(s, /console\.error\('programme: \/data\/' \+ file \+ ' returned '/,
+    'a 404 that returns null silently is how this hid for a whole gate');
+});
+
+test('the withheld reason NAMES the sections that are missing', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+  assert.match(s, /missing sections: ' \+ built\.validation\.missing\.join/,
+    '"content is not complete" is not something a committee member can act on');
+});

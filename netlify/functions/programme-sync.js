@@ -34,11 +34,32 @@ function slugFor(f) {
   return [d, s(f._homeName), 'v', s(f._awayName)].filter(Boolean).join('-');
 }
 
-async function loadJson(path) {
+/**
+ * A club data file.
+ *
+ * THE .json WAS MISSING. This fetched /data/committee — no extension — which
+ * 404s. So committee and sponsors were ALWAYS null, staffGroups and
+ * sponsorTiers were ALWAYS empty, both are MANDATORY sections, and
+ * mandatory_content_valid could therefore never be true.
+ *
+ * The programme engine has never been able to publish a single edition since it
+ * was written. Not Wallingford, not anything. It reported "waiting for
+ * matchday" and looked patient rather than broken, because a 404 here returns
+ * null and an empty section is indistinguishable from one not filled in yet.
+ *
+ * The name is normalised so a caller cannot reintroduce it, and a failure is
+ * now returned rather than swallowed, so the reason reaches the portal.
+ */
+async function loadJson(name) {
+  const file = String(name).replace(/\.json$/i, '') + '.json';
   try {
-    const r = await fetch(SITE + '/data/' + path + '?t=' + Date.now(), { signal: AbortSignal.timeout(8000) });
-    return r.ok ? await r.json() : null;
-  } catch (e) { return null; }
+    const r = await fetch(SITE + '/data/' + file + '?t=' + Date.now(), { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) { console.error('programme: /data/' + file + ' returned ' + r.status); return null; }
+    return await r.json();
+  } catch (e) {
+    console.error('programme: /data/' + file + ' failed: ' + (e && e.message));
+    return null;
+  }
 }
 
 /** Everything the generator needs, gathered from what the club already holds. */
@@ -262,7 +283,10 @@ exports.handler = async function (event) {
         lineup_gate_valid: gate.ok,
         generated_at: new Date().toISOString(),
         state: decision.canPublish ? decision.state : decision.state,
-        withheld_reason: decision.state === RULES.STATES.WITHHELD ? decision.reasons.join('; ') : null,
+        withheld_reason: decision.state === RULES.STATES.WITHHELD
+          ? decision.reasons.concat(built.validation.missing.length
+              ? ['missing sections: ' + built.validation.missing.join(', ')] : []).join('; ')
+          : null,
       };
 
       if (decision.canPublish && !edition.published_at) {
