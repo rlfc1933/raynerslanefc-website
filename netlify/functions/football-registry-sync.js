@@ -24,6 +24,7 @@
 const S = require('./lib/football/store');
 const F = require('./lib/fwp');
 const STATS = require('./lib/football/player-stats');
+const CRESTS = require('./lib/football/crests');
 
 const SEASON = process.env.FWP_SEASON || '2026-2027';
 
@@ -167,6 +168,32 @@ exports.handler = async function () {
       done.push({ fixture: f.internal_fixture_id, ok: !!out, lineups: out ? out.lineups : null, error: err });
     }
     return { attempted: done.length, outstanding: wanted.length - done.length, done };
+  }));
+
+  // ── crests ────────────────────────────────────────────────────────────
+  // NOT rate-limited, because it makes no provider request: it reads the club's
+  // own published crest library. It was originally folded into the season step,
+  // which IS rate-limited for the provider's sake — so restoring a missing badge
+  // would have waited hours behind a courtesy limit that did not apply to it.
+  //
+  // Only ever fills a blank. A crest the club has approved is never touched.
+  steps.push(await step('crests', async () => {
+    const teams = await S.rest('football_teams?select=id,canonical_name,crest_asset_path') || [];
+    const patches = await CRESTS.backfill(teams);
+    for (let i = 0; i < patches.length; i += 50) {
+      await Promise.all(patches.slice(i, i + 50).map((row) =>
+        S.rest('football_teams?id=eq.' + row.id, {
+          method: 'PATCH', body: { crest_asset_path: row.crest_asset_path },
+          headers: { Prefer: 'return=minimal' },
+        })));
+    }
+    const lib = await CRESTS.library();
+    const stillMissing = CRESTS.missing(
+      teams.filter((t) => !patches.some((p) => p.id === t.id)), lib);
+    return {
+      teams: teams.length, restored: patches.length,
+      withoutArtwork: stillMissing.map((t) => t.canonical_name),
+    };
   }));
 
   steps.push(await step('players', async () => {

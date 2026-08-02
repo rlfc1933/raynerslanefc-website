@@ -339,3 +339,16 @@ test('AN EDITION CAN NEVER BE PUBLISHED WITH A BLANK COVER', () => {
   assert.ok(s.indexOf('CRESTS.library()') < s.indexOf('return {\n    homeTeam'),
     'artwork must be settled before the context is returned');
 });
+
+test('the crest backfill is NOT rate-limited behind provider courtesy', () => {
+  // It reads the club's own published library and makes no provider request.
+  // Folded into the season step it would have waited hours behind a courtesy
+  // limit that does not apply to it — a missing badge staying missing for no
+  // reason at all.
+  const s = strip(R('netlify/functions/football-registry-sync.js'));
+  const crestStep = s.slice(s.indexOf("step('crests'"), s.indexOf("step('players'"));
+  assert.ok(crestStep.length > 0, 'crests must be a step of their own');
+  assert.ok(!/age < EVERY/.test(crestStep), 'the backfill must not be gated on freshness');
+  assert.match(crestStep, /CRESTS\.backfill\(teams\)/);
+  assert.match(crestStep, /withoutArtwork/, 'and it must name what it could not fix');
+});
