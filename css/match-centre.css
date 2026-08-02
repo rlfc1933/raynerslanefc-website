@@ -185,3 +185,28 @@
 }
 .mc-xi__row { display: flex; align-items: center; gap: 10px; }
 .mc-xi__row > :nth-child(2) { flex: 1; }
+
+/* ── countdown ────────────────────────────────────────────────────────────
+   These styles duplicate the homepage countdown deliberately. The first
+   version reused the cn__ classes, whose CSS lives in club-now.css — a
+   stylesheet this page does not load — so the units stacked into a vertical
+   list. Same visual language, owned by the page that renders it. */
+.mc-countdown {
+  display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 16px;
+}
+.mc-cd-unit {
+  min-width: 62px; padding: 10px 8px; border-radius: 4px;
+  background: var(--card2); border: 1px solid var(--border); text-align: center;
+}
+.mc-cd-num {
+  font-family: var(--font-d); font-size: 26px; line-height: 1;
+  letter-spacing: .02em; color: var(--yellow);
+}
+.mc-cd-lbl {
+  margin-top: 4px; font-family: var(--font-c); font-size: 10px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.mc-ko {
+  font-family: var(--font-d); font-size: 24px; letter-spacing: .04em; color: var(--yellow);
+}

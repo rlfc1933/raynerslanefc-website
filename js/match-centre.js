@@ -173,7 +173,7 @@
       '<div class="mc-lock">' + team(f.homeTeam, f.isHome) +
         '<div class="mc-mid">' + mid + '</div>' + team(f.awayTeam, !f.isHome) + '</div>' +
       (clock ? '<div class="mc-clock' + (t.state === 'live' ? ' mc-clock--live' : '') + '">' + esc(clock) + '</div>' : '') +
-      (t.state === 'upcoming' ? '<div class="cn__countdown" id="mc-countdown"></div>' : '') +
+      (t.state === 'upcoming' ? '<div class="mc-countdown" id="mc-countdown"></div>' : '') +
       (meta.length ? '<div class="mc-meta">' + esc(meta.join(' · ')) + '</div>' : '') +
     '</section>';
   }
@@ -249,11 +249,11 @@
       var el = document.getElementById('mc-countdown');
       if (!el) { clearInterval(cdTimer); return; }
       var cd = MatchTime.formatCountdown(target, Date.now());
-      if (!cd) { el.innerHTML = '<span class="cn__ko">KICK OFF</span>'; clearInterval(cdTimer); return; }
+      if (!cd) { el.innerHTML = '<span class="mc-ko">KICK OFF</span>'; clearInterval(cdTimer); return; }
       el.innerHTML = [[cd.days, 'Days'], [cd.hours, 'Hrs'], [cd.minutes, 'Min'], [cd.seconds, 'Sec']]
         .map(function (p) {
-          return '<div class="cn__cd-unit"><div class="cn__cd-num">' + String(p[0]).padStart(2, '0') +
-            '</div><div class="cn__cd-lbl">' + p[1] + '</div></div>';
+          return '<div class="mc-cd-unit"><div class="mc-cd-num">' + String(p[0]).padStart(2, '0') +
+            '</div><div class="mc-cd-lbl">' + p[1] + '</div></div>';
         }).join('');
     }
     tick();
