@@ -245,6 +245,103 @@
       '<div id="fzp-msg"></div></div>';
   }
 
+
+  /* ── Optional mobile, and a SEPARATE WhatsApp choice ──────────────────── */
+
+  function contactHtml(state) {
+    var m = state.mobile || { status: 'not_provided' };
+    var w = state.whatsapp || {};
+    var has = m.status && m.status !== 'not_provided' && m.status !== 'removed';
+    return '<div class="fz-card fz-prefs"><h3 class="fz-card__h">Stay closer to The Lane</h3>' +
+      '<p>Add your mobile number if you would like the option to receive future ' +
+      'Rayners Lane supporter updates through WhatsApp. ' +
+      '<b>This is optional</b> — you can use Fan Zone and read programmes without it.</p>' +
+      '<div><label for="fzc-mobile" style="display:block;font-size:12.5px;color:#cfcfcf;margin-bottom:5px">Mobile number</label>' +
+        '<input type="tel" id="fzc-mobile" inputmode="tel" autocomplete="tel" ' +
+        'placeholder="07400 123456" value="' + esc(has ? (m.display || '') : '') + '"></div>' +
+      (has ? '<p class="fz-note">We have your number but have not checked it — ' +
+        'we will never assume it is right without asking you.</p>' : '') +
+      '<label style="margin-top:14px"><input type="checkbox" id="fzc-whatsapp"' +
+        (w.optedIn ? ' checked' : '') + '>' +
+        '<span>I would like Rayners Lane Football Club to send me supporter news, ' +
+        'match updates, events and club offers through WhatsApp when this service launches.</span></label>' +
+      '<p class="fz-note">Giving us your number is not the same as agreeing to WhatsApp — ' +
+      'this box is the permission, and you can take it back whenever you like. ' +
+      'Nothing is sent yet; the service has not launched.</p>' +
+      '<p class="fz-prefs__save">' +
+        '<button type="button" class="btn" id="fzc-save">Save</button>' +
+        (has ? ' <button type="button" class="btn" id="fzc-remove">Remove my number</button>' : '') +
+      '</p><div id="fzc-msg"></div></div>';
+  }
+
+  function interestsHtml(state) {
+    var INTERESTS = [
+      ['volunteering', 'Volunteering'], ['matchday_help', 'Helping on matchday'],
+      ['away_travel', 'Away travel'], ['sponsorship', 'Sponsorship'],
+      ['youth_football', 'Youth football'], ['social_events', 'Social events'],
+      ['photography', 'Photography'], ['commentary', 'Commentary'],
+    ];
+    var mine = state.interests || [];
+    return '<div class="fz-card fz-prefs"><h3 class="fz-card__h">What interests you</h3>' +
+      '<p>Tell us what you would like to hear about. Nothing here is required, ' +
+      'and it only ever comes from you — we do not guess.</p>' +
+      INTERESTS.map(function (i) {
+        return '<label><input type="checkbox" data-interest="' + i[0] + '"' +
+          (mine.indexOf(i[0]) > -1 ? ' checked' : '') + '><span>' + esc(i[1]) + '</span></label>';
+      }).join('') +
+      '<p class="fz-prefs__save"><button type="button" class="btn" id="fzi-save">Save interests</button></p>' +
+      '<div id="fzi-msg"></div></div>';
+  }
+
+  function wireContact() {
+    function say(id, kind, text) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<p class="fz-join__msg fz-join__msg--' + kind + '">' + text + '</p>';
+    }
+
+    var save = document.getElementById('fzc-save');
+    if (save) save.addEventListener('click', async function () {
+      save.disabled = true;
+      var out = await LaneFan.setContact({
+        mobile: (document.getElementById('fzc-mobile') || {}).value || '',
+        whatsapp: !!(document.getElementById('fzc-whatsapp') || {}).checked,
+      });
+      save.disabled = false;
+      if (out && out.ok) {
+        say('fzc-msg', 'ok', out.whatsapp && out.whatsapp.optedIn
+          ? 'Saved. We will let you know when WhatsApp updates launch.'
+          : 'Saved. We will not message you on WhatsApp.');
+      } else {
+        say('fzc-msg', 'err', esc((out && out.error) || 'Could not save that.'));
+      }
+    });
+
+    var rm = document.getElementById('fzc-remove');
+    if (rm) rm.addEventListener('click', async function () {
+      rm.disabled = true;
+      // Removing the number withdraws the permission too — the server does
+      // that, because a permission given for a number we no longer hold is
+      // not a permission to message anybody.
+      var out = await LaneFan.setContact({ mobile: '', whatsapp: false });
+      rm.disabled = false;
+      if (out && out.ok) { say('fzc-msg', 'ok', 'Removed.'); await LaneFan.refresh(); }
+      else say('fzc-msg', 'err', 'Could not remove that.');
+    });
+
+    var si = document.getElementById('fzi-save');
+    if (si) si.addEventListener('click', async function () {
+      si.disabled = true;
+      var chosen = Array.prototype.slice
+        .call(document.querySelectorAll('[data-interest]'))
+        .filter(function (c) { return c.checked; })
+        .map(function (c) { return c.getAttribute('data-interest'); });
+      var out = await LaneFan.setInterests(chosen);
+      si.disabled = false;
+      say('fzi-msg', out && out.ok ? 'ok' : 'err',
+        out && out.ok ? 'Saved.' : 'Could not save that.');
+    });
+  }
+
   function wireMemberHome(state) {
     var save = document.getElementById('fzp-save');
     if (save) save.addEventListener('click', async function () {
@@ -282,6 +379,7 @@
       await LaneFan.signOut();
       location.href = 'index.html';
     });
+    wireContact();
     void state;
   }
 
@@ -321,7 +419,8 @@
     }
 
     host.innerHTML = welcomeHtml(state) +
-      '<div class="fz-grid">' + historyHtml(state) + prefsHtml(state) + '</div>';
+      '<div class="fz-grid">' + historyHtml(state) + prefsHtml(state) +
+      contactHtml(state) + interestsHtml(state) + '</div>';
     wireMemberHome(state);
   }
 

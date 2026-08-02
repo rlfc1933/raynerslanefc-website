@@ -22,6 +22,9 @@ const S = require('../football/store');
 const TERMS_VERSION = 'fanzone-terms-2026-08';
 const PRIVACY_VERSION = 'privacy-2026-08';
 const MARKETING_WORDING = 'marketing-2026-08';
+// The exact WhatsApp wording a supporter agreed to, versioned so it can be
+// shown back to them and so a change of wording is a change of record.
+const WHATSAPP_WORDING = 'whatsapp-2026-08';
 const CLUB_INBOX = process.env.FAN_NOTIFY_TO || 'info@raynerslanefc.co.uk';
 
 const AUTH_BASE = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -283,7 +286,7 @@ function publicMember(member) {
 }
 
 module.exports = {
-  TERMS_VERSION, PRIVACY_VERSION, MARKETING_WORDING, CLUB_INBOX, ANON_KEY,
+  TERMS_VERSION, PRIVACY_VERSION, MARKETING_WORDING, WHATSAPP_WORDING, CLUB_INBOX, ANON_KEY,
   normalise, userFromToken, tokenFrom, byAuthUser, byEmail, safePath,
   ensure, canReadProgrammes, record, setMarketing, context, publicMember,
   storeIntent, claimIntent,

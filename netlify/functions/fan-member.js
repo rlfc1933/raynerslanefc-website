@@ -14,6 +14,7 @@
 const FAN = require('./lib/fan/members');
 const S = require('./lib/football/store');
 const NOTIFY = require('./lib/fan/notify');
+const PHONE = require('./lib/fan/phone');
 
 function resp(code, obj) {
   return {
@@ -81,10 +82,13 @@ exports.handler = async function (event) {
       // an email provider being reachable.
       if (member._created) NOTIFY.drain({ limit: 3 }).catch(() => null);
 
-      const [prefs, history] = await Promise.all([
+      const [prefs, history, mobile, wa, interests] = await Promise.all([
         S.findOne('fan_marketing_preferences', 'member_id=eq.' + member.id + '&select=*')
           .catch(() => null),
         historyFor(member.id),
+        S.findOne('fan_contact_numbers', 'member_id=eq.' + member.id + '&select=*').catch(() => null),
+        S.findOne('fan_whatsapp_consent', 'member_id=eq.' + member.id + '&select=*').catch(() => null),
+        S.rest('fan_interests?member_id=eq.' + member.id + '&select=interest').catch(() => []),
       ]);
 
       // Where to send them next. Preferred from the server-side intent, which
@@ -97,6 +101,19 @@ exports.handler = async function (event) {
         created: !!member._created,
         linkedExisting: !!member._linkedExisting,
         marketing: { email: !!(prefs && prefs.email_marketing) },
+        // The supporter's own contact state. Never the raw number back to the
+        // browser beyond what they typed themselves — there is nothing gained
+        // by shipping it around.
+        mobile: mobile && mobile.status !== 'removed' ? {
+          display: mobile.raw_input || mobile.e164,
+          status: mobile.status,
+          country: mobile.country,
+        } : { status: 'not_provided' },
+        whatsapp: {
+          optedIn: !!(wa && wa.opted_in && !wa.withdrawn_at && !wa.suppressed),
+          consentedAt: wa ? wa.consented_at : null,
+        },
+        interests: (interests || []).map((i) => i.interest),
         programmeHistory: history,
         returnTo: returnTo,
         // Only asked for when it is genuinely missing — a magic link opened on
@@ -133,6 +150,66 @@ exports.handler = async function (event) {
       const next = (patched && patched[0]) || member;
       await FAN.record(member.id, 'profile_updated', { source: 'account' });
       return resp(200, { ok: true, member: FAN.publicMember(next) });
+    }
+
+    if (action === 'contact') {
+      const member = await FAN.byAuthUser(user.id);
+      if (!member) return resp(200, { ok: false, error: 'no membership found' });
+
+      const raw = String(body.mobile == null ? '' : body.mobile).trim();
+      const removing = raw === '';
+      let e164 = null; let country = null;
+
+      if (!removing) {
+        const parsed = PHONE.normalise(raw, body.country);
+        if (!parsed.ok) {
+          return resp(200, { ok: false,
+            error: 'That does not look like a mobile number we can use. ' +
+                   'A UK number like 07400 123456 is fine.' });
+        }
+        e164 = parsed.e164;
+        country = parsed.country;
+        // A landline is not wrong, and we keep it — but it must not be counted
+        // towards a WhatsApp launch it could never be part of.
+        if (body.whatsapp === true && !PHONE.couldReceiveWhatsApp(parsed)) {
+          return resp(200, { ok: false,
+            error: 'That number cannot receive WhatsApp. We have kept it on your ' +
+                   'record — add a mobile if you would like WhatsApp updates later.' });
+        }
+      }
+
+      const out = await S.rest('rpc/fan_set_contact', {
+        method: 'POST',
+        body: {
+          p_member_id: member.id,
+          p_raw: removing ? null : raw,
+          p_e164: e164,
+          p_country: country,
+          p_whatsapp: (typeof body.whatsapp === 'boolean') ? body.whatsapp : null,
+          p_wording: FAN.WHATSAPP_WORDING,
+          p_source: (body.source || 'account').slice(0, 80),
+        },
+      });
+
+      await FAN.record(member.id, 'profile_updated', { source: 'contact' });
+      return resp(200, Object.assign({ ok: true }, out || {}));
+    }
+
+    if (action === 'interests') {
+      const member = await FAN.byAuthUser(user.id);
+      if (!member) return resp(200, { ok: false, error: 'no membership found' });
+      const ALLOWED = ['volunteering', 'sponsorship', 'away_travel', 'matchday_help',
+        'youth_football', 'social_events', 'photography', 'commentary'];
+      const wanted = (Array.isArray(body.interests) ? body.interests : [])
+        .filter((i) => ALLOWED.includes(i)).slice(0, ALLOWED.length);
+      await S.rest('fan_interests?member_id=eq.' + member.id, {
+        method: 'DELETE', headers: { Prefer: 'return=minimal' } }).catch(() => null);
+      if (wanted.length) {
+        await S.rest('fan_interests', { method: 'POST',
+          body: wanted.map((i) => ({ member_id: member.id, interest: i })),
+          headers: { Prefer: 'return=minimal' } });
+      }
+      return resp(200, { ok: true, interests: wanted });
     }
 
     return resp(400, { ok: false, error: 'unknown action' });

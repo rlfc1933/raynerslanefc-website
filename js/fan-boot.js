@@ -47,6 +47,9 @@
     member: null,
     entitled: false,
     marketing: { email: false },
+    mobile: { status: 'not_provided' },
+    whatsapp: { optedIn: false },
+    interests: [],
     programmeHistory: [],
     loaded: false,
     available: false,
@@ -156,6 +159,9 @@
         state.member = j.member;
         state.entitled = !!j.member.entitled;
         state.marketing = j.marketing || { email: false };
+        state.mobile = j.mobile || { status: 'not_provided' };
+        state.whatsapp = j.whatsapp || { optedIn: false };
+        state.interests = j.interests || [];
         state.programmeHistory = j.programmeHistory || [];
       } else {
         // Signed in, but the server would not confirm a membership. Never
@@ -319,6 +325,33 @@
     return j;
   }
 
+  /** Optional mobile, and the SEPARATE WhatsApp permission. */
+  async function setContact(fields) {
+    var t = await accessToken();
+    if (!t) return { error: 'Not signed in.' };
+    var r = await fetch('/.netlify/functions/fan-member', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+      body: JSON.stringify(Object.assign({ action: 'contact' }, fields || {})),
+    });
+    var j = await r.json();
+    if (j && j.ok) await refresh();
+    return j;
+  }
+
+  async function setInterests(list) {
+    var t = await accessToken();
+    if (!t) return { error: 'Not signed in.' };
+    var r = await fetch('/.netlify/functions/fan-member', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t },
+      body: JSON.stringify({ action: 'interests', interests: list || [] }),
+    });
+    var j = await r.json();
+    if (j && j.ok) await refresh();
+    return j;
+  }
+
   async function signOut() {
     if (client) { try { await client.auth.signOut(); } catch (e) {} }
     state.user = null; state.member = null; state.entitled = false;
@@ -405,6 +438,8 @@
     sendMagicLink: sendMagicLink,
     complete: complete,
     setMarketing: setMarketing,
+    setContact: setContact,
+    setInterests: setInterests,
     updateProfile: updateProfile,
     signOut: signOut,
     rememberReturn: rememberReturn,
