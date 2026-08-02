@@ -380,3 +380,18 @@ test('the withheld reason NAMES the sections that are missing', () => {
   assert.match(s, /missing sections: ' \+ built\.validation\.missing\.join/,
     '"content is not complete" is not something a committee member can act on');
 });
+
+test('the programme timer is fast enough to matter on a matchday', () => {
+  // Hourly meant up to 59 minutes between the official teams being confirmed
+  // and the programme appearing. For a 3pm kick-off with teams out at 2pm that
+  // is the difference between a pre-match programme and none at all.
+  const fs = require('fs');
+  const path = require('path');
+  const toml = fs.readFileSync(path.join(__dirname, '..', 'netlify.toml'), 'utf8');
+  const block = toml.slice(toml.indexOf('[functions."programme-sync"]'));
+  const cron = (block.match(/schedule = "([^"]+)"/) || [])[1];
+  assert.ok(cron, 'the programme sync must be scheduled');
+  const everyN = (cron.match(/^\*\/(\d+) \* \* \* \*$/) || [])[1];
+  assert.ok(everyN && Number(everyN) <= 15,
+    'it must run at least every 15 minutes, found: ' + cron);
+});

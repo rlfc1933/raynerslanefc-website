@@ -52,12 +52,21 @@
 [functions."football-registry-sync"]
   schedule = "*/20 * * * *"
 
-# Programme drafts and matchday publication. Hourly is enough: a draft is
-# assembled days ahead, and on matchday the only thing being watched for is the
-# team sheets — which the live match sync is already polling every minute, so
-# the line-ups are in the registry before this runs.
+# Programme drafts and matchday publication.
+#
+# WAS hourly, on the reasoning that a draft is assembled days ahead. That was
+# wrong about the moment that matters. On matchday the engine is waiting for the
+# official team sheets, and an hourly timer means up to 59 minutes between the
+# teams being confirmed and the programme appearing — for a 3pm kick-off with
+# teams out at 2pm, that is the difference between a pre-match programme and
+# none at all. The same gap delays every recovery by up to an hour.
+#
+# Every ten minutes costs the provider nothing: this function never calls them.
+# It reads the club's own registry and the club's own data files.
+#
+# ⛔ SCHEDULED. The button lives in programme-sync-now.js.
 [functions."programme-sync"]
-  schedule = "7 * * * *"
+  schedule = "*/10 * * * *"
 
 # Pin a stable Node LTS so the cloud install is deterministic. Cloud builds
 # started failing (exit 2 in "building site") after edf8e44 while local builds
