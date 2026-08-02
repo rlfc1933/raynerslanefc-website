@@ -210,6 +210,16 @@ async function fixtureDetail(fixtureId) {
   ]);
   const state = (states && states[0]) || null;
 
+  // Is there a PUBLISHED programme for this fixture? The Match Centre shows a
+  // button only when there is; before that it shows a sentence, because a
+  // control that leads nowhere is worse than an honest explanation.
+  let programmePublished = false, programmeState = null;
+  try {
+    const eds = await S.rest('programme_editions?internal_fixture_id=eq.' + encodeURIComponent(f.id) +
+      "&state=in.('published_matchday','published_late','full_time_current','archived')&select=state&limit=1");
+    if (eds && eds[0]) { programmePublished = true; programmeState = eds[0].state; }
+  } catch (e) { /* no programme system yet — the sentence stands */ }
+
   const us = state ? (f.isHome ? state.home_score : state.away_score) : null;
   const them = state ? (f.isHome ? state.away_score : state.home_score) : null;
 
@@ -231,6 +241,7 @@ async function fixtureDetail(fixtureId) {
       ownGoal: e.own_goal, cardColour: e.card_colour,
     })),
     lineups: shapeLineups(lineupRows, f),
+    programmePublished, programmeState,
     previous: list[idx - 1] ? { id: list[idx - 1].id, opponent: list[idx - 1].opponent, kickoffAt: list[idx - 1].kickoffAt } : null,
     next: list[idx + 1] ? { id: list[idx + 1].id, opponent: list[idx + 1].opponent, kickoffAt: list[idx + 1].kickoffAt } : null,
   });
