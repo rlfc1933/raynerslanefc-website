@@ -540,3 +540,96 @@ and Combined Counties rules — the versioned footer mechanism exists and is
 empty rather than carrying unverified claims. PDF export untouched.
 
 ---
+
+## Gates 7 & 8 — players, and one system
+
+### The problem Gate 7 exists for
+
+The provider gives us names as text. Two players share a name; one player is
+spelled six ways across a season; a Rayners Lane shirt and an opposition shirt
+can carry the same surname on the same afternoon.
+
+A pipeline that guesses fails **silently**. No error, no log, no symptom — until
+a player notices his appearance count is short, and by then three seasons have
+been built on it. That single property drove every decision here.
+
+So identity has states and the pipeline may only propose:
+
+- an exact name inside the **same club** is a match; nothing else is
+- nothing crosses a club boundary, ever
+- an initial is offered for review, never resolved
+- a rejected suggestion is never offered again
+- the **database** refuses a public slug on anything unconfirmed, rather than
+  trusting every future endpoint to remember
+
+Every decision is signed and kept in an audit the public key cannot read.
+
+### Statistics: recomputed, never counted
+
+A counter is the obvious way to build appearances and goals, and it is wrong for
+a reason that only appears months later — a counter cannot follow a correction.
+
+Everything is rebuilt from the match records each run. A committee member's
+correction is the one thing that outranks the rebuild rather than being undone
+by it.
+
+Three rules, each now a test named after it:
+
+```
+AN UNUSED SUBSTITUTE HAS NOT PLAYED.
+AN OWN GOAL IS NOT A GOAL FOR THE SCORER.
+A STARTER WHO LEAVES THE PITCH STILL STARTED.
+```
+
+**Minutes are withheld rather than estimated.** On the squad card and the
+profile the Minutes tile simply disappears. A season containing one match whose
+substitutions were never recorded has no defensible total, and a squad page
+reading "63 minutes" when it is guessing is worse than one saying nothing.
+
+### Gate 8 — the things that had no owner
+
+**The registry had no timer.** The season list, the table, the line-ups and the
+player records only moved when somebody pressed a button — which works exactly
+as long as somebody remembers. `football-registry-sync` now runs every twenty
+minutes, four independent steps, each allowed to fail alone, inside a time
+budget.
+
+**Scheduled functions are now a rule, not a habit.** Netlify returns 403 to
+direct HTTP, and this project has shipped a button wired to one twice — the
+button responded, a toast appeared, nothing ran. `tests/scheduled-functions.js`
+requires a companion for every timer, forbids browser code from naming one, and
+proves the flag-off path by running the timers with `fetch` stubbed to throw
+rather than by reading the source and hoping.
+
+**The homepage and the fixtures page were still reading the legacy file.** Both
+now ask the registry first. The countdown is anchored on the fixture's absolute
+instant through `MatchTime` instead of being rebuilt from two strings — the
+shape of the bug that showed Los Angeles a countdown to a match at 89 minutes.
+Where a page needs the day rather than the instant it derives it in
+Europe/London; slicing the front off an ISO string returns the UTC date, which
+is the wrong day after 11pm BST.
+
+**The hand-entered scoreboard is folded away in red.** It still works — it is
+what the club used before the feed — but an open pair of + buttons beside a feed
+already writing the score is an invitation to two writers on a Saturday. It now
+tells the operator the one thing that makes it work: take manual control first,
+or the next check overwrites you.
+
+**A health view.** Everything else reports its own success, which cannot tell
+you something has stopped: a timer that fails silently looks exactly like a
+timer with nothing to do. One line, which part, how long, and the provider's own
+error text rather than a paraphrase nobody can act on.
+
+### A whole season, offline
+
+`tests/season-simulation.test.js` plays forty matches from a fixed seed —
+substitutions, dismissals, own goals, initials — and asserts what has to survive
+all of it. Fixed seed on purpose: a failure in a random season is a coincidence,
+and a coincidence cannot be debugged.
+
+### Left undone, deliberately
+
+The programme's legal footer is still empty. `legal_version` exists; there is no
+wording behind it, because the current FA Handbook and Combined Counties rules
+have not been read from their primary sources. An absence is visible; a
+plausible fabrication is not.
