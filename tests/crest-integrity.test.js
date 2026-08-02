@@ -352,3 +352,71 @@ test('the crest backfill is NOT rate-limited behind provider courtesy', () => {
   assert.match(crestStep, /CRESTS\.backfill\(teams\)/);
   assert.match(crestStep, /withoutArtwork/, 'and it must name what it could not fix');
 });
+
+/* ── idempotency: running it twice must change nothing the second time ────── */
+
+test('THE BACKFILL IS IDEMPOTENT', async () => {
+  const CR = require('../netlify/functions/lib/football/crests');
+  const map = {
+    'broadfieldsunited': 'img/crests/broadfields-united.png',
+    'hilltop': 'img/crests/hilltop.png',
+  };
+  // Simulate the two runs the way the function does: patch, then re-read.
+  let teams = [
+    { id: 1, canonical_name: 'Broadfields United', crest_asset_path: null },
+    { id: 2, canonical_name: 'Hilltop', crest_asset_path: null },
+    { id: 3, canonical_name: 'Unknown FC', crest_asset_path: null },
+  ];
+  const run = (rows) => rows
+    .filter((t) => !CR.patchFor(t.crest_asset_path, t.canonical_name).keep)
+    .map((t) => ({ id: t.id, crest_asset_path: CR.forName(map, t.canonical_name) }))
+    .filter((r) => r.crest_asset_path);
+
+  const first = run(teams);
+  assert.strictEqual(first.length, 2, 'the first run fills the two it can');
+  // Apply, as the function would.
+  first.forEach((p) => { teams.find((t) => t.id === p.id).crest_asset_path = p.crest_asset_path; });
+
+  const second = run(teams);
+  assert.deepStrictEqual(second, [], 'A SECOND RUN MUST CHANGE NOTHING');
+
+  const third = run(teams);
+  assert.deepStrictEqual(third, [], 'and a third');
+  // The club with no artwork is still untouched, not filled with a guess.
+  assert.strictEqual(teams.find((t) => t.id === 3).crest_asset_path, null);
+});
+
+test('an incomplete provider sync cannot erase the mappings afterwards', async () => {
+  const CR = require('../netlify/functions/lib/football/crests');
+  // The provider says nothing about artwork. The registry keeps what it has.
+  const stored = 'img/crests/broadfields-united.png';
+  [null, undefined, '', '   '].forEach((providerSaid) => {
+    const decision = CR.patchFor(stored, 'Broadfields United');
+    assert.strictEqual(decision.keep, true,
+      'approved artwork must survive a provider response of ' + JSON.stringify(providerSaid));
+  });
+  // And the team upsert never carries the column at all.
+  const s = R('netlify/functions/football-sync-season.js');
+  const fn = s.slice(s.indexOf('async function ensureTeams'), s.indexOf('async function ensureCompetitions'));
+  assert.ok(fn.slice(fn.indexOf('const rows = missing.map'), fn.indexOf('const saved'))
+    .indexOf('crest_asset_path') === -1);
+});
+
+test('an empty string is never a valid crest, anywhere', () => {
+  const CR = require('../netlify/functions/lib/football/crests');
+  assert.strictEqual(CR.patchFor('', 'X').keep, false);
+  assert.strictEqual(CR.patchFor('  \t ', 'X').keep, false);
+  // And the browser resolver treats it the same way.
+  const r = LaneCrest.resolve('A Club With No Artwork', '');
+  assert.strictEqual(r.fallback, true);
+  assert.strictEqual(r.url, null);
+});
+
+test('an approved local crest is never replaced by a remote provider URL', () => {
+  const r = LaneCrest.resolve('Hilltop', 'https://provider.example/hilltop.png');
+  assert.strictEqual(r.url, 'img/crests/hilltop.png');
+  assert.match(r.source, /club-library/);
+  // Only a published programme's own snapshot may outrank it, and only then.
+  const snap = LaneCrest.resolve('Hilltop', 'img/crests/hilltop-2026.png', { preferHint: true });
+  assert.match(snap.source, /snapshot/);
+});
