@@ -58,7 +58,16 @@ async function invoke(mod, query) {
     queryStringParameters: Object.assign({ apply: '1' }, query || {}),
     body: JSON.stringify({ apply: true, pin: process.env.ADMIN_PIN || '' }),
   });
-  try { return JSON.parse(out.body || '{}'); } catch (e) { return { ok: false }; }
+  let parsed;
+  try { parsed = JSON.parse(out.body || '{}'); } catch (e) { parsed = null; }
+  // These handlers answer 200 with {ok:false} rather than throwing — that is
+  // right for an HTTP caller and wrong for this one. Left alone, a run where
+  // nothing worked would report four green steps, which is the precise kind of
+  // false reassurance the health view exists to remove.
+  if (!parsed || parsed.ok === false) {
+    throw new Error((parsed && parsed.error) || 'the underlying sync reported failure');
+  }
+  return parsed;
 }
 
 /**
@@ -109,8 +118,11 @@ exports.handler = async function () {
     for (const f of wanted) {
       // Time budget: a scheduled function that overruns is killed mid-write.
       if (Date.now() - startedAt > 18000) break;
-      const out = await invoke(match, { fixture: f.internal_fixture_id || f.external_fixture_id });
-      done.push({ fixture: f.internal_fixture_id, ok: !!out.ok, lineups: out.lineups || null });
+      // One fixture failing must not abandon the others.
+      let out = null, err = null;
+      try { out = await invoke(match, { fixture: f.internal_fixture_id || f.external_fixture_id }); }
+      catch (e) { err = String((e && e.message) || e); }
+      done.push({ fixture: f.internal_fixture_id, ok: !!out, lineups: out ? out.lineups : null, error: err });
     }
     return { attempted: done.length, outstanding: wanted.length - done.length, done };
   }));

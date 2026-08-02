@@ -116,3 +116,14 @@ test('the registry sync stays inside its time budget', () => {
   assert.match(src, /Date\.now\(\) - startedAt > \d+/,
     'a run that overruns is killed mid-write; it must stop itself first');
 });
+
+test('a step that failed is reported as failed, not as green', () => {
+  // The underlying handlers answer 200 with {ok:false} rather than throwing.
+  // That is right for an HTTP caller and wrong for this one: left alone, a run
+  // where nothing worked would report four green steps — the precise false
+  // reassurance the health view exists to remove.
+  const src = R('netlify/functions/football-registry-sync.js');
+  assert.match(src, /if \(!parsed \|\| parsed\.ok === false\) \{\s*\n?\s*throw new Error/);
+  // And one fixture failing must not abandon the rest of them.
+  assert.match(src, /catch \(e\) \{ err = String/);
+});
