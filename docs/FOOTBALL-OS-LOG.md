@@ -245,3 +245,84 @@ No public consumer reads any of it.
 the registry, after parity proof.
 
 ---
+
+## Gate 4 — fixtures, results and league table migrated
+
+**SHA in / out:** `d9c29e4` → `7a31585`
+**Public behaviour:** changed, deliberately and verified — see below.
+
+### Consumer inventory (before)
+
+| Consumer | Was reading | Now |
+|---|---|---|
+| homepage next/previous | `data/fixtures.json` via `rlfcFixturesShape` | registry via `football-data` |
+| homepage league position | `window._rlfcTable` — **never assigned by anything** | registry |
+| fixtures page table | **Wikipedia** (`fetch-table.js`) | registry snapshot, Wikipedia as fallback |
+| fixtures page schedule | `data/fixtures.json` | unchanged this gate (rollback source) |
+| programme | `data/fixtures.json` + Wikipedia | Gate 6 |
+| Match Centre | `match_state` | Gate 5 |
+
+### Two things that were quietly broken
+
+**The league-position tile has never worked.** `js/club-now.js` reads
+`window._rlfcTable`; nothing in the codebase has ever assigned it. Because the
+tile hides itself rather than showing a fake zero, the failure looked like a
+design decision. It now reads the registry — and still hides if that answers
+with nothing. **Live: "10th POSITION".**
+
+**The league table came from Wikipedia.** Accurate today — both sources were
+compared before switching and agreed exactly (Rayners Lane 10th, P1 D1 GF3 GA3
+Pts1 after the 3-3) — but a page anyone may edit is not the competition's own
+record, and nothing validated season or division.
+
+### New
+
+- `netlify/functions/football-sync-table.js` — validates, maps rows to real
+  teams, stores a **snapshot** so an archived programme keeps its own matchday
+  standings. Refuses to replace a good table with a bad one; an identical table
+  does not stack a duplicate.
+- `netlify/functions/lib/football/read.js` — the one place that answers next /
+  current / previous / form / table.
+- `netlify/functions/football-data.js` — one public URL for every surface.
+- `js/football-data.js` — the public client. A failed read returns null and the
+  caller keeps what it had; it never looks like "no fixtures".
+
+### "Next" and "now" were the same function
+
+They shared a 150-minute grace window, so a match **in progress** was still
+offered as the next match — the same class of error that had the hero counting
+down to a fixture that had finished. `nextFrom()` is now strictly future;
+`currentFrom()` owns the in-play window. A test asserts the handover has no gap
+and no overlap: a gap blanks the hero, an overlap shows a countdown beside a
+live score.
+
+### Verified in production, in America/Los_Angeles
+
+```
+next      2026-08-04T18:45Z  Broadfields United v Rayners Lane (away)
+previous  2026-08-01T14:00Z  Rayners Lane 3-3 Wallingford & Crowmarsh
+programme 2026-08-11         v Hilltop   ← skips the away league game AND the away cup tie
+form      D 3-3
+table     10th of 20, P1, Pts1
+counts    40 fixtures, 1 played
+hero      NEXT MATCH · Broadfields away · 02 Days 14 Hrs
+strip     10th POSITION | D 3–3 LAST v WALLINGFORD | D LAST 1
+```
+
+**Checked, not assumed:** the Broadfields away fixture shows Tithe Farm as its
+venue. That is correct — Broadfields United groundshare there. Both entries are
+`verified` in `data/venues.json`.
+
+### Tests
+
+15 new in `tests/football-read.test.js`, covering the failures this site has
+actually had. Full suite **266 pass, 0 fail**.
+
+**Rollback:** revert `7a31585` — the homepage tile returns to hidden and the
+fixtures table to Wikipedia. `data/fixtures.json`, `fetch-table.js` and every
+legacy reader remain in place and untouched.
+
+**Next:** Gate 5 — Match Centre, homepage live/current/next lifecycle, full-time
+hold and archived match navigation.
+
+---
