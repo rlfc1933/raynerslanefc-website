@@ -496,3 +496,46 @@ test('every state the sync writes is a legal state', () => {
     assert.ok(allowed.includes("'" + v + "'"), 'the database would reject state ' + v);
   });
 });
+
+/* ── publication is two writes that are not in a transaction ──────────────── */
+
+test('A PARTIAL PUBLICATION IS REPAIRED, NOT COLLIDED WITH', () => {
+  // Publishing inserts the immutable version, then points the edition at it.
+  // When the second write failed on a check constraint, the version row existed
+  // while the edition still said current_version = 0 — so the next run computed
+  // the same number and hit a unique index (23505). The edition could never
+  // publish, and each attempt failed a little further along than the last.
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+
+  assert.match(s, /async function nextVersion\(editionId, edition\)/,
+    'the version number must come from the versions table, not from the edition');
+  assert.match(s, /if \(highest > acknowledged\)/,
+    'a version the edition never acknowledged must be REUSED, not duplicated');
+  assert.match(s, /return \{ version: highest, repairing: true \}/);
+
+  // Both publication paths must go through it.
+  const uses = (s.match(/await nextVersion\(/g) || []).length;
+  assert.strictEqual(uses, 2, 'both the publish and the enrich path must use it');
+  assert.ok(!/const version = \(edition\.current_version \|\| 0\) \+ 1/.test(s),
+    'the old derivation is still present somewhere');
+
+  // And the insert itself must tolerate a repeat.
+  const inserts = (s.match(/programme_versions\?on_conflict=edition_id,version/g) || []).length;
+  assert.strictEqual(inserts, 2, 'both inserts must be conflict-tolerant');
+  assert.match(s, /resolution=merge-duplicates,return=minimal/);
+});
+
+test('a repeated run creates no second edition and no second version', () => {
+  // The idempotency the brief asks for, expressed as the two rules that give
+  // it: the edition is found by fixture and reused, and the version number is
+  // derived from what exists rather than from a counter that can fall behind.
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+  assert.match(s, /findOne\('programme_editions', 'fixture_id=eq\.' \+ fx\.id\)/,
+    'an edition must be looked up before one is created');
+  assert.match(s, /if \(decision\.canPublish && !edition\.published_at\)/,
+    'an already-published edition must never be republished');
+});

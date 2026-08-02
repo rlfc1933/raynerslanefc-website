@@ -167,6 +167,33 @@ async function lineupsFor(fixtureRowId, fx) {
   return out;
 }
 
+
+/**
+ * The version number this run should write, and whether it is repairing one.
+ *
+ * A publication is two writes: insert the immutable version, then point the
+ * edition at it. They are not in a transaction. When the second write failed —
+ * as it did on a check constraint — the version row existed while the edition
+ * still said current_version = 0, so the next run computed the same number
+ * again and collided with a unique index (23505). The edition could never
+ * publish, and each attempt failed a little further along than the last.
+ *
+ * So the versions table is the source of truth for the number, and a version
+ * that exists beyond what the edition has acknowledged is REUSED rather than
+ * duplicated. That makes a repeated run a repair instead of a collision.
+ */
+async function nextVersion(editionId, edition) {
+  const rows = await S.rest('programme_versions?edition_id=eq.' + editionId +
+    '&select=version&order=version.desc&limit=1') || [];
+  const highest = rows.length ? Number(rows[0].version) : 0;
+  const acknowledged = Number(edition.current_version || 0);
+  if (highest > acknowledged) {
+    // A previous run wrote this and never got to record it. Finish that job.
+    return { version: highest, repairing: true };
+  }
+  return { version: highest + 1, repairing: false };
+}
+
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
@@ -290,8 +317,9 @@ exports.handler = async function (event) {
       };
 
       if (decision.canPublish && !edition.published_at) {
-        const version = (edition.current_version || 0) + 1;
-        await S.rest('programme_versions', {
+        const v = await nextVersion(edition.id, edition);
+        const version = v.version;
+        await S.rest('programme_versions?on_conflict=edition_id,version', {
           method: 'POST',
           body: [{
             edition_id: edition.id, version,
@@ -307,7 +335,7 @@ exports.handler = async function (event) {
             // claiming supporters had a programme on the day when they did not.
             published_at: new Date().toISOString(),
           }],
-          headers: { Prefer: 'return=minimal' },
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
         });
         patch.current_version = version;
         patch.published_at = new Date().toISOString();
@@ -330,8 +358,9 @@ exports.handler = async function (event) {
                  && !edition.fulltime_enriched_at) {
         // Published before the whistle: add the result to the edition that is
         // already out, as a new immutable version rather than an edit.
-        const version = (edition.current_version || 0) + 1;
-        await S.rest('programme_versions', {
+        const v2 = await nextVersion(edition.id, edition);
+        const version = v2.version;
+        await S.rest('programme_versions?on_conflict=edition_id,version', {
           method: 'POST',
           body: [{
             edition_id: edition.id, version, payload: built,
@@ -343,7 +372,7 @@ exports.handler = async function (event) {
             generated_at: new Date().toISOString(),
             published_at: new Date().toISOString(),
           }],
-          headers: { Prefer: 'return=minimal' },
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
         });
         patch.current_version = version;
         patch.fulltime_enriched_at = new Date().toISOString();
