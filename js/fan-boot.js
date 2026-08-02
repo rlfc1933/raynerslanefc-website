@@ -33,6 +33,7 @@
   'use strict';
 
   var CONFIG_SRC = '/js/supabase-config.js';
+  var REDIRECT_SRC = '/js/fan-redirect.js';
   var LIBRARY_SRC = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
   var ACCOUNT_SRC = '/js/fan-account.js';
 
@@ -53,6 +54,18 @@
 
   var client = null;
   var listeners = [];
+  var lastRedirectFault = null;
+
+  /* Did this page load carrying an auth response?
+     Captured SYNCHRONOUSLY, at parse time, because the Supabase client has
+     detectSessionInUrl on and removes the fragment as soon as it starts. By
+     the time any of our own code runs the evidence may already be gone. */
+  var arrivedWithAuth = (function () {
+    try {
+      return /(^|[#&?])(access_token|refresh_token|provider_token|code|error_description|error_code)=/
+        .test(location.hash + '&' + location.search);
+    } catch (e) { return false; }
+  })();
 
   function announce() {
     try {
@@ -97,6 +110,10 @@
 
   async function dependencies() {
     if (!global.RLFC_SUPABASE) await loadScript(CONFIG_SRC);
+    // The redirect rules travel WITH the bootstrap, for the same reason the
+    // Supabase client does: a page that can start a sign-in must not be able
+    // to do it without the rules about where a sign-in may land.
+    if (!global.LaneRedirect) await loadScript(REDIRECT_SRC);
     if (!(global.supabase && global.supabase.createClient)) await loadScript(LIBRARY_SRC);
   }
 
@@ -234,15 +251,29 @@
 
     if (safePath(d.returnPath)) rememberReturn(d.returnPath);
 
+    /* THE GUARD.
+       A real supporter was sent to localhost:3000 because the redirect we
+       asked for was silently discarded by Supabase and replaced with its
+       Site URL. We now check our own redirect before asking for the email —
+       and if it is wrong we send NOTHING. "Please try again shortly" is
+       recoverable; a link to a machine that does not exist is not. */
+    var R = global.LaneRedirect;
+    var target = R ? R.authRedirect() : null;
+    var verdict = R ? R.checkRedirect(target) : { ok: false, reason: 'redirect rules did not load' };
+    if (!verdict.ok) {
+      lastRedirectFault = verdict.reason;
+      return { error: 'We couldn\u2019t prepare your secure sign-in link. Please try again shortly.' };
+    }
+
     try {
       var r = await client.auth.signInWithOtp({
         email: email,
-        options: { emailRedirectTo: location.origin + '/fan-zone.html?welcome=1' },
+        options: { emailRedirectTo: verdict.url },
       });
-      if (r.error) return { error: r.error.message };
-      return { ok: true };
+      if (r.error) return { error: R ? R.redact(r.error.message) : 'Could not send that link.' };
+      return { ok: true, redirect: verdict.url };
     } catch (err) {
-      return { error: String((err && err.message) || err) };
+      return { error: R ? R.redact(String((err && err.message) || err)) : 'Could not send that link.' };
     }
   }
 
@@ -346,6 +377,18 @@
     }
 
     await refresh();
+
+    /* CREDENTIAL CLEANUP.
+       The session now lives in storage; the token in the address bar is spent.
+       Leaving it there puts it in browser history, in the referer of the next
+       request, and in any screenshot the supporter sends us asking for help. */
+    if (arrivedWithAuth && global.LaneRedirect) {
+      try {
+        var clean = global.LaneRedirect.cleanUrl(location.href);
+        history.replaceState({}, document.title, clean);
+      } catch (e) {}
+    }
+
     loadScript(ACCOUNT_SRC).catch(function () {});   // the navigation control
     return state;
   })();
@@ -369,5 +412,10 @@
     safePath: safePath,
     TERMS_VERSION: TERMS_VERSION,
     PRIVACY_VERSION: PRIVACY_VERSION,
+    // True when this page load carried a Supabase auth response. The callback
+    // uses it instead of a ?welcome=1 flag, because the redirect that Supabase
+    // allow-lists is now a bare path with no query string.
+    arrivedWithAuth: function () { return arrivedWithAuth; },
+    redirectFault: function () { return lastRedirectFault; },
   };
 })(window);

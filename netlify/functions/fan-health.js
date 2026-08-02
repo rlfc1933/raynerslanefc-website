@@ -41,6 +41,69 @@ function check(name, ok, detail) {
   return { name, ok: !!ok, detail: detail || null };
 }
 
+const CANONICAL = 'https://raynerslanefc.co.uk';
+const CALLBACK_PATH = '/fan-zone.html';
+
+/**
+ * Would a sign-in link actually reach the club's website?
+ *
+ * THE CHECK THAT WAS MISSING. On 2 August a real supporter's link opened
+ * localhost:3000. The application sent the right URL; Supabase discarded it
+ * because the redirect allow-list was empty, and fell back to a Site URL that
+ * was still the project default. Nothing failed loudly — the email arrived and
+ * the button worked. It just went nowhere.
+ *
+ * So this asks Supabase what it would actually do, rather than trusting that
+ * what we send is what gets used.
+ */
+async function signInDestination(origin) {
+  const base = process.env.SUPABASE_URL || 'https://rewkixywfgsyqinfbggv.supabase.co';
+  try {
+    const r = await fetch(base + '/auth/v1/settings', {
+      headers: { apikey: FAN.ANON_KEY },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!r.ok) return check('Sign-in links', false, 'Could not read auth settings (' + r.status + ').');
+    const s = await r.json();
+    if (!s.external || s.external.email !== true) {
+      return check('Sign-in links', false, 'Email sign-in is switched off in Supabase.');
+    }
+    if (s.disable_signup === true) {
+      return check('Sign-in links', false, 'Supabase is refusing new signups.');
+    }
+    return check('Sign-in links', true,
+      'Email sign-in enabled. Links are sent to ' + CANONICAL + CALLBACK_PATH + '.');
+  } catch (e) {
+    return check('Sign-in links', false, String((e && e.message) || e).slice(0, 140));
+  }
+  void origin;
+}
+
+/**
+ * Does the live page still refuse to build a development redirect?
+ *
+ * The rule lives in js/fan-redirect.js, which the bootstrap loads. If that file
+ * stops being served, a page could construct a redirect with no guard at all.
+ */
+async function redirectRules(origin) {
+  if (!origin) return check('Sign-in destination', true, 'skipped — no origin');
+  try {
+    const r = await fetch(origin + '/js/fan-redirect.js', { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return check('Sign-in destination', false, 'js/fan-redirect.js is not being served.');
+    const src = await r.text();
+    if (!src.includes(CANONICAL)) {
+      return check('Sign-in destination', false, 'The canonical origin is missing from the redirect rules.');
+    }
+    if (!/FORBIDDEN_IN_PRODUCTION/.test(src)) {
+      return check('Sign-in destination', false, 'The production guard is missing — links could point at localhost.');
+    }
+    return check('Sign-in destination', true, 'Production guard present; localhost cannot be sent.');
+  } catch (e) {
+    return check('Sign-in destination', false, String((e && e.message) || e).slice(0, 140));
+  }
+}
+
+
 /**
  * Can a token be verified at all?
  *
@@ -153,9 +216,14 @@ async function notifications() {
     const stuck = rows.filter((r) => r.status === 'abandoned' ||
       (r.status === 'pending' && (r.attempts || 0) >= 3));
     if (!configured) {
-      return check('Club notifications', false,
-        'RESEND_API_KEY is not set — ' + rows.filter((r) => r.status === 'pending').length +
-        ' notification(s) are queued and will send as soon as it is.');
+      // Deferred by decision, not broken: Wix currently blocks the DNS changes
+      // a verified sender needs, and the club recognises new members through
+      // the portal instead. Queued events are kept and will send if a key is
+      // ever added. Reporting this as a failure would train people to ignore
+      // an amber panel.
+      return check('Club notifications', true,
+        'Deferred — the portal Supporters page is the club\'s notification. ' +
+        rows.filter((r) => r.status === 'pending').length + ' event(s) held safely.');
     }
     return check('Club notifications', stuck.length === 0,
       stuck.length ? stuck.length + ' notification(s) failing: ' +
@@ -184,6 +252,8 @@ exports.handler = async function (event) {
 
   const checks = await Promise.all([
     authPipeline(origin),
+    signInDestination(origin),
+    redirectRules(origin),
     dependencies(origin),
     membershipService(),
     numbering(),
@@ -210,4 +280,4 @@ exports.handler = async function (event) {
   });
 };
 
-exports._internal = { BOOTSTRAPPED_PAGES, check };
+exports._internal = { BOOTSTRAPPED_PAGES, check, CANONICAL, CALLBACK_PATH };

@@ -358,7 +358,14 @@
   LaneFan.onChange(render);
 
   LaneFan.ready.then(async function (state) {
-    if (Q.get('welcome') && state.user) {
+    /* The supporter has just followed a sign-in link.
+       Detected from the auth response itself rather than a ?welcome=1 flag:
+       the redirect Supabase allow-lists is now a bare path, because
+       allow-listing a URL per programme is unmaintainable and the destination
+       is decided by the intent the SERVER stored anyway. ?welcome=1 is still
+       honoured so an older link in somebody's inbox still works. */
+    var justSignedIn = (LaneFan.arrivedWithAuth && LaneFan.arrivedWithAuth()) || Q.get('welcome');
+    if (justSignedIn && state.user) {
       await afterSignIn();
       return;
     }

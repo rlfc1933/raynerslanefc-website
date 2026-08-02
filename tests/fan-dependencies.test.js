@@ -69,6 +69,9 @@ test('THE BOOTSTRAP IS THE ONLY WAY IN', async (t) => {
       'fan-boot.js must load the config itself, not assume a page provided it');
     assert.match(src, /@supabase\/supabase-js/,
       'fan-boot.js must load the Supabase library itself');
+    assert.match(src, /fan-redirect\.js/,
+      'and the redirect rules — a page that can start a sign-in must not be ' +
+      'able to do it without the rules about where a sign-in may land');
     assert.match(src, /function\s+loadScript|loadScript\s*=/,
       'fan-boot.js must actually inject them, not merely mention them');
     assert.match(src, /await\s+dependencies\(\)/,
