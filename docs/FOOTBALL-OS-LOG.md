@@ -679,3 +679,122 @@ to remove, so it would have undermined the thing built alongside it.
   a starter withdrawn on 70' — the case the provider's markup makes look like an
   unused substitute — and **zero linked names**, because nobody has been
   confirmed yet. Exactly the specified behaviour.
+
+---
+
+## Incident: every opponent crest disappeared
+
+Reported by the club. Severity: visible on the two most-read pages.
+
+### Root cause
+
+`football_teams.crest_asset_path` was declared in the Gate 1 registry with the
+comment *"OUR artwork, from data/crests.json"* — and **no code ever wrote it**.
+It was null for all 22 clubs from the day the registry was created.
+
+That was invisible for as long as the public pages read `data/fixtures.json`,
+which carries `oppCrest` for all 40 matches. In Gate 8 the home page
+(`d9cf65d`) and the fixtures page (`efae949`) were migrated to read the registry
+**first**, and the adapters dropped the field: `fxFromRegistry` never set
+`oppCrest` at all, and `club-now`'s `fromRegistry` read `f.awayCrest`, which was
+null.
+
+Both pages then drew their **initials placeholder** — which is correct behaviour
+for a club we genuinely hold no artwork for.
+
+**That is why nobody noticed. The failure rendered as a design decision.** A
+broken image would have been louder and far less damaging.
+
+### Why the tests did not catch it
+
+422 were passing. Not one asserted that a club the site is about to draw has
+something to draw. The tests checked that the resolver *had* a fallback; none
+checked that the fallback was not being used for all 21 opponents at once.
+
+### Why the health view did not catch it
+
+It reported everything green. It could not see the problem because it never
+looked at crests at all.
+
+### Blast radius
+
+| Surface | Affected | Why |
+|---|---|---|
+| Home page next match / last result | **Yes** | migrated to the registry |
+| Fixtures page (80 crest slots) | **Yes** | migrated to the registry |
+| Programme covers, reader, library cards | **Yes** | read `crest_asset_path` |
+| Match Centre | **No** | had its own resolver, reading the club library by name |
+
+The Match Centre surviving is the whole lesson: the one page that resolved from
+the club's own artwork by club name, and verified the asset before drawing it,
+was untouched. Six pages had improvised six resolvers; five broke.
+
+### Fix
+
+One resolver, `js/crest.js`, built from the Match Centre's surviving logic and
+used by every surface. It never returns null, an empty string or a guessed
+filename, and never emits an `<img>` for an asset it has not proven loads. A
+club with no artwork gets a shield that **declares itself**, so a fallback can
+never again pass as a crest.
+
+Data path: the registry is populated from the club's library, a null can never
+overwrite approved artwork, and the crest is kept out of the merge-duplicates
+payload entirely — so a bad minute at the CDN cannot become permanent loss.
+
+Health: crests are now a subsystem of their own, and the view names the clubs
+that are missing one rather than reporting a count.
+
+### Found while fixing it
+
+**`A.F.C. Hayes` and `AFC Hayes` normalised differently.** A trailing `\b`
+cannot match after a full stop, so one club would have become two teams with two
+crest lookups. Fixed on both sides and verified against all 27 club names the
+site holds: not one existing key moves. The `AFC`-stripping collision between
+`AFC Hayes` and a bare `Hayes` is now a **documented, tested** latent trap
+rather than a silent one.
+
+**An edition could publish with a blank cover.** The reader is snapshot-only by
+design, so whatever artwork an edition publishes with is what it shows for ever.
+The registry backfill runs every twenty minutes and the programme sync hourly —
+an edition could publish in the gap and carry two grey letters permanently. The
+sync now settles artwork before it generates anything.
+
+**The library called a played match "today".** A recovered edition is not
+archived, so a state check labelled yesterday's programme *"Today at The Lane"*.
+"Today" is now decided from the kick-off instant in Europe/London.
+
+### Verified not damaged
+
+40 fixtures: zero nulls across opponent, home/away, venue, competition, status,
+kick-off, teams and ids. Zero mismatches against the club's own record. 20
+league-table rows all mapped. 0 open conflicts. **The crest was the only
+casualty** — nothing was erased, a reader moved to a source that had never held
+one specific field.
+
+---
+
+## Incident: no programme for the Wallingford match
+
+`decide()` could only publish ON matchday. Any fixture whose day passed without
+publication fell into `WAITING_FOR_MATCHDAY` and stayed there for ever, waiting
+for a date in the past.
+
+That is the shape of every real failure — a deploy landing after the teams are
+out, late line-ups, an outage across kick-off. The programme was not late; it
+was **unreachable**.
+
+### Recovery lifecycle
+
+Inside 48 hours of full time the engine publishes it itself, dated honestly and
+labelled as having come after the whistle. Outside that window nothing is
+manufactured: the edition becomes a candidate a **named human** authorises,
+because a timer producing programmes for matches played months ago would be
+inventing a history the club never had.
+
+`published_at` is **always the real moment**. A test asserts it can never be
+derived from the fixture.
+
+`isFinal` was hardcoded `false`, so no edition could ever be enriched with the
+result it was published alongside. Full time is now captured **into** the
+edition rather than read live — otherwise an archived programme would show the
+current score the moment the next match kicked off.
