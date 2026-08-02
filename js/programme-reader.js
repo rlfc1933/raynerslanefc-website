@@ -187,6 +187,24 @@
         encodeURIComponent(fixtureId) + '">Full match details</a></div>' : '');
   }
 
+  /* The club's identity block. Required in the programme by FA Standardised
+     Rules 2.15. Rendered from what the edition STORED, so an archived
+     programme keeps the footer it was published with.
+
+     No disclaimer of responsibility appears here on purpose: Rule 8.14 says
+     clubs are responsible for their programme's comments "notwithstanding any
+     disclaimers to the contrary", so one would mislead rather than protect. */
+  function legalFooter(l) {
+    if (!l || !l.lines || !l.lines.length) return '';
+    var links = (l.links || []).map(function (x) {
+      return '<a href="' + esc(x.href) + '">' + esc(x.label) + '</a>';
+    }).join('');
+    return '<footer class="pr-legal" aria-label="Club information">' +
+      l.lines.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') +
+      (links ? '<p class="pr-legal__links">' + links + '</p>' : '') +
+      '</footer>';
+  }
+
   function toc(keys) {
     return '<nav class="pr-toc" aria-label="Programme contents">' +
       keys.map(function (k) {
@@ -260,7 +278,8 @@
         (ed.fixtureId ? '<a class="btn btn-primary" href="match-centre.html?id=' + encodeURIComponent(ed.fixtureId) + '">Match Centre</a>' : '') +
         '<a class="btn" href="programmes.html">All programmes</a></div>' +
       '<p class="pr-credit">Rayners Lane FC · free digital matchday programme' +
-        (ed.publishedAt ? ' · published ' + esc(String(ed.publishedAt).slice(0, 10)) : '') + '</p>';
+        (ed.publishedAt ? ' · published ' + esc(String(ed.publishedAt).slice(0, 10)) : '') + '</p>' +
+      legalFooter(d.legal);
 
     if (cover.homeTeam && cover.awayTeam) {
       document.title = cover.homeTeam + ' v ' + cover.awayTeam + ' | Matchday Programme | Rayners Lane FC';

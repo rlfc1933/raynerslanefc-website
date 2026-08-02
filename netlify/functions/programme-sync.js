@@ -15,6 +15,7 @@ const RULES = require('./lib/programme/publish-rules');
 const GEN = require('./lib/programme/generate');
 const F = require('./lib/fwp');
 const CRESTS = require('./lib/football/crests');
+const LEGAL = require('./lib/programme/legal');
 
 const SEASON = process.env.FWP_SEASON || '2026-2027';
 const SITE = process.env.SITE_ORIGIN || 'https://raynerslanefc.co.uk';
@@ -194,6 +195,18 @@ async function nextVersion(editionId, edition) {
   return { version: highest + 1, repairing: false };
 }
 
+/* The club's legal identity, from the club's own published data. Never
+   invented: Rule 2.15 requires the legal FORM as well as the name, and the
+   club has not published one, so the footer says so rather than guessing. */
+async function loadClubLegal() {
+  const j = await loadJson('club-legal').catch(() => null);
+  return {
+    legalName: (j && j.legalName) || 'Rayners Lane Football Club',
+    legalForm: (j && j.legalForm) || '',
+    identifier: (j && j.identifier) || '',
+  };
+}
+
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
@@ -223,6 +236,8 @@ exports.handler = async function (event) {
       f.programme_eligible &&
       f.scheduled_kickoff_at &&
       Date.parse(f.scheduled_kickoff_at) > now - 7 * 86400000);
+
+    const clubLegal = await loadClubLegal();
 
     const outcomes = [];
     for (const fx of eligible) {
@@ -329,7 +344,8 @@ exports.handler = async function (event) {
             sponsor_snapshot: { tiers: ctx.sponsorTiers },
             staff_snapshot: { groups: ctx.staffGroups },
             final_match_snapshot: finalMatch,
-            legal_version: 'v1',
+            legal_version: LEGAL.VERSION,
+            legal_footer: LEGAL.build(clubLegal),
             generated_at: new Date().toISOString(),
             // ALWAYS now. Backdating this to the fixture would be the system
             // claiming supporters had a programme on the day when they did not.
@@ -368,7 +384,8 @@ exports.handler = async function (event) {
             sponsor_snapshot: { tiers: ctx.sponsorTiers },
             staff_snapshot: { groups: ctx.staffGroups },
             final_match_snapshot: finalMatch,
-            legal_version: 'v1',
+            legal_version: LEGAL.VERSION,
+            legal_footer: LEGAL.build(clubLegal),
             generated_at: new Date().toISOString(),
             published_at: new Date().toISOString(),
           }],

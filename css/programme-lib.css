@@ -91,7 +91,7 @@
 
 .pl-grid {
   display: grid; gap: 18px;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(160px,100%), 1fr));
 }
 .pl-card { display: block; text-decoration: none; }
 .pl-card__cover { margin-bottom: 10px; transition: transform .18s var(--ease); }
@@ -189,12 +189,12 @@
 .pr-body p { margin-bottom: 14px; }
 .pr-lead { font-size: 18px; color: var(--white); line-height: 1.7; margin-bottom: 14px; }
 
-.pr-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 2px; margin: 18px 0; }
+.pr-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px,100%),1fr)); gap: 2px; margin: 18px 0; }
 .pr-fact { background: var(--card); border: 1px solid var(--border); padding: 14px; }
 .pr-fact__l { font-family: var(--font-c); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .pr-fact__v { font-family: var(--font-d); font-size: 22px; letter-spacing: .03em; color: var(--white); margin-top: 4px; }
 
-.pr-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 2px; }
+.pr-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px,100%),1fr)); gap: 2px; }
 .pr-person { background: var(--card); border: 1px solid var(--border); padding: 14px 16px; }
 .pr-person__r { font-family: var(--font-c); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
 .pr-person__n { font-family: var(--font-b); font-size: 15px; font-weight: 600; color: var(--white); margin-top: 3px; }
@@ -248,3 +248,20 @@
   .pl-card__cover { transition: none; }
   .pl-card:hover .pl-card__cover { transform: none; }
 }
+
+/* ── CLUB IDENTITY FOOTER ──────────────────────────────────────────────────
+   Required in the programme by FA Standardised Rules 2.15. Quiet by design:
+   it is a legal identity block, not a marketing panel. */
+.pr-legal {
+  margin: 40px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-b);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.pr-legal p { margin: 0 0 3px; }
+.pr-legal__links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 14px; }
+.pr-legal__links a { color: var(--lgrey); border-bottom: 1px solid rgba(255,255,255,.18); }
+.pr-legal__links a:hover, .pr-legal__links a:focus-visible { color: var(--yellow); border-bottom-color: var(--yellow); }

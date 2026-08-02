@@ -151,6 +151,65 @@ async function playerDetail(slug, seasonLabel) {
  * The identity review queue: everything a human has to decide.
  * Portal only — it names real people the system is unsure about.
  */
+/**
+ * The review queue, with the evidence a person needs to decide.
+ *
+ * A bare list of names is not a decision aid — it asks the committee to
+ * confirm identities from a string. This adds what the matches actually show:
+ * how often the name appeared, whether it started, what is provisionally
+ * attached to it, and whether the same name exists at another club.
+ */
+async function reviewQueueDetailed(limit) {
+  const base = await reviewQueue(limit);
+  if (!base.length) return base;
+  const ids = base.map((p) => p.id);
+  const [stats, lineups, teams] = await Promise.all([
+    S.rest('football_player_match_stats?player_id=in.(' + ids.join(',') +
+      ')&select=player_id,started,substitute,unused_substitute,appearance,goals,' +
+      'own_goals,yellow_cards,red_cards,season'),
+    S.rest('football_lineup_players?player_id=in.(' + ids.join(',') +
+      ')&select=player_id,lineup_role,created_at'),
+    S.rest('football_players?id=in.(' + ids.join(',') + ')&select=id,canonical_name,current_team_id'),
+  ]);
+  const byPlayer = {};
+  (stats || []).forEach((r) => {
+    const a = byPlayer[r.player_id] || (byPlayer[r.player_id] = {
+      matches: 0, starts: 0, subs: 0, unused: 0, goals: 0, ownGoals: 0, yellows: 0, reds: 0 });
+    if (r.appearance) a.matches++;
+    if (r.started) a.starts++;
+    if (r.substitute) a.subs++;
+    if (r.unused_substitute) a.unused++;
+    a.goals += r.goals || 0; a.ownGoals += r.own_goals || 0;
+    a.yellows += r.yellow_cards || 0; a.reds += r.red_cards || 0;
+  });
+  const seen = {};
+  (lineups || []).forEach((l) => {
+    const s2 = seen[l.player_id] || (seen[l.player_id] = { first: null, last: null, listed: 0 });
+    s2.listed++;
+    if (!s2.first || l.created_at < s2.first) s2.first = l.created_at;
+    if (!s2.last || l.created_at > s2.last) s2.last = l.created_at;
+  });
+  // The same name at another club is the trap this whole gate exists for.
+  const nameCount = {};
+  (teams || []).forEach((t) => {
+    const k = require('../fwp/normalise').playerKey(t.canonical_name);
+    (nameCount[k] = nameCount[k] || []).push(t.current_team_id);
+  });
+
+  return base.map((p) => {
+    const key = require('../fwp/normalise').playerKey(p.name);
+    const elsewhere = (nameCount[key] || []).filter((t) => String(t) !== String(p.teamId));
+    return Object.assign({}, p, {
+      evidence: byPlayer[p.id] || { matches: 0, starts: 0, subs: 0, unused: 0,
+        goals: 0, ownGoals: 0, yellows: 0, reds: 0 },
+      listed: (seen[p.id] || {}).listed || 0,
+      firstSeen: (seen[p.id] || {}).first || p.since,
+      lastSeen: (seen[p.id] || {}).last || p.since,
+      sameNameAtAnotherClub: elsewhere.length > 0,
+    });
+  });
+}
+
 async function reviewQueue(limit) {
   const players = await S.rest('football_players?identity_status=in.' +
     '(provisional,name_at_another_club,duplicate_candidate,unresolved)' +
@@ -162,6 +221,7 @@ async function reviewQueue(limit) {
   return players.map((p) => ({
     id: p.id,
     name: p.canonical_name,
+    teamId: p.current_team_id,
     team: (teamById[p.current_team_id] || {}).canonical_name || null,
     ours: !!(teamById[p.current_team_id] || {}).is_rayners_lane,
     status: p.identity_status,
@@ -197,4 +257,4 @@ async function statsByClubPlayer(seasonLabel, scope) {
   return out;
 }
 
-module.exports = { squad, playerDetail, reviewQueue, shapeTotals, ourTeamId, statsByClubPlayer };
+module.exports = { squad, playerDetail, reviewQueue, reviewQueueDetailed, shapeTotals, ourTeamId, statsByClubPlayer };

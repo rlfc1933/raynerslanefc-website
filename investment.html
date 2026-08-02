@@ -45,7 +45,7 @@
       padding:8px 20px; margin-bottom:24px;
     }
     .tier-grid {
-      display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
       gap:2px;
     }
     .tier-card {
@@ -87,7 +87,7 @@
     }
     .tier-features li.no::before { content:"—"; color:var(--grey); }
     .reach-grid {
-      display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(min(160px,100%),1fr));
       gap:2px; margin:32px 0;
     }
     .reach-stat {

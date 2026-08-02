@@ -216,7 +216,7 @@ exports.handler = async function (event) {
   try {
     if (action === 'queue') {
       const [queue, players] = await Promise.all([
-        RP.reviewQueue(Number(q.limit) || 200),
+        RP.reviewQueueDetailed(Number(q.limit) || 200),
         S.rest('football_players?select=id,canonical_name,current_team_id,identity_status,' +
           'club_player_id,merged_into_id&order=canonical_name.asc'),
       ]);

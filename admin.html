@@ -10071,6 +10071,10 @@ function toast(msg, err) {
 .ident-row{display:grid;grid-template-columns:1fr 200px auto auto;gap:8px;align-items:center;background:var(--c);border:1px solid var(--bd);border-radius:9px;padding:10px 12px}
 .ident-name{font-family:var(--fb);font-size:14px;color:var(--w)}
 .ident-why{display:block;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:3px}
+.ident-ev{display:block;font-family:var(--fb);font-size:12px;color:var(--gr);margin-top:5px;line-height:1.55}
+.ident-warn{margin-top:7px;padding:7px 10px;border-left:3px solid #F87171;background:rgba(239,68,68,.09);font-family:var(--fb);font-size:12px;color:#F87171;line-height:1.5;border-radius:0 6px 6px 0}
+.ident-intro{font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.7;padding:10px 12px;margin-bottom:12px;border-left:3px solid var(--y);background:rgba(255,209,0,.06);border-radius:0 8px 8px 0}
+.ident-intro b{color:var(--w)}
 .ident-pick{background:var(--c2);border:1px solid var(--bd);color:var(--w);font-family:var(--fb);font-size:13px;padding:9px;border-radius:8px;min-height:42px}
 @media(max-width:760px){.ident-row{grid-template-columns:1fr}}
 .emerg{border:1px solid rgba(248,113,113,.35);border-radius:12px;background:rgba(239,68,68,.05);padding:0 16px;margin:18px 0}
@@ -10435,9 +10439,33 @@ function toast(msg, err) {
         var opts = ['<option value="">Who is this?</option>'].concat(roster.map(function (rp) {
           return '<option value="' + esc(rp.id) + '">' + esc(rp.name) + '</option>';
         })).join('');
+        // The evidence a person needs to decide. A bare name asks the
+        // committee to confirm an identity from a string.
+        var ev = q.evidence || {};
+        var bits = [];
+        if (ev.matches) bits.push(ev.matches + ' match' + (ev.matches === 1 ? '' : 'es'));
+        if (ev.starts) bits.push(ev.starts + ' start' + (ev.starts === 1 ? '' : 's'));
+        if (ev.subs) bits.push(ev.subs + ' as sub');
+        if (ev.unused) bits.push(ev.unused + ' unused');
+        if (ev.goals) bits.push(ev.goals + ' goal' + (ev.goals === 1 ? '' : 's'));
+        if (ev.ownGoals) bits.push(ev.ownGoals + ' own goal' + (ev.ownGoals === 1 ? '' : 's'));
+        if (ev.yellows) bits.push(ev.yellows + ' booking' + (ev.yellows === 1 ? '' : 's'));
+        if (ev.reds) bits.push(ev.reds + ' red');
+        if (!bits.length) bits.push('named but no appearance yet');
+        var when = '';
+        if (q.firstSeen) {
+          var f = ukDate(q.firstSeen), l = ukDate(q.lastSeen);
+          when = f === l ? ('Seen ' + f) : ('First seen ' + f + ' · last seen ' + l);
+        }
+        var warn = q.sameNameAtAnotherClub
+          ? '<div class="ident-warn">⚠ This exact name also exists at another club. ' +
+            'Two clubs\' players with the same name are almost always two different people.</div>' : '';
         return '<div class="ident-row">' +
           '<div class="ident-name">' + esc(q.name) +
-            '<span class="ident-why">' + esc(WORD[q.status] || q.status) + '</span></div>' +
+            '<span class="ident-why">' + esc(q.team || '') + ' · ' + esc(WORD[q.status] || q.status) + '</span>' +
+            '<span class="ident-ev">' + esc(bits.join(' · ')) + (when ? ' — ' + esc(when) : '') + '</span>' +
+            warn +
+          '</div>' +
           // Named for a screen reader: a row of unlabelled selects and repeated
           // "Confirm" buttons is unusable without the visual context.
           '<select class="ident-pick" id="ident-pick-' + q.id + '" ' +
@@ -10445,7 +10473,10 @@ function toast(msg, err) {
           '<button class="fwp-btn" onclick="identConfirm(' + q.id + ')" ' +
             'aria-label="Confirm ' + esc(q.name) + '">Confirm</button>' +
           '<button class="fwp-btn fwp-btn--warn" onclick="identReject(' + q.id + ')" ' +
-            'aria-label="' + esc(q.name) + ' is not one of our players">Not one of ours</button>' +
+            'aria-label="Leave ' + esc(q.name) + ' unconfirmed">Leave unconfirmed</button>' +
+          '<a class="fwp-btn" target="_blank" rel="noopener" ' +
+            'href="match-centre.html?id=' + esc(q.lastFixtureId || '') + '" ' +
+            'aria-label="View the match evidence for ' + esc(q.name) + '">View match evidence</a>' +
         '</div>';
       }).join('');
 
@@ -10454,15 +10485,22 @@ function toast(msg, err) {
         ? ours.length + ' name' + (ours.length === 1 ? '' : 's') + ' to check'
         : 'Every Rayners Lane name is named';
 
-      box.className = 'fwp-box fwp-box--' + kind;
+      // Advisory, never a failure. Unconfirmed names stop nothing.
+      var kindAdv = ours.length ? 'warn' : 'ok';
+      box.className = 'fwp-box fwp-box--' + kindAdv;
       box.innerHTML =
-        '<div class="fwp-hd fwp-hd--' + kind + '"><span class="fwp-dot"></span>Player records</div>' +
+        '<div class="fwp-hd fwp-hd--' + kindAdv + '"><span class="fwp-dot"></span>Player records</div>' +
+        '<div class="ident-intro">Football Web Pages supplies the match name. ' +
+          'The club confirms who that person is. <b>Do not link a player unless you are certain.</b></div>' +
         '<div class="fwp-lines">' +
-          '<b style="color:#fff">' + esc(head) + '</b><br>' +
-          esc(j.confirmed) + ' player' + (j.confirmed === 1 ? '' : 's') + ' confirmed. ' +
-          'Appearances, goals and minutes are worked out from the matches themselves.' +
+          '<b style="color:#fff">' + (ours.length
+            ? esc(ours.length) + ' match name' + (ours.length === 1 ? '' : 's') + ' waiting to be confirmed'
+            : 'Every Rayners Lane name is confirmed') + '</b><br>' +
+          'This does not stop fixtures, live scores, programmes or Match Centre pages. ' +
+          'Only confirmed players receive permanent squad profiles and season statistics.<br>' +
+          esc(j.confirmed) + ' player' + (j.confirmed === 1 ? '' : 's') + ' confirmed so far.' +
           (theirs ? '<br>' + theirs + ' opposition name' + (theirs === 1 ? '' : 's') +
-            ' are also unnamed. That is normal and needs nothing from you.' : '') +
+            ' are also unconfirmed. That is normal and needs nothing from you.' : '') +
         '</div>' +
         (rows ? '<div class="ident-list">' + rows + '</div>' : '') +
         '<div class="fwp-acts">' +

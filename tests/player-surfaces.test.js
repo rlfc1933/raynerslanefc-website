@@ -158,7 +158,8 @@ test('the identity controls are named for somebody who cannot see the row', () =
   const panel = s.slice(s.indexOf('window.identRefresh'), s.indexOf('window.healthRefresh'));
   assert.match(panel, /aria-label="Which of our players is/);
   assert.match(panel, /aria-label="Confirm '/);
-  assert.match(panel, /is not one of our players/);
+  assert.match(panel, /aria-label="Leave ' \+ esc\(q\.name\) \+ ' unconfirmed"/);
+  assert.match(panel, /aria-label="View the match evidence for/);
 });
 
 test('the emergency fold is a real disclosure, keyboard and all', () => {
@@ -167,4 +168,57 @@ test('the emergency fold is a real disclosure, keyboard and all', () => {
     'native details/summary — a div with a click handler is not keyboard-reachable');
   assert.match(s, /\.emerg>summary\{[^}]*min-height:44px/,
     'the target must be big enough to hit on a phone on a touchline');
+});
+
+/* ── the committee handoff ────────────────────────────────────────────────── */
+
+test('THE QUEUE CARRIES EVIDENCE, NOT JUST A NAME', () => {
+  // A bare list asks a committee to confirm an identity from a string.
+  const s = strip(R('netlify/functions/lib/football/read-players.js'));
+  assert.match(s, /async function reviewQueueDetailed/);
+  ['matches', 'starts', 'subs', 'unused', 'goals', 'ownGoals', 'yellows', 'reds']
+    .forEach((k) => assert.ok(s.includes(k), 'evidence missing: ' + k));
+  assert.match(s, /firstSeen/); assert.match(s, /lastSeen/);
+  assert.match(s, /sameNameAtAnotherClub/,
+    'the cross-club collision is the trap this whole gate exists for');
+  // And the endpoint must serve the detailed version.
+  assert.match(strip(R('netlify/functions/football-players.js')), /RP\.reviewQueueDetailed/);
+});
+
+test('the instruction tells the committee the rule in one sentence', () => {
+  const s = R('admin.html');
+  assert.match(s, /Football Web Pages supplies the match name/);
+  assert.match(s, /The club confirms who that person is/);
+  assert.match(s, /Do not link a player unless you are certain/);
+});
+
+test('the summary says plainly that nothing is blocked', () => {
+  const s = R('admin.html');
+  assert.match(s, /waiting to be confirmed/);
+  assert.match(s, /does not stop fixtures, live scores, programmes or Match Centre pages/);
+  assert.match(s, /Only confirmed players receive permanent squad profiles and season statistics/);
+});
+
+test('UNCONFIRMED IDENTITIES ARE ADVISORY, NEVER A SYSTEM FAILURE', () => {
+  // Reporting "football system failed" because a committee has not reviewed a
+  // squad would be crying wolf, and the next real failure would be ignored.
+  const s = strip(R('netlify/functions/football-health.js'));
+  assert.match(s, /identityAdvisory/);
+  assert.match(s, /Player records awaiting club review/);
+  assert.match(s, /state: 'advisory'/);
+  // It must NOT be a subsystem — those are what decide the overall verdict.
+  const pushStart = s.indexOf('subsystems.push({');
+  const pushEnd = s.indexOf('});', pushStart) + 3;
+  const push = s.slice(pushStart, pushEnd);
+  assert.ok(push.length > 20, 'the subsystem push could not be located');
+  assert.ok(!/identity/i.test(push), 'identity must not be a health subsystem');
+  // And the advisory must be reported separately from the verdict.
+  assert.ok(s.indexOf('identityAdvisory') < s.indexOf("const worst = ['failing'")
+    || /identityAdvisory,/.test(s), 'the advisory must be its own field');
+});
+
+test('a cross-club name collision is warned about, in words', () => {
+  const s = R('admin.html');
+  assert.match(s, /This exact name also exists at another club/);
+  assert.match(s, /almost always two different people/);
 });

@@ -29,7 +29,14 @@
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--black);color:var(--white);font-family:var(--font-body);font-size:var(--fs-body);line-height:var(--lh-body);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+/* overflow-x:hidden REMOVED.
+   It was masking a real defect rather than fixing one: the navigation was
+   500px wider than the screen at every desktop size, and this clipped the
+   Fixtures button and part of the menu instead of letting anyone reach them.
+   Hidden overflow is not a fixed layout, it is an invisible one. Every actual
+   cause is now fixed — see tests/layout-invariants.test.js — so if anything
+   overflows again it will be visible, which is the point. */
+body{background:var(--black);color:var(--white);font-family:var(--font-body);font-size:var(--fs-body);line-height:var(--lh-body);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 ul{list-style:none}
@@ -66,7 +73,12 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .nav__title{display:flex;flex-direction:column;line-height:1;gap:2px}
 .nav__title-main{font-family:var(--font-d);font-size:20px;letter-spacing:.06em;color:var(--white)}
 .nav__title-sub{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow)}
-.nav__links{display:flex;align-items:center;gap:2px;flex:1;justify-content:center}
+/* min-width:0 is load-bearing. A flex child defaults to min-width:auto, which
+   means it can never shrink below its content — so this row, holding fourteen
+   nowrap links, forced the whole page 500px wider than the viewport at every
+   desktop size. The page scrolled sideways and the Fixtures button sat off
+   the right edge. Measured in headless Chrome, not guessed. */
+.nav__links{display:flex;align-items:center;gap:2px;flex:1 1 auto;min-width:0;justify-content:center;overflow:hidden}
 .nav__links a{position:relative;font-family:var(--font-body);font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--lgrey);padding:8px 12px;transition:color .2s var(--ease);white-space:nowrap}
 .nav__links a::after{content:'';position:absolute;left:12px;right:12px;bottom:3px;height:2px;background:var(--yellow);border-radius:2px;transform:scaleX(0);transform-origin:left center;transition:transform .28s var(--ease)}
 .nav__links a:hover{color:var(--white)}
@@ -76,7 +88,10 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .nav__ticket{background:var(--yellow);color:var(--black);font-family:var(--font-body);font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:9px 18px;border-radius:7px;transition:transform .2s var(--ease),box-shadow .2s;white-space:nowrap}
 .nav__ticket:hover{transform:translateY(-1px);box-shadow:0 8px 20px -10px rgba(255,209,0,.6)}
 /* Mobile menu button in the top bar — hidden on desktop, shown ≤900 (see media query) */
-.nav__menu-btn{display:none;align-items:center;justify-content:center;width:42px;height:42px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--white);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+/* Visible at EVERY width: the bar shows only the links that fit, so this is
+   how the rest stay reachable. It was desktop-hidden, which is why hiding any
+   link would previously have made a route unreachable. */
+.nav__menu-btn{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--white);cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0}
 .nav__menu-btn:hover{border-color:var(--yellow);color:var(--yellow)}
 
 /* ── HERO ── */
@@ -178,8 +193,20 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .fix__time{color:var(--yellow)}
 
 /* ── FAQ / "The Facts" — the visible answers behind the FAQPage schema ── */
-.faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:2px}
-.faq-item{background:var(--card);border-left:3px solid var(--yellow);padding:22px 24px}
+/* minmax(min(Npx,100%),1fr), not minmax(Npx,1fr).
+   A bare pixel floor is a HARD minimum: at 320px the container is 272px wide
+   and a 310px track simply overflowed it, taking the whole document sideways.
+   min(Npx,100%) keeps the intended column width everywhere it fits and gives
+   way only when the container is genuinely narrower. Applied to every track
+   floor on the site, not just this one. */
+.faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(310px,100%),1fr));gap:2px}
+/* min-width:0 is the fix, not max-width. A grid item defaults to
+   min-width:auto, so it refuses to shrink below its min-content width — this
+   card measured 310px inside a 272px track and max-width:100% could not
+   override it. overflow-wrap lets a long unbroken token break rather than set
+   that min-content floor in the first place. */
+.faq-item{background:var(--card);border-left:3px solid var(--yellow);padding:22px 24px;box-sizing:border-box;min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:360px){ .faq-item{padding:18px 16px} }
 .faq-item h3{font-family:var(--font-d);font-size:20px;letter-spacing:.03em;color:var(--white);margin-bottom:9px;line-height:1.15}
 .faq-item p{font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.8}
 .faq-item strong{color:var(--white);font-weight:600}
@@ -187,7 +214,7 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .faq-item a:hover{border-bottom-color:var(--yellow)}
 
 /* ── SQUAD GRID ── */
-.squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px}
+.squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(180px,100%),1fr));gap:2px}
 .player-card{background:var(--card);padding:0;overflow:hidden;transition:background .22s;cursor:pointer;position:relative}
 .player-card:hover{background:var(--card2)}
 .player-card:hover .player-card__num{color:var(--yellow)}
@@ -351,7 +378,7 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
   .news-card--featured .news-card__content{position:static;background:none;padding:20px 24px 28px}
   .news-card--featured .news-card__img{position:static;aspect-ratio:16/9;height:auto}
   .news-card--featured{display:flex;flex-direction:column}
-  .squad-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .squad-grid{grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr))}
   .fixture-row{grid-template-columns:1fr auto;padding:14px 16px}
   .fix__date{grid-column:1/-1;margin-bottom:2px}
   .about-block{padding:40px 24px}
@@ -394,8 +421,28 @@ body > *:not(#bg-imagery):not(#lane-menu):not(#nav-placeholder):not(#a11y-fab):n
 .nav__cta svg{flex-shrink:0}
 .nav__install{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fff3bf,#FFD100);color:#0d0d0d;border:none;border-radius:8px;padding:9px 15px;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 16px -5px rgba(255,209,0,.7);transition:transform .15s}
 .nav__install:hover{transform:translateY(-1px)}
+/* ── PRIORITY NAVIGATION ──────────────────────────────────────────────────
+   Each tier appears only where it measurably fits. Every hidden link is in the
+   ☰ menu at all times, so nothing is ever unreachable — that is what makes
+   hiding them legitimate rather than a cover-up. */
+.nav__link--t2,.nav__link--t3,.nav__link--t4,.nav__link--t5{display:none}
+@media(min-width:1150px){ .nav__link--t2{display:inline-block} }
+@media(min-width:1400px){ .nav__link--t3{display:inline-block} }
+@media(min-width:1650px){ .nav__link--t4{display:inline-block} }
+@media(min-width:1900px){ .nav__link--t5{display:inline-block} }
+
 @media(max-width:900px){
   .nav__links{display:none}
+  /* The brand plus "Install App" plus the ☰ needed 431px inside a 375px
+     phone, so the top bar alone pushed every page sideways. The install
+     button already lives in the menu footer (.lane-menu__foot .nav__install),
+     so removing it from the bar loses nothing and reaches the same action. */
+  .nav__install{display:none}
+  /* And the wordmark may now shrink rather than shove. */
+  .nav__brand{min-width:0}
+  .nav__title{min-width:0}
+  .nav__title-main,.nav__title-sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nav__i{gap:12px;padding:0 14px}
   .nav__cta{display:none}
   .bnav{
     display:flex;
@@ -406,7 +453,10 @@ body > *:not(#bg-imagery):not(#lane-menu):not(#nav-placeholder):not(#a11y-fab):n
     padding-bottom:env(safe-area-inset-bottom);
   }
   .bnav__item{
-    flex:1;display:flex;flex-direction:column;
+    /* min-width:0 again: five items whose labels cannot shrink made this
+       fixed bar 506px wide inside a 375px phone, so the whole document
+       scrolled sideways under a bar that was supposed to span it. */
+    flex:1 1 0;min-width:0;display:flex;flex-direction:column;
     align-items:center;justify-content:center;
     padding:8px 4px;
     text-decoration:none;
@@ -418,7 +468,8 @@ body > *:not(#bg-imagery):not(#lane-menu):not(#nav-placeholder):not(#a11y-fab):n
   .bnav__item:active,.bnav__item--active{color:#FFD100}
   .bnav__icon{font-size:20px;line-height:1;margin-bottom:3px;display:flex;align-items:center;justify-content:center;height:22px}
   .bnav__icon svg{width:22px;height:22px}
-  .bnav__label{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .bnav__label{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bnav{max-width:100vw;overflow:hidden}
   .bnav__more{background:none;border:none;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .nav__menu-btn{display:inline-flex}
   /* keep the WhatsApp float clear of the fixed bottom bar */
@@ -444,7 +495,21 @@ body > *:not(#bg-imagery):not(#lane-menu):not(#nav-placeholder):not(#a11y-fab):n
 .lane-menu__link--active::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--yellow);margin-right:11px;flex-shrink:0}
 .lane-menu__foot{padding:18px 20px 0}
 .lane-menu__foot .nav__install{width:100%;justify-content:center}
-@media(min-width:901px){ .lane-menu{display:none !important} }
+/* This used to be: @media(min-width:901px){ .lane-menu{display:none!important} }
+   It was correct while the menu was mobile-only. It is NOT correct now that
+   the bar shows a priority subset and nine of the fourteen routes live only
+   behind the ☰ — on a laptop the button would have opened nothing at all and
+   those routes would have been unreachable. The sheet works at every width. */
+@media(min-width:901px){
+  .lane-menu__panel{
+    /* A sheet on a phone; a panel on a desktop. Same markup, same behaviour. */
+    left:auto; right:0; top:0; bottom:0;
+    width:min(420px,100%); max-height:100vh;
+    border-top:none; border-left:3px solid var(--yellow);
+    border-radius:0; transform:translateX(100%);
+  }
+  .lane-menu.open .lane-menu__panel{transform:translateX(0)}
+}
 
 /* PWA banner - desktop hidden, mobile visible */
 #pwa-banner { display:flex !important; }

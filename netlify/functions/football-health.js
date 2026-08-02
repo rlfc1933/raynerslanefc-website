@@ -183,6 +183,21 @@ exports.handler = async function (event) {
           : null),
     });
 
+    /* Player identities are ADVISORY, never a failure.
+       An unconfirmed name stops nothing — fixtures, live scores, programmes and
+       Match Centre pages all work without it, and the system is DESIGNED not to
+       guess. Reporting "football system failed" because a committee has not yet
+       reviewed a squad would be crying wolf, and the next real failure would be
+       ignored. It becomes a genuine fault only if a public profile or statistic
+       is actually misleading — which cannot happen while nothing is confirmed. */
+    const identityAdvisory = identity.awaitingDecision > 0 ? {
+      state: 'advisory',
+      headline: 'Player records awaiting club review',
+      detail: identity.awaitingDecision + ' match name' +
+        (identity.awaitingDecision === 1 ? '' : 's') + ' waiting to be confirmed. ' +
+        'Nothing is blocked by this.',
+    } : null;
+
     // THE INVARIANT: this view must never say everything is fine while a club
     // the site is about to draw has no visual identity.
     const worst = ['failing', 'stale', 'waiting', 'ok']
@@ -210,6 +225,7 @@ exports.handler = async function (event) {
         missingLineupFixtures: missingLineups.slice(0, 8).map((f) => f.internal_fixture_id),
       },
       identity: identity,
+      identityAdvisory,
       leagueTable: {
         lastSynced: howLongAgo(tableAge),
         lastSyncedMinutes: tableAge,

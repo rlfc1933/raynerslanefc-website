@@ -248,20 +248,31 @@ const CREST_IMG = `<img src="img/badge.png" alt="Rayners Lane FC" style="width:1
 
 function buildNav(currentPage) {
   const links = [
-    { label:'Home',        href:'index.html'      },
-    { label:'News',        href:'news.html'       },
-    { label:'Match Centre',href:'match-centre.html'},
-    { label:'Fixtures',    href:'fixtures.html'   },
-    { label:'The Squad',   href:'squad.html'      },
-    { label:'Programme',   href:'programme.html'  },
-    { label:'Gallery',     href:'gallery.html'    },
-    { label:'History',     href:'history.html'    },
-    { label:'Membership',  href:'membership.html' },
-    { label:'Season Tickets', href:'season-tickets.html' },
-    { label:'Fan Zone',    href:'fan-zone.html'   },
-    { label:'Volunteer',   href:'volunteer.html'  },
-    { label:'The Club',    href:'about.html'      },
-    { label:'Contact',     href:'contact.html'    },
+    // PRIORITY NAVIGATION.
+    //
+    // Fourteen links, every one nowrap, need 1384px of row on their own —
+    // measured in headless Chrome. With the badge and the two action buttons
+    // that is about 1950px, so the full horizontal bar has never fitted a
+    // laptop. It overflowed the PAGE at every width from 901px to beyond
+    // 1920px, pushing the Fixtures button and part of the menu off-screen.
+    //
+    // tier 1 shows always; each higher tier appears only where it measurably
+    // fits. Everything, at every width, is also in the ☰ menu — which is why
+    // the button is now visible on desktop too. No route is ever unreachable.
+    { label:'Home',        href:'index.html',       tier:1 },
+    { label:'Fixtures',    href:'fixtures.html',    tier:1 },
+    { label:'Match Centre',href:'match-centre.html',tier:1 },
+    { label:'The Squad',   href:'squad.html',       tier:1 },
+    { label:'Programme',   href:'programme.html',   tier:1 },
+    { label:'News',        href:'news.html',        tier:2 },
+    { label:'History',     href:'history.html',     tier:2 },
+    { label:'Membership',  href:'membership.html',  tier:3 },
+    { label:'Fan Zone',    href:'fan-zone.html',    tier:3 },
+    { label:'Season Tickets', href:'season-tickets.html', tier:4 },
+    { label:'The Club',    href:'about.html',       tier:4 },
+    { label:'Gallery',     href:'gallery.html',     tier:5 },
+    { label:'Volunteer',   href:'volunteer.html',   tier:5 },
+    { label:'Contact',     href:'contact.html',     tier:5 },
   ];
 
   var ico = {
@@ -311,7 +322,7 @@ function buildNav(currentPage) {
   </div>`;
 
   const navLinks = links.map(l =>
-    `<a href="${l.href}" class="nav__link${currentPage===l.href?' nav__link--active':''}">${l.label}</a>`
+    `<a href="${l.href}" class="nav__link nav__link--t${l.tier || 1}${currentPage===l.href?' nav__link--active':''}">${l.label}</a>`
   ).join('');
 
   const bottomNav = bottomPrimary.map(l =>
@@ -344,6 +355,8 @@ function buildNav(currentPage) {
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           Fixtures
         </a>
+        <!-- Visible at EVERY width now. The horizontal bar shows only the
+             links that fit; this is how the rest stay reachable. -->
         <button type="button" class="nav__menu-btn" data-menu-btn aria-controls="lane-menu" aria-expanded="false" aria-label="Open menu" onclick="laneMenuToggle()">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
@@ -367,7 +380,16 @@ window.laneMenuOpen = function () {
   m.classList.add('open'); m.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   _laneMenuBtns().forEach(function (b) { b.setAttribute('aria-expanded', 'true'); });
-  var c = m.querySelector('.lane-menu__close'); if (c) c.focus();
+  // Focus must land INSIDE the dialog, or a keyboard user opens a menu and is
+  // still standing outside it. .focus() fired in the same tick did nothing:
+  // the panel was still display:none when it ran, and you cannot focus a
+  // hidden element. One frame later it is visible and it takes.
+  var c = m.querySelector('.lane-menu__close');
+  if (c) {
+    requestAnimationFrame(function () {
+      try { c.focus({ preventScroll: true }); } catch (e) { try { c.focus(); } catch (e2) {} }
+    });
+  }
   try { history.pushState({ laneMenu: 1 }, ''); } catch (e) {}
 };
 window.laneMenuClose = function (fromPop) {
@@ -406,7 +428,10 @@ function buildTwitterSection() {
   return `
     <div style="background:var(--dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:56px 0">
       <div class="container">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <!-- auto-fit with a minimum, not a hard 1fr 1fr. Two fixed columns
+             with a 48px gap needed 433px inside a 327px phone container, so
+             this block alone scrolled every page sideways on mobile. -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:32px;align-items:center">
 
           <div>
             <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);display:block;margin-bottom:14px">Follow The Lane</span>
@@ -968,12 +993,16 @@ function initComponents(currentPage) {
   if (!localStorage.getItem('rlfc_cookies_accepted')) {
     var banner = document.createElement('div');
     banner.id = 'cookie-banner';
-    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;border-top:2px solid var(--yellow);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:10000;flex-wrap:wrap;';
-    banner.innerHTML = '<div style="font-family:var(--font-c);font-size:12px;color:var(--lgrey);letter-spacing:.04em;flex:1;min-width:200px">' +
+    // box-sizing and min-width:0 are load-bearing. The text block carried
+    // min-width:200px and the buttons flex-shrink:0, so the banner measured
+    // 506px inside a 375px phone and scrolled the whole document sideways —
+    // on every page, because it is fixed and site-wide.
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;box-sizing:border-box;max-width:100%;background:#111;border-top:2px solid var(--yellow);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;flex-wrap:wrap;';
+    banner.innerHTML = '<div style="font-family:var(--font-c);font-size:12px;color:var(--lgrey);letter-spacing:.04em;flex:1 1 220px;min-width:0">' +
       '<span style="color:var(--yellow);font-weight:700"><i class="ico ico-cookie"></i> Cookies</span> — We use cookies to improve your experience and track site visits via Google Analytics. ' +
       '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Learn more</a>' +
       '</div>' +
-      '<div style="display:flex;gap:8px;flex-shrink:0">' +
+      '<div style="display:flex;gap:8px;flex:0 0 auto;flex-wrap:wrap">' +
       '<button onclick="acceptCookies()" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent">Accept</button>' +
       '<button onclick="declineCookies()" style="background:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">Decline</button>' +
       '</div>';

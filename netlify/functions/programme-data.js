@@ -68,6 +68,9 @@ exports.handler = async function (event) {
         lineups: v.lineup_snapshot,
         table: v.table_snapshot,
         finalMatch: v.final_match_snapshot,
+        // Stored with the version, not resolved now — an archived edition must
+        // show the footer that was current when it was published.
+        legal: v.legal_footer || null,
       }, ed.state === 'archived' ? 3600 : 60);
     }
 
