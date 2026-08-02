@@ -1002,3 +1002,67 @@ leave incomplete because the club had not published a legal form.
 The shop advertised a printed programme *"available at every home game"* and
 *"at Tithe Farm on match day"*. The club publishes a digital edition. Promising
 print is a promise to a supporter who turns up expecting one.
+
+---
+
+## 2 August 2026 — Fan Zone completion: a correct gate in front of a door nobody could reach
+
+The previous release was verified and the verification was worse than the report.
+The programme gate was genuinely secure — logged-out requests got metadata and
+nothing else, drafts 404'd for everybody, cookie decline genuinely blocked
+analytics. And **no supporter could become entitled**, so the gate's correct
+answer was always "no".
+
+**Two independent blockers, either one sufficient.**
+
+1. Five of the six pages that loaded `fan-session.js` did not load the Supabase
+   library or the config that file needs. `SB` was silently `null`, no token was
+   ever attached, and every member looked like a stranger.
+2. `SUPABASE_ANON_KEY` was never set in Netlify, so token verification went out
+   with `apikey: ''` and GoTrue answered `401 No API key found`. **Every** token
+   was rejected, valid ones included. This was not in the verification report —
+   it was found in Phase 0 of the fix, and fixing (1) alone would have opened
+   nothing.
+
+Both failed **closed**. That is why 550 tests passed while the feature did not
+work: every test asserted that a fallback existed, none asserted the real path
+was taken. Same shape as the crest incident and the `loadJson('committee')` 404
+— silent, legible, and indistinguishable from working.
+
+### What changed structurally, not just behaviourally
+
+- **`js/fan-boot.js`** — one entry that fetches its own dependencies. A page
+  cannot load the session API without them, because the file loads them itself.
+  `tests/fan-dependencies.test.js` makes the old arrangement uncommittable;
+  `fan-health.js` checks the *served* pages at runtime.
+- **`fan_ensure_membership()`** — identity, Lane Card linkage, number, marketing,
+  attribution, activity and the notification event in ONE transaction. There is
+  no longer a sequence of writes in which to fail halfway.
+- **Lane numbers from a sequence**, skipping anything already issued, plus the
+  unique index the last release was missing. The old `1000 + random()*9000` with
+  no constraint would have collided at a few dozen members.
+- **A notification outbox**, not a `fetch()`. A mail failure cannot roll back a
+  membership or make a supporter wait.
+- **Health that refuses to call a closed gate healthy.** `fan-health.js` fails if
+  a programme is published and nobody is an active member, and has a dedicated
+  check for the missing-api-key fault.
+
+### Proof
+
+The membership transaction was run against the **real production schema** inside
+`begin; … rollback;`. It linked the existing supporter (`linked_existing: true`),
+**preserved their Lane number 4500** rather than issuing a new one, wrote the
+`account_created` activity, and queued `member_linked` with dedupe key
+`member_linked:2` to info@raynerslanefc.co.uk. Then it rolled back: members 0,
+activity 0, outbox 0, marketing 0, sequence still at 1000. Production untouched.
+
+### Still outstanding — and honestly outstanding
+
+The final inbox click. Three owner actions gate it: a `RESEND_API_KEY` in
+Netlify, a verified sender domain, and confirming Supabase's magic-link email
+setting (`mailer_autoconfirm` is currently `true`). Until then the club's
+notifications queue durably and send the moment the key exists — which is the
+whole point of the outbox.
+
+**The lesson, again, in one line:** a system that fails closed cannot be trusted
+to tell you it is working. Something has to prove a supporter can get *in*.
