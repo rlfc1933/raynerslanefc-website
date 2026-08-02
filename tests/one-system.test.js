@@ -191,3 +191,17 @@ test('an unknown kick-off is admitted, not filled in with three o\'clock', () =>
   assert.ok(!/\(f\.kickoff \|\| '15:00'\)/.test(s), 'the invented default is still being rendered');
   assert.ok(!/\(fx\.next\.kickoff \|\| '15:00'\)/.test(s));
 });
+
+test('a timer never blanks a fact the registry already holds', () => {
+  // The season upsert replaces whole rows. That was tolerable while a person
+  // pressed a button; on a twenty-minute timer, one provider response that
+  // omits a kick-off would erase it — and the next run would erase it again,
+  // so nobody would ever catch it happening.
+  const s = strip(R('netlify/functions/football-sync-season.js'));
+  assert.match(s, /const KEEP = \['scheduled_kickoff_at', 'venue', 'internal_fixture_id'\]/);
+  assert.match(s, /if \(row\[f\] == null && prev\[f\] != null\)/,
+    'a provider that says nothing is not a provider that says "nothing"');
+  // And the preserve step must come BEFORE the write.
+  assert.ok(s.indexOf('KEEP.forEach') < s.indexOf("on_conflict=external_provider,external_fixture_id,season'"),
+    'the guard runs after the write, which is no guard at all');
+});

@@ -227,10 +227,33 @@ exports.handler = async function (event) {
         source_confidence: m.confidence,
       };
     });
+    // ── never overwrite a known fact with a blank ──────────────────────────
+    // This upsert replaces the whole row. That was tolerable while a person
+    // pressed a button occasionally; now that it runs every twenty minutes, a
+    // single provider response that omits a kick-off time or a venue would
+    // quietly erase one — and the next run would erase it again, so nobody
+    // would ever catch it in the act.
+    //
+    // A provider that says nothing is not a provider that says "nothing".
+    const existing = await S.rest('football_fixtures?season=eq.' + encodeURIComponent(SEASON) +
+      '&select=external_fixture_id,scheduled_kickoff_at,venue,internal_fixture_id') || [];
+    const known = {};
+    existing.forEach((e) => { known[e.external_fixture_id] = e; });
+    const KEEP = ['scheduled_kickoff_at', 'venue', 'internal_fixture_id'];
+    let preserved = 0;
+    fixtureRows.forEach((row) => {
+      const prev = known[row.external_fixture_id];
+      if (!prev) return;
+      KEEP.forEach((f) => {
+        if (row[f] == null && prev[f] != null) { row[f] = prev[f]; preserved++; }
+      });
+    });
+
     const savedFixtures = await S.rest('football_fixtures?on_conflict=external_provider,external_fixture_id,season', {
       method: 'POST', body: fixtureRows,
       headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, timeout: 15000,
     });
+    counters.warning_count += 0;
     counters.records_updated += fixtureRows.length;
     const written = fixtureRows.map((f) => f.external_fixture_id);
 
@@ -261,6 +284,8 @@ exports.handler = async function (event) {
       season: SEASON,
       summary: rec.summary,
       fixturesWritten: written.length,
+      // Said out loud: how many facts this run declined to erase.
+      fieldsPreserved: preserved,
       unmatchedProvider: rec.unmatchedProvider.map((u) => ({
         date: u.provider.date, opponent: u.provider.opponent,
         id: u.provider.externalFixtureId, confidence: u.confidence, reasons: u.reasons,
