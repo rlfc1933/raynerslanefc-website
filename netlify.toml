@@ -42,6 +42,16 @@
 [functions."fwp-sync"]
   schedule = "* * * * *"
 
+# The football registry: season list, league table, line-ups and the player
+# records built from them. Every 20 minutes rather than every minute — none of
+# these change during a match, and the live scoreboard is a separate, faster
+# path that this must never compete with.
+#
+# ⛔ SCHEDULED. Netlify returns 403 to direct HTTP. The button lives in
+# football-registry-sync-now.js. tests/scheduled-functions.test.js enforces it.
+[functions."football-registry-sync"]
+  schedule = "*/20 * * * *"
+
 # Programme drafts and matchday publication. Hourly is enough: a draft is
 # assembled days ahead, and on matchday the only thing being watched for is the
 # team sheets — which the live match sync is already polling every minute, so

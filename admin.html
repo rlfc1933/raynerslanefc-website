@@ -1062,6 +1062,14 @@
         <div class="fwp-box__load">Checking the matchday programme…</div>
       </div>
 
+      <!-- ── PLAYER RECORDS ───────────────────────────────────────────────────
+           The only place a name from the feed becomes one of our players.
+           Nothing here happens by itself: the system offers, a committee member
+           decides, and the club's record of who played is built from that. -->
+      <div id="ident-status" class="fwp-box">
+        <div class="fwp-box__load">Checking player records…</div>
+      </div>
+
       <!-- FIX 1: the fixture is the source of truth for WHO + WHERE. Pick it here;
            opponent / home-away / date / venue are filled from data/fixtures.json. -->
       <div class="slbl"><i class="ico ico-calendar"></i> Which game? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the fixture; home/away comes from it</span></div>
@@ -10031,6 +10039,12 @@ function toast(msg, err) {
 .fwp-btn{font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;min-height:42px;border-radius:8px;border:1px solid var(--bd);background:var(--c);color:var(--w);cursor:pointer}
 .fwp-btn:hover{border-color:var(--y);color:var(--y)}
 .fwp-btn--warn{border-color:rgba(248,113,113,.5);color:#F87171}
+.ident-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.ident-row{display:grid;grid-template-columns:1fr 200px auto auto;gap:8px;align-items:center;background:var(--c);border:1px solid var(--bd);border-radius:9px;padding:10px 12px}
+.ident-name{font-family:var(--fb);font-size:14px;color:var(--w)}
+.ident-why{display:block;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:3px}
+.ident-pick{background:var(--c2);border:1px solid var(--bd);color:var(--w);font-family:var(--fb);font-size:13px;padding:9px;border-radius:8px;min-height:42px}
+@media(max-width:760px){.ident-row{grid-template-columns:1fr}}
 .fwp-diag{margin-top:12px}
 .fwp-diag>summary{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);cursor:pointer;padding:6px 0}
 .fwp-diag pre{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gr);background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
@@ -10298,6 +10312,136 @@ function toast(msg, err) {
     var panel = document.getElementById('panel-matchday');
     if (panel && panel.style.display !== 'none') window.progRefresh();
   }, 30000);
+})();
+</script>
+
+
+<script>
+/* ── PLAYER RECORDS: naming the people on the team sheet ───────────────────
+   Football Web Pages gives us names as text. This turns a name into one of OUR
+   players — and only a person can do that, because getting it wrong is silent.
+   Two players share a name. One player is spelled six ways. The system never
+   guesses; it shows what it thinks and waits.                                */
+(function () {
+  var box = document.getElementById('ident-status');
+  if (!box) return;
+
+  var roster = [];
+  function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function api(payload) {
+    return fetch('/.netlify/functions/football-players', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ pin: PIN }, payload))
+    }).then(function (r) { return r.json().catch(function () { return {}; }); });
+  }
+
+  // The club's own squad list, which is what a name gets confirmed AGAINST.
+  fetch('data/players.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { roster = (d && d.players) || []; })
+    .catch(function () {});
+
+  var WORD = {
+    provisional: 'Not yet named',
+    name_at_another_club: 'Same name at another club',
+    duplicate_candidate: 'Possibly a duplicate',
+    unresolved: 'Unreadable name',
+  };
+
+  window.identRefresh = function () {
+    api({ action: 'queue' }).then(function (j) {
+      if (!j || j.ok === false) {
+        box.className = 'fwp-box';
+        box.innerHTML = '<div class="fwp-hd fwp-hd--off"><span class="fwp-dot"></span>Player records</div>' +
+          '<div class="fwp-none">' + esc((j && j.error) || 'Could not load player records.') + '</div>';
+        return;
+      }
+      var ours = (j.queue || []).filter(function (q) { return q.ours; });
+      var theirs = (j.queue || []).length - ours.length;
+
+      var rows = ours.slice(0, 25).map(function (q) {
+        var opts = ['<option value="">Who is this?</option>'].concat(roster.map(function (rp) {
+          return '<option value="' + esc(rp.id) + '">' + esc(rp.name) + '</option>';
+        })).join('');
+        return '<div class="ident-row">' +
+          '<div class="ident-name">' + esc(q.name) +
+            '<span class="ident-why">' + esc(WORD[q.status] || q.status) + '</span></div>' +
+          '<select class="ident-pick" id="ident-pick-' + q.id + '">' + opts + '</select>' +
+          '<button class="fwp-btn" onclick="identConfirm(' + q.id + ')">Confirm</button>' +
+          '<button class="fwp-btn fwp-btn--warn" onclick="identReject(' + q.id + ')">Not one of ours</button>' +
+        '</div>';
+      }).join('');
+
+      var kind = ours.length ? 'warn' : 'ok';
+      var head = ours.length
+        ? ours.length + ' name' + (ours.length === 1 ? '' : 's') + ' to check'
+        : 'Every Rayners Lane name is named';
+
+      box.className = 'fwp-box fwp-box--' + kind;
+      box.innerHTML =
+        '<div class="fwp-hd fwp-hd--' + kind + '"><span class="fwp-dot"></span>Player records</div>' +
+        '<div class="fwp-lines">' +
+          '<b style="color:#fff">' + esc(head) + '</b><br>' +
+          esc(j.confirmed) + ' player' + (j.confirmed === 1 ? '' : 's') + ' confirmed. ' +
+          'Appearances, goals and minutes are worked out from the matches themselves.' +
+          (theirs ? '<br>' + theirs + ' opposition name' + (theirs === 1 ? '' : 's') +
+            ' are also unnamed. That is normal and needs nothing from you.' : '') +
+        '</div>' +
+        (rows ? '<div class="ident-list">' + rows + '</div>' : '') +
+        '<div class="fwp-acts">' +
+          '<button class="fwp-btn" onclick="identRecompute()">Rebuild appearances and goals</button>' +
+          '<a class="fwp-btn" target="_blank" rel="noopener" href="squad.html">View the squad page</a>' +
+        '</div>' +
+        ((j.duplicates && j.duplicates.length)
+          ? '<details class="fwp-diag"><summary>' + j.duplicates.length +
+            ' possible duplicate' + (j.duplicates.length === 1 ? '' : 's') + '</summary><pre>' +
+            esc(JSON.stringify(j.duplicates, null, 1)) + '</pre></details>' : '');
+    }).catch(function (e) {
+      box.innerHTML = '<div class="fwp-none">Network error: ' + esc(e.message) + '</div>';
+    });
+  };
+
+  function whoAreYou() {
+    // Every decision here is a claim about a real person, so it is signed.
+    var who = prompt('Your name, so the club has a record of who decided this:');
+    return (who == null || !String(who).trim()) ? null : String(who).trim();
+  }
+
+  window.identConfirm = function (id) {
+    var sel = document.getElementById('ident-pick-' + id);
+    if (!sel || !sel.value) { toast('Pick which of our players this is', true); return; }
+    var who = whoAreYou(); if (!who) return;
+    api({ action: 'confirm', playerId: id, clubPlayerId: sel.value, by: who })
+      .then(function (j) {
+        toast(j && j.ok ? 'Named. His record starts building from the next rebuild.'
+                        : ((j && j.error) || 'Could not confirm'), !(j && j.ok));
+        window.identRefresh();
+      });
+  };
+
+  window.identReject = function (id) {
+    if (!confirm('Mark this name as NOT one of our players?\n\nIt stays on the team sheet — it just will not be offered again.')) return;
+    var who = whoAreYou(); if (!who) return;
+    api({ action: 'reject', playerId: id, by: who }).then(function (j) {
+      toast(j && j.ok ? 'Noted — it will not be suggested again' : ((j && j.error) || 'Could not save'), !(j && j.ok));
+      window.identRefresh();
+    });
+  };
+
+  window.identRecompute = function () {
+    var who = whoAreYou(); if (!who) return;
+    toast('Rebuilding from every match…');
+    api({ action: 'recompute', by: who }).then(function (j) {
+      if (j && j.ok) {
+        toast('Rebuilt: ' + (j.fixtures || 0) + ' matches, ' + (j.matchRowsWritten || 0) + ' player records' +
+          (j.humanCorrectionsPreserved ? ', ' + j.humanCorrectionsPreserved + ' of your corrections kept' : ''));
+      } else toast((j && j.error) || 'Could not rebuild', true);
+      window.identRefresh();
+    });
+  };
+
+  window.identRefresh();
 })();
 </script>
 
