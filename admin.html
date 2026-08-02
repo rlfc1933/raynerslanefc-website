@@ -959,6 +959,11 @@
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.2-9A4.6 4.6 0 0 1 12 6.5 4.6 4.6 0 0 1 21.2 12C19 16.4 12 21 12 21z"/></svg></span>
           <div class="tile-name">Fan Club</div><div class="tile-desc">Champion your patrons</div>
         </button>
+        <button class="tile" style="--accent:#22C55E" onclick="openPanel('supporters')">
+          <span class="tile-arrow">&#8594;</span>
+          <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <div class="tile-name">Supporters</div><div class="tile-desc">Fan Zone members &amp; health</div>
+        </button>
         <button class="tile" style="--accent:#FBBF24" onclick="openPanel('perks')">
           <span class="tile-arrow">&#8594;</span>
           <span class="tile-ic"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
@@ -2142,6 +2147,33 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     </div>
 
     <!-- FAN CLUB -->
+    <div class="panel" id="panel-supporters">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl">&#128101; Supporters</div></div>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
+        <p><strong style="color:var(--w)">The people who support us.</strong> Fan Zone members, how they found us, and whether the club is hearing about them. Treat this like somebody&rsquo;s address book, not a marketing list &mdash; it is deliberately not a record of everything they do on the site.</p>
+      </div>
+
+      <div class="slbl">Fan Zone health</div>
+      <div id="sup-health" style="margin-bottom:18px">Loading&hellip;</div>
+
+      <div class="slbl">At a glance</div>
+      <div id="sup-summary" class="row2" style="margin-bottom:18px"></div>
+
+      <div class="slbl">Find a supporter</div>
+      <div class="row2">
+        <div class="field"><label class="fl">Name, email or Lane number (exact)</label><input type="text" id="sup-q" placeholder="1042 or sam@example.com"></div>
+        <div class="field" style="display:flex;align-items:flex-end"><button class="btn" onclick="supSearch()">Search</button></div>
+      </div>
+      <div id="sup-results" style="margin-bottom:18px"></div>
+
+      <div class="slbl">Latest members</div>
+      <div id="sup-latest">Loading&hellip;</div>
+
+      <div class="slbl" style="margin-top:18px">Club notifications</div>
+      <div id="sup-notes">Loading&hellip;</div>
+      <div style="margin-top:10px"><button class="btn" onclick="supSendNow()">Send queued notifications now</button></div>
+    </div>
+
     <div class="panel" id="panel-fanclub">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-heart"></i>&#65039; Fan Club</div></div>
       <div class="snote" style="border-color:rgba(244,63,94,.3);background:rgba(244,63,94,.06)">
@@ -3935,6 +3967,7 @@ function openPanel(name) {
   if (name === 'social')    renderSocial();
   if (name === 'motm')      renderMotm();
   if (name === 'signing')   renderSigning();
+  if (name === 'supporters') supInit();
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); loadLiveAttendance(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
@@ -10635,6 +10668,228 @@ function toast(msg, err) {
     var panel = document.getElementById('panel-matchday');
     if (panel && panel.style.display !== 'none') window.healthRefresh();
   }, 60000);
+})();
+</script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SUPPORTERS — the club's Fan Zone CRM.
+
+     Read-only by design. Nothing here edits a supporter, because a committee
+     member correcting somebody's name from a portal is how records drift away
+     from what the supporter themselves believes is true. They can edit it in
+     their own Fan Zone; we look.
+
+     The one action is "retry a failed notification", which affects the club's
+     own email, not the supporter's record.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  function e(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function when(iso) {
+    if (!iso) return '—';
+    try {
+      return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London',
+        day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso));
+    } catch (x) { return String(iso).slice(0, 10); }
+  }
+  function how(src, fixture) {
+    if (!src) return 'Direct';
+    if (/^programme:/.test(src)) return 'Programme' + (fixture ? ' · ' + e(fixture) : '');
+    return e(src);
+  }
+  async function api(view, extra) {
+    var body = Object.assign({ pin: PIN, view: view }, extra || {});
+    var r = await fetch('/.netlify/functions/fan-admin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return await r.json();
+  }
+
+  function stat(n, label) {
+    return '<div class="field" style="text-align:center;padding:12px;border:1px solid var(--bd);border-radius:10px">' +
+      '<div style="font-size:26px;font-weight:800;color:var(--y);line-height:1.1">' + e(n) + '</div>' +
+      '<div style="font-size:11px;color:var(--gr);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">' +
+      e(label) + '</div></div>';
+  }
+
+  async function health() {
+    var el = document.getElementById('sup-health');
+    try {
+      var r = await fetch('/.netlify/functions/fan-health?pin=' + encodeURIComponent(PIN));
+      var j = await r.json();
+      if (!j || !j.ok) { el.innerHTML = '<p style="color:var(--gr)">Health check unavailable.</p>'; return; }
+      var colour = j.healthy ? '#22C55E' : '#F59E0B';
+      el.innerHTML = '<div style="border:1px solid ' + colour + '55;background:' + colour +
+        '14;border-radius:10px;padding:14px 16px">' +
+        '<div style="font-weight:800;color:' + colour + ';letter-spacing:.08em;margin-bottom:10px">' +
+          e(j.headline) + '</div>' +
+        j.checks.map(function (c) {
+          return '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:7px">' +
+            '<span style="color:' + (c.ok ? '#22C55E' : '#F59E0B') + ';flex-shrink:0">' +
+              (c.ok ? '\u2713' : '!') + '</span>' +
+            '<div style="min-width:0"><b style="color:var(--w);font-size:13px">' + e(c.name) + '</b>' +
+            '<div style="color:var(--gr);font-size:12px;line-height:1.5">' + e(c.detail || '') + '</div></div></div>';
+        }).join('') +
+        '<div style="color:var(--gr);font-size:12px;margin-top:8px">Latest member: ' +
+          e(when(j.latestMember)) + ' · ' + e(j.action) + '</div>' +
+      '</div>';
+    } catch (x) { el.innerHTML = '<p style="color:var(--gr)">Health check unavailable.</p>'; }
+  }
+
+  function memberRow(m) {
+    return '<div style="display:flex;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--bd);' +
+      'border-radius:9px;margin-bottom:8px;min-width:0">' +
+      '<div style="min-width:0;flex:1">' +
+        '<div style="color:var(--w);font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+          e(m.name) + ' <span style="color:var(--y);font-weight:600">· ' + e(m.membershipNumber || '—') + '</span></div>' +
+        '<div style="color:var(--gr);font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+          e(m.email) + ' · joined ' + e(when(m.joinedAt)) + ' · ' + how(m.source, m.fixtureId) +
+          (m.marketing === 'in' ? ' · emails on' : m.marketing === 'out' ? ' · emails off' : '') +
+        '</div>' +
+      '</div>' +
+      '<button class="btn" style="flex-shrink:0;padding:7px 12px;font-size:11px" onclick="supView(' +
+        Number(m.id) + ')">View</button></div>';
+  }
+
+  window.supInit = async function () {
+    health();
+    var sum = document.getElementById('sup-summary');
+    var latest = document.getElementById('sup-latest');
+    try {
+      var j = await api('summary');
+      if (!j || !j.ok) { sum.innerHTML = ''; latest.innerHTML = '<p style="color:var(--gr)">' +
+        e((j && j.error) || 'Could not load supporters.') + '</p>'; return; }
+      var s2 = j.summary;
+      sum.innerHTML =
+        stat(s2.activeMembers, 'Active members') +
+        stat(s2.newThisWeek, 'New this week') +
+        stat(s2.newThisMonth, 'New this month') +
+        stat(s2.joinedViaProgramme, 'Joined via a programme') +
+        stat(s2.programmeOpens, 'Programmes opened') +
+        stat(s2.matchCheckIns, 'Match check-ins') +
+        stat(s2.marketingOptedIn, 'Happy to hear from us') +
+        stat(s2.marketingNotOptedIn, 'Prefer no emails') +
+        (s2.awaitingIdentityLink ? stat(s2.awaitingIdentityLink, 'Awaiting identity check') : '') +
+        (s2.notificationsFailed ? stat(s2.notificationsFailed, 'Notifications failed') : '');
+
+      if (s2.byFixture && s2.byFixture.length) {
+        sum.innerHTML += '<div class="field" style="grid-column:1/-1"><div class="fl">Which fixtures brought people in</div>' +
+          s2.byFixture.map(function (f) {
+            return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:13px">' +
+              '<span style="color:var(--w)">' + e(f.fixtureId) + '</span><span style="color:var(--y)">' +
+              e(f.members) + '</span></div>';
+          }).join('') + '</div>';
+      }
+
+      latest.innerHTML = (j.latest && j.latest.length)
+        ? j.latest.map(memberRow).join('')
+        : '<p style="color:var(--gr)">No Fan Zone members yet. They appear here the moment somebody joins.</p>';
+    } catch (x) {
+      latest.innerHTML = '<p style="color:var(--gr)">Could not load supporters.</p>';
+    }
+    supNotes();
+  };
+
+  window.supSearch = async function () {
+    var q = (document.getElementById('sup-q') || {}).value || '';
+    var out = document.getElementById('sup-results');
+    if (String(q).trim().length < 3) {
+      out.innerHTML = '<p style="color:var(--gr)">Type a full name, email or Lane number — this searches exactly, not by prefix.</p>';
+      return;
+    }
+    out.innerHTML = 'Searching…';
+    var j = await api('search', { q: q });
+    out.innerHTML = (j && j.ok && j.results && j.results.length)
+      ? j.results.map(memberRow).join('')
+      : '<p style="color:var(--gr)">Nobody matches that exactly.</p>';
+  };
+
+  window.supView = async function (id) {
+    var out = document.getElementById('sup-results');
+    out.innerHTML = 'Loading…';
+    var j = await api('member', { id: id });
+    if (!j || !j.ok) { out.innerHTML = '<p style="color:var(--gr)">Could not open that supporter.</p>'; return; }
+    var m = j.member;
+    function line(l, v) {
+      return '<div style="display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px">' +
+        '<span style="color:var(--gr);flex-shrink:0">' + e(l) + '</span>' +
+        '<span style="color:var(--w);text-align:right;min-width:0;word-break:break-word">' + e(v) + '</span></div>';
+    }
+    out.innerHTML = '<div style="border:1px solid var(--bd);border-radius:10px;padding:16px">' +
+      '<div style="font-size:18px;font-weight:800;color:var(--w);margin-bottom:10px">' + e(m.name) + '</div>' +
+      line('Lane number', m.membershipNumber || '—') +
+      line('Email', m.email || '—') +
+      line('Status', m.status) +
+      line('Joined', when(m.joinedAt)) +
+      line('How they joined', how(m.source, m.fixtureId)) +
+      line('Lane Card linked', m.laneCardLinked ? 'Yes' : 'Not linked') +
+      line('Club emails', m.marketing ? (m.marketing.email ? 'Yes — ' + when(m.marketing.consentedAt)
+        : 'No' + (m.marketing.withdrawnAt ? ' — ' + when(m.marketing.withdrawnAt) : '')) : 'No choice made') +
+      line('Programmes opened', (m.programmesOpened || []).length) +
+      line('Match check-ins', (m.checkIns || []).length) +
+      line('Last active', when(m.lastActiveAt)) +
+      ((m.notifications || []).length
+        ? '<div style="margin-top:12px"><div class="fl">Club notification</div>' +
+          m.notifications.map(function (n) {
+            return '<div style="font-size:12px;color:var(--gr);padding:4px 0">' +
+              e(n.event_type) + ' · ' + e(n.status) +
+              (n.sent_at ? ' · sent ' + e(when(n.sent_at)) : '') +
+              (n.last_error ? ' · ' + e(String(n.last_error).slice(0, 90)) : '') + '</div>';
+          }).join('') + '</div>' : '') +
+      (m.identityReview ? '<div style="margin-top:12px;color:#F59E0B;font-size:12.5px">' +
+        'Waiting for somebody to confirm which Lane Card is theirs: ' + e(m.identityReview.reason) + '</div>' : '') +
+      '<p style="color:var(--gr);font-size:12px;margin-top:14px">This is everything the club holds about them. ' +
+      'There is no record of what they clicked or how long they read for.</p>' +
+    '</div>';
+  };
+
+  window.supNotes = async function () {
+    var out = document.getElementById('sup-notes');
+    if (!out) return;
+    var j = await api('notifications');
+    if (!j || !j.ok || !j.notifications || !j.notifications.length) {
+      out.innerHTML = '<p style="color:var(--gr)">Nothing queued or sent yet.</p>'; return;
+    }
+    out.innerHTML = j.notifications.map(function (n) {
+      var bad = n.status === 'failed' || n.status === 'abandoned';
+      return '<div style="display:flex;gap:12px;align-items:center;padding:9px 12px;border:1px solid ' +
+        (bad ? 'rgba(245,158,11,.4)' : 'var(--bd)') + ';border-radius:9px;margin-bottom:7px;min-width:0">' +
+        '<div style="min-width:0;flex:1"><div style="color:var(--w);font-size:13px">' +
+          e(n.event_type === 'member_linked' ? 'Lane member linked' : 'New member') +
+          ' · <span style="color:' + (bad ? '#F59E0B' : 'var(--gr)') + '">' + e(n.status) + '</span></div>' +
+        '<div style="color:var(--gr);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+          e(when(n.created_at)) + (n.attempts ? ' · ' + e(n.attempts) + ' attempt(s)' : '') +
+          (n.last_error ? ' · ' + e(String(n.last_error).slice(0, 80)) : '') + '</div></div>' +
+        (bad ? '<button class="btn" style="flex-shrink:0;padding:7px 12px;font-size:11px" onclick="supRetry(' +
+          Number(n.id) + ')">Retry</button>' : '') + '</div>';
+    }).join('');
+  };
+
+  window.supRetry = async function (id) {
+    await api('retry', { id: id });
+    supNotes();
+  };
+
+  window.supSendNow = async function () {
+    // fan-notify is SCHEDULED — Netlify answers 403 to direct HTTP. The button
+    // calls its companion, which is the whole reason the companion exists.
+    var r = await fetch('/.netlify/functions/fan-notify-now', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN }),
+    });
+    var j = await r.json();
+    if (typeof toast === 'function') {
+      toast(j && j.ok ? ('Sent ' + (j.sent || 0) + ', failed ' + (j.failed || 0)) : 'Could not send');
+    }
+    supNotes(); health();
+  };
 })();
 </script>
 

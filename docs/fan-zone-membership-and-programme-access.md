@@ -1,3 +1,28 @@
+> **STATUS — 2 August 2026.** This document was written as a verification of
+> production SHA `00b3bb5`, and its findings are what the completion release was
+> built to fix. It is kept as the forensic record. **Sections 1–15 describe the
+> BROKEN state.** What replaced each defect is listed immediately below; the
+> defect list in §14 is now the changelog.
+>
+> | Defect found at `00b3bb5` | Fixed by |
+> |---|---|
+> | Programme pages had no Supabase client | `js/fan-boot.js` — one entry that loads its own config and library. `tests/fan-dependencies.test.js` + `fan-health.js` make the old arrangement unavailable. |
+> | `SUPABASE_ANON_KEY` unset → every token rejected with 401 "No API key found" | `lib/fan/members.js` falls back to the published key. **This was a second, independent blocker not in the original report.** |
+> | `fan-zone.html` discarded `join`/`signin`/`return` | `js/fan-zone-member.js` reads all six parameters. |
+> | No reconciliation on sign-in | `fan-member` action `me` calls `ensure()` on every page load, from every page. |
+> | No return to the programme | Server-stored return path, applied after verification, opens the edition directly. |
+> | Magic link not built | `LaneFan.sendMagicLink()` + the join panel + a server-side signup intent keyed by nonce. |
+> | `membership_number` random, no constraint | `fan_next_membership_number()` sequence + skip-loop + unique index. |
+> | Membership created by four separate writes | `fan_ensure_membership()` — one transaction. |
+> | `fans` had no email column | Added, backfilled from `auth.users` on the proven `id` relationship. |
+> | No club notification | `fan_notification_outbox` → Resend, deduped, bounded backoff. |
+> | No supporter dashboard, no CRM, no health | Built: member home, portal Supporters panel, `fan-health.js`. |
+> | Newsletter disconnected | `fan-newsletter.js` — one email key, no silent enrolment. |
+> | Privacy notice unfinished | Rewritten; `policies.html#privacy`, version `privacy-2026-08`. |
+>
+> Migration: `supabase/migrations/20260804060000_fan_completion.sql`, applied to
+> production 2 August 2026.
+
 # Fan Zone membership and programme access — how it actually works
 
 **Verified at production SHA `00b3bb5`, 2 August 2026.**

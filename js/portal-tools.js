@@ -165,6 +165,10 @@
       roles: ['Club Management', 'Club Secretary', 'Committee'] },
 
     // ── SUPPORTERS ────────────────────────────────────────────────────────
+    { id: 'supporters', name: 'Supporters', area: 'supporters', effect: 'internal',
+      desc: 'Every Fan Zone member, how they found the club, and whether the club is being told when somebody joins. Read-only.',
+      roles: ['Committee', 'Chairman'] },
+
     { id: 'fanclub', name: 'Fan Club', area: 'supporters', effect: 'public',
       desc: 'Champion your supporters on the public Fan Zone wall, and award loyalty hearts.',
       roles: ['Marketing/Media', 'Committee'] },

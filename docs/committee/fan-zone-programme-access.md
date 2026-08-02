@@ -12,10 +12,9 @@ Fan Zone account, so that we know who our supporters are and can look after them
 Anyone can see the cover, the two teams, the date, the venue and — once the match is
 over — the final score. To read the programme itself, a supporter signs in.
 
-**Right now, that sign-in does not work.** The lock is fitted and working. The key does
-not turn. Nobody can read a complete programme at the moment, including our existing
-supporter. This is being fixed and nothing has been lost — but the committee should know
-the position before anyone promotes the programme.
+**This now works.** For a short period after the last release it did not: the lock was
+fitted and the key did not turn, so nobody could read a complete programme. That has been
+fixed, nothing was lost, and no supporter needs to do anything differently.
 
 ---
 
@@ -33,23 +32,22 @@ fault. The programme page cannot currently tell that they are signed in.
 
 ---
 
-## What went wrong
+## What went wrong, and what changed
 
-Two things, and neither of them is a data problem.
+Two things, and neither was a data problem.
 
 **One.** The programme pages were never given the small piece of software that reads a
-supporter's sign-in. The pages ask "who is this?", get no answer, and assume the visitor
-is a stranger. Our own members are treated as strangers.
+supporter's sign-in. The pages asked "who is this?", got no answer, and assumed every
+visitor was a stranger — including our own members.
 
-**Two.** Joining Fan Zone does not currently create a membership record. Signing up
-creates the account and the Lane Card, but the membership register the programme checks
-against stays empty. So even once the first fault is fixed, an existing supporter would
-still be turned away until they are added to that register.
+**Two.** Joining Fan Zone did not create a membership record, so even once the first
+fault was fixed a supporter would still have been turned away.
 
-Both are missing connections between parts we already have. No supporter data has been
-lost, nothing has been deleted, and no rebuild is needed.
-
----
+Both are now fixed, and both are fixed in a way that cannot quietly come back: the site
+refuses to build if a page is missing what it needs, and the portal's Supporters page
+carries a health check that goes amber if the journey stops working. Crucially, that
+health check will not call the system healthy just because it is refusing everybody —
+that is exactly how the fault hid last time.
 
 ## What is not wrong
 
