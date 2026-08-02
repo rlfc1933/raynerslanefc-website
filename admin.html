@@ -1070,6 +1070,14 @@
         <div class="fwp-box__load">Checking player records…</div>
       </div>
 
+      <!-- ── SYSTEM HEALTH ────────────────────────────────────────────────────
+           The one thing none of the boxes above can tell you: whether something
+           has QUIETLY STOPPED. A timer that fails silently looks exactly like a
+           timer with nothing to do. -->
+      <div id="health-status" class="fwp-box">
+        <div class="fwp-box__load">Checking the football system…</div>
+      </div>
+
       <!-- FIX 1: the fixture is the source of truth for WHO + WHERE. Pick it here;
            opponent / home-away / date / venue are filled from data/fixtures.json. -->
       <div class="slbl"><i class="ico ico-calendar"></i> Which game? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the fixture; home/away comes from it</span></div>
@@ -1113,6 +1121,25 @@
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);letter-spacing:.04em;margin-top:8px;line-height:1.6">Saving here sets the home-page <strong style="color:var(--w)">Next Match</strong> badge and countdown too. For your full season schedule, results and the league spine, use the <strong style="color:var(--w)">Fixtures</strong> tile — that's the single source of truth.</p>
 
       <div class="div"></div>
+      <!-- ── EMERGENCY MANUAL SCOREBOARD ──────────────────────────────────────
+           GATE 8. Football Web Pages drives the score, the clock, the scorers
+           and full time, and has done since the feed went live. These buttons
+           are what the club used before that, and they exist now only for the
+           afternoon the feed is wrong or stops.
+
+           Folded away on purpose. Two people entering a score — one tapping
+           here, one arriving from the provider — is the exact failure the whole
+           football system was built to remove, and an open pair of + buttons is
+           an invitation to it. Taking manual control is a deliberate act with a
+           reason recorded against it, in the box at the top of this page. -->
+      <details class="emerg">
+        <summary><i class="ico ico-triangle-alert"></i> Emergency: enter the score by hand</summary>
+        <div class="emerg__why">
+          The score updates by itself from Football Web Pages. You should not need anything in here.
+          <b>Before you use it,</b> press <b>Take manual control</b> in the live updates box at the top of
+          this page &mdash; otherwise the next automatic check will overwrite whatever you type, and it will
+          look like your entry never saved.
+        </div>
       <div class="slbl"><i class="ico ico-football"></i> Live Score <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— tap during the game, fans see it in seconds</span></div>
       <div class="ls-board">
         <div class="ls-team">
@@ -1135,6 +1162,7 @@
       </div>
       <button class="save" style="margin-top:12px" onclick="pushLiveScore()"><i class="ico ico-zap"></i> Push Score Live</button>
       <div class="dep" id="dep-livescore"></div>
+      </details>
 
       <div class="div"></div>
       <div class="slbl"><i class="ico ico-megaphone"></i> Send a Match Alert <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— a push notification to fans who turned on alerts</span></div>
@@ -10045,6 +10073,19 @@ function toast(msg, err) {
 .ident-why{display:block;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-top:3px}
 .ident-pick{background:var(--c2);border:1px solid var(--bd);color:var(--w);font-family:var(--fb);font-size:13px;padding:9px;border-radius:8px;min-height:42px}
 @media(max-width:760px){.ident-row{grid-template-columns:1fr}}
+.emerg{border:1px solid rgba(248,113,113,.35);border-radius:12px;background:rgba(239,68,68,.05);padding:0 16px;margin:18px 0}
+.emerg>summary{cursor:pointer;list-style:none;padding:14px 0;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#F87171;display:flex;align-items:center;gap:8px;min-height:44px}
+.emerg>summary::-webkit-details-marker{display:none}
+.emerg[open]{padding-bottom:16px}
+.emerg__why{font-family:var(--fb);font-size:13px;color:var(--gr);line-height:1.7;padding:0 0 14px;border-bottom:1px solid var(--bd);margin-bottom:14px}
+.hl-list{margin-top:12px;display:flex;flex-direction:column;gap:1px;background:var(--bd);border-radius:9px;overflow:hidden}
+.hl-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;background:var(--c);padding:10px 12px}
+.hl-name{font-family:var(--fb);font-size:14px;color:var(--w)}
+.hl-state{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr)}
+.hl-state--ok{color:#6FCF97}.hl-state--stale{color:var(--y)}.hl-state--failing{color:#F87171}
+.hl-when{font-family:var(--fb);font-size:12px;color:var(--gr)}
+.hl-err{background:rgba(239,68,68,.08);color:#F87171;font-family:var(--fb);font-size:12px;padding:8px 12px;line-height:1.6}
+@media(max-width:600px){.hl-row{grid-template-columns:1fr auto}.hl-when{grid-column:1/-1;font-size:11px}}
 .fwp-diag{margin-top:12px}
 .fwp-diag>summary{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);cursor:pointer;padding:6px 0}
 .fwp-diag pre{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gr);background:var(--c);border:1px solid var(--bd);border-radius:8px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
@@ -10442,6 +10483,85 @@ function toast(msg, err) {
   };
 
   window.identRefresh();
+})();
+</script>
+
+
+<script>
+/* ── SYSTEM HEALTH ─────────────────────────────────────────────────────────
+   Says, in one line, whether the football system is working — and if it is not,
+   which part and how long it has been that way. Everything else on this page
+   reports its own success; only this can tell you something stopped.          */
+(function () {
+  var box = document.getElementById('health-status');
+  if (!box) return;
+  function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  var NAME = {
+    match: 'Live scores', season: 'Fixture list',
+    table: 'League table', programme: 'Matchday programme',
+  };
+  var STATE = {
+    ok: ['ok', 'Working'],
+    waiting: ['', 'Nothing to do yet'],
+    stale: ['warn', 'Has stopped updating'],
+    failing: ['man', 'Failing'],
+  };
+
+  window.healthRefresh = function () {
+    fetch('/.netlify/functions/football-health', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (!j || j.ok === false) {
+          box.className = 'fwp-box';
+          box.innerHTML = '<div class="fwp-hd fwp-hd--off"><span class="fwp-dot"></span>Football system</div>' +
+            '<div class="fwp-none">' + esc((j && j.error) || 'Could not check the system.') + '</div>';
+          return;
+        }
+        var kind = STATE[j.overall] ? STATE[j.overall][0] : '';
+        var rows = (j.subsystems || []).map(function (s) {
+          var st = STATE[s.state] || ['', s.state];
+          return '<div class="hl-row">' +
+            '<span class="hl-name">' + esc(NAME[s.name] || s.name) + '</span>' +
+            '<span class="hl-state hl-state--' + esc(s.state) + '">' + esc(st[1]) + '</span>' +
+            '<span class="hl-when">' + esc(s.lastSuccess) + '</span>' +
+          '</div>' + (s.lastError ? '<div class="hl-err">' + esc(s.lastError) + '</div>' : '');
+        }).join('');
+
+        var notes = [];
+        if (j.fixtures && j.fixtures.missingLineups) {
+          notes.push(j.fixtures.missingLineups + ' played match' +
+            (j.fixtures.missingLineups === 1 ? '' : 'es') + ' still without team sheets');
+        }
+        if (j.identity && j.identity.awaitingDecision) {
+          notes.push(j.identity.awaitingDecision + ' name' +
+            (j.identity.awaitingDecision === 1 ? '' : 's') + ' waiting to be identified');
+        }
+        if (j.conflicts && j.conflicts.total) {
+          notes.push(j.conflicts.total + ' disagreement' + (j.conflicts.total === 1 ? '' : 's') +
+            ' between us and the feed' + (j.conflicts.critical ? ' (' + j.conflicts.critical + ' serious)' : ''));
+        }
+
+        box.className = 'fwp-box' + (kind ? ' fwp-box--' + kind : '');
+        box.innerHTML =
+          '<div class="fwp-hd fwp-hd--' + (kind || 'off') + '"><span class="fwp-dot"></span>Football system</div>' +
+          '<div class="fwp-lines"><b style="color:#fff">' + esc(j.summary) + '</b></div>' +
+          '<div class="hl-list">' + rows + '</div>' +
+          (notes.length ? '<div class="fwp-lines">' + notes.map(esc).join('<br>') + '</div>' : '') +
+          '<details class="fwp-diag"><summary>Technical details</summary><pre>' +
+            esc(JSON.stringify(j, null, 1)) + '</pre></details>';
+      }).catch(function (e) {
+        box.innerHTML = '<div class="fwp-none">Network error: ' + esc(e.message) + '</div>';
+      });
+  };
+
+  window.healthRefresh();
+  setInterval(function () {
+    var panel = document.getElementById('panel-matchday');
+    if (panel && panel.style.display !== 'none') window.healthRefresh();
+  }, 60000);
 })();
 </script>
 

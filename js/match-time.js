@@ -70,6 +70,12 @@
   function kickoffEpoch(fixture) {
     if (!fixture) return NaN;
     if (fixture.kickoffEpoch != null && isFinite(fixture.kickoffEpoch)) return +fixture.kickoffEpoch;
+    // The registry's own field, and the one every surface should be reading.
+    // Absolute, so there is nothing to interpret and nothing to get wrong.
+    if (fixture.kickoffAt) {
+      var reg = Date.parse(fixture.kickoffAt);
+      if (!isNaN(reg)) return reg;
+    }
     // A stored timestamptz from Supabase is already absolute — trust it.
     if (fixture.scheduled_kickoff) {
       var abs = Date.parse(fixture.scheduled_kickoff);

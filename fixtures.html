@@ -226,16 +226,32 @@ async function loadFixturesData() {
   // Venues first — every card needs the ground/address/coords to render
   // Directions (or to say honestly that the address isn't confirmed yet).
   await fxLoadVenues();
-  // PRIMARY: the club-controlled season schedule (admin → Fixtures).
+  // GATE 8 — PRIMARY: the club's own football registry, through the one public
+  // reader every surface uses. It carries the provider's fixture list
+  // reconciled against the club's own schedule, the results, and an absolute
+  // kick-off instant — which is what stopped Los Angeles being shown a
+  // countdown to a match that was in its second half.
+  //
+  // FALLBACK: data/fixtures.json, the club-maintained schedule, for the case
+  // where the registry has not been populated. It is a fallback and not a
+  // second source of truth: whichever answers, ONE of them renders.
   var usedLocal = false;
   try {
-    var lr = await fetch('data/fixtures.json?t=' + Date.now());
-    if (lr.ok) {
-      var ld = await lr.json();
-      var list = (ld && ld.fixtures) || [];
-      if (list.length) { renderFxSeason(list); usedLocal = true; }
-    }
-  } catch (e) {}
+    var reg = window.RLFCFootball ? await window.RLFCFootball.fixtures() : null;
+    var regResults = window.RLFCFootball ? await window.RLFCFootball.results() : null;
+    var regList = (reg && reg.fixtures) || [];
+    if (regList.length) { renderFxSeason(fxFromRegistry(regList, regResults)); usedLocal = true; }
+  } catch (e) { /* fall through to the club's own file */ }
+  if (!usedLocal) {
+    try {
+      var lr = await fetch('data/fixtures.json?t=' + Date.now());
+      if (lr.ok) {
+        var ld = await lr.json();
+        var list = (ld && ld.fixtures) || [];
+        if (list.length) { renderFxSeason(list); usedLocal = true; }
+      }
+    } catch (e) {}
+  }
   // FALLBACK: live feed (TheSportsDB) while the club schedule is still empty.
   if (!usedLocal) {
     try {
@@ -558,6 +574,34 @@ function fxDrawCrest(ctx, img, cx, cy, box, initials) {
       strap: ' ', cta: 'Fixtures & directions', link: '/fixtures.html'
     });
   }
+
+/* Registry fixtures in the shape this page already renders.
+   Scores come from the results feed and are matched on id — never on a name and
+   a date, which is how a postponed fixture inherits the wrong score. */
+function fxFromRegistry(fixtures, results) {
+  var score = {};
+  ((results && results.results) || []).forEach(function (r) {
+    if (r.us != null && r.them != null) score[r.id] = r;
+  });
+  return fixtures.map(function (f) {
+    var s = score[f.id] || null;
+    return {
+      id: f.id,
+      // kickoffAt is absolute; date is kept for the parts of the page that
+      // format a day rather than an instant.
+      kickoffAt: f.kickoffAt,
+      date: f.kickoffAt ? String(f.kickoffAt).slice(0, 10) : '',
+      opponent: f.opponent,
+      isHome: f.isHome,
+      venue: f.venue,
+      competition: f.competition || null,
+      status: f.status,
+      us: s ? s.us : null,
+      them: s ? s.them : null,
+      scorers: s ? s.scorers : null,
+    };
+  });
+}
 
 function renderFxSeason(list) {
   injectFixtureEvents(list);
