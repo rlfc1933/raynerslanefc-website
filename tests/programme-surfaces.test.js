@@ -109,7 +109,7 @@ test('the reader and library are cache-versioned', () => {
   // exact value so a legitimate bump does not fail the suite — it is the
   // FORGOTTEN bump this is here to catch.
   const v = Number((sw.match(/CACHE = 'rlfc-v(\d+)'/) || [])[1]);
-  assert.ok(v >= 12, 'service-worker cache name must be at least rlfc-v12, found v' + v);
+  assert.ok(v >= 13, 'service-worker cache name must be at least rlfc-v13, found v' + v);
 });
 
 test('the reader page has one h1 and semantic sections', () => {

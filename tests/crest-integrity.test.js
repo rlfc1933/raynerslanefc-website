@@ -420,3 +420,36 @@ test('an approved local crest is never replaced by a remote provider URL', () =>
   const snap = LaneCrest.resolve('Hilltop', 'img/crests/hilltop-2026.png', { preferHint: true });
   assert.match(snap.source, /snapshot/);
 });
+
+test('js/crest.js IS THE ONLY ACTIVE RESOLVER', () => {
+  // Six pages once improvised six. Any surviving local code must delegate to
+  // the central resolver, not implement a second set of rules.
+  const drawers = ['js/club-now.js', 'js/match-centre.js', 'js/programme-cover.js',
+    'js/programme-library.js', 'fixtures.html'];
+  drawers.forEach((f) => {
+    const s = strip(R(f));
+    assert.match(s, /window\.LaneCrest/, f + ' does not delegate to the central resolver');
+  });
+  // Wherever a page keeps its own copy, the delegation must come FIRST.
+  const mc = strip(R('js/match-centre.js'));
+  const delegate = mc.indexOf('window.LaneCrest.html');
+  const local = mc.indexOf('var file = crests[norm(name)]');
+  assert.ok(delegate > 0 && delegate < local,
+    'the local fallback must be reached only when the resolver is absent');
+});
+
+test('every page that draws a crest loads the resolver', () => {
+  ['index.html', 'fixtures.html', 'match-centre.html', 'programmes.html'].forEach((f) => {
+    assert.match(R(f), /js\/crest\.js\?v=\d+/, f + ' draws crests without the resolver');
+  });
+  // Except the reader, deliberately: it is snapshot-only.
+  assert.ok(R('programme.html').indexOf('js/crest.js') === -1);
+});
+
+test('one club abbreviates the same way everywhere', () => {
+  // Two different initials rules would make the same club look like two clubs
+  // on two pages. main.js now borrows the resolver's.
+  const s = strip(R('js/main.js'));
+  assert.match(s, /window\.LaneCrest\.initials\(name\)/);
+  assert.strictEqual(LaneCrest.initials('Wallingford & Crowmarsh'), 'WC');
+});

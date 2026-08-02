@@ -353,9 +353,13 @@ function rlfcFixturesShape(list) {
 
 // Their initials in a circle — the same fallback the fixtures page uses, so a
 // club with no crest still reads as a club rather than a broken image icon.
+// Initials come from the ONE resolver so every surface abbreviates a club the
+// same way. "Wallingford & Crowmarsh" must not be WC here and W somewhere else.
 function crestInitials(name) {
-  var ini = String(name || '').replace(/\b(fc|afc|utd|united|town|city)\b/gi, '')
-    .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase();
+  var ini = (window.LaneCrest && window.LaneCrest.initials)
+    ? window.LaneCrest.initials(name)
+    : String(name || '').replace(/\b(fc|afc|utd|united|town|city)\b/gi, '')
+      .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase();
   var d = document.createElement('div');
   d.className = 'hero__badge-crest hero__badge-crest--ini';
   d.textContent = ini || '?';

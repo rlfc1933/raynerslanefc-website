@@ -38,6 +38,7 @@
 
   /* ── crests verified once, so rendering has nothing left to race ───────── */
   function loadCrests() {
+    if (window.LaneCrest && window.LaneCrest.load) return window.LaneCrest.load();
     return fetch('data/crests.json?t=' + Date.now())
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { ((d && d.crests) || []).forEach(function (c) { crests[norm(c.name)] = c.file; }); })
@@ -59,7 +60,17 @@
     return String(name || '').replace(/\b(fc|afc|utd|united|town|city)\b/gi, '')
       .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase() || '?';
   }
+  /* Delegates to the ONE resolver (js/crest.js). This page's own version was
+     the only one of six that survived the crest incident, and js/crest.js is
+     that logic lifted out — so this is the same behaviour, in one place, with
+     every other surface now sharing it. The local copy below remains purely as
+     an offline fallback for the case where crest.js has not loaded. */
   function crestHTML(name) {
+    if (window.LaneCrest && window.LaneCrest.html) {
+      return window.LaneCrest.html(name, {
+        className: 'mc-crest', initialsClass: 'mc-crest mc-crest--ini',
+      });
+    }
     var file = crests[norm(name)];
     if (!file || !verified[file]) return '<span class="mc-crest mc-crest--ini">' + esc(initials(name)) + '</span>';
     return '<img class="mc-crest" src="' + esc(file) + '" alt="' + esc(name) + ' crest">';
