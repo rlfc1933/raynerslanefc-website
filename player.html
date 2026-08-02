@@ -104,7 +104,12 @@ async function loadPlayer() {
 
 function renderPlayer(p, record) {
   var _pImg = p.photo ? (/^https?:/.test(p.photo) ? p.photo : 'https://raynerslanefc.co.uk/' + p.photo.replace(/^\//, '')) : 'https://raynerslanefc.co.uk/img/og-card.jpg';
-  var _pCanon = 'https://raynerslanefc.co.uk/player.html?id=' + encodeURIComponent(p.id || '');
+  // One canonical URL per player. The roster id is the primary form because
+  // every existing link on the site uses it; a confirmed identity's slug is the
+  // fallback for somebody who has left the squad list but keeps his record.
+  var _pCanon = 'https://raynerslanefc.co.uk/player.html?' + (p.id
+    ? 'id=' + encodeURIComponent(p.id)
+    : 'p=' + encodeURIComponent((record && record.slug) || ''));
   setPageSEO({
     title: (p.name || 'Player') + (p.position ? ' — ' + p.position : '') + ' | Rayners Lane FC',
     description: (p.name || 'Player') + (p.position ? ', ' + p.position : '') + ' for Rayners Lane FC — non-league football in Harrow, Combined Counties Premier Division North.',
