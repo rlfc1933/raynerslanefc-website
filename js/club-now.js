@@ -66,12 +66,58 @@
       results: played.slice().reverse().map(function (r) { return { opponent: r.opponent, date: r.date, isHome: r.isHome, us: r.us, them: r.them }; })
     };
   }
+  /* GATE 8 — the registry answers first.
+     The block that leads this page is the club's most-read football fact, and
+     it was still being worked out from the committee's own file while the
+     registry held the reconciled version with an absolute kick-off. Now:
+     registry, then data/fixtures.json, then nothing — in that order, and only
+     one of them ever renders. */
+  function fromRegistry(d) {
+    if (!d || !d.next && !(d.previous)) return null;
+    function shape(f) {
+      if (!f) return null;
+      // The date and time as they are AT THE GROUND, derived from the absolute
+      // instant rather than sliced off an ISO string. A supporter in Los Angeles
+      // should read "Sat 2 Aug, 3pm" — the club's own kick-off — while every
+      // comparison against the clock still uses the instant.
+      var ms = Date.parse(f.kickoffAt);
+      var parts = { date: '', kickoff: '' };
+      if (isFinite(ms)) {
+        var d = new Date(ms);
+        var iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
+          year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+        var hm = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London',
+          hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+        parts = { date: iso, kickoff: hm };
+      }
+      return {
+        opponent: f.opponent, isHome: f.isHome,
+        kickoffAt: f.kickoffAt,
+        date: parts.date, kickoff: parts.kickoff,
+        competition: f.competition || '', venue: f.venue || '',
+        oppCrest: (f.isHome ? f.awayCrest : f.homeCrest) || '',
+      };
+    }
+    var next = shape(d.current || d.next);
+    var prev = d.previous ? Object.assign(shape(d.previous), {
+      us: d.previous.us, them: d.previous.them,
+    }) : null;
+    if (!next && !prev) return null;
+    return { next: next, results: prev ? [prev] : [] };
+  }
+
   function loadFixtures() {
-    return fetch('data/fixtures.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        raw = (d && d.fixtures) || [];
-        shaped = (typeof rlfcFixturesShape === 'function') ? rlfcFixturesShape(raw) : shapeLocal(raw);
-      }).catch(function () { shaped = { next: null, results: [] }; });
+    var registry = (window.RLFCFootball && window.RLFCFootball.summary)
+      ? window.RLFCFootball.summary().then(fromRegistry).catch(function () { return null; })
+      : Promise.resolve(null);
+    return registry.then(function (fromReg) {
+      if (fromReg) { shaped = fromReg; raw = []; return; }
+      return fetch('data/fixtures.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          raw = (d && d.fixtures) || [];
+          shaped = (typeof rlfcFixturesShape === 'function') ? rlfcFixturesShape(raw) : shapeLocal(raw);
+        });
+    }).catch(function () { shaped = { next: null, results: [] }; });
   }
   // Single source of truth: readLiveMatch() (js/main.js) resolves the effective
   // state — including AUTO-LIVE (an armed game flips to live by itself at kick-off,
@@ -205,7 +251,7 @@
         '<a class="cn__btn cn__btn--ghost" href="fixtures.html">Fixtures &amp; Results</a></div>' +
       nextBlock;
 
-    if (n && n.opponent) startCountdown(n.date, n.kickoff);
+    if (n && n.opponent) startCountdown(n);
   }
 
   // ── NEXT MATCH primary ──
@@ -236,14 +282,18 @@
       '<div class="cn__meta"><i class="ico ico-map-pin" aria-hidden="true"></i> ' + esc(metaBits) + '</div>' +
       '<div class="cn__cta">' + dirBtn(n) + icsBtn() +
         '<a class="cn__btn cn__btn--ghost" href="match-centre.html">Match Centre</a></div>';
-    startCountdown(n.date, n.kickoff);
+    startCountdown(n);
   }
 
   // ── countdown (own 1s tick; cleared on each rebuild) — UK-time anchored ──
-  function startCountdown(dateStr, timeStr) {
+  function startCountdown(fixture) {
     if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
     var el = document.getElementById('cn-countdown'); if (!el) return;
-    var targetMs = ukEpoch(dateStr, timeStr || '15:00');
+    // One time utility, one answer. A registry fixture carries the absolute
+    // instant; a legacy one carries a London date and time. MatchTime knows the
+    // difference so nothing here has to.
+    var targetMs = MatchTime.kickoffEpoch(fixture);
+    if (isNaN(targetMs)) targetMs = ukEpoch(fixture && fixture.date, (fixture && fixture.kickoff) || '15:00');
     if (isNaN(targetMs)) { el.innerHTML = '<span class="cn__meta">Kick-off time to be confirmed</span>'; return; }
     function tick() {
       var el2 = document.getElementById('cn-countdown'); if (!el2) { clearInterval(cdTimer); return; }

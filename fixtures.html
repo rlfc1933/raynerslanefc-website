@@ -583,14 +583,23 @@ function fxFromRegistry(fixtures, results) {
   ((results && results.results) || []).forEach(function (r) {
     if (r.us != null && r.them != null) score[r.id] = r;
   });
+  // The date AT THE GROUND. Slicing an ISO string gives the UTC date, which is
+  // the wrong day for anything kicking off after 11pm BST — and, more to the
+  // point, is the habit that has to stop.
+  function londonDate(iso) {
+    var ms = Date.parse(iso);
+    if (!isFinite(ms)) return '';
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
+      year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+  }
   return fixtures.map(function (f) {
     var s = score[f.id] || null;
     return {
       id: f.id,
-      // kickoffAt is absolute; date is kept for the parts of the page that
-      // format a day rather than an instant.
+      // kickoffAt is absolute; date is the club's own day, for the parts of the
+      // page that format a day rather than an instant.
       kickoffAt: f.kickoffAt,
-      date: f.kickoffAt ? String(f.kickoffAt).slice(0, 10) : '',
+      date: londonDate(f.kickoffAt),
       opponent: f.opponent,
       isHome: f.isHome,
       venue: f.venue,

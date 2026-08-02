@@ -133,3 +133,38 @@ test('the registry sync writes the players nobody else does', () => {
   // Exactly two: the timer, and the portal button a human presses.
   assert.deepStrictEqual(others.sort(), ['football-players.js', 'football-registry-sync.js']);
 });
+
+// ── the homepage ────────────────────────────────────────────────────────────
+test('the homepage block asks the registry before the legacy file', () => {
+  const s = strip(R('js/club-now.js'));
+  const registry = s.indexOf('RLFCFootball.summary');
+  const legacy = s.indexOf("fetch('data/fixtures.json");
+  assert.ok(registry > 0, 'the homepage must read the registry');
+  assert.ok(registry < legacy, 'data/fixtures.json is the fallback, not the source');
+});
+
+test('the countdown is anchored on the instant, not on two strings', () => {
+  const s = strip(R('js/club-now.js'));
+  assert.match(s, /function startCountdown\(fixture\)/);
+  assert.match(s, /MatchTime\.kickoffEpoch\(fixture\)/,
+    'a countdown built by re-parsing a date string is how Los Angeles got one for a match at 89 minutes');
+});
+
+test('MatchTime understands the registry\'s own kick-off field', () => {
+  const MT = require('../js/match-time');
+  const iso = '2026-08-01T14:00:00.000Z';       // 3pm at the ground, in August
+  assert.strictEqual(MT.kickoffEpoch({ kickoffAt: iso }), Date.parse(iso));
+  // And an absolute instant beats a date string that disagrees with it.
+  assert.strictEqual(
+    MT.kickoffEpoch({ kickoffAt: iso, date: '2020-01-01', kickoff: '09:00' }),
+    Date.parse(iso));
+  assert.ok(isNaN(MT.kickoffEpoch({ kickoffAt: 'not a date' })) ||
+    MT.kickoffEpoch({ kickoffAt: 'not a date' }) !== 0, 'garbage must not become 1970');
+});
+
+test('the London wall clock is derived from the instant, never sliced off it', () => {
+  const s = strip(R('js/club-now.js'));
+  assert.match(s, /timeZone: 'Europe\/London'/, 'the ground\'s own clock');
+  assert.ok(!/String\(f\.kickoffAt\)\.slice\(0, 10\)/.test(s),
+    'slicing an ISO string gives the UTC date, which is the wrong day after 11pm BST');
+});
