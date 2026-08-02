@@ -315,3 +315,31 @@ test('the portal explains recovery in plain words, with no state names', () => {
   assert.match(block, /published after full time/);
   assert.ok(!/WAITING_FOR|canPublish|decide\(/.test(block), 'no jargon in the committee view');
 });
+
+test('PUBLICATION IS NEVER ONE RUN BEHIND', () => {
+  // decide() reads edition.mandatory_content_valid, and `edition` is the row as
+  // it was BEFORE this run. A programme that had just become complete was
+  // judged on the previous run's answer, withheld, and published an hour later
+  // when the stale flag caught up. On matchday an hour is the difference
+  // between a programme and no programme.
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
+  assert.match(s, /const editionNow = Object\.assign\(\{\}, edition, \{/,
+    'the decision must use this run\'s validity');
+  assert.match(s, /mandatory_content_valid: built\.validation\.ok/);
+  assert.match(s, /edition: editionNow/, 'and decide() must be given it');
+  // The stale row must not be what the decision sees.
+  assert.ok(!/RULES\.decide\(\{\s*\n?\s*fixture: fx, edition, /.test(s),
+    'decide() is still being handed the pre-run row');
+});
+
+test('a freshly complete programme publishes on the SAME run', () => {
+  // Behavioural: content became valid this run, edition row still says false.
+  const staleRow = { mandatory_content_valid: false, generated_at: 'yes' };
+  const freshRow = Object.assign({}, staleRow, { mandatory_content_valid: true });
+  const stale = R.decide(Object.assign(ctx(KO - 3600000), { edition: staleRow }));
+  const fresh = R.decide(Object.assign(ctx(KO - 3600000), { edition: freshRow }));
+  assert.strictEqual(stale.canPublish, false, 'the stale flag withholds it');
+  assert.strictEqual(fresh.canPublish, true, 'the fresh one publishes it');
+});

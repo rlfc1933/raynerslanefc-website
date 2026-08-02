@@ -219,8 +219,20 @@ exports.handler = async function (event) {
         }
       } catch (e) { /* no result yet — the edition simply has no Full Time section */ }
 
+      /* The content validity from THIS run, not the last one.
+         decide() reads edition.mandatory_content_valid, and `edition` is the
+         row as it was BEFORE this run — so a programme that had just become
+         complete was judged on the previous run's answer and withheld, then
+         published an hour later when the stale flag finally caught up.
+         Publication was permanently one run behind, and on matchday an hour is
+         the difference between a programme and no programme. */
+      const editionNow = Object.assign({}, edition, {
+        mandatory_content_valid: built.validation.ok,
+        lineup_gate_valid: gate.ok,
+      });
+
       const decision = RULES.decide({
-        fixture: fx, edition, ourTeamId, now,
+        fixture: fx, edition: editionNow, ourTeamId, now,
         homeLineup: lineups.home, awayLineup: lineups.away,
         isFinal: !!(state && state.is_final),
       });
