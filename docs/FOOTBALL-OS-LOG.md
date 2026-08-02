@@ -633,3 +633,49 @@ The programme's legal footer is still empty. `legal_version` exists; there is no
 wording behind it, because the current FA Handbook and Combined Counties rules
 have not been read from their primary sources. An absence is visible; a
 plausible fabrication is not.
+
+### What production found that the tests did not
+
+Three defects, all discovered by opening the deployed site rather than by
+reading the code. All three were introduced or exposed by this release.
+
+**The two pages disagreed about kick-off.** The home page read the registry and
+said "Tue 4 Aug · 7.45pm" for Broadfields. The fixtures page read the same
+registry and said "Tuesday 4 August · 15:00". My adapter carried the date across
+but not the time, and the renderer fell through to `f.kickoff || '15:00'`.
+
+That fallback is not a default. It is a claim, printed in the club's voice, and
+for a Tuesday night game it was wrong. Both surfaces now derive the ground's own
+clock from the absolute instant, and an unknown kick-off says "Kick-off TBC".
+The club confirmed the pattern independently: Saturdays 15:00, Tuesdays 19:45 —
+which is exactly what the page shows now and could not have shown before.
+
+**A timer can erase what a button never got the chance to.** The season upsert
+replaces whole rows. That was tolerable while somebody pressed it occasionally.
+On a twenty-minute schedule, one provider response omitting a kick-off or a
+venue would blank it — and the next run would blank it again, so nobody would
+ever catch it happening, only notice the absence weeks later. The kick-off, the
+venue and the club's own fixture id are now carried forward when the incoming
+row is silent, and each run says how many facts it declined to erase.
+
+**A failed step reported as green.** The underlying handlers answer HTTP 200
+with `{ok:false}` rather than throwing — correct for an HTTP caller, wrong for
+one that delegates to them. A run in which nothing worked would have shown four
+successful steps. That is the precise false reassurance the health view exists
+to remove, so it would have undermined the thing built alongside it.
+
+### Verified in production
+
+- Schema applied: 6 identity columns, 9 statistic columns, 3 new tables, the
+  public-slug check constraint, one public policy on season totals and **zero**
+  on the decision log.
+- `?what=player&p=beau-pryce` → **404**. No confirmed identity, no page, even
+  with the slug guessed correctly.
+- Both portal endpoints refuse without a sign-in. `football-registry-sync` over
+  HTTP → **403**, which is why the companion exists.
+- Fixtures page: 40 fixtures from the registry, every one carrying a kick-off,
+  Wallingford 3-3 correct.
+- Match Centre `?id=fwp-578225`: 3–3, 31 line-up rows, Le'Kai Chevannes shown as
+  a starter withdrawn on 70' — the case the provider's markup makes look like an
+  unused substitute — and **zero linked names**, because nobody has been
+  confirmed yet. Exactly the specified behaviour.
