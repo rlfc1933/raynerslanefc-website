@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Match Day Programme | Rayners Lane FC</title>
-  <meta name="description" content="Rayners Lane FC official match day programme. Squad, manager notes, fixtures and league table.">
+  <title>Matchday Programme | Rayners Lane FC</title>
+  <meta name="description" content="The official Rayners Lane FC digital matchday programme — team line-ups, the league table, our partners and the story of The Lane. Free to read.">
   <link rel="canonical" href="https://raynerslanefc.co.uk/programme.html">
   <link rel="alternate" hreflang="en-GB" href="https://raynerslanefc.co.uk/programme.html">
   <link rel="alternate" hreflang="en" href="https://raynerslanefc.co.uk/programme.html">
@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/programme-lib.css?v=6">
   <style>
     /* ── MAGAZINE STYLES ── */
     :root { --prog-yellow:#FFD100; --prog-green:#1A5C32; }
@@ -378,384 +379,30 @@
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- ══════════════════════════════════════
-     MAGAZINE COVER — Full viewport
-═══════════════════════════════════════ -->
-<div class="prog-cover-wrap">
-  <div class="prog-cover-bg"></div>
-  <div class="prog-cover-pitch"></div>
-  <div class="prog-cover-glow"></div>
-
-  <div class="prog-cover-content">
-    <h1 class="sr-only">Rayners Lane FC Match Day Programme</h1>
-
-    <!-- Top yellow bar -->
-    <div class="prog-cover-topbar">
-      <span class="prog-cover-topbar-left">RAYNERS LANE FC &middot; OFFICIAL MATCH DAY PROGRAMME</span>
-      <span class="prog-cover-topbar-right">Tithe Farm Social Club &middot; Harrow &middot; HA2 0XH</span>
+<main id="main">
+  <header class="page-header">
+    <div class="container">
+      <span class="label">Free digital edition</span>
+      <!-- A real heading in the served HTML, not one written by JavaScript.
+           Crawlers and screen readers get the page's identity immediately; the
+           reader replaces the text once the edition loads. -->
+      <h1 class="page-header__h" id="pr-title">Matchday <span>Programme</span></h1>
     </div>
+  </header>
 
-    <!-- Main cover area -->
-    <div class="prog-cover-main">
-      <div class="prog-comp-label" id="prog-competition">Combined Counties Premier Division North</div>
-
-      <!-- VS block -->
-      <div class="prog-vs-block">
-
-        <!-- Home team -->
-        <div class="prog-team-block">
-          <img src="img/badge.png" alt="Rayners Lane FC" class="prog-team-badge">
-          <div class="prog-team-name">RAYNERS LANE FC</div>
-        </div>
-
-        <!-- VS -->
-        <div class="prog-vs-center">
-          <div class="prog-vs-divider"></div>
-          <div class="prog-vs-text">VS</div>
-        </div>
-
-        <!-- Away team -->
-        <div class="prog-team-block">
-          <img id="prog-opp-logo" src="img/badge.png" alt="Opposition" class="prog-team-badge"
-               style="filter:grayscale(1) brightness(.4)">
-          <div class="prog-team-name" id="prog-opp-name">Loading...</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Date / competition bar -->
-    <div class="prog-cover-datebar">
-      <div class="prog-cover-detail">
-        <span class="prog-cover-detail-label">Date</span>
-        <span class="prog-cover-detail-val" id="prog-match-date">2026-27 Season</span>
-      </div>
-      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
-      <div class="prog-cover-detail">
-        <span class="prog-cover-detail-label">Venue</span>
-        <span class="prog-cover-detail-val" id="prog-venue">Tithe Farm Social Club</span>
-      </div>
-      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
-      <div class="prog-cover-detail">
-        <span class="prog-cover-detail-label">Competition</span>
-        <span class="prog-cover-detail-val">CCL Premier Div North</span>
-      </div>
-      <div style="width:1px;height:32px;background:rgba(255,255,255,.1)"></div>
-      <div class="prog-cover-detail">
-        <span class="prog-cover-detail-label">Kick-off</span>
-        <span class="prog-cover-detail-val" id="prog-kickoff">3:00 PM</span>
-      </div>
-    </div>
-
-    <!-- Bottom green bar -->
-    <div class="prog-cover-bottom">
-      <div class="prog-cover-bottom-brand">
-        <img src="img/badge.png" alt="RLFC" class="prog-cover-bottom-badge">
-        <span class="prog-cover-bottom-name">THE LANE</span>
-      </div>
-      <span class="prog-cover-bottom-social">Follow @RaynersLaneFC for live updates</span>
-    </div>
-
-  </div>
-
-  <!-- Scroll hint -->
-  <div class="prog-scroll-hint">
-    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" width="20" height="20"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-    <span>Read the programme</span>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     MAGAZINE BODY
-═══════════════════════════════════════ -->
-<div class="prog-magazine">
-
-  <!-- ── CHAIRMAN MESSAGE ── -->
-  <div class="mag-section" style="background:var(--dark)">
-    <div class="mag-section-inner">
-      <div class="mag-chairman">
-        <span class="mag-label">From the Chairman</span>
-        <div class="mag-chairman-quote">
-          "Welcome to Tithe Farm.<br>
-          <em>This is The Lane.</em>"
-        </div>
-        <div class="prog-body-text">
-          Whether you're a lifelong supporter or visiting for the first time today — thank you for being here.
-          This club belongs to Harrow. It always has. It always will. Enjoy the match.
-        </div>
-        <div style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-top:16px">
-          Pete Singh &mdash; Club Chairman
-        </div>
-      </div>
+  <div class="pr">
+    <div id="programme-reader">
+      <div class="pl-empty"><div class="pl-empty__h">Opening the programme…</div></div>
     </div>
   </div>
+</main>
 
-  <!-- ── MANAGER NOTES ── -->
-  <div class="mag-section">
-    <div class="mag-section-inner">
-      <span class="mag-label">From the Dugout</span>
-      <div class="mag-title">The <span>Gaffer</span> Speaks</div>
-      <div class="mag-rule"></div>
-      <div class="mag-manager-layout">
-        <div>
-          <div class="mag-manager-card">
-            <img src="img/players/player-mid-2.svg" alt="Manager" class="mag-manager-img">
-            <div class="mag-manager-name">Gary Pitt</div>
-            <div class="mag-manager-role">First Team Manager</div>
-          </div>
-        </div>
-        <div>
-          <div class="mag-pull-quote" id="prog-vs-text">vs <span id="prog-vs-text-inner">Today's Opponents</span></div>
-          <div id="prog-manager-notes"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── WELCOME OPPOSITION ── -->
-  <div class="mag-section" style="padding:0">
-    <div class="mag-welcome-layout">
-      <div class="mag-welcome-left">
-        <span class="mag-label">Welcome</span>
-        <div class="mag-title" style="font-size:clamp(32px,4vw,56px)">
-          Welcome to<br><span id="prog-welcome-team">Our Guests</span>
-        </div>
-        <div class="mag-rule"></div>
-        <div id="prog-welcome-notes"></div>
-      </div>
-      <div class="mag-welcome-right">
-        <img id="prog-opp-logo-2" src="img/badge.png" alt="Opposition" class="mag-opp-logo"
-             style="filter:grayscale(1) brightness(.4)">
-        <div class="mag-opp-name" id="prog-opp-name-2">Loading...</div>
-        <div style="font-family:var(--font-c);font-size:12px;color:rgba(255,255,255,.8);letter-spacing:.08em">
-          Today's visitors
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── MATCH PREVIEW ── -->
-  <div class="mag-section">
-    <div class="mag-section-inner">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
-        <div>
-          <span class="mag-label">Preview</span>
-          <div class="mag-title" style="font-size:clamp(30px,3.5vw,52px)">What We're<br><span>Looking Forward To</span></div>
-          <div class="mag-rule"></div>
-          <div id="prog-looking-forward"></div>
-        </div>
-        <div>
-          <span class="mag-label">History</span>
-          <div class="mag-title" style="font-size:clamp(30px,3.5vw,52px)">Head <span>to Head</span></div>
-          <div class="mag-rule"></div>
-          <div id="prog-h2h-notes"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── THE SQUAD ── -->
-  <div class="mag-section" style="background:var(--dark)">
-    <div class="mag-section-inner">
-      <span class="mag-label">2026-27 First Team</span>
-      <div class="mag-title">The <span>Squad</span></div>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:4px">
-        <div class="mag-rule" style="margin:0"></div>
-        <span style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">Manager: Gary Pitt</span>
-      </div>
-      <div style="height:16px"></div>
-
-      <!-- Player illustration strip -->
-      <div style="display:flex;gap:2px;margin-bottom:32px;overflow:hidden;height:200px">
-        <img src="img/players/player-gk-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-        <img src="img/players/player-def-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-        <img src="img/players/player-mid-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-        <img src="img/players/player-mid-2.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-        <img src="img/players/player-forward-1.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-        <img src="img/players/player-forward-2.svg" alt="" style="flex:1;object-fit:cover;object-position:top">
-      </div>
-
-      <div class="mag-squad-layout" id="prog-squad-grid">
-        <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em">Loading squad...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TEAM SHEETS & OFFICIALS ── -->
-  <div class="mag-section" id="prog-teamsheets-sec" style="display:none">
-    <div class="mag-section-inner">
-      <span class="mag-label">Today's Teams</span>
-      <div class="mag-title">Team <span>Sheets</span></div>
-      <div class="mag-rule"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start">
-        <div>
-          <div style="font-family:var(--font-c);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);font-size:13px;margin-bottom:12px">Rayners Lane</div>
-          <div id="prog-home-xi"></div>
-          <div id="prog-home-subs-wrap" style="margin-top:16px;display:none"><div style="font-family:var(--font-c);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Substitutes</div><div id="prog-home-subs"></div></div>
-          <div id="prog-staff" style="margin-top:16px;font-family:var(--font-b);font-size:13px;color:var(--grey)"></div>
-        </div>
-        <div>
-          <div style="font-family:var(--font-c);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9aa;font-size:13px;margin-bottom:12px" id="prog-away-label">Opposition</div>
-          <div id="prog-away-lineup"></div>
-        </div>
-      </div>
-      <div id="prog-officials" style="margin-top:26px;padding-top:18px;border-top:1px solid var(--border);font-family:var(--font-b);font-size:14px;color:var(--grey);display:none"></div>
-    </div>
-  </div>
-
-  <!-- ── LEAGUE TABLE ── -->
-  <div class="mag-section">
-    <div class="mag-section-inner">
-      <span class="mag-label">2026-27 Season</span>
-      <div class="mag-title">League <span>Table</span></div>
-      <div class="mag-rule"></div>
-      <div class="mag-fwp-wrap">
-        <div class="mag-fwp-header">
-          <span>Combined Counties Premier Division North</span>
-          <span style="color:var(--yellow)">&#x25CF; Live Data</span>
-        </div>
-        <div id="prog-table" class="mag-live"><div class="mag-live-soon">The league table appears here once the 2026-27 season is under way.</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── FIXTURES ── -->
-  <div class="mag-section" style="background:var(--dark)">
-    <div class="mag-section-inner">
-      <span class="mag-label">Coming Up</span>
-      <div class="mag-title">Fixtures <span>&amp; Results</span></div>
-      <div class="mag-rule"></div>
-      <div class="mag-fwp-wrap">
-        <div class="mag-fwp-header">
-          <span>Rayners Lane FC — All Competitions</span>
-          <a href="fixtures.html" style="color:var(--yellow);font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Sync to Phone &rarr;</a>
-        </div>
-        <div id="prog-fixtures" class="mag-live"><div class="mag-live-soon">Fixtures &amp; results appear here the moment the league publishes the 2026-27 schedule.</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── MATCHDAY INFO & CLUB STATEMENTS ── -->
-  <div class="mag-section">
-    <div class="mag-section-inner">
-      <span class="mag-label">Good to Know</span>
-      <div class="mag-title">Matchday <span>Information</span></div>
-      <div class="mag-rule"></div>
-      <div style="display:grid;gap:12px">
-        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">Admission</b><span id="prog-admission" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
-        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">Ground rules</b><span id="prog-rules" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
-        <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline"><b style="font-family:var(--font-c);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow)">First aid</b><span id="prog-firstaid" style="font-family:var(--font-b);font-size:14px;color:#ccc"></span></div>
-      </div>
-      <div class="mag-rule" style="margin-top:28px"></div>
-      <span class="mag-label">The Club Stands For</span>
-      <div style="display:grid;gap:14px;margin-top:10px">
-        <div id="prog-respect" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
-        <div id="prog-safe" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
-        <div id="prog-equality" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
-        <div id="prog-affil" style="font-family:var(--font-b);font-size:13px;line-height:1.7;color:var(--grey);border-left:2px solid var(--yellow);padding-left:14px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── SPONSORS ── -->
-  <div class="mag-section">
-    <div class="mag-section-inner">
-      <span class="mag-label">Club Partners 2026-27</span>
-      <div class="mag-title">Our <span>Sponsors</span></div>
-      <div class="mag-rule"></div>
-      <div class="mag-sponsors-grid">
-        <div class="mag-sponsor-card featured">
-          <div class="mag-sponsor-logo">Hanlon Dry Lining</div>
-          <div class="mag-sponsor-role">Home Shirt Sponsor</div>
-          <div class="mag-sponsor-note">Nigel Hanlon — Vice Chairman<br>Proud to back The Lane</div>
-        </div>
-        <a href="https://harrow.mccaffertysbars.com/" target="_blank" rel="noopener" style="text-decoration:none" class="mag-sponsor-card">
-          <div class="mag-sponsor-logo">McCafferty's Bar</div>
-          <div class="mag-sponsor-role">Away Shirt Sponsor</div>
-          <div class="mag-sponsor-note">Harrow's favourite bar.<br>harrow.mccaffertysbars.com</div>
-        </a>
-        <a href="https://www.higginson.co.uk/" target="_blank" rel="noopener" style="text-decoration:none" class="mag-sponsor-card">
-          <div class="mag-sponsor-logo">Higginson Stairs</div>
-          <div class="mag-sponsor-role">Programme Sponsor</div>
-          <div class="mag-sponsor-note">Quality staircases.<br>higginson.co.uk</div>
-        </a>
-      </div>
-      <!-- Become a sponsor -->
-      <div class="mag-sponsor-cta">
-        <div style="font-family:var(--font-d);font-size:clamp(28px,4vw,52px);letter-spacing:.03em;color:var(--white);margin-bottom:12px">
-          Want Your Brand Here?
-        </div>
-        <p style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.5);letter-spacing:.04em;max-width:480px;margin:0 auto 24px;line-height:1.6">
-          Shirt sponsorship, match sponsorship, pitch-side boards, programme ads.
-          Multiple packages available for 2026-27.
-        </p>
-        <a href="mailto:info@raynerslanefc.co.uk?subject=Sponsorship%20Enquiry"
-           style="display:inline-flex;align-items:center;gap:10px;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:14px 32px;text-decoration:none;transition:opacity .2s"
-           onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          info@raynerslanefc.co.uk
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── FOLLOW THE LANE ── -->
-  <div class="mag-section" style="background:linear-gradient(160deg,var(--green),#060E06);border-bottom:none">
-    <div class="mag-section-inner" style="text-align:center">
-      <img src="img/badge.png" alt="Rayners Lane FC" style="width:80px;height:80px;object-fit:contain;margin:0 auto 20px;display:block">
-      <div style="font-family:var(--font-d);font-size:clamp(36px,5vw,64px);letter-spacing:.03em;color:var(--white);margin-bottom:12px">
-        The Lane. Est. 1933.
-      </div>
-      <div style="font-family:var(--font-c);font-size:16px;color:rgba(255,255,255,.5);letter-spacing:.06em;margin-bottom:32px">
-        Yellow first. Harrow always.
-      </div>
-      <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
-        <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          @RaynersLaneFC
-        </a>
-        <a href="https://instagram.com/raynerslanefc" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-          @raynerslanefc
-        </a>
-        <a href="fixtures.html" style="display:flex;align-items:center;gap:10px;background:var(--yellow);border:1px solid var(--yellow);padding:12px 20px;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--black);text-decoration:none">
-          Sync Fixtures to Phone
-        </a>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<div id="prog-custom"></div>
-
-<div style="text-align:center;padding:30px 16px 40px">
-  <a href="programmes.html" style="display:inline-flex;align-items:center;gap:9px;background:var(--yellow);color:#0d0d0d;font-family:var(--font-c);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:13px 24px;border-radius:10px;text-decoration:none"><i class="ico ico-library"></i> Browse the Programme Archive</a>
-</div>
-
-<div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/components.js"></script>
-<script src="js/match-time.js"></script>
-<script src="js/programme.js"></script>
+<script src="js/programme-cover.js?v=6"></script>
+<script src="js/programme-reader.js?v=6"></script>
 <script>
-  // Sync opp logo and name to both cover locations
-  document.addEventListener('DOMContentLoaded', () => {
-    const observer = new MutationObserver(() => {
-      const logo1 = document.getElementById('prog-opp-logo');
-      const logo2 = document.getElementById('prog-opp-logo-2');
-      const name1 = document.getElementById('prog-opp-name');
-      const name2 = document.getElementById('prog-opp-name-2');
-      if (logo1 && logo2) { logo2.src = logo1.src; logo2.style.filter = logo1.style.filter; }
-      if (name1 && name2) name2.textContent = name1.textContent;
-    });
-    const logo1 = document.getElementById('prog-opp-logo');
-    const name1 = document.getElementById('prog-opp-name');
-    if (logo1) observer.observe(logo1, { attributes:true });
-    if (name1) observer.observe(name1, { childList:true, characterData:true, subtree:true });
-  });
+  try { initComponents('programme.html'); } catch(e){}
 </script>
 </body>
 </html>

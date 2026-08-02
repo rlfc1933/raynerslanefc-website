@@ -1054,6 +1054,14 @@
         <div class="fwp-box__load">Checking the live match feed…</div>
       </div>
 
+      <!-- ── MATCHDAY PROGRAMME ───────────────────────────────────────────────
+           Monitoring, not building. The programme assembles itself and publishes
+           itself; this says whether that is happening and what, if anything, is
+           in the way. -->
+      <div id="prog-status" class="fwp-box">
+        <div class="fwp-box__load">Checking the matchday programme…</div>
+      </div>
+
       <!-- FIX 1: the fixture is the source of truth for WHO + WHERE. Pick it here;
            opponent / home-away / date / venue are filled from data/fixtures.json. -->
       <div class="slbl"><i class="ico ico-calendar"></i> Which game? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the fixture; home/away comes from it</span></div>
@@ -10184,6 +10192,112 @@ function toast(msg, err) {
   }
   window.fwpRefresh();
   timer = setInterval(tick, 20000);
+})();
+</script>
+
+
+<script>
+/* ── Matchday programme: the committee's view ─────────────────────────────
+   Says one of a few things in plain words, and never a state name:
+     • Programme prepared — publishes on matchday
+     • Waiting for official team sheets — no action required
+     • Programme live
+     • Programme archived
+   Technical detail stays behind Diagnostics.                                */
+(function () {
+  var box = document.getElementById('prog-status');
+  if (!box) return;
+
+  function sb() { return window.RLFC_SUPABASE || {}; }
+  function get(path) {
+    var c = sb(); if (!c.url || !c.anonKey) return Promise.resolve(null);
+    return fetch(c.url + '/rest/v1/' + path, { headers: { apikey: c.anonKey } })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function ukDate(iso) {
+    var ms = Date.parse(iso); if (!isFinite(ms)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/London', weekday:'long', day:'numeric', month:'long' }).format(new Date(ms));
+  }
+  function ukTime(iso) {
+    var ms = Date.parse(iso); if (!isFinite(ms)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/London', hour:'2-digit', minute:'2-digit', hour12:false }).format(new Date(ms));
+  }
+
+  var WORDS = {
+    draft_hidden:        ['Programme being prepared', 'It will publish by itself on matchday.'],
+    waiting_for_matchday:['Programme prepared', 'It publishes by itself on matchday, once both official team sheets are confirmed.'],
+    waiting_for_lineups: ['Waiting for the official team sheets', 'Football Web Pages has not released both teams yet. No action required.'],
+    ready_to_publish:    ['Ready to publish', 'Publishing now.'],
+    published_matchday:  ['Programme live', 'Both official teams were confirmed and the programme published automatically.'],
+    published_late:      ['Programme live', 'The teams were released late, so the programme published as soon as they arrived.'],
+    full_time_current:   ['Full time', 'The final score is being added to the edition.'],
+    archived:            ['Programme archived', 'The edition is preserved exactly as it was published.'],
+    withheld:            ['Programme not published', ''],
+  };
+
+  window.progRefresh = function () {
+    get('programme_editions?select=*&order=scheduled_kickoff_at.asc&limit=8').then(function (rows) {
+      rows = rows || [];
+      var now = Date.now();
+      // The one that matters: the next home fixture that has not finished.
+      var ed = rows.filter(function (r) {
+        return !r.archived_at && (!r.scheduled_kickoff_at || Date.parse(r.scheduled_kickoff_at) > now - 6*3600000);
+      })[0] || rows[rows.length - 1] || null;
+
+      if (!ed) {
+        box.className = 'fwp-box';
+        box.innerHTML = '<div class="fwp-hd fwp-hd--off"><span class="fwp-dot"></span>Matchday programme</div>' +
+          '<div class="fwp-none">No home fixture is being prepared yet. A programme is created by itself ' +
+          'for every Rayners Lane home game.</div>';
+        return;
+      }
+
+      var w = WORDS[ed.state] || ['Programme', ''];
+      var live = ed.state === 'published_matchday' || ed.state === 'published_late' || ed.state === 'full_time_current';
+      var kind = ed.state === 'withheld' ? 'man' : (live ? 'ok' : (ed.state === 'waiting_for_lineups' ? 'warn' : ''));
+
+      var lines = [];
+      if (ed.scheduled_kickoff_at) lines.push('Matchday: <b style="color:#fff">' + esc(ukDate(ed.scheduled_kickoff_at)) + '</b>, kick-off ' + esc(ukTime(ed.scheduled_kickoff_at)));
+      lines.push('Content: <b style="color:#fff">' + (ed.mandatory_content_valid ? 'Ready' : 'Not complete') + '</b>');
+      lines.push('Official teams: <b style="color:#fff">' + (ed.lineup_gate_valid ? 'Confirmed' : 'Awaiting Football Web Pages') + '</b>');
+      if (ed.withheld_reason) lines.push('Reason: ' + esc(ed.withheld_reason));
+
+      var acts = '<button class="fwp-btn" onclick="progRetry()">Refresh programme data</button>';
+      if (live || ed.state === 'archived') {
+        acts += '<a class="fwp-btn" target="_blank" rel="noopener" href="programme.html?id=' + esc(ed.internal_fixture_id) + '">View programme</a>';
+      }
+      acts += '<a class="fwp-btn" target="_blank" rel="noopener" href="match-centre.html?id=' + esc(ed.internal_fixture_id) + '">View Match Centre</a>';
+      acts += '<a class="fwp-btn" target="_blank" rel="noopener" href="programmes.html">Programme library</a>';
+
+      box.className = 'fwp-box' + (kind ? ' fwp-box--' + kind : '');
+      box.innerHTML =
+        '<div class="fwp-hd fwp-hd--' + (kind || 'off') + '"><span class="fwp-dot"></span>' + esc(w[0]) + '</div>' +
+        '<div class="fwp-teams">Rayners Lane v ' + esc(ed.internal_fixture_id ? (ed.slug || '').replace(/^.*?-v-/, '').replace(/-/g, ' ') : '') + '</div>' +
+        '<div class="fwp-lines">' + lines.join('<br>') + '</div>' +
+        (w[1] ? '<div class="fwp-lines" style="color:var(--w)">' + esc(w[1]) + '</div>' : '') +
+        '<div class="fwp-acts">' + acts + '</div>' +
+        '<details class="fwp-diag"><summary>Technical details</summary><pre>' + esc(JSON.stringify(ed, null, 1)) + '</pre></details>';
+    });
+  };
+
+  window.progRetry = function () {
+    if (typeof toast === 'function') toast('Refreshing the programme…');
+    fetch('/.netlify/functions/programme-sync-now', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (typeof toast === 'function') toast(j && j.ok !== false ? 'Programme refreshed' : ((j && j.error) || 'Could not refresh'), !(j && j.ok !== false));
+        setTimeout(window.progRefresh, 1200);
+      }).catch(function (e) { if (typeof toast === 'function') toast('Network error: ' + e.message, true); });
+  };
+
+  window.progRefresh();
+  setInterval(function () {
+    var panel = document.getElementById('panel-matchday');
+    if (panel && panel.style.display !== 'none') window.progRefresh();
+  }, 30000);
 })();
 </script>
 

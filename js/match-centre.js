@@ -233,10 +233,28 @@
     if (f.programmePublished) {
       return '<div class="mc-prog"><a class="cn__btn cn__btn--y" href="programme.html?id=' +
         encodeURIComponent(f.id) + '">' +
-        (t.state === 'full_time' ? 'Read the programme' : 'Read today’s programme') + '</a></div>';
+        (t.state === 'full_time' ? 'Read the matchday programme' : 'Read today’s programme') + '</a></div>';
     }
     if (t.state === 'upcoming' || t.state === 'awaiting') {
-      return '<p class="mc-prog__wait">Digital programme available once today’s official teams are confirmed.</p>';
+      // "today's" is only true ON matchday. Said days ahead it reads as though
+      // the programme is late rather than simply not due yet.
+      var ko = f.kickoffAt ? Date.parse(f.kickoffAt) : NaN;
+      var isToday = false;
+      if (isFinite(ko)) {
+        var day = function (ms) {
+          try {
+            var p = {};
+            new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' })
+              .formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+            return p.year + '-' + p.month + '-' + p.day;
+          } catch (e) { return null; }
+        };
+        isToday = day(Date.now()) === day(ko);
+      }
+      return '<p class="mc-prog__wait">' + (isToday
+        ? 'Digital programme available once today’s official teams are confirmed.'
+        : 'A digital matchday programme will be available here once the official teams are confirmed.') +
+        '</p>';
     }
     return '';
   }

@@ -112,7 +112,7 @@ const CRUMB_NAME = {
   'player.html': 'Player Profile',
   'policies.html': 'Policies & Legal',
   'programme.html': 'Match Day Programme',
-  'programmes.html': 'Match Programmes — Archive',
+  'programmes.html': 'Matchday Programmes',
   'season-tickets.html': '2026/27 Season Tickets',
   'shop.html': 'Club Shop',
   'squad.html': 'The Squad',
