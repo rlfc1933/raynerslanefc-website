@@ -357,7 +357,26 @@
     }).catch(function () { empty('Match information is temporarily unavailable'); });
   }
 
-  loadCrests().then(verifyCrests).then(load).then(function () {
+  /* Wait for the Fan Zone session before the first paint.
+     programmeBlock() reads LaneFan.state.entitled to choose between "Read
+     today's programme" and "Unlock today's programme — free". This page had no
+     way to construct a Supabase client, so entitled was permanently false and
+     every member was invited to unlock something they already had. */
+  var fanReady = (window.LaneFan && window.LaneFan.ready)
+    ? window.LaneFan.ready.catch(function () { return null; })
+    : Promise.resolve(null);
+
+  // And repaint if the answer changes later — a sign-in in another tab, or a
+  // token refresh, should not leave the wrong wording on screen.
+  if (window.LaneFan && window.LaneFan.onChange) {
+    var lastEntitled = null;
+    window.LaneFan.onChange(function (s) {
+      if (lastEntitled !== null && s.entitled !== lastEntitled && lastState) load();
+      lastEntitled = s.entitled;
+    });
+  }
+
+  fanReady.then(loadCrests).then(verifyCrests).then(load).then(function () {
     // Only a live or stalled match needs re-reading. A finished match is
     // finished — repolling it forever is noise.
     poll = setInterval(function () {

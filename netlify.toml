@@ -146,3 +146,15 @@
   for = "/img/*"
   [headers.values]
     Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+# The club's new-member notifications.
+#
+# Joining nudges the outbox directly, so the normal case is that info@ hears
+# within seconds. This schedule is for the abnormal one — provider down, key
+# expired, sender domain not yet verified — where the supporter still joined
+# and the club still needs to be told. Also tidies expired signup intents.
+#
+# ⛔ SCHEDULED. Netlify returns 403 to direct HTTP. The portal's Retry button
+# goes through fan-admin.js, which is PIN-gated.
+[functions."fan-notify"]
+  schedule = "*/5 * * * *"

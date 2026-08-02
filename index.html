@@ -35,6 +35,7 @@
   <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/fan-zone.css?v=1">
   <link rel="stylesheet" href="css/club-now.css">
   <!-- three.js for the cinematic WebGL hero (free CDN, ES module). If it fails to
        load, the hero degrades gracefully to its existing markup. -->
@@ -220,6 +221,26 @@
 </section>
 
 <!-- ══════════ AT THE GATE — matchday admission (data/config.json) ══════════ -->
+<section class="section" style="padding:22px 0 0" aria-label="Your Fan Zone">
+  <div class="container">
+    <!-- Shown only to a recognised member — CSS does the switching from the
+         .is-fan-member class js/fan-account.js puts on <html>, so a logged-out
+         visitor sees the ordinary club homepage and nothing flashes.
+         Deliberately restrained: the homepage is the club's front door, not a
+         private dashboard. A name, a Lane number, and two ways in. -->
+    <div class="fan-strip">
+      <div class="fan-strip__t">
+        <p class="fan-strip__h">Welcome back, <span data-fan-name></span>.</p>
+        <p class="fan-strip__p">Your Lane Card, your programmes and your match history are waiting.</p>
+      </div>
+      <div class="fan-strip__a">
+        <a href="programmes.html">Read the programme</a>
+        <a href="fan-zone.html">My Fan Zone</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section" style="padding:28px 0 0" aria-label="Matchday admission prices">
   <div class="container" style="max-width:760px">
     <div data-at-the-gate></div>
@@ -681,7 +702,7 @@
 
 <script src="js/consent.js?v=1"></script>
 <script src="js/components.js"></script>
-<script src="js/fan-session.js?v=1"></script>
+<script src="js/fan-boot.js?v=1"></script>
 <script>document.addEventListener("DOMContentLoaded",function(){initComponents("index.html");});</script>
 <!-- Cinematic WebGL hero (progressive enhancement; degrades to the static hero). -->
 <script type="module" src="js/hero-webgl.js"></script>

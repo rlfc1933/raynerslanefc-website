@@ -80,7 +80,29 @@ exports.handler = async function (event) {
 
          What the public still gets is everything that makes the edition worth
          opening: the cover, who we played, when, and how it finished. */
-      const gate = await FAN.context(event);
+      let gate = await FAN.context(event);
+
+      /* A verified supporter with no membership row yet.
+
+         This happens for a legitimate reason: they followed a magic link
+         straight to a programme, and the page's own session refresh has not
+         landed yet. Leaving them locked would be technically defensible and
+         practically indefensible — they did everything asked of them and the
+         door still said no.
+
+         So we complete the membership here, once. It is safe because ensure()
+         is the same single transaction used everywhere else and is idempotent:
+         a second call finds the row rather than making another. Entitlement is
+         still decided by the server, from the database, after the fact — not
+         granted because somebody arrived holding a token. */
+      if (gate.user && !gate.member) {
+        try {
+          const made = await FAN.ensure(gate.user, { source: 'programme:' + ed.internal_fixture_id,
+            fixtureId: ed.internal_fixture_id, programmeId: ed.id });
+          if (made) gate = { user: gate.user, member: made, entitled: FAN.canReadProgrammes(made) };
+        } catch (e) { /* stays locked, which is the safe direction */ }
+      }
+
       if (!gate.entitled) {
         return resp(200, {
           ok: true,

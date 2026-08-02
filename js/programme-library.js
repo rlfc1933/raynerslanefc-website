@@ -176,8 +176,21 @@
 
   // Wait for the session too: a member who lands on the library should never
   // be told to unlock something they already have.
-  var sessionReady = (window.LaneFan && window.LaneFan.refresh)
-    ? window.LaneFan.refresh().catch(function () {}) : Promise.resolve();
+  // `ready` rather than `refresh()`: the bootstrap loads the Supabase library
+  // and config itself, so the client may not exist yet when this runs. Calling
+  // refresh() too early is exactly how this page used to report every member
+  // as a stranger — it resolved instantly, with no client and no token.
+  var sessionReady = (window.LaneFan && window.LaneFan.ready)
+    ? window.LaneFan.ready.catch(function () {}) : Promise.resolve();
+
+  // Repaint if the answer changes — signing in should not need a reload.
+  if (window.LaneFan && window.LaneFan.onChange) {
+    var seen = null;
+    window.LaneFan.onChange(function (s) {
+      if (seen !== null && s.entitled !== seen) paint();
+      seen = s.entitled;
+    });
+  }
 
   Promise.all([crestsReady, sessionReady])
     .then(function () { return fetch('/.netlify/functions/programme-data'); })

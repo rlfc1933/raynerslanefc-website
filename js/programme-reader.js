@@ -262,8 +262,15 @@
           '<li>Your match history</li><li>Your Lane Card</li>' +
         '</ul>' +
         '<div class="pr-gate__cta">' +
-          '<a class="btn btn-primary" href="fan-zone.html?join=1&amp;return=' +
-            encodeURIComponent(location.pathname + location.search) + '">Join Fan Zone — free</a>' +
+          // The return path is carried so fan-zone.html can bring them back to
+          // THIS edition, and the source so the club can see which programme
+          // actually brought somebody in. Both were being sent before; nothing
+          // read them, so every supporter landed on a page that had forgotten
+          // why they came.
+          '<a class="btn btn-primary" href="fan-zone.html?join=1&amp;source=' +
+            encodeURIComponent('programme:' + (e.fixtureId || '')) +
+            '&amp;return=' + encodeURIComponent(location.pathname + location.search) +
+            '">Join Fan Zone — free</a>' +
           (signedIn ? '' : '<a class="btn" href="fan-zone.html?signin=1&amp;return=' +
             encodeURIComponent(location.pathname + location.search) + '">Already a member? Sign in</a>') +
         '</div>' +
@@ -346,10 +353,26 @@
       'Choose an edition from the programme library.');
     return;
   }
-  // Authenticated where possible: the token decides whether the server sends
-  // the edition or the member gate. The page never decides for itself.
-  (window.LaneFan ? window.LaneFan.authedFetch : fetch)(
-    '/.netlify/functions/programme-data?id=' + encodeURIComponent(id))
+  /* Wait for the session before asking.
+
+     This is the whole bug from the previous release, in one line. The fetch
+     used to go out immediately; the Supabase client on this page was null, so
+     no token was attached and the server correctly answered "not signed in" —
+     to members and strangers alike. Nothing errored. The programme simply
+     stayed shut, which is indistinguishable from a working gate.
+
+     `LaneFan.ready` resolves once the client exists and the session has been
+     restored, so the token is there to send if there is one to send. A page
+     with no bootstrap at all still works: it asks anonymously and gets the
+     public gate, which is the correct answer for an anonymous request. */
+  var session = (window.LaneFan && window.LaneFan.ready)
+    ? window.LaneFan.ready.catch(function () { return null; })
+    : Promise.resolve(null);
+
+  session.then(function () {
+    return (window.LaneFan ? window.LaneFan.authedFetch : fetch)(
+      '/.netlify/functions/programme-data?id=' + encodeURIComponent(id));
+  })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       // A draft, a waiting edition or a withheld one is simply not public. The
@@ -373,6 +396,22 @@
         return;
       }
       render(d);
+
+      /* One restrained line for somebody who has just joined, then it is gone.
+         They came here to read a programme, not to be congratulated — so this
+         is a sentence above it, never a page in front of it. */
+      if (qs('joined')) {
+        var w = document.createElement('p');
+        w.className = 'pr-joined';
+        w.setAttribute('role', 'status');
+        w.textContent = 'You’re in. Every Rayners Lane programme is yours now — this one included.';
+        root.insertBefore(w, root.firstChild);
+        try {
+          var u = new URL(location.href);
+          u.searchParams.delete('joined');
+          history.replaceState({}, '', u.pathname + u.search + u.hash);
+        } catch (e2) {}
+      }
     })
     .catch(function () {
       unavailable('Programme temporarily unavailable', 'Please try again shortly.');

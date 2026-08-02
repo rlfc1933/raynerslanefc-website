@@ -334,6 +334,9 @@ function buildNav(currentPage) {
         return `<div class="lane-menu__group"><div class="lane-menu__gh">${g.h}</div>${g.items.map(function (it) { return mLink(it[0], it[1]); }).join('')}</div>`;
       }).join('')}
       <div class="lane-menu__foot">
+        <!-- The same account control, in the sheet, for the widths where the
+             top bar has none. Filled by js/fan-account.js. -->
+        <div class="lane-menu__account" id="lane-account-menu" hidden></div>
         <button type="button" class="nav__install" onclick="laneMenuClose();laneInstall()">Install App</button>
       </div>
     </div>
@@ -365,6 +368,12 @@ function buildNav(currentPage) {
       </a>
       <div class="nav__links" id="nav-links">${navLinks}</div>
       <div class="nav__actions">
+        <!-- The Fan Zone account control. Filled by js/fan-account.js when a
+             page carries the bootstrap, and left completely empty otherwise —
+             an empty slot costs nothing and never renders a stale identity.
+             ONE control, deliberately: the navigation was already at its width
+             limit, and a row of member links is how it starts clipping. -->
+        <div class="nav__account" id="lane-account" hidden></div>
         <button class="nav__install js-install" onclick="laneInstall()" title="Install the app">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
           <span>Install App</span>
@@ -521,16 +530,29 @@ function buildFooter() {
             <!-- Newsletter signup -->
             <div style="margin-bottom:20px">
               <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px">Stay in the Loop</div>
-              <form name="newsletter" method="POST" data-netlify="true" style="display:flex;gap:0">
+              <!-- Handled by js/newsletter.js, which sends it to the same
+                   supporter identity Fan Zone uses instead of a disconnected
+                   Netlify form. The markup stays a real form so it still works
+                   with JavaScript off. -->
+              <form name="newsletter" method="POST" data-netlify="true" data-lane-newsletter style="display:flex;gap:0;min-width:0">
                 <input type="hidden" name="form-name" value="newsletter">
                 <input type="email" name="email" placeholder="Your email" required
                   aria-label="Your email address for the newsletter"
-                  style="flex:1;background:var(--dark);border:1px solid var(--border);border-right:none;color:var(--white);font-family:var(--font-b);font-size:14px;padding:10px 14px;outline:none">
+                  style="flex:1;min-width:0;background:var(--dark);border:1px solid var(--border);border-right:none;color:var(--white);font-family:var(--font-b);font-size:14px;padding:10px 14px;outline:none">
                 <button type="submit"
-                  style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:none;cursor:pointer;white-space:nowrap">
+                  style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0">
                   Sign Up
                 </button>
               </form>
+              <!-- What they are actually agreeing to, said before they do it.
+                   The mailing list is NOT Fan Zone, and implying otherwise is
+                   how somebody ends up with a Lane Card they never asked for. -->
+              <p style="font-size:11.5px;color:var(--grey,#8F8F8F);line-height:1.5;margin:8px 0 0">
+                Club news by email. This is the mailing list only — it does not create a
+                Fan Zone account. <a href="fan-zone.html?join=1" style="color:var(--yellow)">Join Fan Zone</a>
+                for programmes and your Lane Card.
+              </p>
+              <div data-lane-newsletter-msg style="font-size:12.5px;line-height:1.5;margin-top:8px"></div>
             </div>
             <p class="footer__brand-sub">
               A community football club serving Harrow since 1933.<br>
@@ -847,7 +869,22 @@ function initComponents(currentPage) {
   const nav     = document.getElementById('nav-placeholder');
   const footer  = document.getElementById('footer-placeholder');
   const twitter = document.getElementById('twitter-placeholder');
-  if (nav) nav.innerHTML = buildNav(currentPage);
+  if (nav) {
+    nav.innerHTML = buildNav(currentPage);
+    // The account slot only exists from this moment. js/fan-account.js may
+    // have resolved the session before the nav was built, so tell it.
+    try { document.dispatchEvent(new CustomEvent('lane:nav-ready')); } catch (e) {}
+  }
+
+  // The footer's mailing-list form is on every page, so its handler is loaded
+  // from here rather than pasted into 33 <head>s — the same reasoning that put
+  // the Fan Zone dependencies inside one bootstrap.
+  if (!document.querySelector('script[src^="/js/newsletter.js"], script[src^="js/newsletter.js"]')) {
+    var nl = document.createElement('script');
+    nl.src = 'js/newsletter.js?v=1';
+    nl.async = true;
+    document.head.appendChild(nl);
+  }
 
   // BreadcrumbList on inner pages (Home › This page) — uses the active nav label.
   if (currentPage && currentPage !== 'index.html') {

@@ -1,0 +1,223 @@
+/* ════════════════════════════════════════════════════════════════════════
+   FAN ZONE — the account control, the join panel and the member home.
+
+   LAYOUT DISCIPLINE
+   -----------------
+   Everything here obeys the rule the viewport audit was built on: any flex or
+   grid child that can hold long content carries an explicit `min-width:0`.
+   `min-width:auto` was the single root cause of all 35 overflowing viewport
+   combinations found in the closeout, in four different costumes. A supporter
+   with a long name is exactly the input that finds it again.
+
+   The account control also has a hard width ceiling. The nav row was already
+   at its limit — measured, not guessed — and an unbounded name is how the
+   Fixtures button gets clipped to "Fix".
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── The navigation account control ──────────────────────────────────────── */
+.nav__account { position: relative; flex-shrink: 0; min-width: 0; }
+
+.fan-acct__join {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border-radius: 8px;
+  border: 1px solid rgba(255, 209, 0, .45);
+  background: rgba(255, 209, 0, .08);
+  color: var(--yellow, #FFD100);
+  font-family: var(--font-c); font-size: 12px; font-weight: 800;
+  letter-spacing: .06em; text-transform: uppercase;
+  text-decoration: none; white-space: nowrap;
+  transition: background .15s, transform .15s;
+}
+.fan-acct__join:hover { background: rgba(255, 209, 0, .16); transform: translateY(-1px); }
+.fan-acct__join svg { flex-shrink: 0; }
+
+.fan-acct__btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  max-width: 190px;                      /* the ceiling; see the note above */
+  padding: 7px 11px 7px 7px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .05);
+  color: #fff; cursor: pointer;
+  font-family: var(--font-c); font-size: 12px; font-weight: 700;
+  transition: background .15s, border-color .15s;
+}
+.fan-acct__btn:hover { background: rgba(255, 255, 255, .1); border-color: rgba(255, 209, 0, .4); }
+.fan-acct__btn svg { flex-shrink: 0; opacity: .7; }
+
+.fan-acct__badge {
+  flex-shrink: 0;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #fff3bf, #FFD100);
+  color: #111; font-size: 12px; font-weight: 900; line-height: 1;
+}
+.fan-acct__name {
+  min-width: 0;                          /* the whole point */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.fan-acct__menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 60;
+  min-width: 216px; max-width: min(280px, calc(100vw - 32px));
+  padding: 8px; border-radius: 12px;
+  background: #141414; border: 1px solid #2a2a2a;
+  box-shadow: 0 18px 44px -12px rgba(0, 0, 0, .8);
+}
+.fan-acct__menu[hidden] { display: none; }
+.fan-acct__head { padding: 8px 10px 10px; border-bottom: 1px solid #242424; margin-bottom: 6px; }
+.fan-acct__hname {
+  display: block; color: #fff; font-weight: 700; font-size: 14px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fan-acct__no {
+  display: block; margin-top: 2px;
+  color: var(--yellow, #FFD100); font-size: 11px; font-weight: 700; letter-spacing: .08em;
+}
+.fan-acct__menu a,
+.fan-acct__menu button {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 10px; border: 0; border-radius: 8px;
+  background: none; color: #ddd; font-size: 13.5px; font-family: inherit;
+  text-decoration: none; cursor: pointer;
+}
+.fan-acct__menu a:hover,
+.fan-acct__menu button:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.fan-acct__menu button[data-fan-signout] { color: #b9b9b9; }
+
+/* The nav row is tight. Below 900px the whole control lives in the menu sheet,
+   exactly like .nav__install and .nav__cta already do. */
+@media (max-width: 900px) {
+  .nav__account { display: none; }
+}
+/* Between 901 and 1080 the name is the first thing to go, not the button. */
+@media (max-width: 1080px) {
+  .fan-acct__btn { max-width: 132px; }
+  .fan-acct__join span { display: none; }
+  .fan-acct__join { padding: 9px 11px; }
+}
+
+.lane-menu__account { display: grid; gap: 6px; margin-bottom: 10px; min-width: 0; }
+.lane-menu__account[hidden] { display: none; }
+.lane-menu__me {
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(255, 209, 0, .08); color: #fff; font-weight: 700; font-size: 14px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.lane-menu__me span { color: var(--yellow, #FFD100); font-weight: 600; font-size: 12px; }
+.lane-menu__signout {
+  border: 0; background: none; font: inherit; text-align: left; cursor: pointer; color: #b9b9b9;
+}
+
+/* ── The join / sign-in panel ────────────────────────────────────────────── */
+.fz-join {
+  max-width: 520px; margin: 0 auto; padding: 26px 24px;
+  border: 1px solid #262626; border-radius: 16px; background: #101010;
+}
+.fz-join__eyebrow {
+  color: var(--yellow, #FFD100); font-size: 11px; font-weight: 800;
+  letter-spacing: .16em; text-transform: uppercase; margin: 0 0 8px;
+}
+.fz-join__h { font-size: clamp(21px, 4vw, 27px); line-height: 1.2; margin: 0 0 10px; color: #fff; }
+.fz-join__p { color: var(--muted, #b5b5b5); font-size: 14.5px; line-height: 1.6; margin: 0 0 18px; }
+.fz-join__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; }
+.fz-join label { display: block; font-size: 12.5px; color: #cfcfcf; margin-bottom: 5px; font-weight: 600; }
+.fz-join input[type=text],
+.fz-join input[type=email] {
+  width: 100%; min-width: 0; box-sizing: border-box;
+  padding: 12px 13px; border-radius: 9px;
+  border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 15px;
+}
+.fz-join input:focus { outline: 2px solid var(--yellow, #FFD100); outline-offset: 1px; border-color: transparent; }
+.fz-join__field { margin-bottom: 14px; min-width: 0; }
+.fz-join__check { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 16px; }
+.fz-join__check input { margin-top: 3px; flex-shrink: 0; width: 17px; height: 17px; }
+.fz-join__check span { font-size: 13px; color: var(--muted, #b5b5b5); line-height: 1.5; min-width: 0; }
+.fz-join__legal { font-size: 12px; color: var(--grey, #8F8F8F); line-height: 1.55; margin: 14px 0 0; }
+.fz-join__legal a { color: var(--yellow, #FFD100); }
+.fz-join__msg { margin: 14px 0 0; padding: 12px 14px; border-radius: 9px; font-size: 14px; line-height: 1.5; }
+.fz-join__msg--ok { background: rgba(60, 160, 90, .14); border: 1px solid rgba(60, 160, 90, .4); color: #b7e8c6; }
+.fz-join__msg--err { background: rgba(200, 60, 60, .12); border: 1px solid rgba(200, 60, 60, .38); color: #f0bcbc; }
+.fz-join .btn { width: 100%; justify-content: center; }
+.fz-join__alt { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--grey, #8F8F8F); }
+.fz-join__alt button {
+  background: none; border: 0; color: var(--yellow, #FFD100);
+  font: inherit; text-decoration: underline; cursor: pointer; padding: 0;
+}
+
+/* ── The member home ─────────────────────────────────────────────────────── */
+.fz-welcome { margin: 0 0 22px; min-width: 0; }
+.fz-welcome__h { font-size: clamp(24px, 5vw, 34px); margin: 0 0 6px; color: #fff; line-height: 1.15; }
+.fz-welcome__sub { color: var(--muted, #b5b5b5); font-size: 14.5px; margin: 0; }
+.fz-welcome__sub b { color: var(--yellow, #FFD100); }
+
+.fz-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+.fz-card {
+  min-width: 0;                                    /* never `auto` in a grid */
+  padding: 20px; border: 1px solid #232323; border-radius: 14px; background: #101010;
+}
+.fz-card__h {
+  font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--yellow, #FFD100); margin: 0 0 12px; font-weight: 800;
+}
+.fz-card p { color: var(--muted, #b5b5b5); font-size: 14px; line-height: 1.6; margin: 0 0 10px; }
+
+.fz-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fz-hist li {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  padding: 10px; border-radius: 10px; background: #161616;
+}
+.fz-hist__body { min-width: 0; flex: 1; }
+.fz-hist__t {
+  display: block; color: #fff; font-size: 14px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fz-hist__d { display: block; color: var(--grey, #8F8F8F); font-size: 12px; margin-top: 2px; }
+.fz-hist img { width: 42px; height: 58px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.fz-hist a { flex-shrink: 0; font-size: 12.5px; color: var(--yellow, #FFD100); text-decoration: none; font-weight: 700; }
+.fz-empty { color: var(--grey, #8F8F8F); font-size: 13.5px; line-height: 1.6; }
+
+.fz-prefs label { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; min-width: 0; }
+.fz-prefs input[type=checkbox] { margin-top: 3px; width: 17px; height: 17px; flex-shrink: 0; }
+.fz-prefs span { font-size: 13.5px; color: var(--muted, #b5b5b5); line-height: 1.5; min-width: 0; }
+.fz-prefs__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; }
+.fz-prefs input[type=text] {
+  width: 100%; min-width: 0; box-sizing: border-box; padding: 10px 12px;
+  border-radius: 8px; border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 14px;
+}
+.fz-prefs__save { margin-top: 6px; }
+.fz-note { font-size: 12.5px; color: var(--grey, #8F8F8F); margin: 10px 0 0; line-height: 1.55; }
+
+/* ── The homepage member strip ───────────────────────────────────────────── */
+.fan-strip {
+  display: none;
+  margin: 0 0 18px; padding: 14px 16px; min-width: 0;
+  border: 1px solid rgba(255, 209, 0, .28); border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 209, 0, .09), rgba(255, 209, 0, .02));
+}
+.is-fan-member .fan-strip { display: flex; }
+.fan-strip {
+  align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.fan-strip__t { min-width: 0; flex: 1 1 200px; }
+.fan-strip__h { color: #fff; font-size: 16px; font-weight: 700; margin: 0; }
+.fan-strip__p { color: var(--muted, #b5b5b5); font-size: 13px; margin: 3px 0 0; }
+.fan-strip__a { flex-shrink: 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.fan-strip__a a {
+  font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  padding: 9px 14px; border-radius: 8px; text-decoration: none;
+  background: var(--yellow, #FFD100); color: #111; white-space: nowrap;
+}
+.fan-strip__a a + a { background: rgba(255, 255, 255, .08); color: #fff; }
+
+/* One line above a just-joined supporter's first programme. Not a banner, not
+   a modal — they came to read, and the celebration should not be in the way. */
+.pr-joined {
+  margin: 0 0 18px; padding: 12px 16px; min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(60, 160, 90, .42);
+  background: rgba(60, 160, 90, .13);
+  color: #b7e8c6; font-size: 14.5px; line-height: 1.5;
+}

@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/fan-zone.css?v=1">
   <style>
     .fz-hero{position:relative;overflow:hidden;padding:64px 0 48px;background:linear-gradient(160deg,var(--green) 0%,#06120a 70%);text-align:center}
     .fz-hero::after{content:"THE LANE FAMILY";position:absolute;right:-10px;bottom:-24px;font-family:var(--font-d);font-size:90px;color:rgba(255,255,255,.04);white-space:nowrap;pointer-events:none}
@@ -182,7 +183,12 @@
 
 <div class="fz-wrap">
 
-  <!-- ACCOUNT BAR (sign in / out) -->
+  <!-- MEMBER HOME / JOIN PANEL — filled by js/fan-zone-member.js.
+       Deliberately empty in the served HTML: nothing personal is ever baked
+       into a static page, and an empty block cannot flash the wrong name. -->
+  <section class="fz-sec" id="fz-member" aria-live="polite"></section>
+
+  <!-- ACCOUNT BAR (sign in / out) — the original Lane Card account row -->
   <div id="fz-account"></div>
 
   <!-- BY THE NUMBERS (social proof) -->
@@ -235,8 +241,9 @@
 <script src="js/supabase-config.js"></script>
 <script src="js/consent.js?v=1"></script>
 <script src="js/components.js"></script>
-<script src="js/fan-session.js?v=1"></script>
+<script src="js/fan-boot.js?v=1"></script>
 <script src="js/fan-zone.js"></script>
+<script src="js/fan-zone-member.js?v=1"></script>
 <script>
   (function(){
     function go(){ try { initComponents("fan-zone.html"); } catch(e){} initFanZone(); }

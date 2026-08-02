@@ -90,21 +90,30 @@ test('EMAIL IS NORMALISED, SO ONE PERSON IS ONE MEMBER', () => {
 });
 
 test('an existing email is claimed, never duplicated', () => {
-  const s = strip(R('netlify/functions/lib/fan/members.js'));
-  // Reconciliation before creation.
-  const ensure = s.slice(s.indexOf('async function ensure'), s.indexOf('function membershipNumber'));
-  assert.match(ensure, /byEmail\(email\)/, 'it must look for an existing record by email');
-  assert.ok(ensure.indexOf('byEmail(email)') < ensure.indexOf("S.rest('fan_members'"),
+  // The guarantee is unchanged; it moved. Reconciliation used to be four
+  // sequential writes issued from JavaScript, any one of which could fail and
+  // leave a half-supporter. It is now one database transaction.
+  const sql = R('supabase/migrations/20260804060000_fan_completion.sql');
+  const fn = /create or replace function public\.fan_ensure_membership[\s\S]*?\n\$\$;/.exec(sql)[0];
+  assert.match(fn, /where email_normalised = v_email for update/,
+    'it must look for an existing record by email — and lock it, so two ' +
+    'concurrent callbacks cannot both claim it');
+  assert.ok(fn.indexOf('email_normalised = v_email for update') < fn.indexOf('insert into public.fan_members'),
     'it must look before it creates');
-  assert.match(ensure, /auth_user_id: authUser\.id/, 'the existing record is claimed');
-  // And a newsletter contact becomes the same supporter.
-  assert.match(ensure, /converted_member_id/);
+  assert.match(fn, /set auth_user_id = p_auth_user_id/, 'the existing record is claimed');
+  assert.match(fn, /converted_member_id/, 'and a newsletter contact becomes the same supporter');
 });
 
 test('a returning member keeps their Lane Card number', () => {
-  const s = strip(R('netlify/functions/lib/fan/members.js'));
-  assert.match(s, /fans'.*lane_no|lane_no/, 'the existing Lane Card number must carry across');
-  assert.match(s, /membership_number: laneNo \|\| membershipNumber\(\)/);
+  const sql = R('supabase/migrations/20260804060000_fan_completion.sql');
+  const fn = /create or replace function public\.fan_ensure_membership[\s\S]*?\n\$\$;/.exec(sql)[0];
+  assert.match(fn, /v_number := btrim\(v_fan\.lane_no::text\)/,
+    'the existing Lane Card number must carry across, not be regenerated');
+  // The random allocator that could hand two supporters one number is gone.
+  assert.doesNotMatch(R('netlify/functions/lib/fan/members.js'),
+    /membership_number: laneNo \|\| membershipNumber\(\)/,
+    'numbers now come from a collision-proof database allocator');
+  assert.match(fn, /public\.fan_next_membership_number\(\)/);
 });
 
 test('the database refuses a duplicate on either key', () => {
@@ -187,8 +196,14 @@ test('how a supporter joined is recorded', () => {
     assert.ok(sql.includes(c), 'missing attribution column ' + c);
   });
   const s = strip(R('netlify/functions/fan-member.js'));
-  assert.match(s, /source: \(body\.source/);
-  assert.match(s, /fixtureId: \(body\.fixtureId/);
+  // Attribution now comes from the server-side signup intent FIRST, so it
+  // survives the magic link opening on another device, and falls back to the
+  // request body. Before, it came from the body alone — and the only caller
+  // sent 'me', which carried none of it, so nothing was ever recorded.
+  assert.match(s, /intent && intent\.signup_source\) \|\| body\.source/);
+  assert.match(s, /intent && intent\.fixture_id\) \|\| body\.fixtureId/);
+  const sql2 = R('supabase/migrations/20260804060000_fan_completion.sql');
+  assert.match(sql2, /signup_source     text/, 'the intent must carry it too');
 });
 
 /* ── return URLs ──────────────────────────────────────────────────────────── */
@@ -196,7 +211,9 @@ test('how a supporter joined is recorded', () => {
 test('A MAGIC LINK CAN NEVER RETURN TO ANOTHER SITE', () => {
   // An open redirect in a login return is a phishing tool wearing the club's
   // badge: the supporter checks the domain in the email, not after the hop.
-  const { safeReturn } = require('../netlify/functions/fan-member')._internal;
+  // One validator, shared by the browser and the server, so neither can be the
+  // laxer of the two. It used to live in fan-member.js alone.
+  const safeReturn = require('../netlify/functions/lib/fan/members').safePath;
   ['https://evil.example/x', '//evil.example', 'http://evil.example',
    'javascript:alert(1)', '\\\\evil.example', 'evil.example/x',
    '/programme.html\nSet-Cookie: x=1', ''].forEach((bad) => {
@@ -207,7 +224,7 @@ test('A MAGIC LINK CAN NEVER RETURN TO ANOTHER SITE', () => {
 });
 
 test('the browser applies the same rule before it stores one', () => {
-  const win = loadBrowserScript('js/fan-session.js');
+  const win = loadBrowserScript('js/fan-boot.js');
   const F = win.LaneFan;
   ['https://evil.example', '//evil.example', 'javascript:alert(1)', 'evil.example', '']
     .forEach((bad) => assert.strictEqual(F.safePath(bad), false, 'accepted ' + bad));
@@ -285,7 +302,8 @@ test('consent.js loads before components.js on every page', () => {
 test('declining does not break Fan Zone or programmes', () => {
   // Nothing in the membership or programme path consults analytics consent.
   ['netlify/functions/fan-member.js', 'netlify/functions/lib/fan/members.js',
-   'netlify/functions/programme-data.js', 'js/fan-session.js'].forEach((f) => {
+   'netlify/functions/programme-data.js', 'netlify/functions/fan-newsletter.js',
+   'js/fan-boot.js', 'js/fan-account.js', 'js/fan-zone-member.js'].forEach((f) => {
     const s = strip(R(f));
     assert.ok(!/LaneConsent|analytics_storage|gtag/.test(s),
       f + ' ties a service to analytics consent');

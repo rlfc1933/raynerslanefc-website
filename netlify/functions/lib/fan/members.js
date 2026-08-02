@@ -8,6 +8,13 @@
 // Everything here keys on the NORMALISED email. "A@B.com", "a@b.com " and
 // "a@b.com" are one supporter, and treating them as three is how a CRM quietly
 // stops being able to answer "how many members do we have".
+//
+// WHAT CHANGED IN THE COMPLETION RELEASE
+// --------------------------------------
+// Creation used to be four sequential writes issued from here. Any one could
+// fail and leave a supporter half-made. It is now a single database function,
+// `fan_ensure_membership`, so there is no longer a sequence in which to fail
+// halfway. This file verifies the token and passes on what the server proved.
 'use strict';
 
 const S = require('../football/store');
@@ -15,6 +22,21 @@ const S = require('../football/store');
 const TERMS_VERSION = 'fanzone-terms-2026-08';
 const PRIVACY_VERSION = 'privacy-2026-08';
 const MARKETING_WORDING = 'marketing-2026-08';
+const CLUB_INBOX = process.env.FAN_NOTIFY_TO || 'info@raynerslanefc.co.uk';
+
+const AUTH_BASE = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  || 'https://rewkixywfgsyqinfbggv.supabase.co';
+
+// The publishable/anon key. It is NOT a secret — it ships in every page of the
+// site inside js/supabase-config.js, and Supabase publishes it as such.
+//
+// This fallback is load-bearing, not tidiness. SUPABASE_ANON_KEY was never set
+// in Netlify, so `apikey: ''` went out on every verification call and GoTrue
+// answered "No API key found in request" — a 401. userFromToken() therefore
+// returned null for EVERY token, valid ones included. Fixing the browser
+// client alone would not have opened a single programme.
+const ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  || 'sb_publishable_7Iwtr1OlGo-VeysFkLcwcw_JjDU6DWE';
 
 /** The one true form of an email address for matching purposes. */
 function normalise(email) {
@@ -30,12 +52,9 @@ function normalise(email) {
  */
 async function userFromToken(token) {
   if (!token) return null;
-  const base = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-    || 'https://rewkixywfgsyqinfbggv.supabase.co';
-  const anon = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   try {
-    const r = await fetch(base + '/auth/v1/user', {
-      headers: { Authorization: 'Bearer ' + token, apikey: anon || '' },
+    const r = await fetch(AUTH_BASE + '/auth/v1/user', {
+      headers: { Authorization: 'Bearer ' + token, apikey: ANON_KEY },
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) return null;
@@ -65,83 +84,68 @@ async function byEmail(email) {
 }
 
 /**
+ * Where a supporter may be sent after signing in.
+ *
+ * Shared by the browser and the server so one cannot be laxer than the other.
+ * Decoded twice before judging, because "%252f%252fevil.com" survives a single
+ * decode looking like a harmless path and arrives as "//evil.com".
+ */
+function safePath(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  if (raw.length > 512) return null;
+  let s = raw;
+  for (let i = 0; i < 2; i++) {
+    let d;
+    try { d = decodeURIComponent(s); } catch (e) { return null; }
+    if (d === s) break;
+    s = d;
+  }
+  if (/[\n\r\t\0]/.test(s)) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(s)) return null;
+  if (s.charAt(0) !== '/') return null;
+  if (s.charAt(1) === '/' || s.charAt(1) === '\\') return null;
+  if (s.includes('\\')) return null;
+  return raw;
+}
+
+/**
  * Find or create the member for a verified auth user.
  *
- * RECONCILIATION, not creation: if a record already exists for this email —
- * because they joined through the footer, or signed up before, or their auth
- * user was recreated — it is claimed rather than duplicated, and their joined
- * date, membership number and history come with it.
+ * One call, one transaction. Identity, Lane Card linkage, membership number,
+ * marketing, attribution, activity and the club notification either all happen
+ * or none of them do.
+ *
+ * The auth user is passed as a VERIFIED object — callers must have been
+ * through userFromToken() first. The database function takes the id as an
+ * argument, so a caller who had not verified would be naming somebody else.
  */
 async function ensure(authUser, opts) {
   const o = opts || {};
   const email = normalise(authUser.email);
 
-  let member = await byAuthUser(authUser.id);
-  if (!member && email) {
-    // Same person, different auth row. Claim it; never make a second.
-    const byMail = await byEmail(email);
-    if (byMail) {
-      const patched = await S.rest('fan_members?id=eq.' + byMail.id, {
-        method: 'PATCH',
-        body: { auth_user_id: authUser.id, last_active_at: new Date().toISOString() },
-        headers: { Prefer: 'return=representation' },
-      });
-      member = (patched && patched[0]) || byMail;
-    }
-  }
+  const out = await S.rest('rpc/fan_ensure_membership', {
+    method: 'POST',
+    body: {
+      p_auth_user_id: authUser.id,
+      p_email: email,
+      p_first_name: o.firstName || null,
+      p_last_name: o.lastName || null,
+      p_source: o.source || null,
+      p_fixture_id: o.fixtureId || null,
+      p_programme_id: o.programmeId || null,
+      p_marketing: (typeof o.marketing === 'boolean') ? o.marketing : null,
+      p_terms_version: o.termsVersion || TERMS_VERSION,
+      p_privacy_version: o.privacyVersion || PRIVACY_VERSION,
+      p_marketing_wording: MARKETING_WORDING,
+      p_destination: CLUB_INBOX,
+    },
+  });
 
-  if (!member) {
-    // Carry the Lane Card number across if they already have one, so nobody's
-    // membership number changes underneath them.
-    let laneNo = null;
-    try {
-      const f = await S.findOne('fans', 'id=eq.' + encodeURIComponent(authUser.id) + '&select=lane_no,name');
-      if (f && f.lane_no) laneNo = String(f.lane_no);
-    } catch (e) { /* no Lane Card yet */ }
-
-    const created = await S.rest('fan_members', {
-      method: 'POST',
-      body: [{
-        auth_user_id: authUser.id,
-        email_normalised: email,
-        first_name: o.firstName || null,
-        last_name: o.lastName || null,
-        display_name: [o.firstName, o.lastName].filter(Boolean).join(' ') || null,
-        membership_number: laneNo || membershipNumber(),
-        membership_status: 'active',
-        signup_source: o.source || null,
-        signup_fixture_id: o.fixtureId || null,
-        signup_programme_id: o.programmeId || null,
-        last_active_at: new Date().toISOString(),
-        terms_version: TERMS_VERSION,
-        privacy_version: PRIVACY_VERSION,
-      }],
-      headers: { Prefer: 'return=representation' },
-    });
-    member = (created && created[0]) || null;
-    if (member) {
-      await record(member.id, 'account_created', { source: o.source || null, fixtureId: o.fixtureId || null });
-      // A newsletter contact who has now joined is the same supporter.
-      if (email) {
-        await S.rest('fan_newsletter_contacts?email_normalised=eq.' + encodeURIComponent(email), {
-          method: 'PATCH', body: { converted_member_id: member.id },
-          headers: { Prefer: 'return=minimal' },
-        }).catch(() => null);
-      }
-    }
-  } else {
-    await S.rest('fan_members?id=eq.' + member.id, {
-      method: 'PATCH', body: { last_active_at: new Date().toISOString() },
-      headers: { Prefer: 'return=minimal' },
-    }).catch(() => null);
-  }
+  if (!out || !out.member) return null;
+  const member = out.member;
+  member._created = !!out.created;
+  member._linkedExisting = !!out.linkedExisting;
   return member;
-}
-
-/** A Lane membership number for somebody who has no Lane Card yet. */
-function membershipNumber() {
-  // Four digits, matching the Lane Card format supporters already recognise.
-  return String(1000 + Math.floor(Math.random() * 9000));
 }
 
 /** Is this member entitled to read programmes? */
@@ -193,9 +197,68 @@ async function setMarketing(memberId, wanted, source) {
   });
 }
 
+// ── SIGNUP INTENT ───────────────────────────────────────────────────────────
+// What the supporter told us before they proved the email is theirs.
+
+function nonce() {
+  return require('crypto').randomBytes(24).toString('base64url');
+}
+
+async function storeIntent(details) {
+  const d = details || {};
+  const email = normalise(d.email);
+  if (!email) return null;
+  const row = {
+    nonce: nonce(),
+    email_normalised: email,
+    first_name: (d.firstName || '').trim().slice(0, 60) || null,
+    last_name: (d.lastName || '').trim().slice(0, 60) || null,
+    return_path: safePath(d.returnPath) || null,
+    signup_source: (d.source || '').slice(0, 80) || null,
+    fixture_id: (d.fixtureId || '').slice(0, 80) || null,
+    programme_id: d.programmeId || null,
+    marketing: (typeof d.marketing === 'boolean') ? d.marketing : null,
+    terms_version: d.termsVersion || TERMS_VERSION,
+    privacy_version: d.privacyVersion || PRIVACY_VERSION,
+  };
+  const out = await S.rest('fan_signup_intents', {
+    method: 'POST', body: [row], headers: { Prefer: 'return=representation' },
+  });
+  return (out && out[0]) || null;
+}
+
+/**
+ * Take the intent belonging to a VERIFIED email.
+ *
+ * Bound to the email at creation and matched against the verified email here,
+ * so a nonce cannot be redeemed by whoever happens to hold it. Single-use:
+ * consumed_at is stamped, and only unconsumed rows are ever returned.
+ */
+async function claimIntent(verifiedEmail) {
+  const email = normalise(verifiedEmail);
+  if (!email) return null;
+  let row = null;
+  try {
+    row = await S.findOne('fan_signup_intents',
+      'email_normalised=eq.' + encodeURIComponent(email) +
+      '&consumed_at=is.null&expires_at=gt.' + encodeURIComponent(new Date().toISOString()) +
+      '&select=*&order=created_at.desc');
+  } catch (e) { return null; }
+  if (!row) return null;
+  try {
+    await S.rest('fan_signup_intents?id=eq.' + row.id + '&consumed_at=is.null', {
+      method: 'PATCH', body: { consumed_at: new Date().toISOString() },
+      headers: { Prefer: 'return=minimal' },
+    });
+  } catch (e) { /* another callback beat us; ensure() is idempotent anyway */ }
+  return row;
+}
+
 /**
  * The whole picture for a request: token → user → member → entitlement.
- * Returns { user, member, entitled }.
+ *
+ * This only LOOKS UP. It never creates, because a read of a programme is not
+ * the moment to decide somebody has joined the club.
  */
 async function context(event) {
   const token = tokenFrom(event);
@@ -205,8 +268,23 @@ async function context(event) {
   return { user, member, entitled: canReadProgrammes(member) };
 }
 
+/** The safe, supporter-facing shape of a member. No internal ids. */
+function publicMember(member) {
+  if (!member) return null;
+  return {
+    membershipNumber: member.membership_number,
+    displayName: member.display_name,
+    firstName: member.first_name,
+    lastName: member.last_name,
+    status: member.membership_status,
+    joinedAt: member.joined_at,
+    entitled: canReadProgrammes(member),
+  };
+}
+
 module.exports = {
-  TERMS_VERSION, PRIVACY_VERSION, MARKETING_WORDING,
-  normalise, userFromToken, tokenFrom, byAuthUser, byEmail,
-  ensure, canReadProgrammes, record, setMarketing, context, membershipNumber,
+  TERMS_VERSION, PRIVACY_VERSION, MARKETING_WORDING, CLUB_INBOX, ANON_KEY,
+  normalise, userFromToken, tokenFrom, byAuthUser, byEmail, safePath,
+  ensure, canReadProgrammes, record, setMarketing, context, publicMember,
+  storeIntent, claimIntent,
 };

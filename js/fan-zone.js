@@ -103,8 +103,17 @@ function esc(s)    { return String(s == null ? '' : s).replace(/&/g,'&amp;').rep
    below falls back to the on-device Lane Card (no password) so the site still
    works. SB === null means "not configured → device mode". */
 var SBCFG = (window.RLFC_SUPABASE || {});
-var SB = (SBCFG.url && SBCFG.anonKey && window.supabase && window.supabase.createClient)
-  ? window.supabase.createClient(SBCFG.url, SBCFG.anonKey) : null;
+// ONE Supabase client per page, shared with js/fan-boot.js through this global.
+// This file used to construct its own, so fan-zone.html ran two GoTrue
+// instances over one stored session — they raced on refresh, and a token
+// written by one could be replaced mid-flight by the other.
+var SB = window.__laneSupabaseClient
+  || ((SBCFG.url && SBCFG.anonKey && window.supabase && window.supabase.createClient)
+    ? window.supabase.createClient(SBCFG.url, SBCFG.anonKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      })
+    : null);
+if (SB) window.__laneSupabaseClient = SB;
 var sbUser = null, sbProfile = null;
 var SESSION_OUT = 'rlfc_signedout';
 

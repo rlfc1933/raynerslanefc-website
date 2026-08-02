@@ -1,12 +1,19 @@
-// Fan Zone membership: join, reconcile, read, and set marketing preference.
+// Fan Zone membership: complete, read, update, and set marketing preference.
 //
 // Every action here needs a verified Supabase token — the caller proves who
 // they are and the server decides what that means. The client never asserts
 // membership; it asks.
+//
+// `me` is the workhorse. It is called on every page load that carries the
+// bootstrap, and it BOTH reads and completes: a supporter who has verified
+// their email but has no membership row yet gets one here. That is why signing
+// in anywhere on the site is now enough, where before only one page could do
+// it and that page could not construct a client.
 'use strict';
 
 const FAN = require('./lib/fan/members');
 const S = require('./lib/football/store');
+const NOTIFY = require('./lib/fan/notify');
 
 function resp(code, obj) {
   return {
@@ -16,7 +23,7 @@ function resp(code, obj) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      // Personal, always.
+      // Personal, always. A shared cache must never hold one of these.
       'Cache-Control': 'private, no-store, max-age=0',
       Vary: 'Authorization',
     },
@@ -24,22 +31,16 @@ function resp(code, obj) {
   };
 }
 
-/**
- * Where a supporter may be sent after signing in.
- *
- * Only a path on this site, and only one that looks like a programme or a
- * known page. An open redirect in a magic-link return is how a phishing page
- * borrows the club's own login flow.
- */
-function safeReturn(raw) {
-  const v = String(raw || '').trim();
-  if (!v) return null;
-  // No scheme, no host, no protocol-relative, no backslash tricks.
-  if (/^[a-z][a-z0-9+.-]*:/i.test(v)) return null;
-  if (v.startsWith('//') || v.startsWith('\\')) return null;
-  if (!v.startsWith('/')) return null;
-  if (v.includes('\n') || v.includes('\r')) return null;
-  return v;
+/** The supporter's own history — theirs alone, read by member id from the token. */
+async function historyFor(memberId) {
+  try {
+    const rows = await S.rest('fan_activity?member_id=eq.' + memberId +
+      '&activity_type=eq.programme_opened&select=fixture_id,programme_id,activity_at' +
+      '&order=activity_at.desc&limit=40');
+    return (rows || []).map((h) => ({
+      fixtureId: h.fixture_id, programmeId: h.programme_id, openedAt: h.activity_at,
+    }));
+  } catch (e) { return []; }
 }
 
 exports.handler = async function (event) {
@@ -56,44 +57,51 @@ exports.handler = async function (event) {
   if (!user) return resp(401, { ok: false, error: 'Sign in to continue' });
 
   try {
-    if (action === 'join' || action === 'me') {
-      const member = await FAN.ensure(user, {
-        firstName: (body.firstName || '').trim().slice(0, 60) || null,
-        lastName: (body.lastName || '').trim().slice(0, 60) || null,
-        source: (body.source || '').slice(0, 80) || null,
-        fixtureId: (body.fixtureId || '').slice(0, 80) || null,
-        programmeId: body.programmeId || null,
-      });
-      if (!member) return resp(200, { ok: false, error: 'could not create the membership' });
+    if (action === 'me' || action === 'complete' || action === 'join') {
+      // Anything the supporter told us before verifying is waiting server-side
+      // against their now-VERIFIED email. Nothing travelled in the link.
+      const intent = await FAN.claimIntent(user.email);
 
-      // Marketing is a SEPARATE decision, only recorded when the join form
-      // actually carried one. Never inferred from having joined.
-      if (action === 'join' && typeof body.marketing === 'boolean') {
-        await FAN.setMarketing(member.id, body.marketing, body.source || 'join');
-      }
+      const member = await FAN.ensure(user, {
+        firstName: (body.firstName || (intent && intent.first_name) || '').trim().slice(0, 60) || null,
+        lastName: (body.lastName || (intent && intent.last_name) || '').trim().slice(0, 60) || null,
+        source: ((intent && intent.signup_source) || body.source || '').slice(0, 80) || null,
+        fixtureId: ((intent && intent.fixture_id) || body.fixtureId || '').slice(0, 80) || null,
+        programmeId: (intent && intent.programme_id) || body.programmeId || null,
+        marketing: intent && typeof intent.marketing === 'boolean' ? intent.marketing
+          : (typeof body.marketing === 'boolean' ? body.marketing : undefined),
+        termsVersion: (intent && intent.terms_version) || undefined,
+        privacyVersion: (intent && intent.privacy_version) || undefined,
+      });
+
+      if (!member) return resp(200, { ok: false, error: 'could not complete the membership' });
+
+      // A brand-new membership means a queued club notification. Nudge the
+      // sender, but never wait on it — the supporter's page must not depend on
+      // an email provider being reachable.
+      if (member._created) NOTIFY.drain({ limit: 3 }).catch(() => null);
 
       const [prefs, history] = await Promise.all([
-        S.findOne('fan_marketing_preferences', 'member_id=eq.' + member.id + '&select=*'),
-        S.rest('fan_activity?member_id=eq.' + member.id +
-          '&activity_type=eq.programme_opened&select=fixture_id,programme_id,activity_at' +
-          '&order=activity_at.desc&limit=30'),
+        S.findOne('fan_marketing_preferences', 'member_id=eq.' + member.id + '&select=*')
+          .catch(() => null),
+        historyFor(member.id),
       ]);
+
+      // Where to send them next. Preferred from the server-side intent, which
+      // survives the magic link opening on a different device.
+      const returnTo = FAN.safePath((intent && intent.return_path) || body.returnTo) || null;
 
       return resp(200, {
         ok: true,
-        member: {
-          membershipNumber: member.membership_number,
-          displayName: member.display_name,
-          firstName: member.first_name,
-          status: member.membership_status,
-          joinedAt: member.joined_at,
-          entitled: FAN.canReadProgrammes(member),
-        },
+        member: FAN.publicMember(member),
+        created: !!member._created,
+        linkedExisting: !!member._linkedExisting,
         marketing: { email: !!(prefs && prefs.email_marketing) },
-        programmeHistory: (history || []).map((h) => ({
-          fixtureId: h.fixture_id, openedAt: h.activity_at,
-        })),
-        returnTo: safeReturn(body.returnTo),
+        programmeHistory: history,
+        returnTo: returnTo,
+        // Only asked for when it is genuinely missing — a magic link opened on
+        // another device has no name to carry over.
+        needsName: !member.first_name,
       });
     }
 
@@ -105,10 +113,32 @@ exports.handler = async function (event) {
       return resp(200, { ok: true, marketing: { email: !!body.email } });
     }
 
+    if (action === 'profile') {
+      const member = await FAN.byAuthUser(user.id);
+      if (!member) return resp(200, { ok: false, error: 'no membership found' });
+      const first = String(body.firstName || '').trim().slice(0, 60);
+      const last = String(body.lastName || '').trim().slice(0, 60);
+      if (!first) return resp(200, { ok: false, error: 'Please give us a first name.' });
+      // A supporter may correct their name. They may NOT change their Lane
+      // number — it is the club's reference to them, not a display preference.
+      const patched = await S.rest('fan_members?id=eq.' + member.id, {
+        method: 'PATCH',
+        body: {
+          first_name: first, last_name: last || null,
+          display_name: [first, last].filter(Boolean).join(' '),
+          updated_at: new Date().toISOString(),
+        },
+        headers: { Prefer: 'return=representation' },
+      });
+      const next = (patched && patched[0]) || member;
+      await FAN.record(member.id, 'profile_updated', { source: 'account' });
+      return resp(200, { ok: true, member: FAN.publicMember(next) });
+    }
+
     return resp(400, { ok: false, error: 'unknown action' });
   } catch (e) {
     return resp(200, { ok: false, error: String((e && e.message) || e) });
   }
 };
 
-exports._internal = { safeReturn };
+exports._internal = { historyFor };
