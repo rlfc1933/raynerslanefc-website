@@ -381,3 +381,76 @@ scoreboard pipeline are untouched by this gate.
 confirmed line-ups, and the permanent archive.
 
 ---
+
+## Gate 6 — matchday programme (part 1 of 2: engine)
+
+**SHA in / out:** `8b2603f` → `900d603`
+**Public behaviour:** unchanged. Nothing publishes until a home matchday with
+two confirmed elevens, and the next home fixture is 11 August.
+
+### Built and proven
+
+| Piece | State |
+|---|---|
+| `programme_editions` + `programme_versions` | live in Supabase, RLS restricted |
+| `lib/programme/publish-rules.js` | the one publication decision |
+| `lib/programme/generate.js` | assembles a full programme from club data |
+| `programme-sync.js` | scheduled hourly, generates and publishes |
+| `programme-sync-now.js` | PIN-gated button version |
+| `programme-data.js` | public read, published editions only |
+| Match Centre link | wired to real publication state |
+
+### The two rules that carry the feature
+
+**Home only, from the registry.** Our canonical team id must equal
+`home_team_id`. Never venue text — Broadfields groundshare at Tithe Farm, so
+"the venue is Tithe Farm" does not mean we are at home. A test asserts exactly
+that. The override for a neutral-venue final is off by default and still checks
+the line-ups are the right way round.
+
+**Both elevens or nothing.** It publishes when the provider confirms two
+elevens for THIS fixture — minutes before kick-off if that is when teams are
+released, and immediately after kick-off if they arrive late.
+
+Matchday is the **club's** day: 22:00 Pacific on Friday is already Saturday in
+Harrow.
+
+The line-up gate refuses ten or twelve starters, duplicates, someone listed as
+both starter and substitute, an unconfirmed line-up, two line-ups for the same
+team, and a line-up carried over from the previous match. It protects the Gate 3
+correction — a substituted or dismissed player is still a starter.
+
+### What the generator will not do
+
+Attribute generated copy to a real person (the Chairman's name on words he did
+not write devalues every genuine word in the edition), invent opposition history,
+show a league table for a cup tie, or invent a sponsorship package or price.
+
+**What it does block on:** an empty staff page or an empty sponsors page.
+
+### Immutability
+
+Publication writes a **version** holding the payload, line-ups, table, sponsors
+and staff exactly as they were. The edition does not point at current club data;
+it owns a frozen copy, so next season's committee cannot appear in this
+season's programme.
+
+### Repeated mistake, caught earlier this time
+
+`programme-sync` is scheduled, and Netlify returns **403** to any direct HTTP
+call on a scheduled function. I hit this with `fwp-sync` earlier in the build
+and only found it by curling the deployed endpoint. This time the companion was
+written at the same time — but I still deployed the scheduled function first and
+got the 403, which is why it is worth recording.
+
+**Tests:** 43 new (28 publication, 15 generation). Suite **309 pass, 0 fail**.
+
+### Remaining in Gate 6 (part 2)
+
+The reader page, the cover-led archive library, and the portal programme panel.
+The engine is complete and scheduled; these are the surfaces that display it.
+
+**Rollback:** revert `e42f2ed..900d603` and drop `programme_editions` /
+`programme_versions`. No public surface reads them yet.
+
+---
