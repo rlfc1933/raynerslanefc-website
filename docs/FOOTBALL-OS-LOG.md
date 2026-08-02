@@ -454,3 +454,89 @@ The engine is complete and scheduled; these are the surfaces that display it.
 `programme_versions`. No public surface reads them yet.
 
 ---
+
+## Gate 6 — matchday programme (complete)
+
+**SHA in / out:** `2dbe208` → see below
+**Public behaviour:** the programme library and reader routes are live. **No
+edition has published** — the next eligible home fixture is 11 August v Hilltop.
+
+### Surfaces
+
+| Route | Purpose |
+|---|---|
+| `programmes.html` | the collection — featured edition, seasons, filters |
+| `programme.html?id=…` | the reader, one published edition |
+| `match-centre.html?id=…` | sentence before publication, button after |
+| portal Match Day panel | monitoring, plain words only |
+
+### Verified against real data, privately
+
+A **private design preview** built from the stored Wallingford match — never
+published, and deleted after inspection, because claiming a programme existed
+that day would be a lie about the club's own history.
+
+```
+10 sections    welcome · opposition · staff · sponsors · table ·
+               fixtures · join · history · squads · full time
+table          20 teams, Rayners Lane and the opposition both highlighted,
+               8 scoped column headers
+squads         11 starters per side, both crests
+headings       one h1, ten h2 — correct hierarchy
+overflow       none
+```
+
+### Decisions worth keeping
+
+**Covers are composed in CSS, not rendered as images.** Crests stay sharp at any
+size, the text stays selectable and readable by a screen reader, and a 200px
+thumbnail is legible without a second pipeline. Container queries size the type,
+so one cover works as a card and as a hero.
+
+**The reader makes exactly one request** — the immutable stored version — and a
+test asserts it. An archived programme that reached for current sponsors or the
+current table would quietly rewrite the past.
+
+**The empty library is honest.** "The collection starts soon", with a real
+explanation. No fake editions, no lorem, and no backfilling a historical
+programme to make the shelf look full.
+
+**Nothing costs anything.** No prices, no locks, no carts — with a test
+enforcing it.
+
+### Two things caught while building
+
+The Match Centre said *"today's official teams"* days before the match, which
+reads as though the programme is late rather than not due yet. Now matchday-aware,
+decided in Europe/London.
+
+My own Release 3 SEO test caught `programme.html` shipping with **no `<h1>`** —
+I had removed the page header. Restored as real served HTML rather than a
+heading written by JavaScript.
+
+### Cache
+
+Handled up front this time. Versioned asset references on both pages, service
+worker bumped `rlfc-v9` → `rlfc-v10`, and a test asserting both. Gate 5 lost a
+cycle to a stale stylesheet.
+
+### Access control
+
+Two locks. RLS restricts `programme_editions` and `programme_versions` to
+published and archived states; the endpoint filters again. A draft returns
+**404 with no hint it exists** — verified in production against the Hilltop
+draft.
+
+**Tests:** 323 pass, 0 fail.
+
+**Rollback:** revert `2dbe208..HEAD`; drop `programme_editions` and
+`programme_versions`. `programmes.html` and `programme.html` return to their
+previous form.
+
+### Remaining, deliberately deferred
+
+Legal footer wording still needs verification against the current FA Handbook
+and Combined Counties rules — the versioned footer mechanism exists and is
+empty rather than carrying unverified claims. PDF export untouched.
+
+---
