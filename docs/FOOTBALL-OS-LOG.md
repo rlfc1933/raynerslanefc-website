@@ -326,3 +326,58 @@ legacy reader remain in place and untouched.
 hold and archived match navigation.
 
 ---
+
+## Gate 5 — one permanent page per fixture
+
+**SHA in / out:** `a69ed31` → `6d42d71`
+**Public behaviour:** changed and verified.
+
+`match-centre.html?id=fwp-578225` is that match's page forever. Upcoming, live
+and finished are three **states of one page**, not three pages — a link shared
+before kick-off is the same link that shows the live score and the same link
+that is still the club's record of the game next season.
+
+With no id it shows whatever is happening now, then the most recent result, then
+the next fixture.
+
+### Verified in production
+
+**Finished match** (`fwp-578225`): FULL TIME, 3–3, 21 events, both line-ups
+(16 and 15 rows — XI plus used substitutes, unused correctly excluded),
+referee, navigation to Broadfields. Zero provider markup, zero iframes.
+
+**Upcoming match** (`fwp-578227`): UPCOMING, Tue 4 Aug 19:45 UK, Broadfields
+home with the AWAY badge on us, live countdown, navigation both ways.
+
+### Honest states
+
+Kicked off with nothing reported says **"Awaiting live update"** rather than
+inventing a match or running a countdown past zero. A live match unheard from
+for three minutes says **"Updates delayed"**. Postponed, cancelled and abandoned
+each say so. Polling continues only while a match is live or stalled — a
+finished match is finished.
+
+The programme block is a **sentence, not a button**, before publication:
+*"Digital programme available once today's official teams are confirmed."* A
+control that leads nowhere is worse than an explanation.
+
+### One defect, found by looking
+
+The countdown rendered as a vertical list. It reused the homepage's
+`cn__countdown` classes, whose CSS lives in `css/club-now.css` — a stylesheet
+this page does not load. The markup was correct and completely unstyled. Now
+owned by the page that renders it.
+
+Worth noting for future gates: `/css/*` is served
+`stale-while-revalidate=86400`, so a CSS change needs one revalidation cycle
+before a returning browser sees it. The fix looked broken for one load.
+
+**Tests:** full suite 266 pass, 0 fail.
+
+**Rollback:** revert `78175df..6d42d71`. The homepage, live bar and the
+scoreboard pipeline are untouched by this gate.
+
+**Next:** Gate 6 — the automatic home-match programme, its publication gate on
+confirmed line-ups, and the permanent archive.
+
+---
