@@ -20,7 +20,12 @@ function resp(code, obj, seconds) {
   };
 }
 
-const PUBLIC_STATES = "('published_matchday','published_late','full_time_current','archived')";
+// The ONE list of states the public may read. It appears in three places —
+// this endpoint, the RLS policy, and the Match Centre's programme check — and
+// they must agree, or an edition gets listed and then refuses to open.
+// 'published_recovery' is public: it IS published. What differs is when, and
+// the edition says so itself rather than hiding it.
+const PUBLIC_STATES = "('published_matchday','published_late','full_time_current','archived','published_recovery')";
 
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
@@ -44,6 +49,10 @@ exports.handler = async function (event) {
           fixtureId: ed.internal_fixture_id, slug: ed.slug, state: ed.state,
           season: ed.season, kickoffAt: ed.scheduled_kickoff_at, venue: ed.venue,
           publishedAt: ed.published_at, version: v.version,
+          // Said on the edition itself. A programme that appeared after the
+          // final whistle must not read as though supporters had it at kick-off.
+          afterFullTime: !!ed.published_after_full_time,
+          publicationSource: ed.publication_source_detail || 'automatic',
         },
         programme: v.payload,
         lineups: v.lineup_snapshot,

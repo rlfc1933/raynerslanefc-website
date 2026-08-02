@@ -216,7 +216,7 @@ async function fixtureDetail(fixtureId) {
   let programmePublished = false, programmeState = null;
   try {
     const eds = await S.rest('programme_editions?internal_fixture_id=eq.' + encodeURIComponent(f.id) +
-      "&state=in.('published_matchday','published_late','full_time_current','archived')&select=state&limit=1");
+      "&state=in.('published_matchday','published_late','full_time_current','archived','published_recovery')&select=state&limit=1");
     if (eds && eds[0]) { programmePublished = true; programmeState = eds[0].state; }
   } catch (e) { /* no programme system yet — the sentence stands */ }
 

@@ -136,7 +136,15 @@
     });
   }
 
-  fetch('/.netlify/functions/programme-data')
+  // The library's cards are LIVE registry data, not archived editions, so the
+  // crest library may answer for them. (The reader is different and must stay
+  // snapshot-only — an archived programme that reached for a current asset
+  // would quietly rewrite the past. tests/programme-surfaces enforces it.)
+  var crestsReady = (window.LaneCrest && window.LaneCrest.load)
+    ? window.LaneCrest.load().catch(function () {})
+    : Promise.resolve();
+
+  crestsReady.then(function () { return fetch('/.netlify/functions/programme-data'); })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       ALL = (d && d.ok && d.editions) ? d.editions : [];

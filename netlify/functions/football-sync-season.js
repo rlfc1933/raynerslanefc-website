@@ -20,6 +20,7 @@ const F = require('./lib/fwp');
 const R = require('./lib/football/reconcile');
 const S = require('./lib/football/store');
 const MT = require('../../js/match-time');
+const CRESTS = require('./lib/football/crests');
 
 const SEASON = process.env.FWP_SEASON || '2026-2027';
 const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://raynerslanefc.co.uk';
@@ -93,6 +94,17 @@ async function ensureTeams(names, cache) {
   }
   if (!missing.length) return 0;
 
+  // NOTE: crest_asset_path is deliberately NOT in this payload.
+  //
+  // This is an upsert with resolution=merge-duplicates, which writes every
+  // column it is given. Including the crest here would mean that on any run
+  // where the crest library failed to load, a null would be written straight
+  // over artwork the club had approved — turning a bad minute at the CDN into
+  // permanent data loss, which is the precise shape of the incident this file
+  // is being repaired for.
+  //
+  // Artwork is applied immediately afterwards by the backfill, which only ever
+  // fills a blank and can therefore never erase one.
   const rows = missing.map((m) => ({
     canonical_name: m.name, display_name: m.name, slug: F.slug(m.name),
     external_provider: 'fwp', external_team_id: m.providerSlug || F.slug(m.name),
@@ -196,6 +208,24 @@ exports.handler = async function (event) {
     counters.records_created += await ensureTeams(teamNames, cache);
     counters.records_created += await ensureCompetitions(comps, cache);
 
+    // ── crest backfill ────────────────────────────────────────────────────
+    // Every team that predates the crest mapping. Merge-safe by construction:
+    // backfill() returns only rows that have NO artwork stored, so a crest the
+    // club has approved can never be replaced by this — including by a null.
+    let crestsRestored = 0;
+    try {
+      const allTeams = await S.rest('football_teams?select=id,canonical_name,crest_asset_path') || [];
+      const patches = await CRESTS.backfill(allTeams);
+      for (let i = 0; i < patches.length; i += 50) {
+        const slice = patches.slice(i, i + 50);
+        await Promise.all(slice.map((row) => S.rest('football_teams?id=eq.' + row.id, {
+          method: 'PATCH', body: { crest_asset_path: row.crest_asset_path },
+          headers: { Prefer: 'return=minimal' },
+        })));
+      }
+      crestsRestored = patches.length;
+    } catch (e) { /* the fixture sync is more important than the artwork */ }
+
     const fixtureRows = rec.matched.map((m) => {
       const p = m.provider;
       const homeName = p.isHome ? R.CLUB : p.opponent;
@@ -286,6 +316,7 @@ exports.handler = async function (event) {
       fixturesWritten: written.length,
       // Said out loud: how many facts this run declined to erase.
       fieldsPreserved: preserved,
+      crestsRestored,
       unmatchedProvider: rec.unmatchedProvider.map((u) => ({
         date: u.provider.date, opponent: u.provider.opponent,
         id: u.provider.externalFixtureId, confidence: u.confidence, reasons: u.reasons,

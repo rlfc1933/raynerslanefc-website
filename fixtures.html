@@ -196,6 +196,7 @@
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
+<script src="js/crest.js?v=8"></script>
 <script src="js/football-data.js"></script>
 <script src="js/match-time.js"></script>
 <script src="js/components.js"></script>
@@ -235,8 +236,10 @@ function fxKOText(f) {
 }
 
 async function loadFixturesData() {
-  // Venues first — every card needs the ground/address/coords to render
-  // Directions (or to say honestly that the address isn't confirmed yet).
+  // Crests and venues first. Nothing draws a badge it has not proven can load,
+  // and every card needs the ground/address/coords to render Directions (or to
+  // say honestly that the address isn't confirmed yet).
+  if (window.LaneCrest) { try { await window.LaneCrest.load(); } catch (e) {} }
   await fxLoadVenues();
   // GATE 8 — PRIMARY: the club's own football registry, through the one public
   // reader every surface uses. It carries the provider's fixture list
@@ -349,7 +352,17 @@ function injectFixtureEvents(list) {
    never a broken image. Grouped by month, colour-coded home/away + by comp. */
 var RL = { name: 'Rayners Lane', crest: 'img/badge.png' };
 function fxInitials(n) { return String(n || '').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).join('').slice(0, 3).toUpperCase(); }
+// ONE resolver for the whole site (js/crest.js). This used to draw whatever
+// path it was handed and fall back to initials when that was empty — which is
+// how every opponent badge on this page turned into two grey letters the day
+// the page started reading the registry, where crests had never been written.
+// The club's own crest library is consulted first; a supplied path is a hint.
 function fxCrestEl(src, name) {
+  if (window.LaneCrest && window.LaneCrest.html) {
+    return window.LaneCrest.html(name, {
+      className: 'fxc__crest', initialsClass: 'fxc__ph', hint: src,
+    });
+  }
   var ini = fxInitials(name);
   if (!src) return '<div class="fxc__ph">' + ini + '</div>';
   return '<img class="fxc__crest" src="' + fxEsc(src) + '" alt="' + fxEsc(name) + '" loading="lazy" ' +
@@ -622,6 +635,11 @@ function fxFromRegistry(fixtures, results) {
       kickoffAt: f.kickoffAt,
       date: londonDate(f.kickoffAt),
       kickoff: londonTime(f.kickoffAt),
+      // The registry's crest if it has one, otherwise the club's own library.
+      // This adapter originally carried NO crest at all, which is the defect
+      // that took every opponent badge off this page.
+      oppCrest: (f.isHome ? f.awayCrest : f.homeCrest)
+        || (window.LaneCrest ? window.LaneCrest.fileFor(f.opponent) : null) || '',
       opponent: f.opponent,
       isHome: f.isHome,
       venue: f.venue,

@@ -33,7 +33,22 @@ var STATES = {
   FULL_TIME_CURRENT: 'full_time_current',
   ARCHIVED: 'archived',
   WITHHELD: 'withheld',
+  // ── recovery ──────────────────────────────────────────────────────────
+  // Added after the Wallingford edition never appeared. The engine could only
+  // publish ON matchday, so any fixture whose day had passed sat in
+  // WAITING_FOR_MATCHDAY for ever — waiting for a day that was gone. That is
+  // what happens when the scheduler misses its window: a deploy lands after
+  // the teams are out, the provider releases line-ups late, or an outage
+  // crosses kick-off. The programme was not late; it was unreachable.
+  PUBLISHED_RECOVERY: 'published_recovery',
+  RETROSPECTIVE_CANDIDATE: 'retrospective_candidate',
 };
+
+// How long after kick-off the engine may still publish by itself.
+// Beyond it, a human authorises — because quietly manufacturing programmes for
+// matches played months ago would be inventing a history the club never had.
+var RECOVERY_WINDOW_HOURS = Number(process.env.PROGRAMME_RECOVERY_HOURS || 48);
+var FULL_TIME_AFTER_KO_MS = 2 * 60 * 60 * 1000;   // 90 minutes plus the usual
 
 var BLOCKED_FIXTURE_STATUS = ['postponed', 'cancelled', 'abandoned'];
 
@@ -176,6 +191,54 @@ function decide(input) {
   }
 
   if (!isMatchday(fixture, now)) {
+    var koMs = Date.parse(fixture.scheduled_kickoff_at);
+    var inPast = isFinite(koMs) && now > koMs;
+
+    // ── the match has been and gone without a programme ──────────────────
+    if (inPast) {
+      var sinceFullTime = now - (koMs + FULL_TIME_AFTER_KO_MS);
+      var withinWindow = sinceFullTime <= RECOVERY_WINDOW_HOURS * 3600000;
+      var gateNow = validateLineupGate(input.homeLineup, input.awayLineup, fixture);
+
+      if (!gateNow.ok) {
+        // No confirmed teams means no programme worth the name, then or now.
+        return { state: STATES.WITHHELD, canPublish: false, recovery: true,
+          reasons: ['the match has been played and the official teams were never confirmed']
+            .concat(gateNow.errors) };
+      }
+      if (!edition.mandatory_content_valid) {
+        return { state: STATES.WITHHELD, canPublish: false, recovery: true,
+          reasons: ['the match has been played and the programme content is incomplete'] };
+      }
+
+      if (withinWindow) {
+        // Recent enough that a supporter still expects it. Publish, honestly
+        // dated now, and say plainly that it came after full time.
+        return {
+          state: STATES.PUBLISHED_RECOVERY, canPublish: true,
+          recovery: true, afterFullTime: true, late: true,
+          reasons: ['published after full time — within the ' +
+            RECOVERY_WINDOW_HOURS + '-hour recovery window'],
+        };
+      }
+
+      // Too long ago to publish by itself. A human decides, and the decision is
+      // recorded — the club's history is not something a timer gets to write.
+      if (edition.retrospective_authorised_by) {
+        return {
+          state: STATES.PUBLISHED_RECOVERY, canPublish: true,
+          recovery: true, afterFullTime: true, late: true, retrospective: true,
+          reasons: ['retrospective edition authorised by ' + edition.retrospective_authorised_by],
+        };
+      }
+      return {
+        state: STATES.RETROSPECTIVE_CANDIDATE, canPublish: false,
+        recovery: true, afterFullTime: true,
+        reasons: ['played more than ' + RECOVERY_WINDOW_HOURS +
+          ' hours ago — a retrospective edition needs authorising in the portal'],
+      };
+    }
+
     return {
       state: edition.generated_at ? STATES.WAITING_FOR_MATCHDAY : STATES.DRAFT_HIDDEN,
       canPublish: false,
@@ -216,6 +279,8 @@ function portalWording(decision, fixture) {
   map[STATES.FULL_TIME_CURRENT] = 'Full time — final score being added';
   map[STATES.ARCHIVED] = 'Archived';
   map[STATES.WITHHELD] = 'Not published';
+  map[STATES.PUBLISHED_RECOVERY] = 'Published after full time';
+  map[STATES.RETROSPECTIVE_CANDIDATE] = 'Needs your approval to publish';
   return {
     headline: map[decision.state] || 'Programme',
     detail: decision.state === STATES.WAITING_FOR_LINEUPS ? 'No action required' : '',
@@ -226,4 +291,5 @@ function portalWording(decision, fixture) {
 module.exports = {
   STATES, londonDay, isMatchday, isHomeFixture,
   validateLineup, validateLineupGate, decide, portalWording,
+  RECOVERY_WINDOW_HOURS, FULL_TIME_AFTER_KO_MS,
 };

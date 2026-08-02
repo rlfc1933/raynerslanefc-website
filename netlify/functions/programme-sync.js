@@ -179,11 +179,45 @@ exports.handler = async function (event) {
       if (gate.ok) ctx.lineups.confirmed = true;
       const built = GEN.build(ctx);
 
+      // The real match state. isFinal was hardcoded false, so an edition could
+      // never be enriched with the result it was published alongside.
+      const ref = fx.internal_fixture_id || ('fwp-' + fx.external_fixture_id);
+      let state = null, events = [];
+      try {
+        const st = await S.rest('match_state?fixture_id=eq.' + encodeURIComponent(ref) + '&select=*');
+        state = (st && st[0]) || null;
+        if (state && state.is_final) {
+          events = await S.rest('match_events?fixture_id=eq.' + encodeURIComponent(ref) +
+            '&retracted_at=is.null&select=event_type,side,player,assistant,minute,stoppage_minute,own_goal' +
+            '&order=minute.asc,stoppage_minute.asc') || [];
+        }
+      } catch (e) { /* no result yet — the edition simply has no Full Time section */ }
+
       const decision = RULES.decide({
         fixture: fx, edition, ourTeamId, now,
         homeLineup: lineups.home, awayLineup: lineups.away,
-        isFinal: false,
+        isFinal: !!(state && state.is_final),
       });
+
+      /* The permanent record of the match, in the club's own words. Captured
+         INTO the edition rather than resolved when somebody reads it, because
+         an archived programme that reached for the current score would rewrite
+         the past the moment the next match kicked off. */
+      const finalMatch = (state && state.is_final) ? {
+        homeTeam: ctx.homeTeam, awayTeam: ctx.awayTeam,
+        homeScore: state.home_score, awayScore: state.away_score,
+        status: 'FULL TIME',
+        referee: state.referee || null,
+        venue: fx.venue || null,
+        events: events.map((e) => ({
+          type: e.own_goal ? 'own_goal' : e.event_type,
+          // An own goal counts on the scoreline it counts on, and belongs to
+          // the player who scored it. It is never a goal FOR him.
+          player: e.player, related: e.assistant,
+          side: e.side, minute: e.minute, stoppage: e.stoppage_minute || 0,
+        })),
+        capturedAt: new Date().toISOString(),
+      } : null;
 
       const patch = {
         mandatory_content_valid: built.validation.ok,
@@ -204,6 +238,40 @@ exports.handler = async function (event) {
             table_snapshot: ctx.table || null,
             sponsor_snapshot: { tiers: ctx.sponsorTiers },
             staff_snapshot: { groups: ctx.staffGroups },
+            final_match_snapshot: finalMatch,
+            legal_version: 'v1',
+            generated_at: new Date().toISOString(),
+            // ALWAYS now. Backdating this to the fixture would be the system
+            // claiming supporters had a programme on the day when they did not.
+            published_at: new Date().toISOString(),
+          }],
+          headers: { Prefer: 'return=minimal' },
+        });
+        patch.current_version = version;
+        patch.published_at = new Date().toISOString();
+        patch.state = decision.recovery
+          ? RULES.STATES.PUBLISHED_RECOVERY
+          : (decision.late ? RULES.STATES.PUBLISHED_LATE : RULES.STATES.PUBLISHED_MATCHDAY);
+        if (decision.recovery) {
+          patch.publication_source = decision.retrospective ? 'retrospective' : 'recovery';
+          // Why the normal moment was missed, kept with the edition.
+          patch.recovery_reason = decision.reasons.join('; ');
+          patch.published_after_full_time = !!decision.afterFullTime;
+        }
+        if (finalMatch) patch.fulltime_enriched_at = new Date().toISOString();
+      } else if (decision.canPublish === false && edition.published_at && finalMatch
+                 && !edition.fulltime_enriched_at) {
+        // Published before the whistle: add the result to the edition that is
+        // already out, as a new immutable version rather than an edit.
+        const version = (edition.current_version || 0) + 1;
+        await S.rest('programme_versions', {
+          method: 'POST',
+          body: [{
+            edition_id: edition.id, version, payload: built,
+            lineup_snapshot: ctx.lineups, table_snapshot: ctx.table || null,
+            sponsor_snapshot: { tiers: ctx.sponsorTiers },
+            staff_snapshot: { groups: ctx.staffGroups },
+            final_match_snapshot: finalMatch,
             legal_version: 'v1',
             generated_at: new Date().toISOString(),
             published_at: new Date().toISOString(),
@@ -211,8 +279,8 @@ exports.handler = async function (event) {
           headers: { Prefer: 'return=minimal' },
         });
         patch.current_version = version;
-        patch.published_at = new Date().toISOString();
-        patch.state = decision.late ? RULES.STATES.PUBLISHED_LATE : RULES.STATES.PUBLISHED_MATCHDAY;
+        patch.fulltime_enriched_at = new Date().toISOString();
+        patch.state = RULES.STATES.FULL_TIME_CURRENT;
       }
 
       await S.rest('programme_editions?id=eq.' + edition.id, {
@@ -226,6 +294,8 @@ exports.handler = async function (event) {
         contentValid: built.validation.ok,
         missing: built.validation.missing,
         lineups: gate.ok ? 'confirmed' : 'awaiting',
+        recovery: !!decision.recovery,
+        fullTime: !!finalMatch,
         reasons: decision.reasons,
       });
     }

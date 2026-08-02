@@ -229,6 +229,12 @@
 
     root.innerHTML =
       (preview ? '<div class="pr-preview">Private design preview — not a published matchday edition</div>' : '') +
+      // Honesty, stated once, near the top, in the club's voice. Not an
+      // apology and not an explanation of the machinery.
+      (ed.afterFullTime
+        ? '<div class="pr-note">This edition was published after full time as Rayners Lane introduced its ' +
+          'new matchday programme platform.</div>'
+        : '') +
       '<div class="pr-cover">' + RLFCCover.render(coverEdition, { as: 'div' }) + '</div>' +
       toc(present) + html +
       '<div class="pr-cta">' +

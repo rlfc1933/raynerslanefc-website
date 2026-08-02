@@ -41,13 +41,28 @@
     return '<span class="cn__crest cn__crest--ini">' + esc(ini) + '</span>';
   }
   window.__cnIni = iniHTML;
+  // ONE resolver for the whole site (js/crest.js). This block used to take
+  // whatever crest path it was handed and draw initials if that was empty —
+  // which is how every opponent badge disappeared the day the block started
+  // reading the registry, where the crest had never been written. The club's
+  // own library is now consulted first, and a path passed in is only ever a
+  // hint. Falls back to the old behaviour if the resolver has not loaded.
   function crestHTML(crest, name) {
+    if (global_crest()) {
+      return window.LaneCrest.html(name, {
+        className: 'cn__crest', initialsClass: 'cn__crest cn__crest--ini', hint: crest,
+      });
+    }
     if (crest) return '<img src="' + esc(crest) + '" alt="' + esc(name) + ' crest" class="cn__crest" ' +
       'data-nm="' + esc(name) + '" onerror="this.outerHTML=window.__cnIni(this.getAttribute(\'data-nm\'))">';
     return iniHTML(name);
   }
+  function global_crest() { return !!(window.LaneCrest && window.LaneCrest.html); }
 
   // ── data loads (all cache-busted so a published change shows immediately) ──
+  function loadCrestLibrary() {
+    return global_crest() ? window.LaneCrest.load() : Promise.resolve();
+  }
   function loadVenues() {
     return fetch('data/venues.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (v) { ((v && v.venues) || []).forEach(function (x) { venues[norm(x.club)] = x; }); })
@@ -464,7 +479,10 @@
   }
 
   // initial paint — venues + fixtures + live in parallel, then build once
-  Promise.all([loadVenues(), loadFixtures(), loadPosition(), readLive().then(function (m) { live = m; })]).then(build);
+  // The crest library is verified before the first paint, so nothing renders a
+  // badge it has not proven can load, and nothing flashes initials first.
+  Promise.all([loadCrestLibrary(), loadVenues(), loadFixtures(), loadPosition(),
+    readLive().then(function (m) { live = m; })]).then(build);
   setInterval(refreshLive, 12000);   // live score / matchday state
   setInterval(refreshData, 60000);   // fixtures / results (rarely changes mid-visit)
 })();

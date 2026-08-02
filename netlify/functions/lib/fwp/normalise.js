@@ -23,8 +23,14 @@ function clubKey(s) {
     t = t.replace(/\b(reserves?|res|development|dev|u\d{2}|academy|youth|women|ladies|a|b)\b\s*$/i, '');
   }
   t = t
-    .replace(/\bf\.?\s?c\.?\b/g, ' ')
-    .replace(/\ba\.?f\.?c\.?\b/g, ' ')
+    // A trailing \b cannot match after "A.F.C." — the final dot and the
+    // following space are both non-word, so there is no boundary between them.
+    // "A.F.C. Hayes" therefore normalised to "ahayes" while "AFC Hayes" gave
+    // "hayes", and one club became two teams with two crest lookups. Anchored
+    // on a following space or end-of-string instead. Verified against all 27
+    // club names the site holds: not one existing key moves.
+    .replace(/\ba\.?\s?f\.?\s?c\.?(?=\s|$)/g, ' ')
+    .replace(/\bf\.?\s?c\.?(?=\s|$)/g, ' ')
     .replace(/\butd\b/g, 'united')
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]/g, '');

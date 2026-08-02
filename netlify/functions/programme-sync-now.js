@@ -11,6 +11,7 @@
 
 const adminOk = require('./lib/pin');
 const sync = require('./programme-sync');
+const S = require('./lib/football/store');
 
 function resp(code, obj) {
   return {
@@ -32,6 +33,34 @@ exports.handler = async function (event) {
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) { /* handled */ }
   if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Not signed in' });
+
+  /* ── authorising a retrospective edition ───────────────────────────────────
+     A match played outside the recovery window gets no programme by itself —
+     a timer quietly manufacturing editions for matches played months ago would
+     be inventing a history the club never had. A person decides, is named for
+     it, and the reason is kept with the edition. The publication date is still
+     the real one: this authorises publishing now, not pretending it was then. */
+  if (b.action === 'authorise_retrospective') {
+    if (!b.fixtureId) return resp(400, { ok: false, error: 'which fixture?' });
+    const who = String(b.by || '').trim();
+    if (!who) return resp(400, { ok: false, error: 'who is authorising this? Send "by".' });
+
+    const ed = await S.findOne('programme_editions',
+      'internal_fixture_id=eq.' + encodeURIComponent(b.fixtureId) + '&select=id,state,published_at');
+    if (!ed) return resp(404, { ok: false, error: 'no edition for that fixture' });
+    if (ed.published_at) return resp(200, { ok: false, error: 'that edition is already published' });
+
+    await S.rest('programme_editions?id=eq.' + ed.id, {
+      method: 'PATCH',
+      body: {
+        retrospective_authorised_by: who.slice(0, 80),
+        retrospective_authorised_at: new Date().toISOString(),
+        retrospective_note: (b.reason || '').slice(0, 500) || null,
+      },
+      headers: { Prefer: 'return=minimal' },
+    });
+    // Then run the engine, which will now find the authorisation and publish.
+  }
 
   const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} });
   let parsed = {};

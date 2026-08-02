@@ -22,7 +22,17 @@
       .trim().split(/\s+/).map(function (w) { return w[0] || ''; })
       .join('').slice(0, 3).toUpperCase() || '?';
   }
+  // A published programme is immutable, so the crest it STORED wins — that is
+  // the artwork the club published. Where an edition has none (every edition
+  // generated before crest_asset_path was ever written did not), the club's own
+  // crest library answers rather than the cover falling to two grey letters.
   function crest(src, name) {
+    if (window.LaneCrest && window.LaneCrest.html) {
+      return window.LaneCrest.html(name, {
+        className: 'pc__crest', initialsClass: 'pc__crest pc__crest--ini',
+        hint: src || null, preferHint: !!src, decorative: true,
+      });
+    }
     if (!src) return '<span class="pc__crest pc__crest--ini" aria-hidden="true">' + esc(initials(name)) + '</span>';
     return '<img class="pc__crest" src="' + esc(src) + '" alt="" aria-hidden="true">';
   }
