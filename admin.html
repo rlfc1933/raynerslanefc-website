@@ -10289,6 +10289,10 @@ function toast(msg, err) {
     full_time_current:   ['Full time', 'The final score is being added to the edition.'],
     archived:            ['Programme archived', 'The edition is preserved exactly as it was published.'],
     withheld:            ['Programme not published', ''],
+    // Recovery. The engine missed the normal moment — a late deploy, late team
+    // sheets, an outage across kick-off — and caught up afterwards.
+    published_recovery:  ['Programme live', 'It published after full time, because the normal publication moment was missed. The edition says so itself.'],
+    retrospective_candidate: ['Needs your approval', 'This match was played too long ago for the system to publish by itself. Approve it below and the programme goes live, dated today — not backdated.'],
   };
 
   window.progRefresh = function () {
@@ -10319,6 +10323,11 @@ function toast(msg, err) {
       if (ed.withheld_reason) lines.push('Reason: ' + esc(ed.withheld_reason));
 
       var acts = '<button class="fwp-btn" onclick="progRetry()">Refresh programme data</button>';
+      // Only a person may publish a programme for a match already in the past.
+      if (ed.state === 'retrospective_candidate') {
+        acts += '<button class="fwp-btn fwp-btn--warn" onclick="progAuthorise(\'' +
+          esc(ed.internal_fixture_id) + '\')">Approve and publish this edition</button>';
+      }
       if (live || ed.state === 'archived') {
         acts += '<a class="fwp-btn" target="_blank" rel="noopener" href="programme.html?id=' + esc(ed.internal_fixture_id) + '">View programme</a>';
       }
@@ -10334,6 +10343,27 @@ function toast(msg, err) {
         '<div class="fwp-acts">' + acts + '</div>' +
         '<details class="fwp-diag"><summary>Technical details</summary><pre>' + esc(JSON.stringify(ed, null, 1)) + '</pre></details>';
     });
+  };
+
+  window.progAuthorise = function (fixtureId) {
+    if (!confirm('Publish a programme for a match that has already been played?\n\n' +
+      'It will be dated TODAY, not backdated, and will say plainly that it was published after full time.')) return;
+    var who = prompt('Your name, so the club has a record of who approved it:');
+    if (who == null || !String(who).trim()) return;
+    var why = prompt('Why is this being published now? (optional)') || '';
+    if (typeof toast === 'function') toast('Publishing the edition…');
+    fetch('/.netlify/functions/programme-sync-now', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, action: 'authorise_retrospective',
+        fixtureId: fixtureId, by: String(who).trim(), reason: why })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (typeof toast === 'function') {
+          toast(j && j.ok !== false ? 'Published — it is in the programme library now'
+                                    : ((j && j.error) || 'Could not publish'), !(j && j.ok !== false));
+        }
+        setTimeout(window.progRefresh, 1500);
+      }).catch(function (e) { if (typeof toast === 'function') toast('Network error: ' + e.message, true); });
   };
 
   window.progRetry = function () {

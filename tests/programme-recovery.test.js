@@ -294,3 +294,24 @@ test('the library card knows an edition came after full time', () => {
   assert.match(s, /published_after_full_time,publication_source_detail/,
     'it must select the columns it reads');
 });
+
+test('the portal offers approval ONLY for a candidate, and names who approved', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8');
+  assert.match(s, /ed\.state === 'retrospective_candidate'/,
+    'the approve button must appear only for an edition awaiting a human');
+  assert.match(s, /action: 'authorise_retrospective'/);
+  assert.match(s, /so the club has a record of who approved it/);
+  // And it tells the truth about the date in the confirmation itself.
+  assert.match(s, /dated TODAY, not backdated/);
+});
+
+test('the portal explains recovery in plain words, with no state names', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8');
+  const block = s.slice(s.indexOf('published_recovery:'), s.indexOf('retrospective_candidate:') + 400);
+  assert.match(block, /published after full time/);
+  assert.ok(!/WAITING_FOR|canPublish|decide\(/.test(block), 'no jargon in the committee view');
+});
