@@ -210,9 +210,19 @@ test('an archived edition stays archived', () => {
 });
 
 test('a deliberate withhold outranks everything', () => {
-  const d = decide({ edition: edition({ withheld_reason: 'pitch inspection' }) });
+  // A DELIBERATE withhold is now keyed on who made it, not on the reason text.
+  // The sync writes withheld_reason for ordinary technical reasons too, so
+  // treating that field as a human decision latched editions shut for ever.
+  const d = decide({ edition: edition({ withheld_by: 'Chair', withheld_reason: 'pitch inspection' }) });
   assert.strictEqual(d.state, P.STATES.WITHHELD);
   assert.match(d.reasons.join(' '), /pitch inspection/);
+  assert.match(d.reasons.join(' '), /Chair/);
+});
+
+test('a machine\'s reason for waiting is not a decision to stop', () => {
+  const d = decide({ edition: edition({ withheld_reason: 'content is not complete' }) });
+  assert.notStrictEqual(d.state, P.STATES.WITHHELD,
+    'a stale automatic reason must not block publication once the cause is gone');
 });
 
 test('incomplete programme content blocks publication even with both teams', () => {

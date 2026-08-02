@@ -146,7 +146,7 @@ test('an archived edition is left alone', () => {
 });
 
 test('a withheld edition stays withheld — a human said no', () => {
-  const d = R.decide(ctx(KO + 30 * 3600000, { withheld_reason: 'pitch inspection' }));
+  const d = R.decide(ctx(KO + 30 * 3600000, { withheld_by: 'Chair', withheld_reason: 'pitch inspection' }));
   assert.strictEqual(d.state, R.STATES.WITHHELD);
   assert.strictEqual(d.canPublish, false);
 });
@@ -394,4 +394,50 @@ test('the programme timer is fast enough to matter on a matchday', () => {
   const everyN = (cron.match(/^\*\/(\d+) \* \* \* \*$/) || [])[1];
   assert.ok(everyN && Number(everyN) <= 15,
     'it must run at least every 15 minutes, found: ' + cron);
+});
+
+/* ── the latch ────────────────────────────────────────────────────────────── */
+
+test('AN AUTOMATIC WITHHOLD DOES NOT LATCH THE EDITION SHUT FOR EVER', () => {
+  // decide() read edition.withheld_reason as "a human said no" — the same field
+  // the sync writes for ordinary technical reasons. So the first automatic
+  // withhold shut the edition permanently: every later run saw the field,
+  // returned early, wrote the reason back with another "withheld: " in front,
+  // and never re-evaluated. The Wallingford edition had four prefixes stacked.
+  const withReason = { mandatory_content_valid: true, generated_at: 'yes',
+    withheld_reason: 'the match has been played and the content is incomplete' };
+  const d = R.decide(ctx(KO - 3600000, withReason));
+  assert.strictEqual(d.canPublish, true,
+    'a stale machine reason must not prevent publication once the cause is gone');
+  assert.notStrictEqual(d.state, R.STATES.WITHHELD);
+});
+
+test('a HUMAN withhold still outranks everything', () => {
+  const stopped = { mandatory_content_valid: true, generated_at: 'yes',
+    withheld_by: 'Chair', withheld_reason: 'pitch inspection at noon' };
+  const d = R.decide(ctx(KO - 3600000, stopped));
+  assert.strictEqual(d.canPublish, false);
+  assert.strictEqual(d.state, R.STATES.WITHHELD);
+  assert.match(d.reasons.join(' '), /withheld by Chair/);
+  assert.match(d.reasons.join(' '), /pitch inspection/);
+});
+
+test('the withheld reason never compounds its own prefix', () => {
+  const stopped = { mandatory_content_valid: true, generated_at: 'yes',
+    withheld_by: 'Chair', withheld_reason: 'pitch inspection' };
+  const once = R.decide(ctx(KO - 3600000, stopped)).reasons.join(' ');
+  const twice = R.decide(ctx(KO - 3600000,
+    Object.assign({}, stopped, { withheld_reason: once }))).reasons.join(' ');
+  assert.ok((twice.match(/withheld by/g) || []).length <= 2,
+    'the reason is growing a prefix every run: ' + twice);
+});
+
+test('the migration clears the latch it created', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const sql = fs.readFileSync(path.join(__dirname, '..',
+    'supabase/migrations/20260803120000_programme_recovery.sql'), 'utf8');
+  assert.match(sql, /add column if not exists withheld_by text/);
+  assert.match(sql, /update public\.programme_editions\s*\n\s*set withheld_reason = null/,
+    'existing latched editions must be released');
 });

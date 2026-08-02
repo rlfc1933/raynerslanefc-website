@@ -24,7 +24,20 @@ alter table public.programme_editions
   -- timer must never quietly manufacture a history the club never had.
   add column if not exists retrospective_authorised_by text,
   add column if not exists retrospective_authorised_at timestamptz,
-  add column if not exists retrospective_note text;
+  add column if not exists retrospective_note text,
+  -- WHO stopped this edition. Set only by a person.
+  --
+  -- decide() used to treat withheld_reason as "a human said no" — but the sync
+  -- writes that field whenever it withholds for an ordinary technical reason.
+  -- The first automatic withhold therefore latched the edition shut for ever.
+  -- A machine's reason for waiting is not a person's decision to stop.
+  add column if not exists withheld_by text;
+
+-- Clear the latch on any edition an automatic run shut. Nothing here was ever
+-- stopped by a person, so nothing loses a human decision.
+update public.programme_editions
+   set withheld_reason = null
+ where withheld_reason is not null;
 
 -- The two new states.
 alter table public.programme_editions

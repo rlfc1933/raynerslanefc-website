@@ -162,9 +162,19 @@ function decide(input) {
 
   if (!fixture) return { state: STATES.WITHHELD, canPublish: false, reasons: ['no fixture'] };
 
-  // A human has deliberately stopped it. That outranks everything.
-  if (edition.withheld_reason) {
-    return { state: STATES.WITHHELD, canPublish: false, reasons: ['withheld: ' + edition.withheld_reason] };
+  /* A human has deliberately stopped it. That outranks everything.
+     Keyed on WHO withheld it, not on the reason text.
+     This used to read `edition.withheld_reason` — the same field the sync
+     writes whenever it withholds for an ordinary technical reason. So the
+     first automatic withhold latched the edition shut for ever: every later
+     run saw the field, returned here, wrote the reason back with another
+     "withheld: " in front of it, and never re-evaluated. The Wallingford
+     edition had four of those prefixes stacked up.
+     A machine's reason for waiting is not a person's decision to stop. */
+  if (edition.withheld_by) {
+    return { state: STATES.WITHHELD, canPublish: false,
+      reasons: ['withheld by ' + edition.withheld_by +
+        (edition.withheld_reason ? ': ' + edition.withheld_reason : '')] };
   }
   if (BLOCKED_FIXTURE_STATUS.indexOf(fixture.fixture_status) !== -1) {
     return { state: STATES.WITHHELD, canPublish: false, reasons: ['fixture is ' + fixture.fixture_status] };
