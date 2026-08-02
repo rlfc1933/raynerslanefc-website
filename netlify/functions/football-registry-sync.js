@@ -71,6 +71,38 @@ async function invoke(mod, query) {
 }
 
 /**
+ * How long since a given sync last SUCCEEDED, in minutes.
+ *
+ * The timer fires every twenty minutes because line-ups and player records
+ * need it. The fixture list and the league table do not — the list changes
+ * when the league reschedules something and the table changes after results.
+ * Asking a provider for them seventy-two times a day would be neither
+ * necessary nor courteous, and this club errs on the lighter side by policy.
+ */
+async function minutesSinceOk(syncType) {
+  const rows = await S.rest('football_sync_runs?sync_type=eq.' + encodeURIComponent(syncType) +
+    '&status=eq.ok&select=completed_at,started_at&order=started_at.desc&limit=1') || [];
+  const r = rows[0];
+  if (!r) return Infinity;
+  const t = Date.parse(r.completed_at || r.started_at);
+  return isFinite(t) ? (Date.now() - t) / 60000 : Infinity;
+}
+
+/** Is a match on today, at the ground's own reckoning of "today"? */
+async function isMatchday() {
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const rows = await S.rest('football_fixtures?season=eq.' + encodeURIComponent(SEASON) +
+    '&select=scheduled_kickoff_at') || [];
+  return rows.some((f) => {
+    if (!f.scheduled_kickoff_at) return false;
+    const d = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
+      year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(f.scheduled_kickoff_at));
+    return d === today;
+  });
+}
+
+/**
  * Played fixtures whose line-ups were never ingested.
  *
  * Bounded to a handful per run on purpose: each one is a provider request and a
@@ -99,13 +131,23 @@ exports.handler = async function () {
   const startedAt = Date.now();
   const steps = [];
 
+  // On a matchday the league moves things and results land, so both are worth
+  // asking for hourly. On a Wednesday in February they are not.
+  const matchday = await isMatchday().catch(() => true);
+  const EVERY = matchday ? 55 : 355;   // minutes: hourly, or six-hourly
+
   steps.push(await step('season', async () => {
+    const age = await minutesSinceOk('season');
+    if (age < EVERY) return { skipped: true, lastSuccessMinutes: Math.round(age), matchday };
     const season = require('./football-sync-season');
     const out = await invoke(season);
-    return { fixtures: out.fixturesWritten, conflicts: (out.conflicts || []).length };
+    return { fixtures: out.fixturesWritten, preserved: out.fieldsPreserved,
+      conflicts: (out.conflicts || []).length };
   }));
 
   steps.push(await step('table', async () => {
+    const age = await minutesSinceOk('table');
+    if (age < EVERY) return { skipped: true, lastSuccessMinutes: Math.round(age), matchday };
     const table = require('./football-sync-table');
     const out = await invoke(table);
     return { rows: out.rows || out.written || null };
@@ -139,6 +181,7 @@ exports.handler = async function () {
     season: SEASON,
     ms: Date.now() - startedAt,
     steps: steps,
+    matchday: matchday,
     // Said plainly: a partial run is not a failed run, and the next one retries.
     note: failed.length ? failed.length + ' of ' + steps.length + ' steps failed; the rest completed' : null,
   });

@@ -127,3 +127,29 @@ test('a step that failed is reported as failed, not as green', () => {
   // And one fixture failing must not abandon the rest of them.
   assert.match(src, /catch \(e\) \{ err = String/);
 });
+
+test('the timer does not ask the provider more often than it needs to', () => {
+  // It fires every twenty minutes because line-ups and player records need it.
+  // The fixture list and the league table do not — seventy-two requests a day
+  // for a list that changes weekly is neither necessary nor courteous, and
+  // this club errs on the lighter side by policy.
+  const src = R('netlify/functions/football-registry-sync.js');
+  assert.match(src, /async function minutesSinceOk\(syncType\)/);
+  assert.match(src, /const EVERY = matchday \? 55 : 355/,
+    'hourly on a matchday, six-hourly otherwise');
+  ['season', 'table'].forEach((s) => {
+    const re = new RegExp("step\\('" + s + "'[\\s\\S]{0,400}?if \\(age < EVERY\\) return \\{ skipped: true");
+    assert.match(src, re, s + ' does not check its own freshness first');
+  });
+  // The player recompute is NOT gated: it makes no provider request at all.
+  const players = src.slice(src.indexOf("step('players'"));
+  assert.ok(!/age < EVERY/.test(players.slice(0, 400)),
+    'recomputing costs the provider nothing and should run every time');
+});
+
+test('matchday is decided at the ground, not in the visitor\'s timezone', () => {
+  const src = R('netlify/functions/football-registry-sync.js');
+  assert.match(src, /timeZone: 'Europe\/London'/);
+  assert.match(src, /isMatchday\(\)\.catch\(\(\) => true\)/,
+    'if we cannot tell what day it is, assume the busier schedule');
+});
