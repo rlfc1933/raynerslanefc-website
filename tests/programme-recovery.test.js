@@ -593,3 +593,19 @@ test('the whole codebase agrees on that', () => {
   walk(ROOT, '');
   assert.deepStrictEqual(offenders, [], 'quoted values inside PostgREST in() filters');
 });
+
+test('EVERY EDITION HAS ITS OWN CANONICAL URL', () => {
+  // programme.html ships a static canonical pointing at itself, so every
+  // edition in the archive claimed the same URL. A search engine would see one
+  // page rather than a collection, and the club's back catalogue would be
+  // invisible no matter how many editions it contained.
+  const fs = require('fs');
+  const path = require('path');
+  const s = fs.readFileSync(path.join(__dirname, '..', 'js/programme-reader.js'), 'utf8');
+  assert.match(s, /function setCanonical\(fixtureId\)/);
+  assert.match(s, /programme\.html\?id=' \+ encodeURIComponent\(fixtureId\)/);
+  assert.match(s, /setCanonical\(\(d\.edition \|\| \{\}\)\.fixtureId\)/,
+    'it must be set from the edition actually rendered');
+  // og:url must move with it or the share card points at the wrong edition.
+  assert.match(s, /meta\[property="og:url"\]/);
+});

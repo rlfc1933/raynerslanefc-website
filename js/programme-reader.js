@@ -194,9 +194,28 @@
       }).join('') + '</nav>';
   }
 
+  /* One canonical URL PER EDITION.
+     programme.html ships a static canonical pointing at itself, so every
+     edition in the archive claimed the same URL — a search engine would see one
+     page, not a collection, and the club's back catalogue would be invisible. */
+  function setCanonical(fixtureId) {
+    if (!fixtureId) return;
+    var href = 'https://raynerslanefc.co.uk/programme.html?id=' + encodeURIComponent(fixtureId);
+    var link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', href);
+    var og = document.querySelector('meta[property="og:url"]');
+    if (og) og.setAttribute('content', href);
+  }
+
   function render(d) {
     var p = d.programme || {};
     var s = p.sections || {};
+    setCanonical((d.edition || {}).fixtureId);
     var cover = s.cover || {};
     var ed = d.edition || {};
     var preview = !!d.preview;
