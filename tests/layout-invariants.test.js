@@ -77,7 +77,9 @@ test('PRIORITY NAVIGATION: every hidden link is still reachable', () => {
 
   // Tiers 2+ are hidden by default and revealed at measured widths.
   assert.match(css, /\.nav__link--t2,\.nav__link--t3,\.nav__link--t4,\.nav__link--t5\{display:none\}/);
-  [1150, 1400, 1650, 1900].forEach((w) => {
+  // The measured breakpoints. They moved once already, when the first set was
+  // found to clip "Fan Zone" to "FA" — estimates, corrected by measurement.
+  [1180, 1320, 1560].forEach((w) => {
     assert.ok(css.includes('@media(min-width:' + w + 'px)'), 'missing tier breakpoint ' + w);
   });
 
@@ -156,4 +158,37 @@ test('the menu meets the keyboard contract', () => {
   // And it traps Tab while open.
   assert.match(s, /e\.key === 'Tab'/);
   assert.match(s, /shiftKey && document\.activeElement === first/);
+});
+
+/* ── controls must be reachable, not merely present ───────────────────────── */
+
+test('NO NAV LINK IS EVER CLIPPED MID-WORD', () => {
+  // A link cut to "FA" reads as broken software. It is worse than the same
+  // link simply living in the menu. The breakpoints were measured, not
+  // estimated: at each one the row was checked for a clipped child.
+  const css = R('css/style.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  [1180, 1320, 1560].forEach((w) => {
+    assert.ok(css.includes('@media(min-width:' + w + 'px)'), 'missing measured breakpoint ' + w);
+  });
+  // Tier 5 needs 1190px of row and the row tops out at 996px, so it can never
+  // appear in the bar at any width.
+  assert.ok(!/\.nav__link--t5\{display:inline-block\}/.test(css),
+    'tier 5 cannot fit on any screen and must stay in the menu');
+  // The nav container must be allowed to use a large screen.
+  assert.match(css, /\.nav__i\{max-width:min\(1600px,100%\)/);
+});
+
+test('the accessibility button does not cover the consent buttons', () => {
+  // The launcher is fixed bottom-left at z-index 90000; the cookie banner sits
+  // at 10000. The launcher was therefore ON TOP of Accept — a consent control
+  // partly covered by another control, which is the one place on the site
+  // where that must never happen.
+  const css = R('css/a11y.css');
+  assert.match(css, /body\.has-cookie-banner \.a11y-fab/,
+    'the launcher must move clear while the banner is up');
+  assert.match(css, /body\.has-cookie-banner \.a11y-panel/);
+  const comp = R('js/components.js');
+  assert.match(comp, /classList\.add\('has-cookie-banner'\)/);
+  assert.match(comp, /classList\.remove\('has-cookie-banner'\)/,
+    'and must move back when the banner goes');
 });

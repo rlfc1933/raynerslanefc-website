@@ -857,3 +857,80 @@ The tests added by this incident assert the opposite thing: not "is there a
 path" but "is the real path being taken" — every active club has a crest, the
 publication filter matches a real published row, every column the sync writes
 exists and accepts the value it is given.
+
+---
+
+## Closeout
+
+### The site fitted no screen it was ever shown on
+
+Fourteen navigation links, all `white-space: nowrap`, need 1384px of row on
+their own. With the badge and the two action buttons that is about 1950px — so
+the bar overflowed the page by **533px at 1440** and **293px even at 1920**. It
+had been that way since the fourteenth link was added.
+
+Nobody saw it because `body { overflow-x: hidden }` was **clipping** it. That is
+not a fixed layout, it is an invisible one: the Fixtures button and part of the
+menu were unreachable rather than merely off to one side.
+
+Every overflow found was the same defect in four costumes — a child that cannot
+shrink below its content width:
+
+| Where | Why |
+|---|---|
+| `.nav__links` | flex child, `min-width: auto` → 1384px row |
+| `.bnav__item` | flex child, `min-width: auto` → 506px bar in a 375px phone |
+| `#cookie-banner` | text block pinned at `min-width: 200px` |
+| `minmax(310px,1fr)` | a HARD grid floor → 310px track in a 272px container |
+
+26 track floors across 16 files are now `minmax(min(Npx,100%),1fr)`: the same
+layout wherever it fits, giving way only where it genuinely cannot.
+
+### What measurement caught that reasoning did not
+
+The first set of tier breakpoints was **estimated** and clipped "Fan Zone" to
+"FA" at 1440. Measuring showed why: `.nav__i` was capped at 1340px, which capped
+the link row at **728px** regardless of screen width — so tiers designed to
+appear at 1650px could never fit. The container now uses `min(1600px, 100%)`,
+the breakpoints are measured, and tier 5 never appears in the bar at all
+because its four links need 1190px and the row tops out at 996px.
+
+A link clipped mid-word reads as broken software. It is worse than the same link
+living in the menu.
+
+### Two things the screenshots caught
+
+The **menu was `display: none` above 900px** — correct while it was mobile-only,
+and a serious regression the moment nine routes moved into it. On a laptop the ☰
+would have opened nothing.
+
+The **accessibility launcher sat on top of the cookie Accept button**. A consent
+control partly covered by another control is the one place on a site where that
+must never happen.
+
+### Legal footer — the actual answer
+
+FA *27 — Standardised Rules* (FA Handbook 2025-26), checked 2 August 2026,
+"mandatory … at Steps 1 to 6 inclusive". Rayners Lane are Step 5.
+
+**Rule 2.15** requires the club's legal name, form and any identifier to appear
+*"within the Club's official matchday programme"*. A real requirement, never met.
+
+**Rule 8.14** requires the programme to exist, says a team sheet is not enough,
+allows electronic-only **only with Board approval obtained before the season**,
+requires the visiting club's squad details to be carried, and a copy to the
+Competition Secretary within three days.
+
+Two deliberate absences. **No disclaimer**, because Rule 8.14 states clubs are
+responsible for their programme's comments *"notwithstanding any disclaimers to
+the contrary"* — printing one would mislead rather than protect. **No legal
+form**, because the club has never published one; "unincorporated association"
+would very likely be right, and a very likely guess printed as a legal statement
+is exactly what this project does not do.
+
+### Smoke checks that test the outcome
+
+Hundreds of tests were green while every crest was missing and the programme
+engine had never published anything, because they asserted a fallback *existed*.
+`tools/smoke.js` and `tools/viewport-check.js` check a running site and take a
+URL, so they run against a preview before a release and not only after one.

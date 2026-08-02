@@ -196,11 +196,13 @@ function acceptCookies() {
   localStorage.setItem('rlfc_cookies_accepted', '1');
   var b = document.getElementById('cookie-banner');
   if (b) b.remove();
+  document.body.classList.remove('has-cookie-banner');
 }
 function declineCookies() {
   localStorage.setItem('rlfc_cookies_accepted', '0');
   var b = document.getElementById('cookie-banner');
   if (b) b.remove();
+  document.body.classList.remove('has-cookie-banner');
 }
 
 // ── GOOGLE ANALYTICS 4 ──────────────────
@@ -262,14 +264,14 @@ function buildNav(currentPage) {
     { label:'Home',        href:'index.html',       tier:1 },
     { label:'Fixtures',    href:'fixtures.html',    tier:1 },
     { label:'Match Centre',href:'match-centre.html',tier:1 },
-    { label:'The Squad',   href:'squad.html',       tier:1 },
+    { label:'The Squad',   href:'squad.html',       tier:2 },
     { label:'Programme',   href:'programme.html',   tier:1 },
     { label:'News',        href:'news.html',        tier:2 },
-    { label:'History',     href:'history.html',     tier:2 },
-    { label:'Membership',  href:'membership.html',  tier:3 },
-    { label:'Fan Zone',    href:'fan-zone.html',    tier:3 },
-    { label:'Season Tickets', href:'season-tickets.html', tier:4 },
-    { label:'The Club',    href:'about.html',       tier:4 },
+    { label:'History',     href:'history.html',     tier:3 },
+    { label:'Membership',  href:'membership.html',  tier:4 },
+    { label:'Fan Zone',    href:'fan-zone.html',    tier:4 },
+    { label:'Season Tickets', href:'season-tickets.html', tier:5 },
+    { label:'The Club',    href:'about.html',       tier:5 },
     { label:'Gallery',     href:'gallery.html',     tier:5 },
     { label:'Volunteer',   href:'volunteer.html',   tier:5 },
     { label:'Contact',     href:'contact.html',     tier:5 },
@@ -1007,6 +1009,10 @@ function initComponents(currentPage) {
       '<button onclick="declineCookies()" style="background:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">Decline</button>' +
       '</div>';
     document.body.appendChild(banner);
+    // The accessibility launcher is fixed bottom-left at z-index 90000 and sat
+    // ON TOP of this banner's Accept button — a consent control partly covered
+    // by another control. Flag the banner so the launcher can move clear.
+    document.body.classList.add('has-cookie-banner');
   }
 
 }

@@ -51,6 +51,7 @@ html.a11y-reduce-motion *, html.a11y-reduce-motion *::before, html.a11y-reduce-m
 /* class-based z-index (specificity beats the body>* z-index:1 clamp). */
 .a11y-fab {
   position: fixed; left: 18px; bottom: 18px; z-index: 90000;
+  transition: bottom .2s ease;
   width: 52px; height: 52px; border-radius: 50%;
   background: var(--yellow, #FFD100); color: #0d0d0d;
   border: 2px solid #0d0d0d; box-shadow: 0 8px 24px rgba(0,0,0,.45);
@@ -143,3 +144,17 @@ html.a11y-reduce-motion *, html.a11y-reduce-motion *::before, html.a11y-reduce-m
 }
 /* Nudge the FAB above a WhatsApp button if one is ever configured. */
 .a11y-fab.a11y-fab--raised { bottom: 84px; }
+
+
+/* ── clear of the consent banner ───────────────────────────────────────────
+   The launcher is fixed bottom-left at z-index 90000; the cookie banner is
+   fixed to the bottom at 10000. The launcher therefore sat ON TOP of the
+   Accept button — a consent control partly covered by another control, which
+   is the one place on the site that must never be hard to press.
+   The class is set while the banner exists and removed when it goes. */
+body.has-cookie-banner .a11y-fab   { bottom: 150px; }
+body.has-cookie-banner .a11y-panel { bottom: 212px; }
+@media (min-width: 760px) {
+  body.has-cookie-banner .a11y-fab   { bottom: 96px; }
+  body.has-cookie-banner .a11y-panel { bottom: 158px; }
+}
