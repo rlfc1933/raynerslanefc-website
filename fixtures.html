@@ -196,6 +196,7 @@
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
+<script src="js/football-data.js"></script>
 <script src="js/match-time.js"></script>
 <script src="js/components.js"></script>
 <script>
@@ -246,15 +247,40 @@ async function loadFixturesData() {
       document.getElementById('fx-form').innerHTML = '';
     }
   }
-  // League table — our own branded render from live Wikipedia standings. If the
-  // fetch fails, still show the branded 20-team table (all zeros) rather than an
-  // error, so the tab is never ugly.
+  // League table — our own branded render.
+  //
+  // PRIMARY: the club's own football registry, which takes the table from the
+  // same provider as the match data, validates the season and division, and
+  // stores it as a snapshot.
+  //
+  // FALLBACK: the original Wikipedia reader, kept for rollback during the
+  // migration. Both were compared before this changed and agreed exactly —
+  // Rayners Lane 10th on 1 point after the 3-3 — but an encyclopaedia anyone
+  // may edit is not the competition's own record.
+  //
+  // If both fail, the branded empty table renders rather than an error, so the
+  // tab is never ugly.
+  var rows = [];
   try {
-    var t = await (await fetch('/.netlify/functions/fetch-table')).json();
-    renderFxTable((t && t.table) || []);
-  } catch (e) {
-    renderFxTable([]);
+    var reg = window.RLFCFootball ? await window.RLFCFootball.table() : null;
+    if (reg && reg.table && reg.table.rows && reg.table.rows.length) {
+      rows = reg.table.rows.map(function (r) {
+        return {
+          pos: r.position, team: r.team, pld: r.played, w: r.won, d: r.drawn, l: r.lost,
+          gf: r.goalsFor, ga: r.goalsAgainst,
+          gd: (r.goalDifference > 0 ? '+' : '') + r.goalDifference,
+          pts: r.points, rlfc: r.isUs,
+        };
+      });
+    }
+  } catch (e) { /* fall through to the legacy reader */ }
+  if (!rows.length) {
+    try {
+      var t = await (await fetch('/.netlify/functions/fetch-table')).json();
+      rows = (t && t.table) || [];
+    } catch (e) { rows = []; }
   }
+  renderFxTable(rows);
 }
 
 // Render the full club season schedule (upcoming + results + form) from

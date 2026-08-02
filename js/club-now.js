@@ -296,12 +296,27 @@
   }
 
   function positionData() {
-    // Position appears the instant a table source exists (FWP → window._rlfcTable,
-    // or a future data/table.json). Until then we HIDE the tile — never a fake 0.
+    // The tile reads window._rlfcTable, which NOTHING in the codebase ever
+    // assigned — so the league position has never once appeared on the
+    // homepage. It is now filled from the club's own football registry
+    // (js/football-data.js) as soon as that answers, and the tile still hides
+    // itself rather than showing a fake 0 if it does not.
     var t = window._rlfcTable;
     if (t && (t.position || t.pos)) return { pos: t.position || t.pos, played: t.played };
     return null;
   }
+
+  /* Fill it from the registry, then repaint. Failure is silent and harmless:
+     the tile simply stays hidden, exactly as it does today. */
+  function loadPosition() {
+    if (!global_RLFCFootball()) return Promise.resolve();
+    return window.RLFCFootball.summary().then(function (d) {
+      if (d && d.table && d.table.position) {
+        window._rlfcTable = { position: d.table.position, played: d.table.played };
+      }
+    }).catch(function () {});
+  }
+  function global_RLFCFootball() { return !!(window.RLFCFootball && window.RLFCFootball.summary); }
 
   function resultTile(r, label) {
     return '<div class="cn__tile">' +
@@ -399,7 +414,7 @@
   }
 
   // initial paint — venues + fixtures + live in parallel, then build once
-  Promise.all([loadVenues(), loadFixtures(), readLive().then(function (m) { live = m; })]).then(build);
+  Promise.all([loadVenues(), loadFixtures(), loadPosition(), readLive().then(function (m) { live = m; })]).then(build);
   setInterval(refreshLive, 12000);   // live score / matchday state
   setInterval(refreshData, 60000);   // fixtures / results (rarely changes mid-visit)
 })();
