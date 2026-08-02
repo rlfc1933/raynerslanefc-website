@@ -168,3 +168,26 @@ test('the London wall clock is derived from the instant, never sliced off it', (
   assert.ok(!/String\(f\.kickoffAt\)\.slice\(0, 10\)/.test(s),
     'slicing an ISO string gives the UTC date, which is the wrong day after 11pm BST');
 });
+
+test('THE TWO PAGES CANNOT DISAGREE ABOUT KICK-OFF', () => {
+  // Caught in production: the home page read the registry and said 7.45pm for
+  // the Broadfields game; the fixtures page read the same registry and said
+  // 15:00, because the adapter carried the date across but not the time and the
+  // renderer fell through to a hardcoded default.
+  //
+  // Both adapters must derive the ground's own clock from the instant.
+  ['fixtures.html', 'js/club-now.js'].forEach((f) => {
+    const s = strip(R(f));
+    assert.match(s, /hour: '2-digit', minute: '2-digit', hour12: false/,
+      f + ' does not derive the kick-off time from the instant');
+    assert.match(s, /timeZone: 'Europe\/London'/, f + ' does not use the ground\'s clock');
+  });
+});
+
+test('an unknown kick-off is admitted, not filled in with three o\'clock', () => {
+  const s = strip(R('fixtures.html'));
+  assert.match(s, /return 'Kick-off TBC'/,
+    'a hardcoded 15:00 is a confident claim, and for a Tuesday night game a wrong one');
+  assert.ok(!/\(f\.kickoff \|\| '15:00'\)/.test(s), 'the invented default is still being rendered');
+  assert.ok(!/\(fx\.next\.kickoff \|\| '15:00'\)/.test(s));
+});

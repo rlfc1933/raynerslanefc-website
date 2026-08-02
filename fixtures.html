@@ -221,6 +221,18 @@
 })();
 
 function fxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* The kick-off, or an honest admission. It used to fall back to a hardcoded
+   "15:00", which is a claim — and for a Tuesday night game it was a wrong one
+   printed with total confidence. Where the time is genuinely unknown, say so. */
+function fxKOText(f) {
+  if (f && f.kickoff) return f.kickoff;
+  var ms = (typeof MatchTime !== 'undefined') ? MatchTime.kickoffEpoch(f) : NaN;
+  if (isFinite(ms)) {
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London',
+      hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ms));
+  }
+  return 'Kick-off TBC';
+}
 
 async function loadFixturesData() {
   // Venues first — every card needs the ground/address/coords to render
@@ -458,7 +470,7 @@ function fxCard(f) {
     '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
     '<span class="fxc__ha">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
     fxLock(f) +
-    '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
+    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
     fxVenueBlock(f) +
     foot +
   '</article>';
@@ -471,7 +483,7 @@ function fxHero(f) {
     '<div class="fxc__top" style="justify-content:center;gap:10px"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
     '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
     fxLock(f) +
-    '<div class="fxc__meta">' + ds + ' &middot; ' + (f.kickoff || '15:00') + '</div>' +
+    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + '</div>' +
     fxVenueBlock(f) +
     '<div class="fxh__cd" id="fx-cd"></div>' + fxActs(f) + '</div>';
 }
@@ -592,6 +604,15 @@ function fxFromRegistry(fixtures, results) {
     return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London',
       year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
   }
+  // The kick-off AT THE GROUND. Without this the page fell through to a
+  // hardcoded 15:00 and told supporters three o'clock for a 7.45 kick-off,
+  // while the home page — reading the same registry — said 7.45pm.
+  function londonTime(iso) {
+    var ms = Date.parse(iso);
+    if (!isFinite(ms)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London',
+      hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ms));
+  }
   return fixtures.map(function (f) {
     var s = score[f.id] || null;
     return {
@@ -600,6 +621,7 @@ function fxFromRegistry(fixtures, results) {
       // page that format a day rather than an instant.
       kickoffAt: f.kickoffAt,
       date: londonDate(f.kickoffAt),
+      kickoff: londonTime(f.kickoffAt),
       opponent: f.opponent,
       isHome: f.isHome,
       venue: f.venue,
@@ -704,7 +726,7 @@ function renderFxResults(fx) {
     var ds = d ? d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
     nextEl.innerHTML = '<div class="fx-next"><span class="fx-next__lbl">Next Match</span>' +
       '<div class="fx-next__teams">' + fxEsc(fx.next.isHome ? ('Rayners Lane vs ' + fx.next.opponent) : (fx.next.opponent + ' vs Rayners Lane')) + '</div>' +
-      '<div class="fx-next__meta">' + ds + ' &middot; ' + (fx.next.kickoff || '15:00') + (fx.next.isHome ? ' &middot; Tithe Farm' : '') + '</div></div>';
+      '<div class="fx-next__meta">' + ds + ' &middot; ' + fxKOText(fx.next) + (fx.next.isHome ? ' &middot; Tithe Farm' : '') + '</div></div>';
   }
   if (!fx.results || !fx.results.length) {
     resEl.innerHTML = '<div class="fx-empty">No results yet this season — the 2026-27 fixtures are released soon.</div>';
