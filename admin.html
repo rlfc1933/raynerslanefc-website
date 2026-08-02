@@ -2153,6 +2153,9 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <p><strong style="color:var(--w)">The people who support us.</strong> Fan Zone members, how they found us, and whether the club is hearing about them. Treat this like somebody&rsquo;s address book, not a marketing list &mdash; it is deliberately not a record of everything they do on the site.</p>
       </div>
 
+      <div class="slbl">WhatsApp supporter launch</div>
+      <div id="sup-whatsapp" style="margin-bottom:18px">Loading&hellip;</div>
+
       <div class="slbl">Fan Zone health</div>
       <div id="sup-health" style="margin-bottom:18px">Loading&hellip;</div>
 
@@ -2164,6 +2167,17 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
         <div class="field"><label class="fl">Name, email or Lane number (exact)</label><input type="text" id="sup-q" placeholder="1042 or sam@example.com"></div>
         <div class="field" style="display:flex;align-items:flex-end"><button class="btn" onclick="supSearch()">Search</button></div>
       </div>
+      <div class="field"><label class="fl">Filter</label>
+        <select id="sup-filter" onchange="supInit()">
+          <option value="">Everyone</option>
+          <option value="week">Joined this week</option>
+          <option value="month">Joined this month</option>
+          <option value="programme">Joined through a programme</option>
+          <option value="mobile">Has given a mobile number</option>
+          <option value="wa_in">Opted in to WhatsApp</option>
+          <option value="wa_out">Withdrew WhatsApp permission</option>
+          <option value="incomplete">Profile incomplete</option>
+        </select></div>
       <div id="sup-results" style="margin-bottom:18px"></div>
 
       <div class="slbl">Latest members</div>
@@ -10752,14 +10766,57 @@ function toast(msg, err) {
         '<div style="color:var(--gr);font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
           e(m.email) + ' · joined ' + e(when(m.joinedAt)) + ' · ' + how(m.source, m.fixtureId) +
           (m.marketing === 'in' ? ' · emails on' : m.marketing === 'out' ? ' · emails off' : '') +
+          (m.mobile && m.mobile !== 'not_provided' ? ' · mobile given' : '') +
+          (m.whatsapp === 'in' ? ' · WhatsApp yes' : m.whatsapp === 'withdrawn' ? ' · WhatsApp withdrawn' : '') +
         '</div>' +
       '</div>' +
       '<button class="btn" style="flex-shrink:0;padding:7px 12px;font-size:11px" onclick="supView(' +
         Number(m.id) + ')">View</button></div>';
   }
 
+  function pct(n, t) { return Math.max(0, Math.min(100, Math.round((n / t) * 100))); }
+
+  async function whatsapp() {
+    var el = document.getElementById('sup-whatsapp');
+    if (!el) return;
+    var j = await api('summary');
+    var w = (j && j.ok && j.summary && j.summary.whatsapp) || { eligible: 0, target: 50, status: '' };
+    var p = pct(w.eligible, w.target || 50);
+    var colour = w.ready ? '#22C55E' : w.eligible >= 40 ? '#FFD100' : '#60A5FA';
+    el.innerHTML = '<div style="border:1px solid var(--bd);border-radius:10px;padding:16px">' +
+      '<div style="font-size:30px;font-weight:800;color:' + colour + ';line-height:1.1">' +
+        e(w.eligible) + ' <span style="font-size:15px;color:var(--gr);font-weight:600">of ' +
+        e(w.target) + ' opted-in supporters</span></div>' +
+      '<div style="height:8px;background:#222;border-radius:99px;margin:12px 0 8px;overflow:hidden">' +
+        '<div style="height:100%;width:' + p + '%;background:' + colour + '"></div></div>' +
+      '<div style="color:var(--gr);font-size:13px">' + e(w.status) + '</div>' +
+      '<p style="color:var(--gr);font-size:12px;margin:10px 0 0;line-height:1.5">' +
+        'Counts only supporters who are active members, gave a usable mobile number and ' +
+        'currently give WhatsApp permission &mdash; not everyone whose number we hold. ' +
+        'Nothing is sent and no group exists.</p>' +
+      (w.ready ? '<p style="margin:12px 0 0"><button class="btn" onclick="supExport()">' +
+        'Export opted-in supporters</button></p>' : '') +
+    '</div>';
+  }
+
+  window.supExport = async function () {
+    var who = prompt('Your name, for the export record:');
+    if (!who) return;
+    var why = prompt('Why is this export needed? (recorded)');
+    if (!why || why.trim().length < 3) return;
+    var j = await api('export', { author: who, reason: why });
+    if (!j || !j.ok) { if (typeof toast === 'function') toast((j && j.error) || 'Export refused'); return; }
+    var blob = new Blob([j.csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'fanzone-whatsapp-optin.csv';
+    a.click();
+    if (typeof toast === 'function') toast('Exported ' + j.rows + ' supporter(s) — recorded in the audit.');
+  };
+
   window.supInit = async function () {
     health();
+    whatsapp();
     var sum = document.getElementById('sup-summary');
     var latest = document.getElementById('sup-latest');
     try {
@@ -10776,6 +10833,10 @@ function toast(msg, err) {
         stat(s2.matchCheckIns, 'Match check-ins') +
         stat(s2.marketingOptedIn, 'Happy to hear from us') +
         stat(s2.marketingNotOptedIn, 'Prefer no emails') +
+        stat(s2.membersWithMobile, 'Gave a mobile number') +
+        stat(s2.whatsappOptedIn, 'WhatsApp opted in') +
+        stat(s2.whatsappWithdrawn, 'WhatsApp withdrawn') +
+        stat(s2.incompleteProfiles, 'Profile incomplete') +
         (s2.awaitingIdentityLink ? stat(s2.awaitingIdentityLink, 'Awaiting identity check') : '') +
         (s2.notificationsFailed ? stat(s2.notificationsFailed, 'Notifications failed') : '');
 
@@ -10788,6 +10849,7 @@ function toast(msg, err) {
           }).join('') + '</div>';
       }
 
+      // An empty list and a broken endpoint look identical unless we say which.
       latest.innerHTML = (j.latest && j.latest.length)
         ? j.latest.map(memberRow).join('')
         : '<p style="color:var(--gr)">No Fan Zone members yet. They appear here the moment somebody joins.</p>';
@@ -10845,9 +10907,43 @@ function toast(msg, err) {
           }).join('') + '</div>' : '') +
       (m.identityReview ? '<div style="margin-top:12px;color:#F59E0B;font-size:12.5px">' +
         'Waiting for somebody to confirm which Lane Card is theirs: ' + e(m.identityReview.reason) + '</div>' : '') +
+      (m.contact ? line('Mobile', m.contact.status === 'not_provided' ? 'Not given'
+        : m.contact.masked + ' (' + m.contact.status.replace(/_/g, ' ') + ')') : '') +
+      (m.contact && m.contact.sharedWithOtherMembers
+        ? '<div style="color:#F59E0B;font-size:12.5px;padding:6px 0">This number is also on ' +
+          e(m.contact.sharedWithOtherMembers) + ' other record(s). Families share phones — ' +
+          'check before assuming these are the same person. Nothing has been merged.</div>' : '') +
+      (m.whatsapp ? line('WhatsApp', m.whatsapp.suppressed ? 'Suppressed'
+        : m.whatsapp.optedIn ? 'Yes — ' + when(m.whatsapp.consentedAt)
+        : m.whatsapp.withdrawnAt ? 'Withdrawn ' + when(m.whatsapp.withdrawnAt) : 'No') : '') +
+      ((m.interests || []).length ? line('Interests',
+        m.interests.map(function (i) { return i.replace(/_/g, ' '); }).join(', ')) : '') +
+      '<div style="margin-top:16px"><div class="fl">Club notes</div>' +
+        '<p style="color:var(--gr);font-size:12px;margin:0 0 8px;line-height:1.5">' +
+          'Only record information that helps the club support its relationship with this member.</p>' +
+        ((m.staffNotes || []).map(function (n) {
+          return '<div style="padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px">' +
+            '<div style="color:var(--w);font-size:13px">' + e(n.body) + '</div>' +
+            '<div style="color:var(--gr);font-size:11.5px;margin-top:4px">' + e(n.author) + ' · ' +
+            e(when(n.createdAt)) + (n.wasEdited ? ' · edited' : '') + '</div></div>';
+        }).join('') || '<p style="color:var(--gr);font-size:13px">No notes.</p>') +
+        '<div class="row2" style="margin-top:8px">' +
+          '<div class="field"><input type="text" id="sup-note-author" placeholder="Your name"></div>' +
+          '<div class="field"><input type="text" id="sup-note-body" placeholder="e.g. Interested in volunteering"></div>' +
+        '</div>' +
+        '<button class="btn" onclick="supNote(' + Number(m.id) + ')">Add note</button>' +
+      '</div>' +
       '<p style="color:var(--gr);font-size:12px;margin-top:14px">This is everything the club holds about them. ' +
       'There is no record of what they clicked or how long they read for.</p>' +
     '</div>';
+  };
+
+  window.supNote = async function (id) {
+    var author = (document.getElementById('sup-note-author') || {}).value || '';
+    var body = (document.getElementById('sup-note-body') || {}).value || '';
+    var j = await api('note', { id: id, author: author, body: body });
+    if (typeof toast === 'function') toast(j && j.ok ? 'Note added' : ((j && j.error) || 'Could not add'));
+    if (j && j.ok) window.supView(id);
   };
 
   window.supNotes = async function () {
