@@ -326,3 +326,16 @@ test('health looks at the teams a fixture or table row actually uses', () => {
   assert.match(s, /home_team_id,away_team_id/, 'it must select the ids it then reads');
   assert.match(s, /football_league_table_rows\?select=team_id/);
 });
+
+test('AN EDITION CAN NEVER BE PUBLISHED WITH A BLANK COVER', () => {
+  // The reader is snapshot-only by design, so whatever artwork an edition is
+  // published with is what it shows for ever. If crest_asset_path were still
+  // null at publication, that cover would carry two grey letters permanently.
+  const s = strip(R('netlify/functions/programme-sync.js'));
+  assert.match(s, /CRESTS\.library\(\)/, 'the sync must resolve artwork before generating');
+  assert.match(s, /CRESTS\.patchFor\(t\.crest_asset_path, t\.canonical_name\)\.keep/,
+    'and must never overwrite a crest the registry already holds');
+  // Resolved BEFORE the snapshot is built, not after.
+  assert.ok(s.indexOf('CRESTS.library()') < s.indexOf('return {\n    homeTeam'),
+    'artwork must be settled before the context is returned');
+});

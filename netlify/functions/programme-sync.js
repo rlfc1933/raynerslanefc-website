@@ -14,6 +14,7 @@ const READ = require('./lib/football/read');
 const RULES = require('./lib/programme/publish-rules');
 const GEN = require('./lib/programme/generate');
 const F = require('./lib/fwp');
+const CRESTS = require('./lib/football/crests');
 
 const SEASON = process.env.FWP_SEASON || '2026-2027';
 const SITE = process.env.SITE_ORIGIN || 'https://raynerslanefc.co.uk';
@@ -44,6 +45,31 @@ async function loadJson(path) {
 async function buildContext(fx, teams, comps) {
   const home = teams[fx.home_team_id] || {};
   const away = teams[fx.away_team_id] || {};
+
+  /* ── artwork, captured WITH the edition ─────────────────────────────────
+     A programme version is immutable, so its crests must be baked in at
+     publication. The reader deliberately does not resolve anything at read
+     time — an archived edition reaching for a current asset would rewrite the
+     past — which means an edition published while crest_asset_path was still
+     null would show two grey letters on its cover for ever.
+
+     So the artwork is resolved here, and written back to the registry, before
+     anything is generated. Never overwrites a crest the registry already has. */
+  try {
+    const lib = await CRESTS.library();
+    for (const t of [home, away]) {
+      if (!t || !t.id) continue;
+      if (CRESTS.patchFor(t.crest_asset_path, t.canonical_name).keep) continue;
+      const file = CRESTS.forName(lib, t.canonical_name);
+      if (!file) continue;
+      t.crest_asset_path = file;
+      await S.rest('football_teams?id=eq.' + t.id, {
+        method: 'PATCH', body: { crest_asset_path: file },
+        headers: { Prefer: 'return=minimal' },
+      }).catch(() => null);
+    }
+  } catch (e) { /* the cover falls back to its designed shield */ }
+
   const comp = comps[fx.competition_id] || {};
   const [committee, sponsors, table, results, seasonList] = await Promise.all([
     loadJson('committee'), loadJson('sponsors'),
