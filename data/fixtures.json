@@ -27,9 +27,9 @@
       "isHome": false,
       "venue": "Tithe Farm Sports & Social Club",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
+      "status": "played",
+      "us": 0,
+      "them": 0,
       "scorers": "",
       "shareHeadline": "THE AWAY DAY THAT ISN'T",
       "shareHeadlineAuto": "THE AWAY DAY THAT ISN'T",
@@ -721,5 +721,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-08-01T16:42:08.027Z"
+  "updatedAt": "2026-08-04T20:41:09.469Z"
 }
