@@ -336,11 +336,13 @@
   }
 
   var lastState = null;
+  var lastFixture = null;   // needed to know when kick-off arrives
   function load() {
     var id = qs('id');
     if (id) {
       return fetchFixture(id).then(function (d) {
         if (!d || !d.ok) { empty('That match could not be found', 'It may have been rescheduled. The full season is on the fixtures page.'); return; }
+        lastFixture = d.fixture;
         lastState = render(d.fixture);
       });
     }
@@ -352,6 +354,7 @@
       if (!pick) { empty('No match to show'); return; }
       return fetchFixture(pick.id).then(function (d) {
         if (!d || !d.ok) { empty('No match to show'); return; }
+        lastFixture = d.fixture;
         lastState = render(d.fixture);
       });
     }).catch(function () { empty('Match information is temporarily unavailable'); });
@@ -380,7 +383,28 @@
     // Only a live or stalled match needs re-reading. A finished match is
     // finished — repolling it forever is noise.
     poll = setInterval(function () {
-      if (lastState && (lastState.state === 'live' || lastState.state === 'delayed' || lastState.state === 'awaiting')) load();
+      if (!lastState) return;
+      var s = lastState.state;
+
+      // Already in play: keep asking.
+      if (s === 'live' || s === 'delayed' || s === 'awaiting') { load(); return; }
+
+      /* UPCOMING, and kick-off has arrived.
+
+         This was the match-day bug. The countdown ticks to zero, prints
+         "KICK OFF" and stops its own timer — and the poll only ran when the
+         state was ALREADY live. But the state only becomes 'awaiting' inside
+         temporal(), which only runs inside render(), which only runs inside
+         load(). Nothing could ever call load(), so a supporter who opened the
+         page before kick-off sat on "KICK OFF" until they refreshed by hand.
+
+         Asking from a minute before kick-off closes the loop, and costs one
+         request every fifteen seconds for the few minutes until the provider
+         reports the match as live. */
+      if (s === 'upcoming' && lastFixture && lastFixture.kickoffAt) {
+        var ko = Date.parse(lastFixture.kickoffAt);
+        if (isFinite(ko) && Date.now() >= ko - 60000) load();
+      }
     }, 15000);
   });
 
