@@ -18,6 +18,13 @@ Disallow: /staff-guide.html
 Disallow: /playermanager1933.html
 Disallow: /scan.html
 Disallow: /programme-print.html
+# The account setup page, and the staff guides it leads to. Nothing here is
+# secret — the guides are instructions, not credentials — but they are written
+# for seven volunteers, not for search results, and indexing them would put the
+# club's internal wording in front of people it was never written for.
+Disallow: /staff-setup.html
+Disallow: /guide.html
+Disallow: /docs/
 
 # ── AI crawlers and answer engines: explicitly welcome ──
 # Listed individually and on purpose. Several of these treat "no rule" as "no

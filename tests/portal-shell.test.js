@@ -40,8 +40,13 @@ test('every panel is represented in the navigation registry', () => {
 test('the Business Playbook is now reachable through normal navigation', () => {
   assert.ok(/id: 'playbook'/.test(tools), 'playbook must be in the registry');
   assert.ok(/Income and Growth Plan/.test(tools), 'with its plain-English name');
-  assert.ok(/area: 'admin'/.test(tools.slice(tools.indexOf("id: 'playbook'"), tools.indexOf("id: 'playbook'") + 400)),
-    'filed under Club Administration');
+  // Grouping moved from a field on the tool to membership of a group's id
+  // list, so that a tool cannot belong to two groups or to none. The thing
+  // being protected is unchanged: the Playbook is filed with the club's
+  // internal records, not left loose.
+  assert.ok(/ids: \[[^\]]*'playbook'/.test(tools), 'playbook must be in a group');
+  assert.ok(/name: 'Reports and Committee'[\s\S]{0,400}'playbook'/.test(tools),
+    'filed under Reports and Committee');
 });
 
 // ── ROUTING, HISTORY AND BOOKMARKS ARE UNCHANGED ───────────────────────────
@@ -87,8 +92,8 @@ test('emergency controls are isolated and explain the consequence first', () => 
   assert.ok(/stored <b>on this device only<\/b>/.test(admin),
     'the localStorage-only rollback history must be disclosed — users assume it is club-wide');
   assert.ok(/danger: true/.test(tools), 'flagged in the registry');
-  assert.ok(/area: 'system'/.test(tools.slice(tools.indexOf("id: 'undo'"), tools.indexOf("id: 'undo'") + 400)),
-    'moved out of Match Days into System');
+  assert.ok(/name: 'System and Recovery'[\s\S]{0,400}'undo'/.test(tools),
+    'moved out of Match Days into System and Recovery');
 });
 
 test('rolling the website back requires a typed confirmation', () => {

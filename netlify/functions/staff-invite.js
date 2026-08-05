@@ -14,9 +14,11 @@ const adminOk = require('./lib/pin');
 const AUTHZ = require('./lib/authz');
 const INV = require('./lib/invitations');
 
-const ASSIGNABLE = ['V Chairman', 'Club Secretary', 'Match Day Secretary',
-  'Club Management', 'Committee', 'Marketing/Media'];
-const ADMIN_PROFILES = ['Chairman'];
+// One list, on the server — see lib/roles.js. Chairman is handled separately
+// below because inviting one is privilege escalation, not an ordinary invite.
+const ROLES = require('./lib/roles');
+const ASSIGNABLE = ROLES.ASSIGNABLE_ROLES;
+const ADMIN_PROFILES = ROLES.ADMIN_ROLES;
 
 function resp(code, obj) {
   return {

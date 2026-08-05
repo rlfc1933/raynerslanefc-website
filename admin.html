@@ -15,6 +15,7 @@
   <!-- Release 1: the attention-led front door. Navigation only — it does not
        touch a single save function, API call or data path. -->
   <script src="js/portal-tools.js"></script>
+  <script src="js/portal-recent.js"></script>
   <script src="js/portal-home.js"></script>
   <script src="js/portal-safety.js"></script>
   <script>
@@ -3122,26 +3123,29 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="row2">
         <div class="field"><label class="fl">Club title</label><input type="text" id="inv-title" placeholder="Secretary"></div>
         <div class="field"><label class="fl">Role profile</label>
-          <select id="inv-profile">
-            <option value="Committee">Committee</option>
-            <option value="Match Day Secretary">Match Day Secretary</option>
-            <option value="Club Secretary">Club Secretary</option>
-            <option value="Club Management">Club Management</option>
-            <option value="Marketing/Media">Marketing/Media</option>
-            <option value="V Chairman">Vice Chairman</option>
-          </select></div>
+          <!-- Filled from PortalTools.PROFILES at open, so the portal can never
+               offer a role the server will refuse. See netlify/functions/lib/roles.js. -->
+          <select id="inv-profile"></select>
+          <div class="snote" style="margin-top:8px"><p>The job, not the person.
+            It decides what their portal opens on and which guide they get
+            &mdash; it does not grant any permission.</p></div></div>
       </div>
       <button class="save" onclick="invCreate()">Create setup link</button>
       <div id="inv-out" style="margin-top:12px"></div>
 
       <div class="slbl" style="margin-top:20px">Invitations</div>
       <div id="inv-list">Loading&hellip;</div>
-      <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> Everyone starts on a shared default password (the box below is pre-filled with it) until you change it here.</p></div>
-      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The shared default password always works in the meantime, so nobody&rsquo;s locked out.</p></div>
+      <div class="snote"><p>Decide who can sign in and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> The normal way to add somebody is the setup link above: they choose their own password, and nobody &mdash; including you &mdash; ever sees it. The box below is a fallback for the case where somebody cannot receive a link at all.</p></div>
+      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. Nobody who can already sign in is locked out while this settles.</p></div>
       <div class="slbl">Add a user</div>
       <div class="field"><label class="fl">Name (what they pick at login)</label><input type="text" id="us-name" placeholder="e.g. Pete Singh"></div>
       <div class="field"><label class="fl">Role</label><select id="us-role"></select></div>
-      <div class="field"><label class="fl">Password</label><input type="text" id="us-pass" value="20raynerslanefc26"></div>
+      <!-- The shared default password used to be pre-filled here, which meant
+           the ordinary way to add somebody was to give them a password the
+           whole committee already knew. It is no longer suggested. Use the
+           setup link above; this box exists only for the case where somebody
+           cannot receive a link at all. -->
+      <div class="field"><label class="fl">Password</label><input type="password" id="us-pass" value="" autocomplete="new-password" placeholder="Leave empty and send a setup link instead"></div>
       <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="us-chair" style="width:16px;height:16px;accent-color:var(--y)"> Chairman powers (can manage users &amp; see the Developer tab)</label>
       <button class="save sec" onclick="addUser()">+ Add user</button>
       <div class="dep" id="dep-users"></div>
@@ -3825,17 +3829,24 @@ async function submitRoleLogin() {
   // function, no-supabase, not-found, junk, offline) → fall back to the shared
   // default password so the committee is never locked out.
   var ok = false, role = picked.role, isChair = picked.isChairman, serverRejected = false;
+  // The person's real name and job title, if the server knows them. They come
+  // ONLY from the server — never from the sign-in screen — so the greeting on
+  // the home page reflects the account, not anything typed in the browser.
+  var sName = null, sTitle = null;
   try {
     var res = await (await fetch('/.netlify/functions/staff-login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: PIN, username: username, password: pass })
     })).json();
-    if (res && typeof res === 'object' && res.ok === true) { ok = true; role = res.role || role; isChair = !!res.isChairman; }
+    if (res && typeof res === 'object' && res.ok === true) {
+      ok = true; role = res.role || role; isChair = !!res.isChairman;
+      sName = res.name || null; sTitle = res.title || null;
+    }
     else if (res && typeof res === 'object' && res.ok === false && res.error === 'wrong-password') { serverRejected = true; }
   } catch (e) {}
   if (!ok && !serverRejected) ok = (pass === STAFF_DEFAULT_PW);
   if (!ok) { document.getElementById('role-err').textContent = 'Wrong password — try again'; setVal('role-pass', ''); return; }
-  try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, at: Date.now() })); } catch (e) {}
+  try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, name: sName, title: sTitle, at: Date.now() })); } catch (e) {}
   // Mint the signed Match Day Ops identity NOW, while the password is still in
   // hand. That is what lets Match Day Ops open in one tap with no second
   // password, while every entry it writes is still attributed server-side.
@@ -3926,9 +3937,28 @@ function saveEmails(msg) {
 }
 
 // ── MANAGE USERS (Chairman) ──
+/** The club's roles, as <option>s. Falls back to the sign-in list if the
+    registry has not loaded, so the panel is never empty. */
+function staffRoleOptions() {
+  var P = window.PortalTools && PortalTools.PROFILES;
+  var keys = P ? Object.keys(P) : STAFF_ROLES.slice();
+  return keys.filter(function (r) {
+    return r !== 'Chairman' || staffIsChairman();
+  }).map(function (r) {
+    var label = (P && P[r] && P[r].title) || r;
+    return '<option value="' + esc(r) + '">' + esc(label) + '</option>';
+  }).join('');
+}
 function initUsers() {
+  // Both role menus come from the one canonical list of club jobs, so the
+  // portal cannot offer a role the server will refuse. Chairman is offered
+  // only to a chairman — the server refuses it either way, but a menu that
+  // shows an option nobody can use is a menu that teaches distrust.
+  var opts = staffRoleOptions();
   var rsel = document.getElementById('us-role');
-  if (rsel) rsel.innerHTML = STAFF_ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('');
+  if (rsel) rsel.innerHTML = opts;
+  var isel = document.getElementById('inv-profile');
+  if (isel && !isel.options.length) isel.innerHTML = opts;
   loadUsers();
   loadStaffLogins();
 }
@@ -3970,7 +4000,11 @@ function renderUsersList(custom) {
 async function addUser() {
   var name = gv('us-name'), role = gv('us-role'), pass = gv('us-pass'), chair = document.getElementById('us-chair').checked;
   if (!name) { toast('Enter a name', true); return; }
-  if (!pass || pass.length < 10) { toast('Password too short (min 10)', true); return; }
+  if (!pass) {
+    toast('Leave this and send a setup link instead — then nobody handles their password', true);
+    return;
+  }
+  if (pass.length < 10) { toast('Password too short (min 10)', true); return; }
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Saving…');
   try {
     // isChairman is NO LONGER SENT. The server derives it from the validated
@@ -3981,7 +4015,7 @@ async function addUser() {
       'Creating a staff login');
     if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
     var j = await _r.json();
-    if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', '20raynerslanefc26'); document.getElementById('us-chair').checked = false; loadUsers(); }
+    if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', ''); document.getElementById('us-chair').checked = false; loadUsers(); }
     else if (j.error === 'no-store') showDep(el, 'err', 'Login store not ready yet — try again in a moment.');
     else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }

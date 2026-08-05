@@ -40,5 +40,15 @@ exports.handler = async function (event) {
   // person would keep signing in and nobody would know.
   if (u.disabled) return resp(200, { ok: false, error: 'account-disabled' });
   if (u.pass_hash !== hash(b.password)) return resp(200, { ok: false, error: 'wrong-password' });
-  return resp(200, { ok: true, role: u.role || b.username, isChairman: !!u.is_chairman });
+  // name and title are returned so the portal can greet a person by name and
+  // show the job they actually hold. Both are optional: accounts created
+  // before invitations existed have neither, and the portal falls back to
+  // "Welcome back" rather than inventing one.
+  return resp(200, {
+    ok: true,
+    role: u.role || b.username,
+    isChairman: !!u.is_chairman,
+    name: u.name || null,
+    title: u.title || null,
+  });
 };

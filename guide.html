@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Guide | Rayners Lane FC</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="img/badge.png">
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<!--
+  THE GUIDES, READ IN THE PORTAL.
+
+  The guides are written as Markdown in docs/guides/ so they can be read,
+  reviewed and corrected in plain text by anyone — including somebody who has
+  never opened the portal. This page renders one of them.
+
+  It is deliberately tiny and has no dependencies. A guide that only renders
+  when a CDN is reachable is not a guide you can rely on at a cold ground with
+  one bar of signal.
+-->
+<style>
+  :root{ --y:#FFD100; --g:#1A5C32; --bg:#080808; --card:#111; --bd:#242424;
+         --w:#F5F3ED; --gr:#8F8F8F; --fd:var(--font-display); --fc:var(--font-body); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--w);font-family:var(--fc);line-height:1.6;
+       -webkit-text-size-adjust:100%}
+  .top{position:sticky;top:0;z-index:5;background:rgba(8,8,8,.94);
+       backdrop-filter:blur(8px);border-bottom:1px solid var(--bd);
+       display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .top img{width:34px;height:34px;border-radius:50%}
+  .top b{font-family:var(--fd);font-size:20px;letter-spacing:1px;font-weight:400}
+  .top a.back{margin-left:auto;color:var(--y);text-decoration:none;font-weight:700;
+              font-size:14px;border:1px solid rgba(255,209,0,.35);border-radius:8px;
+              padding:8px 14px}
+  main{max-width:720px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-family:var(--fd);font-size:clamp(30px,7vw,44px);letter-spacing:1px;
+     font-weight:400;line-height:1.05;margin:8px 0 6px}
+  h2{font-family:var(--fd);font-size:clamp(22px,5vw,28px);letter-spacing:.6px;
+     font-weight:400;margin:34px 0 10px;color:var(--y)}
+  h3{font-size:16px;font-weight:800;margin:22px 0 6px}
+  p{margin:0 0 14px;color:#DEDCD6}
+  ul,ol{margin:0 0 16px 22px}
+  li{margin:0 0 7px;color:#DEDCD6}
+  em{color:var(--gr);font-style:italic}
+  strong{color:var(--w)}
+  hr{border:0;border-top:1px solid var(--bd);margin:28px 0}
+  code{background:#1a1a1a;border:1px solid var(--bd);border-radius:5px;
+       padding:1px 6px;font-size:13px}
+  a{color:var(--y)}
+  .tw{overflow-x:auto;margin:0 0 18px;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;min-width:380px;font-size:14px}
+  th,td{border:1px solid var(--bd);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#151515;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+     color:var(--gr);font-weight:800}
+  .miss{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:20px}
+  .other{margin-top:44px;border-top:1px solid var(--bd);padding-top:20px}
+  .other b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--gr);margin-bottom:10px}
+  .other a{display:block;padding:9px 0;text-decoration:none;border-bottom:1px solid #171717}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img src="img/badge.png" alt="Rayners Lane FC">
+  <b>Your Guide</b>
+  <a class="back" href="admin.html">Back to the portal</a>
+</header>
+
+<main id="doc"><p style="color:var(--gr)">Opening your guide…</p></main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Only these. The name comes from the URL, so it must never be able to reach
+  // for an arbitrary path — a guide reader that will fetch anything is a way to
+  // read anything.
+  var GUIDES = {
+    'how-the-club-portal-works':          'How the club portal works',
+    'pete-singh-chairman':                'Chairman',
+    'nigel-hanlon-vice-chairman':         'Vice Chairman',
+    'jenny-pitt-secretary':               'Secretary',
+    'gary-pitt-team-manager':             'Team Manager',
+    'russell-nugent-programme-sponsors':  'Programme, Sponsorship and Treasury',
+    'darren-nugent-programme-sponsors':   'Programme, Sponsorship and Treasury',
+    'smallz-social-media':                'Social Media'
+  };
+  var SHARED = 'how-the-club-portal-works';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  /* Inline formatting only — bold, italic, code, links. Escaping happens
+     first, so nothing in a guide can introduce markup. */
+  function inline(s) {
+    return esc(s)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+      .replace(/\[([^\]]+)\]\((https?:[^)]+|[\w.\-]+\.md)\)/g, function (m, txt, href) {
+        var g = String(href).replace(/\.md$/, '');
+        if (GUIDES[g]) return '<a href="guide.html#' + g + '">' + txt + '</a>';
+        return /^https?:/.test(href) ? '<a href="' + href + '" rel="noopener">' + txt + '</a>' : txt;
+      });
+  }
+
+  function cells(line) {
+    return line.replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); });
+  }
+
+  /* A deliberately small Markdown subset: exactly what the guides use.
+     Anything else renders as an ordinary paragraph rather than silently
+     disappearing. */
+  function render(md) {
+    var out = [], lines = String(md).replace(/\r/g, '').split('\n');
+    var i = 0;
+    while (i < lines.length) {
+      var l = lines[i];
+
+      if (/^\s*$/.test(l)) { i++; continue; }
+
+      if (/^###\s+/.test(l)) { out.push('<h3>' + inline(l.slice(4)) + '</h3>'); i++; continue; }
+      if (/^##\s+/.test(l))  { out.push('<h2>' + inline(l.slice(3)) + '</h2>'); i++; continue; }
+      if (/^#\s+/.test(l))   { out.push('<h1>' + inline(l.slice(2)) + '</h1>'); i++; continue; }
+      if (/^---+\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
+
+      // Table: a header row, a separator, then rows.
+      if (/^\|/.test(l) && /^\|[\s:|-]+\|?\s*$/.test(lines[i + 1] || '')) {
+        var head = cells(l);
+        i += 2;
+        var body = [];
+        while (i < lines.length && /^\|/.test(lines[i])) { body.push(cells(lines[i])); i++; }
+        out.push('<div class="tw"><table><thead><tr>' +
+          head.map(function (c) { return '<th>' + inline(c) + '</th>'; }).join('') +
+          '</tr></thead><tbody>' +
+          body.map(function (r) {
+            return '<tr>' + r.map(function (c) { return '<td>' + inline(c) + '</td>'; }).join('') + '</tr>';
+          }).join('') + '</tbody></table></div>');
+        continue;
+      }
+
+      if (/^\s*[-*]\s+/.test(l)) {
+        var ul = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          ul.push('<li>' + inline(lines[i].replace(/^\s*[-*]\s+/, '')) + '</li>'); i++;
+        }
+        out.push('<ul>' + ul.join('') + '</ul>');
+        continue;
+      }
+
+      if (/^\s*\d+\.\s+/.test(l)) {
+        var ol = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+          ol.push('<li>' + inline(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>'); i++;
+        }
+        out.push('<ol>' + ol.join('') + '</ol>');
+        continue;
+      }
+
+      // Paragraph — consecutive lines join, the way Markdown expects.
+      var para = [];
+      while (i < lines.length && !/^\s*$/.test(lines[i]) &&
+             !/^(#{1,3}\s|---+\s*$|\||\s*[-*]\s|\s*\d+\.\s)/.test(lines[i])) {
+        para.push(lines[i]); i++;
+      }
+      if (para.length) out.push('<p>' + inline(para.join(' ')) + '</p>');
+      else i++;
+    }
+    return out.join('\n');
+  }
+
+  function otherGuides(current) {
+    var h = '<div class="other"><b>Other guides</b>';
+    Object.keys(GUIDES).forEach(function (k) {
+      if (k === current) return;
+      h += '<a href="guide.html#' + k + '">' + esc(GUIDES[k]) + '</a>';
+    });
+    return h + '</div>';
+  }
+
+  function slug() {
+    var s = String(location.hash || '').replace(/^#/, '').trim();
+    return GUIDES[s] ? s : SHARED;
+  }
+
+  function open() {
+    var name = slug();
+    var el = document.getElementById('doc');
+    document.title = GUIDES[name] + ' | Rayners Lane FC';
+    fetch('docs/guides/' + name + '.md', { cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error('missing'); return r.text(); })
+      .then(function (md) { el.innerHTML = render(md) + otherGuides(name); window.scrollTo(0, 0); })
+      .catch(function () {
+        el.innerHTML = '<div class="miss"><h2 style="margin-top:0">This guide has not loaded</h2>' +
+          '<p>Nothing is broken in the portal — only this page could not fetch the guide. ' +
+          'Try again, and if it keeps happening email <a href="mailto:info@raynerslanefc.co.uk">' +
+          'info@raynerslanefc.co.uk</a>.</p></div>' + otherGuides(name);
+      });
+  }
+
+  window.addEventListener('hashchange', open);
+  open();
+}());
+</script>
+</body>
+</html>

@@ -52,12 +52,17 @@ const CAP = AUTHZ.CAP;
 
 // Roles a caller may assign. Validated against a SERVER-side list — a role
 // string from the body can never introduce a new privilege level.
-const ASSIGNABLE_ROLES = [
-  'Chairman', 'V Chairman', 'Club Secretary', 'Match Day Secretary',
-  'Club Management', 'Committee', 'Marketing/Media',
-];
+//
+// The list itself now lives in lib/roles.js, so the portal, the invitation
+// route and this route cannot drift apart. ASSIGNABLE_ROLES here is every role
+// INCLUDING Chairman, because this route's own escalation check below is what
+// gates Chairman — narrowing the list would turn an explained refusal
+// ("only a chairman-level account can assign that role") into a bare
+// "that is not a role this club uses", which is untrue and unhelpful.
+const ROLES = require('./lib/roles');
+const ASSIGNABLE_ROLES = ROLES.ROLES;
 // Assigning any of these is privilege escalation and needs the strongest right.
-const ADMIN_ROLES = ['Chairman'];
+const ADMIN_ROLES = ROLES.ADMIN_ROLES;
 
 function hash(pw) { return crypto.createHash('sha256').update(String(pw) + ':' + PEPPER).digest('hex'); }
 
