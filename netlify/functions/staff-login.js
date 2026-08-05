@@ -35,6 +35,10 @@ exports.handler = async function (event) {
 
   const u = users[b.username];
   if (!u) return resp(200, { ok: false, error: 'not-found' });
+  // A disabled account is refused BEFORE the password is considered. Without
+  // this, "disable" in Manage Users would be a label with no effect — the
+  // person would keep signing in and nobody would know.
+  if (u.disabled) return resp(200, { ok: false, error: 'account-disabled' });
   if (u.pass_hash !== hash(b.password)) return resp(200, { ok: false, error: 'wrong-password' });
   return resp(200, { ok: true, role: u.role || b.username, isChairman: !!u.is_chairman });
 };

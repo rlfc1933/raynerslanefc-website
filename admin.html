@@ -3702,6 +3702,56 @@ var STAFF_ROLES = ['Club Management', 'Chairman', 'V Chairman', 'Committee', 'Cl
 var STAFF_DEFAULT_PW = '20raynerslanefc26';
 var staffUsers = []; // [{username, role, isChairman}] merged defaults + custom
 
+// ── STAFF ADMINISTRATION: the signed token ────────────────────────────────
+// Managing staff logins now needs proof of WHO is asking, not just the club
+// PIN. md-session mints a signed token after checking the person's own
+// password server-side; the browser cannot forge one. Match Day Ops already
+// stores it under this key, so a user who has signed in there is ready.
+var STAFF_TOKEN_KEY = 'rlfc_md_token';
+function staffToken() { try { return sessionStorage.getItem(STAFF_TOKEN_KEY) || ''; } catch (e) { return ''; } }
+
+/** Ask for the signer's own password and mint a token. Returns '' if declined. */
+async function staffAuthenticate(why) {
+  var s = staffSession() || {};
+  var who = s.username || s.role || '';
+  var pw = prompt((why || 'Managing staff logins') +
+    '\n\nThis needs your own personal staff password' +
+    (who ? ' (' + who + ')' : '') + '.');
+  if (!pw) return '';
+  try {
+    var r = await fetch('/.netlify/functions/md-session', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, username: who, password: pw }),
+    });
+    var j = await r.json();
+    if (j && j.ok && j.token) {
+      try { sessionStorage.setItem(STAFF_TOKEN_KEY, j.token); } catch (e) {}
+      return j.token;
+    }
+    toast(j && j.error === 'account-disabled' ? 'That account has been disabled.'
+      : 'That password was not accepted.', true);
+  } catch (e) { toast('Could not check that password', true); }
+  return '';
+}
+
+/** fetch() for staff administration — carries the signed token, mints one if needed. */
+async function staffAdminFetch(url, opts, why) {
+  var o = opts || {};
+  var tok = staffToken();
+  if (!tok) { tok = await staffAuthenticate(why); if (!tok) return null; }
+  o.headers = Object.assign({}, o.headers || {}, { Authorization: 'Bearer ' + tok });
+  var res = await fetch(url, o);
+  if (res.status === 401) {
+    // Token missing or expired — offer to re-authenticate once.
+    try { sessionStorage.removeItem(STAFF_TOKEN_KEY); } catch (e) {}
+    tok = await staffAuthenticate(why);
+    if (!tok) return null;
+    o.headers.Authorization = 'Bearer ' + tok;
+    res = await fetch(url, o);
+  }
+  return res;
+}
+
 function staffSession() { try { return JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null'); } catch (e) { return null; } }
 function staffIsChairman() { var s = staffSession(); return !!(s && s.isChairman); }
 function staffDefaultUsers() {
@@ -3714,7 +3764,8 @@ function showRoleLogin() {
   // Default roles immediately; merge any custom users from Supabase if available.
   staffUsers = staffDefaultUsers();
   renderRoleOptions();
-  fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN)).then(function (r) { return r.json(); }).then(function (j) {
+  staffAdminFetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN), {}, 'Viewing staff logins')
+    .then(function (r) { return r ? r.json() : null; }).then(function (j) {
     if (j && j.ok && j.users) {
       var merged = staffDefaultUsers().filter(function (d) { return !j.users.some(function (u) { return u.username === d.username; }); });
       staffUsers = j.users.map(function (u) { return { username: u.username, role: u.role || u.username, isChairman: !!u.isChairman || u.role === 'Chairman' }; }).concat(merged);
@@ -3853,7 +3904,8 @@ function initUsers() {
 async function loadUsers() {
   var note = document.getElementById('us-syncnote');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN))).json();
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN), {}, 'Viewing staff logins');
+    var j = _r ? await _r.json() : null;
     if (j && j.ok) { if (note) note.style.display = 'none'; renderUsersList(j.users || []); return; }
     if (note) note.style.display = '';
   } catch (e) { if (note) note.style.display = ''; }
@@ -3887,10 +3939,17 @@ function renderUsersList(custom) {
 async function addUser() {
   var name = gv('us-name'), role = gv('us-role'), pass = gv('us-pass'), chair = document.getElementById('us-chair').checked;
   if (!name) { toast('Enter a name', true); return; }
-  if (!pass || pass.length < 6) { toast('Password too short (min 6)', true); return; }
+  if (!pass || pass.length < 10) { toast('Password too short (min 10)', true); return; }
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Saving…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: role, password: pass, isChairman: chair }) })).json();
+    // isChairman is NO LONGER SENT. The server derives it from the validated
+    // role — sending it was the escalation vulnerability.
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: (chair ? 'Chairman' : role), password: pass }) },
+      'Creating a staff login');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
     if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', '20raynerslanefc26'); document.getElementById('us-chair').checked = false; loadUsers(); }
     else if (j.error === 'no-store') showDep(el, 'err', 'Login store not ready yet — try again in a moment.');
     else showDep(el, 'err', j.error || 'Failed');
@@ -3901,17 +3960,29 @@ async function removeUser(username) {
       'This removes ' + username + '\u2019s login. They will not be able to sign in to the portal again until a new one is created.')) return;
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Removing…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'remove', username: username }) })).json();
+    // DISABLE, not remove. The login stops; the person's history and audit
+    // attribution survive. Permanent deletion is a separate, elevated action.
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'disable', username: username }) },
+      'Disabling a staff login');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
     if (j.ok) { showDep(el, 'ok', 'Removed'); loadUsers(); } else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
 async function setUserPassword(username) {
-  var np = prompt('New password for ' + username + ' (min 6 characters):');
+  var np = prompt('New password for ' + username + ' (min 10 characters):');
   if (np === null) return;
-  if (np.length < 6) { toast('Too short', true); return; }
+  if (np.length < 10) { toast('Too short (min 10)', true); return; }
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Updating…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'setpassword', username: username, password: np }) })).json();
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'setpassword', username: username, password: np }) },
+      'Resetting a staff password');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
     if (j.ok) showDep(el, 'ok', 'Password updated <i class="ico ico-check"></i>'); else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
