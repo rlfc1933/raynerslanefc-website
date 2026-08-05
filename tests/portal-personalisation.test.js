@@ -461,3 +461,51 @@ test('a link to another guide stays inside the reader', () => {
   const bad = render('See [notes](../secrets.md).');
   assert.ok(!/href=/.test(bad), 'linked to a file that is not a guide');
 });
+
+// ── 10 · NO DATABASE WORDING REACHES A VOLUNTEER ────────────────────────────
+
+test('match-day statuses read as English, not as column values', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  const labels = src.match(/var STATUS_LABEL = \{[\s\S]*?\};/)[0];
+  // "Awaiting reconciliation" is accurate and useless — it does not tell the
+  // reader whether they are the person who has to act.
+  assert.ok(!/'Awaiting reconciliation'/.test(labels));
+  assert.ok(/'Waiting to be checked'/.test(labels));
+  assert.ok(!/in_progress: 'In progress'/.test(labels));
+  // No label may still be a raw state name.
+  const shown = [...labels.matchAll(/: '([^']+)'/g)].map((m) => m[1]);
+  assert.ok(shown.length >= 9);
+  shown.forEach((l) => assert.ok(!/_/.test(l), `"${l}" still reads like a database value`));
+});
+
+test('every match-day status says who is waiting on whom', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  const labels = src.match(/var STATUS_LABEL = \{[\s\S]*?\};/)[0];
+  const means = src.match(/var STATUS_MEANS = \{[\s\S]*?\};/)[0];
+  const keys = (t) => [...t.matchAll(/(\w+):\s*'/g)].map((m) => m[1]).sort();
+  assert.deepStrictEqual(keys(means), keys(labels),
+    'every status needs a sentence, and no sentence may describe a status that does not exist');
+  [...means.matchAll(/: '([^']+)'/g)].forEach((m) => {
+    assert.ok(m[1].length > 30, `too short to explain anything: "${m[1]}"`);
+  });
+});
+
+test('the explanation is attached to the badge, where the question is asked', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  const fn = src.match(/function pill\(status, extra\) \{[\s\S]*?\n  \}/)[0];
+  assert.ok(/title="/.test(fn), 'a pointer user must be able to see the sentence');
+  assert.ok(/aria-label="/.test(fn), 'and a screen-reader user must hear it');
+});
+
+test('the nine match-day states are preserved, only their wording changed', () => {
+  // Collapsing them into the portal's six generic words would lose the
+  // difference between a match nobody started and one that was abandoned.
+  const core = fs.readFileSync(path.join(ROOT, 'js/matchday-core.js'), 'utf8');
+  const ops = fs.readFileSync(path.join(ROOT, 'js/matchday-ops.js'), 'utf8');
+  const declared = core.match(/var RECORD_STATUSES = \[([\s\S]*?)\];/)[1]
+    .match(/'(\w+)'/g).map((s) => s.replace(/'/g, ''));
+  const labelled = ops.match(/var STATUS_LABEL = \{[\s\S]*?\};/)[0];
+  declared.forEach((st) => {
+    assert.ok(new RegExp('\\b' + st + ':').test(labelled), `${st} has no plain label`);
+  });
+});
