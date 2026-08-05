@@ -155,8 +155,13 @@ test('Release 1 behaviour is intact', () => {
   assert.ok(/function portalSaid\(kind, detail\)/.test(admin), 'one feedback vocabulary');
   assert.ok(/published:.*sticky: true/.test(admin), 'public confirmations stay until dismissed');
   assert.ok(/View all club tools/.test(home), 'the escape hatch');
-  assert.ok(/\(name === 'users' \|\| name === 'developer'\) && !staffIsChairman\(\)/.test(admin),
-    'chairman gating');
+  // The single combined gate became two, so the Vice Chairman can reach Staff
+  // Access to switch off a compromised account. Developer stays chairman-only.
+  // What must not regress is that neither opens to an ordinary committee member.
+  assert.ok(/name === 'developer' && !staffIsChairman\(\)/.test(admin),
+    'Developer must stay chairman-only');
+  assert.ok(/name === 'users' && !staffCanViewStaff\(\)/.test(admin),
+    'Staff Access must stay capability-gated');
   assert.ok(!/>&#10003; Save to Site<\/button>/.test(admin), 'no bare publish labels');
   assert.ok(/on this device only/.test(admin), 'device-only rollback disclosed');
   assert.ok(/managed in HubSpot/.test(admin), 'HubSpot honesty');

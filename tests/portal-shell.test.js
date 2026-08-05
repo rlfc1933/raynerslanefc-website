@@ -126,10 +126,18 @@ test('every role has a home list, and none of them hides the rest of the portal'
 });
 
 test('chairman-only tools stay protected', () => {
-  assert.ok(/\(name === 'users' \|\| name === 'developer'\) && !staffIsChairman\(\)/.test(admin),
-    'the existing server-side-adjacent guard must remain');
-  assert.ok(/chairman: true/.test(tools), 'and the registry marks them');
-  assert.ok(/!t\.chairman \|\| isChairman\(\)/.test(home), 'and the Home filters them out');
+  // Staff Access is now reachable by the Vice Chairman for the disable-only
+  // cover role, so the gate is per-capability rather than one chairman flag.
+  // The guarantee being protected is unchanged: an ordinary committee member
+  // reaches neither screen, and the server decides regardless.
+  assert.ok(/name === 'developer' && !staffIsChairman\(\)/.test(admin),
+    'Developer must remain chairman-only');
+  assert.ok(/name === 'users' && !staffCanViewStaff\(\)/.test(admin),
+    'Staff Access must remain capability-gated');
+  assert.ok(/chairman: true/.test(tools), 'the registry still marks Developer');
+  assert.ok(/staffAccess: true/.test(tools), 'and marks Staff Access');
+  assert.ok(/T\.canSee\(t, role\(\), isChairman\(\)\)/.test(home),
+    'and the Home filters through the registry');
 });
 
 test('Match Day Ops permissions were not touched', () => {
@@ -180,7 +188,7 @@ test('the approved plain-English names are used', () => {
    ['Club Enquiries'], ['Club Overview'], ['Sponsor Prospects'], ['Commercial Pipeline'],
    ['Match Tweet Cards'], ['Monthly Fixture Posters'], ['Review Drafted Stories'],
    ['Trial Applications'], ['Committee and Staff'], ['Supporter Offers'],
-   ['View the Public Website'], ['Emergency Controls'], ['Staff Logins']].forEach(([n]) => {
+   ['View the Public Website'], ['Emergency Controls'], ['Staff Access']].forEach(([n]) => {
     assert.ok(tools.includes(n), `expected the approved name "${n}"`);
   });
   // Branded names kept, but always explained.

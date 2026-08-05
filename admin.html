@@ -3103,13 +3103,20 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     </div>
 
     <!-- SETTINGS -->
-    <!-- MANAGE USERS (Chairman only) -->
+    <!-- STAFF ACCESS — Chairman manages; Vice Chairman may view and switch off -->
     <div class="panel" id="panel-users">
-      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-users"></i> Manage Users</div></div>
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-users"></i> Staff Access</div></div>
 
       <!-- STAFF INVITATIONS — nobody hands over a password.
            An administrator creates a one-time link; the person follows it and
            sets a password only they ever know. See lib/invitations.js. -->
+      <div id="us-viewer-note" class="snote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)">
+        <p><strong style="color:var(--w)">You have cover access.</strong> You can see who
+        can sign in and <strong style="color:var(--w)">switch an account off</strong> if it
+        has been compromised or somebody has left. Creating accounts, setting passwords and
+        changing roles stay with the Chairman.</p>
+      </div>
+      <div class="manage-only">
       <div class="slbl">Invite a staff member</div>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
         <p><strong style="color:var(--w)">No passwords are handed out.</strong> You create a
@@ -3149,6 +3156,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="us-chair" style="width:16px;height:16px;accent-color:var(--y)"> Chairman powers (can manage users &amp; see the Developer tab)</label>
       <button class="save sec" onclick="addUser()">+ Add user</button>
       <div class="dep" id="dep-users"></div>
+      </div><!-- /.manage-only -->
       <div class="div"></div>
       <div class="slbl" id="us-cnt">Who can sign in</div>
       <div id="us-list"></div>
@@ -3789,6 +3797,25 @@ async function staffAdminFetch(url, opts, why) {
 
 function staffSession() { try { return JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null'); } catch (e) { return null; } }
 function staffIsChairman() { var s = staffSession(); return !!(s && s.isChairman); }
+// ── WHAT THIS PERSON MAY SEE ───────────────────────────────────────────────
+// Mirrors DEFAULT_CAPS in netlify/functions/lib/authz.js (see PortalTools.
+// STAFF_CAPS, which a test asserts matches it). DRAWING ONLY — the server
+// re-checks every action against the signed session, so hiding a button is a
+// courtesy, never a control.
+function staffCan(cap) {
+  var s = staffSession();
+  if (!s) return false;
+  if (s.isChairman) return true;                    // chairman holds them all
+  if (!window.PortalTools) return false;            // registry absent → show nothing extra
+  return PortalTools.roleHas(s.role || s.username, cap);
+}
+/** May they open Staff Access at all? Chairman, or Vice Chairman for cover. */
+function staffCanViewStaff() { return staffCan('can_view_staff'); }
+/** May they shut a compromised account down? The Vice Chairman holds this
+    permanently — that is the whole point of the continuity rule. */
+function staffCanDisable() { return staffCan('can_disable_account'); }
+/** May they create accounts, set passwords and assign roles? Chairman only. */
+function staffCanManage() { return staffCan('can_manage_users'); }
 function staffDefaultUsers() {
   return STAFF_ROLES.map(function (r) { return { username: r, role: r, isChairman: r === 'Chairman' }; });
 }
@@ -3959,6 +3986,15 @@ function initUsers() {
   if (rsel) rsel.innerHTML = opts;
   var isel = document.getElementById('inv-profile');
   if (isel && !isel.options.length) isel.innerHTML = opts;
+  // Trim the screen to what this person actually holds. A Vice Chairman opening
+  // this for cover sees the roll and the off-switch, and nothing that could
+  // create an account or change a role.
+  var canManage = staffCanManage();
+  document.querySelectorAll('#panel-users .manage-only').forEach(function (el) {
+    el.style.display = canManage ? '' : 'none';
+  });
+  var note = document.getElementById('us-viewer-note');
+  if (note) note.style.display = canManage ? 'none' : '';
   loadUsers();
   loadStaffLogins();
 }
@@ -3981,19 +4017,32 @@ function renderUsersList(custom) {
   // The 7 base roles — each can have its password set (or reset to default).
   defaults.forEach(function (role) {
     var c = byName[role];
-    rows.push({ username: role, role: role, isChairman: role === 'Chairman' || (c && !!c.is_chairman), hasCustom: !!c, base: true });
+    rows.push({ username: role, role: role, isChairman: role === 'Chairman' || (c && !!c.is_chairman), hasCustom: !!c, base: true, disabled: !!(c && c.disabled) });
   });
   // Extra named people the chairman added (username isn't one of the 7 roles).
   (custom || []).forEach(function (u) {
-    if (defaults.indexOf(u.username) === -1) rows.push({ username: u.username, role: u.role || u.username, isChairman: !!u.is_chairman, hasCustom: true, base: false });
+    if (defaults.indexOf(u.username) === -1) rows.push({ username: u.username, role: u.role || u.username, isChairman: !!u.is_chairman, hasCustom: true, base: false, disabled: !!u.disabled });
   });
   cnt.textContent = 'Who can sign in (' + rows.length + ')';
   el.innerHTML = rows.map(function (r) {
     var u = r.username.replace(/'/g, '');
     var tag = (r.isChairman ? '<span style="color:var(--y)"><i class="ico ico-star"></i> Chairman</span>' : '<span style="color:var(--gr)">' + esc(r.role) + '</span>') +
       ' <span style="color:' + (r.hasCustom ? 'var(--su)' : 'var(--gr)') + '">&middot; ' + (r.hasCustom ? 'custom password' : 'default password') + '</span>';
-    var actions = '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="setUserPassword(\'' + u + '\')">Set password</button>';
-    if (r.hasCustom) actions += '<button class="li-del" onclick="removeUser(\'' + u + '\')">' + (r.base ? 'Reset' : 'Remove') + '</button>';
+    if (r.disabled) tag += ' <span style="color:var(--re)">&middot; switched off</span>';
+    // ACTIONS BY CAPABILITY. Creating accounts, setting passwords and removing
+    // people are the Chairman's. Switching an account OFF is also the Vice
+    // Chairman's, permanently — see lib/authz.js for why that is not granted
+    // on request.
+    var actions = '';
+    if (staffCanManage()) {
+      actions += '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="setUserPassword(\'' + u + '\')">Set password</button>';
+      if (r.hasCustom) actions += '<button class="li-del" onclick="removeUser(\'' + u + '\')">' + (r.base ? 'Reset' : 'Remove') + '</button>';
+    }
+    if (staffCanDisable() && r.hasCustom) {
+      actions += r.disabled
+        ? '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="enableUser(\'' + u + '\')">Switch back on</button>'
+        : '<button class="li-del" onclick="disableUser(\'' + u + '\')">Switch off</button>';
+    }
     return '<div class="li"><span class="li-num">' + (r.isChairman ? '<i class="ico ico-star"></i>' : '<i class="ico ico-user"></i>') + '</span><div class="li-main"><div class="li-name">' + esc(r.username) + '</div><div class="li-sub" style="font-size:11px">' + tag + '</div></div>' + actions + '</div>';
   }).join('');
 }
@@ -4018,6 +4067,40 @@ async function addUser() {
     if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', ''); document.getElementById('us-chair').checked = false; loadUsers(); }
     else if (j.error === 'no-store') showDep(el, 'err', 'Login store not ready yet — try again in a moment.');
     else showDep(el, 'err', j.error || 'Failed');
+  } catch (e) { showDep(el, 'err', 'Network error'); }
+}
+/**
+ * Switch an account off. Immediate, reversible, and it deletes nothing — the
+ * person's history and record stay intact. This is the one staff action the
+ * Vice Chairman holds permanently.
+ */
+async function disableUser(username) {
+  if (!confirm('Switch off ' + username + '?\n\nThey will not be able to sign in from now on. ' +
+      'Nothing is deleted — their record and history stay exactly as they are, and you can ' +
+      'switch them back on at any time.')) return;
+  var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Switching off…');
+  try {
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'disable', username: username }) },
+      'Switching off a staff login');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
+    if (j.ok) { showDep(el, 'ok', username + ' can no longer sign in'); loadUsers(); }
+    else showDep(el, 'err', j.error || 'Could not switch that account off.');
+  } catch (e) { showDep(el, 'err', 'Network error'); }
+}
+async function enableUser(username) {
+  var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Switching on…');
+  try {
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'enable', username: username }) },
+      'Switching a staff login back on');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
+    if (j.ok) { showDep(el, 'ok', username + ' can sign in again'); loadUsers(); }
+    else showDep(el, 'err', j.error || 'Could not switch that account on.');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
 async function removeUser(username) {
@@ -4086,8 +4169,13 @@ function toggleAllTools() {
 })();
 
 function openPanel(name) {
-  if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
-  if (name === 'users') { initUsers(); if (window.invList) invList(); }
+  // Staff Access opens for anyone who may VIEW staff — the Chairman, and the
+  // Vice Chairman so he can disable a compromised login without waiting for
+  // permission from an account that might itself be the problem. What each of
+  // them can DO inside is trimmed below, and enforced on the server.
+  if (name === 'users' && !staffCanViewStaff()) { toast('Staff access is limited to the Chairman and Vice Chairman', true); return; }
+  if (name === 'developer' && !staffIsChairman()) { toast('Chairman access only', true); return; }
+  if (name === 'users') { initUsers(); if (window.invList && staffCanManage()) invList(); }
   // Historic Match-Day Takings is RETIRED and read-only. Asking for a password
   // just to read the notice explaining it is retired was pure friction, so the
   // panel opens; the figures themselves stay behind the existing gate.
