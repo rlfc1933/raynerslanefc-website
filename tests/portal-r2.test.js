@@ -112,17 +112,18 @@ test('club areas are compact by default so the mobile home is short', () => {
 });
 
 test('each area orients without needing tool names', () => {
-  ['Are you preparing for a match?',
-   'Do you need to update a player?',
-   'Are you publishing something to the website?',
-   'Are you checking sponsors or club income?',
-   'Are you helping supporters?',
-   'Are you managing internal club records?',
-   'Are you fixing or restoring something?'].forEach(q => {
-    assert.ok(tools.includes(q), `missing the club question: ${q}`);
-  });
-  const likely = (tools.match(/likely:/g) || []).length;
-  assert.strictEqual(likely, 7, 'every area states the job people usually want');
+  // Written as a shape rather than a list of exact sentences. The groups were
+  // renamed when the club chose its own eight headings, and a test that
+  // pinned the old wording would have failed for saying the right thing
+  // differently. What must never change is that EVERY group asks the question
+  // a volunteer arrives with, and names the job they usually want.
+  const asks = (tools.match(/ask: '[^']+'/g) || []);
+  const likely = (tools.match(/likely: '[^']+'/g) || []);
+  const groups = (tools.match(/\{ key: '[a-z]+', name: '/g) || []).length;
+  assert.ok(groups >= 8, 'expected the club’s groups to be present');
+  assert.strictEqual(asks.length, groups, 'every group asks the volunteer’s question');
+  assert.strictEqual(likely.length, groups, 'every group states the job people usually want');
+  asks.forEach(a => assert.ok(a.trim().endsWith("?'"), `not phrased as a question: ${a}`));
 });
 
 test('the System area is visually marked as not routine work', () => {

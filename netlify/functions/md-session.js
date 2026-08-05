@@ -68,6 +68,11 @@ exports.handler = async function (event) {
     const { getStore } = await import('@netlify/blobs');
     const users = (await getStore('rlfc-staff').get('users', { type: 'json' })) || {};
     const u = users[username];
+    if (u && u.disabled) {
+      // No token for a disabled account, at any authentication strength. This
+      // is the check that makes "disable" mean something everywhere else.
+      return resp(200, { ok: false, error: 'account-disabled' });
+    }
     if (u) {
       if (u.pass_hash === hash(password)) {
         auth = 'custom';

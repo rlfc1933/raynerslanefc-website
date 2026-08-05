@@ -15,6 +15,7 @@
   <!-- Release 1: the attention-led front door. Navigation only — it does not
        touch a single save function, API call or data path. -->
   <script src="js/portal-tools.js"></script>
+  <script src="js/portal-recent.js"></script>
   <script src="js/portal-home.js"></script>
   <script src="js/portal-safety.js"></script>
   <script>
@@ -3105,12 +3106,46 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <!-- MANAGE USERS (Chairman only) -->
     <div class="panel" id="panel-users">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-users"></i> Manage Users</div></div>
-      <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> Everyone starts on a shared default password (the box below is pre-filled with it) until you change it here.</p></div>
-      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The shared default password always works in the meantime, so nobody&rsquo;s locked out.</p></div>
+
+      <!-- STAFF INVITATIONS — nobody hands over a password.
+           An administrator creates a one-time link; the person follows it and
+           sets a password only they ever know. See lib/invitations.js. -->
+      <div class="slbl">Invite a staff member</div>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
+        <p><strong style="color:var(--w)">No passwords are handed out.</strong> You create a
+        one-time setup link and give it to the person privately. They choose their own
+        password — nobody at the club ever sees it, including you.</p>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Their name</label><input type="text" id="inv-name" placeholder="Jenny Pitt"></div>
+        <div class="field"><label class="fl">Username</label><input type="text" id="inv-user" placeholder="jenny"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Club title</label><input type="text" id="inv-title" placeholder="Secretary"></div>
+        <div class="field"><label class="fl">Role profile</label>
+          <!-- Filled from PortalTools.PROFILES at open, so the portal can never
+               offer a role the server will refuse. See netlify/functions/lib/roles.js. -->
+          <select id="inv-profile"></select>
+          <div class="snote" style="margin-top:8px"><p>The job, not the person.
+            It decides what their portal opens on and which guide they get
+            &mdash; it does not grant any permission.</p></div></div>
+      </div>
+      <button class="save" onclick="invCreate()">Create setup link</button>
+      <div id="inv-out" style="margin-top:12px"></div>
+
+      <div class="slbl" style="margin-top:20px">Invitations</div>
+      <div id="inv-list">Loading&hellip;</div>
+      <div class="snote"><p>Decide who can sign in and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> The normal way to add somebody is the setup link above: they choose their own password, and nobody &mdash; including you &mdash; ever sees it. The box below is a fallback for the case where somebody cannot receive a link at all.</p></div>
+      <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. Nobody who can already sign in is locked out while this settles.</p></div>
       <div class="slbl">Add a user</div>
       <div class="field"><label class="fl">Name (what they pick at login)</label><input type="text" id="us-name" placeholder="e.g. Pete Singh"></div>
       <div class="field"><label class="fl">Role</label><select id="us-role"></select></div>
-      <div class="field"><label class="fl">Password</label><input type="text" id="us-pass" value="20raynerslanefc26"></div>
+      <!-- The shared default password used to be pre-filled here, which meant
+           the ordinary way to add somebody was to give them a password the
+           whole committee already knew. It is no longer suggested. Use the
+           setup link above; this box exists only for the case where somebody
+           cannot receive a link at all. -->
+      <div class="field"><label class="fl">Password</label><input type="password" id="us-pass" value="" autocomplete="new-password" placeholder="Leave empty and send a setup link instead"></div>
       <label class="ha-lbl" style="display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;color:var(--w);margin-bottom:10px"><input type="checkbox" id="us-chair" style="width:16px;height:16px;accent-color:var(--y)"> Chairman powers (can manage users &amp; see the Developer tab)</label>
       <button class="save sec" onclick="addUser()">+ Add user</button>
       <div class="dep" id="dep-users"></div>
@@ -3702,6 +3737,56 @@ var STAFF_ROLES = ['Club Management', 'Chairman', 'V Chairman', 'Committee', 'Cl
 var STAFF_DEFAULT_PW = '20raynerslanefc26';
 var staffUsers = []; // [{username, role, isChairman}] merged defaults + custom
 
+// ── STAFF ADMINISTRATION: the signed token ────────────────────────────────
+// Managing staff logins now needs proof of WHO is asking, not just the club
+// PIN. md-session mints a signed token after checking the person's own
+// password server-side; the browser cannot forge one. Match Day Ops already
+// stores it under this key, so a user who has signed in there is ready.
+var STAFF_TOKEN_KEY = 'rlfc_md_token';
+function staffToken() { try { return sessionStorage.getItem(STAFF_TOKEN_KEY) || ''; } catch (e) { return ''; } }
+
+/** Ask for the signer's own password and mint a token. Returns '' if declined. */
+async function staffAuthenticate(why) {
+  var s = staffSession() || {};
+  var who = s.username || s.role || '';
+  var pw = prompt((why || 'Managing staff logins') +
+    '\n\nThis needs your own personal staff password' +
+    (who ? ' (' + who + ')' : '') + '.');
+  if (!pw) return '';
+  try {
+    var r = await fetch('/.netlify/functions/md-session', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, username: who, password: pw }),
+    });
+    var j = await r.json();
+    if (j && j.ok && j.token) {
+      try { sessionStorage.setItem(STAFF_TOKEN_KEY, j.token); } catch (e) {}
+      return j.token;
+    }
+    toast(j && j.error === 'account-disabled' ? 'That account has been disabled.'
+      : 'That password was not accepted.', true);
+  } catch (e) { toast('Could not check that password', true); }
+  return '';
+}
+
+/** fetch() for staff administration — carries the signed token, mints one if needed. */
+async function staffAdminFetch(url, opts, why) {
+  var o = opts || {};
+  var tok = staffToken();
+  if (!tok) { tok = await staffAuthenticate(why); if (!tok) return null; }
+  o.headers = Object.assign({}, o.headers || {}, { Authorization: 'Bearer ' + tok });
+  var res = await fetch(url, o);
+  if (res.status === 401) {
+    // Token missing or expired — offer to re-authenticate once.
+    try { sessionStorage.removeItem(STAFF_TOKEN_KEY); } catch (e) {}
+    tok = await staffAuthenticate(why);
+    if (!tok) return null;
+    o.headers.Authorization = 'Bearer ' + tok;
+    res = await fetch(url, o);
+  }
+  return res;
+}
+
 function staffSession() { try { return JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null'); } catch (e) { return null; } }
 function staffIsChairman() { var s = staffSession(); return !!(s && s.isChairman); }
 function staffDefaultUsers() {
@@ -3714,7 +3799,8 @@ function showRoleLogin() {
   // Default roles immediately; merge any custom users from Supabase if available.
   staffUsers = staffDefaultUsers();
   renderRoleOptions();
-  fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN)).then(function (r) { return r.json(); }).then(function (j) {
+  staffAdminFetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN), {}, 'Viewing staff logins')
+    .then(function (r) { return r ? r.json() : null; }).then(function (j) {
     if (j && j.ok && j.users) {
       var merged = staffDefaultUsers().filter(function (d) { return !j.users.some(function (u) { return u.username === d.username; }); });
       staffUsers = j.users.map(function (u) { return { username: u.username, role: u.role || u.username, isChairman: !!u.isChairman || u.role === 'Chairman' }; }).concat(merged);
@@ -3743,17 +3829,24 @@ async function submitRoleLogin() {
   // function, no-supabase, not-found, junk, offline) → fall back to the shared
   // default password so the committee is never locked out.
   var ok = false, role = picked.role, isChair = picked.isChairman, serverRejected = false;
+  // The person's real name and job title, if the server knows them. They come
+  // ONLY from the server — never from the sign-in screen — so the greeting on
+  // the home page reflects the account, not anything typed in the browser.
+  var sName = null, sTitle = null;
   try {
     var res = await (await fetch('/.netlify/functions/staff-login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: PIN, username: username, password: pass })
     })).json();
-    if (res && typeof res === 'object' && res.ok === true) { ok = true; role = res.role || role; isChair = !!res.isChairman; }
+    if (res && typeof res === 'object' && res.ok === true) {
+      ok = true; role = res.role || role; isChair = !!res.isChairman;
+      sName = res.name || null; sTitle = res.title || null;
+    }
     else if (res && typeof res === 'object' && res.ok === false && res.error === 'wrong-password') { serverRejected = true; }
   } catch (e) {}
   if (!ok && !serverRejected) ok = (pass === STAFF_DEFAULT_PW);
   if (!ok) { document.getElementById('role-err').textContent = 'Wrong password — try again'; setVal('role-pass', ''); return; }
-  try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, at: Date.now() })); } catch (e) {}
+  try { sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: username, role: role, isChairman: isChair, name: sName, title: sTitle, at: Date.now() })); } catch (e) {}
   // Mint the signed Match Day Ops identity NOW, while the password is still in
   // hand. That is what lets Match Day Ops open in one tap with no second
   // password, while every entry it writes is still attributed server-side.
@@ -3844,16 +3937,36 @@ function saveEmails(msg) {
 }
 
 // ── MANAGE USERS (Chairman) ──
+/** The club's roles, as <option>s. Falls back to the sign-in list if the
+    registry has not loaded, so the panel is never empty. */
+function staffRoleOptions() {
+  var P = window.PortalTools && PortalTools.PROFILES;
+  var keys = P ? Object.keys(P) : STAFF_ROLES.slice();
+  return keys.filter(function (r) {
+    return r !== 'Chairman' || staffIsChairman();
+  }).map(function (r) {
+    var label = (P && P[r] && P[r].title) || r;
+    return '<option value="' + esc(r) + '">' + esc(label) + '</option>';
+  }).join('');
+}
 function initUsers() {
+  // Both role menus come from the one canonical list of club jobs, so the
+  // portal cannot offer a role the server will refuse. Chairman is offered
+  // only to a chairman — the server refuses it either way, but a menu that
+  // shows an option nobody can use is a menu that teaches distrust.
+  var opts = staffRoleOptions();
   var rsel = document.getElementById('us-role');
-  if (rsel) rsel.innerHTML = STAFF_ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('');
+  if (rsel) rsel.innerHTML = opts;
+  var isel = document.getElementById('inv-profile');
+  if (isel && !isel.options.length) isel.innerHTML = opts;
   loadUsers();
   loadStaffLogins();
 }
 async function loadUsers() {
   var note = document.getElementById('us-syncnote');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN))).json();
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN), {}, 'Viewing staff logins');
+    var j = _r ? await _r.json() : null;
     if (j && j.ok) { if (note) note.style.display = 'none'; renderUsersList(j.users || []); return; }
     if (note) note.style.display = '';
   } catch (e) { if (note) note.style.display = ''; }
@@ -3887,11 +4000,22 @@ function renderUsersList(custom) {
 async function addUser() {
   var name = gv('us-name'), role = gv('us-role'), pass = gv('us-pass'), chair = document.getElementById('us-chair').checked;
   if (!name) { toast('Enter a name', true); return; }
-  if (!pass || pass.length < 6) { toast('Password too short (min 6)', true); return; }
+  if (!pass) {
+    toast('Leave this and send a setup link instead — then nobody handles their password', true);
+    return;
+  }
+  if (pass.length < 10) { toast('Password too short (min 10)', true); return; }
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Saving…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: role, password: pass, isChairman: chair }) })).json();
-    if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', '20raynerslanefc26'); document.getElementById('us-chair').checked = false; loadUsers(); }
+    // isChairman is NO LONGER SENT. The server derives it from the validated
+    // role — sending it was the escalation vulnerability.
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'add', username: name, role: (chair ? 'Chairman' : role), password: pass }) },
+      'Creating a staff login');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
+    if (j.ok) { showDep(el, 'ok', name + ' can now sign in <i class="ico ico-check"></i>'); setVal('us-name', ''); setVal('us-pass', ''); document.getElementById('us-chair').checked = false; loadUsers(); }
     else if (j.error === 'no-store') showDep(el, 'err', 'Login store not ready yet — try again in a moment.');
     else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
@@ -3901,17 +4025,29 @@ async function removeUser(username) {
       'This removes ' + username + '\u2019s login. They will not be able to sign in to the portal again until a new one is created.')) return;
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Removing…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'remove', username: username }) })).json();
+    // DISABLE, not remove. The login stops; the person's history and audit
+    // attribution survive. Permanent deletion is a separate, elevated action.
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'disable', username: username }) },
+      'Disabling a staff login');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
     if (j.ok) { showDep(el, 'ok', 'Removed'); loadUsers(); } else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
 async function setUserPassword(username) {
-  var np = prompt('New password for ' + username + ' (min 6 characters):');
+  var np = prompt('New password for ' + username + ' (min 10 characters):');
   if (np === null) return;
-  if (np.length < 6) { toast('Too short', true); return; }
+  if (np.length < 10) { toast('Too short (min 10)', true); return; }
   var el = document.getElementById('dep-users'); showDep(el, 'loading', 'Updating…');
   try {
-    var j = await (await fetch('/.netlify/functions/staff-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, action: 'setpassword', username: username, password: np }) })).json();
+    var _r = await staffAdminFetch('/.netlify/functions/staff-users',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: PIN, action: 'setpassword', username: username, password: np }) },
+      'Resetting a staff password');
+    if (!_r) { showDep(el, 'err', 'Cancelled'); return; }
+    var j = await _r.json();
     if (j.ok) showDep(el, 'ok', 'Password updated <i class="ico ico-check"></i>'); else showDep(el, 'err', j.error || 'Failed');
   } catch (e) { showDep(el, 'err', 'Network error'); }
 }
@@ -3951,7 +4087,7 @@ function toggleAllTools() {
 
 function openPanel(name) {
   if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
-  if (name === 'users') initUsers();
+  if (name === 'users') { initUsers(); if (window.invList) invList(); }
   // Historic Match-Day Takings is RETIRED and read-only. Asking for a password
   // just to read the notice explaining it is retired was pure friction, so the
   // panel opens; the figures themselves stay behind the existing gate.
@@ -10985,6 +11121,81 @@ function toast(msg, err) {
       toast(j && j.ok ? ('Sent ' + (j.sent || 0) + ', failed ' + (j.failed || 0)) : 'Could not send');
     }
     supNotes(); health();
+  };
+})();
+</script>
+
+
+<!-- ═══ STAFF INVITATIONS ═══════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+  var FN = '/.netlify/functions/staff-invite';
+  function e(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function when(iso){ if(!iso) return '—'; try{ return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(iso)); }catch(x){ return String(iso).slice(0,16); } }
+
+  async function api(body){
+    var r = await staffAdminFetch(FN, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(Object.assign({ pin: PIN }, body)) }, 'Managing staff access');
+    return r ? await r.json() : null;
+  }
+
+  window.invCreate = async function(){
+    var out = document.getElementById('inv-out');
+    var j = await api({ action:'create',
+      username: (document.getElementById('inv-user')||{}).value || '',
+      name:     (document.getElementById('inv-name')||{}).value || '',
+      title:    (document.getElementById('inv-title')||{}).value || '',
+      profile:  (document.getElementById('inv-profile')||{}).value || '' });
+    if (!j) { out.innerHTML=''; return; }
+    if (!j.ok) { out.innerHTML = '<p class="msg err" style="color:#f0bcbc">'+e(j.error)+'</p>'; return; }
+
+    // The one and only time this link exists. Shown, copyable, never re-fetchable.
+    var link = location.origin + '/staff-setup.html#' + j.setupToken;
+    out.innerHTML =
+      '<div style="border:1px solid rgba(255,209,0,.45);background:rgba(255,209,0,.07);border-radius:10px;padding:14px">' +
+      '<div style="color:var(--y);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Setup link for ' + e(j.invitation.username) + '</div>' +
+      '<input type="text" id="inv-link" readonly value="' + e(link) + '" style="width:100%;box-sizing:border-box;font-size:12px;padding:9px;border-radius:7px;border:1px solid #333;background:#0a0a0a;color:#fff">' +
+      '<div style="margin-top:8px"><button class="save sec" onclick="invCopy()">Copy link</button></div>' +
+      '<p style="color:var(--w);font-size:13px;margin:10px 0 0"><strong>Copy this link now. For security, it will not be shown again.</strong></p>' +
+      '<p style="color:var(--gr);font-size:12.5px;margin:6px 0 0">Give it to them privately. It works once and expires ' + e(when(j.invitation.expires_at)) + '. ' +
+      'If it goes astray, create a replacement — that cancels this one.</p></div>';
+    invList();
+  };
+
+  window.invCopy = function(){
+    var f = document.getElementById('inv-link'); if(!f) return;
+    f.select(); f.setSelectionRange(0, 99999);
+    try { navigator.clipboard.writeText(f.value); } catch(x){ document.execCommand('copy'); }
+    if (typeof toast === 'function') toast('Setup link copied');
+  };
+
+  window.invRevoke = async function(id){
+    if (!confirm('Cancel this invitation? The link will stop working immediately.')) return;
+    var j = await api({ action:'revoke', id:id });
+    if (typeof toast === 'function') toast(j && j.ok ? 'Invitation cancelled' : 'Could not cancel');
+    invList();
+  };
+
+  window.invList = async function(){
+    var el = document.getElementById('inv-list'); if(!el) return;
+    var j = await api({ action:'list' });
+    if (!j) { el.innerHTML=''; return; }
+    if (!j.ok) { el.innerHTML = '<p style="color:var(--gr)">'+e(j.error||'Could not load invitations.')+'</p>'; return; }
+    if (!j.invitations.length) { el.innerHTML = '<p style="color:var(--gr)">No invitations yet.</p>'; return; }
+    var COLOUR = { pending:'#FFD100', used:'#22C55E', expired:'#8F8F8F', revoked:'#8F8F8F' };
+    var WORD   = { pending:'Waiting to be used', used:'Account set up', expired:'Expired', revoked:'Cancelled' };
+    el.innerHTML = j.invitations.map(function(v){
+      return '<div style="display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;margin-bottom:7px;min-width:0">' +
+        '<div style="min-width:0;flex:1">' +
+          '<div style="color:var(--w);font-size:14px;font-weight:700">' + e(v.name || v.username) +
+            ' <span style="color:var(--gr);font-weight:400">· ' + e(v.username) + '</span></div>' +
+          '<div style="color:' + COLOUR[v.status] + ';font-size:12px;margin-top:2px">' + e(WORD[v.status]) +
+            (v.status==='pending' ? ' · expires ' + e(when(v.expires_at)) : '') +
+            ' · ' + e(v.profile||'') + '</div></div>' +
+        (v.status==='pending' ? '<button class="save sec" style="flex-shrink:0;padding:7px 12px;font-size:11px" onclick="invRevoke(\''+e(v.id)+'\')">Cancel</button>' : '') +
+      '</div>';
+    }).join('');
   };
 })();
 </script>

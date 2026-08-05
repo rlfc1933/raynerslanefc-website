@@ -56,14 +56,39 @@
     if (mins < 1440) return Math.round(mins / 60) + 'h ago';
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
+  // ── WHAT A STATUS MEANS ──────────────────────────────────────────────────
+  // "Awaiting reconciliation" is accurate and useless: a volunteer reading it
+  // cannot tell whether THEY are the person who has to do something. Every
+  // status now carries a sentence saying who is waiting on whom, attached to
+  // the pill itself so the answer is where the question is asked.
+  //
+  // The nine states are kept. They are a real state machine — see the
+  // transition table in matchday-core.js — and collapsing them into the
+  // portal's six generic words would lose the distinction between a match
+  // nobody has started and one somebody abandoned. Only the WORDING changed.
   var STATUS_LABEL = {
-    upcoming: 'Upcoming', ready: 'Ready', in_progress: 'In progress',
-    awaiting_reconciliation: 'Awaiting reconciliation', completed: 'Completed',
-    locked: 'Locked', cancelled: 'Cancelled', postponed: 'Postponed', abandoned: 'Abandoned'
+    upcoming: 'Not started yet', ready: 'Ready for match day', in_progress: 'Being filled in',
+    awaiting_reconciliation: 'Waiting to be checked', completed: 'Checked and approved',
+    locked: 'Closed', cancelled: 'Cancelled', postponed: 'Postponed', abandoned: 'Abandoned'
+  };
+  var STATUS_MEANS = {
+    upcoming: 'Nothing to do yet. This opens as the match gets closer.',
+    ready: 'Set up and ready. Fill it in on the day.',
+    in_progress: 'Somebody has started this and has not finished. It is not submitted yet.',
+    awaiting_reconciliation: 'The attendance and takings have been submitted. Somebody other than the person who filled it in has to check and approve them.',
+    completed: 'Checked and agreed. There is nothing more to do.',
+    locked: 'Closed for the record. Reopening it needs a reason and permission.',
+    cancelled: 'This match did not go ahead. No money was taken.',
+    postponed: 'This match was moved. It will get its own record on the new date.',
+    abandoned: 'The match was stopped part way. Money was still taken, so the record still has to be completed.'
   };
   function pill(status, extra) {
-    return '<span class="md-pill md-pill--' + esc(status) + '">' + esc(STATUS_LABEL[status] || status) + '</span>' +
-      (extra ? ' <span class="md-pill md-pill--legacy">Legacy</span>' : '');
+    var means = STATUS_MEANS[status] || '';
+    return '<span class="md-pill md-pill--' + esc(status) + '"' +
+      (means ? ' title="' + esc(means) + '" aria-label="' +
+        esc((STATUS_LABEL[status] || status) + '. ' + means) + '"' : '') +
+      '>' + esc(STATUS_LABEL[status] || status) + '</span>' +
+      (extra ? ' <span class="md-pill md-pill--legacy" title="Brought in from the old spreadsheet. It was not filled in through this portal.">Legacy</span>' : '');
   }
 
   // ── SESSION ──────────────────────────────────────────────────────────────

@@ -34,17 +34,35 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function sess() {
+    try { return JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null'); }
+    catch (e) { return null; }
+  }
   function role() {
-    try {
-      var s = JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null');
-      return (s && (s.role || s.username)) || 'Committee';
-    } catch (e) { return 'Committee'; }
+    var s = sess();
+    return (s && (s.role || s.username)) || 'Committee';
   }
   function isChairman() {
-    try {
-      var s = JSON.parse(sessionStorage.getItem('rlfc_staff') || 'null');
-      return !!(s && s.isChairman);
-    } catch (e) { return false; }
+    var s = sess();
+    return !!(s && s.isChairman);
+  }
+  /**
+   * The name to greet somebody by.
+   *
+   * Only a real name is used. If the account has none — an older login, or one
+   * created before names were recorded — the portal says "Welcome back" and
+   * stops. Guessing a first name from a username produces "Hello, Vchairman",
+   * which is worse than not trying.
+   */
+  function firstName() {
+    var s = sess();
+    var n = (s && s.name && String(s.name).trim()) || '';
+    if (!n) return '';
+    return n.split(/\s+/)[0];
+  }
+  function greeting() {
+    var h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
   }
   function today() { return new Date().toISOString().slice(0, 10); }
   function daysUntil(iso) {
@@ -197,9 +215,33 @@
     if (!el) return;
     T = global.PortalTools;
     if (!T) { el.innerHTML = ''; return; }
-    el.innerHTML = viewToday() + viewAttention() + viewMyWork() + viewAreas() + viewAllToolsToggle();
+    // The order answers, in sequence: who am I · what is wrong · what do I do
+    // now · what was I doing · what else is mine · where is everything else ·
+    // who do I ask. A volunteer should be able to stop reading at any point
+    // and still have got what they came for.
+    el.innerHTML = viewMyPortal() + viewAttention() + viewQuick() + viewRecent() +
+                   viewMyWork() + viewAreas() + viewHelp();
     var dash = $('dash-home');
     if (dash) dash.style.display = S.showAll ? 'block' : 'none';
+  }
+
+  /** MY PORTAL — who you are, what your job is, and what today looks like. */
+  function viewMyPortal() {
+    var p = T.profileFor(role());
+    var n = firstName();
+    var hello = n ? greeting() + ', ' + esc(n) : 'Welcome back';
+    var guide = T.guideFor(role());
+    return '<section class="ph-me" aria-labelledby="ph-me-h">' +
+      '<div class="ph-me__row">' +
+        '<div>' +
+          '<h2 class="ph-h ph-h--big" id="ph-me-h">' + hello + '</h2>' +
+          '<p class="ph-me__role">' + esc(p.title) + '</p>' +
+          '<p class="ph-me__blurb">' + esc(p.blurb) + '</p>' +
+        '</div>' +
+        (guide
+          ? '<a class="ph-guide" href="guide.html#' + esc(guide) + '">My guide</a>'
+          : '<a class="ph-guide" href="guide.html#how-the-club-portal-works">Portal guide</a>') +
+      '</div>' + viewToday() + '</section>';
   }
 
   function viewToday() {
@@ -225,9 +267,9 @@
     var last = d && d.lastResult
       ? '<span class="ph-chip">Last result &middot; ' + esc(d.lastResult.opponent) + ' ' +
         esc(d.lastResult.us) + '&ndash;' + esc(d.lastResult.them) + '</span>' : '';
-    return '<section class="ph-today" aria-labelledby="ph-today-h">' +
-      '<h2 class="ph-h" id="ph-today-h">Today at the club</h2>' + body +
-      '<div class="ph-chips">' + live + last + '</div></section>';
+    return '<div class="ph-today" aria-labelledby="ph-today-h">' +
+      '<h3 class="ph-h ph-h--sm" id="ph-today-h">Today at the club</h3>' + body +
+      '<div class="ph-chips">' + live + last + '</div></div>';
   }
 
   function viewAttention() {
@@ -257,6 +299,69 @@
     return h + '</section>';
   }
 
+  /**
+   * QUICK ACTIONS — the three or four jobs this person does weekly.
+   *
+   * Chosen by their profile, not by their name, and not by watching them. A
+   * "most used" list learned from behaviour would be empty on somebody's first
+   * day, which is exactly the day they need it most.
+   */
+  function viewQuick() {
+    var acts = T.quickFor(role()).filter(function (q) {
+      var t = T.byId(q.panel);
+      return t && (!t.chairman || isChairman());
+    });
+    if (!acts.length) return '';
+    return '<section class="ph-sec" aria-labelledby="ph-q-h">' +
+      '<h2 class="ph-h" id="ph-q-h">Quick actions</h2>' +
+      '<div class="ph-quick">' + acts.map(function (q) {
+        var t = T.byId(q.panel);
+        var pub = t.effect === 'public';
+        return '<button class="ph-qbtn" onclick="PortalHome.go(\'' + esc(q.panel) + '\')">' +
+          '<span class="ph-qbtn__lbl">' + esc(q.label) + '</span>' +
+          '<span class="ph-qbtn__eff' + (pub ? ' is-public' : '') + '">' +
+            esc(T.EFFECT_LABEL[t.effect] || '') + '</span></button>';
+      }).join('') + '</div></section>';
+  }
+
+  /**
+   * MY RECENT WORK — only saves the server confirmed, on this device.
+   *
+   * Empty is a real and common answer. It says so rather than filling the
+   * space with something that looks like history.
+   */
+  function viewRecent() {
+    var R = global.PortalRecent;
+    var rows = R ? R.list() : [];
+    var h = '<section class="ph-sec" aria-labelledby="ph-r-h" id="ph-recent">' +
+      '<h2 class="ph-h" id="ph-r-h">My recent work</h2>';
+    if (!rows.length) {
+      return h + '<div class="ph-empty">' +
+        '<b>Nothing saved yet from this device.</b>' +
+        'When you save something, it will appear here so you can pick up where you left off. ' +
+        'This list is kept on this device only — it is not a record the club can see.' +
+        '</div></section>';
+    }
+    return h + '<div class="ph-recent">' + rows.map(function (r) {
+      return '<button class="ph-rrow" onclick="PortalHome.go(\'' + esc(r.tool.id) + '\')">' +
+        '<span class="ph-rrow__name">' + esc(r.tool.name) + '</span>' +
+        '<span class="ph-rrow__when">' + esc(r.verb) + ' ' + esc(R.ago(r.at)) + '</span>' +
+        '</button>';
+    }).join('') + '</div></section>';
+  }
+
+  /** Repaint just this section after a save, without rebuilding the page. */
+  function paintRecent() {
+    var box = $('ph-recent');
+    // A save can land before the home has ever painted — the volunteer opened
+    // a panel straight from a bookmark. There is nothing to repaint then.
+    if (!box || !T) return;
+    var tmp = document.createElement('div');
+    tmp.innerHTML = viewRecent();
+    var fresh = tmp.firstChild;
+    if (fresh) box.parentNode.replaceChild(fresh, box);
+  }
+
   function toolCard(t) {
     var badge = t.effect === 'public'
       ? '<span class="ph-badge ph-badge--public">Changes the website</span>'
@@ -274,11 +379,12 @@
   }
 
   function viewMyWork() {
-    var r = role();
-    var tools = T.homeFor(r).filter(function (t) { return !t.chairman || isChairman(); });
+    var p = T.profileFor(role());
+    var tools = T.homeFor(role()).filter(function (t) { return !t.chairman || isChairman(); });
     return '<section class="ph-sec" aria-labelledby="ph-my-h">' +
       '<h2 class="ph-h" id="ph-my-h">My club work</h2>' +
-      '<p class="ph-sub">The tools a <b>' + esc(r) + '</b> normally uses. Everything else is still available below.</p>' +
+      '<p class="ph-sub">The tools a <b>' + esc(p.title) + '</b> normally uses. ' +
+      'Nothing is hidden from you — everything else is under <em>All club tools</em> below.</p>' +
       '<div class="ph-tools">' + tools.map(toolCard).join('') + '</div></section>';
   }
 
@@ -291,8 +397,10 @@
     // hidden: everything is one tap away, and the desktop layout is unchanged
     // in substance, just tighter.
     var h = '<section class="ph-sec" aria-labelledby="ph-areas-h">' +
-      '<h2 class="ph-h" id="ph-areas-h">Club areas</h2>' +
-      '<p class="ph-sub">Everything the portal can do, grouped the way the club works. Tap an area to see its tools.</p>' +
+      '<h2 class="ph-h" id="ph-areas-h">All club tools</h2>' +
+      '<p class="ph-sub">Everything the portal can do, grouped the way the club works. ' +
+      'You can open any of it — if you are covering for somebody, their tools are here. ' +
+      'Tap a group to see what is inside.</p>' +
       '<div class="ph-areas">';
     T.AREAS.forEach(function (a) {
       var tools = T.byArea(a.key).filter(function (t) { return !t.chairman || chair; });
@@ -313,13 +421,32 @@
     return h + '</div></section>';
   }
 
-  function viewAllToolsToggle() {
-    return '<section class="ph-sec ph-sec--all">' +
+  /**
+   * HELP — the last section, because it is where somebody goes when the rest
+   * of the page has not answered them.
+   *
+   * It leads with the reassurance, not with a contact address. The commonest
+   * reason a volunteer stops using the portal is fear of breaking the website,
+   * and that fear is answerable in one sentence.
+   */
+  function viewHelp() {
+    var guide = T.guideFor(role());
+    return '<section class="ph-sec ph-help" aria-labelledby="ph-help-h">' +
+      '<h2 class="ph-h" id="ph-help-h">Help</h2>' +
+      '<p class="ph-sub"><b>You cannot break the website from here.</b> The portal is only ' +
+      'allowed to change the club’s information and pictures — never the site itself. ' +
+      'The worst that can happen is wrong words on a page until you correct them.</p>' +
+      '<div class="ph-helprow">' +
+        (guide ? '<a class="ph-hbtn" href="guide.html#' + esc(guide) + '">My guide</a>' : '') +
+        '<a class="ph-hbtn" href="guide.html#how-the-club-portal-works">How the portal works</a>' +
+        '<button class="ph-hbtn" onclick="PortalHome.go(\'siteguide\')">Handbook</button>' +
+        '<a class="ph-hbtn" href="mailto:info@raynerslanefc.co.uk">Email the club</a>' +
+      '</div>' +
       '<button class="ph-allbtn" onclick="PortalHome.toggleAll()" aria-expanded="' + S.showAll + '">' +
-      (S.showAll ? 'Hide the full tool list' : 'View all club tools') + '</button>' +
+      (S.showAll ? 'Hide the classic tile list' : 'Show the classic tile list') + '</button>' +
       '<p class="ph-sub ph-sub--center">' + (S.showAll
-        ? 'The original full list, exactly as it was.'
-        : 'Every tool in the portal, in the classic list.') + '</p></section>';
+        ? 'The original list, exactly as it was.'
+        : 'If you learned the portal on the old screen, it is still here.') + '</p></section>';
   }
 
   // ── ACTIONS ──────────────────────────────────────────────────────────────
@@ -350,6 +477,9 @@
   }
 
   function init() {
+    // Watch for confirmed saves BEFORE the first paint, so a save made in the
+    // first few seconds is recorded like any other.
+    try { if (global.PortalRecent) global.PortalRecent.watch(); } catch (e) {}
     render();
     load();
     setTimeout(mdopsAttention, 1200);
@@ -357,6 +487,6 @@
 
   global.PortalHome = {
     init: init, go: go, toggleAll: toggleAll, showAllAttention: showAllAttention,
-    refresh: load, _state: S
+    paintRecent: paintRecent, refresh: load, _state: S
   };
 }(window));
