@@ -309,7 +309,7 @@
   function viewQuick() {
     var acts = T.quickFor(role()).filter(function (q) {
       var t = T.byId(q.panel);
-      return t && (!t.chairman || isChairman());
+      return t && T.canSee(t, role(), isChairman());
     });
     if (!acts.length) return '';
     return '<section class="ph-sec" aria-labelledby="ph-q-h">' +
@@ -380,7 +380,7 @@
 
   function viewMyWork() {
     var p = T.profileFor(role());
-    var tools = T.homeFor(role()).filter(function (t) { return !t.chairman || isChairman(); });
+    var tools = T.homeFor(role()).filter(function (t) { return T.canSee(t, role(), isChairman()); });
     return '<section class="ph-sec" aria-labelledby="ph-my-h">' +
       '<h2 class="ph-h" id="ph-my-h">My club work</h2>' +
       '<p class="ph-sub">The tools a <b>' + esc(p.title) + '</b> normally uses. ' +
@@ -403,7 +403,7 @@
       'Tap a group to see what is inside.</p>' +
       '<div class="ph-areas">';
     T.AREAS.forEach(function (a) {
-      var tools = T.byArea(a.key).filter(function (t) { return !t.chairman || chair; });
+      var tools = T.byArea(a.key).filter(function (t) { return T.canSee(t, role(), chair); });
       if (!tools.length) return;
       var danger = a.key === 'system';
       h += '<details class="ph-area' + (danger ? ' ph-area--care' : '') + '">' +

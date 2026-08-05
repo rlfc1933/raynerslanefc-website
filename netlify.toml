@@ -2,6 +2,74 @@
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
 
+# ── SERVER-SIDE SOURCE IS NOT A PUBLIC PAGE ─────────────────────────────────
+# Netlify publishes the repository ROOT, because the site is plain HTML with no
+# build step. That is what makes the club's editing model work — and it also
+# meant every server-side file was downloadable as if it were a page:
+#
+#     https://raynerslanefc.co.uk/netlify/functions/lib/authz.js   → 200
+#     https://raynerslanefc.co.uk/netlify/functions/lib/invitations.js → 200
+#     https://raynerslanefc.co.uk/supabase/rls-check.sh            → 200
+#
+# No credential was ever in those files — every secret is read from the
+# environment — so nothing was leaked. But the invitation and password PEPPER
+# is a literal in lib/invitations.js, and a pepper that anybody can read adds
+# nothing against an offline attack. The row-level-security scripts and the
+# test suite also describe the shape of the club's data more helpfully than
+# they should to a stranger.
+#
+# WHY A REDIRECT RATHER THAN MOVING THE PUBLISH DIRECTORY
+# ------------------------------------------------------
+# Moving the site into a subdirectory would mean relocating every HTML file,
+# every asset path and the admin's own save paths (PATH_OK in save-data.js) in
+# one change, with no build step to catch a mistake. A rule that returns 404
+# for a handful of prefixes is a hundredth of the risk and is exactly as
+# effective for the thing being fixed.
+#
+# THE LEADING DOT MATTERS
+# -----------------------
+# Functions are INVOKED at /.netlify/functions/<name> — with a dot. These
+# rules match /netlify/... — without one. They are different paths, so
+# blocking the source cannot break a single function call. There is a test
+# that asserts exactly this, because getting it wrong would take the whole
+# site's back end down.
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/tests/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/supabase/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# The dependency manifest and lockfile describe the build, not the club.
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # Guarantee the Sponsor Radar baked business snapshots are bundled with the
 # radar-discover function (it require()s them, but this makes it bulletproof).
 # These ship INSIDE the function bundle — not publicly served.

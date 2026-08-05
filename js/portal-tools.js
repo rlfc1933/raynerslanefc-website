@@ -251,9 +251,12 @@
       desc: 'Historic takings recorded before Match-Day Attendance and Takings. Read-only.',
       roles: ['Chairman', 'V Chairman'] },
 
-    { id: 'users', name: 'Staff Logins', effect: 'internal', chairman: true,
-      desc: 'Add or remove logins, set passwords and see who has signed in.',
-      roles: ['Chairman'] },
+    // Not `chairman: true`. The Vice Chairman must be able to REACH this screen
+    // to disable a compromised account — what he sees inside is trimmed to the
+    // capabilities he actually holds, and the server decides the rest.
+    { id: 'users', name: 'Staff Access', effect: 'internal', staffAccess: true,
+      desc: 'Invite people, disable an account, and see who has signed in.',
+      roles: ['Chairman', 'V Chairman'] },
 
     // ── SYSTEM ────────────────────────────────────────────────────────────
     { id: 'settings', name: 'Website Status', effect: 'view',
@@ -439,6 +442,32 @@
     }
   };
 
+  // ── WHAT THE INTERFACE MAY SHOW ───────────────────────────────────────────
+  // A MIRROR of DEFAULT_CAPS in netlify/functions/lib/authz.js, kept here so
+  // the portal can decide what to DRAW. It decides nothing else.
+  //
+  // This is not a permission. The server re-checks every action against the
+  // signed session, and a hidden button is not a locked door — a test asserts
+  // that the two lists agree, and separate tests assert the server still
+  // refuses an action whose button was merely hidden.
+  //
+  // It exists because the opposite was worse: Nigel holds DISABLE_ACCOUNT
+  // permanently — the club's continuity rule, so a compromised login can be
+  // shut down even when the Chairman is the problem — and the interface was
+  // hiding the only screen where he could use it. A capability nobody can
+  // reach is not a capability.
+  var STAFF_CAPS = {
+    'Chairman':   ['can_view_staff', 'can_manage_users', 'can_disable_account',
+                   'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles'],
+    'V Chairman': ['can_view_staff', 'can_disable_account'],
+  };
+
+  /** Does this role hold this capability BY DEFAULT? Drawing only. */
+  function roleHas(role, cap) {
+    var caps = STAFF_CAPS[profileKey(role)] || STAFF_CAPS[String(role || '')] || [];
+    return caps.indexOf(cap) > -1;
+  }
+
   // Older accounts, and the seven role names the sign-in screen already
   // offers, must keep working. An unknown role falls through to Committee —
   // never to nothing, and never to Chairman.
@@ -535,9 +564,21 @@
     return null;
   }
 
+  /**
+   * May a signed-in person even SEE this tool?
+   * Drawing only — the server re-checks every action regardless.
+   */
+  function canSee(tool, role, isChairman) {
+    if (!tool) return false;
+    if (tool.chairman) return !!isChairman;
+    if (tool.staffAccess) return !!isChairman || roleHas(role, 'can_view_staff');
+    return true;
+  }
+
   global.PortalTools = {
     AREAS: AREAS, TOOLS: TOOLS, PROFILES: PROFILES, ROLE_HOME: ROLE_HOME,
-    EFFECT_LABEL: EFFECT_LABEL, STATUS: STATUS,
+    EFFECT_LABEL: EFFECT_LABEL, STATUS: STATUS, STAFF_CAPS: STAFF_CAPS,
+    roleHas: roleHas, canSee: canSee,
     byId: byId, byArea: byArea, areaByKey: areaByKey, areaOf: areaOf,
     homeFor: homeFor, quickFor: quickFor, guideFor: guideFor,
     profileFor: profileFor, profileKey: profileKey, statusOf: statusOf
