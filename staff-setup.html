@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Set up your Rayners Lane staff account</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Deliberately its own small page. Somebody arriving here has no account
+     yet, so the portal shell would be meaningless — and loading 818 KB of
+     admin.html to type a password twice would be absurd. */
+  body{background:#0b0b0b;color:#fff;font-family:var(--font-b,Arial,Helvetica,sans-serif);margin:0}
+  .wrap{max-width:460px;margin:0 auto;padding:48px 20px}
+  .card{background:#121212;border:1px solid #262626;border-radius:16px;padding:28px 24px}
+  .crest{display:block;width:64px;height:64px;margin:0 auto 18px}
+  h1{font-size:23px;line-height:1.25;margin:0 0 8px;text-align:center}
+  .sub{color:#b5b5b5;font-size:14.5px;line-height:1.6;margin:0 0 22px;text-align:center}
+  label{display:block;font-size:12.5px;color:#cfcfcf;margin:0 0 5px;font-weight:600}
+  input{width:100%;min-width:0;box-sizing:border-box;padding:12px 13px;border-radius:9px;
+        border:1px solid #333;background:#0a0a0a;color:#fff;font-size:16px;margin-bottom:14px}
+  input:focus{outline:2px solid #FFD100;outline-offset:1px;border-color:transparent}
+  button{width:100%;padding:14px;border:0;border-radius:9px;background:#FFD100;color:#111;
+         font-weight:800;font-size:15px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+  button[disabled]{opacity:.55;cursor:default}
+  .msg{margin:16px 0 0;padding:12px 14px;border-radius:9px;font-size:14px;line-height:1.5}
+  .ok{background:rgba(60,160,90,.14);border:1px solid rgba(60,160,90,.4);color:#b7e8c6}
+  .err{background:rgba(200,60,60,.12);border:1px solid rgba(200,60,60,.38);color:#f0bcbc}
+  .hint{color:#8F8F8F;font-size:12.5px;line-height:1.55;margin:10px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <img class="crest" src="img/email-crest.png" alt="Rayners Lane Football Club crest">
+    <h1 id="head">Set up your staff account</h1>
+    <p class="sub" id="sub">Checking your link…</p>
+    <div id="form" hidden>
+      <label for="pw">Choose a password</label>
+      <input type="password" id="pw" autocomplete="new-password" minlength="10">
+      <label for="cf">Type it again</label>
+      <input type="password" id="cf" autocomplete="new-password" minlength="10">
+      <button id="go" type="button">Set my password</button>
+      <p class="hint">At least 10 characters. Nobody at the club can see it —
+        not even the chairman. If you forget it, ask for a new setup link.</p>
+    </div>
+    <div id="msg"></div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var FN = '/.netlify/functions/staff-activate';
+  function $(i){ return document.getElementById(i); }
+  function say(kind, text){ $('msg').innerHTML = '<p class="msg ' + kind + '">' + text + '</p>'; }
+  // The token travels in the URL fragment, not the query string: a fragment is
+  // never sent to the server in a request line and never lands in an access log.
+  var token = (location.hash || '').replace(/^#/, '') ||
+              new URLSearchParams(location.search).get('t') || '';
+
+  function clean() {
+    try { history.replaceState({}, document.title, location.pathname); } catch (e) {}
+  }
+
+  if (!token) { $('sub').textContent = ''; say('err', 'This link is missing its setup code. Ask whoever invited you for a new one.'); return; }
+
+  fetch(FN, { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ token: token, action: 'check' }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j || !j.ok) { $('sub').textContent=''; say('err', (j && j.error) || 'This link is not valid.'); return; }
+      $('head').textContent = j.name ? ('Welcome, ' + j.name) : 'Set up your staff account';
+      $('sub').textContent = 'Choose a password for the username ' + j.username + '.';
+      $('form').hidden = false;
+      $('pw').focus();
+    })
+    .catch(function(){ $('sub').textContent=''; say('err','Could not check that link. Please try again.'); });
+
+  $('go').addEventListener('click', async function(){
+    var pw = $('pw').value, cf = $('cf').value;
+    if (pw.length < 10) return say('err','Please use at least 10 characters.');
+    if (pw !== cf) return say('err','Those two passwords do not match.');
+    $('go').disabled = true; $('go').textContent = 'Setting up…';
+    try {
+      var r = await fetch(FN, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ token: token, password: pw, confirm: cf }) });
+      var j = await r.json();
+      if (j && j.ok) {
+        clean();
+        $('form').hidden = true; $('sub').textContent = '';
+        say('ok', j.message + '<br><br><a href="admin.html" style="color:#FFD100">Go to the portal</a>');
+        return;
+      }
+      say('err', (j && j.error) || 'Something went wrong.');
+    } catch (e) { say('err','Something went wrong. Please try again.'); }
+    $('go').disabled = false; $('go').textContent = 'Set my password';
+  });
+})();
+</script>
+</body>
+</html>

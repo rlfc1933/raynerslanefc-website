@@ -3105,6 +3105,37 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <!-- MANAGE USERS (Chairman only) -->
     <div class="panel" id="panel-users">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-users"></i> Manage Users</div></div>
+
+      <!-- STAFF INVITATIONS — nobody hands over a password.
+           An administrator creates a one-time link; the person follows it and
+           sets a password only they ever know. See lib/invitations.js. -->
+      <div class="slbl">Invite a staff member</div>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)">
+        <p><strong style="color:var(--w)">No passwords are handed out.</strong> You create a
+        one-time setup link and give it to the person privately. They choose their own
+        password — nobody at the club ever sees it, including you.</p>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Their name</label><input type="text" id="inv-name" placeholder="Jenny Pitt"></div>
+        <div class="field"><label class="fl">Username</label><input type="text" id="inv-user" placeholder="jenny"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="fl">Club title</label><input type="text" id="inv-title" placeholder="Secretary"></div>
+        <div class="field"><label class="fl">Role profile</label>
+          <select id="inv-profile">
+            <option value="Committee">Committee</option>
+            <option value="Match Day Secretary">Match Day Secretary</option>
+            <option value="Club Secretary">Club Secretary</option>
+            <option value="Club Management">Club Management</option>
+            <option value="Marketing/Media">Marketing/Media</option>
+            <option value="V Chairman">Vice Chairman</option>
+          </select></div>
+      </div>
+      <button class="save" onclick="invCreate()">Create setup link</button>
+      <div id="inv-out" style="margin-top:12px"></div>
+
+      <div class="slbl" style="margin-top:20px">Invitations</div>
+      <div id="inv-list">Loading&hellip;</div>
       <div class="snote"><p>Decide who can sign in, set their password, and see who&rsquo;s used the portal. <strong style="color:var(--w)">Chairman only.</strong> Everyone starts on a shared default password (the box below is pre-filled with it) until you change it here.</p></div>
       <div class="snote" id="us-syncnote" style="display:none;border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Login store is warming up.</strong> If a change doesn&rsquo;t save, give it a moment and try again. The shared default password always works in the meantime, so nobody&rsquo;s locked out.</p></div>
       <div class="slbl">Add a user</div>
@@ -4022,7 +4053,7 @@ function toggleAllTools() {
 
 function openPanel(name) {
   if ((name === 'users' || name === 'developer') && !staffIsChairman()) { toast('Chairman access only', true); return; }
-  if (name === 'users') initUsers();
+  if (name === 'users') { initUsers(); if (window.invList) invList(); }
   // Historic Match-Day Takings is RETIRED and read-only. Asking for a password
   // just to read the notice explaining it is retired was pure friction, so the
   // panel opens; the figures themselves stay behind the existing gate.
@@ -11056,6 +11087,81 @@ function toast(msg, err) {
       toast(j && j.ok ? ('Sent ' + (j.sent || 0) + ', failed ' + (j.failed || 0)) : 'Could not send');
     }
     supNotes(); health();
+  };
+})();
+</script>
+
+
+<!-- ═══ STAFF INVITATIONS ═══════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+  var FN = '/.netlify/functions/staff-invite';
+  function e(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function when(iso){ if(!iso) return '—'; try{ return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(iso)); }catch(x){ return String(iso).slice(0,16); } }
+
+  async function api(body){
+    var r = await staffAdminFetch(FN, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(Object.assign({ pin: PIN }, body)) }, 'Managing staff access');
+    return r ? await r.json() : null;
+  }
+
+  window.invCreate = async function(){
+    var out = document.getElementById('inv-out');
+    var j = await api({ action:'create',
+      username: (document.getElementById('inv-user')||{}).value || '',
+      name:     (document.getElementById('inv-name')||{}).value || '',
+      title:    (document.getElementById('inv-title')||{}).value || '',
+      profile:  (document.getElementById('inv-profile')||{}).value || '' });
+    if (!j) { out.innerHTML=''; return; }
+    if (!j.ok) { out.innerHTML = '<p class="msg err" style="color:#f0bcbc">'+e(j.error)+'</p>'; return; }
+
+    // The one and only time this link exists. Shown, copyable, never re-fetchable.
+    var link = location.origin + '/staff-setup.html#' + j.setupToken;
+    out.innerHTML =
+      '<div style="border:1px solid rgba(255,209,0,.45);background:rgba(255,209,0,.07);border-radius:10px;padding:14px">' +
+      '<div style="color:var(--y);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Setup link for ' + e(j.invitation.username) + '</div>' +
+      '<input type="text" id="inv-link" readonly value="' + e(link) + '" style="width:100%;box-sizing:border-box;font-size:12px;padding:9px;border-radius:7px;border:1px solid #333;background:#0a0a0a;color:#fff">' +
+      '<div style="margin-top:8px"><button class="save sec" onclick="invCopy()">Copy link</button></div>' +
+      '<p style="color:var(--w);font-size:13px;margin:10px 0 0"><strong>Copy this link now. For security, it will not be shown again.</strong></p>' +
+      '<p style="color:var(--gr);font-size:12.5px;margin:6px 0 0">Give it to them privately. It works once and expires ' + e(when(j.invitation.expires_at)) + '. ' +
+      'If it goes astray, create a replacement — that cancels this one.</p></div>';
+    invList();
+  };
+
+  window.invCopy = function(){
+    var f = document.getElementById('inv-link'); if(!f) return;
+    f.select(); f.setSelectionRange(0, 99999);
+    try { navigator.clipboard.writeText(f.value); } catch(x){ document.execCommand('copy'); }
+    if (typeof toast === 'function') toast('Setup link copied');
+  };
+
+  window.invRevoke = async function(id){
+    if (!confirm('Cancel this invitation? The link will stop working immediately.')) return;
+    var j = await api({ action:'revoke', id:id });
+    if (typeof toast === 'function') toast(j && j.ok ? 'Invitation cancelled' : 'Could not cancel');
+    invList();
+  };
+
+  window.invList = async function(){
+    var el = document.getElementById('inv-list'); if(!el) return;
+    var j = await api({ action:'list' });
+    if (!j) { el.innerHTML=''; return; }
+    if (!j.ok) { el.innerHTML = '<p style="color:var(--gr)">'+e(j.error||'Could not load invitations.')+'</p>'; return; }
+    if (!j.invitations.length) { el.innerHTML = '<p style="color:var(--gr)">No invitations yet.</p>'; return; }
+    var COLOUR = { pending:'#FFD100', used:'#22C55E', expired:'#8F8F8F', revoked:'#8F8F8F' };
+    var WORD   = { pending:'Waiting to be used', used:'Account set up', expired:'Expired', revoked:'Cancelled' };
+    el.innerHTML = j.invitations.map(function(v){
+      return '<div style="display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;margin-bottom:7px;min-width:0">' +
+        '<div style="min-width:0;flex:1">' +
+          '<div style="color:var(--w);font-size:14px;font-weight:700">' + e(v.name || v.username) +
+            ' <span style="color:var(--gr);font-weight:400">· ' + e(v.username) + '</span></div>' +
+          '<div style="color:' + COLOUR[v.status] + ';font-size:12px;margin-top:2px">' + e(WORD[v.status]) +
+            (v.status==='pending' ? ' · expires ' + e(when(v.expires_at)) : '') +
+            ' · ' + e(v.profile||'') + '</div></div>' +
+        (v.status==='pending' ? '<button class="save sec" style="flex-shrink:0;padding:7px 12px;font-size:11px" onclick="invRevoke(\''+e(v.id)+'\')">Cancel</button>' : '') +
+      '</div>';
+    }).join('');
   };
 })();
 </script>
