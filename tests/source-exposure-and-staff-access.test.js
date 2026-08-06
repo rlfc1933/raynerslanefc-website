@@ -162,6 +162,8 @@ test('Staff Access is visible to the Vice Chairman; Developer is not', () => {
   const dev = PT.byId('developer');
   assert.strictEqual(PT.canSee(users, 'V Chairman', false), true, 'Nigel cannot reach Staff Access');
   assert.strictEqual(PT.canSee(dev, 'V Chairman', false), false, 'Nigel can reach Developer');
+  // The System Maintainer may — the developer tools are that role's actual job.
+  assert.strictEqual(PT.canSee(dev, 'System Maintainer', false), true);
   assert.strictEqual(PT.canSee(users, 'Chairman', true), true);
   assert.strictEqual(PT.canSee(dev, 'Chairman', true), true);
 });
@@ -245,8 +247,15 @@ test('a Vice Chairman cannot promote himself or assign a chairman', () => {
   const code = src.replace(/^\s*(\/\/.*)$/gm, '');
   assert.ok(/self_promotion/.test(code), 'self-promotion refusal is gone');
   assert.ok(/no_admin_assign/.test(code), 'chairman assignment is no longer gated');
-  assert.ok(/is_chairman: ADMIN_ROLES\.indexOf\(role\) > -1/.test(code),
-    'is_chairman must be derived from the validated role, never sent');
+  // is_chairman is no longer STORED at all: the account row keeps only the role,
+  // and chairman-ness is derived from it wherever it is needed. That is strictly
+  // stronger than deriving it once at write time — there is no flag to go stale
+  // or to be set by a request.
+  assert.ok(!/is_chairman:/.test(code),
+    'chairman status must not be stored on the account row');
+  const login = fs.readFileSync(path.join(ROOT, 'netlify/functions/staff-login.js'), 'utf8');
+  assert.ok(/ROLES\.ADMIN_ROLES\.indexOf\(u\.role\) > -1/.test(login),
+    'it must be derived from the server-held role at read time');
 });
 
 test('disabling a chairman still needs chairman-level authority', () => {

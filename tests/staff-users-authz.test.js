@@ -99,8 +99,17 @@ test('NOTHING IN THE REQUEST BODY GRANTS AUTHORITY', async (t) => {
   });
 
   await t.test('is_chairman is derived from the server-validated role', () => {
+    // Stronger than before: chairman-ness is no longer STORED at all. The
+    // account row keeps only the role, and admin status is derived from it at
+    // read time — so there is no flag to go stale, and none for a request to
+    // set. The row cannot disagree with the role it holds.
     const src = strip(read('netlify/functions/staff-users.js'));
-    assert.match(src, /is_chairman: ADMIN_ROLES\.indexOf\(role\) > -1/);
+    assert.ok(!/is_chairman:/.test(src), 'no chairman flag may be written to the row');
+    const login = strip(read('netlify/functions/staff-login.js'));
+    assert.match(login, /ROLES\.ADMIN_ROLES\.indexOf\(u\.role\) > -1/,
+      'it must be derived from the role the server holds');
+    const session = strip(read('netlify/functions/md-session.js'));
+    assert.match(session, /ROLES\.ADMIN_ROLES\.indexOf\(v\.user\.role\) > -1/);
   });
 
   await t.test('a committee member supplying isChairman:true stays ordinary', async () => {
@@ -223,23 +232,34 @@ test('HIGH-RISK ACTIONS NEED A PERSONAL PASSWORD', async (t) => {
    ══════════════════════════════════════════════════════════════════════════ */
 test('DISABLING AN ACCOUNT IS NOT JUST A LABEL', async (t) => {
   await t.test('staff-login refuses a disabled account before checking the password', () => {
-    const src = read('netlify/functions/staff-login.js');
-    const i = src.indexOf("u.disabled");
-    const j = src.indexOf("u.pass_hash !== hash");
+    // The check moved into lib/staff-store.js with the store itself. The ORDER
+    // is the guarantee: a disabled account is refused before its password is
+    // read, so the right password cannot rescue it.
+    const src = read('netlify/functions/lib/staff-store.js');
+    const i = src.indexOf("reason: 'account-disabled'");
+    const j = src.indexOf('timingSafeEqual');
     assert.ok(i > -1 && i < j, 'the disabled check must come first');
     assert.match(src, /account-disabled/);
   });
 
   await t.test('md-session refuses to mint a token for a disabled account', () => {
+    // The store answers with a reason; md-session acts on it. No token is
+    // issued at any authentication strength, which is what makes "disabled"
+    // mean something in Match Day Ops as well as at sign-in.
     const src = read('netlify/functions/md-session.js');
-    assert.match(src, /u && u\.disabled/);
-    assert.match(src, /account-disabled/);
+    assert.match(src, /v\.reason === 'account-disabled'/);
+    assert.match(src, /return resp\(200, \{ ok: false, error: 'account-disabled' \}\)/);
   });
 
   await t.test('disable preserves the account rather than deleting it', () => {
+    // Disabling now goes through the store, which flips the flag and the status
+    // and DELETES NOTHING — the row, the role and the history all survive.
     const src = strip(read('netlify/functions/staff-users.js'));
-    assert.match(src, /disabled_at:.*new Date\(\)\.toISOString\(\)/);
-    assert.match(src, /disabled_by: action === 'disable' \? actor\.username : null/);
+    assert.match(src, /STORE\.setDisabled\(username, action === 'disable'\)/);
+    const store = strip(read('netlify/functions/lib/staff-store.js'));
+    assert.match(store, /disabled: !!disabled, status: status/);
+    assert.ok(!/delete /.test(store.match(/async function setDisabled[\s\S]*?\n\}/)[0]),
+      'disable must never delete');
   });
 });
 
@@ -248,17 +268,36 @@ test('DISABLING AN ACCOUNT IS NOT JUST A LABEL', async (t) => {
    ══════════════════════════════════════════════════════════════════════════ */
 test('NO SECRET LEAVES THE FUNCTION, AND NO ROLE IS INVENTED', async (t) => {
   await t.test('the user list never carries a password hash', () => {
-    const u = FN._internal.publicUser('Pete', {
-      role: 'Chairman', is_chairman: true, pass_hash: 'deadbeef', disabled: false,
+    const u = FN._internal.publicUser({
+      username: 'pete', role: 'Chairman', pass_hash: 'deadbeef', disabled: false,
     });
     assert.ok(!('pass_hash' in u), 'pass_hash must never be returned');
-    assert.strictEqual(u.has_custom_password, true, 'presence may be reported, never the value');
+    assert.ok(!JSON.stringify(u).includes('deadbeef'));
+    // Presence is still reportable — 'active' means a password exists — but the
+    // value never is.
+    assert.strictEqual(u.status, 'active');
   });
 
   await t.test('roles are validated against a server-side list', () => {
     assert.ok(FN._internal.ASSIGNABLE_ROLES.includes('Committee'));
     assert.ok(!FN._internal.ASSIGNABLE_ROLES.includes('Superuser'));
-    assert.deepStrictEqual(FN._internal.ADMIN_ROLES, ['Chairman']);
+    // Both administrative roles: Chairman runs the club, System Maintainer keeps
+    // the site working. Assigning either is escalation.
+    assert.deepStrictEqual(Array.from(FN._internal.ADMIN_ROLES).sort(),
+      ['Chairman', 'System Maintainer']);
+    // This route's own list deliberately INCLUDES the administrative roles, so
+    // that asking for one produces the honest refusal ("only a chairman-level
+    // account can assign that role") rather than the untrue "that is not a role
+    // this club uses". The guard is the escalation check below it, not the list.
+    const src = strip(read('netlify/functions/staff-users.js'));
+    assert.match(src, /const escalating = ADMIN_ROLES\.indexOf\(role\) > -1/);
+    assert.match(src, /if \(escalating\) \{[\s\S]*?self_promotion[\s\S]*?no_admin_assign[\s\S]*?needs_elevated/,
+      'assigning an administrative role needs a second person, the capability and elevation');
+    // And the CLUB-WIDE list — the one everything else derives from — excludes
+    // them, so no other caller can hand one out.
+    const ROLES = require('../netlify/functions/lib/roles.js');
+    assert.strictEqual(ROLES.ASSIGNABLE_ROLES.indexOf('System Maintainer'), -1);
+    assert.strictEqual(ROLES.ASSIGNABLE_ROLES.indexOf('Chairman'), -1);
   });
 
   await t.test('an unknown role is refused', async () => {

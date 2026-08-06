@@ -71,12 +71,19 @@ test('the roster is never cached', () => {
 test('listing an account is not admitting it', () => {
   // The roster is a display list. Every one of these still has to pass
   // staff-login.js, which checks the password and refuses disabled accounts.
+  // The password check moved from staff-login.js into lib/staff-store.js when
+  // the store moved off Netlify Blobs. The guarantee is unchanged and is
+  // asserted where it now lives.
+  const store = fs.readFileSync(path.join(ROOT, 'netlify/functions/lib/staff-store.js'), 'utf8');
+  assert.ok(/if \(u\.disabled\) return \{ ok: false, reason: 'account-disabled' \}/.test(store),
+    'a disabled account must be refused before the password is read');
+  assert.ok(/if \(!u\.pass_hash\) return \{ ok: false, reason: 'setup-required' \}/.test(store),
+    'an account with no password must be refused, never treated as a pass');
+  assert.ok(/crypto\.timingSafeEqual/.test(store), 'the comparison must be constant time');
+  // And staff-login must act on that answer rather than deciding for itself.
   const login = fs.readFileSync(path.join(ROOT, 'netlify/functions/staff-login.js'), 'utf8');
-  assert.ok(/u\.pass_hash !== hash\(b\.password\)/.test(login));
-  assert.ok(/if \(u\.disabled\) return resp\(200, \{ ok: false, error: 'account-disabled' \}\)/.test(login));
-  // An account with no password cannot match any hash, so setup_required
-  // accounts are refused by that same line without needing a special case.
-  assert.ok(!/pass_hash \|\| /.test(login), 'never treat a missing hash as a pass');
+  assert.ok(/STORE\.verifyPassword\(/.test(login));
+  assert.ok(/if \(!v\.ok\) return resp\(200, \{ ok: false, error: v\.reason \}\)/.test(login));
 });
 
 // ── 2 · THE SIGN-IN SCREEN CAN ACTUALLY READ IT ─────────────────────────────
@@ -93,7 +100,12 @@ test('the sign-in screen no longer asks for a session it cannot have', () => {
 test('a roster failure falls back to a usable list rather than a blank screen', () => {
   const fn = admin.match(/function showRoleLogin\(\) \{[\s\S]*?\n\}/)[0];
   assert.ok(/staffUsers = staffDefaultUsers\(\)/.test(fn), 'seed the list before fetching');
-  assert.ok(/if \(!j \|\| !j\.ok \|\| !j\.staff \|\| !j\.staff\.length\) return/.test(fn),
+  // A store FAILURE is now said out loud rather than swallowed — that silence
+  // is what hid the original fault. An empty-but-successful roster still keeps
+  // the placeholder list rather than clearing the screen.
+  assert.ok(/if \(!j \|\| j\.ok === false\)/.test(fn), 'a store failure must be shown');
+  assert.ok(/could not be loaded/.test(fn), 'and must say so in words');
+  assert.ok(/if \(!j\.staff \|\| !j\.staff\.length\) return/.test(fn),
     'an empty roster must keep the fallback, not clear the screen');
   assert.ok(/\.catch\(/.test(fn));
 });

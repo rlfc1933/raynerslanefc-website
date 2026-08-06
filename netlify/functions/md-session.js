@@ -21,6 +21,8 @@
 // a shared-password login. See lib/md-auth.js for why that is the honest line.
 
 const adminOk = require('./lib/pin');
+const STORE = require('./lib/staff-store');
+const ROLES = require('./lib/roles');
 const crypto = require('crypto');
 const AUTH = require('./lib/md-auth');
 
@@ -64,29 +66,30 @@ exports.handler = async function (event) {
   let role = username, isChairman = username === 'Chairman', auth = null;
 
   // 1 · custom per-person password
+  // Accounts moved from Netlify Blobs to Supabase (lib/staff-store.js) — the
+  // Blobs store was never provisioned for this site, so this branch could never
+  // find anybody and every session was minted from the shared password.
   try {
-    const { getStore } = await import('@netlify/blobs');
-    const users = (await getStore('rlfc-staff').get('users', { type: 'json' })) || {};
-    const u = users[username];
-    if (u && u.disabled) {
+    const v = await STORE.verifyPassword(username, password);
+    if (v.ok) {
+      auth = 'custom';
+      role = v.user.role || username;
+      // Derived from the validated role, never from a stored flag.
+      isChairman = ROLES.ADMIN_ROLES.indexOf(v.user.role) > -1;
+    } else if (v.reason === 'account-disabled') {
       // No token for a disabled account, at any authentication strength. This
       // is the check that makes "disable" mean something everywhere else.
       return resp(200, { ok: false, error: 'account-disabled' });
+    } else if (v.reason === 'wrong-password') {
+      // A personal password EXISTS and was missed. Do not fall through to the
+      // shared default — that would make setting one pointless.
+      return resp(200, { ok: false, error: 'wrong-password' });
     }
-    if (u) {
-      if (u.pass_hash === hash(password)) {
-        auth = 'custom';
-        role = u.role || username;
-        isChairman = !!u.is_chairman;
-      } else {
-        // A custom password EXISTS and was missed. Do not fall through to the
-        // shared default — that would make setting one pointless.
-        return resp(200, { ok: false, error: 'wrong-password' });
-      }
-    }
+    // 'not-found' and 'setup-required' fall through to the shared default,
+    // which is what keeps the committee working while accounts are activated.
   } catch (e) {
-    // Blob store unavailable — fall through to the shared password so the
-    // committee is never locked out of the gate on a match day.
+    // Store unavailable — fall through to the shared password so the committee
+    // is never locked out of the gate on a match day.
   }
 
   // 2 · shared committee default

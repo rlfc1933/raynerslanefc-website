@@ -36,6 +36,7 @@
 'use strict';
 
 const adminOk = require('./lib/pin');
+const STORE = require('./lib/staff-store');
 
 function resp(code, obj) {
   return {
@@ -52,29 +53,10 @@ function resp(code, obj) {
   };
 }
 
-/**
- * One word for the state of an account, in the words the club uses.
- *
- *   active          has a password and may sign in
- *   setup_required  exists, has no password yet, cannot sign in
- *   disabled        switched off; refused before the password is even checked
- */
-function statusOf(u) {
-  if (u.disabled) return 'disabled';
-  if (!u.pass_hash) return 'setup_required';
-  return 'active';
-}
-
-/** The safe shape. Everything else about the account stays on the server. */
-function publicEntry(username, u) {
-  return {
-    username: username,
-    name: u.name || null,
-    title: u.title || null,
-    role: u.role || username,
-    status: statusOf(u),
-  };
-}
+// The shape of an account, and the word for its state, are decided once in
+// lib/staff-store.js. This function used to derive them a second time from the
+// raw record — which meant two places had an opinion about what "active" means
+// and about which fields are safe to send. There is now one.
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
@@ -85,21 +67,38 @@ exports.handler = async function (event) {
   }
   if (!adminOk(pin)) return resp(401, { ok: false, error: 'Unauthorized' });
 
-  let users;
   try {
-    const { getStore } = await import('@netlify/blobs');
-    users = (await getStore('rlfc-staff').get('users', { type: 'json' })) || {};
+    const rows = await STORE.listUsers();
+    const staff = rows.map((u) => ({
+      username: u.username,
+      name: u.name || null,
+      title: u.title || null,
+      role: u.role,
+      status: u.status,
+    }));
+    return resp(200, { ok: true, staff: staff, store: true });
   } catch (e) {
-    // The store being unavailable must not lock the committee out of the
-    // screen entirely — the caller falls back to temporary access.
-    return resp(200, { ok: true, staff: [], store: false });
+    // A store failure is REPORTED, not swallowed. Silently returning an empty
+    // list is what made the original fault invisible: the screen fell back to
+    // generic role names and looked like "the accounts were never created".
+    // The caller shows a message and keeps temporary access available.
+    console.error('[staff-roster] store unavailable:', (e && e.message) || e);
+    return resp(200, {
+      ok: false, store: false, staff: [],
+      error: 'The staff list could not be loaded. Temporary committee access is still available.',
+    });
   }
-
-  const staff = Object.keys(users)
-    .map((k) => publicEntry(k, users[k]))
-    .sort((a, b) => String(a.name || a.username).localeCompare(String(b.name || b.username)));
-
-  return resp(200, { ok: true, staff: staff, store: true });
 };
 
-exports._internal = { statusOf, publicEntry };
+// Re-exported so the sign-in tests can assert the shape without reaching
+// into the store's internals.
+exports._internal = {
+  statusOf: function (u) { return STORE.publicUser(u).status; },
+  publicEntry: function (username, u) {
+    const p = STORE.publicUser(Object.assign({ username: username }, u, {
+      display_name: u.display_name || u.name || null,
+      club_title: u.club_title || u.title || null,
+    }));
+    return { username: p.username, name: p.name, title: p.title, role: p.role, status: p.status };
+  },
+};

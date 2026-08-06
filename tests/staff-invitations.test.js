@@ -11,12 +11,12 @@
 // ════════════════════════════════════════════════════════════════════════════
 'use strict';
 
-const stub = require('./helpers/blob-stub.js');
-
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
+const { makeDriver } = require('./helpers/staff-store-driver.js');
+const STORE = require('../netlify/functions/lib/staff-store.js');
 
 process.env.MD_TOKEN_SECRET = process.env.MD_TOKEN_SECRET || 'test-secret-at-least-16-chars-long';
 process.env.ADMIN_PIN = process.env.ADMIN_PIN || 'test-pin-1234';
@@ -30,7 +30,8 @@ const AUTH = require('../netlify/functions/lib/md-auth.js');
 const INV = require('../netlify/functions/lib/invitations.js');
 // Point every store read/write at memory. Nothing in this file can reach the
 // club's real staff accounts.
-INV._setStoreFactory(stub.getStore);
+let DB = makeDriver();
+STORE._setDriver(DB);
 const INVITE_FN = require('../netlify/functions/staff-invite.js');
 const ACTIVATE_FN = require('../netlify/functions/staff-activate.js');
 const BOOTSTRAP_FN = require('../netlify/functions/staff-bootstrap.js');
@@ -44,7 +45,7 @@ const invite = (body, token) => INVITE_FN.handler({
 const activate = (body) => ACTIVATE_FN.handler({ httpMethod: 'POST', headers: {}, body: JSON.stringify(body) });
 const PETE = () => tok('pete', 'Chairman', true, 'custom');
 
-test.beforeEach(() => stub.reset());
+test.beforeEach(() => { DB = makeDriver(); STORE._setDriver(DB); });
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 test('A TOKEN IS SHOWN ONCE AND STORED NEVER', async (t) => {
@@ -59,7 +60,7 @@ test('A TOKEN IS SHOWN ONCE AND STORED NEVER', async (t) => {
 
   await t.test('only a HASH is persisted — the raw token is nowhere', async () => {
     const j = parse(await invite({ action: 'create', username: 'jenny', profile: 'Committee' }, PETE()));
-    const stored = JSON.stringify(stub._stores['rlfc-staff'].invitations);
+    const stored = JSON.stringify(DB._tables.la_staff_invitations);
     assert.ok(!stored.includes(j.setupToken), 'the raw token must not be in the store');
     assert.match(stored, /"token_hash":"[a-f0-9]{64}"/, 'a sha-256 hash is what is kept');
   });
@@ -89,16 +90,18 @@ test('AN INVITATION WORKS EXACTLY ONCE', async (t) => {
     const token = await fresh('jenny', 'Match Day Secretary');
     const j = parse(await activate({ token, password: 'a-good-long-password', confirm: 'a-good-long-password' }));
     assert.strictEqual(j.ok, true, j.error);
-    const users = stub._stores['rlfc-staff'].users;
-    assert.ok(users.jenny.pass_hash, 'a password hash is stored');
-    assert.strictEqual(users.jenny.pending, false, 'the account is now active');
-    assert.strictEqual(users.jenny.is_chairman, false);
+    const jenny = DB._tables.la_staff_users.find((r) => r.username === 'jenny');
+    assert.ok(jenny.pass_hash, 'a password hash is stored');
+    assert.strictEqual(jenny.status, 'active', 'the account is now active');
+    // Chairman-ness is no longer stored at all — it is derived from the role,
+    // so there is no flag that could be set on an ordinary account.
+    assert.ok(!('is_chairman' in jenny));
   });
 
   await t.test('the plain password is never stored', async () => {
     const token = await fresh('jenny');
     await activate({ token, password: 'plain-text-password-here', confirm: 'plain-text-password-here' });
-    const dump = JSON.stringify(stub._stores['rlfc-staff']);
+    const dump = JSON.stringify(DB._tables);
     assert.ok(!dump.includes('plain-text-password-here'), 'the password must not appear anywhere');
   });
 
@@ -107,7 +110,9 @@ test('AN INVITATION WORKS EXACTLY ONCE', async (t) => {
     await activate({ token, password: 'a-good-long-password', confirm: 'a-good-long-password' });
     const j = parse(await activate({ token, password: 'another-long-password', confirm: 'another-long-password' }));
     assert.strictEqual(j.ok, false);
-    assert.match(j.error, /already been used/);
+    // The message is now IDENTICAL for every bad token — used, expired,
+      // revoked or never real. A caller probing tokens must not learn which.
+      assert.match(j.error, /Something went wrong|not valid|try again/i);
   });
 
   await t.test('a wrong token is refused, and says nothing useful', async () => {
@@ -120,10 +125,12 @@ test('AN INVITATION WORKS EXACTLY ONCE', async (t) => {
 
   await t.test('an expired token is refused', async () => {
     const token = await fresh('jenny');
-    const all = stub._stores['rlfc-staff'].invitations;
+    const all = DB._tables.la_staff_invitations;
     Object.keys(all).forEach((k) => { all[k].expires_at = new Date(Date.now() - 1000).toISOString(); });
     const j = parse(await activate({ token, password: 'a-good-long-password', confirm: 'a-good-long-password' }));
-    assert.match(j.error, /expired/);
+    // The message is now IDENTICAL for every bad token — used, expired,
+      // revoked or never real. A caller probing tokens must not learn which.
+      assert.match(j.error, /Something went wrong|not valid|try again/i);
   });
 
   await t.test('a revoked token is refused', async () => {
@@ -131,7 +138,9 @@ test('AN INVITATION WORKS EXACTLY ONCE', async (t) => {
     const id = parse(await invite({ action: 'list' }, PETE())).invitations[0].id;
     await invite({ action: 'revoke', id }, PETE());
     const j = parse(await activate({ token, password: 'a-good-long-password', confirm: 'a-good-long-password' }));
-    assert.match(j.error, /cancelled/);
+    // The message is now IDENTICAL for every bad token — used, expired,
+      // revoked or never real. A caller probing tokens must not learn which.
+      assert.match(j.error, /Something went wrong|not valid|try again/i);
   });
 
   await t.test('a REPLACEMENT invalidates the previous link', async () => {
@@ -170,15 +179,19 @@ test('AN INVITATION WORKS EXACTLY ONCE', async (t) => {
 test('A PENDING ACCOUNT CANNOT SIGN IN', async (t) => {
   await t.test('it is created with no password hash', async () => {
     await invite({ action: 'create', username: 'jenny', profile: 'Committee' }, PETE());
-    const u = stub._stores['rlfc-staff'].users.jenny;
-    assert.strictEqual(u.pending, true);
+    const u = DB._tables.la_staff_users.find(r => r.username === 'jenny');
+    assert.strictEqual(u.status, 'setup_required');
     assert.strictEqual(u.pass_hash, undefined, 'no password exists until they set one');
   });
 
   await t.test('staff-login cannot admit a row with no hash', () => {
-    const src = read('netlify/functions/staff-login.js');
-    assert.match(src, /u\.pass_hash !== hash\(b\.password\)/,
-      'an absent hash can never equal a computed hash, so a pending row is refused');
+    // The check moved into lib/staff-store.js with the store itself. An account
+    // with no password is refused by name — it is never treated as a match.
+    const store = read('netlify/functions/lib/staff-store.js');
+    assert.match(store, /if \(!u\.pass_hash\) return \{ ok: false, reason: 'setup-required' \}/,
+      'a pending row must be refused explicitly');
+    const login = read('netlify/functions/staff-login.js');
+    assert.match(login, /STORE\.verifyPassword\(/);
   });
 });
 
@@ -232,62 +245,35 @@ test('INVITING IS AN ADMINISTRATIVE ACT', async (t) => {
 });
 
 /* ══════════════════════════════════════════════════════════════════════════ */
-test('THE BOOTSTRAP CAN DO ONE THING, ONCE', async (t) => {
+test('THE TOKEN-MINTING BOOTSTRAP IS RETIRED', async (t) => {
+  // It produced a setup TOKEN that somebody had to copy out of a terminal and
+  // carry to Pete — a live credential in transit, seen by whoever ran it.
+  // chairman-setup.html replaced it: Pete types his own password directly, so
+  // no token exists at any point. Two routes that can both make a first
+  // Chairman is one more than the club needs.
   const call = (body) => BOOTSTRAP_FN.handler({ httpMethod: 'POST', headers: {}, body: JSON.stringify(body || {}) });
 
-  await t.test('OFF by default', async () => {
+  await t.test('it refuses unconditionally, flag or no flag', async () => {
     delete process.env.STAFF_BOOTSTRAP_ENABLED;
-    const r = await call({});
+    assert.strictEqual((await call({})).statusCode, 410);
+    process.env.STAFF_BOOTSTRAP_ENABLED = '1';
+    const r = await call({ username: 'pete' });
     assert.strictEqual(r.statusCode, 410);
-    assert.strictEqual(parse(r).closed, true);
-  });
-
-  await t.test('enabled, it creates a Chairman INVITATION and no password', async () => {
-    process.env.STAFF_BOOTSTRAP_ENABLED = '1';
-    const j = parse(await call({ username: 'pete' }));
-    assert.strictEqual(j.ok, true, j.error);
-    assert.ok(j.setupToken);
-    assert.strictEqual(stub._stores['rlfc-staff'].users.pete.pending, true);
-    assert.strictEqual(stub._stores['rlfc-staff'].users.pete.pass_hash, undefined);
+    assert.strictEqual(parse(r).retired, true);
     delete process.env.STAFF_BOOTSTRAP_ENABLED;
   });
 
-  await t.test('the role cannot be chosen by the caller', async () => {
-    process.env.STAFF_BOOTSTRAP_ENABLED = '1';
-    const j = parse(await call({ username: 'attacker', role: 'Chairman', profile: 'Chairman', isChairman: true }));
-    assert.strictEqual(j.invitation.profile, 'Chairman', 'it always makes a Chairman — there is nothing else to ask for');
-    const src = strip(read('netlify/functions/staff-bootstrap.js'));
-    assert.ok(!/b\.role|body\.role|b\.profile/.test(src), 'the role must not be read from the request');
-    delete process.env.STAFF_BOOTSTRAP_ENABLED;
+  await t.test('it can no longer mint a token at all', () => {
+    const code = strip(read('netlify/functions/staff-bootstrap.js'));
+    assert.ok(!/setupToken/.test(code));
+    assert.ok(!/createInvite|INV\.create/.test(code));
   });
 
-  await t.test('it closes itself once a Chairman is active', async () => {
-    process.env.STAFF_BOOTSTRAP_ENABLED = '1';
-    const j = parse(await call({ username: 'pete' }));
-    await activate({ token: j.setupToken, password: 'a-good-long-password', confirm: 'a-good-long-password' });
-    const again = await call({ username: 'someone-else' });
-    assert.strictEqual(again.statusCode, 410, 'a second run must be refused even with the flag on');
-    delete process.env.STAFF_BOOTSTRAP_ENABLED;
-  });
-
-  await t.test('replaying the original request fails', async () => {
-    process.env.STAFF_BOOTSTRAP_ENABLED = '1';
-    const j = parse(await call({ username: 'pete' }));
-    await activate({ token: j.setupToken, password: 'a-good-long-password', confirm: 'a-good-long-password' });
-    const replay = parse(await activate({ token: j.setupToken, password: 'a-good-long-password', confirm: 'a-good-long-password' }));
-    assert.strictEqual(replay.ok, false);
-    delete process.env.STAFF_BOOTSTRAP_ENABLED;
-  });
-
-  await t.test('nothing secret is logged', () => {
-    const src = read('netlify/functions/staff-bootstrap.js');
-    const warns = src.match(/console\.\w+\([\s\S]*?\);/g) || [];
-    warns.forEach((w) => assert.ok(!/token|password|hash/i.test(w.replace(/\/\/.*$/gm, ''))));
-  });
-
-  await t.test('it is not wired into netlify.toml', () => {
-    assert.ok(!read('netlify.toml').includes('STAFF_BOOTSTRAP_ENABLED'),
-      'the flag must be set deliberately in Netlify, never committed');
+  await t.test('the page that replaced it never produces one either', () => {
+    const code = strip(read('netlify/functions/staff-chairman-setup.js'));
+    assert.ok(!/setupToken|mintToken|createInvite/.test(code));
+    assert.match(code, /STORE\.setPassword\(WHO, password\)/,
+      'the password comes straight from the person');
   });
 });
 
@@ -303,8 +289,10 @@ test('NO CREDENTIAL IS COMMITTED ANYWHERE', async (t) => {
   });
 
   await t.test('the invitation module holds no literal secret', () => {
-    const src = read('netlify/functions/lib/invitations.js');
-    assert.ok(!/randomBytes\(\d+\)\.toString\('hex'\) *= *'/.test(src));
-    assert.match(src, /crypto\.randomBytes\(32\)/, 'the token is generated, never fixed');
+    // Token generation moved into lib/staff-store.js with the store itself.
+    const store = read('netlify/functions/lib/staff-store.js');
+    assert.match(store, /crypto\.randomBytes\(32\)/, 'the token is generated, never fixed');
+    const inv = read('netlify/functions/lib/invitations.js');
+    assert.ok(!/=\s*'[A-Za-z0-9+/_-]{20,}'/.test(strip(inv)), 'no fixed token or key');
   });
 });

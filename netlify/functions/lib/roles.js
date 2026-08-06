@@ -30,8 +30,28 @@
 // ════════════════════════════════════════════════════════════════════════════
 'use strict';
 
+/**
+ * Roles whose assignment is privilege escalation.
+ *
+ * DEFINED FIRST, ON PURPOSE. ASSIGNABLE_ROLES below is derived by subtracting
+ * this list, so a role added to ROLES without being added here would silently
+ * become assignable by anyone holding MANAGE_USERS. Declaring the guard above
+ * the thing it guards makes that mistake harder to make and obvious to read.
+ *
+ * Assigning any of these needs CAP.ASSIGN_ADMIN *and* the assigner's own
+ * personal password, and none can ever be assigned to oneself — making
+ * somebody more powerful always takes a second person.
+ */
+const ADMIN_ROLES = ['Chairman', 'System Maintainer'];
+
 /** Every role that may be assigned to an account. Order is display order. */
 const ROLES = [
+  // The named person who maintains the site itself. Distinct from Chairman:
+  // the Chairman runs the club, the System Maintainer keeps the machinery
+  // working — including the case where what is broken is the permission
+  // system. It is an individual account, not a shared "admin" login, and every
+  // action it takes is attributed to that name like any other.
+  'System Maintainer',
   'Chairman',
   'V Chairman',
   'Club Secretary',
@@ -46,14 +66,6 @@ const ROLES = [
   'Committee',
   'Volunteer',
 ];
-
-/**
- * Roles whose assignment is privilege escalation.
- *
- * Only Chairman. Assigning it needs CAP.ASSIGN_ADMIN *and* the assigner's own
- * personal password, and it can never be assigned to oneself.
- */
-const ADMIN_ROLES = ['Chairman'];
 
 /** Roles anyone holding MANAGE_USERS may assign — everything except Chairman. */
 const ASSIGNABLE_ROLES = ROLES.filter((r) => ADMIN_ROLES.indexOf(r) === -1);
