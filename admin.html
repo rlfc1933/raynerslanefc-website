@@ -99,6 +99,40 @@
     .pin-logo{width:70px;height:70px;object-fit:contain}
     .pin-title{font-family:var(--fd);font-size:34px;letter-spacing:.06em;text-align:center}
     .pin-sub{font-family:var(--fc);font-size:14px;color:var(--gr);letter-spacing:.08em;text-align:center}
+    /* ── WHO'S SIGNING IN — people, not role names ─────────────────────────
+       Each person is a full-width target with their name, their job and the
+       state of their account. An account awaiting setup is SHOWN, greyed but
+       readable: hiding it is what made people think the portal was broken. */
+    .rl-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .rl-person{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+      min-height:60px;padding:12px 14px;text-align:left;cursor:pointer;
+      background:var(--c);border:1px solid var(--br);border-radius:11px;color:var(--w);
+      -webkit-tap-highlight-color:transparent}
+    .rl-person:hover,.rl-person:focus-visible{border-color:var(--y)}
+    .rl-person.is-off{opacity:.55}
+    .rl-person__txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+    .rl-person__name{font-family:var(--fb);font-size:16px;font-weight:700;line-height:1.2}
+    .rl-person__role{font-family:var(--fc);font-size:12px;letter-spacing:.06em;color:var(--gr)}
+    .rl-badge{flex:0 0 auto;font-family:var(--fc);font-size:10px;font-weight:800;letter-spacing:.1em;
+      text-transform:uppercase;padding:5px 9px;border-radius:999px;border:1px solid}
+    .rl-badge--ok{color:var(--su);border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.08)}
+    .rl-badge--wait{color:var(--y);border-color:rgba(255,209,0,.4);background:rgba(255,209,0,.08)}
+    .rl-badge--off{color:var(--re);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
+    .rl-chosen{display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-family:var(--fc);font-size:13px;color:var(--gr)}
+    .rl-chosen b{color:var(--w)}
+    .rl-chosen button{background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;
+      font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
+    .rl-wait{font-family:var(--fb);font-size:14px;line-height:1.55;color:#DEDCD6;
+      border:1px solid rgba(255,209,0,.35);background:rgba(255,209,0,.06);border-radius:11px;padding:14px}
+    .rl-wait b{display:block;color:var(--w);margin-bottom:6px}
+    .rl-temp{display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;
+      border-top:1px solid var(--br);padding-top:14px;margin-top:2px}
+    .rl-temp button{background:none;border:1px solid var(--br);border-radius:9px;color:var(--w);
+      font-family:var(--fc);font-size:13px;font-weight:700;padding:11px 16px;cursor:pointer;width:100%}
+    .rl-temp button:hover{border-color:var(--y)}
+    .rl-temp span{font-family:var(--fb);font-size:12px;color:var(--gr)}
+    @media(max-width:560px){.rl-list{max-height:44vh}.rl-person__name{font-size:15px}}
     .pin-dots{display:flex;gap:12px}
     .pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--br);background:transparent;transition:all .15s}
     .pin-dot.filled{background:var(--y);border-color:var(--y)}
@@ -677,12 +711,44 @@
 <!-- ROLE LOGIN (after the PIN — recognises who's signing in) -->
 <div id="role-screen" style="display:none;position:fixed;inset:0;z-index:60;background:var(--bk);flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px">
   <img src="img/badge.png" class="pin-logo" alt="RLFC">
-  <div style="text-align:center"><div class="pin-title">WHO'S SIGNING IN?</div><div class="pin-sub">Choose your role &amp; enter your password</div></div>
-  <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px">
-    <select id="role-user" style="width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fc);font-size:16px;padding:14px 12px"></select>
-    <input type="password" id="role-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')submitRoleLogin()" style="width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fb);font-size:16px;padding:14px 12px">
+  <div style="text-align:center"><div class="pin-title">WHO'S SIGNING IN?</div><div class="pin-sub">Choose yourself from the list</div></div>
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px">
+
+    <!-- THE PEOPLE. Filled from staff-roster.js, which needs no session —
+         see showRoleLogin() for why the old call could never have worked. -->
+    <div id="role-list" class="rl-list"></div>
+
+    <!-- Chosen an ACTIVE account: ask for their own password. -->
+    <div id="role-pwbox" style="display:none;flex-direction:column;gap:10px">
+      <div class="rl-chosen">Signing in as <b id="role-who"></b>
+        <button type="button" onclick="unpickRole()">Not you?</button></div>
+      <input type="password" id="role-pass" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitRoleLogin()" style="width:100%;background:var(--c);border:1px solid var(--br);border-radius:10px;color:var(--w);font-family:var(--fb);font-size:16px;padding:14px 12px">
+      <button onclick="submitRoleLogin()" style="width:100%;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;font-size:16px;letter-spacing:.04em;padding:15px;border:none;border-radius:10px;cursor:pointer">Sign in &#8594;</button>
+    </div>
+
+    <!-- Chosen an account that has not finished setup. Nothing to type: the
+         answer is a setup link, and this says who to ask for one. -->
+    <div id="role-pending" style="display:none;flex-direction:column;gap:10px">
+      <div class="rl-chosen">Signing in as <b id="role-who2"></b>
+        <button type="button" onclick="unpickRole()">Not you?</button></div>
+      <div class="rl-wait">
+        <b>Your account is ready, but you still need to create your personal password.</b>
+        Ask Pete or DEV for your private setup link. It opens once, you choose your own
+        password, and nobody at the club ever sees it — including them.
+      </div>
+    </div>
+
     <div id="role-err" style="font-family:var(--fc);font-size:13px;color:var(--re);min-height:16px;text-align:center"></div>
-    <button onclick="submitRoleLogin()" style="width:100%;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;font-size:16px;letter-spacing:.04em;padding:15px;border:none;border-radius:10px;cursor:pointer">Sign in &#8594;</button>
+
+    <!-- TEMPORARY COMMITTEE ACCESS. Stays until everyone has their own login.
+         It can open the ordinary club tools and nothing administrative: every
+         elevated capability requires auth:'custom', which a shared password
+         does not produce. See lib/authz.js. -->
+    <div class="rl-temp">
+      <button type="button" onclick="pickTempAccess()">Continue with temporary committee access</button>
+      <span>Use this only until your individual account has been activated.</span>
+    </div>
+
     <button onclick="lock()" style="width:100%;background:none;color:var(--gr);font-family:var(--fc);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:8px;border:none;cursor:pointer">&#8592; Back to PIN</button>
   </div>
 </div>
@@ -3816,39 +3882,156 @@ function staffCanViewStaff() { return staffCan('can_view_staff'); }
 function staffCanDisable() { return staffCan('can_disable_account'); }
 /** May they create accounts, set passwords and assign roles? Chairman only. */
 function staffCanManage() { return staffCan('can_manage_users'); }
+/**
+ * The list shown if the roster cannot be read — offline, or the store is
+ * still waking up. The generic role names, so the committee is never stranded
+ * at a blank screen. Marked 'active' because they go through exactly the same
+ * server check; nothing here decides whether a password is accepted.
+ */
 function staffDefaultUsers() {
-  return STAFF_ROLES.map(function (r) { return { username: r, role: r, isChairman: r === 'Chairman' }; });
+  return STAFF_ROLES.map(function (r) {
+    return { username: r, name: r, role: r, title: r, status: 'active', isChairman: r === 'Chairman' };
+  });
 }
 function showRoleLogin() {
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'none';
   var rs = document.getElementById('role-screen'); rs.style.display = 'flex';
-  // Default roles immediately; merge any custom users from Supabase if available.
   staffUsers = staffDefaultUsers();
   renderRoleOptions();
-  staffAdminFetch('/.netlify/functions/staff-users?pin=' + encodeURIComponent(PIN), {}, 'Viewing staff logins')
-    .then(function (r) { return r ? r.json() : null; }).then(function (j) {
-    if (j && j.ok && j.users) {
-      var merged = staffDefaultUsers().filter(function (d) { return !j.users.some(function (u) { return u.username === d.username; }); });
-      staffUsers = j.users.map(function (u) { return { username: u.username, role: u.role || u.username, isChairman: !!u.isChairman || u.role === 'Chairman' }; }).concat(merged);
+  // ── WHY THIS NO LONGER USES staffAdminFetch ──────────────────────────────
+  // It used to. staffAdminFetch attaches a SIGNED SESSION — and at the sign-in
+  // screen nobody has one, because signing in is what this screen is for. The
+  // call 401'd every time, the .catch() swallowed it, and the list silently
+  // fell back to seven generic role names. Nobody's actual name ever appeared,
+  // and the failure was indistinguishable from "the accounts don't exist".
+  //
+  // Worse, a missing token makes staffAdminFetch PROMPT for a password, so the
+  // sign-in screen could sit behind a dialog asking you to authenticate before
+  // you could authenticate.
+  //
+  // staff-roster.js is the right shape: gated on the club PIN (the only
+  // credential that exists at this point), and it returns nothing but the
+  // fields needed to draw a button — never a hash, never a capability.
+  fetch('/.netlify/functions/staff-roster?pin=' + encodeURIComponent(PIN))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.ok || !j.staff || !j.staff.length) return;   // keep the fallback list
+      staffUsers = j.staff.map(function (u) {
+        return {
+          username: u.username,
+          name: u.name || u.username,
+          title: u.title || u.role || '',
+          role: u.role || u.username,
+          status: u.status || 'active',
+          isChairman: u.role === 'Chairman',
+        };
+      });
       renderRoleOptions();
-    }
-  }).catch(function () {});
+    })
+    .catch(function () { /* offline → the fallback list still works */ });
   setVal('role-pass', ''); document.getElementById('role-err').textContent = '';
-  setTimeout(function () { var i = document.getElementById('role-user'); if (i) i.focus(); }, 120);
 }
+
+/**
+ * The sign-in list, as PEOPLE rather than role names.
+ *
+ * An account that has not finished setup is SHOWN, not hidden. Hiding it is
+ * what produced the original complaint: a committee member looks for their
+ * name, does not find it, and concludes the portal is broken. Showing it with
+ * "Setup required" answers the question on the screen where it is asked.
+ */
 function renderRoleOptions() {
-  var sel = document.getElementById('role-user'); if (!sel) return;
-  var cur = sel.value;
-  sel.innerHTML = staffUsers.map(function (u) { return '<option value="' + esc(u.username) + '">' + esc(u.username) + (u.role && u.role !== u.username ? ' · ' + esc(u.role) : '') + '</option>'; }).join('');
-  if (cur) sel.value = cur;
+  var box = document.getElementById('role-list'); if (!box) return;
+  var pending = function (u) { return u.status === 'setup_required'; };
+  var off = function (u) { return u.status === 'disabled'; };
+  box.innerHTML = staffUsers.map(function (u) {
+    var badge = pending(u) ? '<span class="rl-badge rl-badge--wait">Setup required</span>'
+              : off(u)     ? '<span class="rl-badge rl-badge--off">Switched off</span>'
+              : '<span class="rl-badge rl-badge--ok">Active</span>';
+    var sub = u.title && u.title !== u.name ? esc(u.title) : esc(u.role || '');
+    return '<button type="button" class="rl-person' + (off(u) ? ' is-off' : '') + '" ' +
+      'onclick="pickRole(\'' + esc(String(u.username).replace(/'/g, '')) + '\')">' +
+      '<span class="rl-person__txt">' +
+        '<span class="rl-person__name">' + esc(u.name || u.username) + '</span>' +
+        '<span class="rl-person__role">' + sub + '</span>' +
+      '</span>' + badge + '</button>';
+  }).join('');
+}
+
+/** Which person is signing in. Presentation only — the server still decides. */
+var rolePicked = null;
+function pickRole(username) {
+  rolePicked = staffUsers.filter(function (u) { return u.username === username; })[0] || null;
+  var box = document.getElementById('role-list');
+  var pw = document.getElementById('role-pwbox');
+  var wait = document.getElementById('role-pending');
+  var err = document.getElementById('role-err');
+  if (err) err.textContent = '';
+  if (box) box.style.display = 'none';
+  var nm = rolePicked ? (rolePicked.name || rolePicked.username) : '';
+  var who = document.getElementById('role-who');
+  var who2 = document.getElementById('role-who2');
+  if (who) who.textContent = nm;
+  if (who2) who2.textContent = nm;
+  if (rolePicked && rolePicked.status === 'disabled') {
+    if (pw) pw.style.display = 'none';
+    if (wait) wait.style.display = 'none';
+    if (box) box.style.display = '';
+    if (err) err.textContent = 'That account has been switched off. Ask Pete or DEV.';
+    rolePicked = null;
+    return;
+  }
+  if (rolePicked && rolePicked.status === 'setup_required') {
+    if (pw) pw.style.display = 'none';
+    if (wait) wait.style.display = '';
+    return;
+  }
+  if (wait) wait.style.display = 'none';
+  if (pw) pw.style.display = '';
+  setTimeout(function () { var i = document.getElementById('role-pass'); if (i) i.focus(); }, 80);
+}
+/**
+ * Temporary committee access — the shared login, kept until everyone has
+ * their own. It is NOT a lesser password on the same account: it produces a
+ * session whose auth is 'shared', and every elevated capability in
+ * lib/authz.js requires auth 'custom'. So it opens the ordinary club tools
+ * and cannot create an account, reset a password, assign a role, grant a
+ * capability, or reach the developer or emergency screens.
+ */
+function pickTempAccess() {
+  rolePicked = { username: 'Committee', name: 'Temporary committee access',
+                 role: 'Committee', title: 'Temporary access', status: 'active', isChairman: false };
+  document.getElementById('role-list').style.display = 'none';
+  document.getElementById('role-pending').style.display = 'none';
+  var who = document.getElementById('role-who');
+  if (who) who.textContent = 'Temporary committee access';
+  document.getElementById('role-pwbox').style.display = '';
+  setTimeout(function () { var i = document.getElementById('role-pass'); if (i) i.focus(); }, 80);
+}
+
+/** Back to the list of people. */
+function unpickRole() {
+  rolePicked = null;
+  setVal('role-pass', '');
+  document.getElementById('role-err').textContent = '';
+  document.getElementById('role-list').style.display = '';
+  document.getElementById('role-pwbox').style.display = 'none';
+  document.getElementById('role-pending').style.display = 'none';
 }
 async function submitRoleLogin() {
-  var username = gv('role-user'), pass = gv('role-pass');
-  if (!username) { document.getElementById('role-err').textContent = 'Choose your role'; return; }
+  var picked = rolePicked;
+  if (!picked) { document.getElementById('role-err').textContent = 'Choose yourself from the list'; return; }
+  // An account that has never completed setup has no password to check. The
+  // server would refuse it anyway; saying so here saves a pointless round trip
+  // and a misleading "wrong password".
+  if (picked.status === 'setup_required') {
+    document.getElementById('role-err').textContent = 'That account still needs its setup link.';
+    return;
+  }
+  var username = picked.username, pass = gv('role-pass');
   if (!pass) { document.getElementById('role-err').textContent = 'Enter your password'; return; }
   document.getElementById('role-err').textContent = 'Checking…';
-  var picked = staffUsers.filter(function (u) { return u.username === username; })[0] || { username: username, role: username, isChairman: username === 'Chairman' };
   // 1) Try the server (custom passwords + login logging). 2) Fall back to the
   // shared default password so the committee is never locked out.
   // Server outcomes: ok:true → in; ok:false + 'wrong-password' → a CUSTOM
