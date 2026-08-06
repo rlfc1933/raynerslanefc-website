@@ -23,6 +23,7 @@ Disallow: /programme-print.html
 # for seven volunteers, not for search results, and indexing them would put the
 # club's internal wording in front of people it was never written for.
 Disallow: /staff-setup.html
+Disallow: /chairman-setup.html
 Disallow: /guide.html
 Disallow: /docs/
 

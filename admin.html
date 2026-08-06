@@ -3916,7 +3916,16 @@ function showRoleLogin() {
   fetch('/.netlify/functions/staff-roster?pin=' + encodeURIComponent(PIN))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
-      if (!j || !j.ok || !j.staff || !j.staff.length) return;   // keep the fallback list
+      // A store failure is SAID OUT LOUD. Silently keeping the placeholder list
+      // is what hid the original fault for weeks: the screen looked normal and
+      // nobody could tell the difference between "no accounts" and "no store".
+      if (!j || j.ok === false) {
+        var e = document.getElementById('role-err');
+        if (e) e.textContent = (j && j.error) ||
+          'The staff list could not be loaded. Temporary committee access is still available.';
+        return;
+      }
+      if (!j.staff || !j.staff.length) return;   // keep the fallback list
       staffUsers = j.staff.map(function (u) {
         return {
           username: u.username,

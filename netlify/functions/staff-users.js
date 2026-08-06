@@ -46,6 +46,7 @@
 const crypto = require('crypto');
 const adminOk = require('./lib/pin');
 const AUTHZ = require('./lib/authz');
+const STORE = require('./lib/staff-store');
 
 const PEPPER = 'rlfc:staff:v1';
 const CAP = AUTHZ.CAP;
@@ -80,17 +81,15 @@ function resp(code, obj) {
   };
 }
 
-/** Never returns pass_hash. The list is for managing people, not credentials. */
-function publicUser(username, u) {
-  return {
-    username: username,
-    role: u.role || username,
-    is_chairman: !!u.is_chairman,
-    disabled: !!u.disabled,
-    disabled_at: u.disabled_at || null,
-    has_custom_password: !!u.pass_hash,
-  };
-}
+/**
+ * The safe shape for the account list.
+ *
+ * It no longer builds anything: lib/staff-store.js owns what an account looks
+ * like to a caller, and its publicUser() cannot return a hash — there is no
+ * line in it that adds one. Keeping a second definition here is how the two
+ * would eventually disagree about which fields are safe.
+ */
+const publicUser = STORE.publicUser;
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
@@ -135,28 +134,28 @@ exports.handler = async function (event) {
   }
   const actor = gate.session;
 
-  let store, users;
-  try {
-    const { getStore } = await import('@netlify/blobs');
-    store = getStore('rlfc-staff');
-    users = (await store.get('users', { type: 'json' })) || {};
-  } catch (e) {
-    return resp(200, { ok: false, error: 'no-store' });
-  }
-
+  // Accounts live in Supabase (lib/staff-store.js). They were in Netlify Blobs,
+  // which has never been provisioned for this site — so every write silently
+  // went nowhere and no staff account has ever existed.
   if (action === 'list') {
-    return resp(200, {
-      ok: true,
-      users: Object.keys(users).map(function (k) { return publicUser(k, users[k]); }),
-      actor: { username: actor.username, role: actor.role, auth: actor.auth },
-    });
+    try {
+      return resp(200, {
+        ok: true,
+        users: await STORE.listUsers(),
+        actor: { username: actor.username, role: actor.role, auth: actor.auth },
+      });
+    } catch (e) {
+      return resp(200, { ok: false, error: 'no-store' });
+    }
   }
 
-  const username = String(body.username || '').trim();
+  const username = STORE.norm(body.username);
   if (!username) return resp(400, { ok: false, error: 'no-username' });
 
-  const existing = users[username] || null;
-  const before = existing ? publicUser(username, existing) : null;
+  let existing;
+  try { existing = await STORE.getUser(username); }
+  catch (e) { return resp(200, { ok: false, error: 'no-store' }); }
+  const before = existing;
 
   // ── SELF-PROTECTION ──────────────────────────────────────────────────────
   // An administrator may not use this endpoint to raise their OWN authority,
@@ -188,19 +187,13 @@ exports.handler = async function (event) {
           return refuse('admin_target', 'Only a chairman-level account can disable another chairman.');
         }
       }
-      users[username] = Object.assign({}, existing, {
-        disabled: action === 'disable',
-        disabled_at: action === 'disable' ? new Date().toISOString() : null,
-        disabled_by: action === 'disable' ? actor.username : null,
-      });
-      await store.setJSON('users', users);
+      const after = await STORE.setDisabled(username, action === 'disable');
       await AUTHZ.audit({
-        action: 'staff.' + action, targetUser: username, before: before,
-        after: publicUser(username, users[username]),
+        action: 'staff.' + action, targetUser: username, before: before, after: after,
         actorUsername: actor.username, actorRole: actor.role,
         capability: capability, auth: actor.auth, result: 'success',
       });
-      return resp(200, { ok: true, user: publicUser(username, users[username]) });
+      return resp(200, { ok: true, user: after });
     }
 
     // ── REMOVE ─────────────────────────────────────────────────────────────
@@ -218,8 +211,11 @@ exports.handler = async function (event) {
           return refuse('admin_target', 'Only a chairman-level account can remove another chairman.');
         }
       }
-      delete users[username];
-      await store.setJSON('users', users);
+      // Removal is a hard delete of the row; the audit entry below is the only
+      // record that the account ever existed, which is why it is written first
+      // in spirit and why disable is the preferred action everywhere else.
+      await STORE.updateUser(username, { status: 'disabled', disabled: true });
+      await STORE.removeUser(username);
       await AUTHZ.audit({
         action: 'staff.remove', targetUser: username, before: before,
         actorUsername: actor.username, actorRole: actor.role,
@@ -247,21 +243,17 @@ exports.handler = async function (event) {
             'Assigning a chairman role needs your own personal password.');
         }
       }
-      users[username] = Object.assign({}, existing, {
-        role: role,
-        // The chairman flag is derived from the SERVER-validated role. It is
-        // never read from the request — that was the original vulnerability.
-        is_chairman: escalating,
-      });
-      await store.setJSON('users', users);
+      // The role is the only thing stored. Chairman-ness is DERIVED from it
+      // wherever it is needed — never stored as a flag and never read from the
+      // request, which was the original vulnerability.
+      const after = await STORE.updateUser(username, { role: role });
       await AUTHZ.audit({
-        action: 'staff.setrole', targetUser: username, before: before,
-        after: publicUser(username, users[username]),
+        action: 'staff.setrole', targetUser: username, before: before, after: after,
         actorUsername: actor.username, actorRole: actor.role,
         capability: escalating ? CAP.ASSIGN_ADMIN : capability,
         auth: actor.auth, result: 'success',
       });
-      return resp(200, { ok: true, user: publicUser(username, users[username]) });
+      return resp(200, { ok: true, user: after });
     }
 
     // ── ADD / SETPASSWORD ──────────────────────────────────────────────────
@@ -275,7 +267,7 @@ exports.handler = async function (event) {
         return refuse('not_found', 'That account does not exist.', 404);
       }
 
-      const cur = existing || {};
+      const cur = existing || {};   // publicUser shape: no hash, ever
       // A role may be supplied on create; it is validated server-side and can
       // never be an admin role without ASSIGN_ADMIN.
       let role = cur.role || username;
@@ -301,22 +293,24 @@ exports.handler = async function (event) {
         }
       }
 
-      users[username] = {
-        role: role,
-        pass_hash: hash(password),
-        // Derived from the validated role, never from body.isChairman.
-        is_chairman: ADMIN_ROLES.indexOf(role) > -1,
-        disabled: !!cur.disabled,
-        disabled_at: cur.disabled_at || null,
-      };
-      await store.setJSON('users', users);
+      if (!existing) {
+        await STORE.createUser({
+          username: username, name: body.name || null, title: body.title || null,
+          role: role, createdBy: actor.username,
+        });
+      } else if (role !== cur.role) {
+        await STORE.updateUser(username, { role: role });
+      }
+      // setPassword is the ONLY path that writes a hash, and it moves the
+      // account to 'active' in the same statement — so an account can never
+      // hold a password while still reading as awaiting setup.
+      const after = await STORE.setPassword(username, password);
       await AUTHZ.audit({
-        action: 'staff.' + action, targetUser: username, before: before,
-        after: publicUser(username, users[username]),
+        action: 'staff.' + action, targetUser: username, before: before, after: after,
         actorUsername: actor.username, actorRole: actor.role,
         capability: capability, auth: actor.auth, result: 'success',
       });
-      return resp(200, { ok: true, user: publicUser(username, users[username]) });
+      return resp(200, { ok: true, user: after });
     }
 
     return resp(400, { ok: false, error: 'bad-action' });

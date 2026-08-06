@@ -299,6 +299,17 @@
   //   guide   the written guide for this job
   //   blurb   what this job is, in one line, for the person holding it
   var PROFILES = {
+    'System Maintainer': {
+      title: 'System Maintainer',
+      blurb: 'You keep the site working. Everything is open to you, and every action carries your name.',
+      home:  ['settings', 'undo', 'users', 'developer', 'clubstats'],
+      quick: [
+        { label: 'Check the website status', panel: 'settings' },
+        { label: 'Manage staff access',      panel: 'users' },
+        { label: 'Developer reference',      panel: 'developer' }
+      ],
+      guide: null
+    },
     'Chairman': {
       title: 'Chairman',
       blurb: 'Oversight of the club, and the only person who can create a staff account.',
@@ -457,6 +468,10 @@
   // hiding the only screen where he could use it. A capability nobody can
   // reach is not a capability.
   var STAFF_CAPS = {
+    // Same bundle as Chairman: somebody has to be able to repair the permission
+    // system, including when the permission system is what is broken.
+    'System Maintainer': ['can_view_staff', 'can_manage_users', 'can_disable_account',
+                          'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles'],
     'Chairman':   ['can_view_staff', 'can_manage_users', 'can_disable_account',
                    'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles'],
     'V Chairman': ['can_view_staff', 'can_disable_account'],
@@ -570,7 +585,10 @@
    */
   function canSee(tool, role, isChairman) {
     if (!tool) return false;
-    if (tool.chairman) return !!isChairman;
+    // `chairman: true` means administrative-only. The System Maintainer is an
+    // administrative role too — gating on the flag alone would hide the
+    // developer tools from the person whose job they are.
+    if (tool.chairman) return !!isChairman || roleHas(role, 'can_assign_admin_roles');
     if (tool.staffAccess) return !!isChairman || roleHas(role, 'can_view_staff');
     return true;
   }

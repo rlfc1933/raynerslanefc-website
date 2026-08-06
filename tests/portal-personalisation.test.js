@@ -61,9 +61,9 @@ test('every role the server accepts has a profile in the portal', () => {
   });
 });
 
-test('there are thirteen role profiles, and they are jobs rather than names', () => {
+test('every role profile is a job rather than a person', () => {
   const keys = Object.keys(PT.PROFILES);
-  assert.strictEqual(keys.length, 13);
+  assert.strictEqual(keys.length, 14);   // 13 club jobs + System Maintainer
   // A profile keyed to a person would have to be edited the day they leave.
   ['pete', 'nigel', 'gary', 'jenny', 'russell', 'darren', 'smallz'].forEach((n) => {
     keys.forEach((k) => {
@@ -72,10 +72,17 @@ test('there are thirteen role profiles, and they are jobs rather than names', ()
   });
 });
 
-test('Chairman is the only role the server treats as escalation', () => {
-  assert.deepStrictEqual(SERVER_ROLES.ADMIN_ROLES, ['Chairman']);
-  assert.ok(SERVER_ROLES.ASSIGNABLE_ROLES.indexOf('Chairman') === -1);
-  assert.strictEqual(SERVER_ROLES.ASSIGNABLE_ROLES.length, SERVER_ROLES.ROLES.length - 1);
+test('every administrative role is treated as escalation', () => {
+  // Chairman runs the club; System Maintainer keeps the site working. Both can
+  // hand out authority, so assigning either needs ASSIGN_ADMIN and elevation.
+  assert.deepStrictEqual(SERVER_ROLES.ADMIN_ROLES.slice().sort(),
+    ['Chairman', 'System Maintainer']);
+  SERVER_ROLES.ADMIN_ROLES.forEach((r) => {
+    assert.strictEqual(SERVER_ROLES.ASSIGNABLE_ROLES.indexOf(r), -1,
+      r + ' must never be ordinarily assignable');
+  });
+  assert.strictEqual(SERVER_ROLES.ASSIGNABLE_ROLES.length,
+    SERVER_ROLES.ROLES.length - SERVER_ROLES.ADMIN_ROLES.length);
 });
 
 test('a role that is not on the list is refused', () => {
@@ -165,7 +172,7 @@ test('every profile has quick actions and a home layout', () => {
 test('only the Chairman profile leads with staff accounts', () => {
   assert.strictEqual(PT.PROFILES['Chairman'].quick[0].panel, 'users');
   Object.keys(PT.PROFILES).forEach((key) => {
-    if (key === 'Chairman' || key === 'V Chairman') return;
+    if (key === 'Chairman' || key === 'V Chairman' || key === 'System Maintainer') return;
     PT.PROFILES[key].quick.forEach((q) => {
       assert.notStrictEqual(q.panel, 'users', `${key} should not lead with staff accounts`);
     });

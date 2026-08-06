@@ -61,7 +61,10 @@ const CAP = {
 const ELEVATED = [CAP.RESET_CREDENTIALS, CAP.ASSIGN_ADMIN, CAP.MANAGE_USERS];
 
 // Roles that confer administrative authority over other accounts.
-const ADMIN_ROLES = ['Chairman'];
+// Taken from lib/roles.js rather than restated, so the list that decides
+// "is this escalation?" cannot drift from the list that decides "may this be
+// assigned?". A role that escalates in one file and not the other is a hole.
+const ADMIN_ROLES = require('./roles').ADMIN_ROLES;
 
 // ── DEFAULT MAP ────────────────────────────────────────────────────────────
 // Used when la_permissions has no row for the role — and when Supabase is
@@ -74,7 +77,16 @@ const ADMIN_ROLES = ['Chairman'];
 // exists for — if the compromised account is the Chairman's, there is nobody
 // left to grant the cover. Creation and role assignment stay Chairman-only,
 // because those are the powers that can escalate anyone to anything.
+//
+// System Maintainer holds the same set as Chairman. Somebody has to be able to
+// repair the permission system, including the case where the permission system
+// is what is broken. It is NOT a shared administrator login: it belongs to one
+// named person, it is subject to every rule below — no self-promotion, no
+// self-disable, elevation required for the dangerous capabilities — and every
+// action it takes carries that name in the audit trail.
 const DEFAULT_CAPS = {
+  'System Maintainer': [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
+                        CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN],
   'Chairman':   [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
                  CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN],
   'V Chairman': [CAP.VIEW_STAFF, CAP.DISABLE_ACCOUNT],
