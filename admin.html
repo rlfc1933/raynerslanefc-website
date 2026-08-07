@@ -1465,7 +1465,10 @@
       <div id="pr-pages-list"></div>
       <button class="save sec" onclick="prAddPage()">+ Add a page</button>
 
-      <button class="save" style="margin-top:14px" onclick="saveProgramme()">&#10003; Publish Programme</button>
+      <button class="save sec" style="margin-top:14px" onclick="saveProgramme()">&#10003; Save Draft</button>
+      <div class="snote" style="margin-top:10px"><p>Saving keeps your work and updates the print edition. It does <strong style="color:var(--w)">not</strong> put the programme on the website.</p></div>
+      <button class="save" style="margin-top:10px;background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to Website</button>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans will be able to see it, and the match details, player figures and league table are saved exactly as they are today. Opening it again next year will still show this match as it was.</p></div>
       <div class="dep" id="dep-programme"></div>
       <div class="row2" style="margin-top:8px">
         <button class="save sec" onclick="prNewProgramme()">+ Start a new one</button>
@@ -5485,6 +5488,10 @@ function prBuildDoc() {
   // downstream could tell "the programme for this fixture" from "whatever the
   // website currently calls the next fixture".
   data.fixtureId = gv('pr-fixture') || '';
+  // A draft carries no frozen figures: it should always show the latest
+  // recorded Full-Time data while it is still being built. publishProgramme()
+  // is the only thing that freezes.
+  data.published = false;
   var _fx = (window._prFixtures || []).filter(function (f) { return f.id === data.fixtureId; })[0];
   if (_fx) data.isHome = _fx.isHome !== false;
   // Stable id so re-publishing the same match updates its archive entry.
@@ -5534,6 +5541,53 @@ function prPrintEdition() {
 function prPreviewEdition() {
   prHandOverDraft();
   window.open('programme-print.html?draft=1', '_blank');
+}
+
+/**
+ * PUBLISH — and freeze.
+ *
+ * A programme is a record of the club on one afternoon. The moment it goes
+ * public it stops being a live document: the player figures, the league table
+ * and the form shown to supporters that day are written into the edition
+ * itself.
+ *
+ * Without this, opening last August's Hilltop programme in March would show a
+ * player on 25 appearances because that is what he has NOW — quietly rewriting
+ * a document supporters already hold in their hands.
+ */
+async function publishProgramme() {
+  if (!confirm('Publish this programme to the website?\n\nFans will be able to see it. ' +
+    'The match details, player figures and league table are frozen exactly as they are today — ' +
+    'this edition will always show this match as it was.')) return;
+
+  var el = document.getElementById('dep-programme');
+  if (el) showDep(el, 'loading', 'Freezing this edition…');
+
+  var doc = prBuildDoc();
+  // Everything the edition DISPLAYS is captured, not referenced. A reference
+  // would follow the season; a copy stays put.
+  try {
+    var ps = await fetch('/.netlify/functions/programme-stats').then(function (r) { return r.ok ? r.json() : null; });
+    if (ps && ps.ok) doc.playerStats = ps;
+  } catch (e) { /* no figures is honest; today's figures on an old edition is not */ }
+  try {
+    var tb = await fetch('/.netlify/functions/fetch-table').then(function (r) { return r.ok ? r.json() : null; });
+    if (tb) doc.leagueTable = tb;
+  } catch (e) {}
+
+  doc.published = true;
+  doc.publishedAt = new Date().toISOString();
+  doc.snapshotOf = doc.fixtureId || doc.id;
+
+  pushToGitHub('programme', doc, 'dep-programme');
+  fetchJSON('programmes', function (arch) {
+    var items = (arch && arch.items) || [];
+    items = items.filter(function (it) { return it.id !== doc.id; });
+    items.unshift(doc);
+    items.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+    setTimeout(function () { pushToGitHub('programmes', { items: items, updatedAt: new Date().toISOString() }, 'dep-programme'); }, 1500);
+  });
+  toast('Programme published. Fans can now view it on the website.');
 }
 
 function prNewProgramme() {

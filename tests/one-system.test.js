@@ -127,11 +127,20 @@ test('the emergency fold is not open by default', () => {
 test('the registry sync writes the players nobody else does', () => {
   const src = strip(R('netlify/functions/football-registry-sync.js'));
   assert.match(src, /STATS\.recompute/);
-  const others = fs.readdirSync(path.join(ROOT, 'netlify/functions'))
+  // The guarantee is about WRITING, not reading. Only two things may recompute
+  // the club's record: the timer, and the portal button a human presses. Match
+  // on the call itself rather than on any mention of the module, so a reader
+  // that merely names it in a comment is not mistaken for a second writer.
+  const writers = fs.readdirSync(path.join(ROOT, 'netlify/functions'))
     .filter((f) => f.endsWith('.js'))
-    .filter((f) => /STATS\.recompute|player-stats/.test(fs.readFileSync(path.join(ROOT, 'netlify/functions', f), 'utf8')));
-  // Exactly two: the timer, and the portal button a human presses.
-  assert.deepStrictEqual(others.sort(), ['football-players.js', 'football-registry-sync.js']);
+    .filter((f) => /STATS\.recompute\s*\(/.test(fs.readFileSync(path.join(ROOT, 'netlify/functions', f), 'utf8')));
+  assert.deepStrictEqual(writers.sort(), ['football-players.js', 'football-registry-sync.js']);
+
+  // Readers are fine and expected — but they must go through the canonical
+  // service rather than aggregating rows for themselves.
+  const prog = fs.readFileSync(path.join(ROOT, 'netlify/functions/programme-stats.js'), 'utf8');
+  assert.ok(!/STATS\.recompute\s*\(/.test(prog), 'the programme must never recompute');
+  assert.match(prog, /statsByClubPlayer/, 'it reads through the canonical service');
 });
 
 // ── the homepage ────────────────────────────────────────────────────────────
