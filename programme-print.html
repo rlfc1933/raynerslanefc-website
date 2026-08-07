@@ -88,6 +88,22 @@
   .spon-feat img{ max-width:78%; max-height:74px; object-fit:contain; }
   /* The Cherry Red artwork is white on transparent, so it only reads on a dark
      panel. Sized by max-height with width:auto so it can never be stretched. */
+  /* Playing colours and officials — set as type, not as cards. */
+  .kit-block{ display:flex; flex-direction:column; gap:7px; }
+  .kit-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+            border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .kit-l{ font-family:var(--fd); font-size:15px; letter-spacing:.5px; color:var(--ink);
+          min-width:130px; }
+  .kit-i{ font-family:var(--fb); font-size:11px; color:#333; display:inline-flex;
+          align-items:center; gap:5px; }
+  .kit-i b{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--soft); }
+  .kit-i i{ width:11px; height:11px; border:1px solid rgba(0,0,0,.35); display:inline-block; }
+  .kit-tbc,.off-tbc{ font-family:var(--fb); font-size:11px; font-style:italic; color:var(--soft); }
+  .off-block{ display:flex; gap:22px; flex-wrap:wrap; }
+  .off-i{ font-family:var(--fb); font-size:11.5px; color:#222; }
+  .off-i b{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.1em;
+            text-transform:uppercase; color:var(--soft); display:block; }
   .league-mark{ margin-top:12px; background:#0d0d0d; border-radius:10px; padding:14px 16px;
                 display:flex; align-items:center; gap:14px; justify-content:center; }
   .league-mark img{ height:34px; width:auto; max-width:190px; object-fit:contain; }
@@ -349,10 +365,14 @@
       .catch(function(){ return null; });
   }
 
+  var cfgKit = null;   // the club's own playing colours, stored once in config
+
   Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
     fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-    getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad')
+    getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad'),
+    getJSON('config')
   ]).then(function (res) {
+    cfgKit = (res[10] && res[10].kit) || null;
     var d = res[0]||{}, crests=(res[1]&&res[1].crests)||[], sponsors=(res[2]&&res[2].sponsors)||[], fixtures=(res[3]&&res[3].fixtures)||[];
 
     /* THE ARCHIVE RULE, APPLIED TO THE TABLE.
@@ -524,14 +544,66 @@
 
     /* 4 — TEAM SHEETS */
     function tsList(text){ var L=lines(text); if(!L.length) return ''; return '<div class="ts-list">'+L.map(function(l){ var m=l.match(/^\s*(\d+)[\.\)]?\s+(.*)$/); return '<div class="ts-row">'+(m?'<span class="n">'+m[1]+'</span><span>'+esc(m[2])+'</span>':'<span>'+esc(l)+'</span>')+'</div>'; }).join('')+'</div>'; }
-    if (lines(d.homeXI).length || lines(d.homeSubs).length || lines(d.awayLineup).length || (d.staff||'').trim()) {
+    /* ALWAYS RENDERED. This page carries the three things the League's published
+       minimum asks a matchday programme to contain — both sides' players, the
+       colours they will play in, and the match officials. It used to appear
+       only if somebody had typed a line-up into the form, which meant the
+       entire required set could silently vanish from an edition that was
+       otherwise finished. An empty section that says "confirmed at kick-off" is
+       honest; a missing page is not. */
+    {
+      /* THE COLOURS THE TEAMS WILL PLAY IN.
+         The League's published minimum for a matchday programme is the players
+         of both sides with their playing numbers, the colours the teams will
+         play in, and the match officials. Two of those three were here. The
+         colours were absent from the programme entirely — found by auditing the
+         document against the rule rather than against our own assumptions.
+
+         Ours come from data/config.json, stored once, because nobody should
+         retype their own club's kit every fortnight. The opposition's are
+         confirmed per edition. Unknown prints "To be confirmed" — never a
+         guess, because turning up in the wrong colours is a real problem for a
+         real referee. */
+      function kitStrip(label, k){
+        if(!k) return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
+                      '<span class="kit-tbc">To be confirmed</span></div>';
+        var parts=[['Shirt',k.shirt],['Shorts',k.shorts],['Socks',k.socks]];
+        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
+          parts.map(function(p){
+            var v=p[1]||null, nm=v&&(v.name||v)||'';
+            if(!nm) return '';
+            var hex=(v&&v.hex)||'';
+            return '<span class="kit-i">'+(hex?'<i style="background:'+esc(hex)+'"></i>':'')+
+                   '<b>'+esc(p[0])+'</b> '+esc(nm)+'</span>';
+          }).join('')+
+          (k.goalkeeper?'<span class="kit-i"><b>GK</b> '+esc(k.goalkeeper.name||k.goalkeeper)+'</span>':'')+
+        '</div>';
+      }
+      var ourKit = (d.isHome===false) ? (cfgKit && cfgKit.away) : (cfgKit && cfgKit.home);
+      var oppKit = d.oppKit || null;
+
+      /* The officials, on the page the rule expects them on rather than buried
+         in matchday information. Entered once by the Secretary against the
+         fixture; never invented here. */
+      var offRows = [['Referee', d.referee], ['Assistant', d.assistant1],
+                     ['Assistant', d.assistant2], ['Fourth Official', d.fourthOfficial]]
+        .filter(function(r){ return (r[1]||'').trim(); });
+
       P.push('<div class="page">'+ banner('Today’s Teams','Team Sheets')+
         '<div class="grid2">'+
           '<div><div class="ts-team">Rayners Lane</div>'+(tsList(d.homeXI)||'<div class="ts-list"><div class="ts-row muted">Confirmed at kick-off.</div></div>')+
             (lines(d.homeSubs).length?'<div class="divider"><span class="lbl">Substitutes</span></div>'+tsList(d.homeSubs):'')+
             ((d.staff||'').trim()?'<div class="card g" style="margin-top:12px"><div class="k">Management</div><div class="t">'+esc(d.staff)+'</div></div>':'')+'</div>'+
           '<div><div class="ts-team away">'+esc(opp)+'</div>'+(tsList(d.awayLineup)||'<div class="ts-list"><div class="ts-row muted">Confirmed at kick-off.</div></div>')+'</div>'+
-        '</div>'+ foot()+'</div>');
+        '</div>'+
+        '<div class="divider"><span class="lbl">Playing Colours</span></div>'+
+        '<div class="kit-block">'+ kitStrip('Rayners Lane', ourKit) + kitStrip(opp, oppKit) +'</div>'+
+        '<div class="divider"><span class="lbl">Match Officials</span></div>'+
+        (offRows.length
+          ? '<div class="off-block">'+offRows.map(function(r){
+              return '<span class="off-i"><b>'+esc(r[0])+'</b> '+esc(r[1])+'</span>'; }).join('')+'</div>'
+          : '<div class="off-block"><span class="off-tbc">Appointments to be confirmed</span></div>')+
+        foot()+'</div>');
     }
 
     /* Each player's season figures, keyed by the club's own player id.

@@ -24,5 +24,20 @@
     "contactEmail": "info@raynerslanefc.co.uk",
     "enquireSubject": "Season Ticket 2026/27"
   },
-  "updatedAt": "2026-07-27T00:00:00.000Z"
+  "_kitNote": "The colours the club plays in. Required in the matchday programme by the League's published minimum ('the colours in which the teams will play') and, until this was added, absent from it entirely. Stored ONCE here so no programme editor ever retypes the club's own kit; the opposition's colours are confirmed per edition. `hex` is only for drawing the little kit strip — `name` is what prints.",
+  "kit": {
+    "home": {
+      "shirt": { "name": "Yellow", "hex": "#FFD100" },
+      "shorts": { "name": "Green", "hex": "#0B3A20" },
+      "socks": { "name": "Yellow", "hex": "#FFD100" },
+      "goalkeeper": { "name": "Green", "hex": "#0B3A20" }
+    },
+    "away": {
+      "shirt": { "name": "White", "hex": "#FFFFFF" },
+      "shorts": { "name": "Black", "hex": "#0D0D0D" },
+      "socks": { "name": "White", "hex": "#FFFFFF" },
+      "goalkeeper": { "name": "Green", "hex": "#0B3A20" }
+    }
+  },
+  "updatedAt": "2026-08-07T00:00:00.000Z"
 }
