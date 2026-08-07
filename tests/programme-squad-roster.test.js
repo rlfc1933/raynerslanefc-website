@@ -120,13 +120,13 @@ test('a single player does not get a page to himself plus an empty one', () => {
 // ── 3 · THE PAGE ITSELF ─────────────────────────────────────────────────────
 
 test('squad pages are built from the balanced plan, not a fixed step', () => {
-  assert.match(print, /var pages = squadPages\(pc\.length, 6\);/);
+  assert.match(print, /var pages = squadPages\(pc\.length, 30\);/);
   assert.ok(!/pi \+= PER_PAGE/.test(print), 'the fixed-step loop is gone');
   assert.match(print, /pages\.forEach\(function \(n, idx\)/);
 });
 
 test('continuation pages say so', () => {
-  assert.match(print, /idx === 0 \? 'Squad Profiles' : 'Squad Profiles continued'/);
+  assert.match(print, /idx === 0 \? 'The Squad' : 'The Squad continued'/);
 });
 
 test('every squad page carries the roster archetype', () => {
@@ -138,8 +138,8 @@ test('every squad page carries the roster archetype', () => {
 test('a missing headshot still yields a designed card, not a gap', () => {
   const withoutPhoto = ROSTER.filter((p) => !(p.photo || p.image));
   assert.ok(withoutPhoto.length > 0, 'the club genuinely has players without photographs');
-  assert.match(print, /ph--none/);
-  assert.match(print, /Photo to follow/);
+  assert.match(print, /sq-ph--none/);
+  assert.match(print, /Photo<br>to follow/);
   assert.match(print, /esc\(initials\(p\.name\)\)/);
 });
 

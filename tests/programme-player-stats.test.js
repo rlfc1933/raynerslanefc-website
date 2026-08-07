@@ -74,13 +74,14 @@ test('the four scopes are a total plus subsets, not four separate seasons', () =
 });
 
 test('a name alias cannot create a second identity', () => {
-  // Identity is resolved once, in the football store, against a stable
-  // provider id — never re-derived from the display name in the programme.
+  // The squad no longer carries per-player figures at all, so there is no
+  // lookup to get wrong. What must stay true is that nothing in the card
+  // builder matches players by NAME — that is how aliases split a person.
   const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
-  assert.match(cardBlock, /playerSeason\[p\.id\]/,
-    'lookup must be by club player id, never by name');
   assert.ok(!/\.name\s*===|toLowerCase\(\)\s*===/.test(cardBlock),
     'no name matching may happen at render time');
+  assert.ok(!/playerSeason|appearances|goals|minutes/.test(cardBlock),
+    'individual statistics were removed from the squad — they must not return');
 });
 
 test('the programme adds no statistics of its own', () => {
@@ -109,11 +110,16 @@ test('a confirmed player with no involvement is a real zero', () => {
   assert.strictEqual(z.coverage, 'confirmed');
 });
 
-test('the card prints a dash for unknown and a digit for zero', () => {
-  const cell = print.match(/function statCell\(v, label\)\{[\s\S]*?\n      \}/)[0];
-  assert.match(cell, /v !== null && v !== undefined/, 'zero must count as known');
-  assert.match(cell, /&mdash;/);
-  assert.ok(!/v \?/.test(cell), 'a truthiness test would turn 0 into a dash');
+test('the squad carries no statistics at all — not even dashes', () => {
+  // The old rule was "a dash means unknown, a digit means known". With
+  // nineteen of twenty-six players unmatched that produced a page of em
+  // dashes, so the club removed the figures rather than print emptiness.
+  assert.ok(!/function statCell/.test(print), 'the stat cell builder is gone');
+  const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
+  assert.ok(!/&mdash;/.test(cardBlock), 'no placeholder dash may appear on a squad tile');
+  ['APPS', 'GOALS', 'MINS', 'Clean Sheets'].forEach((label) => {
+    assert.ok(!cardBlock.includes(label), label + ' must not appear on the squad');
+  });
 });
 
 // ── 3 · NO ASSISTS ANYWHERE ─────────────────────────────────────────────────
@@ -124,18 +130,23 @@ test('assists are gone from the programme entirely', () => {
     'no assist figure may be rendered anywhere in the programme');
 });
 
-test('the third stat is one we genuinely hold', () => {
+test('a squad tile carries only number, face, name and position', () => {
   const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
-  assert.match(cardBlock, /statCell\(mins,'Mins'\)/);
-  assert.match(cardBlock, /statCell\(apps,'Apps'\)/);
+  assert.match(cardBlock, /sq-no/);
+  assert.match(cardBlock, /sq-nm/);
+  assert.match(cardBlock, /sq-po/);
+  assert.match(cardBlock, /sq-ph/);
 });
 
 // ── 4 · GOALKEEPERS ─────────────────────────────────────────────────────────
 
-test('a goalkeeper gets clean sheets where an outfielder gets goals', () => {
+test('the goalkeeper split is gone with the rest of the figures', () => {
   const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
-  assert.match(cardBlock, /keeper[\s\S]*?statCell\(sheets, 'Clean Sheets'\)/);
-  assert.match(cardBlock, /statCell\(goals, 'Goals'\)/);
+  assert.ok(!/keeper|cleanSheets/.test(cardBlock),
+    'no per-player figure survives on the squad, keeper or otherwise');
+  // The canonical service still computes clean sheets for Match Centre.
+  const cs = require(path.join(ROOT, 'netlify/functions/programme-stats.js'))._internal.cardStats;
+  assert.strictEqual(cs({ appearances: 2, cleanSheets: 1 }, true).cleanSheets, 1);
 });
 
 test('clean sheets are only ever claimed for a keeper, and only if derived', () => {
