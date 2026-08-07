@@ -471,10 +471,15 @@
     // Same bundle as Chairman: somebody has to be able to repair the permission
     // system, including when the permission system is what is broken.
     'System Maintainer': ['can_view_staff', 'can_manage_users', 'can_disable_account',
-                          'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles'],
+                          'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles',
+                          'can_confirm_player_identity'],
     'Chairman':   ['can_view_staff', 'can_manage_users', 'can_disable_account',
-                   'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles'],
+                   'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles',
+                   'can_confirm_player_identity'],
     'V Chairman': ['can_view_staff', 'can_disable_account'],
+    // Holds one capability and no administrative power: he is the person who
+    // knows which of two same-named players actually played.
+    'Team Manager': ['can_confirm_player_identity'],
   };
 
   /** Does this role hold this capability BY DEFAULT? Drawing only. */

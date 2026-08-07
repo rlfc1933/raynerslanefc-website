@@ -53,6 +53,15 @@ const CAP = {
   RESET_CREDENTIALS: 'can_reset_credentials',   // set somebody else's password
   ASSIGN_ROLES:      'can_assign_roles',        // ordinary role assignment
   ASSIGN_ADMIN:      'can_assign_admin_roles',  // Chairman / admin — escalation
+
+  // ── FOOTBALL RECORD ──────────────────────────────────────────────────────
+  // Deciding that a name on a Full-Time team sheet IS one of our players. Not
+  // a staff-administration power at all, which is why it is named separately:
+  // the person who knows whether that is Josh Adams or a different Josh Adams
+  // is the manager, not the treasurer. It is listed here because this file is
+  // where the club's answer to "who may do what" lives, and a second
+  // permission system would be a second place to get it wrong.
+  CONFIRM_IDENTITY:  'can_confirm_player_identity',
 };
 
 // Actions that additionally require a per-person password, never the shared
@@ -84,12 +93,24 @@ const ADMIN_ROLES = require('./roles').ADMIN_ROLES;
 // named person, it is subject to every rule below — no self-promotion, no
 // self-disable, elevation required for the dangerous capabilities — and every
 // action it takes carries that name in the audit trail.
+//
+// CONFIRM_IDENTITY deliberately does NOT follow the administrative pattern. It
+// is held by the Team Manager, who is not a staff administrator and holds
+// nothing else here — because he is the person who actually knows which Josh
+// Adams played on Saturday. Tying that decision to Developer access would mean
+// the only people permitted to answer a football question are the two people
+// least likely to know the answer, and the queue would sit untouched, which is
+// exactly what happened. Any other role can be granted it in la_permissions
+// without a deploy; that is a club decision, not a code one.
 const DEFAULT_CAPS = {
   'System Maintainer': [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
-                        CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN],
+                        CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN,
+                        CAP.CONFIRM_IDENTITY],
   'Chairman':   [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
-                 CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN],
+                 CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN,
+                 CAP.CONFIRM_IDENTITY],
   'V Chairman': [CAP.VIEW_STAFF, CAP.DISABLE_ACCOUNT],
+  'Team Manager': [CAP.CONFIRM_IDENTITY],
 };
 
 /**
