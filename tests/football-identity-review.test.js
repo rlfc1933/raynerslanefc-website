@@ -412,15 +412,20 @@ test('the season summary function is not shadowed inside render', () => {
   assert.match(r, /var playerSeason = \(d\.playerStats && d\.playerStats\.players\) \|\| \{\};/);
 });
 
-test('the per-player figures are declared where they are read', () => {
+test('the per-player figures are declared before anything could read them', () => {
+  // The original fault: `var playerSeason` sat inside the squad block while the
+  // Statistics Centre read it unconditionally, so a club with no players listed
+  // hoisted it as undefined and Object.keys() threw. The Statistics Centre has
+  // since been removed with the rest of the individual statistics, but the
+  // declaration must stay above the squad block — a published edition still
+  // carries a frozen snapshot, and anything added later must find it defined.
   const r = print.slice(print.indexOf('function render(d, crests'));
   const decl = r.indexOf('var playerSeason =');
   const guard = r.indexOf('if (club.players && club.players.length)');
-  const use = r.indexOf('Object.keys(playerSeason)');
-  assert.ok(decl < guard,
-    'declared inside the squad block, it hoists as undefined and the ' +
-    'Statistics Centre throws on a club with no players listed');
-  assert.ok(decl < use && guard < use);
+  assert.ok(decl > -1, 'the frozen snapshot is still read for published editions');
+  assert.ok(decl < guard, 'it must not be trapped inside the squad block');
+  assert.ok(!/Object\.keys\(playerSeason\)/.test(print),
+    'nothing reads it unconditionally any more — the Statistics Centre is gone');
 });
 
 test('a failure to build says so instead of hanging', () => {

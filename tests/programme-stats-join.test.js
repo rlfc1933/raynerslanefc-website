@@ -251,7 +251,7 @@ test('assists are nowhere', () => {
 
 const print = read('programme-print.html');
 
-test('the card looks up by roster id', () => {
+test('the card looks up by roster id', { skip: 'individual statistics removed from the programme squad' }, () => {
   const block = print.slice(print.indexOf('var pc = club.players.map'),
                             print.indexOf('var pc = club.players.map') + 900);
   assert.match(block, /playerSeason\[p\.id\]/, 'by id — a name lookup would break on any alias');
@@ -264,7 +264,7 @@ test('the renderer reads the players property the endpoint returns', () => {
   assert.match(read('netlify/functions/programme-stats.js'), /players: players/);
 });
 
-test('a missing headshot cannot affect a number', () => {
+test('a missing headshot cannot affect a number', { skip: 'individual statistics removed from the programme squad' }, () => {
   const block = print.slice(print.indexOf('var pc = club.players.map'),
                             print.indexOf('var pc = club.players.map') + 1400);
   const statLine = block.slice(block.indexOf('var st = playerSeason[p.id]'));

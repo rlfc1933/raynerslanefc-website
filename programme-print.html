@@ -207,6 +207,62 @@
   .gg b{ display:block; font-family:var(--fc); font-size:9.5px; font-weight:700;
          letter-spacing:.16em; text-transform:uppercase; color:var(--g); margin-bottom:3px; }
 
+  /* ═══ THE SQUAD — a roster directory, not twenty-six adverts ═════════════
+     Five across. The portrait is deliberately small: at this size the page
+     reads as THE FIRST TEAM rather than as a grid of individual features, and
+     twenty-six players fit on one A4 sheet with room to breathe.
+
+     No card, no border, no radius, no statistics. Number, face, name,
+     position. A squad page in a media guide carries exactly that and nothing
+     more, because that is all a reader wants from it. */
+  .sq-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:11px 9px; }
+  .sq{ position:relative; }
+  .sq-ph{ aspect-ratio:1/1; background:linear-gradient(160deg,#14532d,#0b2a1a);
+          position:relative; overflow:hidden; display:flex; align-items:center;
+          justify-content:center; }
+  .sq-ph img{ width:100%; height:100%; object-fit:cover; object-position:50% 22%; }
+  /* The fallback occupies the identical footprint, so adding a photograph
+     later needs no layout change at all. */
+  .sq-ph--none{ background:
+      repeating-linear-gradient(115deg, rgba(255,209,0,.14) 0 7px, transparent 7px 17px),
+      linear-gradient(160deg,#14532d,#08210f); }
+  .sq-ph--none .ini{ font-family:var(--fd); font-size:27px; line-height:.85; color:#fff;
+                     letter-spacing:.5px; }
+  .sq-ph--none .crestcrop{ position:absolute; left:-14px; top:-12px; width:48px; height:48px;
+                           background:url(img/badge.png) center/contain no-repeat; opacity:.14; }
+  .sq-ph--none .soon{ position:absolute; left:0; right:0; bottom:3px; text-align:center;
+                      font-family:var(--fc); font-size:5.5px; font-weight:700; letter-spacing:.12em;
+                      text-transform:uppercase; color:rgba(255,255,255,.5); line-height:1.35; }
+  .sq-no{ position:absolute; top:0; left:0; background:var(--y); color:#0d0d0d;
+          font-family:var(--fd); font-size:15px; line-height:1; padding:2px 5px 1px;
+          font-variant-numeric:tabular-nums; }
+  .sq-nm{ font-family:var(--fd); font-size:12.5px; line-height:1; letter-spacing:.2px;
+          color:var(--ink); margin-top:5px; }
+  .sq-po{ font-family:var(--fc); font-size:7px; font-weight:700; letter-spacing:.13em;
+          text-transform:uppercase; color:var(--g); margin-top:2px; }
+
+  /* ═══ CLUB DIRECTORY — a masthead, not a spreadsheet ═════════════════════
+     Names carry more weight than the roles beside them, because the people are
+     the point. Grouped by what they actually do. */
+  .mast-dir{ display:grid; grid-template-columns:1fr 1fr; gap:16px 30px; }
+  .md-sec{ break-inside:avoid; }
+  .md-sec > b{ display:block; font-family:var(--fc); font-size:9px; font-weight:700;
+               letter-spacing:.2em; text-transform:uppercase; color:var(--soft);
+               border-bottom:2px solid var(--ink); padding-bottom:4px; margin-bottom:7px; }
+  .md-p{ display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+         padding:4px 0; border-bottom:1px solid var(--line); }
+  .md-p .nm{ font-family:var(--fd); font-size:16px; letter-spacing:.3px; color:var(--ink);
+             line-height:1.05; }
+  .md-p .rl{ font-family:var(--fc); font-size:8px; font-weight:700; letter-spacing:.11em;
+             text-transform:uppercase; color:var(--g); text-align:right; white-space:nowrap; }
+  .md-contact{ margin-top:14px; border-top:2px solid var(--ink); padding-top:9px;
+               display:grid; grid-template-columns:1fr 1fr; gap:4px 26px; }
+  .md-contact div{ display:flex; justify-content:space-between; gap:10px;
+                   font-family:var(--fb); font-size:10px; color:#333;
+                   border-bottom:1px dotted var(--line); padding:3px 0; }
+  .md-contact b{ font-family:var(--fc); font-size:8px; font-weight:700; letter-spacing:.1em;
+                 text-transform:uppercase; color:var(--soft); }
+
   /* A rule with a label sitting on it — replaces .divider's pill-and-dash. */
   .rule{ display:flex; align-items:center; gap:12px; margin:22px 0 11px; }
   .rule::before{ content:''; height:3px; width:34px; background:var(--y); flex:none; }
@@ -872,68 +928,48 @@
 
     /* SQUAD PROFILES (player cards) */
     if (club.players && club.players.length) {
-      /* THE THREE NUMBERS. Assists are gone: Full-Time's pages carry no assist
-         information, so a printed "0 ASSISTS" claimed knowledge we never had.
-         A goalkeeper's second slot is clean sheets; everyone else's is goals.
+      /* ═══ THE FIRST TEAM — ONE PAGE, ONE DIRECTORY ═════════════════════════
+         Two decisions the club made, and both simplify this a great deal.
 
-         An em dash means "we do not know" — the player is unmatched, or the
-         figure is not derivable. A zero means we DO know, from complete
-         recorded coverage, that it is nought. Those are different claims and
-         the card must not blur them. */
-      function statCell(v, label){
-        var known = v !== null && v !== undefined;
-        return '<div><div class="v'+(known?'':' unk')+'">'+(known?esc(String(v)):'&mdash;')+
-               '</div><div class="k">'+label+'</div></div>';
-      }
-      /* THE WHOLE SQUAD. `slice(0,15)` silently dropped eleven of the club's
-         twenty-six players — nothing to do with photographs, statistics or
-         identity confirmation, just a hard cap nobody had revisited. The squad
-         section answers "who plays for Rayners Lane", which is the club roster
-         and only the club roster. Whether we have verified match data for
-         somebody is a different question, answered on the same card by the
-         figures next to their name. */
+         NO INDIVIDUAL STATISTICS. Appearances, goals, minutes and clean sheets
+         are gone from the squad entirely — not replaced with zeros, removed.
+         Nineteen of twenty-six players had no confirmed Full-Time identity, so
+         the honest render was a page of em dashes, and a page of em dashes is
+         worse than no column at all. Team figures survive on Season So Far,
+         where they are complete and verified. The statistics service itself is
+         untouched and still serves Match Centre.
+
+         THE WHOLE SQUAD ON ONE SHEET. Profile cards at three across needed five
+         pages for twenty-six players. A squad is not twenty-six advertisements;
+         it is a roster, and a roster belongs on one page where you can see the
+         team. Five across, compact head-and-shoulders crop, number, name,
+         position. Nothing else fits and nothing else is needed. */
       var pc = club.players.map(function(p){
         var no=p.number||p.no||'', ph=p.photo||p.image||'';
-        var st = playerSeason[p.id] || null;
-        var keeper = /goal ?keeper|^gk$/i.test(p.position||p.pos||'');
-        var apps    = st ? st.appearances : null;
-        var goals   = st ? st.goals : null;
-        var mins    = (st && st.minutesKnown) ? st.minutes : null;
-        var sheets  = (st && st.cleanSheets != null) ? st.cleanSheets : null;
-        var second  = keeper
-          ? statCell(sheets, 'Clean Sheets')
-          : statCell(goals, 'Goals');
-        // A player without a photograph gets a designed identity graphic, never
-        // an empty coloured box that reads as a broken image.
+        // A player without a photograph gets a designed identity graphic in
+        // exactly the same footprint, so a real headshot drops straight in.
         var phInner = ph
           ? '<img src="'+esc(ph)+'">'
           : '<span class="crestcrop"></span><span class="ini">'+esc(initials(p.name))+'</span>'+
-            (no ? '<span class="bignum">'+esc(no)+'</span>' : '')+
-            '<span class="soon">Photo to follow</span>';
-        return '<div class="pcard"><div class="ph'+(ph?'':' ph--none')+'">'+phInner+
-          (ph ? '<div class="no">'+esc(no)+'</div>' : '')+'</div>'+
-          '<div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div>'+
-          '<div class="st">'+statCell(apps,'Apps')+second+statCell(mins,'Mins')+'</div></div>';
+            '<span class="soon">Photo<br>to follow</span>';
+        return '<div class="sq"><div class="sq-ph'+(ph?'':' sq-ph--none')+'">'+phInner+'</div>'+
+          (no ? '<span class="sq-no">'+esc(no)+'</span>' : '')+
+          '<div class="sq-nm">'+esc(p.name||'')+'</div>'+
+          '<div class="sq-po">'+esc(p.position||p.pos||'')+'</div></div>';
       });
 
-      /* BALANCED PAGINATION, NOT BLIND CHUNKING.
-         Chunking six at a time is fine until the roster is not a multiple of
-         six: 26 players becomes 6·6·6·6·2, and that last sheet with two players
-         on it is the orphan problem again in a new costume. The squad changes
-         through the season — people sign, leave, come back — so the renderer
-         works out the page count first and then spreads the roster as evenly as
-         the grid allows.
-
-         26 → 6·5·5·5·5.  19 → 5·5·5·4.  15 → 5·5·5.  23 → 6·6·6·5.
-         Nobody is dropped, nobody is duplicated, and no sheet is left holding
-         the remainder. */
-      var pages = squadPages(pc.length, 6);
+      /* ONE PAGE. squadPages() is still used, but with the capacity of the
+         compact directory grid rather than the old profile cards — 30 to a
+         sheet at five across. A roster only spills onto a second page if the
+         club genuinely carries more than thirty players, and if it ever does,
+         the balancing still applies rather than orphaning the remainder. */
+      var pages = squadPages(pc.length, 30);
       var at = 0;
       pages.forEach(function (n, idx) {
         var chunk = pc.slice(at, at + n); at += n;
         P.push('<div class="page page--roster">' +
-          banner('First Team', idx === 0 ? 'Squad Profiles' : 'Squad Profiles continued') +
-          '<div class="pcards">' + chunk.join('') + '</div>' + foot() + '</div>');
+          banner('First Team', idx === 0 ? 'The Squad' : 'The Squad continued') +
+          '<div class="sq-grid">' + chunk.join('') + '</div>' + foot() + '</div>');
       });
     }
     /* CAPTAIN'S NOTES */
@@ -1025,34 +1061,20 @@
         foot()+'</div>');
     }
 
-    /* STATISTICS CENTRE — from the club's own record of official Full-Time
-       line-ups and scorer lines, not from the hand-typed fields in
-       data/players.json that nobody ever filled in.
+    /* STATISTICS CENTRE — REMOVED.
+       This page was Top Scorer, Most Appearances, Most Minutes and a per-player
+       table: individual player statistics, every one of them. With nineteen of
+       twenty-six players unmatched to a Full-Time identity it rendered a column
+       of em dashes, and a page of em dashes is worse than no page.
 
-       Assists are absent by design: Full-Time's pages carry none, so "Most
-       Assists" could only ever have been a made-up award. Minutes replace it —
-       a figure the club genuinely derives. */
-    var statRows = Object.keys(playerSeason).length
-      ? club.players.map(function(p){ var t=playerSeason[p.id]; return t?Object.assign({name:p.name,position:p.position||p.pos},t):null; }).filter(Boolean)
-      : [];
-    if (statRows.length) {
-      function topBy(k){ return statRows.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
-      var tg=topBy('goals'), tap=topBy('appearances'), tm=topBy('minutes');
-      P.push('<div class="page page--data">'+ banner('By The Numbers','Statistics Centre')+
-        '<div class="grid2">'+
-          '<div class="card g"><div class="k">Top Scorer</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tg.name||'–')+' <span style="color:var(--g)">'+(tg.goals!=null?tg.goals:'—')+'</span></div></div>'+
-          '<div class="card y"><div class="k">Most Appearances</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tap.name||'–')+' <span style="color:var(--g)">'+(tap.appearances!=null?tap.appearances:'—')+'</span></div></div>'+
-          '<div class="card g"><div class="k">Most Minutes</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tm.name||'–')+' <span style="color:var(--g)">'+(tm.minutes!=null?tm.minutes:'—')+'</span></div></div>'+
-          '<div class="card y"><div class="k">Player of the Month</div><div class="t">'+esc(d.potm||'Announced on matchday')+'</div></div>'+
-        '</div>'+
-        '<div class="divider"><span class="lbl">Squad Stats</span></div>'+
-        '<table class="lt"><thead><tr><th class="l">Player</th><th>Pos</th><th>Apps</th><th>Goals</th><th>Mins</th></tr></thead><tbody>'+
-          statRows.slice(0,18).map(function(p){ var dash=function(v){return v!=null?v:'—';};
-            return '<tr><td class="l">'+esc(p.name||'')+'</td><td>'+esc(p.position||'')+'</td><td class="num">'+dash(p.appearances)+'</td><td class="num">'+dash(p.goals)+'</td><td class="num">'+dash(p.minutesKnown?p.minutes:null)+'</td></tr>';}).join('')+
-        '</tbody></table>'+
-        '<div class="card g" style="margin-top:8px"><div class="t" style="font-size:10.5px">From official Full-Time line-ups and scorer records'+(d.playerStats&&d.playerStats.matchesPlayed!=null?' after '+d.playerStats.matchesPlayed+' match'+(d.playerStats.matchesPlayed===1?'':'es'):'')+'. A dash means the figure is not recorded.</div></div>'+
-        foot()+'</div>');
-    }
+       The club's decision is that the programme no longer depends on individual
+       player figures at all. Team figures survive on Season So Far, where they
+       are complete and verified from official results. The statistics service
+       itself is untouched and still serves Match Centre and the squad pages on
+       the website — only the programme stops asking.
+
+       `playerSeason` is still read above so a published edition keeps whatever
+       it froze; nothing in the current layout consumes it. */
 
     /* 9 — SPONSORS (premium showcase) */
     var feat = sponsors.slice(0,2), restS = sponsors.slice(2);
@@ -1141,10 +1163,74 @@
 
     /* CLUB DIRECTORY */
     if (club.committee && club.committee.length) {
+      /* ═══ THE CHAIRMAN WAS MISSING FROM THE CLUB DIRECTORY ═══════════════
+         Not filtered out, not truncated — he was never in the list. The club
+         keeps its people in TWO unrelated places: data/committee.json holds
+         twelve members, and data/officials.json separately holds three names
+         (chairman, secretary, welfare officer). The directory rendered the
+         first and mentioned the second in a footnote card, so Pete Singh
+         appeared on the page as a passing reference and never as an entry.
+
+         Merging them here, deduplicated by name, is the fix: the officials
+         become first-class directory people, so a Chairman cannot go missing
+         from a Club Directory again whichever file the club updates. Merged at
+         the point of use rather than by rewriting either file, because both
+         are edited by staff through the portal and neither should be
+         invalidated by the programme's preferences.
+
+         Grouped as a masthead, because a directory is about people. */
+      var seenPerson = {};
+      function person(name, role){
+        var n = String(name||'').replace(/\s+/g,' ').trim();
+        if (!n) return null;
+        var k = n.toLowerCase();
+        if (seenPerson[k]) return null;          // one entry per person
+        seenPerson[k] = true;
+        return { name: n, role: String(role||'').replace(/\s+/g,' ').trim() };
+      }
+      /* Officials first, so the club's most senior roles lead the page and
+         win the de-duplication if the same person also sits on the committee. */
+      var dirPeople = [
+        person(OFF.chairman, 'Chairman'),
+        person(OFF.secretary, 'Club Secretary'),
+        person(OFF.welfareOfficer, 'Welfare Officer'),
+      ].concat((club.committee||[]).map(function(m){ return person(m.name, m.role||m.title); }))
+       .filter(Boolean);
+
+      /* Which section a role belongs in. Anything unrecognised lands in Club,
+         so a new role never disappears from the page. */
+      function section(role){
+        var r = (role||'').toLowerCase();
+        if (/chair|president|vice/.test(r))                       return 0;
+        if (/manager|coach|physio|keeper|goalkeep/.test(r))       return 1;
+        if (/welfare|safeguard/.test(r))                          return 3;
+        return 2;
+      }
+      var SECTIONS = ['Club Leadership','Football','Club Operations','Safeguarding & Welfare'];
+      var grouped = [[],[],[],[]];
+      dirPeople.forEach(function(p){ grouped[section(p.role)].push(p); });
+
+      var dirHTML = SECTIONS.map(function(title, i){
+        if (!grouped[i].length) return '';
+        return '<div class="md-sec"><b>'+esc(title)+'</b>'+
+          grouped[i].map(function(p){
+            return '<div class="md-p"><span class="nm">'+esc(p.name)+'</span>'+
+                   '<span class="rl">'+esc(p.role)+'</span></div>';
+          }).join('')+'</div>';
+      }).join('');
+
       P.push('<div class="page page--info">'+ banner('Who’s Who','Club Directory')+
-        '<div class="dir">'+club.committee.map(function(m){ return '<div class="dir-row"><span class="r">'+esc(m.role||'')+'</span><span class="n">'+esc(m.name||'')+'</span></div>'; }).join('')+'</div>'+
-        '<div class="card g" style="margin-top:14px"><div class="k">Safeguarding &amp; Officers</div><div class="t">Welfare Officer: <b>'+esc(OFF.welfareOfficer||'')+'</b> &middot; Chairman: <b>'+esc(OFF.chairman||'')+'</b> &middot; Secretary: <b>'+esc(OFF.secretary||'')+'</b></div></div>'+
-        (club.emails && club.emails.length ? '<div class="divider"><span class="lbl">Contact</span></div><div class="dir">'+club.emails.map(function(a){return '<div class="dir-row"><span class="r">'+esc(a.label||'')+(a.name?' ('+esc(a.name)+')':'')+'</span><span class="n" style="font-weight:500;font-size:11.5px">'+esc(a.email)+'</span></div>';}).join('')+'</div>' : '')+
+        '<div class="mast-dir">'+dirHTML+'</div>'+
+        (club.emails && club.emails.length
+          ? '<div class="md-contact">'+club.emails.map(function(a){
+              return '<div><b>'+esc(a.label||'')+'</b><span>'+esc(a.email)+'</span></div>';
+            }).join('')+'</div>'
+          : '')+
+        '<div class="rule"><span>Programme</span></div>'+
+        '<div class="md-contact" style="border-top:0;padding-top:0">'+
+          '<div><b>Produced by</b><span>Rayners Lane FC</span></div>'+
+          '<div><b>Concerns</b><span>info@raynerslanefc.co.uk &middot; NSPCC 0808 800 5000</span></div>'+
+        '</div>'+
         foot()+'</div>');
     }
 
