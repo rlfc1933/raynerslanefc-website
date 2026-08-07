@@ -77,7 +77,7 @@ test('a name alias cannot create a second identity', () => {
   // Identity is resolved once, in the football store, against a stable
   // provider id — never re-derived from the display name in the programme.
   const cardBlock = print.match(/var pc = club\.players\.slice\(0,15\)[\s\S]*?\}\)\.join\(''\);/)[0];
-  assert.match(cardBlock, /seasonStats\[p\.id\]/,
+  assert.match(cardBlock, /playerSeason\[p\.id\]/,
     'lookup must be by club player id, never by name');
   assert.ok(!/\.name\s*===|toLowerCase\(\)\s*===/.test(cardBlock),
     'no name matching may happen at render time');
@@ -186,7 +186,7 @@ test('TEMPORAL REGRESSION — an archived edition cannot drift', () => {
     'the live call must be unreachable once a snapshot exists');
 
   // And the cards read that document, not a service.
-  const cardBlock = print.match(/var seasonStats = [^\n]*\n/)[0];
+  const cardBlock = print.match(/var playerSeason = [^\n]*\n/)[0];
   assert.match(cardBlock, /d\.playerStats/,
     'cards must render from the document, so an archived edition renders its own past');
 });

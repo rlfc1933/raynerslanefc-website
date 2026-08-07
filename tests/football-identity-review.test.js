@@ -393,6 +393,40 @@ test('the freeze stores rows the print page can actually read', () => {
     'storing the envelope made the print page fall through to today’s table');
 });
 
+// ── 9 · THE PAGE MUST ACTUALLY BUILD ────────────────────────────────────────
+// A local `var seasonStats` inside render() shadowed the season-summary
+// function — `var` is function-scoped, not block-scoped — so the Season So Far
+// page called an object. The render chain had no catch, so the promise rejected
+// silently and the page sat on "Building…" for ever. It looked like a slow
+// network. Every printed programme had quietly lost a page.
+
+test('the season summary function is not shadowed inside render', () => {
+  const r = print.slice(print.indexOf('function render(d, crests'));
+  assert.ok(!/var seasonStats\s*=/.test(r),
+    'a local of that name silently replaces the function for the whole of render');
+  assert.match(r, /var playerSeason = \(d\.playerStats && d\.playerStats\.players\) \|\| \{\};/);
+});
+
+test('the per-player figures are declared where they are read', () => {
+  const r = print.slice(print.indexOf('function render(d, crests'));
+  const decl = r.indexOf('var playerSeason =');
+  const guard = r.indexOf('if (club.players && club.players.length)');
+  const use = r.indexOf('Object.keys(playerSeason)');
+  assert.ok(decl < guard,
+    'declared inside the squad block, it hoists as undefined and the ' +
+    'Statistics Centre throws on a club with no players listed');
+  assert.ok(decl < use && guard < use);
+});
+
+test('a failure to build says so instead of hanging', () => {
+  const c = print.match(/\}\)\.catch\(function\(err\)\{[\s\S]*?\n  \}\);/);
+  assert.ok(c, 'the render chain must have a catch');
+  assert.match(c[0], /This programme could not be built/);
+  assert.match(c[0], /Nothing has been printed/, 'the reader must know not to trust the page');
+  assert.match(c[0], /esc\(String\(\(err && err\.message\) \|\| err\)\)/,
+    'the fault must be reportable, not guessed at');
+});
+
 test('nothing already deployed is regressed', () => {
   assert.match(read('programme-print.html'), /aspect-ratio:4\/5/, 'headshot fix');
   assert.match(read('programme-print.html'), /league-mark/, 'Cherry Red placement');

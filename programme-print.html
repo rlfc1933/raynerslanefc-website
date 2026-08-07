@@ -364,6 +364,24 @@
       render(d, crests, sponsors, fixtures, table, club);
       afterRender();
     });
+  }).catch(function(err){
+    /* WHY THIS EXISTS.
+       render() threw and this chain had no catch, so the page sat on
+       "Building…" indefinitely. It looked like a slow network. It was a
+       TypeError, and it had been swallowing the Season So Far page of every
+       printed programme.
+
+       A blank page that says nothing is the worst outcome here, because
+       somebody prints it. Say plainly that it failed, and name the fault so
+       it can be reported rather than guessed at. */
+    var host = document.getElementById('pages') || document.body;
+    host.innerHTML = '<div class="page" style="padding:24mm 18mm">' +
+      '<h2 style="font-family:var(--fc);letter-spacing:.06em">This programme could not be built</h2>' +
+      '<p style="margin-top:10px;line-height:1.6">Nothing has been printed. Please tell whoever looks ' +
+      'after the website, and pass on the line below.</p>' +
+      '<pre style="margin-top:14px;padding:12px;background:#f4f4f4;border-radius:6px;white-space:pre-wrap;' +
+      'font-size:12px">' + esc(String((err && err.message) || err)) + '</pre></div>';
+    console.error('[programme-print]', err);
   });
 
   function afterRender(){
@@ -496,6 +514,21 @@
         '</div>'+ foot()+'</div>');
     }
 
+    /* Each player's season figures, keyed by the club's own player id.
+       Declared HERE, at the top of render, for two reasons that both bit.
+
+       It must not be called `seasonStats`. That is the function above which
+       computes the club's season summary. A local var of the same name shadows
+       it for the whole of render — `var` is function-scoped, not block-scoped —
+       so the Season So Far page called an object and threw. With no catch on
+       the render chain, the page sat on "Building…" for ever and every printed
+       programme silently lost that page.
+
+       And it must not live inside the `if (club.players...)` block below. The
+       Statistics Centre further down reads it unconditionally, so on a squad
+       with no players the hoisted var was undefined and Object.keys() threw. */
+    var playerSeason = (d.playerStats && d.playerStats.players) || {};
+
     /* SQUAD PROFILES (player cards) */
     if (club.players && club.players.length) {
       /* THE THREE NUMBERS. Assists are gone: Full-Time's pages carry no assist
@@ -506,7 +539,6 @@
          figure is not derivable. A zero means we DO know, from complete
          recorded coverage, that it is nought. Those are different claims and
          the card must not blur them. */
-      var seasonStats = (d.playerStats && d.playerStats.players) || {};
       function statCell(v, label){
         var known = v !== null && v !== undefined;
         return '<div><div class="v'+(known?'':' unk')+'">'+(known?esc(String(v)):'&mdash;')+
@@ -514,7 +546,7 @@
       }
       var pc = club.players.slice(0,15).map(function(p){
         var no=p.number||p.no||'', ph=p.photo||p.image||'';
-        var st = seasonStats[p.id] || null;
+        var st = playerSeason[p.id] || null;
         var keeper = /goal ?keeper|^gk$/i.test(p.position||p.pos||'');
         var apps    = st ? st.appearances : null;
         var goals   = st ? st.goals : null;
@@ -602,8 +634,8 @@
        Assists are absent by design: Full-Time's pages carry none, so "Most
        Assists" could only ever have been a made-up award. Minutes replace it —
        a figure the club genuinely derives. */
-    var statRows = Object.keys(seasonStats).length
-      ? club.players.map(function(p){ var t=seasonStats[p.id]; return t?Object.assign({name:p.name,position:p.position||p.pos},t):null; }).filter(Boolean)
+    var statRows = Object.keys(playerSeason).length
+      ? club.players.map(function(p){ var t=playerSeason[p.id]; return t?Object.assign({name:p.name,position:p.position||p.pos},t):null; }).filter(Boolean)
       : [];
     if (statRows.length) {
       function topBy(k){ return statRows.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
