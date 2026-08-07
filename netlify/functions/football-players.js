@@ -9,6 +9,7 @@
 'use strict';
 
 const adminOk = require('./lib/pin');
+const AUTHZ = require('./lib/authz');
 const S = require('./lib/football/store');
 const ID = require('./lib/football/identity');
 const RP = require('./lib/football/read-players');
@@ -24,10 +25,20 @@ function resp(code, obj) {
   };
 }
 
-/** Who is doing this. Recorded against every decision; never optional. */
-function actor(body) {
-  const who = String((body && body.by) || '').trim();
-  return who.slice(0, 80);
+/**
+ * Who is doing this. Recorded against every decision; never optional.
+ *
+ * Taken from the SIGNED SESSION, never from the request body. It used to read
+ * body.by, which the browser filled from a prompt() — so the permanent record
+ * of who decided a player's identity was whatever anybody chose to type. The
+ * role is carried too, because "Team Manager" is the part that explains why
+ * that person was entitled to answer a football question.
+ */
+function actor(sess) {
+  if (!sess) return '';
+  const name = String(sess.username || '').trim();
+  const role = String(sess.role || '').trim();
+  return (role && role !== name ? name + ' (' + role + ')' : name).slice(0, 80);
 }
 
 async function audit(row) {
@@ -250,11 +261,125 @@ exports.handler = async function (event) {
       return resp(200, { ok: true, player: { id: p.id, name: p.canonical_name }, proposal: r });
     }
 
-    // Anything that changes a person's record needs a person's name against it.
-    const by = actor(body);
-    if (!by) return resp(400, { ok: false, error: 'who is making this decision? Send "by".' });
+    // ── SUGGESTIONS FOR THE WHOLE QUEUE, IN ONE CALL ────────────────────
+    // The review screen showed nineteen blank dropdowns and asked a committee
+    // member to identify each person from a bare name. The resolver could
+    // already propose an answer — the screen simply never asked it.
+    //
+    // Batched deliberately: nineteen separate round trips would make the screen
+    // feel broken, and each would re-read the same two tables.
+    //
+    // A READ, so it sits above the permission gate below. Anybody who can open
+    // the review screen may see what the computer thinks; only the roles that
+    // hold CONFIRM_IDENTITY may act on it.
+    //
+    // NOTHING HERE DECIDES ANYTHING. Every proposal comes back as a suggestion
+    // carrying its reason, and becomes real only when somebody presses confirm.
+    // An exact string match is still only a suggestion: two people can share a
+    // name, and the club — not the software — is accountable for saying which
+    // of its players scored.
+    if (action === 'suggestall') {
+      const N = require('./lib/fwp/normalise');
+      const ourTeam = await RP.ourTeamId();
+      const [queue, all, rejections] = await Promise.all([
+        RP.reviewQueueDetailed ? RP.reviewQueueDetailed() : RP.reviewQueue(),
+        S.rest('football_players?select=id,canonical_name,current_team_id,identity_status,merged_into_id'),
+        S.rest('football_identity_rejections?select=normalised,team_id,club_player_id'),
+      ]);
+      const index = {};
+      (all || []).forEach((x) => {
+        if (x.merged_into_id) return;
+        index[x.current_team_id + '|' + N.playerKey(x.canonical_name)] = x;
+      });
+      // Which club players are already spoken for. Offering a taken player
+      // would only produce a refusal at confirm time.
+      const takenBy = {};
+      (all || []).forEach((x) => { if (x.club_player_id) takenBy[x.club_player_id] = x.id; });
+
+      const roster = Array.isArray(body.roster) ? body.roster : [];
+      const items = (queue || []).filter((q) => q.ours).map((q) => {
+        const self = { id: q.id, canonical_name: q.name, current_team_id: ourTeam };
+        const idx = Object.assign({}, index);
+        delete idx[ourTeam + '|' + N.playerKey(q.name)];
+        let r;
+        try {
+          r = ID.resolve(q.name, ourTeam,
+            { index: idx, roster: roster, ourTeamId: ourTeam, rejections: rejections || [] });
+        } catch (e) { r = { suggestions: [], reason: 'could not be read' }; }
+
+        const picks = (r.suggestions || []).filter((sg) =>
+          !sg.clubPlayerId || !takenBy[sg.clubPlayerId] || String(takenBy[sg.clubPlayerId]) === String(q.id));
+        const exact = picks.filter((sg) => sg.strength === 'exact');
+        return {
+          id: q.id,
+          name: q.name,
+          evidence: q.evidence || {},
+          sameNameAtAnotherClub: !!q.sameNameAtAnotherClub,
+          // 'exact'     — one unambiguous name match, safe to offer in bulk
+          // 'ambiguous' — more than one candidate; the committee must choose
+          // 'none'      — nothing to propose
+          confidence: exact.length === 1 ? 'exact' : (picks.length ? 'ambiguous' : 'none'),
+          suggestion: exact.length === 1 ? exact[0] : null,
+          options: picks.slice(0, 5),
+          reason: r.reason || '',
+        };
+      });
+
+      return resp(200, {
+        ok: true,
+        items: items,
+        counts: {
+          total: items.length,
+          exact: items.filter((i) => i.confidence === 'exact').length,
+          ambiguous: items.filter((i) => i.confidence === 'ambiguous').length,
+          none: items.filter((i) => i.confidence === 'none').length,
+        },
+      });
+    }
+
+    // ── FROM HERE ON, EVERYTHING CHANGES A REAL PERSON'S RECORD ──────────
+    //
+    // Two separate things had to be true and neither was.
+    //
+    // WHO. The decider used to be a name typed into a browser prompt, which
+    // meant the permanent audit trail recorded whatever string was entered.
+    // It is now taken from the signed session and the typed value is ignored,
+    // so "Gary confirmed this" means Gary signed in.
+    //
+    // WHETHER. The endpoint was gated on the shared club PIN alone, so anyone
+    // who could open the portal could rewrite the club's playing record. It now
+    // needs CONFIRM_IDENTITY — held by the Chairman, the System Maintainer and
+    // the Team Manager, and grantable to anyone else in la_permissions without
+    // a deploy.
+    //
+    // Reads stay above this line on purpose. Seeing the queue is how a
+    // volunteer knows there is work to do; only deciding is restricted.
+    const gate = await AUTHZ.requireCap(event, AUTHZ.CAP.CONFIRM_IDENTITY);
+    if (!gate.ok) return gate.response;
+    const by = actor(gate.session);
 
     if (action === 'confirm') return resp(200, await confirm(body, by));
+
+    // ── BULK CONFIRM ─────────────────────────────────────────────────────
+    // Nineteen decisions is enough friction that the job does not get done.
+    // This applies several at once, but every one goes through confirm() —
+    // the same duplicate checks, the same audit row, the same named decider.
+    // There is no faster path that skips a protection.
+    //
+    // The caller must send the exact pairs it was shown. A "confirm everything
+    // you think is right" action would let the screen and the server disagree
+    // about what was approved.
+    if (action === 'confirmmany') {
+      const pairs = Array.isArray(body.pairs) ? body.pairs.slice(0, 50) : [];
+      if (!pairs.length) return resp(400, { ok: false, error: 'nothing to confirm' });
+      const done = [], failed = [];
+      for (const pr of pairs) {
+        const r = await confirm({ playerId: pr.playerId, clubPlayerId: pr.clubPlayerId,
+          reason: 'bulk exact-name confirmation, reviewed on screen' }, by);
+        if (r.ok) done.push(pr); else failed.push({ playerId: pr.playerId, error: r.error });
+      }
+      return resp(200, { ok: true, confirmed: done.length, failed: failed });
+    }
     if (action === 'reject') return resp(200, await reject(body, by));
     if (action === 'merge') return resp(200, await merge(body, by));
     if (action === 'unmerge') return resp(200, await unmerge(body, by));

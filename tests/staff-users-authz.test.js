@@ -127,17 +127,42 @@ test('NOTHING IN THE REQUEST BODY GRANTS AUTHORITY', async (t) => {
    3. CAPABILITIES ARE SEPARATE, NOT ONE BLANKET RIGHT
    ══════════════════════════════════════════════════════════════════════════ */
 test('EACH ACTION NEEDS ITS OWN CAPABILITY', async (t) => {
-  await t.test('the six capabilities are distinct', () => {
+  await t.test('the capabilities are distinct', () => {
     const caps = Object.values(AUTHZ.CAP);
     assert.strictEqual(new Set(caps).size, caps.length, 'no duplicate capability names');
     assert.ok(caps.includes('can_manage_users'),
       'the pre-existing la_permissions name must be reused, not duplicated');
   });
 
-  await t.test('Chairman holds all six; V Chairman holds view + disable only', () => {
-    assert.strictEqual(AUTHZ.DEFAULT_CAPS['Chairman'].length, 6);
+  // Six administer STAFF ACCOUNTS. The seventh, CONFIRM_IDENTITY, administers
+  // nothing — it decides which of our players a Full-Time name refers to. It
+  // lives in the same vocabulary so there is one answer to "who may do what",
+  // but it is deliberately not part of the administrative bundle: the Team
+  // Manager holds it and holds no power over anybody's account.
+  const STAFF_ADMIN = [AUTHZ.CAP.VIEW_STAFF, AUTHZ.CAP.MANAGE_USERS, AUTHZ.CAP.DISABLE_ACCOUNT,
+    AUTHZ.CAP.RESET_CREDENTIALS, AUTHZ.CAP.ASSIGN_ROLES, AUTHZ.CAP.ASSIGN_ADMIN];
+
+  await t.test('Chairman holds all six staff powers; V Chairman holds view + disable only', () => {
+    STAFF_ADMIN.forEach((c) => assert.ok(AUTHZ.DEFAULT_CAPS['Chairman'].includes(c),
+      'Chairman must hold ' + c));
     assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['V Chairman'],
       [AUTHZ.CAP.VIEW_STAFF, AUTHZ.CAP.DISABLE_ACCOUNT]);
+  });
+
+  await t.test('confirming a player is not a staff-administration power', () => {
+    assert.ok(!STAFF_ADMIN.includes(AUTHZ.CAP.CONFIRM_IDENTITY));
+    // The Team Manager is the proof: he can answer a football question and
+    // cannot touch a single account.
+    assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['Team Manager'], [AUTHZ.CAP.CONFIRM_IDENTITY]);
+    STAFF_ADMIN.forEach((c) => assert.ok(!AUTHZ.DEFAULT_CAPS['Team Manager'].includes(c),
+      'Team Manager must not hold ' + c));
+  });
+
+  await t.test('the new capability does not need elevation', () => {
+    // Deliberate: requiring a personal password would mean the manager cannot
+    // answer until somebody sets him one, and the queue sits untouched again.
+    // It is still a signed session, and the audit still carries his name.
+    assert.ok(!AUTHZ.ELEVATED.includes(AUTHZ.CAP.CONFIRM_IDENTITY));
   });
 
   await t.test('an ordinary committee member holds none', async () => {

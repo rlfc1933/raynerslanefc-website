@@ -56,7 +56,14 @@ test('the identity queue is behind the portal, reads included', () => {
 
 test('every decision records who made it', () => {
   const s = strip(R('netlify/functions/football-players.js'));
-  assert.match(s, /if \(!by\) return resp\(400/, 'a decision with no name against it is refused');
+  // The name used to come from the request body, which the browser filled from
+  // a prompt() — so the club's permanent record of who identified a player was
+  // whatever string was typed. It is now taken from the signed session, and a
+  // request without one never reaches a decision at all.
+  assert.match(s, /const gate = await AUTHZ\.requireCap\(event, AUTHZ\.CAP\.CONFIRM_IDENTITY\)/,
+    'a decision with nobody behind it is refused');
+  assert.match(s, /const by = actor\(gate\.session\)/);
+  assert.ok(!/actor\(body\)/.test(s), 'the decider must not come from the request body');
   ['confirm', 'reject', 'merge', 'unmerge'].forEach((a) => {
     assert.ok(s.includes("action: '" + a + "'"), a + ' is not written to the audit');
   });
@@ -158,7 +165,9 @@ test('the identity controls are named for somebody who cannot see the row', () =
   const panel = s.slice(s.indexOf('window.identRefresh'), s.indexOf('window.healthRefresh'));
   assert.match(panel, /aria-label="Which of our players is/);
   assert.match(panel, /aria-label="Confirm '/);
-  assert.match(panel, /aria-label="Leave ' \+ esc\(q\.name\) \+ ' unconfirmed"/);
+  // All three answers, each naming the person the row is about.
+  assert.match(panel, /aria-label="Leave ' \+ esc\(q\.name\) \+ ' for somebody who knows"/);
+  assert.match(panel, /aria-label="' \+ esc\(q\.name\) \+ ' is not one of our players"/);
   assert.match(panel, /aria-label="View the match evidence for/);
 });
 
