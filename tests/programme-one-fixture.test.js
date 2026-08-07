@@ -228,9 +228,17 @@ test('no commercial title is invented for MJM', () => {
   const sponsors = JSON.parse(read('data/sponsors.json'));
   const list = sponsors.sponsors || sponsors;
   const mjm = list.filter((s) => s.name === 'MJM Sports')[0];
-  // about.html records no designation for MJM, so a neutral one is used.
-  assert.strictEqual(mjm.tier, 'Club Partner');
-  assert.ok(!/Main Sponsor|Official Partner|Title/i.test(mjm.tier));
+  // CORRECTED. This used to assert tier === 'Club Partner'. A neutral-sounding
+  // designation is still a designation, and nothing established it — the entry
+  // existed because a logo file did. The Combined Counties League distributes
+  // an official "MJM Sports Programme Advert" to member clubs, so the
+  // relationship the evidence actually supports is with the League. The tier is
+  // withdrawn until the club's own records say otherwise.
+  assert.strictEqual(mjm.tier, '');
+  assert.strictEqual(mjm.unconfirmed, true);
+  const manifest = JSON.parse(read('data/programme-compliance.json'));
+  assert.ok(manifest.leagueAdverts.some((a) => a.sponsor === 'MJM Sports'),
+    'and it is carried as a league advert instead');
 });
 
 test('Cherry Red Records sits with the league, not in the club partner strip', () => {

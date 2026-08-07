@@ -63,10 +63,12 @@
     },
     {
       "name": "MJM Sports",
-      "tier": "Club Partner",
+      "tier": "",
       "logo": "img/sponsors/mjm-sports.png",
       "url": "",
-      "blurb": ""
+      "blurb": "",
+      "unconfirmed": true,
+      "_note": "TIER WITHDRAWN, DELIBERATELY. This was listed as 'Club Partner' on no evidence beyond a logo file existing in the repository. The Combined Counties League distributes an official 'MJM Sports Programme Advert' to member clubs, so the relationship the evidence supports is with the LEAGUE, not with Rayners Lane. The League advert is handled in data/programme-compliance.json. If the club does hold a direct MJM agreement, set the tier back and delete this note — but that has to come from the club's own records, not from an inference."
     }
   ],
   "affiliations": [
