@@ -214,7 +214,9 @@ test('the gate sits below the reads and above every write', () => {
 test('the manager holds it without holding any administrative power', () => {
   const AZ = require(path.join(ROOT, 'netlify/functions/lib/authz.js'));
   const tm = AZ.DEFAULT_CAPS['Team Manager'] || [];
-  assert.deepStrictEqual(tm, [AZ.CAP.CONFIRM_IDENTITY]);
+  // He now also maintains the squad list — he picks it, after all. Still no
+  // power over anybody's account, which is what this test protects.
+  assert.deepStrictEqual(tm, [AZ.CAP.CONFIRM_IDENTITY, AZ.CAP.MANAGE_ROSTER]);
   AZ.ELEVATED.concat([AZ.CAP.MANAGE_USERS, AZ.CAP.ASSIGN_ADMIN, AZ.CAP.VIEW_STAFF])
     .forEach((c) => assert.ok(tm.indexOf(c) === -1, `Team Manager must not hold ${c}`));
 });
@@ -234,7 +236,7 @@ test('the drawing mirror agrees with the server', () => {
   Object.keys(AZ.DEFAULT_CAPS).forEach((role) => {
     assert.ok(caps.includes("'" + role + "'"), `the portal has no mirror for "${role}"`);
   });
-  assert.match(caps, /'Team Manager': \['can_confirm_player_identity'\]/);
+  assert.match(caps, /'Team Manager': \['can_confirm_player_identity', 'can_manage_first_team_roster'\]/);
 });
 
 test('the decider is taken from the signed session, never from the body', () => {

@@ -251,12 +251,29 @@ test('assists are nowhere', () => {
 
 const print = read('programme-print.html');
 
-test('the card looks up by roster id', { skip: 'individual statistics removed from the programme squad' }, () => {
-  const block = print.slice(print.indexOf('var pc = club.players.map'),
-                            print.indexOf('var pc = club.players.map') + 900);
-  assert.match(block, /playerSeason\[p\.id\]/, 'by id — a name lookup would break on any alias');
-  assert.ok(!/\.name\s*===|toLowerCase\(\)\s*===/.test(block));
+test('no squad tile carries a statistic', () => {
+  // REPLACES an assertion that the card looked statistics up by roster id.
+  // The club removed individual figures from the programme, so the protection
+  // is now pointed the other way: nothing may quietly put them back and
+  // reintroduce a page of em dashes.
+  const tile = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
+  ['APPS', 'GOALS', 'MINS', 'Clean Sheets', 'statCell', 'playerSeason',
+   'appearances', 'minutes'].forEach((k) =>
+    assert.ok(!tile.includes(k), k + ' must not appear on a squad tile'));
+  assert.ok(!/&mdash;|—/.test(tile), 'no placeholder dash may render on the squad');
 });
+
+test('the squad still renders every roster player', () => {
+  // The other half: removing the figures must not remove anybody.
+  const roster = JSON.parse(read('data/players.json')).players || [];
+  assert.ok(roster.length >= 26);
+  const block = print.slice(print.indexOf('var pc = club.players.map'),
+                            print.indexOf('var pages = squadPages'));
+  assert.ok(!/\.slice\(0\s*,\s*\d+\)/.test(block), 'no cap');
+  assert.ok(!/\.filter\(/.test(block), 'no filter drops a squad member');
+  assert.match(print, /var pages = squadPages\(pc\.length, 30\)/);
+});
+
 
 test('the renderer reads the players property the endpoint returns', () => {
   assert.match(print, /d\.playerStats && d\.playerStats\.players/,
@@ -264,13 +281,16 @@ test('the renderer reads the players property the endpoint returns', () => {
   assert.match(read('netlify/functions/programme-stats.js'), /players: players/);
 });
 
-test('a missing headshot cannot affect a number', { skip: 'individual statistics removed from the programme squad' }, () => {
-  const block = print.slice(print.indexOf('var pc = club.players.map'),
-                            print.indexOf('var pc = club.players.map') + 1400);
-  const statLine = block.slice(block.indexOf('var st = playerSeason[p.id]'));
-  assert.ok(!/photo|image/.test(statLine.slice(0, 300)),
-    'the figures are derived before, and independently of, any photograph');
+test('a missing headshot produces a designed tile, not a gap', () => {
+  // REPLACES an assertion that a missing photograph could not affect a number.
+  // There are no numbers now; what matters is that the tile is still designed.
+  assert.match(print, /sq-ph--none/);
+  assert.match(print, /Photo<br>to follow/);
+  assert.match(print, /esc\(initials\(p\.name\)\)/);
+  const css = print.match(/\.sq-ph\{[^}]*\}/)[0];
+  assert.match(css, /aspect-ratio:1\/1/, 'the fallback occupies the same footprint as a photo');
 });
+
 
 // ── 5 · DRAFT REFRESHES, PUBLISHED IS FROZEN ────────────────────────────────
 
@@ -354,5 +374,5 @@ test('the status is drawn from the queue, not guessed', () => {
 });
 
 test('the editor shows the status when it opens', () => {
-  assert.match(admin, /if \(name === 'programme'\) \{ initProgramme\(\); prStatsStatus\(\); \}/);
+  assert.match(admin, /if \(name === 'programme'\) \{ initProgramme\(\); prStatsStatus\(\); prRosterLoad\(\); \}/);
 });

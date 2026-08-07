@@ -118,6 +118,41 @@
     /* Large, because it is the one action that unblocks the whole page. */
     .pr-ss-acts .btn-go{background:var(--y);color:#0d0d0d;font-weight:800;letter-spacing:.08em;
       min-height:46px;padding:0 20px;border-color:var(--y)}
+    /* FIRST TEAM ROSTER — a squad list, compact enough to scan at a glance. */
+    .pr-roster{margin-bottom:16px}
+    .pr-r-head{display:flex;justify-content:space-between;align-items:center;gap:12px;
+      flex-wrap:wrap;border-bottom:2px solid var(--br);padding-bottom:8px;margin-bottom:11px}
+    .pr-r-head b{font-family:var(--fc);font-size:13px;color:var(--w);letter-spacing:.03em}
+    .pr-r-tabs{display:flex;gap:6px}
+    .pr-r-tabs button{background:transparent;border:1px solid var(--br);color:var(--gr);
+      font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.05em;
+      padding:5px 11px;cursor:pointer;border-radius:6px}
+    .pr-r-tabs button.on{background:var(--y);border-color:var(--y);color:#0d0d0d}
+    .pr-r-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(215px,100%),1fr));gap:9px}
+    .pr-r-p{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--br);
+      border-radius:9px;background:rgba(255,255,255,.02)}
+    .pr-r-p--out{opacity:.62}
+    .pr-r-ph{position:relative;width:42px;height:42px;flex:none;border-radius:6px;overflow:hidden;
+      background:linear-gradient(160deg,#14532d,#0b2a1a);display:flex;align-items:center;
+      justify-content:center}
+    .pr-r-ph img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+    .pr-r-ph span{font-family:var(--fd);font-size:15px;color:#fff;letter-spacing:.5px}
+    .pr-r-ph b{position:absolute;left:0;top:0;background:var(--y);color:#0d0d0d;
+      font-family:var(--fd);font-size:10px;line-height:1;padding:2px 4px}
+    .pr-r-tx{min-width:0;flex:1}
+    .pr-r-nm{font-family:var(--fc);font-size:13px;font-weight:700;color:var(--w);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pr-r-po{font-family:var(--fb);font-size:11px;color:var(--gr);margin-top:1px}
+    .pr-r-act{display:flex;flex-direction:column;gap:4px}
+    .pr-r-act .btn-sm{font-size:10px;padding:4px 8px;min-height:0;white-space:nowrap}
+    .pr-r-act .btn-warn{background:transparent;border-color:rgba(239,68,68,.5);color:#F87171}
+    .pr-r-add{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:12px;
+      border-top:1px solid var(--br)}
+    .pr-r-add input,.pr-r-add select{flex:1 1 130px;min-width:0}
+    .pr-r-add input[type=number]{flex:0 0 74px}
+    .pr-r-note{font-family:var(--fb);font-size:11.5px;color:var(--gr);line-height:1.5;margin-top:8px}
+    .pr-r-empty{font-family:var(--fb);font-size:12.5px;color:var(--gr);padding:12px 0}
+    @media(max-width:600px){.pr-r-grid{grid-template-columns:1fr}}
     .pr-fx{border:1px solid rgba(255,209,0,.4);background:linear-gradient(135deg,rgba(255,209,0,.10),transparent 62%);border-radius:12px;padding:16px;margin-bottom:14px}
     .pr-fx__k{font-family:var(--fc);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--y);margin-bottom:5px}
     .pr-fx__m{font-family:var(--fd);font-size:26px;line-height:1.05;color:var(--w)}
@@ -1389,6 +1424,14 @@
            looked broken. This says it, in the one place the editor is standing,
            and offers the way to fix it. -->
       <div id="pr-stats-status" class="pr-stats-status" hidden></div>
+
+      <!-- FIRST TEAM ROSTER. The squad that prints in the programme, editable
+           by the person producing the programme. A signing on Thursday has to
+           be in Saturday's edition, and waiting for a developer is how the old
+           programme ended up capped at fifteen players. -->
+      <div class="slbl"><i class="ico ico-users"></i> First Team Roster
+        <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— who prints in the squad pages</span></div>
+      <div id="pr-roster" class="pr-roster"></div>
 
       <div class="slbl"><i class="ico ico-zap"></i> Choose another match <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fills in opponent, date, time &amp; venue. Your writing is kept.</span></div>
       <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
@@ -4435,7 +4478,7 @@ function openPanel(name) {
   if (name === 'mdops')     MDOps.init();
   if (name === 'venues')    vnInit();
   if (name === 'signoff')   soInit();
-  if (name === 'programme') { initProgramme(); prStatsStatus(); }
+  if (name === 'programme') { initProgramme(); prStatsStatus(); prRosterLoad(); }
   if (name === 'mail')      initMail();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
@@ -5629,6 +5672,174 @@ async function prStatsStatus() {
   } catch (e) {
     box.hidden = true;   // never block the editor over a status line
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FIRST TEAM ROSTER — the squad, maintained by the person who prints it.
+
+   The canonical roster is Supabase `la_players`; data/players.json is
+   regenerated from it on every save. This screen is the operations that were
+   missing rather than a new store: EDIT a player without minting a second one,
+   SEE who has left and bring them back, and be WARNED before adding a name the
+   club already has.
+
+   Nothing here touches Full-Time identities. Being in the squad and having
+   match data are different questions, and the squad answers only the first.
+   ══════════════════════════════════════════════════════════════════════════ */
+var prRoster = { active: [], inactive: [], showInactive: false };
+var PR_POS = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
+
+function prRosterApi(payload) {
+  var body = Object.assign({ pin: PIN }, payload);
+  var writing = payload.action && payload.action !== 'list';
+  var url = '/.netlify/functions/la-roster';
+  var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(body) };
+  // Reads are open inside the portal; changing the squad is signed.
+  return (writing ? staffAdminFetch(url, opts, 'Changing the first team squad')
+                  : fetch(url, opts))
+    .then(function (r) { return r ? r.json().catch(function () { return {}; }) : null; })
+    .catch(function (e) { return { ok: false, error: e.message }; });
+}
+
+async function prRosterLoad() {
+  var box = document.getElementById('pr-roster');
+  if (!box) return;
+  box.innerHTML = '<div class="pr-r-empty">Loading the squad…</div>';
+  var j = await prRosterApi({ action: 'list' });
+  if (!j || j.ok === false) {
+    box.innerHTML = '<div class="pr-r-empty">The squad list is unavailable just now.</div>';
+    return;
+  }
+  prRoster.active = j.active || [];
+  prRoster.inactive = j.inactive || [];
+  prRosterRender();
+}
+
+function prRosterRender() {
+  var box = document.getElementById('pr-roster');
+  if (!box) return;
+  var may = staffCan('can_manage_first_team_roster');
+  var list = prRoster.showInactive ? prRoster.inactive : prRoster.active;
+
+  function tile(p) {
+    var initials = String(p.name || '').trim().split(/[\s-]+/).filter(Boolean);
+    initials = ((initials[0] || '')[0] || '') + (initials.length > 1 ? (initials[initials.length - 1][0] || '') : '');
+    return '<div class="pr-r-p' + (p.active ? '' : ' pr-r-p--out') + '">' +
+      '<div class="pr-r-ph">' + (p.photo
+        ? '<img src="' + esc(p.photo) + '" alt="">'
+        : '<span>' + esc(initials.toUpperCase()) + '</span>') +
+        (p.number ? '<b>' + esc(String(p.number)) + '</b>' : '') + '</div>' +
+      '<div class="pr-r-tx"><div class="pr-r-nm">' + esc(p.name) + '</div>' +
+        '<div class="pr-r-po">' + esc(p.position || 'Position not set') + '</div></div>' +
+      (may ? '<div class="pr-r-act">' +
+        (p.active
+          ? '<button class="btn btn-sm" onclick="prRosterEdit(' + p.id + ')">Edit</button>' +
+            '<button class="btn btn-sm btn-warn" onclick="prRosterOut(' + p.id + ')">Remove from squad</button>'
+          : '<button class="btn btn-sm" onclick="prRosterBack(' + p.id + ')">Restore to squad</button>') +
+        '</div>' : '') +
+    '</div>';
+  }
+
+  box.innerHTML =
+    '<div class="pr-r-head">' +
+      '<b>' + esc(String(prRoster.active.length)) + ' in the current squad</b>' +
+      '<span class="pr-r-tabs">' +
+        '<button class="' + (prRoster.showInactive ? '' : 'on') + '" onclick="prRosterTab(false)">Current squad</button>' +
+        '<button class="' + (prRoster.showInactive ? 'on' : '') + '" onclick="prRosterTab(true)">' +
+          'Left the club (' + prRoster.inactive.length + ')</button>' +
+      '</span>' +
+    '</div>' +
+    (may ? '' : '<div class="pr-r-empty">You can see the squad. Changing it is done by the ' +
+      'manager, the chairman or the programme editor.</div>') +
+    (list.length
+      ? '<div class="pr-r-grid">' + list.map(tile).join('') + '</div>'
+      : '<div class="pr-r-empty">' + (prRoster.showInactive
+          ? 'Nobody has left the squad.' : 'No players yet.') + '</div>') +
+    (may && !prRoster.showInactive
+      ? '<div class="pr-r-add">' +
+          '<input type="text" id="pr-r-name" placeholder="Player name" autocomplete="off">' +
+          '<select id="pr-r-pos"><option value="">Position…</option>' +
+            PR_POS.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select>' +
+          '<input type="number" id="pr-r-no" placeholder="No." min="1" max="99">' +
+          '<button class="btn btn-go" onclick="prRosterAdd()">+ Add player</button>' +
+        '</div>' +
+        '<div class="pr-r-note">Adding somebody puts them straight into the programme’s squad ' +
+          'pages. A photograph can come later — until then they get a designed Rayners Lane ' +
+          'graphic, not a blank box.</div>'
+      : '');
+}
+
+function prRosterTab(showInactive) { prRoster.showInactive = !!showInactive; prRosterRender(); }
+
+async function prRosterAdd(confirmDuplicate) {
+  var name = (document.getElementById('pr-r-name') || {}).value || '';
+  var pos = (document.getElementById('pr-r-pos') || {}).value || '';
+  var no = (document.getElementById('pr-r-no') || {}).value || '';
+  if (!name.trim()) { toast('Enter the player’s name', true); return; }
+  if (!pos) { toast('Choose a position', true); return; }
+
+  var j = await prRosterApi({ action: 'add', name: name.trim(), position: pos,
+    number: no, confirmDuplicate: !!confirmDuplicate });
+  if (!j) return;
+
+  // The club already has somebody by that name — show who, and let the editor
+  // decide. Never silently merged, never silently duplicated.
+  if (j.duplicate) {
+    var who = (j.matches || []).map(function (m) {
+      return '  • ' + m.name + (m.active ? '' : ' (left the club)');
+    }).join('\n');
+    if (!confirm('A player with a very similar name already exists:\n\n' + who +
+      '\n\nIf this is the same person, press Cancel — you can restore them from ' +
+      '“Left the club” instead.\n\nAdd "' + name.trim() + '" as a separate player anyway?')) return;
+    return prRosterAdd(true);
+  }
+  if (j.ok === false) { toast(j.error || 'Could not add that player', true); return; }
+
+  ['pr-r-name', 'pr-r-no'].forEach(function (id) { var e = document.getElementById(id); if (e) e.value = ''; });
+  toast(name.trim() + ' added to the squad. The programme will show them straight away.');
+  prRosterLoad();
+}
+
+async function prRosterEdit(id) {
+  var p = prRoster.active.concat(prRoster.inactive).filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  var name = prompt('Player name', p.name); if (name === null) return;
+  var pos = prompt('Position (Goalkeeper, Defender, Midfielder, Forward)', p.position || '');
+  if (pos === null) return;
+  var no = prompt('Squad number (leave blank if none)', p.number == null ? '' : String(p.number));
+  if (no === null) return;
+
+  // BY ID. Changing a name must correct the player, never create a second one.
+  var j = await prRosterApi({ action: 'update', id: id, name: name, position: pos, number: no });
+  if (!j) return;
+  toast(j.ok ? 'Updated. The programme will use the new details.'
+             : (j.error || 'Could not save that change'), !j.ok);
+  if (j.ok) prRosterLoad();
+}
+
+async function prRosterOut(id) {
+  var p = prRoster.active.filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  // Deliberately not "delete". Their record, their appearances and every
+  // published programme they appear in all stay exactly as they are.
+  if (!confirm('Remove ' + p.name + ' from the current squad?\n\n' +
+    'They come out of the programme’s squad pages from now on.\n\n' +
+    'Nothing is deleted — their record and every programme already published ' +
+    'stay exactly as they are, and you can restore them at any time.')) return;
+  var j = await prRosterApi({ action: 'deactivate', id: id });
+  if (!j) return;
+  toast(j.ok ? p.name + ' removed from the current squad.' : (j.error || 'Could not do that'), !j.ok);
+  if (j.ok) prRosterLoad();
+}
+
+async function prRosterBack(id) {
+  var p = prRoster.inactive.filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  var j = await prRosterApi({ action: 'restore', id: id });
+  if (!j) return;
+  toast(j.ok ? p.name + ' is back in the squad.' : (j.error || 'Could not do that'), !j.ok);
+  if (j.ok) prRosterLoad();
 }
 
 /** Straight to the screen that fixes it, scrolled to the right block. */
