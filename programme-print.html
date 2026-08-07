@@ -331,10 +331,19 @@
 
      Without this, opening last August's Hilltop programme in March would show
      a player on 25 appearances because that is what he has NOW — rewriting a
-     document supporters already hold. */
+     document supporters already hold.
+
+     WHAT DECIDES IS `published`, NOT "is there a snapshot".
+     The test used to be `if (doc.playerStats)`, and an empty object is truthy.
+     A draft that had ever been handed a `{}` — or a snapshot taken while the
+     squad was still unmatched — was therefore treated as settled history and
+     printed dashes for ever, with no way to refresh short of publishing. A
+     draft is not history. It refreshes. Only a published edition is frozen,
+     and it stays frozen even if what it froze was empty, because that is
+     honestly what the club knew that afternoon. */
   function loadSeasonStats(doc){
-    if (doc && doc.playerStats) return Promise.resolve(doc.playerStats);   // frozen
-    if (doc && doc.published) return Promise.resolve(null);   // published without one: show dashes, never today's
+    var published = !!(doc && doc.published);
+    if (published) return Promise.resolve((doc && doc.playerStats) || null);
     return fetch('/.netlify/functions/programme-stats')
       .then(function(r){ return r.ok ? r.json() : null; })
       .catch(function(){ return null; });
@@ -351,16 +360,27 @@
        of publication, but this page was still calling fetch-table on every
        render — so opening a published edition months later redrew it with
        TODAY's table, showing a club in eighth on a page that went to print
-       while they were in second. The frozen copy wins whenever there is one;
-       only a draft asks for the live standings. */
+       while they were in second.
+
+       Same rule as the player figures, for the same reason: PUBLISHED decides,
+       not "is there a snapshot". A draft shows the standings as they are now,
+       so the edition being built is built on current information. Only a
+       published edition is pinned to what it froze. */
     var frozenTable = d.leagueTable && (d.leagueTable.table || d.leagueTable);   // rows, or an older envelope
-    var table = (frozenTable && frozenTable.length) ? frozenTable : ((res[4]&&res[4].table)||[]);
+    var liveTable = (res[4] && res[4].table) || [];
+    var table = d.published
+      ? ((frozenTable && frozenTable.length) ? frozenTable : liveTable)
+      : (liveTable.length ? liveTable : (frozenTable || []));
     var club = {
       committee:(res[5]&&res[5].members)||[], officials:res[6]||{}, emails:(res[7]&&res[7].accounts)||[],
       players:((res[8]&&res[8].players)||(res[9]&&res[9].players)||[])
     };
     return loadSeasonStats(d).then(function(ps){
-      if (ps && !d.playerStats) d.playerStats = ps;   // draft: attach today's
+      // Overwrite on a draft. `!d.playerStats` was the same truthiness trap:
+      // a draft carrying a stale empty snapshot would discard the figures we
+      // had just gone and fetched.
+      if (ps && !d.published) d.playerStats = ps;
+      else if (ps && !d.playerStats) d.playerStats = ps;
       render(d, crests, sponsors, fixtures, table, club);
       afterRender();
     });

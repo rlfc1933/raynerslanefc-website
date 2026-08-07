@@ -381,9 +381,14 @@ test('the print page passes the edition its own date', () => {
 
 test('a published edition draws the table it was published with', () => {
   assert.match(print, /var frozenTable = d\.leagueTable && \(d\.leagueTable\.table \|\| d\.leagueTable\)/);
-  const line = print.match(/var table = \(frozenTable[^\n]*/)[0];
-  assert.ok(line.indexOf('frozenTable') < line.indexOf('res[4]'),
-    'the frozen copy must win over the live standings');
+  // PUBLISHED decides, the same rule the player figures follow: an archived
+  // edition keeps the standings it went to print with, while a draft is built
+  // on the standings as they are today.
+  const block = print.slice(print.indexOf('var frozenTable ='), print.indexOf('var club = {'));
+  assert.match(block, /d\.published\s*\n?\s*\? \(\(frozenTable && frozenTable\.length\) \? frozenTable : liveTable\)/,
+    'a published edition takes its frozen copy');
+  assert.match(block, /: \(liveTable\.length \? liveTable : \(frozenTable \|\| \[\]\)\)/,
+    'a draft takes the live standings');
 });
 
 test('the freeze stores rows the print page can actually read', () => {
