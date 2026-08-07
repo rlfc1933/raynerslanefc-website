@@ -76,7 +76,7 @@ test('the four scopes are a total plus subsets, not four separate seasons', () =
 test('a name alias cannot create a second identity', () => {
   // Identity is resolved once, in the football store, against a stable
   // provider id — never re-derived from the display name in the programme.
-  const cardBlock = print.match(/var pc = club\.players\.slice\(0,15\)[\s\S]*?\}\)\.join\(''\);/)[0];
+  const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
   assert.match(cardBlock, /playerSeason\[p\.id\]/,
     'lookup must be by club player id, never by name');
   assert.ok(!/\.name\s*===|toLowerCase\(\)\s*===/.test(cardBlock),
@@ -125,7 +125,7 @@ test('assists are gone from the programme entirely', () => {
 });
 
 test('the third stat is one we genuinely hold', () => {
-  const cardBlock = print.match(/var pc = club\.players\.slice\(0,15\)[\s\S]*?\}\)\.join\(''\);/)[0];
+  const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
   assert.match(cardBlock, /statCell\(mins,'Mins'\)/);
   assert.match(cardBlock, /statCell\(apps,'Apps'\)/);
 });
@@ -133,7 +133,7 @@ test('the third stat is one we genuinely hold', () => {
 // ── 4 · GOALKEEPERS ─────────────────────────────────────────────────────────
 
 test('a goalkeeper gets clean sheets where an outfielder gets goals', () => {
-  const cardBlock = print.match(/var pc = club\.players\.slice\(0,15\)[\s\S]*?\}\)\.join\(''\);/)[0];
+  const cardBlock = print.match(/var pc = club\.players\.map\(function\(p\)\{[\s\S]*?\n      \}\);/)[0];
   assert.match(cardBlock, /keeper[\s\S]*?statCell\(sheets, 'Clean Sheets'\)/);
   assert.match(cardBlock, /statCell\(goals, 'Goals'\)/);
 });

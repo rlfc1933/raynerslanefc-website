@@ -504,6 +504,25 @@
 
      No date on the edition (an undated draft) falls back to the old behaviour:
      anything with a score. */
+  /**
+   * How many players go on each squad page, given a roster size and the most
+   * that fit on one sheet.
+   *
+   * Returns a list of per-page counts that sum to exactly `total`, uses the
+   * fewest pages that can hold them, and differs by at most one between the
+   * fullest and emptiest page. That last property is the point: it is what
+   * stops a roster of 26 ending on a sheet holding two players.
+   */
+  function squadPages(total, max){
+    if (total <= 0) return [];
+    var pages = Math.ceil(total / max);
+    var base = Math.floor(total / pages);
+    var extra = total % pages;                 // spread the remainder, one each
+    var out = [];
+    for (var i = 0; i < pages; i++) out.push(base + (i < extra ? 1 : 0));
+    return out;
+  }
+
   function seasonStats(fixtures, editionDate){
     var cut = String(editionDate||'').slice(0,10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(cut)) cut = '';
@@ -866,7 +885,14 @@
         return '<div><div class="v'+(known?'':' unk')+'">'+(known?esc(String(v)):'&mdash;')+
                '</div><div class="k">'+label+'</div></div>';
       }
-      var pc = club.players.slice(0,15).map(function(p){
+      /* THE WHOLE SQUAD. `slice(0,15)` silently dropped eleven of the club's
+         twenty-six players — nothing to do with photographs, statistics or
+         identity confirmation, just a hard cap nobody had revisited. The squad
+         section answers "who plays for Rayners Lane", which is the club roster
+         and only the club roster. Whether we have verified match data for
+         somebody is a different question, answered on the same card by the
+         figures next to their name. */
+      var pc = club.players.map(function(p){
         var no=p.number||p.no||'', ph=p.photo||p.image||'';
         var st = playerSeason[p.id] || null;
         var keeper = /goal ?keeper|^gk$/i.test(p.position||p.pos||'');
@@ -890,24 +916,25 @@
           '<div class="st">'+statCell(apps,'Apps')+second+statCell(mins,'Mins')+'</div></div>';
       });
 
-      /* REPACK, DO NOT LET THE BROWSER BREAK IT.
-         Every card used to be pushed into ONE .page and left to overflow across
-         however many sheets the renderer felt like. The local PDF proved what
-         that costs: a third sheet carrying three orphaned stat lines and
-         nothing else — 128 characters on a sheet of A4, which is a print
-         failure, not a layout quirk.
+      /* BALANCED PAGINATION, NOT BLIND CHUNKING.
+         Chunking six at a time is fine until the roster is not a multiple of
+         six: 26 players becomes 6·6·6·6·2, and that last sheet with two players
+         on it is the orphan problem again in a new costume. The squad changes
+         through the season — people sign, leave, come back — so the renderer
+         works out the page count first and then spreads the roster as evenly as
+         the grid allows.
 
-         Six to a page: three across, two rows, which is what actually fits
-         inside the A4 text block once the banner and footer are taken off.
-         The count is explicit so the page breaks are ours and not the
-         renderer's guess. */
-      var PER_PAGE = 6;
-      for (var pi = 0; pi < pc.length; pi += PER_PAGE) {
-        var chunk = pc.slice(pi, pi + PER_PAGE);
-        P.push('<div class="page">' +
-          banner('First Team', pi === 0 ? 'Squad Profiles' : 'Squad Profiles continued') +
+         26 → 6·5·5·5·5.  19 → 5·5·5·4.  15 → 5·5·5.  23 → 6·6·6·5.
+         Nobody is dropped, nobody is duplicated, and no sheet is left holding
+         the remainder. */
+      var pages = squadPages(pc.length, 6);
+      var at = 0;
+      pages.forEach(function (n, idx) {
+        var chunk = pc.slice(at, at + n); at += n;
+        P.push('<div class="page page--roster">' +
+          banner('First Team', idx === 0 ? 'Squad Profiles' : 'Squad Profiles continued') +
           '<div class="pcards">' + chunk.join('') + '</div>' + foot() + '</div>');
-      }
+      });
     }
     /* CAPTAIN'S NOTES */
     edPage('From the Skipper', (d.captainName?esc(d.captainName)+'’s':'Captain’s')+' Notes', d.captainNotes);

@@ -252,8 +252,8 @@ test('assists are nowhere', () => {
 const print = read('programme-print.html');
 
 test('the card looks up by roster id', () => {
-  const block = print.slice(print.indexOf('var pc = club.players.slice(0,15)'),
-                            print.indexOf('var pc = club.players.slice(0,15)') + 900);
+  const block = print.slice(print.indexOf('var pc = club.players.map'),
+                            print.indexOf('var pc = club.players.map') + 900);
   assert.match(block, /playerSeason\[p\.id\]/, 'by id — a name lookup would break on any alias');
   assert.ok(!/\.name\s*===|toLowerCase\(\)\s*===/.test(block));
 });
@@ -265,8 +265,8 @@ test('the renderer reads the players property the endpoint returns', () => {
 });
 
 test('a missing headshot cannot affect a number', () => {
-  const block = print.slice(print.indexOf('var pc = club.players.slice(0,15)'),
-                            print.indexOf('var pc = club.players.slice(0,15)') + 1400);
+  const block = print.slice(print.indexOf('var pc = club.players.map'),
+                            print.indexOf('var pc = club.players.map') + 1400);
   const statLine = block.slice(block.indexOf('var st = playerSeason[p.id]'));
   assert.ok(!/photo|image/.test(statLine.slice(0, 300)),
     'the figures are derived before, and independently of, any photograph');
