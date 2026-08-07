@@ -115,9 +115,16 @@ test('unknown colours say so rather than guessing', () => {
 test("the club's own colours are stored once, not retyped", () => {
   const cfg = JSON.parse(read('data/config.json'));
   assert.ok(cfg.kit && cfg.kit.home && cfg.kit.away);
-  ['shirt', 'shorts', 'socks', 'goalkeeper'].forEach((k) => {
+  // The HOME outfield kit is known, so it must be complete.
+  ['shirt', 'shorts', 'socks'].forEach((k) => {
     assert.ok(cfg.kit.home[k] && cfg.kit.home[k].name, `home ${k} missing`);
-    assert.ok(cfg.kit.away[k] && cfg.kit.away[k].name, `away ${k} missing`);
+  });
+  // The goalkeeper and away colours are NOT recorded, and must stay that way
+  // until the club confirms them. I had filled both in with a plausible green;
+  // that is how an invented detail reaches print unchallenged.
+  assert.strictEqual(cfg.kit.home.goalkeeper, null);
+  ['shirt', 'shorts', 'socks', 'goalkeeper'].forEach((k) => {
+    assert.strictEqual(cfg.kit.away[k], null, `away ${k} must not be guessed`);
   });
   assert.match(print, /cfgKit = \(res\[10\] && res\[10\]\.kit\) \|\| null/);
 });

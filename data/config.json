@@ -25,18 +25,19 @@
     "enquireSubject": "Season Ticket 2026/27"
   },
   "_kitNote": "The colours the club plays in. Required in the matchday programme by the League's published minimum ('the colours in which the teams will play') and, until this was added, absent from it entirely. Stored ONCE here so no programme editor ever retypes the club's own kit; the opposition's colours are confirmed per edition. `hex` is only for drawing the little kit strip — `name` is what prints.",
+  "_kitCorrection": "The home kit is YELLOW / YELLOW / YELLOW. It was briefly recorded here with green shorts, which was wrong and was corrected by the club. The goalkeeper colours are NOT recorded because the club has not confirmed them — that field stays null and the programme prints 'To be confirmed'. An invented goalkeeper colour is exactly the kind of plausible detail that reaches print unchallenged, so it is left empty on purpose. Away colours are unconfirmed for the same reason.",
   "kit": {
     "home": {
       "shirt": { "name": "Yellow", "hex": "#FFD100" },
-      "shorts": { "name": "Green", "hex": "#0B3A20" },
+      "shorts": { "name": "Yellow", "hex": "#FFD100" },
       "socks": { "name": "Yellow", "hex": "#FFD100" },
-      "goalkeeper": { "name": "Green", "hex": "#0B3A20" }
+      "goalkeeper": null
     },
     "away": {
-      "shirt": { "name": "White", "hex": "#FFFFFF" },
-      "shorts": { "name": "Black", "hex": "#0D0D0D" },
-      "socks": { "name": "White", "hex": "#FFFFFF" },
-      "goalkeeper": { "name": "Green", "hex": "#0B3A20" }
+      "shirt": null,
+      "shorts": null,
+      "socks": null,
+      "goalkeeper": null
     }
   },
   "updatedAt": "2026-08-07T00:00:00.000Z"

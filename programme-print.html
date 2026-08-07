@@ -30,10 +30,58 @@
   .pages{ padding:24px 0; }
   .page{ width:210mm; min-height:297mm; background:#fff; margin:0 auto 18px; padding:15mm 14mm 18mm; position:relative; overflow:hidden; box-shadow:0 6px 30px rgba(0,0,0,.3); }
 
-  /* ===== SECTION BANNER (every inside page leads with one) ===== */
-  .banner{ position:relative; overflow:hidden; background:linear-gradient(105deg,#0b1d11,#15532e 92%); border-radius:12px; padding:17px 22px; margin-bottom:18px; }
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE MASTHEAD — what replaced the banner.
+
+     Nineteen of twenty-one pages used to open with the same green rounded
+     bar: yellow eyebrow, white condensed title, crest watermarked behind it.
+     Shrunk to thumbnails on a contact sheet the publication read as one
+     component repeated twenty-one times, which is exactly what it was.
+
+     A masthead instead: a hard rule, a section number, a label set vertically
+     against it, and the title at a size the page can carry. No fill, no
+     radius, no watermark. The RULE colour is what varies by archetype, so a
+     data page and a commercial page announce themselves differently before a
+     word is read.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .mh{ display:grid; grid-template-columns:auto 1fr; gap:0 14px; align-items:end;
+       border-bottom:3px solid var(--ink); padding-bottom:7px; margin-bottom:16px; }
+  .mh .n{ font-family:var(--fd); font-size:44px; line-height:.78; color:var(--y);
+          -webkit-text-stroke:1px var(--ink); letter-spacing:.01em; }
+  .mh .tx{ min-width:0; }
+  .mh .kick{ font-family:var(--fc); font-size:9.5px; font-weight:700; letter-spacing:.22em;
+             text-transform:uppercase; color:var(--soft); display:block; }
+  .mh h2{ font-family:var(--fd); font-size:34px; line-height:.9; letter-spacing:.6px;
+          color:var(--ink); font-weight:400; margin-top:2px; }
+  /* Archetype tints — the only thing that changes, and it changes the read. */
+  .page--data    .mh{ border-bottom-color:var(--g); }
+  .page--data    .mh .n{ color:var(--g); -webkit-text-stroke:0; }
+  .page--comm    .mh{ border-bottom-color:var(--y); }
+  .page--comm    .mh .n{ color:var(--ink); -webkit-text-stroke:0; }
+  .page--edit    .mh{ border-bottom-width:1px; }
+  .page--edit    .mh h2{ font-size:42px; }
+  .page--edit    .mh .n{ display:none; }
+  .page--roster  .mh{ border-bottom-color:var(--ink); }
+  .page--info    .mh{ border-bottom-width:1px; border-bottom-color:var(--line); }
+  .page--info    .mh h2{ font-size:24px; }
+  .page--info    .mh .n{ font-size:26px; }
+
+  /* Dark archetypes: full colour fields, type reversed out. */
+  .page--dark{ background:var(--gd); color:#fff; }
+  .page--dark .mh{ border-bottom-color:rgba(255,255,255,.35); }
+  .page--dark .mh h2{ color:#fff; }
+  .page--dark .mh .n{ color:var(--y); -webkit-text-stroke:0; }
+  .page--dark .mh .kick{ color:rgba(255,255,255,.7); }
+  .page--dark .body,.page--dark .body p{ color:rgba(255,255,255,.88); }
+  .page--ink{ background:#0d0d0d; color:#fff; }
+  .page--ink .mh{ border-bottom-color:rgba(255,255,255,.3); }
+  .page--ink .mh h2{ color:#fff; }
+  .page--ink .mh .n{ color:var(--y); -webkit-text-stroke:0; }
+  .page--ink .mh .kick{ color:rgba(255,255,255,.65); }
+
+  /* Retained only where a green field is genuinely the design. */
+  .banner{ position:relative; overflow:hidden; background:linear-gradient(105deg,#0b1d11,#15532e 92%); padding:17px 22px; margin-bottom:18px; }
   .banner::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:8px; background:var(--y); }
-  .banner::after{ content:''; position:absolute; right:-24px; top:-34px; width:150px; height:150px; background:url(img/badge.png) center/contain no-repeat; opacity:.10; }
   .banner .kick{ font-family:var(--fc); font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--y); position:relative; }
   .banner h2{ font-family:var(--fd); font-size:36px; line-height:.92; letter-spacing:1px; color:#fff; font-weight:400; margin-top:1px; position:relative; }
 
@@ -46,29 +94,29 @@
 
   .divider{ display:flex; align-items:center; gap:10px; margin:20px 0 12px; }
   .divider .lbl{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--g); white-space:nowrap; }
-  .divider::before{ content:''; height:3px; width:20px; background:var(--y); border-radius:2px; }
+  .divider::before{ content:''; height:3px; width:20px; background:var(--y); }
   .divider::after{ content:''; height:1px; background:var(--line); flex:1; }
 
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
-  .card{ border:1px solid var(--line); border-radius:10px; padding:13px 15px; background:#fff; margin-bottom:10px; }
-  .card.g{ border-left:4px solid var(--g); background:#f3f8f4; }
-  .card.y{ border-left:4px solid var(--y); background:#fffdf0; }
+  .card{ border:0; border-top:2px solid var(--ink); padding:9px 0 0; background:transparent; margin-bottom:13px; }
+  .card.g{ border-top-color:var(--g); background:transparent; }
+  .card.y{ border-top-color:var(--y); background:transparent; }
   .card .k{ font-family:var(--fc); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--g); }
   .card .t{ font-family:var(--fb); font-size:12.5px; color:#222; margin-top:2px; line-height:1.5; }
 
   /* stat tiles */
   .tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-  .tile{ background:#0d0d0d; color:#fff; border-radius:10px; padding:14px 6px 11px; text-align:center; position:relative; overflow:hidden; }
+  .tile{ background:#0d0d0d; color:#fff; padding:14px 6px 11px; text-align:center; position:relative; overflow:hidden; }
   .tile::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--y); }
   .tile .n{ font-family:var(--fd); font-size:40px; line-height:.85; color:var(--y); }
   .tile .l{ font-family:var(--fc); font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:rgba(255,255,255,.66); margin-top:5px; }
   .form-strip{ display:flex; gap:6px; }
-  .fchip{ width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--fc); font-weight:700; color:#fff; font-size:14px; }
+  .fchip{ width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-family:var(--fc); font-weight:700; color:#fff; font-size:14px; }
 
   /* team sheets */
-  .ts-team{ font-family:var(--fd); font-size:23px; letter-spacing:.5px; color:#fff; background:var(--g); padding:6px 13px; border-radius:8px 8px 0 0; }
+  .ts-team{ font-family:var(--fd); font-size:23px; letter-spacing:.5px; color:#fff; background:var(--g); padding:6px 13px; }
   .ts-team.away{ background:#0d0d0d; }
-  .ts-list{ border:1px solid var(--line); border-top:none; border-radius:0 0 8px 8px; overflow:hidden; }
+  .ts-list{ border:0; border-top:2px solid var(--ink); overflow:hidden; }
   .ts-row{ display:flex; gap:10px; align-items:center; font-family:var(--fb); font-size:13px; padding:6px 13px; }
   .ts-row:nth-child(even){ background:#fafafa; }
   .ts-row .n{ font-family:var(--fd); font-size:17px; color:var(--g); min-width:24px; text-align:center; }
@@ -84,10 +132,132 @@
 
   /* premium sponsor showcase */
   .spon-feat-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
-  .spon-feat{ border:1px solid var(--line); border-top:5px solid var(--y); border-radius:10px; padding:18px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:7px; background:#fff; min-height:150px; justify-content:center; }
+  .spon-feat{ border:0; border-top:4px solid var(--y); padding:18px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:7px; background:#fff; min-height:150px; justify-content:center; }
   .spon-feat img{ max-width:78%; max-height:74px; object-fit:contain; }
   /* The Cherry Red artwork is white on transparent, so it only reads on a dark
      panel. Sized by max-height with width:auto so it can never be stretched. */
+  /* ═══ FLOOD PAGES — one colour field, type at poster scale ═══════════════
+     The campaign pages were the emptiest in the publication: two outlined
+     panels delivering a sentence each on a white sheet. A flood page fills
+     edge to edge and carries one message, which is what a campaign page is.
+     It also gives the contact sheet something to read at thumbnail size —
+     a solid field is instantly distinguishable from an editorial page. */
+  .page--flood{ padding:0; }
+  .fl{ height:100%; padding:22mm 16mm 16mm; display:flex; flex-direction:column; }
+  .page--flood-y{ background:var(--y); }
+  .page--flood-y .fl{ color:#0d0d0d; }
+  .page--flood-g{ background:var(--gd); }
+  .page--flood-g .fl{ color:#fff; }
+  .fl-kick{ font-family:var(--fc); font-size:11px; font-weight:700; letter-spacing:.26em;
+            text-transform:uppercase; opacity:.7; }
+  .fl-big{ font-family:var(--fd); font-size:86px; line-height:.84; letter-spacing:.5px;
+           margin-top:14px; }
+  .page--flood-g .fl-big{ color:#fff; }
+  .fl-sub{ font-family:var(--fb); font-size:16px; line-height:1.5; max-width:34ch;
+           margin-top:16px; font-weight:500; }
+  .fl-qr{ margin-top:auto; width:132px; height:132px; background:#fff; padding:9px; }
+  .page--flood-y .fl-qr{ border:2px solid #0d0d0d; }
+  .fl-qr img,.fl-qr canvas{ width:100%; height:100%; }
+  .fl-foot{ margin-top:16px; padding-top:11px; display:flex; justify-content:space-between;
+            gap:16px; flex-wrap:wrap; font-family:var(--fc); font-size:10px; font-weight:700;
+            letter-spacing:.12em; text-transform:uppercase; }
+  .page--flood-y .fl-foot{ border-top:2px solid #0d0d0d; }
+  .page--flood-g .fl-foot{ border-top:2px solid rgba(255,255,255,.5); color:rgba(255,255,255,.85); }
+  .fl-body{ font-family:var(--fb); font-size:12.5px; line-height:1.7; max-width:62ch; margin-top:14px; }
+  .page--flood-g .fl-body{ color:rgba(255,255,255,.9); }
+  /* Reporting routes as columns on a rule, not four tinted cards. */
+  .kio{ margin-top:auto; display:grid; grid-template-columns:1fr 1fr; gap:16px 26px;
+        border-top:2px solid rgba(255,255,255,.45); padding-top:14px; }
+  .kio div{ font-family:var(--fb); font-size:11.5px; line-height:1.55; color:rgba(255,255,255,.88); }
+  .kio b{ display:block; font-family:var(--fc); font-size:9.5px; font-weight:700;
+          letter-spacing:.16em; text-transform:uppercase; color:var(--y); margin-bottom:3px; }
+
+  /* ═══ ACERBIS — technical partner editorial ═══════════════════════════════
+     Black field, the real mark at proper clear space, one enormous statement,
+     three short columns on a rule. Closer to a sportswear campaign page than a
+     sponsor listing, which is what a kit partner earns. */
+  .acb{ display:flex; flex-direction:column; }
+  .acb-top{ display:flex; align-items:center; justify-content:space-between; gap:20px;
+            border-bottom:2px solid rgba(255,255,255,.28); padding-bottom:16px; }
+  /* Height only — the width follows, so the mark keeps its own proportions. */
+  .acb-mark{ height:54px; width:auto; }
+  .acb-tier{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.24em;
+             text-transform:uppercase; color:var(--y); }
+  .acb-big{ font-family:var(--fd); font-size:96px; line-height:.82; color:#fff;
+            letter-spacing:1px; margin-top:26px; }
+  .acb-cols{ margin-top:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px;
+             border-top:2px solid var(--y); padding-top:15px; }
+  .acb-cols div{ font-family:var(--fb); font-size:11px; line-height:1.6; color:rgba(255,255,255,.82); }
+  .acb-cols b{ display:block; font-family:var(--fd); font-size:19px; letter-spacing:.4px;
+               color:#fff; font-weight:400; margin-bottom:5px; }
+  .acb-foot{ margin-top:16px; padding-top:11px; border-top:1px solid rgba(255,255,255,.25);
+             display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+             font-family:var(--fc); font-size:9.5px; font-weight:700; letter-spacing:.16em;
+             text-transform:uppercase; color:rgba(255,255,255,.6); }
+
+  /* GROUND GUIDE — a photograph where there used to be white space. */
+  .gg-hero{ margin:0 0 16px; }
+  .gg-hero img{ width:100%; height:74mm; object-fit:cover; object-position:50% 55%; display:block; }
+  .gg-hero figcaption{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.14em;
+                       text-transform:uppercase; color:var(--soft); padding-top:6px;
+                       border-top:2px solid var(--ink); margin-top:6px; }
+  .gg{ display:grid; grid-template-columns:1fr 1fr; gap:13px 26px; }
+  .gg div{ font-family:var(--fb); font-size:11.5px; line-height:1.55; color:#262626;
+           border-top:1px solid var(--line); padding-top:7px; }
+  .gg b{ display:block; font-family:var(--fc); font-size:9.5px; font-weight:700;
+         letter-spacing:.16em; text-transform:uppercase; color:var(--g); margin-bottom:3px; }
+
+  /* A rule with a label sitting on it — replaces .divider's pill-and-dash. */
+  .rule{ display:flex; align-items:center; gap:12px; margin:22px 0 11px; }
+  .rule::before{ content:''; height:3px; width:34px; background:var(--y); flex:none; }
+  .rule span{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.2em;
+              text-transform:uppercase; color:var(--ink); white-space:nowrap; }
+  .rule::after{ content:''; height:2px; background:var(--ink); flex:1; }
+
+  /* SEASON SO FAR — one dominant record, no KPI tiles. */
+  .ssf{ display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap;
+        border-bottom:3px solid var(--ink); padding-bottom:12px; }
+  .ssf-hero{ display:flex; align-items:flex-end; gap:11px; }
+  .ssf-big{ font-family:var(--fd); font-size:118px; line-height:.72; color:var(--g);
+            font-variant-numeric:tabular-nums; }
+  .ssf-cap{ font-family:var(--fc); font-size:11px; font-weight:700; letter-spacing:.16em;
+            text-transform:uppercase; color:var(--soft); line-height:1.5; padding-bottom:5px; }
+  .ssf-cap b{ color:var(--ink); }
+  .ssf-rec{ display:flex; flex-direction:column; gap:5px; padding-bottom:5px; }
+  .ssf-wdl{ font-family:var(--fd); font-size:44px; line-height:.85; color:var(--ink);
+            font-variant-numeric:tabular-nums; }
+  .ssf-wdl i{ font-style:normal; font-size:19px; color:var(--y); -webkit-text-stroke:.6px var(--ink);
+              padding:0 7px 0 3px; }
+  .ssf-pts{ font-family:var(--fd); font-size:26px; color:var(--g); line-height:1; }
+  .ssf-pts i{ font-style:normal; font-family:var(--fc); font-size:10px; font-weight:700;
+              letter-spacing:.14em; text-transform:uppercase; color:var(--soft); }
+  .ssf-goals{ display:flex; gap:30px; flex-wrap:wrap; padding:9px 0 0; }
+  .ssf-goals span{ font-family:var(--fb); font-size:11.5px; color:#333; letter-spacing:.02em; }
+  .ssf-goals b{ font-family:var(--fd); font-size:24px; color:var(--ink); line-height:1;
+                padding-right:5px; font-variant-numeric:tabular-nums; }
+
+  /* NEXT MATCH — a fixture poster, not an advert in a rounded box.
+     Hard rules, one colour field, type doing the work. The away variant shifts
+     the field darker and swaps the connector; it does NOT adopt the opponent's
+     colours, because this is still a Rayners Lane publication. */
+  .nx{ background:var(--g); color:#fff; padding:26px 24px 24px; }
+  .nx-away{ }
+  .nx-away .nx{ background:#0d0d0d; border-top:5px solid var(--y); }
+  .nx-state{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.2em;
+             text-transform:uppercase; color:var(--y); }
+  .nx-fix{ margin-top:8px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .nx-us,.nx-them{ font-family:var(--fd); font-size:40px; line-height:.9; letter-spacing:.5px; color:#fff; }
+  .nx-vs{ font-family:var(--fd); font-size:28px; color:var(--y); line-height:.9; }
+  .nx-meta{ margin-top:12px; padding-top:9px; border-top:1px solid rgba(255,255,255,.28);
+            font-family:var(--fb); font-size:12px; color:rgba(255,255,255,.9); }
+  .nx-cta{ margin-top:14px; display:inline-block; background:var(--y); color:#0d0d0d;
+           font-family:var(--fc); font-weight:700; letter-spacing:.06em; padding:8px 16px; font-size:12px; }
+  .nx-note{ margin-top:12px; font-family:var(--fb); font-size:12px; color:rgba(255,255,255,.82); }
+  .nx-second{ display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+              flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:7px; }
+  .nx-second b{ font-family:var(--fd); font-size:21px; letter-spacing:.4px; color:var(--ink); font-weight:400; }
+  .nx-second span{ font-family:var(--fb); font-size:11.5px; color:#333; }
+
   /* Playing colours and officials — set as type, not as cards. */
   .kit-block{ display:flex; flex-direction:column; gap:7px; }
   .kit-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap;
@@ -104,7 +274,7 @@
   .off-i{ font-family:var(--fb); font-size:11.5px; color:#222; }
   .off-i b{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.1em;
             text-transform:uppercase; color:var(--soft); display:block; }
-  .league-mark{ margin-top:12px; background:#0d0d0d; border-radius:10px; padding:14px 16px;
+  .league-mark{ margin-top:12px; background:#0d0d0d; padding:14px 16px;
                 display:flex; align-items:center; gap:14px; justify-content:center; }
   .league-mark img{ height:34px; width:auto; max-width:190px; object-fit:contain; }
   .league-mark span{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.1em;
@@ -113,13 +283,13 @@
   .spon-feat .nm{ font-family:var(--fd); font-size:24px; letter-spacing:.5px; color:var(--ink); line-height:1; }
   .spon-feat .role{ font-family:var(--fb); font-size:11.5px; color:var(--soft); }
   .spon-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-  .spon{ border:1px solid var(--line); border-radius:8px; height:76px; display:flex; align-items:center; justify-content:center; background:#fff; padding:8px; }
+  .spon{ border:0; height:76px; display:flex; align-items:center; justify-content:center; background:#fff; padding:8px; }
   .spon img{ max-width:88%; max-height:58px; object-fit:contain; }
   .spon .nm2{ font-family:var(--fc); font-weight:700; color:#444; text-align:center; font-size:12px; }
 
   /* today's match sponsors */
   .todays{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .today{ border-radius:9px; padding:12px; text-align:center; background:#0d0d0d; color:#fff; position:relative; overflow:hidden; }
+  .today{ padding:12px; text-align:center; background:#0d0d0d; color:#fff; position:relative; overflow:hidden; }
   .today::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--y); }
   .today .k{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--y); }
   .today .v{ font-family:var(--fd); font-size:22px; letter-spacing:.5px; line-height:1.05; margin-top:4px; }
@@ -127,7 +297,7 @@
   /* statements + CTA */
   .stmt{ border-left:3px solid var(--y); padding-left:12px; margin-bottom:11px; font-size:12px; line-height:1.55; color:#333; }
   .stmt b{ display:block; font-family:var(--fc); letter-spacing:.08em; text-transform:uppercase; color:var(--g); font-size:11.5px; margin-bottom:2px; }
-  .cta-card{ display:flex; gap:18px; align-items:center; border:1px solid var(--line); border-left:5px solid var(--y); border-radius:10px; padding:16px 18px; background:#fffdf3; }
+  .cta-card{ display:flex; gap:18px; align-items:center; border:0; border-top:2px solid var(--ink); padding:14px 0 0; background:transparent; }
   .cta-qr img, .cta-qr canvas, .cta-qr table{ width:118px; height:118px; }
   .cta-h{ font-family:var(--fd); font-size:25px; letter-spacing:.5px; color:var(--ink); margin-bottom:5px; }
   .backqr{ display:flex; gap:18px; align-items:center; border-top:2px solid var(--y); padding-top:14px; margin-top:16px; }
@@ -163,8 +333,10 @@
   /* A card must never be sliced by a page boundary — half a face at the foot
      of one sheet and the stats at the top of the next is the sort of thing the
      committee then tries to fix by hand. */
-  .pcard{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
-          break-inside:avoid; page-break-inside:avoid; }
+  /* No card. The border and radius were what made the squad read as an
+     e-commerce grid; the portrait now runs to the cell edge and type sits
+     under it, which is how a squad page works in print. */
+  .pcard{ background:transparent; break-inside:avoid; page-break-inside:avoid; }
   /* THE HEADSHOT BOX WAS THE CROP BUG. At 96px tall in a ~225px-wide column it
      was a letterbox, and object-fit:cover on a portrait photo threw away most
      of the head. object-position:top saved the forehead and cut the chin.
@@ -174,14 +346,39 @@
               display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
   .pcard .ph img{ width:100%; height:100%; object-fit:cover; object-position:50% 28%; }
   .pcard .no{ position:absolute; top:6px; left:8px; font-family:var(--fd); font-size:28px; color:var(--y); line-height:1; }
-  .pcard .nm{ font-family:var(--fd); font-size:17px; letter-spacing:.4px; color:var(--ink); padding:7px 9px 0; line-height:1; }
-  .pcard .po{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--g); padding:1px 9px 6px; }
-  .pcard .st{ display:flex; border-top:1px solid var(--line); }
-  .pcard .st div{ flex:1; text-align:center; padding:5px 2px; border-right:1px solid var(--line); }
-  .pcard .st div:last-child{ border-right:none; }
-  .pcard .st .v{ font-family:var(--fm); font-size:14px; font-weight:700; color:var(--ink); }
-  .pcard .st .v.unk{ color:var(--soft); font-weight:400; }
-  .pcard .st .k{ font-family:var(--fc); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
+  .pcard .nm{ font-family:var(--fd); font-size:19px; letter-spacing:.4px; color:var(--ink);
+              padding:7px 0 0; line-height:.95; }
+  .pcard .po{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.14em;
+              text-transform:uppercase; color:var(--g); padding:2px 0 5px; }
+  /* ONE HORIZONTAL LINE, not three boxed cells. A statistic does not need a
+     box; it needs to be legible and to sit on a rule. */
+  .pcard .st{ display:flex; gap:10px; border-top:2px solid var(--ink); padding-top:4px; }
+  .pcard .st div{ display:flex; align-items:baseline; gap:3px; }
+  .pcard .st .v{ font-family:var(--fd); font-size:16px; color:var(--ink); line-height:1;
+                 font-variant-numeric:tabular-nums; }
+  .pcard .st .v.unk{ color:var(--soft); }
+  .pcard .st .k{ font-family:var(--fc); font-size:7.5px; font-weight:700; letter-spacing:.1em;
+                 text-transform:uppercase; color:var(--soft); }
+
+  /* ═══ NO PHOTOGRAPH YET — designed, not failed ═══════════════════════════
+     Eight of twenty-six players have no headshot. They used to render as a
+     flat green rectangle, which on the contact sheet was indistinguishable
+     from a broken image. This is a deliberate identity graphic instead: the
+     squad number oversized, the player's initials, a diagonal kit stripe and
+     a cropped crest. When a real photograph arrives it simply replaces this —
+     nothing else changes. */
+  .ph--none{ background:
+      repeating-linear-gradient(115deg, rgba(255,209,0,.13) 0 9px, transparent 9px 22px),
+      linear-gradient(160deg,#14532d,#08210f); }
+  .ph--none .ini{ font-family:var(--fd); font-size:46px; line-height:.85; color:#fff;
+                  letter-spacing:1px; opacity:.95; }
+  .ph--none .bignum{ position:absolute; right:-6px; bottom:-16px; font-family:var(--fd);
+                     font-size:96px; line-height:.72; color:var(--y); opacity:.20; }
+  .ph--none .soon{ position:absolute; left:0; right:0; bottom:6px; text-align:center;
+                   font-family:var(--fc); font-size:7px; font-weight:700; letter-spacing:.18em;
+                   text-transform:uppercase; color:rgba(255,255,255,.55); }
+  .ph--none .crestcrop{ position:absolute; left:-22px; top:-18px; width:78px; height:78px;
+                        background:url(img/badge.png) center/contain no-repeat; opacity:.13; }
 
   /* directory */
   .dir{ display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; }
@@ -191,21 +388,21 @@
 
   /* tiered sponsor directory */
   .tier-block{ margin-bottom:12px; }
-  .tier-head{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:var(--g); padding:4px 12px; border-radius:6px; display:inline-block; }
+  .tier-head{ font-family:var(--fc); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:var(--g); padding:4px 12px; display:inline-block; }
   .tier-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-  .tier-chip{ border:1px solid var(--line); border-left:3px solid var(--y); border-radius:6px; padding:7px 12px; font-family:var(--fb); font-size:12.5px; }
+  .tier-chip{ border:0; border-bottom:1px solid var(--line); padding:6px 0; font-family:var(--fb); font-size:12.5px; }
   .tier-chip b{ font-family:var(--fc); font-weight:700; }
 
   /* match preview / opposition cards */
   .pv-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .pv-vs{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:14px; }
+  .pv-vs{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; border:0; border-top:3px solid var(--ink); border-bottom:3px solid var(--ink); padding:14px 0; margin-bottom:14px; }
   .pv-vs .t{ text-align:center; }
   .pv-vs img{ width:64px; height:64px; object-fit:contain; }
   .pv-vs .nm{ font-family:var(--fd); font-size:18px; letter-spacing:.3px; }
   .pv-vs .vs{ font-family:var(--fd); font-size:30px; color:var(--g); }
 
   /* next-match advert / back cover */
-  .advert{ background:linear-gradient(160deg,#0b1d11,#15532e); color:#fff; border-radius:14px; padding:26px 22px; text-align:center; position:relative; overflow:hidden; }
+  .advert{ background:linear-gradient(160deg,#0b1d11,#15532e); color:#fff; padding:26px 22px; text-align:center; position:relative; overflow:hidden; }
   .advert::after{ content:''; position:absolute; right:-40px; bottom:-50px; width:240px; height:240px; background:url(img/badge.png) center/contain no-repeat; opacity:.08; }
   .advert .k{ font-family:var(--fc); font-size:13px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--y); }
   .advert .big{ font-family:var(--fd); font-size:46px; line-height:.95; letter-spacing:1px; margin:6px 0; }
@@ -216,8 +413,15 @@
     body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .bar{ display:none; }
     .pages{ padding:0; }
-    .page{ margin:0; box-shadow:none; page-break-after:always; }
-    .page:last-child{ page-break-after:auto; }
+    /* HEIGHT, NOT MIN-HEIGHT. With min-height:297mm the last sheet rounded a
+       hair over A4 and Chrome emitted a blank trailing page — a wasted sheet on
+       every copy the club prints. Fixing the height to exactly A4 (with
+       overflow hidden, already set) makes each .page occupy one sheet and no
+       more. `page-break-after:always` is dropped for the same reason: with
+       exact-height pages the natural flow already breaks correctly, and the
+       explicit break was what produced the extra sheet at the end. */
+    .page{ margin:0; box-shadow:none; height:297mm; break-after:page; }
+    .page:last-child{ break-after:auto; page-break-after:auto; }
     /* Nothing that reads as one unit may be split across sheets. */
     .pcard, .card, .spon, .spon-feat, .ts-row, .cta-card, .partners{ break-inside:avoid; page-break-inside:avoid; }
     .pcards{ break-inside:auto; }
@@ -252,6 +456,13 @@
   function to12(t){ if(!t||!/^\d{1,2}:\d{2}/.test(t))return t||'3:00 PM'; var p=t.split(':'),h=parseInt(p[0],10),m=p[1].slice(0,2),ap=h>=12?'PM':'AM'; h=h%12; if(h===0)h=12; return h+':'+m+' '+ap; }
   function niceDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
   function shortDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); }
+  /** "Keiran Barnard-White" -> "KB". Two letters, because three starts to read
+      as an acronym rather than a person. */
+  function initials(name){
+    var w = String(name||'').trim().split(/[\s-]+/).filter(Boolean);
+    if(!w.length) return '';
+    return ((w[0][0]||'') + (w.length>1 ? (w[w.length-1][0]||'') : '')).toUpperCase();
+  }
   function initialsBadge(name){
     var w=String(name||'').replace(/F\.?C\.?/gi,'').trim().split(/\s+/);
     var ini=w.slice(0,3).map(function(x){return (x[0]||'').toUpperCase();}).join('');
@@ -260,7 +471,20 @@
   function getJSON(name){ return fetch('data/'+name+'.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}); }
   function qr(text){ try{ var q=qrcode(0,'M'); q.addData(text); q.make(); return q.createImgTag(4,0); }catch(e){ return ''; } }
   function paramId(){ var m=location.search.match(/[?&]id=([^&]+)/); return m?decodeURIComponent(m[1]):''; }
-  function banner(kick,title){ return '<div class="banner"><div class="kick">'+esc(kick)+'</div><h2>'+esc(title)+'</h2></div>'; }
+  /* The masthead that replaced the repeated green bar. `secNo` counts the
+     editorial sections so the number means something — it is the section's
+     position in the publication, not decoration. */
+  var secNo = 0;
+  function banner(kick,title){
+    secNo++;
+    var n = (secNo<10?'0':'') + secNo;
+    return '<div class="mh"><span class="n">'+n+'</span><div class="tx">'+
+      '<span class="kick">'+esc(kick)+'</span><h2>'+esc(title)+'</h2></div></div>';
+  }
+  /* For pages that carry their own hierarchy and need no masthead at all. */
+  function rule(label){
+    return '<div class="rule"><span>'+esc(label)+'</span></div>';
+  }
 
   /* ── THE SEASON AS IT STOOD BEFORE THIS MATCH ─────────────────────────────
      A programme is handed to supporters BEFORE kick-off. Every number in it is
@@ -280,6 +504,25 @@
 
      No date on the edition (an undated draft) falls back to the old behaviour:
      anything with a score. */
+  /**
+   * How many players go on each squad page, given a roster size and the most
+   * that fit on one sheet.
+   *
+   * Returns a list of per-page counts that sum to exactly `total`, uses the
+   * fewest pages that can hold them, and differs by at most one between the
+   * fullest and emptiest page. That last property is the point: it is what
+   * stops a roster of 26 ending on a sheet holding two players.
+   */
+  function squadPages(total, max){
+    if (total <= 0) return [];
+    var pages = Math.ceil(total / max);
+    var base = Math.floor(total / pages);
+    var extra = total % pages;                 // spread the remainder, one each
+    var out = [];
+    for (var i = 0; i < pages; i++) out.push(base + (i < extra ? 1 : 0));
+    return out;
+  }
+
   function seasonStats(fixtures, editionDate){
     var cut = String(editionDate||'').slice(0,10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(cut)) cut = '';
@@ -470,7 +713,7 @@
 
     /* 1 — COVER (themed) */
     P.push('<div class="page cover" style="background:'+TH.bg+';color:'+TH.ink+'">'+
-      (d.matchSponsor?'<div class="cover-sponsor" style="background:'+TH.accent+';color:'+TH.accentInk+';display:flex;align-items:center;justify-content:center;gap:10px">'+(d.matchSponsorLogo?'<img src="'+esc(d.matchSponsorLogo)+'" alt="'+esc(d.matchSponsor)+'" style="height:30px;max-width:120px;object-fit:contain;background:#fff;border-radius:4px;padding:3px 6px">':'')+'<span>This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></span></div>':'')+
+      (d.matchSponsor?'<div class="cover-sponsor" style="background:'+TH.accent+';color:'+TH.accentInk+';display:flex;align-items:center;justify-content:center;gap:10px">'+(d.matchSponsorLogo?'<img src="'+esc(d.matchSponsorLogo)+'" alt="'+esc(d.matchSponsor)+'" style="height:30px;max-width:120px;object-fit:contain;background:#fff;padding:3px 6px">':'')+'<span>This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></span></div>':'')+
       '<div class="cover-top" style="position:relative">'+
         '<div style="position:absolute;right:-120px;bottom:-110px;width:520px;height:520px;background:url(img/badge.png) center/contain no-repeat;opacity:.05;pointer-events:none"></div>'+
         '<img class="cover-badge" src="img/badge.png" alt="RLFC">'+
@@ -496,7 +739,7 @@
 
     /* CLUB INFORMATION */
     var OFF = club.officials||{};
-    P.push('<div class="page">'+ banner('The Club','Rayners Lane FC')+
+    P.push('<div class="page page--edit">'+ banner('The Club','Rayners Lane FC')+
       '<div class="tiles" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px"><div class="tile"><div class="n">1933</div><div class="l">Founded</div></div><div class="tile"><div class="n">5</div><div class="l">Our Step</div></div><div class="tile"><div class="n">Harrow</div><div class="l">Middlesex</div></div><div class="tile"><div class="n">3G</div><div class="l">Yellow Army</div></div></div>'+
       (lines(d.clubInfo).length ? '<div class="body">'+notes(d.clubInfo)+'</div>' : '<div class="body"><p>Rayners Lane FC has been at the heart of Harrow since 1933. Operated by Rayners Lane Football Club Limited (Company No. 17110511) and playing at Tithe Farm, the club plays in yellow and green and is proudly known as “The Lane.” We are an FA Charter Standard Community Club, affiliated to Middlesex County FA, competing in the Combined Counties Premier Division North at Step 5 of the National League System.</p></div>')+
       '<div class="grid2" style="margin-top:6px">'+
@@ -508,7 +751,7 @@
 
     /* 2 — WELCOME & MANAGER'S NOTES */
     if (lines(d.welcomeNotes).length || lines(d.managerNotes).length || lines(d.lookingForward).length) {
-      P.push('<div class="page">'+ banner('From The Lane','Welcome to Tithe Farm')+
+      P.push('<div class="page page--edit">'+ banner('From The Lane','Welcome to Tithe Farm')+
         '<div class="lead">'+esc(niceDate(d.date))+' &middot; Kick-off '+esc(to12(d.kickoff))+' &middot; '+esc(venue)+'</div>'+
         (lines(d.welcomeNotes).length?'<div class="body">'+notes(d.welcomeNotes)+'</div>':'')+
         (lines(d.managerNotes).length?'<div class="divider"><span class="lbl">From the Dugout</span></div><div class="body">'+notes(d.managerNotes)+'</div>':'')+
@@ -518,7 +761,7 @@
 
     /* 3 — TODAY'S VISITORS */
     if (lines(d.oppSummary).length || lines(d.headToHead).length) {
-      P.push('<div class="page">'+ banner('Today’s Visitors', opp)+
+      P.push('<div class="page page--edit">'+ banner('Today’s Visitors', opp)+
         '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px"><img src="'+esc(oppCrest)+'" style="width:88px;height:88px;object-fit:contain">'+
           '<div><div class="eyebrow">Rayners Lane FC vs</div><div style="font-family:var(--fd);font-size:34px;letter-spacing:.5px;color:var(--ink);line-height:.95">'+esc(opp)+'</div><div class="muted body">'+esc(comp)+'</div></div></div>'+
         (lines(d.oppSummary).length?'<div class="body">'+notes(d.oppSummary)+'</div>':'')+
@@ -529,14 +772,14 @@
     /* OPPOSITION FOCUS (scouting) */
     var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
     if (oppFacts.length || lines(d.oppOnesToWatch).length) {
-      P.push('<div class="page">'+ banner('Scouting Report', opp)+
+      P.push('<div class="page page--edit">'+ banner('Scouting Report', opp)+
         (oppFacts.length?'<div class="grid2" style="grid-template-columns:repeat('+Math.min(oppFacts.length,3)+',1fr);margin-bottom:14px">'+oppFacts.map(function(f){return '<div class="card g"><div class="k">'+f[0]+'</div><div class="t">'+esc(f[1])+'</div></div>';}).join('')+'</div>':'')+
         (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">Ones to Watch</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
         foot()+'</div>');
     }
     /* MATCH PREVIEW (storylines + key players) */
     if (lines(d.storylines).length || lines(d.keyPlayers).length) {
-      P.push('<div class="page">'+ banner('Today’s Match','The Preview')+
+      P.push('<div class="page page--edit">'+ banner('Today’s Match','The Preview')+
         (lines(d.storylines).length?'<div class="body">'+notes(d.storylines)+'</div>':'')+
         (lines(d.keyPlayers).length?'<div class="divider"><span class="lbl">Lane Players to Watch</span></div><div class="body">'+notes(d.keyPlayers)+'</div>':'')+
         foot()+'</div>');
@@ -565,19 +808,25 @@
          guess, because turning up in the wrong colours is a real problem for a
          real referee. */
       function kitStrip(label, k){
-        if(!k) return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
-                      '<span class="kit-tbc">To be confirmed</span></div>';
-        var parts=[['Shirt',k.shirt],['Shorts',k.shorts],['Socks',k.socks]];
-        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
-          parts.map(function(p){
-            var v=p[1]||null, nm=v&&(v.name||v)||'';
-            if(!nm) return '';
-            var hex=(v&&v.hex)||'';
-            return '<span class="kit-i">'+(hex?'<i style="background:'+esc(hex)+'"></i>':'')+
-                   '<b>'+esc(p[0])+'</b> '+esc(nm)+'</span>';
-          }).join('')+
-          (k.goalkeeper?'<span class="kit-i"><b>GK</b> '+esc(k.goalkeeper.name||k.goalkeeper)+'</span>':'')+
-        '</div>';
+        var parts = k ? [['Shirt',k.shirt],['Shorts',k.shorts],['Socks',k.socks]] : [];
+        var cells = parts.map(function(p){
+          var v=p[1]||null, nm=(v&&(v.name||v))||'';
+          if(!nm) return '';
+          var hex=(v&&v.hex)||'';
+          return '<span class="kit-i">'+(hex?'<i style="background:'+esc(hex)+'"></i>':'')+
+                 '<b>'+esc(p[0])+'</b> '+esc(nm)+'</span>';
+        }).filter(Boolean);
+        // An unrecorded colour is unknown, not a blank. Saying so is the whole
+        // point — the goalkeeper's colours were briefly invented as green here,
+        // which is precisely the plausible detail that reaches print unchallenged.
+        var gkName = k && k.goalkeeper && (k.goalkeeper.name || k.goalkeeper);
+        cells.push('<span class="kit-i"><b>GK</b> ' +
+          (gkName ? esc(gkName) : '<em class="kit-tbc">To be confirmed</em>') + '</span>');
+        if(!parts.filter(function(p){ return p[1] && (p[1].name||p[1]); }).length){
+          return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
+                 '<span class="kit-tbc">To be confirmed</span></div>';
+        }
+        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+cells.join('')+'</div>';
       }
       var ourKit = (d.isHome===false) ? (cfgKit && cfgKit.away) : (cfgKit && cfgKit.home);
       var oppKit = d.oppKit || null;
@@ -589,7 +838,7 @@
                      ['Assistant', d.assistant2], ['Fourth Official', d.fourthOfficial]]
         .filter(function(r){ return (r[1]||'').trim(); });
 
-      P.push('<div class="page">'+ banner('Today’s Teams','Team Sheets')+
+      P.push('<div class="page page--roster">'+ banner('Today’s Teams','Team Sheets')+
         '<div class="grid2">'+
           '<div><div class="ts-team">Rayners Lane</div>'+(tsList(d.homeXI)||'<div class="ts-list"><div class="ts-row muted">Confirmed at kick-off.</div></div>')+
             (lines(d.homeSubs).length?'<div class="divider"><span class="lbl">Substitutes</span></div>'+tsList(d.homeSubs):'')+
@@ -636,7 +885,14 @@
         return '<div><div class="v'+(known?'':' unk')+'">'+(known?esc(String(v)):'&mdash;')+
                '</div><div class="k">'+label+'</div></div>';
       }
-      var pc = club.players.slice(0,15).map(function(p){
+      /* THE WHOLE SQUAD. `slice(0,15)` silently dropped eleven of the club's
+         twenty-six players — nothing to do with photographs, statistics or
+         identity confirmation, just a hard cap nobody had revisited. The squad
+         section answers "who plays for Rayners Lane", which is the club roster
+         and only the club roster. Whether we have verified match data for
+         somebody is a different question, answered on the same card by the
+         figures next to their name. */
+      var pc = club.players.map(function(p){
         var no=p.number||p.no||'', ph=p.photo||p.image||'';
         var st = playerSeason[p.id] || null;
         var keeper = /goal ?keeper|^gk$/i.test(p.position||p.pos||'');
@@ -647,33 +903,71 @@
         var second  = keeper
           ? statCell(sheets, 'Clean Sheets')
           : statCell(goals, 'Goals');
-        return '<div class="pcard"><div class="ph">'+(ph?'<img src="'+esc(ph)+'">':'')+'<div class="no">'+esc(no)+'</div></div>'+
+        // A player without a photograph gets a designed identity graphic, never
+        // an empty coloured box that reads as a broken image.
+        var phInner = ph
+          ? '<img src="'+esc(ph)+'">'
+          : '<span class="crestcrop"></span><span class="ini">'+esc(initials(p.name))+'</span>'+
+            (no ? '<span class="bignum">'+esc(no)+'</span>' : '')+
+            '<span class="soon">Photo to follow</span>';
+        return '<div class="pcard"><div class="ph'+(ph?'':' ph--none')+'">'+phInner+
+          (ph ? '<div class="no">'+esc(no)+'</div>' : '')+'</div>'+
           '<div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div>'+
           '<div class="st">'+statCell(apps,'Apps')+second+statCell(mins,'Mins')+'</div></div>';
-      }).join('');
-      P.push('<div class="page">'+ banner('First Team','Squad Profiles')+'<div class="pcards">'+pc+'</div>'+ foot()+'</div>');
+      });
+
+      /* BALANCED PAGINATION, NOT BLIND CHUNKING.
+         Chunking six at a time is fine until the roster is not a multiple of
+         six: 26 players becomes 6·6·6·6·2, and that last sheet with two players
+         on it is the orphan problem again in a new costume. The squad changes
+         through the season — people sign, leave, come back — so the renderer
+         works out the page count first and then spreads the roster as evenly as
+         the grid allows.
+
+         26 → 6·5·5·5·5.  19 → 5·5·5·4.  15 → 5·5·5.  23 → 6·6·6·5.
+         Nobody is dropped, nobody is duplicated, and no sheet is left holding
+         the remainder. */
+      var pages = squadPages(pc.length, 6);
+      var at = 0;
+      pages.forEach(function (n, idx) {
+        var chunk = pc.slice(at, at + n); at += n;
+        P.push('<div class="page page--roster">' +
+          banner('First Team', idx === 0 ? 'Squad Profiles' : 'Squad Profiles continued') +
+          '<div class="pcards">' + chunk.join('') + '</div>' + foot() + '</div>');
+      });
     }
     /* CAPTAIN'S NOTES */
     edPage('From the Skipper', (d.captainName?esc(d.captainName)+'’s':'Captain’s')+' Notes', d.captainNotes);
 
     /* 5 — MATCHDAY INFO & OFFICIALS */
     var offBits = [ d.referee?'Referee: '+esc(d.referee):'', (d.assistant1||d.assistant2)?'Assistants: '+esc([d.assistant1,d.assistant2].filter(Boolean).join(' & ')):'', d.fourthOfficial?'4th Official: '+esc(d.fourthOfficial):'' ].filter(Boolean);
-    P.push('<div class="page">'+ banner('Good to Know','Matchday Information')+
-      '<div class="grid2">'+
-        '<div>'+
-          (offBits.length?'<div class="card g"><div class="k">Match Officials</div><div class="t">'+offBits.join('<br>')+'</div></div>':'')+
-          '<div class="card y"><div class="k">Admission</div><div class="t">'+esc(d.admission||DEF.admission)+'</div></div>'+
-          '<div class="card g"><div class="k">Find Us</div><div class="t">'+esc(venue)+(d.address?'<br>'+esc(d.address):'')+'</div></div>'+
-        '</div>'+
-        '<div>'+
-          '<div class="card y"><div class="k">Ground Rules</div><div class="t">'+esc(d.groundRules||DEF.rules)+'</div></div>'+
-          '<div class="card g"><div class="k">First Aid</div><div class="t">'+esc(d.firstAid||DEF.firstaid)+'</div></div>'+
-          '<div class="card y"><div class="k">Welcome, Officials</div><div class="t">Rayners Lane FC thanks today’s match officials. We back The FA Respect programme — please support positive football.</div></div>'+
-        '</div>'+
-      '</div>'+ foot()+'</div>');
+    /* ═══ ONE GROUND GUIDE, NOT TWO HALF-EMPTY SHEETS ══════════════════════
+       "Matchday Information" and "Ground Information" said much the same thing
+       across two pages, each about a quarter full, each built from six tinted
+       cards. The contact sheet measured them at 33% and 26% of the sheet.
+
+       Merged into one guide: the goalmouth photograph running full width across
+       the top — the club owns three good ground photographs and was using one —
+       then everything a visitor actually needs as a two-column list on rules.
+       One page, properly filled, and a photograph where there was white space. */
+    P.push('<div class="page page--info">'+ banner('Good to Know','Matchday at Tithe Farm')+
+      '<figure class="gg-hero"><img src="img/ground/tithe-farm-goalmouth-1600.jpg" alt="Tithe Farm">'+
+        '<figcaption>Tithe Farm Sports &amp; Social Club &middot; home of Rayners Lane FC since 1933</figcaption></figure>'+
+      '<div class="gg">'+
+        '<div><b>Admission</b>'+esc(d.admission||DEF.admission)+'</div>'+
+        '<div><b>Getting here</b>'+esc(d.groundTravel||'Rayners Lane Underground (Metropolitan & Piccadilly lines) is a short walk away. Street parking nearby.')+'</div>'+
+        '<div><b>The ground</b>'+esc(venue)+(d.address?'<br>'+esc(d.address):'<br>151 Rayners Lane, Harrow HA2 0XH')+'</div>'+
+        '<div><b>Bar &amp; food</b>'+esc(d.groundFacilities||'Licensed clubhouse bar, hot food, toilets and accessible viewing. Families and well-behaved dogs welcome.')+'</div>'+
+        '<div><b>Ground rules</b>'+esc(d.groundRules||DEF.rules)+'</div>'+
+        '<div><b>First aid &amp; safety</b>'+esc(d.firstAid||DEF.firstaid)+' Please note the emergency exits and follow steward instructions.</div>'+
+        (offBits.length?'<div><b>Today’s officials</b>'+offBits.join('<br>')+'</div>':'')+
+        '<div><b>Respect</b>Rayners Lane FC thanks today’s match officials. We back The FA Respect programme — please support positive football.</div>'+
+      '</div>'+
+      (lines(d.groundInfo).length?'<div class="body" style="margin-top:12px">'+notes(d.groundInfo)+'</div>':'')+
+      foot()+'</div>');
 
     /* 6 — THE LEAGUE */
-    P.push('<div class="page">'+ banner('The Competition','Combined Counties League')+
+    P.push('<div class="page page--data">'+ banner('The Competition','Combined Counties League')+
       '<div class="tiles" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
         '<div class="tile"><div class="n">1978</div><div class="l">Founded</div></div>'+
         '<div class="tile"><div class="n">5</div><div class="l">Our Step</div></div>'+
@@ -701,7 +995,7 @@
        Lane that does not exist. Artwork is white, so it needs a dark panel. */
     var leagueMark = '<div class="league-mark"><img src="img/sponsors/cherry-red-records.png" alt="Cherry Red Records">' +
       '<span>Title sponsor of the Combined Counties League</span></div>';
-    P.push('<div class="page">'+ banner('Where We Stand','League Table')+
+    P.push('<div class="page page--data">'+ banner('Where We Stand','League Table')+
       '<div class="eyebrow" style="margin-bottom:8px">'+esc(comp)+' &middot; updated weekly</div>'+ tableHTML +
       leagueMark + foot()+'</div>');
 
@@ -709,13 +1003,25 @@
     var S = seasonStats(fixtures, d.date);
     if (S.played) {
       var formHTML = '<div class="form-strip">'+S.form.map(function(v){ var c=v==='W'?'#22C55E':(v==='D'?'#C9A200':'#EF4444'); return '<span class="fchip" style="background:'+c+'">'+v+'</span>'; }).join('')+'</div>';
-      var resHTML = S.results.slice(0,8).map(function(r){ var win=r.us>r.them,draw=r.us===r.them,c=win?'#1a7a3a':(draw?'#9a7d00':'#b3231a'); return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(r.date))+' &middot; Rayners Lane '+(r.isHome===false?'@ ':'vs ')+esc(r.opponent||'')+'</span><b style="color:'+c+'">'+r.us+'–'+r.them+'</b></div>'; }).join('');
+      var resHTML = S.results.slice(0,8).map(function(r){ var win=r.us>r.them,draw=r.us===r.them,c=win?'#1a7a3a':(draw?'#9a7d00':'#b3231a'); return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(r.date))+' &middot; Rayners Lane '+(r.isHome===false?'@ ':'v ')+esc(r.opponent||'')+'</span><b style="color:'+c+'">'+r.us+'–'+r.them+'</b></div>'; }).join('');
       var scoreHTML = S.scorers.length ? '<table class="lt"><thead><tr><th class="l">Top Scorers</th><th>Goals</th></tr></thead><tbody>'+S.scorers.map(function(s){return '<tr><td class="l">'+esc(s.name)+'</td><td class="num"><b>'+s.goals+'</b></td></tr>';}).join('')+'</tbody></table>' : '<div class="card g"><div class="t">Goal scorers appear here as results come in.</div></div>';
-      P.push('<div class="page">'+ banner('By The Numbers','Season So Far')+
-        '<div class="tiles"><div class="tile"><div class="n">'+S.played+'</div><div class="l">Played</div></div><div class="tile"><div class="n">'+S.w+'</div><div class="l">Won</div></div><div class="tile"><div class="n">'+S.d+'</div><div class="l">Drawn</div></div><div class="tile"><div class="n">'+S.l+'</div><div class="l">Lost</div></div></div>'+
-        '<div class="tiles" style="margin-top:10px"><div class="tile"><div class="n">'+S.gf+'</div><div class="l">Goals For</div></div><div class="tile"><div class="n">'+S.ga+'</div><div class="l">Against</div></div><div class="tile"><div class="n">'+(S.gf-S.ga>0?'+':'')+(S.gf-S.ga)+'</div><div class="l">Goal Diff</div></div><div class="tile"><div class="n">'+S.pts+'</div><div class="l">Points</div></div></div>'+
-        '<div class="divider"><span class="lbl">Recent Form</span></div>'+formHTML+
-        '<div class="grid2" style="margin-top:14px"><div><div class="eyebrow" style="margin-bottom:6px">Recent Results</div><div class="ts-list">'+resHTML+'</div></div><div><div class="eyebrow" style="margin-bottom:6px">Marksmen</div>'+scoreHTML+'</div></div>'+
+      /* ONE DOMINANT RECORD, not eight black KPI tiles.
+         The figures were never the problem — the presentation was analytics
+         software. Played is set enormous because it is the number that frames
+         everything else; the W-D-L reads as a record the way a football
+         publication writes it; goals sit on a rule underneath. */
+      var gd = S.gf - S.ga;
+      P.push('<div class="page page--data">'+ banner('By The Numbers','Season So Far')+
+        '<div class="ssf">'+
+          '<div class="ssf-hero"><span class="ssf-big">'+S.played+'</span>'+
+            '<span class="ssf-cap">Played<br><b>before today</b></span></div>'+
+          '<div class="ssf-rec"><span class="ssf-wdl">'+S.w+'<i>W</i>'+S.d+'<i>D</i>'+S.l+'<i>L</i></span>'+
+            '<span class="ssf-pts">'+S.pts+' <i>pts</i></span></div>'+
+        '</div>'+
+        '<div class="ssf-goals"><span><b>'+S.gf+'</b> scored</span><span><b>'+S.ga+'</b> conceded</span>'+
+          '<span><b>'+(gd>0?'+':'')+gd+'</b> difference</span></div>'+
+        '<div class="rule"><span>Recent Form</span></div>'+formHTML+
+        '<div class="grid2" style="margin-top:16px"><div><div class="eyebrow" style="margin-bottom:6px">Recent Results</div><div class="ts-list">'+resHTML+'</div></div><div><div class="eyebrow" style="margin-bottom:6px">Marksmen</div>'+scoreHTML+'</div></div>'+
         foot()+'</div>');
     }
 
@@ -732,7 +1038,7 @@
     if (statRows.length) {
       function topBy(k){ return statRows.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
       var tg=topBy('goals'), tap=topBy('appearances'), tm=topBy('minutes');
-      P.push('<div class="page">'+ banner('By The Numbers','Statistics Centre')+
+      P.push('<div class="page page--data">'+ banner('By The Numbers','Statistics Centre')+
         '<div class="grid2">'+
           '<div class="card g"><div class="k">Top Scorer</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tg.name||'–')+' <span style="color:var(--g)">'+(tg.goals!=null?tg.goals:'—')+'</span></div></div>'+
           '<div class="card y"><div class="k">Most Appearances</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tap.name||'–')+' <span style="color:var(--g)">'+(tap.appearances!=null?tap.appearances:'—')+'</span></div></div>'+
@@ -752,15 +1058,47 @@
     var feat = sponsors.slice(0,2), restS = sponsors.slice(2);
     function featCard(s){ return '<div class="spon-feat">'+(s.logo?'<img src="'+esc(s.logo)+'">':'')+'<div class="tier">'+esc(s.tier||'Club Partner')+'</div><div class="nm">'+esc(s.name||'')+'</div>'+(s.role?'<div class="role">'+esc(s.role)+'</div>':'')+'</div>'; }
     var todays=[ d.matchSponsor?['Match Sponsor',d.matchSponsor,d.matchSponsorLogo]:null, d.ballSponsor?['Match Ball Sponsor',d.ballSponsor,d.ballSponsorLogo]:null, d.matchdaySponsor?['Matchday Sponsor',d.matchdaySponsor,d.matchdaySponsorLogo]:null ].filter(Boolean);
-    P.push('<div class="page">'+ banner('Powered by our partners','Proud Partners of The Lane')+
+    /* ═══ ACERBIS — OFFICIAL KIT PARTNER ═══════════════════════════════════
+       The kit supplier appeared as one logo on a wall. This is the technical
+       partner page it should have.
+
+       THE MARK IS THE REAL ONE. img/sponsors/kit-sponsor.png is the Acerbis "A"
+       already approved and in the repository — found by auditing the assets
+       before designing anything, which is the whole point of doing it in that
+       order. Nothing is typeset to stand in for a logo, nothing was taken from
+       a search engine, and the artwork keeps its own proportions.
+
+       The company facts are Acerbis's own published heritage. Nothing is said
+       about Rayners Lane's commercial terms — no length, no value, no
+       exclusivity — because the club's records establish the designation
+       "Official Kit Partner" and nothing more. */
+    P.push('<div class="page page--ink acb">'+
+      '<div class="acb-top">'+
+        '<img class="acb-mark" src="img/sponsors/kit-sponsor.png" alt="Acerbis">'+
+        '<div class="acb-tier">Official Kit Partner</div>'+
+      '</div>'+
+      '<div class="acb-big">BUILT<br>FOR THE<br>GAME</div>'+
+      '<div class="acb-cols">'+
+        '<div><b>Since 1973</b>Acerbis has been making technical sportswear and protective '+
+          'equipment for more than fifty years, growing from Bergamo in northern Italy into a '+
+          'brand worn across football, motorsport and outdoor sport.</div>'+
+        '<div><b>On the pitch</b>Acerbis supplies playing kit, training wear and teamwear to clubs '+
+          'across Europe — from grassroots sides to professional football.</div>'+
+        '<div><b>At The Lane</b>Rayners Lane FC wears Acerbis. Yellow shirts, yellow shorts, '+
+          'yellow socks — the kit the Yellow Army recognises from the touchline.</div>'+
+      '</div>'+
+      '<div class="acb-foot"><span>acerbis.com</span><span>Official Kit Partner of Rayners Lane FC</span></div>'+
+    '</div>');
+
+    P.push('<div class="page page--comm">'+ banner('Powered by our partners','Proud Partners of The Lane')+
       (feat.length ? '<div class="spon-feat-row">'+feat.map(featCard).join('')+'</div>' : '<div class="spon-feat-row"><div class="spon-feat"><div class="tier">Principal Partner</div><div class="nm">Your business here</div><div class="role">Be the name that backs The Lane</div></div></div>')+
       (restS.length ? '<div class="divider"><span class="lbl">Our Partners</span></div><div class="spon-grid">'+restS.map(function(s){ return '<div class="spon">'+(s.logo?'<img src="'+esc(s.logo)+'" alt="'+esc(s.name)+'">':'<span class="nm2">'+esc(s.name)+'</span>')+'</div>'; }).join('')+'</div>' : '')+
-      (todays.length ? '<div class="divider"><span class="lbl">Today’s Sponsors</span></div><div class="todays">'+todays.map(function(t){return '<div class="today">'+(t[2]?'<img src="'+esc(t[2])+'" alt="'+esc(t[1])+'" style="max-height:36px;max-width:78%;object-fit:contain;background:#fff;border-radius:5px;padding:4px 7px;margin:0 auto 7px;display:block">':'')+'<div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>';}).join('')+'</div>' : '')+
+      (todays.length ? '<div class="divider"><span class="lbl">Today’s Sponsors</span></div><div class="todays">'+todays.map(function(t){return '<div class="today">'+(t[2]?'<img src="'+esc(t[2])+'" alt="'+esc(t[1])+'" style="max-height:36px;max-width:78%;object-fit:contain;background:#fff;padding:4px 7px;margin:0 auto 7px;display:block">':'')+'<div class="k">'+t[0]+'</div><div class="v">'+esc(t[1])+'</div></div>';}).join('')+'</div>' : '')+
       '<div class="card y" style="margin-top:14px"><div class="k">Sponsor The Lane</div><div class="t">Shirt &amp; kit, match &amp; matchball sponsorship, pitch-side boards and programme ads — marketing that backs grassroots football. Email <b>info@raynerslanefc.co.uk</b>.</div></div>'+
       foot()+'</div>');
 
     /* COMMERCIAL OPPORTUNITIES */
-    P.push('<div class="page">'+ banner('Back The Lane','Commercial Opportunities')+
+    P.push('<div class="page page--comm">'+ banner('Back The Lane','Commercial Opportunities')+
       '<div class="lead">Reach the Yellow Army every matchday — marketing that backs grassroots football.</div>'+
       '<div class="grid2">'+
         '<div class="card y"><div class="k">Match Sponsorship</div><div class="t">Named backer of a game — line-up graphic, social shout-outs &amp; a programme mention. From £250.</div></div>'+
@@ -778,7 +1116,7 @@
       var tiers={}; sponsors.forEach(function(s){ var t=s.tier||'Club Partner'; (tiers[t]=tiers[t]||[]).push(s); });
       var order=['Principal Partner','Kit Sponsor','Training Kit Sponsor','Programme Sponsor','Club Partner'];
       var tkeys=Object.keys(tiers).sort(function(a,b){ var ia=order.indexOf(a),ib=order.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
-      P.push('<div class="page">'+ banner('With Thanks','Our Sponsor Directory')+
+      P.push('<div class="page page--comm">'+ banner('With Thanks','Our Sponsor Directory')+
         tkeys.map(function(t){ return '<div class="tier-block"><span class="tier-head">'+esc(t)+'</span><div class="tier-row">'+tiers[t].map(function(s){return '<span class="tier-chip"><b>'+esc(s.name)+'</b>'+(s.role?' — '+esc(s.role):'')+'</span>';}).join('')+'</div></div>'; }).join('')+
         '<div class="card y" style="margin-top:10px"><div class="t">Please support the businesses who support your club. To join them, email info@raynerslanefc.co.uk.</div></div>'+
         foot()+'</div>');
@@ -789,7 +1127,7 @@
       if(!cp.image && !cp.title && !cp.caption) return;
       P.push('<div class="page">'+
         (cp.title ? banner('Feature', cp.title) : banner('Rayners Lane FC','Official Programme'))+
-        (cp.image ? '<div style="text-align:center"><img src="'+esc(cp.image)+'" style="max-width:100%;max-height:215mm;object-fit:contain;border-radius:8px"></div>' : '')+
+        (cp.image ? '<div style="text-align:center"><img src="'+esc(cp.image)+'" style="max-width:100%;max-height:215mm;object-fit:contain"></div>' : '')+
         (cp.caption ? '<div class="body muted" style="text-align:center;margin-top:12px">'+esc(cp.caption)+'</div>' : '')+
         foot()+'</div>');
     });
@@ -803,7 +1141,7 @@
 
     /* CLUB DIRECTORY */
     if (club.committee && club.committee.length) {
-      P.push('<div class="page">'+ banner('Who’s Who','Club Directory')+
+      P.push('<div class="page page--info">'+ banner('Who’s Who','Club Directory')+
         '<div class="dir">'+club.committee.map(function(m){ return '<div class="dir-row"><span class="r">'+esc(m.role||'')+'</span><span class="n">'+esc(m.name||'')+'</span></div>'; }).join('')+'</div>'+
         '<div class="card g" style="margin-top:14px"><div class="k">Safeguarding &amp; Officers</div><div class="t">Welfare Officer: <b>'+esc(OFF.welfareOfficer||'')+'</b> &middot; Chairman: <b>'+esc(OFF.chairman||'')+'</b> &middot; Secretary: <b>'+esc(OFF.secretary||'')+'</b></div></div>'+
         (club.emails && club.emails.length ? '<div class="divider"><span class="lbl">Contact</span></div><div class="dir">'+club.emails.map(function(a){return '<div class="dir-row"><span class="r">'+esc(a.label||'')+(a.name?' ('+esc(a.name)+')':'')+'</span><span class="n" style="font-weight:500;font-size:11.5px">'+esc(a.email)+'</span></div>';}).join('')+'</div>' : '')+
@@ -811,40 +1149,54 @@
     }
 
     /* GROUND INFORMATION */
-    P.push('<div class="page">'+ banner('Matchday','Ground Information')+
-      '<div class="grid2">'+
-        '<div class="card g"><div class="k">The Ground</div><div class="t">'+esc(venue)+'<br>'+esc(d.address||'151 Rayners Lane, Harrow HA2 0XH')+'</div></div>'+
-        '<div class="card y"><div class="k">Getting Here</div><div class="t">'+esc(d.groundTravel||'Rayners Lane Underground (Metropolitan &amp; Piccadilly lines) is a short walk away. Street parking nearby.')+'</div></div>'+
-        '<div class="card g"><div class="k">Facilities</div><div class="t">'+esc(d.groundFacilities||'Licensed clubhouse bar, hot food, toilets and accessible viewing. Families and well-behaved dogs welcome.')+'</div></div>'+
-        '<div class="card y"><div class="k">Safety</div><div class="t">First aid at the clubhouse. Please note the emergency exits and follow steward instructions.</div></div>'+
-      '</div>'+
-      (lines(d.groundInfo).length?'<div class="body" style="margin-top:10px">'+notes(d.groundInfo)+'</div>':'')+
-      foot()+'</div>');
+    /* Ground Information is GONE — merged into Matchday at Tithe Farm above.
+       It repeated the same address, travel, facilities and safety notes on its
+       own quarter-filled sheet. Keeping both would have meant preserving a page
+       count rather than a publication. */
 
     /* 11 — BECOME PART OF THE LANE */
-    P.push('<div class="page">'+ banner('Join us','Become Part of The Lane')+
-      '<div class="cta-card"><div class="cta-qr">'+qr(SITE+'/fan-zone.html')+'</div>'+
-        '<div><div class="cta-h">Join the Yellow Army — it’s free</div>'+
-        '<div class="body">Become a free <b>Lane loyalty member</b>: your own membership card, yellow hearts every time you come, and rewards through the season. Scan the code or visit <b>raynerslanefc.co.uk/fan-zone.html</b>.</div></div></div>'+
-      '<div class="cta-card" style="margin-top:16px;border-left-color:var(--g);background:#f3f8f4"><div style="width:100%">'+
-        '<div class="cta-h" style="color:var(--g)">Sponsor The Lane</div>'+
-        '<div class="body">Put your business in front of the Yellow Army every matchday. To get involved, email <b>info@raynerslanefc.co.uk</b>.</div></div></div>'+
-      foot()+'</div>');
+    /* A CAMPAIGN PAGE, not a call-to-action in a bordered box.
+       This used to be two large outlined panels delivering one sentence each on
+       an otherwise blank sheet. A full yellow field, the line set at poster
+       scale, one QR built into the composition. Minimal because it is meant to
+       be, not because the pagination gave up. */
+    P.push('<div class="page page--flood page--flood-y">'+
+      '<div class="fl">'+
+        '<div class="fl-kick">Join us</div>'+
+        '<div class="fl-big">JOIN THE<br>YELLOW ARMY</div>'+
+        '<div class="fl-sub">Free Lane membership. Your own card, yellow hearts every game, '+
+          'and rewards all season long.</div>'+
+        '<div class="fl-qr">'+qr(SITE+'/fan-zone.html')+'</div>'+
+        '<div class="fl-foot"><span>raynerslanefc.co.uk/fan-zone</span>'+
+          '<span>Sponsor The Lane &middot; info@raynerslanefc.co.uk</span></div>'+
+      '</div></div>');
 
     /* 12 — REPORT IT (FA) */
-    P.push('<div class="page">'+ banner('Football is for everyone','Report It. Kick It Out.')+
-      '<div class="body" style="font-size:13px"><p>Rayners Lane FC and The FA are committed to football for everyone. Discrimination of any kind — age, disability, gender reassignment, marriage &amp; civil partnership, pregnancy &amp; maternity, race, religion or belief, sex or sexual orientation — has no place at The Lane.</p></div>'+
-      '<div class="grid2" style="margin-top:6px">'+
-        '<div class="card g"><div class="k">At the ground</div><div class="t">Speak to any committee member or match official straight away — we will act.</div></div>'+
-        '<div class="card y"><div class="k">Kick It Out</div><div class="t">kickitout.org · report@kickitout.org · the free Kick It Out app</div></div>'+
-        '<div class="card g"><div class="k">The FA</div><div class="t">thefa.com/football-rules-governance/equality</div></div>'+
-        '<div class="card y"><div class="k">Club Welfare</div><div class="t">Safeguarding or welfare concern? Contact our Club Welfare Officer via info@raynerslanefc.co.uk.</div></div>'+
-      '</div>'+
-      '<div class="card g" style="margin-top:6px"><div class="t">Rayners Lane FC is affiliated to Middlesex County FA — an FA Charter Standard Community Club. #UpTheLane, together.</div></div>'+
-      foot()+'</div>');
+    /* A CAMPAIGN, NOT A SETTINGS SCREEN.
+       Equality and discrimination messaging presented as four tinted cards
+       quietly tells the reader it is boilerplate. A full green field with the
+       line set large says the club means it. The reporting routes stay — they
+       are the useful part — set as three plain columns on a rule. */
+    P.push('<div class="page page--flood page--flood-g">'+
+      '<div class="fl">'+
+        '<div class="fl-kick">Football is for everyone</div>'+
+        '<div class="fl-big">REPORT IT.<br>KICK IT OUT.</div>'+
+        '<div class="fl-body">Discrimination of any kind — age, disability, gender reassignment, '+
+          'marriage and civil partnership, pregnancy and maternity, race, religion or belief, sex '+
+          'or sexual orientation — has no place at The Lane.</div>'+
+        '<div class="kio">'+
+          '<div><b>At the ground</b>Speak to any committee member or match official straight away. We will act.</div>'+
+          '<div><b>Kick It Out</b>kickitout.org · report@kickitout.org · the free Kick It Out app</div>'+
+          '<div><b>The FA</b>thefa.com/football-rules-governance/equality</div>'+
+          '<div><b>Club Welfare</b>Safeguarding or welfare concern? Contact our Club Welfare Officer '+
+            'via info@raynerslanefc.co.uk</div>'+
+        '</div>'+
+        '<div class="fl-foot"><span>Rayners Lane FC &middot; Affiliated to Middlesex County FA</span>'+
+          '<span>#UpTheLane, together</span></div>'+
+      '</div></div>');
 
     /* LAWS & REGULATIONS (compliance notices) */
-    P.push('<div class="page">'+ banner('Notices','Laws &amp; Regulations')+
+    P.push('<div class="page page--info">'+ banner('Notices','Laws & Regulations')+
       '<div class="grid2">'+
         '<div class="card g"><div class="k">Affiliation</div><div class="t">'+esc(d.affiliation||DEF.affil)+'</div></div>'+
         '<div class="card y"><div class="k">Ground Regulations</div><div class="t">'+esc(d.groundRules||DEF.rules)+'. Entry is subject to the club’s ground regulations.</div></div>'+
@@ -858,9 +1210,9 @@
     function dt(f){ return new Date(f.date+'T'+(f.kickoff||'15:00')+':00').getTime(); }
     var upcoming = fixtures.slice().filter(function(f){ return f.us==null||f.them==null; }).sort(function(a,b){return dt(a)-dt(b);}).slice(0,6);
     var fixHTML = upcoming.length
-      ? '<div class="ts-list">'+upcoming.map(function(f){ return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(f.date))+' &middot; Rayners Lane '+(f.isHome===false?'@ ':'vs ')+esc(f.opponent||'TBC')+'</span><span class="n" style="min-width:auto;color:var(--ink)">'+esc(f.kickoff||'15:00')+'</span></div>'; }).join('')+'</div>'
+      ? '<div class="ts-list">'+upcoming.map(function(f){ return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(f.date))+' &middot; Rayners Lane '+(f.isHome===false?'@ ':'v ')+esc(f.opponent||'TBC')+'</span><span class="n" style="min-width:auto;color:var(--ink)">'+esc(f.kickoff||'15:00')+'</span></div>'; }).join('')+'</div>'
       : '<div class="card g"><div class="t">Fixtures are released soon.</div></div>';
-    P.push('<div class="page">'+ banner('Coming Up','Fixtures & The Club')+ fixHTML +
+    P.push('<div class="page page--data">'+ banner('Coming Up','Fixtures & The Club')+ fixHTML +
       '<div class="divider"><span class="lbl">The Club Stands For</span></div>'+
       '<div class="stmt"><b>Respect &amp; Fair Play</b>'+esc(d.respect||DEF.respect)+'</div>'+
       '<div class="stmt"><b>Safeguarding</b>'+esc(d.safeguarding||DEF.safe)+'</div>'+
@@ -872,14 +1224,72 @@
       foot()+'</div>');
 
     /* NEXT MATCH ADVERT (inside back cover) */
-    var nextHome = fixtures.slice().filter(function(f){ return (f.us==null||f.them==null) && f.isHome!==false; }).sort(function(a,b){return dt(a)-dt(b);})[0];
-    if (nextHome) {
-      P.push('<div class="page">'+ banner('Don’t Miss It','Next at The Lane')+
-        '<div class="advert"><div class="k">Next Home Fixture</div><div class="big">Rayners Lane<br>vs '+esc(nextHome.opponent||'TBC')+'</div>'+
-        '<div class="meta">'+esc(shortDate(nextHome.date))+' &middot; '+esc(to12(nextHome.kickoff))+' &middot; '+esc(nextHome.venue||venue)+'</div>'+
-        '<div style="margin-top:14px;display:inline-block;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;letter-spacing:.06em;padding:9px 18px;border-radius:8px">PAY ON THE GATE · BAR OPEN · ALL WELCOME</div></div>'+
-        '<div class="cta-card" style="margin-top:16px"><div class="cta-qr">'+qr(SITE+'/fixtures.html')+'</div><div><div class="cta-h">Never miss a game</div><div class="body">Scan to add the whole season to your phone calendar. #UpTheLane</div></div></div>'+
-        foot()+'</div>');
+    /* ── NEXT MATCH, AND NEXT AT THE LANE — two different things ─────────
+       THE BUG THIS REPLACES. The old code took every fixture without a score,
+       filtered to home games, sorted, and printed the first one as "Next at
+       The Lane". Three faults, and the first is the worst:
+
+       1. It never excluded the edition's OWN fixture, so the Hilltop programme
+          advertised Hilltop as the next game at the ground people were stood in.
+       2. There was no NEXT MATCH concept at all — only next HOME match. An away
+          trip was silently skipped in favour of the next prettier home page.
+       3. "No score yet" was treated as "still to be played", so a postponed or
+          abandoned fixture would be promoted as upcoming.
+
+       NEXT MATCH follows the calendar. Home or away is just the state of that
+       fixture, read from the canonical `isHome` field — never inferred from a
+       display string. NEXT AT THE LANE is the next HOME fixture, and only earns
+       its own block when it is not already the next match. */
+    function fxKey(f){ return String(f.date||'').slice(0,10) + 'T' + String(f.kickoff||'00:00'); }
+    function fxIsHome(f){ return f.isHome !== false; }
+    function upcomingAfter(list, afterDate){
+      var cut = String(afterDate||'').slice(0,10);
+      return (list||[]).filter(function(f){
+        if (f.us != null && f.them != null) return false;              // played
+        if (/postpon|cancel|abandon|void|off/i.test(String(f.status||''))) return false;
+        var d = String(f.date||'').slice(0,10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+        return cut ? d > cut : true;                                    // strictly after this edition
+      }).sort(function(a,b){ return fxKey(a).localeCompare(fxKey(b)); });
+    }
+
+    /* Frozen for a published edition, live for a draft — the same rule the
+       player figures and the league table follow. An edition printed in August
+       must still say what August's next fixture was, even if it was later
+       postponed. The website carries the correction; the programme is history. */
+    var upcoming2 = upcomingAfter(fixtures, d.date);
+    var nextMatch = d.published ? (d.nextFixture || null)     : (upcoming2[0] || null);
+    var nextHome  = d.published ? (d.nextHomeFixture || null) : (upcoming2.filter(fxIsHome)[0] || null);
+
+    if (nextMatch) {
+      var away = !fxIsHome(nextMatch);
+      var nmVenue = away ? (nextMatch.venue || '') : (nextMatch.venue || venue);
+      P.push('<div class="page' + (away ? ' nx-away' : '') + '">' +
+        banner(away ? 'On The Road' : 'Don’t Miss It', 'Next Match') +
+        '<div class="nx">' +
+          '<div class="nx-state">' + (away ? 'Away' : 'Home') + ' &middot; ' +
+            esc(nextMatch.competition || '') + '</div>' +
+          '<div class="nx-fix"><span class="nx-us">Rayners Lane</span>' +
+            '<span class="nx-vs">' + (away ? '@' : 'v') + '</span>' +
+            '<span class="nx-them">' + esc(nextMatch.opponent || 'TBC') + '</span></div>' +
+          '<div class="nx-meta">' + esc(shortDate(nextMatch.date)) + ' &middot; ' +
+            esc(to12(nextMatch.kickoff)) +
+            (nmVenue ? ' &middot; ' + esc(nmVenue) : ' &middot; Venue to be confirmed') + '</div>' +
+          (away
+            ? '<div class="nx-note">Rayners Lane are away from home. Follow the score on our channels.</div>'
+            : '<div class="nx-cta">PAY ON THE GATE &middot; BAR OPEN &middot; ALL WELCOME</div>') +
+        '</div>' +
+        /* Only when the next home game is NOT the next game — otherwise this
+           would print the same fixture twice under two headings. */
+        (nextHome && nextHome.id !== nextMatch.id
+          ? '<div class="divider"><span class="lbl">Next at The Lane</span></div>' +
+            '<div class="nx-second"><b>Rayners Lane v ' + esc(nextHome.opponent || 'TBC') + '</b>' +
+            '<span>' + esc(shortDate(nextHome.date)) + ' &middot; ' + esc(to12(nextHome.kickoff)) +
+            ' &middot; ' + esc(nextHome.venue || venue) + '</span></div>'
+          : '') +
+        '<div class="cta-card" style="margin-top:16px"><div class="cta-qr">' + qr(SITE+'/fixtures.html') +
+          '</div><div><div class="cta-h">Never miss a game</div><div class="body">Scan to add the whole season to your phone calendar. #UpTheLane</div></div></div>' +
+        foot() + '</div>');
     }
 
     /* BACK COVER */
@@ -889,7 +1299,7 @@
         '<div class="cover-kicker">Join the Yellow Army</div>'+
         '<div class="cover-title" style="font-size:52px">BE PART OF<br>THE LANE</div>'+
         '<div class="body" style="color:rgba(255,255,255,.85);max-width:380px;margin:14px auto 0;text-align:center">Free Lane membership, yellow hearts every game and rewards all season. Scan to join in a minute.</div>'+
-        '<div style="margin:18px auto 0;background:#fff;padding:11px;border-radius:12px;width:150px;height:150px">'+qr(SITE+'/fan-zone.html')+'</div>'+
+        '<div style="margin:18px auto 0;background:#fff;padding:11px;width:150px;height:150px">'+qr(SITE+'/fan-zone.html')+'</div>'+
       '</div>'+
       '<div class="cover-bottom"><span>raynerslanefc.co.uk</span><span>@RaynersLaneFC · #UpTheLane</span></div>'+
     '</div>');

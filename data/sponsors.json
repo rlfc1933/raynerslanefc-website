@@ -2,6 +2,8 @@
   "sponsors": [
     {
       "name": "Acerbis",
+      "logo": "img/sponsors/kit-sponsor.png",
+      "_logoNote": "The approved Acerbis mark was already in the repository under a generic filename, which is why the partner pages had been typesetting the name instead. Found by auditing assets before designing. Not sourced from a search engine.",
       "tier": "Kit Partner",
       "role": "Official Kit Partner",
       "url": "https://www.acerbis.com",
