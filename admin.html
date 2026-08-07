@@ -5698,6 +5698,27 @@ async function publishProgramme() {
     if (tb && tb.table && tb.table.length) doc.leagueTable = tb.table;
   } catch (e) {}
 
+  // WHAT THE NEXT FIXTURE WAS ON THE DAY. An edition printed in August must
+  // still say "away at Burnham" even if Burnham is later postponed — the
+  // website carries the correction, the programme is the document supporters
+  // were handed. Frozen here, read back by the print page when published.
+  try {
+    var fxAll = (await fetch('data/fixtures.json?t=' + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; }) || {}).fixtures || [];
+    var cutD = String(doc.date || '').slice(0, 10);
+    var up = fxAll.filter(function (f) {
+      if (f.us != null && f.them != null) return false;
+      if (/postpon|cancel|abandon|void|off/i.test(String(f.status || ''))) return false;
+      var dd = String(f.date || '').slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dd)) return false;
+      return cutD ? dd > cutD : true;
+    }).sort(function (a, b) {
+      return (a.date + 'T' + (a.kickoff || '00:00')).localeCompare(b.date + 'T' + (b.kickoff || '00:00'));
+    });
+    doc.nextFixture = up[0] || null;
+    doc.nextHomeFixture = up.filter(function (f) { return f.isHome !== false; })[0] || null;
+  } catch (e) { /* no snapshot is honest; a later season's fixture is not */ }
+
   doc.published = true;
   doc.publishedAt = new Date().toISOString();
   doc.snapshotOf = doc.fixtureId || doc.id;

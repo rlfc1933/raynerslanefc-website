@@ -88,6 +88,28 @@
   .spon-feat img{ max-width:78%; max-height:74px; object-fit:contain; }
   /* The Cherry Red artwork is white on transparent, so it only reads on a dark
      panel. Sized by max-height with width:auto so it can never be stretched. */
+  /* NEXT MATCH — a fixture poster, not an advert in a rounded box.
+     Hard rules, one colour field, type doing the work. The away variant shifts
+     the field darker and swaps the connector; it does NOT adopt the opponent's
+     colours, because this is still a Rayners Lane publication. */
+  .nx{ background:var(--g); color:#fff; padding:26px 24px 24px; }
+  .nx-away{ }
+  .nx-away .nx{ background:#0d0d0d; border-top:5px solid var(--y); }
+  .nx-state{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.2em;
+             text-transform:uppercase; color:var(--y); }
+  .nx-fix{ margin-top:8px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .nx-us,.nx-them{ font-family:var(--fd); font-size:40px; line-height:.9; letter-spacing:.5px; color:#fff; }
+  .nx-vs{ font-family:var(--fd); font-size:28px; color:var(--y); line-height:.9; }
+  .nx-meta{ margin-top:12px; padding-top:9px; border-top:1px solid rgba(255,255,255,.28);
+            font-family:var(--fb); font-size:12px; color:rgba(255,255,255,.9); }
+  .nx-cta{ margin-top:14px; display:inline-block; background:var(--y); color:#0d0d0d;
+           font-family:var(--fc); font-weight:700; letter-spacing:.06em; padding:8px 16px; font-size:12px; }
+  .nx-note{ margin-top:12px; font-family:var(--fb); font-size:12px; color:rgba(255,255,255,.82); }
+  .nx-second{ display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+              flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:7px; }
+  .nx-second b{ font-family:var(--fd); font-size:21px; letter-spacing:.4px; color:var(--ink); font-weight:400; }
+  .nx-second span{ font-family:var(--fb); font-size:11.5px; color:#333; }
+
   /* Playing colours and officials — set as type, not as cards. */
   .kit-block{ display:flex; flex-direction:column; gap:7px; }
   .kit-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap;
@@ -216,8 +238,15 @@
     body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .bar{ display:none; }
     .pages{ padding:0; }
-    .page{ margin:0; box-shadow:none; page-break-after:always; }
-    .page:last-child{ page-break-after:auto; }
+    /* HEIGHT, NOT MIN-HEIGHT. With min-height:297mm the last sheet rounded a
+       hair over A4 and Chrome emitted a blank trailing page — a wasted sheet on
+       every copy the club prints. Fixing the height to exactly A4 (with
+       overflow hidden, already set) makes each .page occupy one sheet and no
+       more. `page-break-after:always` is dropped for the same reason: with
+       exact-height pages the natural flow already breaks correctly, and the
+       explicit break was what produced the extra sheet at the end. */
+    .page{ margin:0; box-shadow:none; height:297mm; break-after:page; }
+    .page:last-child{ break-after:auto; page-break-after:auto; }
     /* Nothing that reads as one unit may be split across sheets. */
     .pcard, .card, .spon, .spon-feat, .ts-row, .cta-card, .partners{ break-inside:avoid; page-break-inside:avoid; }
     .pcards{ break-inside:auto; }
@@ -565,19 +594,25 @@
          guess, because turning up in the wrong colours is a real problem for a
          real referee. */
       function kitStrip(label, k){
-        if(!k) return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
-                      '<span class="kit-tbc">To be confirmed</span></div>';
-        var parts=[['Shirt',k.shirt],['Shorts',k.shorts],['Socks',k.socks]];
-        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
-          parts.map(function(p){
-            var v=p[1]||null, nm=v&&(v.name||v)||'';
-            if(!nm) return '';
-            var hex=(v&&v.hex)||'';
-            return '<span class="kit-i">'+(hex?'<i style="background:'+esc(hex)+'"></i>':'')+
-                   '<b>'+esc(p[0])+'</b> '+esc(nm)+'</span>';
-          }).join('')+
-          (k.goalkeeper?'<span class="kit-i"><b>GK</b> '+esc(k.goalkeeper.name||k.goalkeeper)+'</span>':'')+
-        '</div>';
+        var parts = k ? [['Shirt',k.shirt],['Shorts',k.shorts],['Socks',k.socks]] : [];
+        var cells = parts.map(function(p){
+          var v=p[1]||null, nm=(v&&(v.name||v))||'';
+          if(!nm) return '';
+          var hex=(v&&v.hex)||'';
+          return '<span class="kit-i">'+(hex?'<i style="background:'+esc(hex)+'"></i>':'')+
+                 '<b>'+esc(p[0])+'</b> '+esc(nm)+'</span>';
+        }).filter(Boolean);
+        // An unrecorded colour is unknown, not a blank. Saying so is the whole
+        // point — the goalkeeper's colours were briefly invented as green here,
+        // which is precisely the plausible detail that reaches print unchallenged.
+        var gkName = k && k.goalkeeper && (k.goalkeeper.name || k.goalkeeper);
+        cells.push('<span class="kit-i"><b>GK</b> ' +
+          (gkName ? esc(gkName) : '<em class="kit-tbc">To be confirmed</em>') + '</span>');
+        if(!parts.filter(function(p){ return p[1] && (p[1].name||p[1]); }).length){
+          return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+
+                 '<span class="kit-tbc">To be confirmed</span></div>';
+        }
+        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span>'+cells.join('')+'</div>';
       }
       var ourKit = (d.isHome===false) ? (cfgKit && cfgKit.away) : (cfgKit && cfgKit.home);
       var oppKit = d.oppKit || null;
@@ -650,8 +685,26 @@
         return '<div class="pcard"><div class="ph">'+(ph?'<img src="'+esc(ph)+'">':'')+'<div class="no">'+esc(no)+'</div></div>'+
           '<div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div>'+
           '<div class="st">'+statCell(apps,'Apps')+second+statCell(mins,'Mins')+'</div></div>';
-      }).join('');
-      P.push('<div class="page">'+ banner('First Team','Squad Profiles')+'<div class="pcards">'+pc+'</div>'+ foot()+'</div>');
+      });
+
+      /* REPACK, DO NOT LET THE BROWSER BREAK IT.
+         Every card used to be pushed into ONE .page and left to overflow across
+         however many sheets the renderer felt like. The local PDF proved what
+         that costs: a third sheet carrying three orphaned stat lines and
+         nothing else — 128 characters on a sheet of A4, which is a print
+         failure, not a layout quirk.
+
+         Six to a page: three across, two rows, which is what actually fits
+         inside the A4 text block once the banner and footer are taken off.
+         The count is explicit so the page breaks are ours and not the
+         renderer's guess. */
+      var PER_PAGE = 6;
+      for (var pi = 0; pi < pc.length; pi += PER_PAGE) {
+        var chunk = pc.slice(pi, pi + PER_PAGE);
+        P.push('<div class="page">' +
+          banner('First Team', pi === 0 ? 'Squad Profiles' : 'Squad Profiles continued') +
+          '<div class="pcards">' + chunk.join('') + '</div>' + foot() + '</div>');
+      }
     }
     /* CAPTAIN'S NOTES */
     edPage('From the Skipper', (d.captainName?esc(d.captainName)+'’s':'Captain’s')+' Notes', d.captainNotes);
@@ -709,7 +762,7 @@
     var S = seasonStats(fixtures, d.date);
     if (S.played) {
       var formHTML = '<div class="form-strip">'+S.form.map(function(v){ var c=v==='W'?'#22C55E':(v==='D'?'#C9A200':'#EF4444'); return '<span class="fchip" style="background:'+c+'">'+v+'</span>'; }).join('')+'</div>';
-      var resHTML = S.results.slice(0,8).map(function(r){ var win=r.us>r.them,draw=r.us===r.them,c=win?'#1a7a3a':(draw?'#9a7d00':'#b3231a'); return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(r.date))+' &middot; Rayners Lane '+(r.isHome===false?'@ ':'vs ')+esc(r.opponent||'')+'</span><b style="color:'+c+'">'+r.us+'–'+r.them+'</b></div>'; }).join('');
+      var resHTML = S.results.slice(0,8).map(function(r){ var win=r.us>r.them,draw=r.us===r.them,c=win?'#1a7a3a':(draw?'#9a7d00':'#b3231a'); return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(r.date))+' &middot; Rayners Lane '+(r.isHome===false?'@ ':'v ')+esc(r.opponent||'')+'</span><b style="color:'+c+'">'+r.us+'–'+r.them+'</b></div>'; }).join('');
       var scoreHTML = S.scorers.length ? '<table class="lt"><thead><tr><th class="l">Top Scorers</th><th>Goals</th></tr></thead><tbody>'+S.scorers.map(function(s){return '<tr><td class="l">'+esc(s.name)+'</td><td class="num"><b>'+s.goals+'</b></td></tr>';}).join('')+'</tbody></table>' : '<div class="card g"><div class="t">Goal scorers appear here as results come in.</div></div>';
       P.push('<div class="page">'+ banner('By The Numbers','Season So Far')+
         '<div class="tiles"><div class="tile"><div class="n">'+S.played+'</div><div class="l">Played</div></div><div class="tile"><div class="n">'+S.w+'</div><div class="l">Won</div></div><div class="tile"><div class="n">'+S.d+'</div><div class="l">Drawn</div></div><div class="tile"><div class="n">'+S.l+'</div><div class="l">Lost</div></div></div>'+
@@ -814,7 +867,7 @@
     P.push('<div class="page">'+ banner('Matchday','Ground Information')+
       '<div class="grid2">'+
         '<div class="card g"><div class="k">The Ground</div><div class="t">'+esc(venue)+'<br>'+esc(d.address||'151 Rayners Lane, Harrow HA2 0XH')+'</div></div>'+
-        '<div class="card y"><div class="k">Getting Here</div><div class="t">'+esc(d.groundTravel||'Rayners Lane Underground (Metropolitan &amp; Piccadilly lines) is a short walk away. Street parking nearby.')+'</div></div>'+
+        '<div class="card y"><div class="k">Getting Here</div><div class="t">'+esc(d.groundTravel||'Rayners Lane Underground (Metropolitan & Piccadilly lines) is a short walk away. Street parking nearby.')+'</div></div>'+
         '<div class="card g"><div class="k">Facilities</div><div class="t">'+esc(d.groundFacilities||'Licensed clubhouse bar, hot food, toilets and accessible viewing. Families and well-behaved dogs welcome.')+'</div></div>'+
         '<div class="card y"><div class="k">Safety</div><div class="t">First aid at the clubhouse. Please note the emergency exits and follow steward instructions.</div></div>'+
       '</div>'+
@@ -844,7 +897,7 @@
       foot()+'</div>');
 
     /* LAWS & REGULATIONS (compliance notices) */
-    P.push('<div class="page">'+ banner('Notices','Laws &amp; Regulations')+
+    P.push('<div class="page">'+ banner('Notices','Laws & Regulations')+
       '<div class="grid2">'+
         '<div class="card g"><div class="k">Affiliation</div><div class="t">'+esc(d.affiliation||DEF.affil)+'</div></div>'+
         '<div class="card y"><div class="k">Ground Regulations</div><div class="t">'+esc(d.groundRules||DEF.rules)+'. Entry is subject to the club’s ground regulations.</div></div>'+
@@ -858,7 +911,7 @@
     function dt(f){ return new Date(f.date+'T'+(f.kickoff||'15:00')+':00').getTime(); }
     var upcoming = fixtures.slice().filter(function(f){ return f.us==null||f.them==null; }).sort(function(a,b){return dt(a)-dt(b);}).slice(0,6);
     var fixHTML = upcoming.length
-      ? '<div class="ts-list">'+upcoming.map(function(f){ return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(f.date))+' &middot; Rayners Lane '+(f.isHome===false?'@ ':'vs ')+esc(f.opponent||'TBC')+'</span><span class="n" style="min-width:auto;color:var(--ink)">'+esc(f.kickoff||'15:00')+'</span></div>'; }).join('')+'</div>'
+      ? '<div class="ts-list">'+upcoming.map(function(f){ return '<div class="ts-row"><span style="flex:1">'+esc(shortDate(f.date))+' &middot; Rayners Lane '+(f.isHome===false?'@ ':'v ')+esc(f.opponent||'TBC')+'</span><span class="n" style="min-width:auto;color:var(--ink)">'+esc(f.kickoff||'15:00')+'</span></div>'; }).join('')+'</div>'
       : '<div class="card g"><div class="t">Fixtures are released soon.</div></div>';
     P.push('<div class="page">'+ banner('Coming Up','Fixtures & The Club')+ fixHTML +
       '<div class="divider"><span class="lbl">The Club Stands For</span></div>'+
@@ -872,14 +925,72 @@
       foot()+'</div>');
 
     /* NEXT MATCH ADVERT (inside back cover) */
-    var nextHome = fixtures.slice().filter(function(f){ return (f.us==null||f.them==null) && f.isHome!==false; }).sort(function(a,b){return dt(a)-dt(b);})[0];
-    if (nextHome) {
-      P.push('<div class="page">'+ banner('Don’t Miss It','Next at The Lane')+
-        '<div class="advert"><div class="k">Next Home Fixture</div><div class="big">Rayners Lane<br>vs '+esc(nextHome.opponent||'TBC')+'</div>'+
-        '<div class="meta">'+esc(shortDate(nextHome.date))+' &middot; '+esc(to12(nextHome.kickoff))+' &middot; '+esc(nextHome.venue||venue)+'</div>'+
-        '<div style="margin-top:14px;display:inline-block;background:var(--y);color:#0d0d0d;font-family:var(--fc);font-weight:700;letter-spacing:.06em;padding:9px 18px;border-radius:8px">PAY ON THE GATE · BAR OPEN · ALL WELCOME</div></div>'+
-        '<div class="cta-card" style="margin-top:16px"><div class="cta-qr">'+qr(SITE+'/fixtures.html')+'</div><div><div class="cta-h">Never miss a game</div><div class="body">Scan to add the whole season to your phone calendar. #UpTheLane</div></div></div>'+
-        foot()+'</div>');
+    /* ── NEXT MATCH, AND NEXT AT THE LANE — two different things ─────────
+       THE BUG THIS REPLACES. The old code took every fixture without a score,
+       filtered to home games, sorted, and printed the first one as "Next at
+       The Lane". Three faults, and the first is the worst:
+
+       1. It never excluded the edition's OWN fixture, so the Hilltop programme
+          advertised Hilltop as the next game at the ground people were stood in.
+       2. There was no NEXT MATCH concept at all — only next HOME match. An away
+          trip was silently skipped in favour of the next prettier home page.
+       3. "No score yet" was treated as "still to be played", so a postponed or
+          abandoned fixture would be promoted as upcoming.
+
+       NEXT MATCH follows the calendar. Home or away is just the state of that
+       fixture, read from the canonical `isHome` field — never inferred from a
+       display string. NEXT AT THE LANE is the next HOME fixture, and only earns
+       its own block when it is not already the next match. */
+    function fxKey(f){ return String(f.date||'').slice(0,10) + 'T' + String(f.kickoff||'00:00'); }
+    function fxIsHome(f){ return f.isHome !== false; }
+    function upcomingAfter(list, afterDate){
+      var cut = String(afterDate||'').slice(0,10);
+      return (list||[]).filter(function(f){
+        if (f.us != null && f.them != null) return false;              // played
+        if (/postpon|cancel|abandon|void|off/i.test(String(f.status||''))) return false;
+        var d = String(f.date||'').slice(0,10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+        return cut ? d > cut : true;                                    // strictly after this edition
+      }).sort(function(a,b){ return fxKey(a).localeCompare(fxKey(b)); });
+    }
+
+    /* Frozen for a published edition, live for a draft — the same rule the
+       player figures and the league table follow. An edition printed in August
+       must still say what August's next fixture was, even if it was later
+       postponed. The website carries the correction; the programme is history. */
+    var upcoming2 = upcomingAfter(fixtures, d.date);
+    var nextMatch = d.published ? (d.nextFixture || null)     : (upcoming2[0] || null);
+    var nextHome  = d.published ? (d.nextHomeFixture || null) : (upcoming2.filter(fxIsHome)[0] || null);
+
+    if (nextMatch) {
+      var away = !fxIsHome(nextMatch);
+      var nmVenue = away ? (nextMatch.venue || '') : (nextMatch.venue || venue);
+      P.push('<div class="page' + (away ? ' nx-away' : '') + '">' +
+        banner(away ? 'On The Road' : 'Don’t Miss It', 'Next Match') +
+        '<div class="nx">' +
+          '<div class="nx-state">' + (away ? 'Away' : 'Home') + ' &middot; ' +
+            esc(nextMatch.competition || '') + '</div>' +
+          '<div class="nx-fix"><span class="nx-us">Rayners Lane</span>' +
+            '<span class="nx-vs">' + (away ? '@' : 'v') + '</span>' +
+            '<span class="nx-them">' + esc(nextMatch.opponent || 'TBC') + '</span></div>' +
+          '<div class="nx-meta">' + esc(shortDate(nextMatch.date)) + ' &middot; ' +
+            esc(to12(nextMatch.kickoff)) +
+            (nmVenue ? ' &middot; ' + esc(nmVenue) : ' &middot; Venue to be confirmed') + '</div>' +
+          (away
+            ? '<div class="nx-note">Rayners Lane are away from home. Follow the score on our channels.</div>'
+            : '<div class="nx-cta">PAY ON THE GATE &middot; BAR OPEN &middot; ALL WELCOME</div>') +
+        '</div>' +
+        /* Only when the next home game is NOT the next game — otherwise this
+           would print the same fixture twice under two headings. */
+        (nextHome && nextHome.id !== nextMatch.id
+          ? '<div class="divider"><span class="lbl">Next at The Lane</span></div>' +
+            '<div class="nx-second"><b>Rayners Lane v ' + esc(nextHome.opponent || 'TBC') + '</b>' +
+            '<span>' + esc(shortDate(nextHome.date)) + ' &middot; ' + esc(to12(nextHome.kickoff)) +
+            ' &middot; ' + esc(nextHome.venue || venue) + '</span></div>'
+          : '') +
+        '<div class="cta-card" style="margin-top:16px"><div class="cta-qr">' + qr(SITE+'/fixtures.html') +
+          '</div><div><div class="cta-h">Never miss a game</div><div class="body">Scan to add the whole season to your phone calendar. #UpTheLane</div></div></div>' +
+        foot() + '</div>');
     }
 
     /* BACK COVER */
