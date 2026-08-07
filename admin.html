@@ -99,6 +99,17 @@
     .pin-logo{width:70px;height:70px;object-fit:contain}
     .pin-title{font-family:var(--fd);font-size:34px;letter-spacing:.06em;text-align:center}
     .pin-sub{font-family:var(--fc);font-size:14px;color:var(--gr);letter-spacing:.08em;text-align:center}
+    /* ── PROGRAMME FOR … ────────────────────────────────────────────────
+       One line answering "what am I working on?", and one answering "can
+       anybody see it?". Deliberately not called "Next Game": a programme
+       built on Friday for Tuesday is not the next game. */
+    .pr-fx{border:1px solid rgba(255,209,0,.4);background:linear-gradient(135deg,rgba(255,209,0,.10),transparent 62%);border-radius:12px;padding:16px;margin-bottom:14px}
+    .pr-fx__k{font-family:var(--fc);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--y);margin-bottom:5px}
+    .pr-fx__m{font-family:var(--fd);font-size:26px;line-height:1.05;color:var(--w)}
+    .pr-fx__d{font-family:var(--fb);font-size:14px;color:var(--gr);margin-top:5px}
+    .pr-fx__s{display:inline-block;margin-top:10px;font-family:var(--fc);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--y);border:1px solid rgba(255,209,0,.4);background:rgba(255,209,0,.08);border-radius:999px;padding:5px 11px}
+    .pr-fx__none{font-family:var(--fb);font-size:14px;color:var(--gr)}
+    @media(max-width:560px){.pr-fx__m{font-size:22px}}
     /* ── WHO'S SIGNING IN — people, not role names ─────────────────────────
        Each person is a full-width target with their name, their job and the
        state of their account. An account awaiting setup is SHOWN, greyed but
@@ -1349,7 +1360,12 @@
       <div class="slbl"><i class="ico ico-palette"></i> Cover colour scheme <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the front-page look</span></div>
       <div id="pr-themes" class="pr-themes"></div>
 
-      <div class="slbl"><i class="ico ico-zap"></i> Load from fixture <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— auto-fills opponent, date, time &amp; venue</span></div>
+      <!-- WHICH MATCH THIS PROGRAMME IS FOR. Shown before anything else,
+           because it is the first thing the operator needs to know and the
+           thing the old panel got wrong. -->
+      <div id="pr-fixture-head" class="pr-fx"></div>
+
+      <div class="slbl"><i class="ico ico-zap"></i> Choose another match <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fills in opponent, date, time &amp; venue. Your writing is kept.</span></div>
       <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
 
       <div class="slbl">Match &amp; Fixture Details</div>
@@ -1459,9 +1475,9 @@
 
       <div class="div"></div>
       <div class="slbl"><i class="ico ico-printer"></i>&#65039; Print Edition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— a printer-ready A4 PDF</span></div>
-      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06)"><p><strong style="color:var(--w)">Press Publish first</strong> (above), then tap the button below. A full A4 programme opens and your phone/computer&rsquo;s print box appears. Choose <strong style="color:var(--w)">Save as PDF</strong>, make sure paper is <strong style="color:var(--w)">A4</strong>, then email that PDF to your printer. That&rsquo;s it.</p></div>
-      <button class="save sec" onclick="window.open('programme-print.html?print=1','_blank')">&#128438; Make the Print Edition (PDF)</button>
-      <a href="programme-print.html" target="_blank" style="display:block;text-align:center;font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:8px;text-decoration:underline">Just preview it first (no print box)</a>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Print this programme now. This does not put it on the website.</strong> Your work is saved first, then a full A4 programme opens with your print box. Choose <strong style="color:var(--w)">Save as PDF</strong>, set paper to <strong style="color:var(--w)">A4</strong>, and email that PDF to your printer. The programme stays a draft until you press Publish.</p></div>
+      <button class="save sec" onclick="prPrintEdition()">&#128438; Print / Save PDF</button>
+      <a href="#" onclick="prPreviewEdition();return false" style="display:block;text-align:center;font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:8px;text-decoration:underline">Just look at it first (no print box)</a>
       </div><!-- /pr-form -->
       <aside class="pr-side">
         <div class="pr-side-lbl">Live cover preview</div>
@@ -5203,6 +5219,8 @@ function initProgramme() {
   });
   fetchJSON('programme', function (d) {
     applyProgrammeData(d);
+    // The fixture this programme belongs to, remembered across reloads.
+    window._prSavedFixtureId = (d && d.fixtureId) || '';
     _prReady.programme = true; prMaybeSeed();
   });
   // Live preview updates as the cover-affecting fields change.
@@ -5222,21 +5240,70 @@ function initProgramme() {
 // Never touches a programme someone is part-way through: it only seeds when the
 // saved programme has no opponent, or is for a match that has already been
 // played. Editorial work is never overwritten.
+/**
+ * WHICH MATCH IS THIS PROGRAMME FOR?
+ *
+ * It used to guess, and only when the form happened to be empty:
+ *
+ *     needsSeed = !savedOpp || (savedDate && savedDate < todayISO)
+ *
+ * So once anything was saved, the panel kept showing that old match — Russell
+ * opened it expecting Tuesday's Hilltop programme and got Wallingford, with no
+ * obvious way to move on. And when it did guess, it guessed from whatever the
+ * whole website currently called the next fixture, which is a different
+ * question from "what am I preparing".
+ *
+ * Now the programme REMEMBERS its fixture (fixtureId, saved with the doc). The
+ * guess only ever runs for a genuinely new programme, and it only fills the
+ * blanks — it never overwrites a fixture somebody chose on purpose.
+ */
 function prSeedFromNextFixture() {
   var sel = document.getElementById('pr-fixture'); if (!sel) return;
   var list = window._prFixtures || []; if (!list.length) return;
+
+  // A fixture was chosen and saved with this programme. That is the answer.
+  var saved = window._prSavedFixtureId || '';
+  if (saved && list.some(function (f) { return f.id === saved; })) {
+    sel.value = saved;
+    prRenderFixtureHeader();
+    return;
+  }
+  // Never overwrite a part-built programme just because the season moved on.
+  if (gv('pr-opp')) { prRenderFixtureHeader(); return; }
+
   var todayISO = new Date().toISOString().slice(0, 10);
-  var savedOpp = gv('pr-opp'), savedDate = gv('pr-date');
-  var needsSeed = !savedOpp || (savedDate && savedDate < todayISO);
-  if (!needsSeed) return;
   var next = list.filter(function (f) { return f.date && f.date >= todayISO; })
     .sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
-  if (!next) return;
+  if (!next) { prRenderFixtureHeader(); return; }
   sel.value = next.id;
-  prProgFromFixture(next.id);
+  prProgFromFixture(next.id, true);
 }
 
-function prProgFromFixture(id) {
+/**
+ * The one line that answers "what am I working on?" — in the club's words, not
+ * the website's. Deliberately NOT called "Next Game": a programme being built
+ * on Friday for Tuesday is not the next game, and calling it that is what made
+ * the old panel feel wrong.
+ */
+function prRenderFixtureHeader() {
+  var el = document.getElementById('pr-fixture-head'); if (!el) return;
+  var id = gv('pr-fixture');
+  var f = (window._prFixtures || []).filter(function (x) { return x.id === id; })[0];
+  var opp = gv('pr-opp'), date = gv('pr-date'), ko = gv('pr-ko');
+  if (!opp && !f) {
+    el.innerHTML = '<div class="pr-fx__none">No match chosen yet — pick one below to start a programme.</div>';
+    return;
+  }
+  var home = f ? (f.isHome !== false) : true;
+  var when = (typeof fxFmtDate === 'function' && date) ? fxFmtDate(date) : (date || '');
+  el.innerHTML =
+    '<div class="pr-fx__k">Programme for</div>' +
+    '<div class="pr-fx__m">' + (home ? 'Rayners Lane v ' : 'Rayners Lane @ ') + esc(opp || (f && f.opponent) || 'TBC') + '</div>' +
+    '<div class="pr-fx__d">' + esc(when) + (ko ? ' &middot; ' + esc(ko) : '') + ' &middot; ' + (home ? 'Home' : 'Away') + '</div>' +
+    '<div class="pr-fx__s">Draft &mdash; not visible to fans</div>';
+}
+
+function prProgFromFixture(id, quiet) {
   if (!id) return;
   var f = (window._prFixtures || []).filter(function (x) { return x.id === id; })[0]; if (!f) return;
   setVal('pr-opp', f.opponent || ''); setVal('pr-date', f.date || ''); setVal('pr-ko', f.kickoff || '15:00');
@@ -5244,7 +5311,8 @@ function prProgFromFixture(id) {
   if (f.venue) setVal('pr-venue', f.venue);
   var oc = document.getElementById('pr-oppcrest'); if (oc && f.oppCrest) { prClearOppCrestUpload(); oc.value = f.oppCrest; }
   prRenderPreview();
-  toast('Match details filled from the fixture');
+  prRenderFixtureHeader();
+  if (!quiet) toast('Match details filled in. Your writing has been kept.');
 }
 
 // ── Opponent crest: upload option (for cup ties / friendlies not on the list) ──
@@ -5382,8 +5450,17 @@ function prPageImg(i, input) {
   };
   reader.readAsDataURL(file);
 }
-function saveProgramme() {
-  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
+/**
+ * THE PROGRAMME, AS ONE OBJECT.
+ *
+ * Everything downstream — the cover preview, the digital programme, the print
+ * edition, the PDF, the archive and the published page — reads this same
+ * shape. It is built in exactly one place so the preview and the print edition
+ * cannot disagree, which is precisely what went wrong: the preview rendered
+ * live form state while the print page read a saved file that still had
+ * opponent:'' and no date, so it fell back to "TBC / 2026-27 / 3:00 PM".
+ */
+function prBuildDoc() {
   var data = {
     opponent: gv('pr-opp'), date: gv('pr-date'), kickoff: gv('pr-ko'),
     competition: gv('pr-comp'), venue: gv('pr-venue'), pitch: gv('pr-pitch'), address: gv('pr-address'),
@@ -5403,8 +5480,21 @@ function saveProgramme() {
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
+  // THE SELECTED FIXTURE, CARRIED WITH THE PROGRAMME. Without this the only
+  // link back to a match was a string built from date+opponent, so nothing
+  // downstream could tell "the programme for this fixture" from "whatever the
+  // website currently calls the next fixture".
+  data.fixtureId = gv('pr-fixture') || '';
+  var _fx = (window._prFixtures || []).filter(function (f) { return f.id === data.fixtureId; })[0];
+  if (_fx) data.isHome = _fx.isHome !== false;
   // Stable id so re-publishing the same match updates its archive entry.
   data.id = (data.date || 'undated') + '-' + (data.opponent || 'tbc').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return data;
+}
+
+function saveProgramme() {
+  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
+  var data = prBuildDoc();
   pushToGitHub('programme', data, 'dep-programme');           // latest (for the live digital programme)
   // …and add/update it in the archive library.
   fetchJSON('programmes', function (arch) {
@@ -5414,8 +5504,38 @@ function saveProgramme() {
     items.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
     setTimeout(function () { pushToGitHub('programmes', { items: items, updatedAt: new Date().toISOString() }, 'dep-programme'); }, 1500);
   });
-  toast('Programme published — saved to the archive');
+  toast('Programme saved. Nothing has been published to the website yet.');
 }
+/**
+ * PRINTING IS NOT PUBLISHING.
+ *
+ * The panel used to say "Press Publish first". That was a workaround for the
+ * real defect — the print page could only see saved data — and it taught the
+ * committee that the only way to get a PDF was to put the programme on the
+ * public website. Russell was printing Tuesday's programme by publishing it.
+ *
+ * Now the draft is handed straight to the print page, so what prints is
+ * exactly what is on screen, and nothing becomes public.
+ */
+function prHandOverDraft() {
+  var doc = prBuildDoc();
+  try {
+    localStorage.setItem('rlfc_programme_draft',
+      JSON.stringify({ savedAt: new Date().toISOString(), doc: doc }));
+  } catch (e) { /* private browsing — the saved file is still the fallback */ }
+  return doc;
+}
+function prPrintEdition() {
+  prHandOverDraft();
+  saveProgramme();                       // keep the stored copy in step
+  window.open('programme-print.html?draft=1&print=1', '_blank');
+  toast('PDF opened. Nothing has been published to the website.');
+}
+function prPreviewEdition() {
+  prHandOverDraft();
+  window.open('programme-print.html?draft=1', '_blank');
+}
+
 function prNewProgramme() {
   if (!confirm('Start a fresh programme? This clears the form (your published/archived ones are safe).')) return;
   applyProgrammeData({});
