@@ -60,6 +60,13 @@
       "logo": "img/partners/younique-logo.png",
       "note": "Amar Rai · Level 3 PT",
       "feature": false
+    },
+    {
+      "name": "MJM Sports",
+      "tier": "Club Partner",
+      "logo": "img/sponsors/mjm-sports.png",
+      "url": "",
+      "blurb": ""
     }
   ],
   "affiliations": [

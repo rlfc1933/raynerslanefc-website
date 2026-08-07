@@ -86,6 +86,13 @@
   .spon-feat-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
   .spon-feat{ border:1px solid var(--line); border-top:5px solid var(--y); border-radius:10px; padding:18px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:7px; background:#fff; min-height:150px; justify-content:center; }
   .spon-feat img{ max-width:78%; max-height:74px; object-fit:contain; }
+  /* The Cherry Red artwork is white on transparent, so it only reads on a dark
+     panel. Sized by max-height with width:auto so it can never be stretched. */
+  .league-mark{ margin-top:12px; background:#0d0d0d; border-radius:10px; padding:14px 16px;
+                display:flex; align-items:center; gap:14px; justify-content:center; }
+  .league-mark img{ height:34px; width:auto; max-width:190px; object-fit:contain; }
+  .league-mark span{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.1em;
+                     text-transform:uppercase; color:rgba(255,255,255,.75); }
   .spon-feat .tier{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--g); }
   .spon-feat .nm{ font-family:var(--fd); font-size:24px; letter-spacing:.5px; color:var(--ink); line-height:1; }
   .spon-feat .role{ font-family:var(--fb); font-size:11.5px; color:var(--soft); }
@@ -137,9 +144,19 @@
 
   /* player cards */
   .pcards{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .pcard{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
-  .pcard .ph{ height:96px; background:linear-gradient(160deg,#14532d,#0b2a1a); display:flex; align-items:center; justify-content:center; position:relative; }
-  .pcard .ph img{ width:100%; height:100%; object-fit:cover; object-position:top; }
+  /* A card must never be sliced by a page boundary — half a face at the foot
+     of one sheet and the stats at the top of the next is the sort of thing the
+     committee then tries to fix by hand. */
+  .pcard{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+          break-inside:avoid; page-break-inside:avoid; }
+  /* THE HEADSHOT BOX WAS THE CROP BUG. At 96px tall in a ~225px-wide column it
+     was a letterbox, and object-fit:cover on a portrait photo threw away most
+     of the head. object-position:top saved the forehead and cut the chin.
+     A portrait box keeps the whole face, and 50% 28% sits the eyeline slightly
+     above centre, which is where it falls in almost every squad photo. */
+  .pcard .ph{ aspect-ratio:4/5; height:auto; background:linear-gradient(160deg,#14532d,#0b2a1a);
+              display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .pcard .ph img{ width:100%; height:100%; object-fit:cover; object-position:50% 28%; }
   .pcard .no{ position:absolute; top:6px; left:8px; font-family:var(--fd); font-size:28px; color:var(--y); line-height:1; }
   .pcard .nm{ font-family:var(--fd); font-size:17px; letter-spacing:.4px; color:var(--ink); padding:7px 9px 0; line-height:1; }
   .pcard .po{ font-family:var(--fc); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--g); padding:1px 9px 6px; }
@@ -184,6 +201,14 @@
     .pages{ padding:0; }
     .page{ margin:0; box-shadow:none; page-break-after:always; }
     .page:last-child{ page-break-after:auto; }
+    /* Nothing that reads as one unit may be split across sheets. */
+    .pcard, .card, .spon, .spon-feat, .ts-row, .cta-card, .partners{ break-inside:avoid; page-break-inside:avoid; }
+    .pcards{ break-inside:auto; }
+    h1,h2,h3,.k{ break-after:avoid; page-break-after:avoid; }
+    /* Backgrounds and logos must survive the print pipeline; without this
+       Chrome drops every panel colour and the crest strip prints blank. */
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    img{ max-width:100%; }
   }
 </style>
 </head>
@@ -236,7 +261,38 @@
     var top=Object.keys(scorers).map(function(n){return {name:n,goals:scorers[n]};}).sort(function(a,b){return b.goals-a.goals;}).slice(0,12);
     return { played:played.length, w:w, d:dd, l:l, gf:gf, ga:ga, pts:(w*3+dd), form:form.slice(-6), scorers:top, results:played.slice().reverse() };
   }
+  /* ── WHICH PROGRAMME IS THIS? ────────────────────────────────────────────
+     THE BUG THIS FIXES. The admin cover preview rendered from the FORM the
+     operator was typing into. This page rendered from the SAVED FILE. Nothing
+     reconciled the two, so the preview showed Hilltop while the print edition
+     showed "TBC / 2026-27 / 3:00 PM" — the fallbacks that fire when
+     data/programme.json still has opponent:'' and no date.
+
+     The operator had no way to know. The panel even told them to press Publish
+     first, which "worked" only because publishing happened to write the file.
+     Printing and publishing are different things and must not be entangled.
+
+     Order of preference now:
+       1. ?draft=1  → the snapshot the admin just saved, handed over directly.
+                      Instant, works while unpublished, and is byte-identical
+                      to what the operator is looking at.
+       2. ?id=…     → a specific archived edition (history must never change).
+       3. otherwise → the current saved programme, as before.                */
+  function draftSnapshot(){
+    try {
+      if (!/[?&]draft=1/.test(location.search)) return null;
+      var raw = localStorage.getItem('rlfc_programme_draft');
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      // Stale hand-offs are worse than none: a snapshot from an hour ago would
+      // silently print the wrong match.
+      if (!o || !o.savedAt || (Date.now() - Date.parse(o.savedAt)) > 30 * 60 * 1000) return null;
+      return o.doc || null;
+    } catch (e) { return null; }
+  }
   function loadProgrammeDoc(){
+    var draft = draftSnapshot();
+    if (draft) return Promise.resolve(draft);
     var id = paramId();
     if (!id) return getJSON('programme');
     return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; return items.filter(function(it){return it.id===id;})[0] || getJSON('programme'); });
@@ -419,7 +475,7 @@
       '<div class="lead">The Combined Counties Football League — our home in the non-league pyramid.</div>'+
       '<div class="body"><p>The Combined Counties Football League was formed in 1978 and sits at Steps 5 and 6 of the National League System, the ninth and tenth tiers of English football. It serves clubs across Middlesex, Surrey, Berkshire, Hampshire and Greater London.</p>'+
       '<p>Since the 2021 restructure the top flight has been split into the <b>Premier Division North</b> and <b>Premier Division South</b>. Each divisional champion goes forward for promotion towards Step 4 of the non-league pyramid. Below the Premier Divisions sit Division One North and South at Step 6.</p>'+
-      '<p>Rayners Lane Football Club — operated by Rayners Lane Football Club Limited (Company No. 17110511), playing at Tithe Farm, affiliated to Middlesex County FA and an FA Charter Standard Community Club — competes in the Premier Division North. The league is sanctioned by The Football Association and backed by its title partner, Pitching In.</p></div>'+
+      '<p>Rayners Lane Football Club — operated by Rayners Lane Football Club Limited (Company No. 17110511), playing at Tithe Farm, affiliated to Middlesex County FA and an FA Charter Standard Community Club — competes in the Premier Division North. The league is sanctioned by The Football Association and backed by its title sponsor, Cherry Red Records.</p></div>'+
       '<div class="card g" style="margin-top:6px"><div class="k">More</div><div class="t">Tables, fixtures and results across the league: <b>combinedcountiesleague.co.uk</b></div></div>'+
       foot()+'</div>');
 
@@ -429,9 +485,17 @@
         table.map(function(r){ return '<tr class="'+(r.rlfc?'me':'')+'"><td class="num">'+r.pos+'</td><td class="l">'+esc(r.team)+'</td><td class="num">'+r.pld+'</td><td class="num">'+r.w+'</td><td class="num">'+r.d+'</td><td class="num">'+r.l+'</td><td class="num">'+(r.gf!=null?r.gf:'')+'</td><td class="num">'+(r.ga!=null?r.ga:'')+'</td><td class="num">'+r.gd+'</td><td class="num"><b>'+r.pts+'</b></td></tr>'; }).join('')+
         '</tbody></table>'
       : '<div class="card g"><div class="t">The league table appears here once the season is under way.</div></div>';
+    /* CHERRY RED RECORDS is the LEAGUE'S title sponsor — about.html lists it
+       under affiliations, linked to combinedcountiesleague.co.uk, and there is
+       no Cherry Red record in data/sponsors.json. So it sits with the
+       competition it actually sponsors, not in the club's partner strip.
+       Putting it there would assert a commercial relationship with Rayners
+       Lane that does not exist. Artwork is white, so it needs a dark panel. */
+    var leagueMark = '<div class="league-mark"><img src="img/sponsors/cherry-red-records.png" alt="Cherry Red Records">' +
+      '<span>Title sponsor of the Combined Counties League</span></div>';
     P.push('<div class="page">'+ banner('Where We Stand','League Table')+
       '<div class="eyebrow" style="margin-bottom:8px">'+esc(comp)+' &middot; updated weekly</div>'+ tableHTML +
-      foot()+'</div>');
+      leagueMark + foot()+'</div>');
 
     /* 8 — SEASON SO FAR */
     var S = seasonStats(fixtures);
