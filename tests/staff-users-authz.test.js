@@ -151,9 +151,12 @@ test('EACH ACTION NEEDS ITS OWN CAPABILITY', async (t) => {
 
   await t.test('confirming a player is not a staff-administration power', () => {
     assert.ok(!STAFF_ADMIN.includes(AUTHZ.CAP.CONFIRM_IDENTITY));
+    assert.ok(!STAFF_ADMIN.includes(AUTHZ.CAP.MANAGE_ROSTER),
+      'maintaining the squad is not power over an account either');
     // The Team Manager is the proof: he can answer a football question and
     // cannot touch a single account.
-    assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['Team Manager'], [AUTHZ.CAP.CONFIRM_IDENTITY]);
+    assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['Team Manager'],
+      [AUTHZ.CAP.CONFIRM_IDENTITY, AUTHZ.CAP.MANAGE_ROSTER]);
     STAFF_ADMIN.forEach((c) => assert.ok(!AUTHZ.DEFAULT_CAPS['Team Manager'].includes(c),
       'Team Manager must not hold ' + c));
   });

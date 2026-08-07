@@ -62,6 +62,13 @@ const CAP = {
   // where the club's answer to "who may do what" lives, and a second
   // permission system would be a second place to get it wrong.
   CONFIRM_IDENTITY:  'can_confirm_player_identity',
+
+  // Maintaining who is in the first-team squad — adding a signing, correcting a
+  // number, standing somebody down when they leave. Distinct from
+  // CONFIRM_IDENTITY: that decides which real person a Full-Time match-sheet
+  // name refers to, this decides who plays for the club. The Programme Editor
+  // needs the second and has no business with the first.
+  MANAGE_ROSTER:     'can_manage_first_team_roster',
 };
 
 // Actions that additionally require a per-person password, never the shared
@@ -105,12 +112,17 @@ const ADMIN_ROLES = require('./roles').ADMIN_ROLES;
 const DEFAULT_CAPS = {
   'System Maintainer': [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
                         CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN,
-                        CAP.CONFIRM_IDENTITY],
+                        CAP.CONFIRM_IDENTITY, CAP.MANAGE_ROSTER],
   'Chairman':   [CAP.VIEW_STAFF, CAP.MANAGE_USERS, CAP.DISABLE_ACCOUNT,
                  CAP.RESET_CREDENTIALS, CAP.ASSIGN_ROLES, CAP.ASSIGN_ADMIN,
-                 CAP.CONFIRM_IDENTITY],
+                 CAP.CONFIRM_IDENTITY, CAP.MANAGE_ROSTER],
   'V Chairman': [CAP.VIEW_STAFF, CAP.DISABLE_ACCOUNT],
-  'Team Manager': [CAP.CONFIRM_IDENTITY],
+  // The manager picks the squad, so the manager maintains the squad list.
+  'Team Manager': [CAP.CONFIRM_IDENTITY, CAP.MANAGE_ROSTER],
+  // The Programme Editor maintains the roster and nothing else. He needs it
+  // because a signing on Thursday has to be in Saturday's programme, and
+  // waiting for a developer is how the old programme ended up capped at 15.
+  'Programme Editor': [CAP.MANAGE_ROSTER],
 };
 
 /**
