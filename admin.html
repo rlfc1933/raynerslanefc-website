@@ -103,6 +103,21 @@
        One line answering "what am I working on?", and one answering "can
        anybody see it?". Deliberately not called "Next Game": a programme
        built on Friday for Tuesday is not the next game. */
+    /* WHY THE CARDS SHOW DASHES. Amber while something is waiting on a person,
+       green once it is not — the same language the rest of the portal uses for
+       "you have something to do" versus "this is fine". */
+    .pr-stats-status{border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid}
+    .pr-stats-status--wait{border-color:rgba(255,209,0,.45);background:linear-gradient(135deg,rgba(255,209,0,.10),transparent 62%)}
+    .pr-stats-status--ok{border-color:rgba(16,185,129,.40);background:linear-gradient(135deg,rgba(16,185,129,.10),transparent 62%)}
+    .pr-ss-hd{font-family:var(--fc);font-size:15px;font-weight:700;letter-spacing:.03em;color:var(--w);margin-bottom:7px}
+    .pr-stats-status--wait .pr-ss-hd{color:var(--y)}
+    .pr-stats-status--ok .pr-ss-hd{color:#34D399}
+    .pr-stats-status p{margin:0 0 7px;font-size:14px;line-height:1.55;color:var(--w)}
+    .pr-ss-sub{color:var(--gr) !important;font-size:13px !important}
+    .pr-ss-acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+    /* Large, because it is the one action that unblocks the whole page. */
+    .pr-ss-acts .btn-go{background:var(--y);color:#0d0d0d;font-weight:800;letter-spacing:.08em;
+      min-height:46px;padding:0 20px;border-color:var(--y)}
     .pr-fx{border:1px solid rgba(255,209,0,.4);background:linear-gradient(135deg,rgba(255,209,0,.10),transparent 62%);border-radius:12px;padding:16px;margin-bottom:14px}
     .pr-fx__k{font-family:var(--fc);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--y);margin-bottom:5px}
     .pr-fx__m{font-family:var(--fd);font-size:26px;line-height:1.05;color:var(--w)}
@@ -1364,6 +1379,16 @@
            because it is the first thing the operator needs to know and the
            thing the old panel got wrong. -->
       <div id="pr-fixture-head" class="pr-fx"></div>
+
+      <!-- WHY THE PLAYER CARDS SHOW DASHES.
+           The club had verified Full-Time figures — 2 apps, 1 goal, 179 minutes
+           for Keiran Barnard-White — and the programme printed an em dash for
+           every player, because not one Full-Time name had been confirmed as
+           one of our players yet. That is the system working correctly: it will
+           not guess which Keiran scored. But it explained itself nowhere, so it
+           looked broken. This says it, in the one place the editor is standing,
+           and offers the way to fix it. -->
+      <div id="pr-stats-status" class="pr-stats-status" hidden></div>
 
       <div class="slbl"><i class="ico ico-zap"></i> Choose another match <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fills in opponent, date, time &amp; venue. Your writing is kept.</span></div>
       <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
@@ -4410,7 +4435,7 @@ function openPanel(name) {
   if (name === 'mdops')     MDOps.init();
   if (name === 'venues')    vnInit();
   if (name === 'signoff')   soInit();
-  if (name === 'programme') initProgramme();
+  if (name === 'programme') { initProgramme(); prStatsStatus(); }
   if (name === 'mail')      initMail();
   if (name === 'analytics') renderAnalytics();
   if (name === 'social')    renderSocial();
@@ -5541,6 +5566,100 @@ function prPrintEdition() {
 function prPreviewEdition() {
   prHandOverDraft();
   window.open('programme-print.html?draft=1', '_blank');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   WHY THE PLAYER CARDS SHOW DASHES — said out loud, where the editor stands.
+
+   The club had genuine Full-Time figures sitting in the store: Keiran
+   Barnard-White on 2 appearances, 1 goal, 179 minutes. The programme printed
+   "— APPS · — GOALS · — MINS" for every single player, because not one
+   Full-Time name had been confirmed as one of our players. The join is
+   club_player_id, and it was null on all nineteen.
+
+   The system was behaving correctly — it will not guess which Keiran scored —
+   but it explained that nowhere, so it read as a broken statistics feed.
+   Russell should never have to work out what an em dash means.
+   ══════════════════════════════════════════════════════════════════════════ */
+async function prStatsStatus() {
+  var box = document.getElementById('pr-stats-status');
+  if (!box) return;
+  try {
+    // The queue is the authority on how many names are waiting. Read-only, and
+    // it is the same endpoint the review screen uses, so the two cannot drift.
+    var r = await fetch('/.netlify/functions/football-players', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, action: 'queue' }),
+    });
+    var j = await r.json().catch(function () { return null; });
+    if (!j || j.ok === false) { box.hidden = true; return; }
+
+    var waiting = (j.queue || []).filter(function (q) { return q.ours; }).length;
+    var confirmed = j.confirmed || 0;
+
+    if (!waiting) {
+      // Nothing to warn about. Say what the cards will show, and give the way
+      // to pull the latest figures in without leaving the page.
+      box.hidden = false;
+      box.className = 'pr-stats-status pr-stats-status--ok';
+      box.innerHTML =
+        '<div class="pr-ss-hd"><i class="ico ico-check"></i> Player statistics are ready</div>' +
+        '<p>All Full-Time names are matched to our players. ' +
+        (confirmed ? confirmed + ' player' + (confirmed === 1 ? '' : 's') + ' confirmed. ' : '') +
+        'Appearances, goals and minutes will print from official match data.</p>' +
+        '<div class="pr-ss-acts">' +
+          '<button class="btn" onclick="prRefreshFootball()">Refresh football data</button>' +
+        '</div>';
+      return;
+    }
+
+    box.hidden = false;
+    box.className = 'pr-stats-status pr-stats-status--wait';
+    box.innerHTML =
+      '<div class="pr-ss-hd"><i class="ico ico-alert"></i> Player statistics are waiting for player matching</div>' +
+      '<p><b>' + esc(String(waiting)) + ' Full-Time player' + (waiting === 1 ? '' : 's') +
+        ' still need to be checked</b> before their official appearances and goals can be shown.</p>' +
+      '<p class="pr-ss-sub">Until then the player cards print a dash rather than a number. ' +
+        'A dash means &ldquo;we do not know&rdquo;. It is not a zero, and the club will not guess ' +
+        'which of two players with the same name scored.</p>' +
+      '<div class="pr-ss-acts">' +
+        '<button class="btn btn-go" onclick="prGoCheckPlayers()">CHECK THE PLAYERS</button>' +
+        '<button class="btn" onclick="prRefreshFootball()">Refresh football data</button>' +
+      '</div>';
+  } catch (e) {
+    box.hidden = true;   // never block the editor over a status line
+  }
+}
+
+/** Straight to the screen that fixes it, scrolled to the right block. */
+function prGoCheckPlayers() {
+  openPanel('settings');
+  setTimeout(function () {
+    var t = document.getElementById('ident-status');
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (window.identRefresh) identRefresh();
+  }, 260);
+}
+
+/**
+ * Pull the current figures in and show what changed — the other half of the
+ * loop. Confirming a player and then not seeing it take effect is how somebody
+ * concludes the confirmation did not work.
+ */
+async function prRefreshFootball() {
+  toast('Fetching the latest official figures…');
+  try {
+    var r = await fetch('/.netlify/functions/programme-stats?t=' + Date.now());
+    var j = await r.json().catch(function () { return null; });
+    var n = (j && j.players) ? Object.keys(j.players).length : 0;
+    toast(n
+      ? n + ' player' + (n === 1 ? '' : 's') + ' now have official figures. ' +
+        'Press Preview or Print to see them on the cards.'
+      : 'No player figures yet — the Full-Time names still need matching.', !n);
+  } catch (e) {
+    toast('Could not reach the football data just now.', true);
+  }
+  prStatsStatus();
 }
 
 /**

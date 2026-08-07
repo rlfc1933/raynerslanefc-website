@@ -151,13 +151,16 @@ test('clean sheets are only ever claimed for a keeper, and only if derived', () 
 
 test('a draft reads today’s figures; a published edition never does', () => {
   const fn = print.match(/function loadSeasonStats\(doc\)\{[\s\S]*?\n  \}/)[0];
-  assert.match(fn, /if \(doc && doc\.playerStats\) return Promise\.resolve\(doc\.playerStats\)/,
-    'a frozen snapshot wins over everything');
-  assert.match(fn, /if \(doc && doc\.published\) return Promise\.resolve\(null\)/,
+  // PUBLISHED decides, not "is there a snapshot". The old test was
+  // `if (doc.playerStats)`, and an empty object is truthy — so a draft that
+  // had ever been handed a {} was treated as settled history and printed
+  // dashes for ever. See tests/programme-stats-join.test.js, which exercises
+  // the four cases rather than matching the source.
+  assert.match(fn, /var published = !!\(doc && doc\.published\)/);
+  assert.match(fn, /if \(published\) return Promise\.resolve\(\(doc && doc\.playerStats\) \|\| null\)/,
     'a published edition must never fall through to the live service');
-  // The order matters: snapshot, then published-guard, then live.
-  assert.ok(fn.indexOf('doc.playerStats') < fn.indexOf('doc.published'));
-  assert.ok(fn.indexOf('doc.published') < fn.indexOf('programme-stats'));
+  assert.ok(fn.indexOf('if (published)') < fn.indexOf('programme-stats'),
+    'the guard comes before the live call, so an archived edition cannot drift');
 });
 
 test('publishing freezes the figures, the table and the moment', () => {
@@ -180,10 +183,10 @@ test('TEMPORAL REGRESSION — an archived edition cannot drift', () => {
   // canonical service later says 25. The renderer proves this: with a
   // playerStats snapshot present it returns immediately and never calls out.
   const fn = print.match(/function loadSeasonStats\(doc\)\{[\s\S]*?\n  \}/)[0];
-  const snapshotReturn = fn.indexOf('return Promise.resolve(doc.playerStats)');
+  const frozenReturn = fn.indexOf('if (published) return Promise.resolve');
   const liveCall = fn.indexOf("fetch('/.netlify/functions/programme-stats')");
-  assert.ok(snapshotReturn > -1 && liveCall > snapshotReturn,
-    'the live call must be unreachable once a snapshot exists');
+  assert.ok(frozenReturn > -1 && liveCall > frozenReturn,
+    'the live call must be unreachable once an edition is published');
 
   // And the cards read that document, not a service.
   const cardBlock = print.match(/var playerSeason = [^\n]*\n/)[0];

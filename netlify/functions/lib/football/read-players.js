@@ -247,8 +247,17 @@ async function statsByClubPlayer(seasonLabel, scope) {
   const totals = await S.rest('football_player_season_stats?season=eq.' +
     encodeURIComponent(season) + '&scope=eq.' + (scope || 'all') +
     '&player_id=in.(' + withClubId.map((p) => p.id).join(',') + ')&select=*') || [];
+  // ONE SCOPE, BELT AND BRACES. The query already asks for a single scope, so
+  // in practice only those rows arrive. But this was a plain last-one-wins
+  // assignment, and season_stats holds a row per scope — 'all' is the total,
+  // 'league'/'cup'/'friendly' are subsets of it. If the filter above were ever
+  // widened or dropped, the last row would quietly win and a player with 2
+  // appearances would print whatever his cup record happened to be. Nought, in
+  // the case that made this visible. Pin the scope here too, so a subset can
+  // never be mistaken for the total — and never added to it.
+  const want = scope || 'all';
   const byPlayer = {};
-  totals.forEach((t) => { byPlayer[t.player_id] = t; });
+  totals.forEach((t) => { if (!t.scope || t.scope === want) byPlayer[t.player_id] = t; });
   const out = {};
   withClubId.forEach((p) => {
     out[p.club_player_id] = Object.assign(
