@@ -164,6 +164,7 @@
   .pcard .st div{ flex:1; text-align:center; padding:5px 2px; border-right:1px solid var(--line); }
   .pcard .st div:last-child{ border-right:none; }
   .pcard .st .v{ font-family:var(--fm); font-size:14px; font-weight:700; color:var(--ink); }
+  .pcard .st .v.unk{ color:var(--soft); font-weight:400; }
   .pcard .st .k{ font-family:var(--fc); font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--soft); }
 
   /* directory */
@@ -298,6 +299,23 @@
     return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; return items.filter(function(it){return it.id===id;})[0] || getJSON('programme'); });
   }
 
+  /* ── THE ARCHIVE RULE ─────────────────────────────────────────────────
+     A programme is a record of the club on one afternoon, not a live
+     document. A DRAFT may read today's figures so Russell builds it with
+     current information. A PUBLISHED edition renders from the snapshot frozen
+     at publication and never asks the season service again.
+
+     Without this, opening last August's Hilltop programme in March would show
+     a player on 25 appearances because that is what he has NOW — rewriting a
+     document supporters already hold. */
+  function loadSeasonStats(doc){
+    if (doc && doc.playerStats) return Promise.resolve(doc.playerStats);   // frozen
+    if (doc && doc.published) return Promise.resolve(null);   // published without one: show dashes, never today's
+    return fetch('/.netlify/functions/programme-stats')
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .catch(function(){ return null; });
+  }
+
   Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
     fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad')
@@ -307,12 +325,19 @@
       committee:(res[5]&&res[5].members)||[], officials:res[6]||{}, emails:(res[7]&&res[7].accounts)||[],
       players:((res[8]&&res[8].players)||(res[9]&&res[9].players)||[])
     };
-    render(d, crests, sponsors, fixtures, table, club);
+    return loadSeasonStats(d).then(function(ps){
+      if (ps && !d.playerStats) d.playerStats = ps;   // draft: attach today's
+      render(d, crests, sponsors, fixtures, table, club);
+      afterRender();
+    });
+  });
+
+  function afterRender(){
     if (/[?&](print|auto)=1/.test(location.search)) {
       window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 900); });
       setTimeout(function(){ window.print(); }, 1400);
     }
-  });
+  }
 
   function render(d, crests, sponsors, fixtures, table, club) {
     club = club || { committee:[], officials:{}, emails:[], players:[] };
@@ -439,9 +464,34 @@
 
     /* SQUAD PROFILES (player cards) */
     if (club.players && club.players.length) {
+      /* THE THREE NUMBERS. Assists are gone: Full-Time's pages carry no assist
+         information, so a printed "0 ASSISTS" claimed knowledge we never had.
+         A goalkeeper's second slot is clean sheets; everyone else's is goals.
+
+         An em dash means "we do not know" — the player is unmatched, or the
+         figure is not derivable. A zero means we DO know, from complete
+         recorded coverage, that it is nought. Those are different claims and
+         the card must not blur them. */
+      var seasonStats = (d.playerStats && d.playerStats.players) || {};
+      function statCell(v, label){
+        var known = v !== null && v !== undefined;
+        return '<div><div class="v'+(known?'':' unk')+'">'+(known?esc(String(v)):'&mdash;')+
+               '</div><div class="k">'+label+'</div></div>';
+      }
       var pc = club.players.slice(0,15).map(function(p){
         var no=p.number||p.no||'', ph=p.photo||p.image||'';
-        return '<div class="pcard"><div class="ph">'+(ph?'<img src="'+esc(ph)+'">':'')+'<div class="no">'+esc(no)+'</div></div><div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div><div class="st"><div><div class="v">'+(p.apps!=null?p.apps:'–')+'</div><div class="k">Apps</div></div><div><div class="v">'+(p.goals!=null?p.goals:'–')+'</div><div class="k">Goals</div></div><div><div class="v">'+(p.assists!=null?p.assists:'–')+'</div><div class="k">Assists</div></div></div></div>';
+        var st = seasonStats[p.id] || null;
+        var keeper = /goal ?keeper|^gk$/i.test(p.position||p.pos||'');
+        var apps    = st ? st.appearances : null;
+        var goals   = st ? st.goals : null;
+        var mins    = (st && st.minutesKnown) ? st.minutes : null;
+        var sheets  = (st && st.cleanSheets != null) ? st.cleanSheets : null;
+        var second  = keeper
+          ? statCell(sheets, 'Clean Sheets')
+          : statCell(goals, 'Goals');
+        return '<div class="pcard"><div class="ph">'+(ph?'<img src="'+esc(ph)+'">':'')+'<div class="no">'+esc(no)+'</div></div>'+
+          '<div class="nm">'+esc(p.name||'')+'</div><div class="po">'+esc(p.position||p.pos||'')+'</div>'+
+          '<div class="st">'+statCell(apps,'Apps')+second+statCell(mins,'Mins')+'</div></div>';
       }).join('');
       P.push('<div class="page">'+ banner('First Team','Squad Profiles')+'<div class="pcards">'+pc+'</div>'+ foot()+'</div>');
     }
@@ -511,21 +561,33 @@
         foot()+'</div>');
     }
 
-    /* STATISTICS CENTRE (player leaders — when player stats exist) */
-    if (club.players && club.players.some(function(p){return p.goals||p.assists||p.apps;})) {
-      function topBy(k){ return club.players.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
-      var tg=topBy('goals'), ta=topBy('assists'), tap=topBy('apps');
+    /* STATISTICS CENTRE — from the club's own record of official Full-Time
+       line-ups and scorer lines, not from the hand-typed fields in
+       data/players.json that nobody ever filled in.
+
+       Assists are absent by design: Full-Time's pages carry none, so "Most
+       Assists" could only ever have been a made-up award. Minutes replace it —
+       a figure the club genuinely derives. */
+    var statRows = Object.keys(seasonStats).length
+      ? club.players.map(function(p){ var t=seasonStats[p.id]; return t?Object.assign({name:p.name,position:p.position||p.pos},t):null; }).filter(Boolean)
+      : [];
+    if (statRows.length) {
+      function topBy(k){ return statRows.slice().filter(function(p){return p[k]!=null;}).sort(function(a,b){return (b[k]||0)-(a[k]||0);})[0]||{}; }
+      var tg=topBy('goals'), tap=topBy('appearances'), tm=topBy('minutes');
       P.push('<div class="page">'+ banner('By The Numbers','Statistics Centre')+
         '<div class="grid2">'+
-          '<div class="card g"><div class="k">Top Scorer</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tg.name||'–')+' <span style="color:var(--g)">'+(tg.goals||0)+'</span></div></div>'+
-          '<div class="card y"><div class="k">Most Assists</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(ta.name||'–')+' <span style="color:var(--g)">'+(ta.assists||0)+'</span></div></div>'+
-          '<div class="card g"><div class="k">Most Appearances</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tap.name||'–')+' <span style="color:var(--g)">'+(tap.apps||0)+'</span></div></div>'+
+          '<div class="card g"><div class="k">Top Scorer</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tg.name||'–')+' <span style="color:var(--g)">'+(tg.goals!=null?tg.goals:'—')+'</span></div></div>'+
+          '<div class="card y"><div class="k">Most Appearances</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tap.name||'–')+' <span style="color:var(--g)">'+(tap.appearances!=null?tap.appearances:'—')+'</span></div></div>'+
+          '<div class="card g"><div class="k">Most Minutes</div><div class="t" style="font-family:var(--fd);font-size:24px;color:var(--ink)">'+esc(tm.name||'–')+' <span style="color:var(--g)">'+(tm.minutes!=null?tm.minutes:'—')+'</span></div></div>'+
           '<div class="card y"><div class="k">Player of the Month</div><div class="t">'+esc(d.potm||'Announced on matchday')+'</div></div>'+
         '</div>'+
         '<div class="divider"><span class="lbl">Squad Stats</span></div>'+
-        '<table class="lt"><thead><tr><th class="l">Player</th><th>Pos</th><th>Apps</th><th>Goals</th><th>Assists</th></tr></thead><tbody>'+
-          club.players.slice(0,18).map(function(p){return '<tr><td class="l">'+esc(p.name||'')+'</td><td>'+esc(p.position||p.pos||'')+'</td><td class="num">'+(p.apps||0)+'</td><td class="num">'+(p.goals||0)+'</td><td class="num">'+(p.assists||0)+'</td></tr>';}).join('')+
-        '</tbody></table>'+ foot()+'</div>');
+        '<table class="lt"><thead><tr><th class="l">Player</th><th>Pos</th><th>Apps</th><th>Goals</th><th>Mins</th></tr></thead><tbody>'+
+          statRows.slice(0,18).map(function(p){ var dash=function(v){return v!=null?v:'—';};
+            return '<tr><td class="l">'+esc(p.name||'')+'</td><td>'+esc(p.position||'')+'</td><td class="num">'+dash(p.appearances)+'</td><td class="num">'+dash(p.goals)+'</td><td class="num">'+dash(p.minutesKnown?p.minutes:null)+'</td></tr>';}).join('')+
+        '</tbody></table>'+
+        '<div class="card g" style="margin-top:8px"><div class="t" style="font-size:10.5px">From official Full-Time line-ups and scorer records'+(d.playerStats&&d.playerStats.matchesPlayed!=null?' after '+d.playerStats.matchesPlayed+' match'+(d.playerStats.matchesPlayed===1?'':'es'):'')+'. A dash means the figure is not recorded.</div></div>'+
+        foot()+'</div>');
     }
 
     /* 9 — SPONSORS (premium showcase) */
