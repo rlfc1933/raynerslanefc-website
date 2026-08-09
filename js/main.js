@@ -284,6 +284,17 @@ async function loadMatchDay() {
           var ms = MatchTime.kickoffEpoch({ date: m.date });
           return isFinite(ms) ? new Date(ms).toISOString() : m.date;
         })(),
+        // EventScheduled is correct here rather than lazy, and the reason is
+        // worth writing down: this block only ever describes the NEXT match,
+        // and the next match is chosen by MatchTime.isPlayable(), which
+        // excludes postponed, cancelled, abandoned and void fixtures. A
+        // called-off game can therefore never reach this line — which is why
+        // Hilltop is absent from it while fixtures.html, which lists every
+        // fixture, correctly publishes it as EventPostponed.
+        //
+        // Note `m.status` is NOT the fixture's status: on this object it is the
+        // live clock label ("Kick Off", "HT"). Mapping it here would look like
+        // a safety check while actually keying off the wrong field.
         'eventStatus': 'https://schema.org/EventScheduled',
         'sport': 'Association football',
         'homeTeam': { '@type': 'SportsTeam', 'name': m.homeTeam },
