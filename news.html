@@ -48,16 +48,7 @@
       padding: 24px 0 20px;
     }
     .newsroom-masthead span { color: var(--yellow); }
-    .live-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #CE2626; padding: 4px 12px;
-      font-family: var(--font-c); font-size: 11px; font-weight: 700;
-      letter-spacing: .14em; text-transform: uppercase; color: white;
-    }
-    .live-badge-dot {
-      width: 7px; height: 7px; border-radius:var(--r-circle); background: white;
-      animation: pulse 1.5s infinite;
-    }
+    /* .live-badge removed — see the newsroom top bar. */
     /* SOURCE FILTER TABS */
     .source-tabs {
       display: flex; gap: 0; border-bottom: 1px solid var(--border);
@@ -94,6 +85,17 @@
       transition: background .2s; cursor: pointer;
     }
     .featured-card:hover { background: var(--card2); }
+    /* THE LEAD STORY WITH NO PHOTOGRAPH.
+       Not an empty image well — a masthead-style block where the headline is
+       the artwork. Yellow rule top and bottom, generous space, the club's
+       colours doing the work a picture would have done. */
+    .featured-card--type {
+      background: linear-gradient(180deg, #101010 0%, var(--card) 100%);
+      border-top: 4px solid var(--yellow);
+      border-bottom: 1px solid var(--border);
+    }
+    .featured-card--type .featured-body { padding: 44px 32px 40px; }
+    .featured-card--type .featured-title { font-size: clamp(38px, 5.2vw, 68px); }
     .featured-img {
       width: 100%; aspect-ratio: 16/9; object-fit: cover;
       display: block;
@@ -233,10 +235,11 @@
       <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.6)">
         <i class="ico ico-newspaper"></i> Rayners Lane FC Newsroom
       </span>
-      <div class="live-badge">
-        <div class="live-badge-dot"></div>
-        Live &amp; Auto-Updating
-      </div>
+      <!-- A pulsing red "LIVE & AUTO-UPDATING" badge sat here. LIVE on this site
+           means a match is being played right now — that is what the red dot
+           says everywhere else, and spending it on "this page refreshes itself"
+           both devalues the signal and tells the supporter about the plumbing.
+           The timestamp below is the honest version of the same claim. -->
     </div>
     <div class="container" style="margin-left:auto">
       <span id="last-updated" style="font-family:var(--font-c);font-size:10px;color:rgba(0,0,0,.7);letter-spacing:.08em"></span>
@@ -397,6 +400,26 @@ function newsHeroImage(a, featured) {
   return src || IMG_FALLBACK;
 }
 
+/**
+ * Does this article actually have a PHOTOGRAPH?
+ *
+ * A crest is not one, and neither is one of the generated news-*.svg
+ * stand-ins. Stretched across a 500px lead slot both read as a broken image:
+ * the newsroom's most valuable space filled with a faint watermark.
+ *
+ * The club does not always have a picture, and inventing one is not an option,
+ * so the lead story simply stops pretending. hasPhoto() drives a typographic
+ * lead instead — which is what a football programme or a local paper does with
+ * a story it has no picture for, and it reads as a decision rather than a gap.
+ */
+function hasPhoto(a) {
+  var src = a && a.image ? String(a.image) : '';
+  if (!src) return false;
+  if (/(^|\/)img\/crests\//i.test(src)) return false;   // the other club's badge
+  if (/(^|\/)img\/news\/news-[a-z-]+\.svg$/i.test(src)) return false;  // generated stand-in
+  return true;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   initComponents('news.html');
   renderNewsroom();
@@ -491,6 +514,9 @@ function makeCard(a, featured) {
   if (a.external) { card.target = '_blank'; card.rel = 'noopener'; }
   card.className = featured ? 'featured-card' : 'news-card';
 
+  var photo = hasPhoto(a);
+  if (featured && !photo) card.className = 'featured-card featured-card--type';
+
   var img = document.createElement('img');
   // An opponent CREST is not a photograph, and it must never fill the lead slot
   // — the newsroom's most valuable image ends up advertising the other club,
@@ -505,7 +531,9 @@ function makeCard(a, featured) {
 
   var imgWrap = document.createElement('div');
   imgWrap.className = featured ? '' : 'news-card-img-wrap';
-  imgWrap.appendChild(img);
+  // No photograph, no picture frame. Secondary cards keep their small stand-in
+  // (it works at thumbnail size); only the lead slot goes typographic.
+  if (!(featured && !photo)) imgWrap.appendChild(img);
 
   var badge = document.createElement('div');
   badge.className = featured ? 'featured-source-badge' : 'news-card-source';

@@ -228,6 +228,19 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .stripe{padding:64px 0;background:var(--green);position:relative;overflow:hidden;clip-path:polygon(0 8%,100% 0,100% 92%,0 100%)}
 .stripe::before{content:'FC';position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:var(--font-d);font-size:300px;color:rgba(255,255,255,.04);line-height:1;pointer-events:none}
 .stripe__inner{display:flex;align-items:center;justify-content:space-around;gap:40px;flex-wrap:wrap}
+/* The identity statement that replaced the four pseudo-statistics. Reads as a
+   line of terrace signage: the year large, the facts beside it at a size meant
+   for reading rather than for scoring. */
+.stripe__inner--id{display:block}
+.stripe__id{display:flex;align-items:baseline;gap:clamp(16px,3vw,34px);flex-wrap:wrap;
+  max-width:none;margin:0}
+.stripe__est{font-family:var(--font-d);font-size:clamp(38px,5vw,64px);line-height:1;
+  letter-spacing:.02em;color:rgba(255,255,255,.55);white-space:nowrap}
+.stripe__est b{color:var(--yellow);font-weight:400}
+.stripe__say{flex:1 1 24ch;min-width:0;font-family:var(--font-b);
+  font-size:clamp(15px,1.5vw,18px);line-height:1.65;color:rgba(255,255,255,.82)}
+.stripe__say b{color:#fff;font-weight:700}
+@media(max-width:640px){ .stripe__id{gap:10px} }
 .stripe__stat{text-align:center}
 .stripe__num{font-family:var(--font-d);font-size:64px;color:var(--yellow);line-height:1;letter-spacing:.02em}
 .stripe__lbl{font-family:var(--font-c);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-top:4px}
