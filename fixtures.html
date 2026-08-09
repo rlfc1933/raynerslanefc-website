@@ -198,6 +198,22 @@
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
 <script src="js/crest.js?v=8"></script>
+  <script src="js/competition-brand.js?v=1"></script>
+  <script>
+    /* Load the registry BEFORE the fixture list renders. renderCompetitions()
+       also sets it, but that runs after the cards are already on the page — so
+       without this the first paint fell back to the feed's abbreviation and
+       only corrected on a later render. */
+    (function () {
+      fetch('data/competitions.json?t=' + Date.now())
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.competitions && window.CompetitionBrand) {
+            CompetitionBrand.setRegistry(d.competitions);
+          }
+        }).catch(function () { /* cards fall back to the raw label */ });
+    })();
+  </script>
 <script src="js/football-data.js"></script>
 <script src="js/match-time.js"></script>
 <script src="js/consent.js?v=1"></script>
@@ -527,7 +543,7 @@ function fxCard(f) {
     '<div class="fxc__top"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
     '<span class="fxc__ha">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
     fxLock(f) +
-    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + ' &middot; ' + fxEsc(f.competition || '') + '</div>' +
+    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + ' &middot; ' + fxCompText(f) + '</div>' +
     fxVenueBlock(f) +
     foot +
   '</article>';
@@ -897,12 +913,30 @@ var FX_COMP_STATE = {
   'eliminated':         { lbl: 'Out', cls: 'out' },
   'completed':          { lbl: 'Completed', cls: 'out' }
 };
+/**
+ * How a fixture card names its competition.
+ *
+ * "FA Vase 1Q" is what the feed sends; "Isuzu FA Vase · First Qualifying Round"
+ * is what the competition is called. Resolved from the registry so a
+ * sponsorship change is one edit, and so nothing keys off the opponent. Falls
+ * back to the raw label for anything unregistered, which is never blank.
+ */
+function fxCompText(f) {
+  if (!window.CompetitionBrand) return fxEsc(f.competition || '');
+  var i = CompetitionBrand.identity(f);
+  var label = i.label || i.short || '';
+  return fxEsc(label) + (i.round ? ' &middot; ' + fxEsc(i.round) : '');
+}
+
 function renderCompetitions() {
   var el = document.getElementById('fx-comps'); if (!el) return;
   fetch('data/competitions.json?t=' + Date.now())
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       var list = (d && d.competitions) || [];
+      // One registry, one resolver — the same entries that describe the
+      // competitions here also decide what a match card calls them.
+      if (window.CompetitionBrand) CompetitionBrand.setRegistry(list);
       if (!list.length) { el.innerHTML = ''; return; }
       var counts = {};
       (window._fxAll || []).forEach(function (f) {

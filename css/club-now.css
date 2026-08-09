@@ -44,6 +44,33 @@
   display:inline-flex; align-items:center; gap:8px;
 }
 .cn__eyebrow--live { color:#fff; }
+
+/* ── COMPETITION IDENTITY ─────────────────────────────────────────────────
+   The competition identifies the match; the two clubs ARE the match. So the
+   mark sits at cap height in the eyebrow — never above the crests, never
+   scaled up to compete with them.
+
+   `height` only, so the width follows and the artwork keeps its own
+   proportions: a competition wordmark is a trademark and must never be
+   stretched. The reserved box (width/height on the <img>) means no layout
+   shift while it loads. No plate, no white rectangle behind a transparent
+   mark; `filter: brightness` lifts a dark mark on the dark card instead of
+   touching the artwork itself. */
+.cn__eyebrow--comp { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.cn__complogo {
+  height:22px; width:auto; max-width:132px; object-fit:contain;
+  filter:brightness(0) invert(1) opacity(.92);
+}
+@media (prefers-contrast: more) { .cn__complogo { filter:brightness(0) invert(1); } }
+.cn__round {
+  font-family:var(--font-c, inherit); font-size:10px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; opacity:.72;
+}
+.cn__eyebrow--comp .cn__round { padding-left:10px; border-left:1px solid rgba(255,255,255,.28); }
+@media (max-width:420px) {
+  .cn__complogo { height:18px; max-width:104px; }
+  .cn__round { font-size:9px; letter-spacing:.1em; }
+}
 .cn__dot {
   width:9px; height:9px; border-radius:50%; background:#EF4444; flex-shrink:0;
   box-shadow:0 0 0 0 rgba(239,68,68,.7); animation:cn-pulse 1.6s ease-out infinite;

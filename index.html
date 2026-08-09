@@ -712,6 +712,21 @@
 <script src="js/live-config.js"></script>
 <script src="js/live-match.js"></script>
 <script src="js/crest.js?v=8"></script>
+  <script src="js/competition-brand.js?v=1"></script>
+  <script>
+    /* Feed the competition resolver once, as early as the crest library, so the
+       Next Match eyebrow can name the competition properly on first paint
+       rather than flashing the feed's abbreviation. */
+    (function () {
+      fetch('data/competitions.json?t=' + Date.now())
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.competitions && window.CompetitionBrand) {
+            CompetitionBrand.setRegistry(d.competitions);
+          }
+        }).catch(function () { /* the card falls back to the raw label */ });
+    })();
+  </script>
 <script src="js/football-data.js"></script>
 <script src="js/match-time.js"></script>
 <script src="js/main.js"></script>
