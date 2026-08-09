@@ -206,6 +206,30 @@ test('the club-confirmed status records where it came from', () => {
   assert.strictEqual(HILLTOP.statusSource, 'club');
 });
 
+// ── 8b · THE FRESHNESS RACE ─────────────────────────────────────────────────
+// js/components.js intercepts every data/*.json fetch, races jsDelivr@main
+// against the deployed file, and keeps whichever has the newer `updatedAt`.
+// A fixture edited without touching `updatedAt` TIES — and a tie goes to the
+// CDN, so the browser keeps the stale copy and the correction is invisible to
+// every visitor while curl shows it applied perfectly. That is precisely how a
+// postponement could be recorded, deployed and still advertised.
+
+test('the file wins the freshness race against the CDN', () => {
+  const doc = JSON.parse(read('data/fixtures.json'));
+  assert.ok(doc.updatedAt, 'without this the deployed file can never win');
+  const changed = (doc.fixtures || [])
+    .filter((f) => f.statusUpdatedAt)
+    .map((f) => Date.parse(f.statusUpdatedAt));
+  changed.forEach((t) => assert.ok(Date.parse(doc.updatedAt) >= t,
+    'a status change must bump the document updatedAt, or the CDN copy wins'));
+});
+
+test('the interceptor keeps the newer copy, and falls back safely', () => {
+  const s = read('js/components.js');
+  assert.match(s, /ts\(dep\) > ts\(cdn\) \? dep : cdn/, 'newer wins');
+  assert.match(s, /return _fetch\(url, opts\)/, 'and a total failure falls back to the plain fetch');
+});
+
 test('the automatic fixture sync is permission-gated', () => {
   const s = read('netlify/functions/fwp-sync.js');
   assert.match(s, /FWP_SYNC_ENABLED/,
