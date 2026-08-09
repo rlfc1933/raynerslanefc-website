@@ -33,6 +33,13 @@
   <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
   <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- The hero still is the first thing in the LCP region, so it is fetched
+       alongside the stylesheet instead of after it. imagesrcset mirrors the
+       <img> exactly so the preload and the element resolve to the SAME file —
+       get that wrong and the page downloads two. -->
+  <link rel="preload" as="image" href="video/hero-poster-1440.jpg"
+        imagesrcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
+        imagesizes="100vw" fetchpriority="high">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
@@ -140,7 +147,19 @@
 <section class="hero" style="isolation:isolate">
   <!-- No-WebGL / reduced-motion fallback: a still poster behind the hero.
        Hidden once the live WebGL scene takes over (html.gl-on). -->
-  <div class="hero__poster" aria-hidden="true"></div>
+  <!-- The hero still, as a real <img> rather than a CSS background.
+       As a background it was invisible to the preload scanner and was only
+       requested once the stylesheet had parsed and the element had been laid
+       out: measured on production, the request did not START until 1186ms,
+       though the file itself took only 77ms to arrive. An <img> is discovered
+       in the raw HTML, and srcset stops a phone downloading the 1920×1080
+       desktop encode (131KB) when a 960-wide one (43KB) is what it will show. -->
+  <div class="hero__poster" aria-hidden="true">
+    <img src="video/hero-poster-1440.jpg"
+         srcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
+         sizes="100vw" width="1920" height="1080" alt=""
+         fetchpriority="high" decoding="async">
+  </div>
   <!-- Hidden source for the WebGL video texture (the club footage is rendered
        INSIDE the GL scene, behind the morphing particles, so it travels with
        them). Mobile / reduced-motion never load it — poster only. -->
@@ -158,8 +177,14 @@
     body{isolation:isolate}
     #hero-gl{position:fixed!important;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
     .hero__poster{position:absolute;inset:0;z-index:0;pointer-events:none;
-      background:#080808 url('video/hero-poster.jpg') center/cover no-repeat;opacity:.45}
-    .gl-on .hero__poster{display:none}
+      background:#080808;opacity:.45;transition:opacity .9s ease}
+    .hero__poster img{width:100%;height:100%;object-fit:cover;display:block}
+    /* Was `.gl-on .hero__poster{display:none}`, which fired the instant WebGL
+       was detected and left the hero black for the whole of the video load.
+       The still now hands over only when the video has frames (html.gl-video),
+       and fades rather than snaps. */
+    .gl-video .hero__poster{opacity:0}
+    @media (prefers-reduced-motion: reduce){ .hero__poster{transition:none} }
     /* Frosted info panel — translucent so the living-void graphics glow behind
        the "Born in Harrow" copy, while the blur keeps the text crisp. */
     .gl-on .hero__right{background:linear-gradient(160deg,rgba(20,44,31,.62) 0%,rgba(11,27,17,.56) 55%,rgba(8,8,8,.46) 100%)!important;

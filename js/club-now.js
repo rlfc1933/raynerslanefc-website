@@ -274,7 +274,7 @@
     var hs = live.homeScore || 0, as = live.awayScore || 0;
     elStatus.textContent = 'Live';
     elPrimary.innerHTML =
-      '<div class="cn__eyebrow cn__eyebrow--live"><span class="cn__dot"></span> Live' + (live.status ? ' · ' + esc(live.status) : '') + '</div>' +
+      '<div class="cn__eyebrow mstat mstat--live">Live' + (live.status ? ' · ' + esc(live.status) : '') + '</div>' +
       '<div class="cn__lock">' +
         '<div class="cn__team">' + crestHTML(L.c, L.n) + '<span class="cn__nm">' + esc(L.n.toUpperCase()) + '</span></div>' +
         '<div class="cn__mid"><span class="cn__score">' + hs + ' – ' + as + '</span></div>' +
@@ -326,7 +326,7 @@
     }
 
     elPrimary.innerHTML =
-      '<div class="cn__eyebrow cn__eyebrow--ft">Full Time' + (live.competition ? ' · ' + esc(live.competition) : '') + '</div>' +
+      '<div class="cn__eyebrow mstat mstat--ft">Full Time' + (live.competition ? ' · ' + esc(live.competition) : '') + '</div>' +
       '<div class="cn__lock">' +
         '<div class="cn__team">' + crestHTML(L.c, L.n) + '<span class="cn__nm">' + esc(L.n.toUpperCase()) + '</span></div>' +
         '<div class="cn__mid"><span class="cn__score">' + hs + ' – ' + as + '</span></div>' +
@@ -482,7 +482,7 @@
     // the result — which is a different and honest thing to tell a supporter.
     var num = hasScore(r)
       ? chip(wdl(r)) + ' <span class="cn__result-score">' + esc(String(r.us)) + '–' + esc(String(r.them)) + '</span>'
-      : '<span class="cn__result-await">Result to follow</span>';
+      : '<span class="mstat mstat--await">Result to follow</span>';
     return '<div class="cn__tile">' +
       '<div class="cn__tile-num">' + num + '</div>' +
       '<div class="cn__tile-lbl">' + esc(label || ('v ' + (r.opponent || ''))) + '</div></div>';
@@ -542,9 +542,16 @@
     var L = home ? { n: 'Rayners Lane', c: 'img/badge.png' } : { n: opp, c: oc };
     var R = home ? { n: opp, c: oc } : { n: 'Rayners Lane', c: 'img/badge.png' };
     var label = st === 'delayed' ? 'Kick-off Delayed' : (st === 'postponed' ? 'Postponed' : 'Cancelled');
+    // These used to render as cn__eyebrow--live, pulsing red dot and all. A
+    // postponed match is the opposite of a live one, and an animated red light
+    // on a game that is NOT being played is the most misleading thing this card
+    // could show. Shared .mstat classes: colour per state, motion only on LIVE.
+    var stateCls = st === 'cancelled' ? 'mstat--cancelled'
+                 : st === 'delayed' ? 'mstat--abandoned'   /* amber: still might */
+                 : 'mstat--off';
     elStatus.textContent = label;
     elPrimary.innerHTML =
-      '<div class="cn__eyebrow cn__eyebrow--live"><span class="cn__dot"></span> ' + esc(label) + '</div>' +
+      '<div class="cn__eyebrow mstat ' + stateCls + '">' + esc(label) + '</div>' +
       '<div class="cn__lock">' +
         '<div class="cn__team">' + crestHTML(L.c, L.n) + '<span class="cn__nm">' + esc(L.n.toUpperCase()) + '</span></div>' +
         '<div class="cn__mid"><span class="cn__vs">VS</span></div>' +

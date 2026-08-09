@@ -77,6 +77,59 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .btn-text:hover::after{transform:translateX(3px)}
 .btn svg,.btn-text svg{width:16px;height:16px;flex-shrink:0}
 
+/* ── MATCH STATUS ─────────────────────────────────────────────────────────
+   A match is in one of a small number of states, and each one means something
+   different to a supporter deciding whether to travel. They were being drawn
+   in three places with three vocabularies: the homepage card used a coloured
+   eyebrow, the fixtures list used a bordered notice, and matchday-ops used a
+   grey pill. Worse, the homepage drew POSTPONED and CANCELLED with the LIVE
+   treatment — pulsing red dot included. The reasoning for not doing that had
+   already been written down for Full Time ("a pulsing red dot on a finished
+   game reads as still playing") and simply never reached the off-states.
+
+   The colour carries the meaning, and it is never the only carrier — the word
+   is always there too, which is what makes this usable without colour vision:
+     LIVE       red, and the ONLY state that moves
+     FULL TIME  green, settled
+     POSTPONED  yellow, loud — see .mnotice; this is the one that changes plans
+     CANCELLED  red, flat, final
+     ABANDONED  amber, flat
+     AWAITING   grey, deliberately quiet
+
+   UPCOMING has no treatment at all. A scheduled match is the normal case, and
+   badging the normal case is how ordinary metadata turns into status pills. */
+.mstat{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-c);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;line-height:1}
+.mstat::before{content:'';width:8px;height:8px;border-radius:var(--r-circle);background:currentColor;flex-shrink:0}
+.mstat--live{color:#FF4A4A}
+/* Only LIVE pulses. Motion is the signal that something is happening now. */
+.mstat--live::before{animation:mstat-pulse 1.6s ease-out infinite}
+.mstat--ft{color:#6FCF97}
+.mstat--off{color:var(--yellow)}
+.mstat--cancelled{color:#FF6B6B}
+.mstat--abandoned{color:#E0A93B}
+/* No dot: an absent result is not a state the match is in, it is a gap in what
+   we know. Giving it a status light would make missing data look like news. */
+.mstat--await{color:var(--muted);letter-spacing:.1em}
+.mstat--await::before{display:none}
+@keyframes mstat-pulse{
+  0%{box-shadow:0 0 0 0 rgba(255,74,74,.7)}
+  70%{box-shadow:0 0 0 9px rgba(255,74,74,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,74,74,0)}
+}
+@media (prefers-reduced-motion: reduce){ .mstat--live::before{animation:none} }
+
+/* POSTPONED OUTRANKS EVERYTHING AROUND IT.
+   A called-off match is the single most important thing on a fixtures page —
+   it is the one that stops someone driving to Harrow on a Tuesday night. It
+   gets a block, a rule down the side and the reason in full, not a chip. */
+.mnotice{border-left:4px solid var(--yellow);background:rgba(255,209,0,.06);padding:14px 16px}
+.mnotice--cancelled{border-left-color:#FF6B6B;background:rgba(255,107,107,.06)}
+.mnotice--abandoned{border-left-color:#E0A93B;background:rgba(224,169,59,.06)}
+.mnotice__h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mnotice__was{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:6px;letter-spacing:.03em}
+.mnotice__why{font-family:var(--font-b);font-size:13px;color:var(--white);margin-top:7px;line-height:1.5}
+.mnotice__next{font-family:var(--font-b);font-size:12.5px;color:var(--grey);margin-top:4px;line-height:1.5}
+
 /* ── TICKER ── */
 .ticker{background:var(--yellow);height:34px;overflow:hidden;display:flex;align-items:center;position:relative;z-index:200}
 .ticker__tag{background:var(--green);color:#fff;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:0 16px;height:100%;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;gap:8px}

@@ -215,6 +215,15 @@
   [headers.values]
     Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
 
+# /video/* had NO rule, so the hero still and the 13MB hero encode fell through
+# to the HTML default (max-age=0, must-revalidate) — the site's two largest
+# assets on its weakest caching, revalidated on every single visit. They are
+# static media: they change when someone uploads new footage, not on deploy.
+[[headers]]
+  for = "/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
 # The club's new-member notifications.
 #
 # Joining nudges the outbox directly, so the normal case is that info@ hears
