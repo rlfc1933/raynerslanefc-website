@@ -311,16 +311,21 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
 .notify-bar__btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
 
 /* ── AFFILIATIONS ── */
-.affils{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:32px 0;border-top:1px solid var(--border)}
-.affil-item{font-family:var(--font-c);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);padding:6px 12px;border:1px solid var(--border);border-radius:var(--r-xs);transition:border-color .2s,color .2s}
-.affil-item:hover{border-color:var(--yellow);color:var(--yellow)}
+/* A sentence, set as one. No boxes to imply five controls, and no hover state
+   on text that was never clickable. */
+.affils{padding:28px 0 4px;border-top:1px solid var(--border);font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--grey);line-height:1.7;max-width:64ch}
+.affils__lbl{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-right:8px}
 
 /* ── FOOTER ── */
 .footer{background:var(--dark);border-top:1px solid var(--border);padding:64px 0 32px}
 .footer__grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
 .footer__brand .nav__crest{width:52px;height:52px;font-size:19px;margin-bottom:16px}
 .footer__brand-name{font-family:var(--font-d);font-size:28px;letter-spacing:.06em;margin-bottom:8px}
-.footer__brand-sub{font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.1em;line-height:1.8;max-width:260px}
+/* 260px inside a 460px column broke the registered address across lines as
+   "…Middlesex HA2 / 0XH." Tracking of .1em belongs on an uppercase label, not on
+   a sentence — it is what made the column feel like it needed the extra width.
+   Set as running text at a normal measure, the address holds together. */
+.footer__brand-sub{font-family:var(--font-c);font-size:12.5px;color:var(--grey);letter-spacing:.01em;line-height:1.75;max-width:42ch}
 .footer__social{display:flex;gap:10px;margin-top:20px}
 .footer__social a{width:44px;height:44px;border:1px solid var(--border);border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
 .footer__social a:hover{border-color:var(--yellow);background:rgba(255,209,0,.1)}
@@ -390,8 +395,13 @@ h1,h2,h3,h4{font-family:var(--font-d);line-height:.95;letter-spacing:.03em}
   .fixture-row{grid-template-columns:1fr auto;padding:14px 16px}
   .fix__date{grid-column:1/-1;margin-bottom:2px}
   .about-block{padding:40px 24px}
-  .footer__grid{grid-template-columns:1fr}
-  .footer__col:not(:first-child){display:none}
+  /* The three link columns used to be display:none below 768px, which is to say
+     on every phone — about twenty routes (the committee, the history, results,
+     the programme, trials, policies) present for anyone on a laptop and gone for
+     everyone else. Hiding a sitemap is not a responsive layout. They stack two
+     up instead, with the brand block spanning the full width above them. */
+  .footer__grid{grid-template-columns:1fr 1fr;gap:28px 20px}
+  .footer__brand{grid-column:1/-1}
   .stripe{clip-path:none;padding:48px 0}
   .stripe__divider{display:none}
   .section-header{flex-direction:column;align-items:flex-start}

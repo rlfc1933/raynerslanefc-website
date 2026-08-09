@@ -70,6 +70,13 @@
 @media (max-width:420px) {
   .cn__complogo { height:18px; max-width:104px; }
   .cn__round { font-size:9px; letter-spacing:.1em; }
+  /* On a phone "NEXT MATCH · ISUZU FA VASE" and "FIRST QUALIFYING ROUND" both
+     shrank and wrapped INSIDE themselves rather than the row wrapping between
+     them, so the competition broke across two lines while the round sat beside
+     it doing the same. Two facts, stacked, each on its own line — and no
+     dividing rule, because there is nothing left to divide. */
+  .cn__eyebrow--comp { flex-direction:column; align-items:flex-start; gap:4px; }
+  .cn__eyebrow--comp .cn__round { padding-left:0; border-left:none; }
 }
 .cn__dot {
   width:9px; height:9px; border-radius:var(--r-circle); background:#EF4444; flex-shrink:0;

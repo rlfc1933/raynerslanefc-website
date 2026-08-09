@@ -557,8 +557,7 @@ function buildFooter() {
             <p class="footer__brand-sub">
               A community football club serving Harrow since 1933.<br>
               Operated by <strong>Rayners Lane Football Club Limited</strong> &middot; Company No. 17110511.<br>
-              Tithe Farm Sports &amp; Social Club, 151 Rayners Lane, Harrow, Middlesex HA2 0XH.<br>
-              Affiliated to Middlesex County FA &middot; The FA &middot; FA Charter Standard.
+              Tithe Farm Sports &amp; Social Club, 151 Rayners Lane, Harrow, Middlesex HA2 0XH.
             </p>
             <div class="footer__social">
               <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener" aria-label="X">
@@ -634,13 +633,17 @@ function buildFooter() {
             <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow);text-decoration:underline'>info@raynerslanefc.co.uk</a> &middot;
             <a href='admin.html' style='color:var(--grey);font-size:11px;letter-spacing:.06em;text-decoration:underline'>Staff Admin</a>
           </p>
-          <div class="affils">
-            <span class="affil-item">FA Charter Standard</span>
-            <span class="affil-item">Middlesex County FA</span>
-            <span class="affil-item">The FA</span>
-            <span class="affil-item">Kick It Out</span>
-            <span class="affil-item">Football Foundation</span>
-          </div>
+          <!-- These are affiliations: a statement of fact about the club, not a
+               row of controls. They shipped as five bordered boxes that changed
+               colour on hover while being inert <span>s — a button's affordance
+               with a button's nothing behind it — and three of the five simply
+               repeated the sentence in the brand column above. Said once, as the
+               sentence it always was. The claims themselves are unchanged. -->
+          <p class="affils">
+            <span class="affils__lbl">Affiliated to</span>
+            Middlesex County FA &middot; The FA &middot; FA Charter Standard &middot;
+            Kick It Out &middot; Football Foundation
+          </p>
         </div>
       </div>
     </footer>
