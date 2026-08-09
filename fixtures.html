@@ -254,12 +254,53 @@ async function loadFixturesData() {
   // where the registry has not been populated. It is a fallback and not a
   // second source of truth: whichever answers, ONE of them renders.
   var usedLocal = false;
+  // THE CLUB'S OWN STATUSES OVERLAY THE FEED.
+  // The registry comes from Full-Time, which stays authoritative for scores and
+  // line-ups. But a postponement is agreed between two secretaries and a
+  // referee, so the club knows days before the provider does — this page was
+  // still advertising a match the club had called off, because the registry
+  // said 'scheduled' and the registry is read first.
+  //
+  // Nothing upstream is overwritten. Where the club has recorded a called-off
+  // status for the same fixture, that status is applied to the registry's copy
+  // on the way in. When the feed catches up the two simply agree.
   try {
     var reg = window.RLFCFootball ? await window.RLFCFootball.fixtures() : null;
     var regResults = window.RLFCFootball ? await window.RLFCFootball.results() : null;
     var regList = (reg && reg.fixtures) || [];
-    if (regList.length) { renderFxSeason(fxFromRegistry(regList, regResults)); usedLocal = true; }
+    if (regList.length) {
+      await loadClubStatuses();
+      renderFxSeason(applyClubStatus(fxFromRegistry(regList, regResults)));
+      usedLocal = true;
+    }
   } catch (e) { /* fall through to the club's own file */ }
+  // Read AFTER the registry, deliberately: the registry remains the source of
+  // fixtures and this file is only ever consulted for statuses the club has
+  // corrected. The ordering keeps that distinction honest.
+  var clubStatuses = [];
+  async function loadClubStatuses() {
+    try {
+      var cs = await fetch('data/fixtures.json?t=' + Date.now());
+      if (cs.ok) clubStatuses = ((await cs.json()) || {}).fixtures || [];
+    } catch (e) {}
+  }
+  function applyClubStatus(list) {
+    if (!clubStatuses.length) return list;
+    return list.map(function (f) {
+      var ms = fxDate(f).getTime();
+      var opp = String(f.opponent || '').trim().toLowerCase();
+      var hit = clubStatuses.filter(function (c) {
+        return MatchTime.isCalledOff(c) &&
+          String(c.opponent || '').trim().toLowerCase() === opp &&
+          Math.abs(MatchTime.fixtureSortKey(c) - ms) < 12 * 3600000;
+      })[0];
+      return hit ? Object.assign({}, f, {
+        status: hit.status,
+        postponedReason: hit.postponedReason || '',
+        rearrangedDate: hit.rearrangedDate || null,
+      }) : f;
+    });
+  }
   if (!usedLocal) {
     try {
       var lr = await fetch('data/fixtures.json?t=' + Date.now());

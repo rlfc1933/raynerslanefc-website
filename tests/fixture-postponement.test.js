@@ -278,6 +278,16 @@ test('the veto matches on opponent AND kick-off, not name alone', () => {
     'the December return fixture is unaffected');
 });
 
+test('the fixtures page overlays the club status onto the feed', () => {
+  const s = read('fixtures.html');
+  assert.match(s, /function applyClubStatus\(list\)/);
+  assert.match(s, /renderFxSeason\(applyClubStatus\(fxFromRegistry\(regList, regResults\)\)\)/);
+  assert.match(s, /MatchTime\.isCalledOff\(c\)/);
+  assert.match(s, /Math\.abs\(MatchTime\.fixtureSortKey\(c\) - ms\) < 12 \* 3600000/,
+    'matched on opponent AND kick-off, so a return fixture is unaffected');
+  assert.match(s, /Nothing upstream is overwritten/);
+});
+
 test('the club file is always read, so it can always veto', () => {
   assert.match(CN, /The club's own file is ALWAYS read now/);
   assert.match(CN, /var vetoed = clubSaysCalledOff\(regNext, list\);/);
