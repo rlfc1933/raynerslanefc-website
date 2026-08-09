@@ -184,6 +184,37 @@
     return isFinite(k) ? k : Number.MAX_SAFE_INTEGER;
   }
 
+  /* ── IS THIS GAME ACTUALLY GOING TO BE PLAYED? ───────────────────────────
+     A fixture that has been called off still has no score, and "no score yet"
+     was the only test the homepage and the Club Now panel applied when picking
+     the next match. So the night Hilltop was postponed, the front page went on
+     counting down to a game that was not happening — 7.45pm Tuesday, directions,
+     add to calendar, the lot.
+
+     The status was already modelled (matchday-core lists scheduled, played,
+     postponed, cancelled, abandoned) and Match Centre and the JSON-LD already
+     honoured it. Only the "what's next" logic did not, so a postponement could
+     be recorded correctly and still be advertised.
+
+     One rule, in the one module both callers already share. */
+  var OFF_STATUSES = ['postponed', 'cancelled', 'abandoned', 'void'];
+
+  function isCalledOff(fixture) {
+    var s = String((fixture && fixture.status) || '').toLowerCase();
+    return OFF_STATUSES.indexOf(s) > -1;
+  }
+
+  /**
+   * A fixture the club is still expecting to play: no result recorded, and not
+   * called off. This is what "next match", countdowns and match-day arming must
+   * filter on — never "has no score".
+   */
+  function isPlayable(fixture) {
+    if (!fixture) return false;
+    if (fixture.us != null && fixture.them != null) return false;   // already played
+    return !isCalledOff(fixture);
+  }
+
   return {
     CLUB_TZ: CLUB_TZ,
     zoneOffsetAt: zoneOffsetAt,
@@ -197,6 +228,9 @@
     viewerZone: viewerZone,
     viewerDiffersFromClub: viewerDiffersFromClub,
     fixtureSortKey: fixtureSortKey,
+    isPlayable: isPlayable,
+    isCalledOff: isCalledOff,
+    OFF_STATUSES: OFF_STATUSES,
     LIVE_PERIODS: LIVE_PERIODS,
   };
 });

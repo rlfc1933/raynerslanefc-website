@@ -336,7 +336,9 @@ function rlfcFixturesShape(list) {
   function dt(f) { return MatchTime.fixtureSortKey(f); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
   var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
-  var upcoming = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
+  // NOT "has no score" — a postponed game has no score either, and that is how
+  // the homepage counted down to a match that had been called off.
+  var upcoming = sorted.filter(function (f) { return MatchTime.isPlayable(f); });
   // Not-yet-kicked-off, or kicked off within the last 6h (a game in progress is
   // still "next" — it shouldn't vanish from the homepage at 15:01).
   var live = upcoming.filter(function (f) { return dt(f) > now - 6 * 3600000; });

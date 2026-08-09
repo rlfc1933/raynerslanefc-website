@@ -73,7 +73,8 @@
     function dt(f) { return MatchTime.fixtureSortKey(f); }
     var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
     var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
-    var up = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
+    // Same rule as main.js: a called-off fixture is not the next match.
+    var up = sorted.filter(function (f) { return MatchTime.isPlayable(f); });
     var soon = up.filter(function (f) { return dt(f) > now - 6 * 3600000; });
     var next = soon.filter(function (f) { return f.pinned; })[0] || soon[0] || up[0] || null;
     return {

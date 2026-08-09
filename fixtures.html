@@ -662,10 +662,17 @@ function renderFxSeason(list) {
   function dt(f) { return fxDate(f).getTime(); }
   var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
   var hasScore = function (f) { return f.us != null && f.them != null; };
+  // A CALLED-OFF GAME IS NEITHER UPCOMING NOR A RESULT.
+  // Before this it was both, in turn: with no score and a future date it sat in
+  // "upcoming" and could be picked as the next match, and the morning after the
+  // date it had been called off it moved into RESULTS as a game "awaiting a
+  // score" — a match that was never played, filed as one that was.
+  var calledOff = sorted.filter(function (f) { return MatchTime.isCalledOff(f); });
+  var live      = sorted.filter(function (f) { return !MatchTime.isCalledOff(f); });
   // Classify by TIME, not by whether a score was typed in.
-  var played   = sorted.filter(hasScore);                                        // finished, score known
-  var awaiting = sorted.filter(function (f) { return !hasScore(f) && fxPast(f); }); // finished, score not entered
-  var upcoming = sorted.filter(function (f) { return !hasScore(f) && !fxPast(f); }); // genuinely still to come
+  var played   = live.filter(hasScore);                                        // finished, score known
+  var awaiting = live.filter(function (f) { return !hasScore(f) && fxPast(f); }); // finished, score not entered
+  var upcoming = live.filter(function (f) { return !hasScore(f) && !fxPast(f); }); // genuinely still to come
   // A game staff pinned in admin → Next Match wins; otherwise soonest wins.
   // Must match js/main.js's rule exactly — if the homepage and this page
   // disagree about "next", one of them is lying to supporters.
@@ -688,6 +695,28 @@ function renderFxSeason(list) {
       return '<section class="fxm"><div class="fxm__h"><span class="fxm__m">' + fxEsc(k.split(' ')[0].toUpperCase()) + '</span>' +
         '<span class="fxm__c">' + g.length + ' game' + (g.length > 1 ? 's' : '') + '</span></div>' + g.map(fxCard).join('') + '</section>';
     }).join('');
+  }
+  // CALLED OFF — shown, not hidden. A supporter who has the original date in
+  // their diary needs to find it here and be told plainly, with the reason and
+  // whether a new date exists yet. Disappearing would be worse than wrong.
+  if (calledOff.length) {
+    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">POSTPONED</span>' +
+      '<span class="fxm__c">' + calledOff.length + ' game' + (calledOff.length > 1 ? 's' : '') + '</span></div>' +
+      calledOff.sort(function (a, b) { return dt(a) - dt(b); }).map(function (f) {
+        var label = (f.status || 'postponed').toUpperCase();
+        return '<div class="fx-off">' +
+          '<div class="fx-off__h"><span class="fx-off__tag">' + fxEsc(label) + '</span>' +
+          '<b>Rayners Lane ' + (f.isHome === false ? '@' : 'v') + ' ' + fxEsc(f.opponent || 'TBC') + '</b></div>' +
+          '<div class="fx-off__d">Was ' + fxEsc(fxDate(f).toLocaleDateString('en-GB',
+            { weekday: 'long', day: 'numeric', month: 'long' })) +
+            (f.kickoff ? ' · ' + fxEsc(f.kickoff) : '') + '</div>' +
+          (f.postponedReason ? '<div class="fx-off__r">' + fxEsc(f.postponedReason) + '</div>' : '') +
+          '<div class="fx-off__n">' + (f.rearrangedDate
+            ? 'Rearranged for ' + fxEsc(new Date(f.rearrangedDate).toLocaleDateString('en-GB',
+                { weekday: 'long', day: 'numeric', month: 'long' }))
+            : 'A rearranged date will be announced once confirmed.') + '</div>' +
+        '</div>';
+      }).join('') + '</section>';
   }
   // Games that have been and gone go in RESULTS — newest first — whether or not
   // the score has been entered yet. They never sit in "upcoming".
@@ -860,6 +889,16 @@ function renderCompetitions() {
 }
 </script>
 <style>
+  /* A called-off fixture: stated plainly, not hidden and not dressed up as a
+     result. Amber because it is information, not a loss. */
+  .fx-off{border-left:4px solid #FFD100;background:rgba(255,209,0,.06);padding:13px 15px;margin-bottom:9px}
+  .fx-off__h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .fx-off__tag{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;
+    background:#FFD100;color:#0d0d0d;padding:3px 8px}
+  .fx-off__h b{font-family:var(--font-d);font-size:19px;letter-spacing:.4px;font-weight:400;color:var(--white)}
+  .fx-off__d{font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:6px;letter-spacing:.03em}
+  .fx-off__r{font-family:var(--font-b);font-size:13px;color:var(--white);margin-top:7px;line-height:1.5}
+  .fx-off__n{font-family:var(--font-b);font-size:12.5px;color:var(--grey);margin-top:4px;line-height:1.5}
   .fx-loading,.fx-empty{font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em;padding:28px 4px;text-align:center}
   .fx-attr{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.05em;margin-top:14px}
   .fx-attr a{color:var(--yellow)}
