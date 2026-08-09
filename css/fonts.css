@@ -87,6 +87,34 @@
   --r-xl:    20px;    /* full-bleed containers */
   --r-pill:  999px;   /* a shape, not a size — never part of the scale */
   --r-circle: 50%;    /* crests, dots, avatars */
+
+  /* ── CONTROLS ─────────────────────────────────────────────────────────
+     Six button families had grown up independently — .btn, .cn__btn,
+     .fz-btn, .cal-btn and the two in the nav bar — for what is really three
+     jobs. Between them they used four corner radii, four letter-spacings,
+     three border widths and two font weights, so the same action looked
+     like a different control depending on which part of the site drew it.
+
+     These tokens are the shared geometry. What stays per-family is what is
+     genuinely different: how a control behaves in ITS layout (a Club Now
+     button is flex:1 in a three-up row; a Fan Zone button has a min-width)
+     and what it MEANS (yellow fill, border, or plain text). Geometry is not
+     meaning, so geometry is shared.
+
+     The two sizes are real: a page-level call to action and the compact
+     variant used in the nav bar and inside card action rows. There is no
+     third size, because a third size is how you get back to six. */
+  --ctl-fs:        13px;
+  --ctl-fs-sm:     12px;
+  --ctl-weight:    800;
+  --ctl-ls:        0.06em;
+  --ctl-radius:    var(--r-sm);
+  --ctl-border:    1.5px;
+  --ctl-pad-y:     13px;
+  --ctl-pad-x:     24px;
+  --ctl-pad-y-sm:  10px;
+  --ctl-pad-x-sm:  16px;
+  --ctl-min-h:     44px;   /* the tap-target floor, on every control */
 }
 
 /* ════════ REUSABLE HIERARCHY UTILITIES (token-driven, not arbitrary) ════════ */

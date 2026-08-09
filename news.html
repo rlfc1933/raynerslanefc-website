@@ -55,7 +55,7 @@
       letter-spacing: .14em; text-transform: uppercase; color: white;
     }
     .live-badge-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: white;
+      width: 7px; height: 7px; border-radius:var(--r-circle); background: white;
       animation: pulse 1.5s infinite;
     }
     /* SOURCE FILTER TABS */
@@ -74,7 +74,7 @@
     .source-tab:hover { color: var(--white); }
     .source-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
     .source-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      width: 8px; height: 8px; border-radius:var(--r-circle); flex-shrink: 0;
     }
     /* NEWS GRID LAYOUT */
     .newsroom-layout {
@@ -201,7 +201,7 @@
     /* Public share button on our own news cards. Big enough to hit with a thumb,
      quiet enough not to compete with the story. */
   .news-share{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:transparent;
-    border:1px solid var(--border);border-radius:7px;color:var(--grey);font-family:var(--font-c);
+    border:1px solid var(--border);border-radius:var(--r-sm);color:var(--grey);font-family:var(--font-c);
     font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;
     min-height:36px;cursor:pointer;transition:color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
   .news-share:hover{color:var(--yellow);border-color:var(--yellow)}
@@ -327,28 +327,28 @@
           <span class="sidebar-label">News Sources</span>
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:50%;background:#FFD100;flex-shrink:0"></div>
+              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#FFD100;flex-shrink:0"></div>
               <div>
                 <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Rayners Lane FC</div>
                 <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official club news · live</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:50%;background:#EF4444;flex-shrink:0"></div>
+              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#EF4444;flex-shrink:0"></div>
               <div>
                 <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The Non-League Paper</div>
                 <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Non-league football news · live</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:50%;background:#1D4ED8;flex-shrink:0"></div>
+              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#1D4ED8;flex-shrink:0"></div>
               <div>
                 <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The FA</div>
                 <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official FA announcements · live</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:50%;background:#22C55E;flex-shrink:0"></div>
+              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#22C55E;flex-shrink:0"></div>
               <div>
                 <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Combined Counties League</div>
                 <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Division news · live</div>
@@ -515,7 +515,7 @@ function makeCard(a, featured) {
     badge.style.color = src.text;
   }
   var dot = document.createElement('div');
-  dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + src.colour + ';flex-shrink:0';
+  dot.style.cssText = 'width:6px;height:6px;border-radius:var(--r-circle);background:' + src.colour + ';flex-shrink:0';
   badge.appendChild(dot);
   badge.appendChild(document.createTextNode(src.label));
 
@@ -628,7 +628,7 @@ function renderTicker(articles) {
     var item = document.createElement('div');
     item.className = 'ticker-item';
     item.innerHTML = '<div class="ticker-source" style="color:' + src.colour + '">' +
-      '<div style="width:6px;height:6px;border-radius:50%;background:' + src.colour + '"></div>' + src.label + '</div>' +
+      '<div style="width:6px;height:6px;border-radius:var(--r-circle);background:' + src.colour + '"></div>' + src.label + '</div>' +
       '<div class="ticker-title">' + (a.title||'') + '</div>' +
       (ago ? '<div class="ticker-time">' + ago + '</div>' : '');
     item.querySelector('.ticker-title').addEventListener('click', function() {

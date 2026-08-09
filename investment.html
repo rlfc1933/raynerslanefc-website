@@ -110,7 +110,7 @@
     /* Sponsor application form */
     .spon-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
     .spon-l{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin:12px 0 6px}
-    .spon-form input,.spon-form select,.spon-form textarea{width:100%;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.16);border-radius:8px;color:#fff;font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s}
+    .spon-form input,.spon-form select,.spon-form textarea{width:100%;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-md);color:#fff;font-family:var(--font-b);font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s}
     .spon-form input:focus,.spon-form select:focus,.spon-form textarea:focus{border-color:var(--yellow)}
     .spon-form select{appearance:none;-webkit-appearance:none}
     @media(max-width:560px){.spon-row{grid-template-columns:1fr}}
@@ -337,7 +337,7 @@
     </div>
 
     <!-- SPONSOR APPLICATION FORM -->
-    <div id="apply" style="margin-top:48px;padding:56px 32px;background:linear-gradient(135deg,var(--green),#060E06);position:relative;overflow:hidden;border-radius:4px">
+    <div id="apply" style="margin-top:48px;padding:56px 32px;background:linear-gradient(135deg,var(--green),#060E06);position:relative;overflow:hidden;border-radius:var(--r-xs)">
       <div aria-hidden="true" style="font-family:var(--font-d);font-size:160px;color:rgba(255,255,255,.03);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none">RLFC</div>
       <div style="position:relative;z-index:1;max-width:640px;margin:0 auto">
         <div style="text-align:center;margin-bottom:30px">
@@ -411,7 +411,7 @@
     function box(s){
       // Kit Partner (Acerbis) gets an elevated, logo-led card — top billing.
       if (/kit partner/i.test(s.tier||'')) {
-        var kst = 'background:linear-gradient(135deg,#12261a,#0a160c);border:1px solid rgba(255,209,0,.5);border-top:3px solid var(--yellow);padding:16px 24px;border-radius:8px;display:flex;flex-direction:column;gap:9px;text-decoration:none;box-shadow:0 14px 34px -20px rgba(255,209,0,.3)';
+        var kst = 'background:linear-gradient(135deg,#12261a,#0a160c);border:1px solid rgba(255,209,0,.5);border-top:3px solid var(--yellow);padding:16px 24px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:9px;text-decoration:none;box-shadow:0 14px 34px -20px rgba(255,209,0,.3)';
         var klogo = s.logo
           ? '<img src="' + esc(s.logo) + '" alt="' + esc(s.name) + ' — Official Kit Partner" style="height:34px;width:auto;max-width:160px;object-fit:contain;align-self:flex-start" onerror="this.style.display=\'none\';var t=this.parentNode.querySelector(\'.kit-fb\');if(t)t.style.display=\'block\'">'
           : '';

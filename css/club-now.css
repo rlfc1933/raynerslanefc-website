@@ -135,12 +135,17 @@
 
 /* CTA row */
 .cn__cta { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+/* Geometry from the shared --ctl-* tokens (compact variant — these sit three
+   across inside a card). What stays local is the layout behaviour: flex:1 so
+   the row divides evenly, and a min-width so it wraps rather than crushes. */
 .cn__btn {
-  flex:1 1 auto; min-height:44px; min-width:104px;
+  flex:1 1 auto; min-height:var(--ctl-min-h); min-width:104px;
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  font-family:var(--font-c); font-size:12px; font-weight:800; letter-spacing:.06em;
+  font-family:var(--font-c); font-size:var(--ctl-fs-sm); font-weight:var(--ctl-weight);
+  letter-spacing:var(--ctl-ls);
   text-transform:uppercase; text-decoration:none; cursor:pointer;
-  border-radius:var(--r-md); padding:11px 14px; border:1px solid var(--border);
+  border-radius:var(--ctl-radius); padding:var(--ctl-pad-y-sm) var(--ctl-pad-x-sm);
+  border:var(--ctl-border) solid var(--border);
   background:rgba(8,8,8,.5); color:#fff; transition:transform .16s var(--ease), border-color .16s, background .16s;
 }
 .cn__btn .ico, .cn__btn svg { width:15px; height:15px; flex:none; }

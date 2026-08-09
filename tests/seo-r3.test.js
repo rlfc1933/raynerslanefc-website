@@ -206,7 +206,11 @@ test('the club facts never contradict each other', () => {
 test('every image can be described to someone who cannot see it', () => {
   const bad = [];
   for (const { f, s } of publicPages) {
-    for (const img of s.match(/<img\b[^>]*>/g) || []) {
+    // Comments stripped first. A note that mentions an <img> tag in prose is
+    // documentation, not an image on the page, and counting it reports a
+    // missing alt attribute on markup that does not exist.
+    const markup = s.replace(/<!--[\s\S]*?-->/g, ' ');
+    for (const img of markup.match(/<img\b[^>]*>/g) || []) {
       if (!/\salt\s*=/.test(img)) bad.push(`${f}: ${img.slice(0, 70)}`);
     }
   }

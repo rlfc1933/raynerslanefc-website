@@ -29,15 +29,15 @@
     .tr-hero h1{font-family:var(--font-d);font-size:clamp(44px,7vw,86px);letter-spacing:.02em;color:var(--white);line-height:.92;margin:10px 0 14px}
     .tr-hero h1 span{color:var(--yellow)}
     .tr-hero p{font-family:var(--font-b);font-size:16px;color:var(--grey);line-height:1.7;max-width:560px;margin:0 auto}
-    .tr-form{max-width:640px;margin:0 auto 64px;background:linear-gradient(160deg,#132A1E,#0A1A10 60%,#080808);border:1px solid var(--border);border-radius:16px;padding:30px 26px}
+    .tr-form{max-width:640px;margin:0 auto 64px;background:linear-gradient(160deg,#132A1E,#0A1A10 60%,#080808);border:1px solid var(--border);border-radius:var(--r-lg);padding:30px 26px}
     .tr-row{display:flex;gap:14px;flex-wrap:wrap}.tr-row>div{flex:1;min-width:180px}
     .tr-l{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lgrey);margin:14px 0 6px}
-    .tr-form input,.tr-form select,.tr-form textarea{width:100%;background:var(--black);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:var(--font-b);font-size:15px;padding:11px 13px;outline:none}
+    .tr-form input,.tr-form select,.tr-form textarea{width:100%;background:var(--black);border:1px solid var(--border);border-radius:var(--r-md);color:var(--white);font-family:var(--font-b);font-size:15px;padding:11px 13px;outline:none}
     .tr-form input:focus,.tr-form select:focus,.tr-form textarea:focus{border-color:var(--yellow)}
-    .tr-guardian{display:none;border-left:3px solid var(--yellow);background:rgba(255,209,0,.05);padding:4px 16px 16px;margin-top:14px;border-radius:0 8px 8px 0}
+    .tr-guardian{display:none;border-left:3px solid var(--yellow);background:rgba(255,209,0,.05);padding:4px 16px 16px;margin-top:14px;border-radius:0 var(--r-md) var(--r-md) 0}
     .tr-guardian.on{display:block}
     .tr-note{font-family:var(--font-c);font-size:11px;color:var(--grey);margin-top:6px}
-    .tr-submit{width:100%;margin-top:22px;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:10px;font-family:var(--font-c);font-size:16px;font-weight:800;letter-spacing:.04em;padding:14px;cursor:pointer}
+    .tr-submit{width:100%;margin-top:22px;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:var(--r-md);font-family:var(--font-c);font-size:16px;font-weight:800;letter-spacing:.04em;padding:14px;cursor:pointer}
     .tr-private{font-family:var(--font-c);font-size:11px;color:var(--grey);margin-top:14px;line-height:1.5}
   </style>
   <!-- lane-schema:start -->
@@ -110,7 +110,7 @@
       </div>
 
       <!-- GDPR consent (health data — age + injuries; applicants can be children) -->
-      <label class="tr-consent" style="display:flex;gap:10px;align-items:flex-start;font-family:var(--font-b);font-size:12.5px;color:var(--lgrey);line-height:1.6;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-top:4px;cursor:pointer">
+      <label class="tr-consent" style="display:flex;gap:10px;align-items:flex-start;font-family:var(--font-b);font-size:12.5px;color:var(--lgrey);line-height:1.6;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;margin-top:4px;cursor:pointer">
         <input type="checkbox" name="consent" id="tr-consent" value="yes" style="width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--yellow)">
         <span>I consent to Rayners Lane FC storing these details — including age and any injury information — to assess this trial application. Only club staff can see it, it’s kept for up to <strong style="color:var(--white)">24 months</strong>, and you can ask us to delete it any time at <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>. See our <a href="policies.html#privacy" style="color:var(--yellow);text-decoration:underline">privacy policy</a>.</span>
       </label>
@@ -161,7 +161,7 @@
       box = document.createElement('div');
       box.id = 'tr-err';
       box.setAttribute('role', 'alert');
-      box.style.cssText = 'font-family:var(--font-b);font-size:13px;color:#ff6b6b;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:10px 13px;margin-top:10px;line-height:1.5';
+      box.style.cssText = 'font-family:var(--font-b);font-size:13px;color:#ff6b6b;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35);border-radius:var(--r-md);padding:10px 13px;margin-top:10px;line-height:1.5';
       var btn = document.querySelector('.tr-submit');
       btn.parentNode.insertBefore(box, btn);
     }

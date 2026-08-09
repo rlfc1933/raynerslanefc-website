@@ -68,14 +68,14 @@
     .st-hero__lead{font-family:var(--font-b);font-size:clamp(15px,2.4vw,18px);line-height:1.6;color:var(--lgrey);max-width:560px}
     .st-hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
     /* EARLY BIRD band */
-    .st-early{background:linear-gradient(100deg,var(--yellow),#ffdf4d);color:#0d0d0d;border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:26px 0 4px;box-shadow:0 18px 40px -20px rgba(255,209,0,.5)}
+    .st-early{background:linear-gradient(100deg,var(--yellow),#ffdf4d);color:#0d0d0d;border-radius:var(--r-lg);padding:18px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:26px 0 4px;box-shadow:0 18px 40px -20px rgba(255,209,0,.5)}
     .st-early__tag{font-family:var(--font-d);font-size:30px;letter-spacing:.04em;line-height:.9;white-space:nowrap}
     .st-early__body{font-family:var(--font-b);font-size:15px;font-weight:700;line-height:1.45}
     .st-early__body b{font-family:var(--font-d);font-size:20px;letter-spacing:.02em;font-weight:400}
     /* PRICE cards */
     .st-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:22px 0}
     @media(min-width:760px){.st-grid{grid-template-columns:repeat(4,1fr)}}
-    .st-card{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:22px 18px;display:flex;flex-direction:column;gap:4px;min-height:150px;justify-content:flex-end}
+    .st-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 18px;display:flex;flex-direction:column;gap:4px;min-height:150px;justify-content:flex-end}
     .st-card--free{background:linear-gradient(160deg,var(--green),#08150c);border-color:rgba(26,92,50,.7)}
     .st-card__label{font-family:var(--font-c);font-size:14px;font-weight:800;letter-spacing:.04em;color:var(--white)}
     .st-card__note{font-family:var(--font-c);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--grey);min-height:13px}
@@ -83,8 +83,8 @@
     /* INCLUDES / EXCLUDES */
     .st-panels{display:grid;grid-template-columns:1fr;gap:16px;margin:26px 0}
     @media(min-width:760px){.st-panels{grid-template-columns:1.4fr 1fr}}
-    .st-inc{background:var(--card);border:1px solid rgba(26,92,50,.5);border-left:3px solid var(--green-mid);border-radius:14px;padding:20px 22px}
-    .st-exc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+    .st-inc{background:var(--card);border:1px solid rgba(26,92,50,.5);border-left:3px solid var(--green-mid);border-radius:var(--r-lg);padding:20px 22px}
+    .st-exc{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px}
     .st-panel__h{font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px}
     .st-exc .st-panel__h{color:var(--grey)}
     .st-inc__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
@@ -93,12 +93,12 @@
     .st-exc__p{font-family:var(--font-b);font-size:14.5px;line-height:1.6;color:var(--lgrey)}
     .st-exc__p b{color:var(--white)}
     /* CTA + gate cross-link */
-    .st-cta-band{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;text-align:center;margin:8px 0 30px}
+    .st-cta-band{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 24px;text-align:center;margin:8px 0 30px}
     .st-cta-band h2{font-family:var(--font-d);font-size:clamp(30px,6vw,46px);letter-spacing:.03em;color:var(--white);margin:0 0 8px}
     .st-cta-band p{font-family:var(--font-b);font-size:15px;color:var(--lgrey);max-width:460px;margin:0 auto 18px;line-height:1.6}
     .st-gate{margin:0 0 46px}
     .st-gate__intro{font-family:var(--font-b);font-size:14px;color:var(--grey);text-align:center;margin-bottom:14px}
-    .btn.btn-st{background:var(--yellow);color:#0d0d0d;border:none;min-height:52px;font-family:var(--font-c);font-weight:800;letter-spacing:.03em;padding:0 26px;display:inline-flex;align-items:center;gap:9px;border-radius:10px}
+    .btn.btn-st{background:var(--yellow);color:#0d0d0d;border:none;min-height:52px;font-family:var(--font-c);font-weight:800;letter-spacing:.03em;padding:0 26px;display:inline-flex;align-items:center;gap:9px;border-radius:var(--r-md)}
   </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.

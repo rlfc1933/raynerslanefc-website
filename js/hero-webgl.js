@@ -35,7 +35,16 @@ import * as THREE from 'three';
   if (reduce || !hasWebGL()) return;  // → poster fallback stays
 
   var docEl = document.documentElement;
-  docEl.classList.add('gl-on');       // hide the poster fallback
+  // gl-on means "the canvas is taking over the backdrop" — it switches the Club
+  // Now panel to its frosted treatment so text stays legible over the scene.
+  //
+  // IT NO LONGER HIDES THE POSTER. It used to, and that was the whole of the
+  // three-second black hero: this line runs the moment WebGL is merely
+  // SUPPORTED — before the canvas has drawn a pixel, before the 13MB video has
+  // been requested — so the fallback was switched off at the start of the gap
+  // it exists to cover. The poster now stays up until the video is genuinely
+  // on screen and then cross-fades (html.gl-video, set in setupVideo below).
+  docEl.classList.add('gl-on');
 
   /* ── renderer / scene / camera ─────────────────────────────────────── */
   var canvas = document.createElement('canvas');
@@ -321,6 +330,14 @@ import * as THREE from 'three';
       new THREE.MeshBasicMaterial({ color: 0x080808, transparent: true, opacity: 0.45, depthWrite: false }));
     scrim.position.z = VID_Z + 0.01; scene.add(scrim);
     videoMesh.userData.scrim = scrim; videoMesh.userData.tex = tex;
+
+    // THE HANDOVER. Only once the decoder actually has frames does the poster
+    // step aside — 'loadeddata' is the first moment the video can contribute
+    // pixels. Until then the still is what the supporter looks at, which is the
+    // point of having one. Cross-fade, so nothing snaps.
+    videoEl.addEventListener('loadeddata', function () {
+      docEl.classList.add('gl-video');
+    }, { once: true });
 
     videoEl.addEventListener('loadedmetadata', sizeVideo);
     sizeVideo();

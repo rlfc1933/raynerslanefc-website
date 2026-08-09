@@ -35,7 +35,7 @@
     .video-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
     .video-card:hover .video-thumb img { transform:scale(1.03); }
     .play-btn { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-    .play-circle { width:56px; height:56px; background:rgba(255,209,0,.9); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .play-circle { width:56px; height:56px; background:rgba(255,209,0,.9); border-radius:var(--r-circle); display:flex; align-items:center; justify-content:center; }
     .video-body { padding:16px 20px; }
     .video-title { font-family:var(--font-c); font-size:15px; font-weight:700; color:var(--white); line-height:1.35; margin-bottom:6px; }
     .video-meta { font-family:var(--font-c); font-size:11px; color:var(--grey); letter-spacing:.06em; }
@@ -100,7 +100,11 @@
     </div>
 
     <!-- Quick links to gallery and social -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-top:2px">
+    <!-- Three hard columns forced each social card to 128px at 390px while its
+         content needed 157px, so the page scrolled sideways on a phone. Same
+         auto-fit idiom as .video-grid above: three across when there is room,
+         fewer when there is not. -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:2px;margin-top:2px">
       <a href="gallery.html" style="background:var(--card);border:1px solid var(--border);padding:24px;text-decoration:none;transition:background .2s;display:block" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='var(--card)'">
         <div style="font-size:24px;margin-bottom:10px"><i class="ico ico-camera"></i></div>
         <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">Photo Gallery</div>
