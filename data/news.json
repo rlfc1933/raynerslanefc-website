@@ -1,6 +1,18 @@
 {
   "articles": [
     {
+      "id": "article-hilltop-postponed-fa-vase-2026",
+      "title": "Hilltop Fixture Postponed — FA Vase Up Next at Tithe Farm",
+      "category": "Match",
+      "date": "2026-08-09",
+      "author": "Rayners Lane FC",
+      "image": "img/crests/new-bradwell-st-peter.png",
+      "excerpt": "TUESDAY'S HOME FIXTURE AGAINST HILLTOP IS POSTPONED — A NEW DATE TO FOLLOW. THE LANE RETURN TO TITHE FARM ON SATURDAY FOR THE FA VASE AGAINST NEW BRADWELL ST PETER",
+      "shareHeadline": "FA VASE AT THE LANE",
+      "body": "Rayners Lane's scheduled home fixture against Hilltop on Tuesday 11 August has been postponed, with Broadfields' FA Cup replay taking priority.\n\nA new date for the Hilltop fixture will be confirmed in due course, and announced across the club's website and social channels as soon as it is agreed. The fixture remains on our schedule page, marked as postponed, so nobody is left guessing.\n\nAttention now turns to Saturday, as The Lane return to Tithe Farm for FA Vase First Qualifying Round action against New Bradwell St Peter.\n\nWith a place in the next round at stake, we're looking forward to getting back out in front of our home support.\n\nRayners Lane v New Bradwell St Peter\nFA Vase First Qualifying Round\nSaturday 15 August 2026\nTithe Farm Sports & Social Club\n\nCome down and back The Lane.",
+      "featured": true
+    },
+    {
       "id": "article-preseason-met-police-2026",
       "title": "One more before it's real: The Lane face Met Police to close out pre-season",
       "category": "Pre-Season",
@@ -10,7 +22,7 @@
       "excerpt": "THE LANE CLOSE OUT PRE-SEASON AWAY TO METROPOLITAN POLICE THIS SATURDAY — OFF THE BACK OF ANOTHER PRE-SEASON WIN, THIS TIME OVER AYLESBURY UNITED",
       "shareHeadline": "ONE MORE BEFORE IT COUNTS",
       "body": "The countdown is on. With the 2026/27 season now just around the corner, Rayners Lane close out pre-season this Saturday with a final friendly away to Metropolitan Police — and the mood around the club could hardly be better.\n\nIt's been a promising summer, and Tuesday night added to it: another pre-season win, this time over Aylesbury United, sending the lads into the weekend on a real buzz. The performances are coming together, the new faces are bedding in, and the squad looks sharper every week.\n\nSaturday's hosts are proper opposition to test ourselves against. Metropolitan Police FC — founded in 1919 for officers and staff of the Met — are one of non-league's most established and characterful clubs. They play their football at Imber Court in East Molesey, a 3,000-capacity ground they've called home for decades, and they've long been a fixture of the Isthmian League. A team with over a century of history is exactly the kind of side you want in your final hit-out before the real thing.\n\nOne more friendly. One more chance to fine-tune. Then it counts.\n\nThis Saturday · Kick-off 3:00 PM · Imber Court, East Molesey · Pre-season friendly.\n\nGet behind the boys as we sign off pre-season the right way. Up the Lane. 💛💚",
-      "featured": true,
+      "featured": false,
       "_sources": "Metropolitan Police FC facts verified via en.wikipedia.org/wiki/Metropolitan_Police_F.C. — founded 1919 for members of the Metropolitan Police; home ground Imber Court, East Molesey (~3,000 capacity); long-time Isthmian League club. KO time, venue and home/away pulled from data/fixtures.json (friendly-met-police-20260725: 2026-07-25, 15:00, Imber Court, isHome:false). No score stated for the Aylesbury United friendly (reported only as a win) and none for Met Police — per club instruction, no scorelines invented."
     },
     {
@@ -135,5 +147,5 @@
       "featured": false
     }
   ],
-  "updatedAt": "2026-07-27T14:09:23.663Z"
+  "updatedAt": "2026-08-09T17:15:00.000Z"
 }
