@@ -63,7 +63,7 @@
   <div class="container">
     <div class="page-header__eyebrow"><span class="label">Combined Counties Premier Division North &middot; Step 5</span></div>
     <h1 class="page-header__h">Fixtures <span>&amp; Results</span></h1>
-    <p class="page-header__meta">2026-27 Season &middot; Fixtures, results &amp; table update automatically</p>
+    <p class="page-header__meta">2026-27 season &middot; Combined Counties Premier Division North, plus cup football</p>
   </div>
     <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px"><i class="ico ico-mail"></i> <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
 </div>
@@ -73,19 +73,11 @@
   <div class="container">
 
     <!-- ═══ LIVE FIXTURES, RESULTS & TABLE (top of page) ═══ -->
-    <div style="margin-bottom:18px">
-      <span class="label" style="display:block;margin-bottom:8px">Live Data</span>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <h2 style="font-family:var(--font-d);font-size:clamp(32px,4vw,52px);letter-spacing:.03em">
-          Fixtures, Results <span style="color:var(--yellow)">&amp; Table</span>
-        </h2>
-        <a href="index.html"
-           style="font-family:var(--font-c);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s"
-           onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--grey)'">
-          Updates automatically &rarr;
-        </a>
-      </div>
-    </div>
+    <!-- The page header already says FIXTURES & RESULTS in 90px Bebas. A second
+         heading saying "Fixtures, Results & Table" directly beneath it was the
+         same sentence twice, and "Updates automatically →" was meta-commentary
+         about the CMS pointed at the homepage. A supporter wants the football;
+         the tabs below already say what each panel holds. -->
 
     <div class="tab-row">
       <button class="tab-btn active" data-tab="fixtures">Fixtures &amp; Results</button>
@@ -552,9 +544,15 @@ function fxHero(f) {
   var comp = fxComp(f.competition), home = f.isHome !== false;
   var d = fxDate(f);
   var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  // The competition names itself here through the shared resolver, exactly as
+  // it does on the homepage card: "Isuzu FA Vase · First Qualifying Round",
+  // not a grey pill reading "FA VASE". This block is the most prominent thing
+  // on the page and was the one place still bypassing CompetitionBrand.
+  // Home/away is a fact about the fixture, not a status — it reads as a word
+  // beside the venue, not as a second chip competing with the competition.
   return '<div class="fxh" data-ko="' + d.getTime() + '"><span class="fxh__lbl">Next Match</span>' +
-    '<div class="fxc__top" style="justify-content:center;gap:10px"><span class="fxc__tag ' + comp.cls + '">' + comp.lbl + '</span>' +
-    '<span class="fxc__ha" style="color:' + (home ? 'var(--yellow)' : '#7fe0a3') + '">' + (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
+    '<div class="fxh__comp">' + fxCompText(f) +
+      '<span class="fxh__ha' + (home ? ' fxh__ha--home' : '') + '">' + (home ? 'Home' : 'Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + '</div>' +
     fxVenueBlock(f) +
@@ -1072,6 +1070,21 @@ function renderCompetitions() {
   .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
   /* next match — elevated hero with countdown */
   .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:var(--r-lg);padding:18px 16px 14px;margin-bottom:22px}
+  /* The competition, named properly, leading the next-match block. Set as type
+     rather than as a chip: a competition is the match's identity, not a tag
+     filed against it. The round sits inside fxCompText's own markup. */
+  .fxh__comp{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:14px;
+    display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+  .fxh__ha{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;
+    color:var(--grey);padding-left:12px;border-left:1px solid var(--border)}
+  .fxh__ha--home{color:var(--white)}
+  @media(max-width:520px){
+    /* Stack rather than let both halves wrap into themselves — same failure the
+       homepage eyebrow had at 390. */
+    .fxh__comp{flex-direction:column;gap:5px}
+    .fxh__ha{padding-left:0;border-left:0}
+  }
   .fxh__lbl{display:block;font-family:var(--font-c);font-weight:800;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:10px}
   .fxh .fxc__crest,.fxh .fxc__ph{width:68px;height:68px}
   .fxh .fxc__ph{font-size:22px}

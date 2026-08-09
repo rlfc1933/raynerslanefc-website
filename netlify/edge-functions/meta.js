@@ -59,8 +59,17 @@ function headFor(page, item) {
     // iMessage will not render an SVG preview — and several articles carry an
     // SVG crest as their image, so the link preview silently showed nothing.
     // Fall back to the club's own OG card, which is a real 1200x630 JPEG.
+    //
+    // AND IT MUST NOT BE THE OTHER CLUB'S BADGE.
+    // The SVG rule missed the commonest case: a fixture story whose image is an
+    // opponent crest as a PNG. The postponement article shipped with
+    // og:image = new-bradwell-st-peter.png, so every share of a Rayners Lane
+    // story previewed New Bradwell's badge — the club advertising its opponent
+    // on WhatsApp. news.html applies this exact rule on the page already
+    // (see newsHeroImage / hasPhoto); this is the other half of it.
     const raw = abs(item.image);
-    const img = (!raw || /\.svg(\?|$)/i.test(raw)) ? ORIGIN + '/img/og-card.jpg' : raw;
+    const unusable = !raw || /\.svg(\?|$)/i.test(raw) || /\/img\/crests\//i.test(raw);
+    const img = unusable ? ORIGIN + '/img/og-card.jpg' : raw;
     const ld = {
       '@context': 'https://schema.org',
       '@type': 'NewsArticle',
