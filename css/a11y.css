@@ -32,7 +32,10 @@ html.a11y-contrast {
   --yellow-dim: #FFD100;   /* dimmed yellow → full yellow for AA */
 }
 html.a11y-contrast body { background: #000; }
-html.a11y-contrast a:not(.btn):not([class*="fz-btn"]):not(.nav__ticket) { text-decoration: underline; text-underline-offset: 2px; }
+/* .nav__ticket was removed as dead code; .btn already covers the header CTA,
+   which is `.btn btn-primary nav__cta`. :where() so the exclusions cost no
+   specificity — the same trap that broke the skip link. */
+html.a11y-contrast a:not(:where(.btn,[class*="fz-btn"],.btn-text)) { text-decoration: underline; text-underline-offset: 2px; }
 /* Strong, always-on focus ring in contrast mode (not just :focus-visible). */
 html.a11y-contrast a:focus, html.a11y-contrast button:focus,
 html.a11y-contrast input:focus, html.a11y-contrast select:focus,

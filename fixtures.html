@@ -111,7 +111,7 @@
            (live Wikipedia standings, server-side, cached 15 min) so it updates
            itself through the season. Replaced the Football Web Pages iframe,
            which is cross-origin and can't be styled. -->
-      <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)">
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--card)">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--card2);border-bottom:1px solid var(--border)">
           <span style="font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--white)">Premier Division North</span>
           <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)"><span style="color:#22C55E">●</span> Live &middot; 2026-27</span>
@@ -167,7 +167,7 @@
         </a>
 
       </div>
-      <div style="margin-top:16px;padding:14px 18px;background:rgba(255,209,0,.05);border:1px solid rgba(255,209,0,.12);border-radius:3px">
+      <div style="margin-top:16px;padding:14px 18px;background:rgba(255,209,0,.05);border:1px solid rgba(255,209,0,.12);border-radius:var(--r-xs)">
         <p style="font-family:var(--font-c);font-size:13px;color:var(--lgrey);letter-spacing:.03em;line-height:1.7">
           <strong style="color:var(--yellow)"><i class="ico ico-smartphone"></i> iPhone:</strong> Tap "iPhone / Apple Calendar" &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.<br>
           <strong style="color:var(--yellow)"><i class="ico ico-bot"></i> Android:</strong> Tap "Android / Google Calendar" &rarr; sign in &rarr; tap Add. Syncs every few hours.<br>
@@ -978,17 +978,17 @@ function renderCompetitions() {
   .fx-attr{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.05em;margin-top:14px}
   .fx-attr a{color:var(--yellow)}
   /* Competition states — deliberately quiet. This is reference, not a headline. */
-  .fxcomp{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)}
+  .fxcomp{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--card)}
   .fxcomp__r{padding:13px 16px;border-bottom:1px solid var(--border)}
   .fxcomp__r:last-child{border-bottom:none}
   .fxcomp__n{font-family:var(--font-d);font-size:20px;letter-spacing:.03em;color:var(--white);display:flex;align-items:center;gap:9px;flex-wrap:wrap;line-height:1.15}
-  .fxcomp__st{font-family:var(--font-c);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border-radius:4px;padding:3px 7px}
+  .fxcomp__st{font-family:var(--font-c);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border-radius:var(--r-xs);padding:3px 7px}
   .fxcomp__s{font-family:var(--font-c);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
   .fxcomp__s--ok{color:#7fe0a3}
   .fxcomp__s--wait{color:var(--yellow)}
   .fxcomp__s--out{color:var(--grey)}
   .fxcomp__note{font-family:var(--font-b);font-size:13px;color:var(--lgrey,#bbb);line-height:1.5;margin-top:5px}
-  .fx-next{background:linear-gradient(135deg,var(--green),#06120a);border:1px solid #21402b;border-radius:14px;padding:22px 24px;margin-bottom:18px}
+  .fx-next{background:linear-gradient(135deg,var(--green),#06120a);border:1px solid #21402b;border-radius:var(--r-lg);padding:22px 24px;margin-bottom:18px}
   .fx-next__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
   .fx-next__teams{font-family:var(--font-d);font-size:clamp(26px,4.5vw,38px);letter-spacing:.03em;color:#fff;line-height:1;margin-top:6px}
   .fx-next__meta{font-family:var(--font-c);font-size:13px;letter-spacing:.06em;color:rgba(255,255,255,.7);margin-top:8px}
@@ -996,10 +996,10 @@ function renderCompetitions() {
   .fx-res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 4px;border-bottom:1px solid var(--border)}
   .fx-res__m{font-family:var(--font-c);font-size:15px;color:#fff;letter-spacing:.02em}
   .fx-res__d{color:var(--grey);font-size:12px;margin-left:4px}
-  .fx-res__s{font-family:var(--font-d);font-size:22px;letter-spacing:.06em;padding:2px 10px;border-radius:6px}
+  .fx-res__s{font-family:var(--font-d);font-size:22px;letter-spacing:.06em;padding:2px 10px;border-radius:var(--r-sm)}
   .fx-res__s.w{color:#22C55E;background:rgba(34,197,94,.1)} .fx-res__s.d{color:#FBBF24;background:rgba(251,191,36,.1)} .fx-res__s.l{color:#EF4444;background:rgba(239,68,68,.1)}
   .fx-form{display:flex;gap:8px}
-  .fx-form__dot{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff}
+  .fx-form__dot{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff}
   .fx-form__dot.w{background:#22C55E} .fx-form__dot.d{background:#FBBF24;color:#0d0d0d} .fx-form__dot.l{background:#EF4444}
   .fx-table{width:100%;border-collapse:collapse;font-family:var(--font-c)}
   .fx-table th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:center;padding:12px 6px;border-bottom:1px solid var(--border)}
@@ -1017,7 +1017,7 @@ function renderCompetitions() {
   .lt td.l{padding-left:14px}
   .lt-team{display:flex;align-items:center;gap:11px;min-width:0}
   .lt-crest{width:27px;height:27px;object-fit:contain;flex:0 0 27px}
-  .lt-crest--ini{border-radius:50%;background:linear-gradient(160deg,#242424,#0b0b0b);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:10px;color:var(--yellow)}
+  .lt-crest--ini{border-radius:var(--r-circle);background:linear-gradient(160deg,#242424,#0b0b0b);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:10px;color:var(--yellow)}
   .lt-name{font-family:var(--font-c);font-weight:600;font-size:15px;letter-spacing:.01em;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lt td.pts{font-family:var(--font-d);font-weight:400;font-size:20px;letter-spacing:.03em;color:var(--yellow)}
   .lt tbody tr:hover td,.lt tbody tr:hover td{background:rgba(255,255,255,.02)}
@@ -1033,12 +1033,12 @@ function renderCompetitions() {
   .fxm__h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
   .fxm__m{font-family:var(--font-d);font-size:30px;letter-spacing:.05em;color:var(--white);line-height:1}
   .fxm__c{font-family:var(--font-c);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
-  .fxc{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;margin-bottom:10px;overflow:hidden}
+  .fxc{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 14px 12px;margin-bottom:10px;overflow:hidden}
   .fxc:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
   .fxc--home:before{background:var(--yellow)}
   .fxc--away:before{background:var(--green)}
   .fxc__top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-  .fxc__tag{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid transparent}
+  .fxc__tag{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-xl);border:1px solid transparent}
   .tag-league{background:rgba(255,209,0,.14);color:var(--yellow);border-color:rgba(255,209,0,.4)}
   .tag-facup{background:rgba(255,202,107,.14);color:#ffca6b;border-color:rgba(255,202,107,.4)}
   .tag-favase{background:rgba(196,181,253,.14);color:#c4b5fd;border-color:rgba(196,181,253,.4)}
@@ -1050,7 +1050,7 @@ function renderCompetitions() {
   .fxc__lock{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
   .fxc__team{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
   .fxc__crest{width:52px;height:52px;object-fit:contain}
-  .fxc__ph{width:52px;height:52px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:17px;letter-spacing:.04em;color:var(--grey)}
+  .fxc__ph{width:52px;height:52px;border-radius:var(--r-circle);background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:17px;letter-spacing:.04em;color:var(--grey)}
   .fxc__nm{font-family:var(--font-d);font-size:15px;letter-spacing:.04em;color:var(--white);text-align:center;line-height:1.05;word-break:break-word}
   .fxc__vs{font-family:var(--font-d);font-size:16px;color:var(--yellow);letter-spacing:.06em}
   .fxc__score{font-family:var(--font-d);font-size:26px;letter-spacing:.04em;white-space:nowrap}
@@ -1058,26 +1058,26 @@ function renderCompetitions() {
   .fxc__meta{font-family:var(--font-c);font-weight:600;font-size:12px;color:var(--lgrey);text-align:center;margin-top:10px;letter-spacing:.03em}
   .fxc__venue{font-family:var(--font-b);font-size:11.5px;color:var(--grey);text-align:center;margin-top:3px}
   .fxc__addr{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
-  .fxc__note{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7fe0a3;background:rgba(26,92,50,.18);border:1px solid rgba(26,92,50,.5);border-radius:8px;padding:6px 8px;text-align:center;margin-top:8px}
+  .fxc__note{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7fe0a3;background:rgba(26,92,50,.18);border:1px solid rgba(26,92,50,.5);border-radius:var(--r-md);padding:6px 8px;text-align:center;margin-top:8px}
   .fxc__tbc{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffca6b;text-align:center;margin-top:6px}
   .fxc--gone{opacity:.9}
   .fxc__await{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);text-align:center;margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
   .fxc__acts{display:flex;gap:6px;margin-top:11px}
-  .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:8px;padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
+  .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:var(--r-md);padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
   .fxc__b--mc{border-color:rgba(255,209,0,.45);color:var(--yellow);background:rgba(255,209,0,.06)}
   .fxc__b--mc:hover{background:rgba(255,209,0,.14);border-color:var(--yellow);color:var(--yellow)}
   .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
   /* next match — elevated hero with countdown */
-  .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:16px;padding:18px 16px 14px;margin-bottom:22px}
+  .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:var(--r-lg);padding:18px 16px 14px;margin-bottom:22px}
   .fxh__lbl{display:block;font-family:var(--font-c);font-weight:800;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:10px}
   .fxh .fxc__crest,.fxh .fxc__ph{width:68px;height:68px}
   .fxh .fxc__ph{font-size:22px}
   .fxh .fxc__nm{font-size:19px}
   .fxh__cd{display:flex;justify-content:center;gap:8px;margin-top:14px}
-  .fxh__u{text-align:center;min-width:50px;background:rgba(255,255,255,.04);border-radius:8px;padding:6px 4px}
+  .fxh__u{text-align:center;min-width:50px;background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:6px 4px}
   .fxh__n{font-family:var(--font-d);font-size:24px;color:var(--yellow);line-height:1}
   .fxh__l{font-family:var(--font-c);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:2px}
-  .fx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--card2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:10px;padding:11px 14px;z-index:9999;transition:transform .35s;font-family:var(--font-b);font-size:13px;color:var(--white);box-shadow:0 12px 34px rgba(0,0,0,.6);max-width:90vw}
+  .fx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--card2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--r-md);padding:11px 14px;z-index:9999;transition:transform .35s;font-family:var(--font-b);font-size:13px;color:var(--white);box-shadow:0 12px 34px rgba(0,0,0,.6);max-width:90vw}
   .fx-toast.on{transform:translateX(-50%) translateY(0)}
   .fx-toast a{color:var(--yellow);margin-left:8px;font-family:var(--font-c);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
   @media(max-width:420px){ .fxc__nm{font-size:13px} .fxh .fxc__nm{font-size:16px} .fxc__crest,.fxc__ph{width:46px;height:46px} }

@@ -50,13 +50,45 @@ test('the whole footer link list survives every width', () => {
   assert.deepStrictEqual(risky, [], 'found a footer block hidden by CSS: ' + risky.join(' | '));
 });
 
+/**
+ * The @media blocks whose query matches `re`, each returned as its full body.
+ *
+ * An earlier version of this test just sliced from the first
+ * `@media(max-width:768px)` and regex-matched the next `.footer__grid{…}`.
+ * That silently depended on no other 768px block existing earlier in the file
+ * than the base `.footer__grid` declaration — and the moment one was added the
+ * test matched the DESKTOP rule and failed while the CSS was perfectly correct.
+ * Reading the blocks properly costs a few lines and removes the trap.
+ */
+function mediaBlocks(css, re) {
+  const out = [];
+  const open = /@media([^{]*)\{/g;
+  let m;
+  while ((m = open.exec(css))) {
+    if (!re.test(m[1])) continue;
+    let depth = 1, i = open.lastIndex;
+    while (i < css.length && depth > 0) {
+      if (css[i] === '{') depth++;
+      else if (css[i] === '}') depth--;
+      i++;
+    }
+    out.push(css.slice(open.lastIndex, i - 1));
+  }
+  return out;
+}
+
 test('the columns stack rather than disappear on a phone', () => {
-  const mq = LIVE.slice(LIVE.indexOf('@media(max-width:768px)'));
-  const grid = mq.match(/\.footer__grid\{[^}]*\}/);
-  assert.ok(grid, 'the footer grid must still be answered for at phone widths');
-  assert.match(grid[0], /grid-template-columns:\s*1fr 1fr/,
+  const blocks = mediaBlocks(LIVE, /max-width:\s*768px/);
+  assert.ok(blocks.length, 'a 768px breakpoint must exist');
+
+  const owning = blocks.filter((b) => /\.footer__grid\{/.test(b));
+  assert.strictEqual(owning.length, 1,
+    'exactly one 768px block should answer for the footer grid');
+
+  const grid = owning[0].match(/\.footer__grid\{[^}]*\}/)[0];
+  assert.match(grid, /grid-template-columns:\s*1fr 1fr/,
     'two up keeps twenty links reachable without a wall of text');
-  assert.match(mq, /\.footer__brand\{grid-column:1\/-1\}/,
+  assert.match(owning[0], /\.footer__brand\{grid-column:1\/-1\}/,
     'the brand block spans, so the link columns sit beneath it');
 });
 

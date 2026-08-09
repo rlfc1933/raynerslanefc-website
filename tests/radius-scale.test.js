@@ -38,6 +38,20 @@ const FONTS = read('css/fonts.css');
 
 const TOKENS = ['--r-xs', '--r-sm', '--r-md', '--r-lg', '--r-xl', '--r-pill', '--r-circle'];
 
+/**
+ * Tokens a border-radius may legitimately be written as.
+ *
+ * `--ctl-radius` is the shared control geometry token and is itself declared
+ * as `var(--r-sm)`, so a button written as `border-radius:var(--ctl-radius)`
+ * is on the scale — one level of indirection, on purpose, so that changing
+ * the shape of every button is one edit rather than six. The test below holds
+ * that the indirection actually points at the scale; without that check this
+ * allowance would be a hole you could drive a raw value through.
+ */
+const ALLOWED_VARS = ['--r-', '--ctl-radius'];
+const onScale = (part) =>
+  part === '0' || ALLOWED_VARS.some((v) => part.startsWith('var(' + v));
+
 /** Declared value of a token, e.g. "--r-md" -> "10px". */
 const valueOf = (t) => {
   const m = FONTS.match(new RegExp('\\' + t + ':\\s*([^;]+);'));
@@ -103,13 +117,49 @@ test('no stylesheet sets a raw corner radius', () => {
     let m;
     while ((m = re.exec(src))) {
       const parts = m[1].trim().split(/\s+/);
-      if (!parts.every((p) => p.startsWith('var(--r-') || p === '0')) {
+      if (!parts.every(onScale)) {
         offenders.push(f + ': ' + m[1].trim());
       }
     }
   });
   assert.deepStrictEqual(offenders, [],
     'every corner comes from the scale, or the scale is not one');
+});
+
+test('no PAGE sets a raw corner radius either', () => {
+  // The first pass at this only swept css/*.css and the test only checked
+  // css/*.css, so it passed while 118 raw radii — twenty distinct values,
+  // including 15px, 18px, 7px and 9px — sat in <style> blocks and inline
+  // style attributes across eighteen public pages. Half a scale is not a
+  // scale, and a test scoped to the half that was done will never say so.
+  const PRIVATE = /^(admin|staff-|chairman-setup|playermanager|scan|guide|The-Lane-Portal|lane-app-prototype|fan-zone-guide|programme-print)/;
+  const pages = fs.readdirSync(ROOT).filter((f) => f.endsWith('.html') && !PRIVATE.test(f));
+  assert.ok(pages.length >= 20, 'sanity: the public page list should not be empty');
+
+  const offenders = [];
+  pages.forEach((f) => {
+    const src = read(f).replace(/<!--[\s\S]*?-->/g, ' ');
+    const re = /border-radius:\s*([^;"'}\n]+)/g;
+    let m;
+    while ((m = re.exec(src))) {
+      const parts = m[1].trim().split(/\s+/);
+      if (!parts.every(onScale)) {
+        offenders.push(f + ': ' + m[1].trim());
+      }
+    }
+  });
+  assert.deepStrictEqual(offenders, [],
+    'a page-level radius escapes the scale just as completely as a stylesheet one');
+});
+
+test('the control token points at the scale, not around it', () => {
+  // The one indirection the tests above allow. If --ctl-radius ever became a
+  // raw px value, every button would silently leave the scale while both
+  // "no raw corner radius" tests carried on passing.
+  const v = valueOf('--ctl-radius');
+  assert.ok(v, '--ctl-radius must be declared');
+  assert.match(v, /^var\(--r-(xs|sm|md|lg|xl|pill|circle)\)$/,
+    '--ctl-radius must resolve to a scale step, not a literal: got ' + v);
 });
 
 test('the scale is actually used, not merely declared', () => {

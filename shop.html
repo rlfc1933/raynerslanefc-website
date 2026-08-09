@@ -96,7 +96,7 @@
       align-items: center;
     }
     .colour-dot {
-      width: 18px; height: 18px; border-radius: 50%;
+      width: 18px; height: 18px; border-radius:var(--r-circle);
       border: 2px solid rgba(255,255,255,.2);
     }
     .colour-label {
@@ -308,15 +308,15 @@
           <!-- Scarf graphic -->
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:32px">
             <div style="width:100%;display:flex;flex-direction:column;gap:8px">
-              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
-              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
-              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
-              <div style="height:18px;background:var(--black);border-radius:2px;display:flex;align-items:center;justify-content:center">
+              <div style="height:28px;background:#FFD100;border-radius:var(--r-xs)"></div>
+              <div style="height:28px;background:#1A5C32;border-radius:var(--r-xs)"></div>
+              <div style="height:28px;background:#FFD100;border-radius:var(--r-xs)"></div>
+              <div style="height:18px;background:var(--black);border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center">
                 <span style="font-family:var(--font-d);font-size:13px;letter-spacing:.12em;color:var(--yellow)">THE LANE</span>
               </div>
-              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
-              <div style="height:28px;background:#FFD100;border-radius:2px"></div>
-              <div style="height:28px;background:#1A5C32;border-radius:2px"></div>
+              <div style="height:28px;background:#1A5C32;border-radius:var(--r-xs)"></div>
+              <div style="height:28px;background:#FFD100;border-radius:var(--r-xs)"></div>
+              <div style="height:28px;background:#1A5C32;border-radius:var(--r-xs)"></div>
             </div>
           </div>
           <span class="product-tag">Supporter</span>
@@ -454,8 +454,11 @@
           Email us — we'll get back to you within 48 hours.
         </p>
       </div>
-      <a href="mailto:info@raynerslanefc.co.uk?subject=Shop%20Order" 
-         style="background:var(--black);color:var(--yellow);font-family:var(--font-d);font-size:28px;letter-spacing:.06em;padding:16px 32px;text-decoration:none;white-space:nowrap;transition:opacity .2s"
+      <!-- 28px Bebas + nowrap made this address 356px wide inside a 390px
+           screen, so the shop page scrolled sideways. It shrinks to fit now
+           rather than pushing the page. -->
+      <a href="mailto:info@raynerslanefc.co.uk?subject=Shop%20Order"
+         style="background:var(--black);color:var(--yellow);font-family:var(--font-d);font-size:clamp(19px,5.2vw,28px);letter-spacing:.06em;padding:16px clamp(16px,5vw,32px);text-decoration:none;overflow-wrap:anywhere;transition:opacity .2s"
          onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
         info@raynerslanefc.co.uk
       </a>
