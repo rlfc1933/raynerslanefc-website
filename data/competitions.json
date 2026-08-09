@@ -11,7 +11,19 @@
       "note": "Step 5 of the National League System. The full season schedule is below.",
       "seasonTicket": true,
       "source": "https://www.combinedcountiesleague.co.uk",
-      "checkedAt": "2026-07-27"
+      "checkedAt": "2026-07-27",
+      "aliases": [
+        "Combined Counties Prem N",
+        "Combined Counties Premier North",
+        "CCL Premier North",
+        "Cherry Red Records Combined Counties Football League",
+        "Combined Counties League"
+      ],
+      "logoStatus": "not-sourced",
+      "logoNote": "The league publishes a site logo but no separate division wordmark for club use. Ask the League for an approved mark before adding one.",
+      "logo": null,
+      "logoAlt": "Combined Counties Premier Division North logo",
+      "cardName": "Combined Counties Premier North"
     },
     {
       "id": "ccl-league-cup",
@@ -22,7 +34,16 @@
       "note": "The draw has not been published yet. Fixtures appear here as soon as the league confirms them.",
       "seasonTicket": true,
       "source": "https://www.combinedcountiesleague.co.uk",
-      "checkedAt": "2026-07-27"
+      "checkedAt": "2026-07-27",
+      "aliases": [
+        "CCL League Cup",
+        "Combined Counties Cup"
+      ],
+      "logoStatus": "not-sourced",
+      "logoNote": "Same as the league — request from the competition.",
+      "logo": null,
+      "logoAlt": "Combined Counties League Cup logo",
+      "cardName": "Combined Counties League Cup"
     },
     {
       "id": "middlesex-senior-cup",
@@ -33,7 +54,17 @@
       "note": "The draw has not been published yet. Fixtures appear here as soon as Middlesex FA confirm them.",
       "seasonTicket": true,
       "source": "https://www.middlesexfa.com",
-      "checkedAt": "2026-07-27"
+      "checkedAt": "2026-07-27",
+      "aliases": [
+        "Middlesex Senior Cup",
+        "Middlesex County Senior Cup",
+        "Middlesex FA Senior Cup"
+      ],
+      "logoStatus": "not-sourced",
+      "logoNote": "Request from Middlesex FA.",
+      "logo": null,
+      "logoAlt": "Middlesex County Senior Cup logo",
+      "cardName": "Middlesex Senior Cup"
     },
     {
       "id": "fa-cup",
@@ -44,7 +75,22 @@
       "note": "Extra Preliminary Round tie confirmed. Later rounds depend on the result.",
       "seasonTicket": false,
       "source": "https://www.thefa.com/competitions/thefacup",
-      "checkedAt": "2026-07-27"
+      "checkedAt": "2026-07-27",
+      "aliases": [
+        "FA Cup",
+        "The FA Cup",
+        "Emirates FA Cup",
+        "The Emirates FA Cup",
+        "FA Cup EP",
+        "FA Challenge Cup"
+      ],
+      "sponsorConfirmed": "Emirates, title partner to end of 2027/28",
+      "sponsorSource": "https://www.emirates.com/media-centre/emirates-fa-cup-title-partnership-extended-until-2028/",
+      "logoStatus": "issued-by-the-fa",
+      "logoNote": "NOT a public download. The FA issues competition marks to competing clubs. Obtain via the club Secretary from The FA, save to img/competitions/, then set `logo` here — no code change needed.",
+      "logo": null,
+      "logoAlt": "Emirates FA Cup logo",
+      "cardName": "Emirates FA Cup"
     },
     {
       "id": "fa-vase",
@@ -55,8 +101,24 @@
       "note": "First Qualifying Round tie confirmed. Later rounds depend on the result.",
       "seasonTicket": false,
       "source": "https://www.thefa.com/competitions/thefavase",
-      "checkedAt": "2026-07-27"
+      "checkedAt": "2026-07-27",
+      "aliases": [
+        "FA Vase",
+        "The FA Vase",
+        "Isuzu FA Vase",
+        "The Isuzu FA Vase",
+        "FA Vase 1Q",
+        "FA Challenge Vase"
+      ],
+      "sponsorConfirmed": "Isuzu UK, title partner to end of 2027/28",
+      "sponsorSource": "https://www.thefa.com/news/2025/jun/05/isuzu-partnership-renewal",
+      "logoStatus": "issued-by-the-fa",
+      "logoNote": "FA Challenge Vase rules 3(c)/(f): The Association ISSUES the FA Vase Logo, and a club using it 'shall use the image issued by The Association'. Taking one from a logo site would breach the rule it is meant to satisfy. Request via the Secretary; drop the file in img/competitions/ and set `logo`.",
+      "logo": null,
+      "logoAlt": "Isuzu FA Vase logo",
+      "cardName": "Isuzu FA Vase"
     }
   ],
-  "updatedAt": "2026-07-27T00:00:00.000Z"
+  "updatedAt": "2026-08-09T18:40:00.000Z",
+  "_brandNote": "Competition identity for match cards is resolved from these entries by js/competition-brand.js — one source of truth for every surface. `logo` is null until an OFFICIAL asset is obtained; a null logo makes cards fall back to the text identity, which is the intended behaviour, not a failure. Never populate `logo` from a logo-aggregator site: FA competition marks are issued by The Association to competing clubs and must be the issued image."
 }

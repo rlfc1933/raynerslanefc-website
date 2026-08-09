@@ -68,6 +68,27 @@
       .then(function (v) { ((v && v.venues) || []).forEach(function (x) { venues[norm(x.club)] = x; }); })
       .catch(function () {});
   }
+  /**
+   * The competition identifier that leads a match card.
+   *
+   * A mark when the club holds an official one, the competition's proper name
+   * and round when it does not. The logo is deliberately subordinate to the two
+   * clubs — it sits at cap height in the eyebrow, never above the crests — and
+   * it is only ever rendered when the registry holds a real asset, so a missing
+   * file cannot leave a broken image or a gap.
+   */
+  function compEyebrow(ident, prefix) {
+    var round = ident.round ? '<span class="cn__round">' + esc(ident.round) + '</span>' : '';
+    if (ident.logo) {
+      return '<div class="cn__eyebrow cn__eyebrow--comp">' +
+        '<img class="cn__complogo" src="' + esc(ident.logo) + '" alt="' + esc(ident.alt) + '"' +
+        ' width="72" height="24" loading="eager" decoding="async">' + round + '</div>';
+    }
+    var label = ident.label || ident.short || '';
+    return '<div class="cn__eyebrow"><i class="ico ico-football" aria-hidden="true"></i> ' +
+      esc(prefix) + (label ? ' · ' + esc(label) : '') + round + '</div>';
+  }
+
   function shapeLocal(list) {   // fallback if main.js's shaper isn't present
     var now = Date.now();
     function dt(f) { return MatchTime.fixtureSortKey(f); }
@@ -78,7 +99,7 @@
     var soon = up.filter(function (f) { return dt(f) > now - 6 * 3600000; });
     var next = soon.filter(function (f) { return f.pinned; })[0] || soon[0] || up[0] || null;
     return {
-      next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, venue: next.venue, oppCrest: next.oppCrest || '' } : null,
+      next: next ? { opponent: next.opponent, date: next.date, kickoff: next.kickoff, isHome: next.isHome, competition: next.competition, competitionId: next.competitionId || '', venue: next.venue, oppCrest: next.oppCrest || '' } : null,
       results: played.slice().reverse().map(function (r) { return { opponent: r.opponent, date: r.date, isHome: r.isHome, us: r.us, them: r.them }; })
     };
   }
@@ -110,7 +131,7 @@
         opponent: f.opponent, isHome: f.isHome,
         kickoffAt: f.kickoffAt,
         date: parts.date, kickoff: parts.kickoff,
-        competition: f.competition || '', venue: f.venue || '',
+        competition: f.competition || '', competitionId: f.competitionId || '', venue: f.venue || '',
         oppCrest: (f.isHome ? f.awayCrest : f.homeCrest) || '',
       };
     }
@@ -335,14 +356,21 @@
     var L = home ? { n: 'Rayners Lane', c: 'img/badge.png', us: true } : { n: opp, c: n.oppCrest, us: false };
     var R = home ? { n: opp, c: n.oppCrest, us: false } : { n: 'Rayners Lane', c: 'img/badge.png', us: true };
     var comp = n.competition || '';
-    elStatus.textContent = /friendly|pre-?season/i.test(comp) ? 'Pre-Season' : (comp || 'Next Up');
+    // ONE RESOLVER. "FA Vase 1Q" becomes "Isuzu FA Vase" + "First Qualifying
+    // Round" — the competition as football names it, not as the feed abbreviates
+    // it. Falls back to the raw label for anything unregistered.
+    var ident = (window.CompetitionBrand
+      ? CompetitionBrand.identity({ competitionId: n.competitionId, competition: comp })
+      : { label: comp, short: comp, round: '', logo: null, alt: comp });
+    var compLabel = ident.label || ident.short || comp;
+    elStatus.textContent = /friendly|pre-?season/i.test(comp) ? 'Pre-Season' : (compLabel || 'Next Up');
     function team(t) {
       return '<div class="cn__team">' + crestHTML(t.c, t.n) + '<span class="cn__nm">' + esc(t.n.toUpperCase()) + '</span>' +
         (t.us ? '<span class="cn__ha ' + (home ? 'cn__ha--home' : '') + '">' + (home ? 'Home' : 'Away') + '</span>' : '') + '</div>';
     }
     var metaBits = [fmtDate(n.date), fmtKO(n.kickoff), venueLabel(n)].filter(Boolean).join(' · ');
     elPrimary.innerHTML =
-      '<div class="cn__eyebrow"><i class="ico ico-football" aria-hidden="true"></i> Next Match' + (comp ? ' · ' + esc(comp) : '') + '</div>' +
+      compEyebrow(ident, 'Next Match') +
       '<div class="cn__lock">' + team(L) + '<div class="cn__mid"><span class="cn__vs">VS</span></div>' + team(R) + '</div>' +
       '<div class="cn__countdown" id="cn-countdown"></div>' +
       '<div class="cn__meta"><i class="ico ico-map-pin" aria-hidden="true"></i> ' + esc(metaBits) + '</div>' +
