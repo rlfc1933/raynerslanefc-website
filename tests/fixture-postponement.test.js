@@ -244,6 +244,54 @@ test('fixture import is a staff preview-and-confirm, not a silent job', () => {
     'the importer must not be on a schedule');
 });
 
+// ── 8c · THE CLUB CAN OVERRIDE A STALE FEED ─────────────────────────────────
+// The homepage's Club Now panel asks the football registry FIRST, and the
+// registry is fed from Full-Time. A postponement is agreed between two
+// secretaries and a referee, so the club knows days before the provider does —
+// the registry still read `scheduled` for a match called off on the Sunday, and
+// because it is consulted first the front page kept counting down even with the
+// club's own file correctly marked postponed.
+
+const CN = read('js/club-now.js');
+const clubSaysCalledOff = (() => {
+  const src = CN.match(/function clubSaysCalledOff\(regFixture, clubList\) \{[\s\S]*?\n  \}/)[0];
+  return new Function('MatchTime', src + '; return clubSaysCalledOff;')(MT);
+})();
+
+test('the club file vetoes a stale registry fixture', () => {
+  const stale = { opponent: 'Hilltop', kickoffAt: '2026-08-11T18:45:00.000Z', status: 'scheduled' };
+  assert.strictEqual(clubSaysCalledOff(stale, FIXTURES), true,
+    'the feed says scheduled; the club says postponed; the club wins');
+});
+
+test('a genuine fixture is never vetoed', () => {
+  const real = { opponent: 'New Bradwell St Peter', kickoffAt: '2026-08-15T14:00:00.000Z', status: 'scheduled' };
+  assert.strictEqual(clubSaysCalledOff(real, FIXTURES), false);
+  assert.strictEqual(clubSaysCalledOff(null, FIXTURES), false);
+  assert.strictEqual(clubSaysCalledOff({ opponent: 'Hilltop' }, []), false);
+});
+
+test('the veto matches on opponent AND kick-off, not name alone', () => {
+  // Rayners Lane play Hilltop twice; only the postponed leg may be vetoed.
+  const away = { opponent: 'Hilltop', kickoffAt: '2026-12-04T19:45:00.000Z', status: 'scheduled' };
+  assert.strictEqual(clubSaysCalledOff(away, FIXTURES), false,
+    'the December return fixture is unaffected');
+});
+
+test('the club file is always read, so it can always veto', () => {
+  assert.match(CN, /The club's own file is ALWAYS read now/);
+  assert.match(CN, /var vetoed = clubSaysCalledOff\(regNext, list\);/);
+  assert.match(CN, /if \(reg && reg\.shaped && !vetoed\)/);
+});
+
+test('the veto declines the registry rather than overwriting it', () => {
+  // FWP keeps its authority; nothing is written back upstream.
+  const block = CN.match(/function loadFixtures\(\) \{[\s\S]*?\n  \}/)[0];
+  assert.ok(!/method:\s*['"](POST|PATCH|PUT|DELETE)/i.test(block),
+    'the override must not write to the registry');
+  assert.match(block, /fetch\('data\/fixtures\.json/, 'it only READS the club file');
+});
+
 // ── 9 · IT COMES BACK CLEANLY ───────────────────────────────────────────────
 
 test('setting a rearranged date and status returns it to the fixture list', () => {
