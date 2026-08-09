@@ -409,8 +409,23 @@
   }
 
   // ── STRIP: position / last result / last-5 form — or pre-season states ──
-  function wdl(r) { return r.us > r.them ? 'w' : (r.us === r.them ? 'd' : 'l'); }
-  function chip(c) { return '<span class="cn__wdl cn__wdl--' + c + '">' + c.toUpperCase() + '</span>'; }
+  /* A MATCH WITHOUT A SCORE IS NOT A DRAW.
+     `r.us === r.them` was reached with both sides null — and null === null is
+     true — so a fixture the registry had marked played but for which nobody had
+     entered a score was announced on the front page as "D null–null". It
+     invented a result, which is the worst way to be wrong about football. */
+  function hasScore(r) {
+    return !!r && r.us != null && r.them != null &&
+      isFinite(Number(r.us)) && isFinite(Number(r.them));
+  }
+  function wdl(r) {
+    if (!hasScore(r)) return '';
+    return r.us > r.them ? 'w' : (r.us === r.them ? 'd' : 'l');
+  }
+  function chip(c) {
+    if (!c) return '';   // unknown outcome shows nothing, never a fabricated letter
+    return '<span class="cn__wdl cn__wdl--' + c + '">' + c.toUpperCase() + '</span>';
+  }
 
   /** What to call the match we have just played, from its own competition. */
   function lastLabel(m) {
@@ -463,8 +478,13 @@
   function global_RLFCFootball() { return !!(window.RLFCFootball && window.RLFCFootball.summary); }
 
   function resultTile(r, label) {
+    // No score yet: say so. The match happened, we simply have not been given
+    // the result — which is a different and honest thing to tell a supporter.
+    var num = hasScore(r)
+      ? chip(wdl(r)) + ' <span class="cn__result-score">' + esc(String(r.us)) + '–' + esc(String(r.them)) + '</span>'
+      : '<span class="cn__result-await">Result to follow</span>';
     return '<div class="cn__tile">' +
-      '<div class="cn__tile-num">' + chip(wdl(r)) + ' <span class="cn__result-score">' + r.us + '–' + r.them + '</span></div>' +
+      '<div class="cn__tile-num">' + num + '</div>' +
       '<div class="cn__tile-lbl">' + esc(label || ('v ' + (r.opponent || ''))) + '</div></div>';
   }
 
@@ -474,11 +494,14 @@
 
     if (results.length) {
       var last = results[0];
-      var form = results.slice(0, 5).map(function (r) { return chip(wdl(r)); }).join('');
+      var form = results.filter(hasScore).slice(0, 5).map(function (r) { return chip(wdl(r)); }).join('');
       var tiles = '';
       if (pos) tiles += '<div class="cn__tile"><div class="cn__tile-num">' + esc(String(pos.pos)) + '<small>' + ord(pos.pos) + '</small></div><div class="cn__tile-lbl">Position</div></div>';
       tiles += resultTile(last, 'Last · v ' + (last.opponent || ''));
-      tiles += '<div class="cn__tile"><div class="cn__chips">' + form + '</div><div class="cn__tile-lbl">Last ' + Math.min(5, results.length) + '</div></div>';
+      var scored = results.filter(hasScore).length;
+      if (form) {
+        tiles += '<div class="cn__tile"><div class="cn__chips">' + form + '</div><div class="cn__tile-lbl">Last ' + Math.min(5, scored) + '</div></div>';
+      }
       elStrip.style.gridTemplateColumns = 'repeat(' + (pos ? 3 : 2) + ',1fr)';
       elStrip.innerHTML = tiles;
       return;

@@ -165,6 +165,13 @@
 .cn__wdl--d { background:#FBBF24; }
 .cn__wdl--l { background:#EF4444; color:#fff; }
 .cn__result-score { font-family:var(--font-d); font-size:22px; letter-spacing:.04em; color:#fff; }
+
+/* A match played but not yet scored. Deliberately quieter than a score — it is
+   information, not a result, and must never be mistaken for one. */
+.cn__result-await {
+  font-family:var(--font-c, inherit); font-size:12px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.62);
+}
 .cn__chips { display:flex; gap:4px; justify-content:center; }
 
 .cn__skel { color:var(--muted); font-family:var(--font-c); font-size:12px; letter-spacing:.08em; text-align:center; padding:30px 0; }
