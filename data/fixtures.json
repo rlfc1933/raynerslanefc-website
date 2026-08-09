@@ -63,14 +63,18 @@
       "isHome": true,
       "venue": "Tithe Farm Sports & Social Club",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
+      "status": "postponed",
       "us": null,
       "them": null,
       "scorers": "",
       "shareHeadline": "HILLTOP AT THE LANE",
       "shareHeadlineAuto": "HILLTOP AT THE LANE",
       "season": "2026-27",
-      "competitionId": "ccl-prem-north"
+      "competitionId": "ccl-prem-north",
+      "postponedReason": "Broadfields' FA Cup replay takes priority",
+      "rearrangedDate": null,
+      "statusUpdatedAt": "2026-08-09T00:00:00.000Z",
+      "statusSource": "club"
     },
     {
       "id": "favase-1q-new-bradwell-20260815",
@@ -721,5 +725,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-08-04T20:45:17.742Z"
+  "updatedAt": "2026-08-09T16:30:00.000Z"
 }

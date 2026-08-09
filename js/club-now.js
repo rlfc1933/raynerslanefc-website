@@ -73,7 +73,8 @@
     function dt(f) { return MatchTime.fixtureSortKey(f); }
     var sorted = list.slice().sort(function (a, b) { return dt(a) - dt(b); });
     var played = sorted.filter(function (f) { return f.us != null && f.them != null; });
-    var up = sorted.filter(function (f) { return !(f.us != null && f.them != null); });
+    // Same rule as main.js: a called-off fixture is not the next match.
+    var up = sorted.filter(function (f) { return MatchTime.isPlayable(f); });
     var soon = up.filter(function (f) { return dt(f) > now - 6 * 3600000; });
     var next = soon.filter(function (f) { return f.pinned; })[0] || soon[0] || up[0] || null;
     return {
@@ -113,7 +114,26 @@
         oppCrest: (f.isHome ? f.awayCrest : f.homeCrest) || '',
       };
     }
-    var next = shape(d.current || d.next);
+    /* ── THE CLUB KNOWS BEFORE THE FEED DOES ──────────────────────────────
+       The registry is fed from Full-Time and stays authoritative for live
+       scores and confirmed line-ups. But a postponement is agreed between two
+       secretaries and a referee, and the club knows hours or days before the
+       provider updates. Rayners Lane v Hilltop was called off on the Sunday;
+       the registry still read `scheduled` on the Tuesday, and because the
+       registry is consulted FIRST the front page kept counting down to it —
+       even with the club's own fixtures file correctly marked postponed.
+
+       So: if the registry offers a called-off fixture as the next match, we
+       decline the registry for this read and fall through to the club's own
+       file, which the club controls. Nothing is overwritten and the provider
+       keeps its authority over everything it is actually authoritative for —
+       this only stops a stale upstream row advertising a match that is not
+       being played. When the feed catches up, the two agree and this never
+       fires. */
+    var raw = d.current || d.next;
+    if (raw && MatchTime.isCalledOff(raw)) return null;
+
+    var next = shape(raw);
     var prev = d.previous ? Object.assign(shape(d.previous), {
       us: d.previous.us, them: d.previous.them,
     }) : null;
@@ -121,17 +141,48 @@
     return { next: next, results: prev ? [prev] : [] };
   }
 
+  /**
+   * Does the club's own fixture list say this match has been called off?
+   *
+   * Matched on the kick-off instant and the opponent, because the registry and
+   * the club file are two records of one fixture and only those two facts are
+   * reliably identical across both.
+   */
+  function clubSaysCalledOff(regFixture, clubList) {
+    if (!regFixture || !clubList || !clubList.length) return false;
+    var ms = Date.parse(regFixture.kickoffAt);
+    var opp = String(regFixture.opponent || '').trim().toLowerCase();
+    return clubList.some(function (f) {
+      if (!MatchTime.isCalledOff(f)) return false;
+      if (String(f.opponent || '').trim().toLowerCase() !== opp) return false;
+      var fms = MatchTime.fixtureSortKey(f);
+      return isFinite(ms) && isFinite(fms) && Math.abs(fms - ms) < 12 * 3600000;
+    });
+  }
+
   function loadFixtures() {
     var registry = (window.RLFCFootball && window.RLFCFootball.summary)
-      ? window.RLFCFootball.summary().then(fromRegistry).catch(function () { return null; })
+      ? window.RLFCFootball.summary().then(function (d) { return { raw: d, shaped: fromRegistry(d) }; })
+          .catch(function () { return null; })
       : Promise.resolve(null);
-    return registry.then(function (fromReg) {
-      if (fromReg) { shaped = fromReg; raw = []; return; }
-      return fetch('data/fixtures.json?t=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          raw = (d && d.fixtures) || [];
-          shaped = (typeof rlfcFixturesShape === 'function') ? rlfcFixturesShape(raw) : shapeLocal(raw);
-        });
+    // The club's own file is ALWAYS read now, even when the registry answers.
+    // It is the only record the club can correct itself, so it has to be
+    // available to veto a stale upstream fixture — that is the whole mechanism.
+    var clubFile = fetch('data/fixtures.json?t=' + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { return (d && d.fixtures) || []; })
+      .catch(function () { return []; });
+
+    return Promise.all([registry, clubFile]).then(function (r) {
+      var reg = r[0], list = r[1];
+      var regNext = reg && reg.raw && (reg.raw.current || reg.raw.next);
+      var vetoed = clubSaysCalledOff(regNext, list);
+
+      if (reg && reg.shaped && !vetoed) { shaped = reg.shaped; raw = list; return; }
+      // Either there is no registry answer, or the club has called that fixture
+      // off and the feed has not caught up. Fall back to the club's own list.
+      raw = list;
+      shaped = (typeof rlfcFixturesShape === 'function') ? rlfcFixturesShape(raw) : shapeLocal(raw);
     }).catch(function () { shaped = { next: null, results: [] }; });
   }
   // Single source of truth: readLiveMatch() (js/main.js) resolves the effective
