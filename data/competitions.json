@@ -19,11 +19,16 @@
         "Cherry Red Records Combined Counties Football League",
         "Combined Counties League"
       ],
-      "logoStatus": "not-sourced",
-      "logoNote": "The league publishes a site logo but no separate division wordmark for club use. Ask the League for an approved mark before adding one.",
-      "logo": null,
-      "logoAlt": "Combined Counties Premier Division North logo",
-      "cardName": "Combined Counties Premier North"
+      "logoStatus": "in-repository",
+      "logoNote": "Already present at img/sponsors/combined-counties-league.png and filed under sponsors, so the competition registry had it as null while the artwork sat on disk. Wired up, not sourced.",
+      "logo": "img/sponsors/combined-counties-league.png",
+      "logoAlt": "Combined Counties Football League",
+      "cardName": "Combined Counties Premier North",
+      "sponsorLogo": "img/sponsors/cherry-red-records.png",
+      "sponsorLogoAlt": "Cherry Red Records",
+      "sponsorName": "Cherry Red Records",
+      "sponsorLogoStatus": "in-repository",
+      "creativeTreatment": "league"
     },
     {
       "id": "ccl-league-cup",
@@ -40,10 +45,11 @@
         "Combined Counties Cup"
       ],
       "logoStatus": "not-sourced",
-      "logoNote": "Same as the league — request from the competition.",
+      "logoNote": "Combined Counties League Cup mark not held. League identity may be used as the fallback treatment.",
       "logo": null,
       "logoAlt": "Combined Counties League Cup logo",
-      "cardName": "Combined Counties League Cup"
+      "cardName": "Combined Counties League Cup",
+      "creativeTreatment": "cup"
     },
     {
       "id": "middlesex-senior-cup",
@@ -61,10 +67,11 @@
         "Middlesex FA Senior Cup"
       ],
       "logoStatus": "not-sourced",
-      "logoNote": "Request from Middlesex FA.",
+      "logoNote": "Middlesex FA hold this mark. img/sponsors/middlesex-fa.png is the county FA badge, which is NOT the competition logo — do not substitute one for the other.",
       "logo": null,
       "logoAlt": "Middlesex County Senior Cup logo",
-      "cardName": "Middlesex Senior Cup"
+      "cardName": "Middlesex Senior Cup",
+      "creativeTreatment": "cup"
     },
     {
       "id": "fa-cup",
@@ -86,11 +93,13 @@
       ],
       "sponsorConfirmed": "Emirates, title partner to end of 2027/28",
       "sponsorSource": "https://www.emirates.com/media-centre/emirates-fa-cup-title-partnership-extended-until-2028/",
-      "logoStatus": "issued-by-the-fa",
-      "logoNote": "NOT a public download. The FA issues competition marks to competing clubs. Obtain via the club Secretary from The FA, save to img/competitions/, then set `logo` here — no code change needed.",
+      "logoStatus": "official-artwork-required",
+      "logoNote": "OFFICIAL ARTWORK REQUIRED. FA Challenge Vase rule 3(f): a club shall use the image ISSUED by The Association. Drop the issued file at the logoSlot path and set logo to it. Until then the Studio uses the typographic competition treatment — which is correct and permitted, not a degraded state. Never trace, approximate or download a substitute.",
       "logo": null,
       "logoAlt": "Emirates FA Cup logo",
-      "cardName": "Emirates FA Cup"
+      "cardName": "Emirates FA Cup",
+      "creativeTreatment": "cup-night",
+      "logoSlot": "img/competitions/fa-cup.png"
     },
     {
       "id": "fa-vase",
@@ -112,13 +121,15 @@
       ],
       "sponsorConfirmed": "Isuzu UK, title partner to end of 2027/28",
       "sponsorSource": "https://www.thefa.com/news/2025/jun/05/isuzu-partnership-renewal",
-      "logoStatus": "issued-by-the-fa",
-      "logoNote": "FA Challenge Vase rules 3(c)/(f): The Association ISSUES the FA Vase Logo, and a club using it 'shall use the image issued by The Association'. Taking one from a logo site would breach the rule it is meant to satisfy. Request via the Secretary; drop the file in img/competitions/ and set `logo`.",
+      "logoStatus": "official-artwork-required",
+      "logoNote": "OFFICIAL ARTWORK REQUIRED. FA Challenge Vase rule 3(f): a club shall use the image ISSUED by The Association. Drop the issued file at the logoSlot path and set logo to it. Until then the Studio uses the typographic competition treatment — which is correct and permitted, not a degraded state. Never trace, approximate or download a substitute.",
       "logo": null,
       "logoAlt": "Isuzu FA Vase logo",
-      "cardName": "Isuzu FA Vase"
+      "cardName": "Isuzu FA Vase",
+      "creativeTreatment": "cup-night",
+      "logoSlot": "img/competitions/fa-vase.png"
     }
   ],
-  "updatedAt": "2026-08-09T18:40:00.000Z",
+  "updatedAt": "2026-08-09T18:00:00.000Z",
   "_brandNote": "Competition identity for match cards is resolved from these entries by js/competition-brand.js — one source of truth for every surface. `logo` is null until an OFFICIAL asset is obtained; a null logo makes cards fall back to the text identity, which is the intended behaviour, not a failure. Never populate `logo` from a logo-aggregator site: FA competition marks are issued by The Association to competing clubs and must be the issued image."
 }

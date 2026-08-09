@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>crest sampler</title>
+<script src="js/brand-palette.js"></script>
+<body style="background:#111;color:#eee;font:13px system-ui">
+<div id="out">sampling…</div>
+<script>
+(async function(){
+  var reg = await fetch('data/club-brands.json').then(r=>r.json());
+  BrandPalette.setRegistry(reg);
+  var res = [];
+  for (const c of reg.clubs) {
+    if (!c.crest || c.id === 'rayners-lane') continue;
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    var ok = await new Promise(function(res2){ img.onload=()=>res2(true); img.onerror=()=>res2(false); img.src=c.crest; });
+    res.push({ id:c.id, name:c.name, ok:ok, s: ok ? BrandPalette.sampleCrest(img) : null });
+  }
+  window.__SAMPLE = res;
+  document.getElementById('out').textContent = 'done: '+res.length;
+})();
+</script>

@@ -1,20 +1,93 @@
 {
   "_note": "Canonical sponsor manifest for the SponsorRail component (js/sponsor-rail.js). Drives the commercial rail on every shareable graphic — Studio templates + public share cards. Allocation is CONTEXT-driven (home-kit / away-kit / neutral), never venue-driven: the caller passes the kit/content context and the rail returns the right partners in a FIXED order. Assets are pre-trimmed to visible artwork; sizing uses cap-height on the visible mark with optical correction <=10%. No King, Denham in the rail per the approved final list. Labels are Studio-only, never on public exports.",
   "sponsors": {
-    "acerbis":   { "name": "Acerbis",                    "role": "Kit Supplier",     "colour": "img/sponsors/band/acerbis.png",     "white": "img/sponsors/band/acerbis-white.png",     "ar": 1.633, "optical": 1.0 },
-    "hdl":       { "name": "Hanlon Dry Lining",          "role": "Home Kit Sponsor", "colour": "img/sponsors/band/hdl.png",         "white": "img/sponsors/band/hdl-white.png",         "ar": 1.647, "optical": 1.0 },
-    "mccafferty":{ "name": "McCafferty's",               "role": "Away Kit Sponsor", "colour": "img/sponsors/band/mccaffertys.png", "white": "img/sponsors/band/mccaffertys-white.png", "ar": 4.333, "optical": 0.92 },
-    "ashwood":   { "name": "Ashwood Builders Merchants", "role": "Club Sponsor",     "colour": "img/sponsors/band/ashwood.png",     "white": "img/sponsors/band/ashwood-white.png",     "ar": 5.463, "optical": 0.9 },
-    "king":      { "name": "The King, Denham",           "role": "Club Sponsor",     "colour": "img/sponsors/band/king.png",        "white": "img/sponsors/band/king-white.png",        "ar": 2.662, "optical": 1.0 },
-    "ahiq":      { "name": "AHiQ",                        "role": "Club Sponsor",     "colour": "img/sponsors/band/ahiq.png",        "white": "img/sponsors/band/ahiq-white.png",        "ar": 3.333, "optical": 0.95 }
+    "acerbis": {
+      "name": "Acerbis",
+      "role": "Kit Supplier",
+      "colour": "img/sponsors/band/acerbis.png",
+      "white": "img/sponsors/band/acerbis-white.png",
+      "ar": 1.633,
+      "optical": 1
+    },
+    "hdl": {
+      "name": "Hanlon Dry Lining",
+      "role": "Home Kit Sponsor",
+      "colour": "img/sponsors/band/hdl.png",
+      "white": "img/sponsors/band/hdl-white.png",
+      "ar": 1.647,
+      "optical": 1
+    },
+    "mccafferty": {
+      "name": "McCafferty's",
+      "role": "Away Kit Sponsor",
+      "colour": "img/sponsors/band/mccaffertys.png",
+      "white": "img/sponsors/band/mccaffertys-white.png",
+      "ar": 4.333,
+      "optical": 0.92
+    },
+    "ashwood": {
+      "name": "Ashwood Builders Merchants",
+      "role": "Club Sponsor",
+      "colour": "img/sponsors/band/ashwood.png",
+      "white": "img/sponsors/band/ashwood-white.png",
+      "ar": 5.463,
+      "optical": 0.9
+    },
+    "king": {
+      "name": "The King, Denham",
+      "role": "Club Sponsor",
+      "colour": "img/sponsors/band/king.png",
+      "white": "img/sponsors/band/king-white.png",
+      "ar": 2.662,
+      "optical": 1
+    },
+    "ahiq": {
+      "name": "AHiQ",
+      "role": "Club Sponsor",
+      "colour": "img/sponsors/band/ahiq.png",
+      "white": "img/sponsors/band/ahiq-white.png",
+      "ar": 3.333,
+      "optical": 0.95
+    }
   },
   "contexts": {
-    "home":      ["acerbis", "hdl", "ashwood", "ahiq"],
-    "away":      ["acerbis", "mccafferty", "ashwood", "ahiq"],
-    "neutral":   ["ashwood", "ahiq"],
-    "presented": ["ashwood", "king", "ahiq"]
+    "home": [
+      "acerbis",
+      "hdl",
+      "ashwood",
+      "king",
+      "ahiq"
+    ],
+    "away": [
+      "acerbis",
+      "mccafferty",
+      "ashwood",
+      "king",
+      "ahiq"
+    ],
+    "neutral": [
+      "ashwood",
+      "king",
+      "ahiq"
+    ],
+    "presented": [
+      "ashwood",
+      "king",
+      "ahiq"
+    ]
   },
-  "presents": { "home": "hdl", "away": "mccafferty", "supplier": "acerbis" },
-  "railPct": { "square": 0.14, "portrait": 0.105, "landscape": 0.16, "story": 0.09 },
-  "updatedAt": "2026-07-28T00:00:00.000Z"
+  "presents": {
+    "home": "hdl",
+    "away": "mccafferty",
+    "supplier": "acerbis"
+  },
+  "railPct": {
+    "square": 0.14,
+    "portrait": 0.105,
+    "landscape": 0.16,
+    "story": 0.09
+  },
+  "updatedAt": "2026-08-09T18:00:00.000Z",
+  "_historicalNote": "SUPERSEDED (Aug 2026): this manifest previously read \"No King, Denham in the rail per the approved final list\" and contexts.home/away carried only ashwood + ahiq. The owner has since confirmed the current commercial requirement in writing — The King, Denham sits in the persistent rail alongside Ashwood and AHiQ on every post. Recorded rather than deleted so the change is traceable and nobody re-applies the old list from memory.",
+  "_railNote": "PRESENTER vs RAIL. presents.home/away names the presenting sponsor, which the composition gives its own prominent position. The rail is the persistent partner strip and is deliberately secondary — Ashwood, The King Denham, AHiQ on every post, plus the kit supplier where the context includes it. The presenter also appears in contexts.home/away because the rail is what non-presenting layouts fall back to; a layout that gives the presenter a distinct slot should drop it from the rail rather than print it twice."
 }
