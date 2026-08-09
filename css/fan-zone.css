@@ -19,7 +19,7 @@
 
 .fan-acct__join {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 14px; border-radius: 8px;
+  padding: 9px 14px; border-radius:var(--r-md);
   border: 1px solid rgba(255, 209, 0, .45);
   background: rgba(255, 209, 0, .08);
   color: var(--yellow, #FFD100);
@@ -34,7 +34,7 @@
 .fan-acct__btn {
   display: inline-flex; align-items: center; gap: 8px;
   max-width: 190px;                      /* the ceiling; see the note above */
-  padding: 7px 11px 7px 7px; border-radius: 999px;
+  padding: 7px 11px 7px 7px; border-radius:var(--r-pill);
   border: 1px solid rgba(255, 255, 255, .14);
   background: rgba(255, 255, 255, .05);
   color: #fff; cursor: pointer;
@@ -46,7 +46,7 @@
 
 .fan-acct__badge {
   flex-shrink: 0;
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius:var(--r-circle);
   display: grid; place-items: center;
   background: linear-gradient(135deg, #fff3bf, #FFD100);
   color: #111; font-size: 12px; font-weight: 900; line-height: 1;
@@ -59,7 +59,7 @@
 .fan-acct__menu {
   position: absolute; top: calc(100% + 10px); right: 0; z-index: 60;
   min-width: 216px; max-width: min(280px, calc(100vw - 32px));
-  padding: 8px; border-radius: 12px;
+  padding: 8px; border-radius:var(--r-lg);
   background: #141414; border: 1px solid #2a2a2a;
   box-shadow: 0 18px 44px -12px rgba(0, 0, 0, .8);
 }
@@ -76,7 +76,7 @@
 .fan-acct__menu a,
 .fan-acct__menu button {
   display: block; width: 100%; text-align: left;
-  padding: 9px 10px; border: 0; border-radius: 8px;
+  padding: 9px 10px; border: 0; border-radius:var(--r-md);
   background: none; color: #ddd; font-size: 13.5px; font-family: inherit;
   text-decoration: none; cursor: pointer;
 }
@@ -99,7 +99,7 @@
 .lane-menu__account { display: grid; gap: 6px; margin-bottom: 10px; min-width: 0; }
 .lane-menu__account[hidden] { display: none; }
 .lane-menu__me {
-  padding: 10px 12px; border-radius: 10px;
+  padding: 10px 12px; border-radius:var(--r-md);
   background: rgba(255, 209, 0, .08); color: #fff; font-weight: 700; font-size: 14px;
   overflow: hidden; text-overflow: ellipsis;
 }
@@ -111,7 +111,7 @@
 /* ── The join / sign-in panel ────────────────────────────────────────────── */
 .fz-join {
   max-width: 520px; margin: 0 auto; padding: 26px 24px;
-  border: 1px solid #262626; border-radius: 16px; background: #101010;
+  border: 1px solid #262626; border-radius:var(--r-lg); background: #101010;
 }
 .fz-join__eyebrow {
   color: var(--yellow, #FFD100); font-size: 11px; font-weight: 800;
@@ -124,7 +124,7 @@
 .fz-join input[type=text],
 .fz-join input[type=email] {
   width: 100%; min-width: 0; box-sizing: border-box;
-  padding: 12px 13px; border-radius: 9px;
+  padding: 12px 13px; border-radius:var(--r-md);
   border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 15px;
 }
 .fz-join input:focus { outline: 2px solid var(--yellow, #FFD100); outline-offset: 1px; border-color: transparent; }
@@ -134,7 +134,7 @@
 .fz-join__check span { font-size: 13px; color: var(--muted, #b5b5b5); line-height: 1.5; min-width: 0; }
 .fz-join__legal { font-size: 12px; color: var(--grey, #8F8F8F); line-height: 1.55; margin: 14px 0 0; }
 .fz-join__legal a { color: var(--yellow, #FFD100); }
-.fz-join__msg { margin: 14px 0 0; padding: 12px 14px; border-radius: 9px; font-size: 14px; line-height: 1.5; }
+.fz-join__msg { margin: 14px 0 0; padding: 12px 14px; border-radius:var(--r-md); font-size: 14px; line-height: 1.5; }
 .fz-join__msg--ok { background: rgba(60, 160, 90, .14); border: 1px solid rgba(60, 160, 90, .4); color: #b7e8c6; }
 .fz-join__msg--err { background: rgba(200, 60, 60, .12); border: 1px solid rgba(200, 60, 60, .38); color: #f0bcbc; }
 .fz-join .btn { width: 100%; justify-content: center; }
@@ -156,7 +156,7 @@
 }
 .fz-card {
   min-width: 0;                                    /* never `auto` in a grid */
-  padding: 20px; border: 1px solid #232323; border-radius: 14px; background: #101010;
+  padding: 20px; border: 1px solid #232323; border-radius:var(--r-lg); background: #101010;
 }
 .fz-card__h {
   font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
@@ -167,7 +167,7 @@
 .fz-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .fz-hist li {
   display: flex; align-items: center; gap: 12px; min-width: 0;
-  padding: 10px; border-radius: 10px; background: #161616;
+  padding: 10px; border-radius:var(--r-md); background: #161616;
 }
 .fz-hist__body { min-width: 0; flex: 1; }
 .fz-hist__t {
@@ -175,7 +175,7 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .fz-hist__d { display: block; color: var(--grey, #8F8F8F); font-size: 12px; margin-top: 2px; }
-.fz-hist img { width: 42px; height: 58px; object-fit: cover; border-radius: 5px; flex-shrink: 0; }
+.fz-hist img { width: 42px; height: 58px; object-fit: cover; border-radius:var(--r-sm); flex-shrink: 0; }
 .fz-hist a { flex-shrink: 0; font-size: 12.5px; color: var(--yellow, #FFD100); text-decoration: none; font-weight: 700; }
 .fz-empty { color: var(--grey, #8F8F8F); font-size: 13.5px; line-height: 1.6; }
 
@@ -185,7 +185,7 @@
 .fz-prefs__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; }
 .fz-prefs input[type=text] {
   width: 100%; min-width: 0; box-sizing: border-box; padding: 10px 12px;
-  border-radius: 8px; border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 14px;
+  border-radius:var(--r-md); border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 14px;
 }
 .fz-prefs__save { margin-top: 6px; }
 .fz-note { font-size: 12.5px; color: var(--grey, #8F8F8F); margin: 10px 0 0; line-height: 1.55; }
@@ -194,7 +194,7 @@
 .fan-strip {
   display: none;
   margin: 0 0 18px; padding: 14px 16px; min-width: 0;
-  border: 1px solid rgba(255, 209, 0, .28); border-radius: 12px;
+  border: 1px solid rgba(255, 209, 0, .28); border-radius:var(--r-lg);
   background: linear-gradient(135deg, rgba(255, 209, 0, .09), rgba(255, 209, 0, .02));
 }
 .is-fan-member .fan-strip { display: flex; }
@@ -207,7 +207,7 @@
 .fan-strip__a { flex-shrink: 0; display: flex; gap: 8px; flex-wrap: wrap; }
 .fan-strip__a a {
   font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-  padding: 9px 14px; border-radius: 8px; text-decoration: none;
+  padding: 9px 14px; border-radius:var(--r-md); text-decoration: none;
   background: var(--yellow, #FFD100); color: #111; white-space: nowrap;
 }
 .fan-strip__a a + a { background: rgba(255, 255, 255, .08); color: #fff; }
@@ -216,7 +216,7 @@
    a modal — they came to read, and the celebration should not be in the way. */
 .pr-joined {
   margin: 0 0 18px; padding: 12px 16px; min-width: 0;
-  border-radius: 10px;
+  border-radius:var(--r-md);
   border: 1px solid rgba(60, 160, 90, .42);
   background: rgba(60, 160, 90, .13);
   color: #b7e8c6; font-size: 14.5px; line-height: 1.5;

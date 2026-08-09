@@ -42,7 +42,7 @@
 .ph-today {
   border: 1px solid rgba(255,209,0,.4);
   background: linear-gradient(135deg, rgba(255,209,0,.10), transparent 62%);
-  border-radius: 14px; padding: 20px; margin-bottom: 22px;
+  border-radius:var(--r-lg); padding: 20px; margin-bottom: 22px;
 }
 .ph-today .ph-h { color: var(--y, #FFD100); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; }
 .ph-today__big {
@@ -53,11 +53,11 @@
 .ph-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .ph-chip {
   font-family: var(--fc, system-ui); font-size: 12px; font-weight: 700; letter-spacing: .06em;
-  color: var(--gr); border: 1px solid var(--br); border-radius: 999px; padding: 7px 13px;
+  color: var(--gr); border: 1px solid var(--br); border-radius:var(--r-pill); padding: 7px 13px;
 }
 .ph-chip--live { color: #111; background: var(--y, #FFD100); border-color: var(--y); }
 .ph-dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; width: 8px; height: 8px; border-radius:var(--r-circle);
   background: #111; margin-right: 6px; animation: ph-pulse 1.2s infinite;
 }
 @keyframes ph-pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
@@ -67,7 +67,7 @@
 .ph-att {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   border: 1px solid var(--br); border-left: 4px solid var(--gr);
-  background: var(--c, #161616); border-radius: 12px; padding: 15px 16px;
+  background: var(--c, #161616); border-radius:var(--r-lg); padding: 15px 16px;
 }
 /* Red is reserved for overdue or failed. Amber is upcoming. Nothing else. */
 .ph-att--red   { border-left-color: var(--ph-red);   background: rgba(239,68,68,.06); }
@@ -84,7 +84,7 @@
 /* Exactly one visually dominant action per card. */
 .ph-att__go {
   flex: 0 0 auto; min-height: 48px; padding: 12px 20px;
-  background: var(--y, #FFD100); color: #0d0d0d; border: none; border-radius: 10px;
+  background: var(--y, #FFD100); color: #0d0d0d; border: none; border-radius:var(--r-md);
   font-family: var(--fc); font-size: 14px; font-weight: 800; letter-spacing: .05em;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
@@ -92,13 +92,13 @@
 .ph-att__go:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .ph-more {
   width: 100%; min-height: 48px; margin-top: 10px;
-  background: none; border: 1px solid var(--br); border-radius: 10px; color: var(--gr);
+  background: none; border: 1px solid var(--br); border-radius:var(--r-md); color: var(--gr);
   font-family: var(--fc); font-size: 14px; font-weight: 700; letter-spacing: .05em; cursor: pointer;
 }
 
 /* ── EMPTY STATES — reassuring, never blank ──────────────────────────────── */
 .ph-empty {
-  border: 1px dashed var(--br); border-radius: 12px; padding: 22px;
+  border: 1px dashed var(--br); border-radius:var(--r-lg); padding: 22px;
   font-family: var(--fb); font-size: 15px; line-height: 1.6; color: var(--gr);
 }
 .ph-empty b { display: block; color: var(--w); font-family: var(--fc); letter-spacing: .03em; margin-bottom: 5px; }
@@ -112,7 +112,7 @@
 .ph-tool {
   display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   width: 100%; min-height: 112px; padding: 16px;
-  background: var(--c, #161616); border: 1px solid var(--br); border-radius: 12px;
+  background: var(--c, #161616); border: 1px solid var(--br); border-radius:var(--r-lg);
   text-align: left; cursor: pointer; font: inherit; color: inherit;
   transition: border-color .15s, background .15s;
 }
@@ -133,7 +133,7 @@
 .ph-badge {
   font-family: var(--fc); font-size: 11px; font-weight: 700; letter-spacing: .07em;
   text-transform: uppercase; color: var(--gr);
-  border: 1px solid var(--br); border-radius: 999px; padding: 4px 9px;
+  border: 1px solid var(--br); border-radius:var(--r-pill); padding: 4px 9px;
 }
 /* "Changes the website" is the single most important thing a volunteer needs
    to know before pressing anything, so it is the one badge that is coloured. */
@@ -149,7 +149,7 @@
    one readable row carrying the question a volunteer actually asks, so they can
    choose where to go without knowing any tool names. */
 .ph-areas { display: flex; flex-direction: column; gap: 8px; }
-.ph-area { border: 1px solid var(--br); border-radius: 12px; background: var(--dk, #0F0F0F); overflow: hidden; }
+.ph-area { border: 1px solid var(--br); border-radius:var(--r-lg); background: var(--dk, #0F0F0F); overflow: hidden; }
 .ph-area__head {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px; min-height: 64px; cursor: pointer; list-style: none;
@@ -162,7 +162,7 @@
 .ph-area__ask { font-family: var(--fb); font-size: 14px; line-height: 1.4; color: var(--gr); }
 .ph-area__count {
   flex: 0 0 auto; font-family: var(--fc); font-size: 12px; font-weight: 700;
-  color: var(--gr); border: 1px solid var(--br); border-radius: 999px; padding: 3px 10px;
+  color: var(--gr); border: 1px solid var(--br); border-radius:var(--r-pill); padding: 3px 10px;
 }
 .ph-area__chev { flex: 0 0 auto; color: var(--y, #FFD100); transition: transform .18s; font-size: 13px; }
 .ph-area[open] .ph-area__chev { transform: rotate(180deg); }
@@ -183,7 +183,7 @@
 /* ── VIEW ALL ────────────────────────────────────────────────────────────── */
 .ph-allbtn {
   width: 100%; min-height: 52px; padding: 15px;
-  background: var(--c2, #1A1A1A); border: 1px solid var(--br); border-radius: 12px;
+  background: var(--c2, #1A1A1A); border: 1px solid var(--br); border-radius:var(--r-lg);
   color: var(--w); font-family: var(--fc); font-size: 14px; font-weight: 800;
   letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
 }
@@ -201,14 +201,14 @@
   color: var(--y, #FFD100); font: inherit; font-size: 13px; cursor: pointer;
   text-decoration: underline; text-underline-offset: 3px;
 }
-.ph-crumb button:focus-visible { outline: 2px solid var(--y); outline-offset: 2px; border-radius: 4px; }
+.ph-crumb button:focus-visible { outline: 2px solid var(--y); outline-offset: 2px; border-radius:var(--r-xs); }
 .ph-crumb__sep { opacity: .5; }
 .ph-crumb__here { color: var(--w); font-weight: 600; }
 
 /* ── EMERGENCY CONTROLS — must never look like routine work ──────────────── */
 .ph-danger {
   border: 2px solid var(--ph-red); background: rgba(239,68,68,.08);
-  border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  border-radius:var(--r-lg); padding: 16px; margin-bottom: 16px;
 }
 .ph-danger__h {
   font-family: var(--fc); font-size: 13px; font-weight: 800; letter-spacing: .14em;
@@ -219,7 +219,7 @@
 /* ── RETIRED / ARCHIVE NOTICE ────────────────────────────────────────────── */
 .ph-retired {
   border: 1px solid rgba(167,139,250,.45); background: rgba(167,139,250,.07);
-  border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  border-radius:var(--r-lg); padding: 16px; margin-bottom: 16px;
   font-family: var(--fb); font-size: 15px; line-height: 1.6; color: #DDD6FE;
 }
 .ph-retired b { color: #fff; }
@@ -234,7 +234,7 @@
    Short enough that somebody will actually read it. Nine questions a committee
    member genuinely asks, not a documentation system. */
 .ph-help { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-.ph-faq { border: 1px solid var(--br); border-radius: 10px; background: var(--c, #161616); }
+.ph-faq { border: 1px solid var(--br); border-radius:var(--r-md); background: var(--c, #161616); }
 .ph-faq summary {
   padding: 15px 16px; min-height: 52px; cursor: pointer; list-style: none;
   display: flex; align-items: center;
@@ -244,7 +244,7 @@
 .ph-faq summary::-webkit-details-marker { display: none; }
 .ph-faq summary::after { content: '+'; margin-left: auto; color: var(--y, #FFD100); font-size: 20px; line-height: 1; }
 .ph-faq[open] summary::after { content: '\2212'; }
-.ph-faq summary:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; border-radius: 10px; }
+.ph-faq summary:focus-visible { outline: 3px solid var(--y); outline-offset: -3px; border-radius:var(--r-md); }
 .ph-faq p {
   margin: 0; padding: 0 16px 16px;
   font-family: var(--fb, system-ui); font-size: 15px; line-height: 1.6; color: var(--gr, #8F8F8F);
@@ -283,7 +283,7 @@
    somebody reading instructions while working wants. */
 .ph-guide {
   flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 44px;
-  padding: 11px 18px; border-radius: 10px; text-decoration: none;
+  padding: 11px 18px; border-radius:var(--r-md); text-decoration: none;
   border: 1px solid rgba(255,209,0,.45); color: var(--y, #FFD100);
   font-family: var(--fc, system-ui); font-size: 14px; font-weight: 800;
   letter-spacing: .03em;
@@ -302,7 +302,7 @@
 .ph-qbtn {
   display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   min-height: 64px; padding: 14px 16px; cursor: pointer; text-align: left;
-  border: 1px solid var(--br, #2A2A2A); border-radius: 12px;
+  border: 1px solid var(--br, #2A2A2A); border-radius:var(--r-lg);
   background: var(--cd, #141414); color: var(--w, #F5F3ED);
   -webkit-tap-highlight-color: transparent;
 }
@@ -321,7 +321,7 @@
 
 /* ── MY RECENT WORK ─────────────────────────────────────────────────────── */
 .ph-recent {
-  border: 1px solid var(--br, #2A2A2A); border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--br, #2A2A2A); border-radius:var(--r-lg); overflow: hidden;
 }
 .ph-rrow {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -349,7 +349,7 @@
 .ph-helprow { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
 .ph-hbtn {
   display: inline-flex; align-items: center; min-height: 44px; padding: 11px 16px;
-  border: 1px solid var(--br, #2A2A2A); border-radius: 10px;
+  border: 1px solid var(--br, #2A2A2A); border-radius:var(--r-md);
   background: var(--cd, #141414); color: var(--w, #F5F3ED); cursor: pointer;
   font-family: var(--fc, system-ui); font-size: 14px; font-weight: 700;
   text-decoration: none; -webkit-tap-highlight-color: transparent;

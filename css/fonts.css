@@ -64,6 +64,29 @@
   --font-d: var(--font-display);   /* was Bebas — unchanged */
   --font-b: var(--font-body);      /* was Barlow — now Manrope */
   --font-c: var(--font-body);      /* was Barlow Condensed — now Manrope */
+
+  /* ── CORNER RADII ─────────────────────────────────────────────────────
+     One scale, five steps, two shapes. The stylesheets between them held
+     seventeen different corner values — 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14,
+     16 and 20px alongside pills and circles — which is not a rounded-corner
+     style, it is the absence of one. Nothing read as deliberate because
+     nothing agreed. The steps below are far enough apart to mean something:
+     a chip is not a button, a button is not a card, a card is not a sheet.
+
+     THIS LIVES HERE, NOT IN style.css, BECAUSE EVERY PAGE LOADS THIS FILE.
+     Nine pages — the guides, the scanner, the print programme, the player
+     manager — pull in fonts.css and icons.css without style.css. A token
+     defined only in style.css resolves to nothing there, and an invalid
+     border-radius computes to 0, so every pill would have quietly squared
+     off on exactly the pages nobody looks at twice. Same reasoning as the
+     type scale above: shared tokens belong in the file everything loads. */
+  --r-xs:     4px;    /* chips, badges, the nav underline, hairline accents */
+  --r-sm:     6px;    /* buttons, inputs, small controls */
+  --r-md:    10px;    /* cards, panels, tiles */
+  --r-lg:    14px;    /* large cards, sheets, modals */
+  --r-xl:    20px;    /* full-bleed containers */
+  --r-pill:  999px;   /* a shape, not a size — never part of the scale */
+  --r-circle: 50%;    /* crests, dots, avatars */
 }
 
 /* ════════ REUSABLE HIERARCHY UTILITIES (token-driven, not arbitrary) ════════ */
@@ -84,13 +107,13 @@
   display: inline-flex; align-items: center; gap: 0.4em;
   font-family: var(--font-body); font-weight: 800; font-size: 0.72em;
   letter-spacing: 0.1em; text-transform: uppercase; line-height: 1;
-  padding: 0.42em 0.72em; border-radius: 999px;
+  padding: 0.42em 0.72em; border-radius:var(--r-pill);
   background: var(--yellow, #FFD100); color: #0d0d0d;
 }
 .t-accent--green { background: var(--green, #1A5C32); color: var(--white, #F5F3ED); }
 .t-accent--live  { background: #EF4444; color: #fff; }
 .t-accent--live::before {
-  content: ''; width: 0.5em; height: 0.5em; border-radius: 50%;
+  content: ''; width: 0.5em; height: 0.5em; border-radius:var(--r-circle);
   background: currentColor; animation: t-pulse 1.6s ease-in-out infinite;
 }
 @keyframes t-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }

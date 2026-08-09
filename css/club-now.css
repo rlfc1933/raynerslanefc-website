@@ -26,7 +26,7 @@
   text-transform:uppercase; color:#fff; display:inline-flex; align-items:center; gap:8px;
 }
 .cn__brand::before {
-  content:''; width:7px; height:7px; border-radius:50%; background:var(--yellow);
+  content:''; width:7px; height:7px; border-radius:var(--r-circle); background:var(--yellow);
 }
 .cn__status {
   font-family:var(--font-c); font-size:10px; font-weight:700; letter-spacing:.14em;
@@ -72,7 +72,7 @@
   .cn__round { font-size:9px; letter-spacing:.1em; }
 }
 .cn__dot {
-  width:9px; height:9px; border-radius:50%; background:#EF4444; flex-shrink:0;
+  width:9px; height:9px; border-radius:var(--r-circle); background:#EF4444; flex-shrink:0;
   box-shadow:0 0 0 0 rgba(239,68,68,.7); animation:cn-pulse 1.6s ease-out infinite;
 }
 @keyframes cn-pulse {
@@ -86,7 +86,7 @@
 .cn__team { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
 .cn__crest { width:60px; height:60px; object-fit:contain; flex:none; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5)); }
 .cn__crest--ini {
-  display:flex; align-items:center; justify-content:center; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; border-radius:var(--r-circle);
   background:var(--card2); border:1px solid var(--border);
   font-family:var(--font-d); font-size:22px; letter-spacing:.03em; color:var(--yellow);
 }
@@ -133,7 +133,7 @@
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   font-family:var(--font-c); font-size:12px; font-weight:800; letter-spacing:.06em;
   text-transform:uppercase; text-decoration:none; cursor:pointer;
-  border-radius:9px; padding:11px 14px; border:1px solid var(--border);
+  border-radius:var(--r-md); padding:11px 14px; border:1px solid var(--border);
   background:rgba(8,8,8,.5); color:#fff; transition:transform .16s var(--ease), border-color .16s, background .16s;
 }
 .cn__btn .ico, .cn__btn svg { width:15px; height:15px; flex:none; }
@@ -160,7 +160,7 @@
 
 /* W/D/L — colour PLUS letter (never colour alone) */
 .cn__wdl { display:inline-flex; align-items:center; justify-content:center; width:1.55em; height:1.55em;
-  border-radius:5px; font-family:var(--font-c); font-weight:800; font-size:12px; letter-spacing:0; color:#0d0d0d; }
+  border-radius:var(--r-sm); font-family:var(--font-c); font-weight:800; font-size:12px; letter-spacing:0; color:#0d0d0d; }
 .cn__wdl--w { background:#22C55E; }
 .cn__wdl--d { background:#FBBF24; }
 .cn__wdl--l { background:#EF4444; color:#fff; }
@@ -189,9 +189,14 @@
      the first thing a phone visitor sees (the identity hero follows below). */
   .hero { min-height:auto; display:flex; flex-direction:column; }
   .hero__left { order:2; }
+  /* flex-direction MATTERS here. As a row, .cn is a flex item sized to its own
+     content: on a phone that content is wider than the card so it filled it by
+     accident, but at tablet widths it settled at ~539px inside a 736px card and
+     left a 200px column of empty green gradient down the right-hand side. As a
+     column it stretches, which is what a card wants at every width. */
   .hero__right.hero__right--cn {
-    order:1; display:flex !important; margin:14px 16px 4px;
-    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    order:1; display:flex !important; flex-direction:column; margin:14px 16px 4px;
+    border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden;
     background:linear-gradient(160deg,#132A1E 0%,#0A1A10 60%,#080808 100%);
   }
   .cn__head { border-radius:0; }

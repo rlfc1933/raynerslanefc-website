@@ -18,7 +18,7 @@
 /* ── status band ─────────────────────────────────────────────────────────── */
 .mc-status {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  padding: 12px 16px; border-radius: 4px; margin-bottom: 18px;
+  padding: 12px 16px; border-radius:var(--r-xs); margin-bottom: 18px;
   background: var(--card); border: 1px solid var(--border);
   font-family: var(--font-c); font-size: 12px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
@@ -28,7 +28,7 @@
 .mc-status--ft        { background: rgba(26,92,50,.18);   border-color: rgba(35,107,60,.55);  color: #6FCF97; }
 .mc-status--off       { color: var(--grey); }
 
-.mc-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+.mc-dot { width: 9px; height: 9px; border-radius:var(--r-circle); background: currentColor; flex: none; }
 .mc-status--live .mc-dot { animation: mcPulse 1.6s ease-in-out infinite; }
 @keyframes mcPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
 @media (prefers-reduced-motion: reduce) { .mc-status--live .mc-dot { animation: none; } }
@@ -41,7 +41,7 @@
 /* ── the scoreline ───────────────────────────────────────────────────────── */
 .mc-board {
   background: linear-gradient(160deg, #12261a 0%, var(--card) 55%, var(--dark) 100%);
-  border: 1px solid var(--border); border-radius: 6px;
+  border: 1px solid var(--border); border-radius:var(--r-sm);
   padding: 28px 20px 24px; margin-bottom: 22px;
 }
 .mc-comp {
@@ -55,7 +55,7 @@
 .mc-crest { width: 68px; height: 68px; object-fit: contain; }
 .mc-crest--ini {
   width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: var(--card2); border: 1px solid var(--border);
+  border-radius:var(--r-circle); background: var(--card2); border: 1px solid var(--border);
   font-family: var(--font-d); font-size: 24px; letter-spacing: .04em; color: var(--muted);
 }
 .mc-name {
@@ -66,7 +66,7 @@
 .mc-ha {
   font-family: var(--font-c); font-size: 9px; font-weight: 700; letter-spacing: .16em;
   text-transform: uppercase; color: var(--muted);
-  border: 1px solid var(--border); border-radius: 2px; padding: 2px 7px;
+  border: 1px solid var(--border); border-radius:var(--r-xs); padding: 2px 7px;
 }
 
 /* The single loudest element on the page. */
@@ -95,7 +95,7 @@
 .mc-events { display: flex; flex-direction: column; gap: 2px; }
 .mc-ev {
   display: grid; grid-template-columns: 56px 26px 1fr auto; align-items: center; gap: 12px;
-  background: var(--card); border: 1px solid var(--border); border-radius: 3px;
+  background: var(--card); border: 1px solid var(--border); border-radius:var(--r-xs);
   padding: 12px 14px;
 }
 .mc-ev--us { border-left: 3px solid var(--yellow); }
@@ -119,7 +119,7 @@
 
 /* Yellow/red cards drawn as cards, not borrowed icons — the icon set has no
    card glyph, and a small rectangle reads correctly at any size. */
-.mc-card { display:inline-block; width:11px; height:15px; border-radius:2px; vertical-align:middle; }
+.mc-card { display:inline-block; width:11px; height:15px; border-radius:var(--r-xs); vertical-align:middle; }
 .mc-card--y { background:var(--yellow); }
 .mc-card--r { background:#E23B3B; }
 .mc-mid { display:flex; align-items:center; justify-content:center; }
@@ -127,7 +127,7 @@
 /* ── line-ups ────────────────────────────────────────────────────────────── */
 .mc-lineups { display: grid; grid-template-columns: 1fr; gap: 18px; }
 @media (min-width: 720px) { .mc-lineups { grid-template-columns: 1fr 1fr; } }
-.mc-xi { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.mc-xi { background: var(--card); border: 1px solid var(--border); border-radius:var(--r-xs); padding: 16px 18px; }
 .mc-xi__h {
   font-family: var(--font-c); font-size: 11px; font-weight: 700; letter-spacing: .16em;
   text-transform: uppercase; color: var(--yellow); margin-bottom: 12px;
@@ -146,7 +146,7 @@
 
 /* ── empty / waiting ─────────────────────────────────────────────────────── */
 .mc-empty {
-  background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+  background: var(--card); border: 1px solid var(--border); border-radius:var(--r-xs);
   padding: 44px 24px; text-align: center;
 }
 .mc-empty__h { font-family: var(--font-d); font-size: 28px; letter-spacing: .03em; color: var(--white); margin-bottom: 10px; }
@@ -200,7 +200,7 @@
   margin-top: 16px;
 }
 .mc-cd-unit {
-  min-width: 62px; padding: 10px 8px; border-radius: 4px;
+  min-width: 62px; padding: 10px 8px; border-radius:var(--r-xs);
   background: var(--card2); border: 1px solid var(--border); text-align: center;
 }
 .mc-cd-num {

@@ -27,11 +27,11 @@
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; margin: -4px -2px 12px;
   background: var(--c2, #1a1a1a); border: 1px solid var(--br, #2a2a2a);
-  border-radius: 10px;
+  border-radius:var(--r-md);
   font-family: var(--fc, system-ui); font-size: 12px; letter-spacing: .04em;
 }
 .md-savebar__dot {
-  width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px;
+  width: 10px; height: 10px; border-radius:var(--r-circle); flex: 0 0 10px;
   background: var(--md-ok);
 }
 .md-savebar[data-state="saving"]  .md-savebar__dot { background: var(--md-info); animation: md-pulse 1s infinite; }
@@ -47,7 +47,7 @@
 @media (min-width: 620px) { .md-summary { grid-template-columns: repeat(4, 1fr); } }
 .md-stat {
   background: var(--c, #161616); border: 1px solid var(--br, #2a2a2a);
-  border-radius: 10px; padding: 12px; text-align: left;
+  border-radius:var(--r-md); padding: 12px; text-align: left;
   min-height: 68px; display: flex; flex-direction: column; justify-content: center;
   cursor: pointer; width: 100%; font: inherit; color: inherit;
   border-left: 3px solid var(--accent, var(--gr));
@@ -60,7 +60,7 @@
 /* ── TODAY ──────────────────────────────────────────────────────────────── */
 .md-today {
   border: 1px solid rgba(255,209,0,.45); background: linear-gradient(135deg, rgba(255,209,0,.10), transparent 60%);
-  border-radius: 12px; padding: 14px; margin-bottom: 14px;
+  border-radius:var(--r-lg); padding: 14px; margin-bottom: 14px;
 }
 .md-today__eyebrow { font-family: var(--fc); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--y, #FFD100); font-weight: 800; }
 .md-today__opp { font-family: var(--fd); font-size: 22px; color: var(--w); margin: 4px 0 2px; line-height: 1.1; }
@@ -90,7 +90,7 @@
 .md-table, .md-table tbody, .md-table tr, .md-table td { display: block; width: 100%; }
 .md-table thead { display: none; }
 .md-table tr {
-  border: 1px solid var(--br); border-radius: 10px; margin-bottom: 8px; padding: 4px 0;
+  border: 1px solid var(--br); border-radius:var(--r-md); margin-bottom: 8px; padding: 4px 0;
   background: var(--c);
 }
 .md-table td { border: none; padding: 5px 12px; display: flex; justify-content: space-between; gap: 12px; }
@@ -118,7 +118,7 @@
 
 /* ── STATUS PILLS ───────────────────────────────────────────────────────── */
 .md-pill {
-  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  display: inline-block; padding: 3px 9px; border-radius:var(--r-pill);
   font-family: var(--fc); font-size: 10px; font-weight: 800; letter-spacing: .08em;
   text-transform: uppercase; white-space: nowrap;
   border: 1px solid currentColor;
@@ -138,7 +138,7 @@
    has to be the first thing you see, not a field buried in a settings tab. */
 .md-operator {
   border: 1px solid rgba(255,209,0,.45); background: rgba(255,209,0,.06);
-  border-radius: 12px; padding: 12px 14px;
+  border-radius:var(--r-lg); padding: 12px 14px;
 }
 .md-operator--empty { border-color: var(--md-warn); background: rgba(245,158,11,.09); }
 .md-operator__lbl {
@@ -147,7 +147,7 @@
 }
 .md-operator input {
   width: 100%; min-height: 52px; font-size: 17px; padding: 12px 14px;
-  background: var(--bg, #0d0d0d); border: 1px solid var(--br); border-radius: 9px; color: var(--w);
+  background: var(--bg, #0d0d0d); border: 1px solid var(--br); border-radius:var(--r-md); color: var(--w);
   font-family: var(--fb, system-ui);
 }
 .md-operator input:focus { outline: 3px solid var(--y); outline-offset: 1px; border-color: var(--y); }
@@ -180,7 +180,7 @@
 .md-tally { display: flex; flex-direction: column; gap: 8px; }
 .md-tally__row {
   display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
-  background: var(--c); border: 1px solid var(--br); border-radius: 12px; padding: 10px 12px;
+  background: var(--c); border: 1px solid var(--br); border-radius:var(--r-lg); padding: 10px 12px;
 }
 .md-tally__row--primary { border-color: rgba(255,209,0,.4); background: rgba(255,209,0,.05); }
 /* The label column must be allowed to shrink, or its min-content width pushes
@@ -190,7 +190,7 @@
 .md-tally__price { font-family: var(--fb); font-size: 11.5px; color: var(--gr); margin-top: 2px; }
 .md-tally__ctrls { display: flex; align-items: center; gap: 8px; }
 .md-tally__btn {
-  width: 64px; height: 64px; min-width: 64px; border-radius: 14px;
+  width: 64px; height: 64px; min-width: 64px; border-radius:var(--r-lg);
   background: var(--c2, #1f1f1f); border: 1px solid var(--br);
   color: var(--w); font-size: 30px; line-height: 1; font-weight: 300;
   display: flex; align-items: center; justify-content: center;
@@ -212,7 +212,7 @@
 }
 .md-tally__count input::-webkit-outer-spin-button,
 .md-tally__count input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.md-tally__count input:focus { outline: 2px solid var(--y); border-radius: 6px; }
+.md-tally__count input:focus { outline: 2px solid var(--y); border-radius:var(--r-sm); }
 
 /* On a phone the label and the three 64px controls cannot share a row: the
    label column collapses and the text wraps one letter per line. Stack them
@@ -229,7 +229,7 @@
 .md-running {
   position: sticky; bottom: 0; z-index: 30;
   display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
-  background: var(--br); border: 1px solid var(--br); border-radius: 12px;
+  background: var(--br); border: 1px solid var(--br); border-radius:var(--r-lg);
   overflow: hidden; margin-top: 14px;
 }
 .md-running__cell { background: var(--c2, #1a1a1a); padding: 12px; text-align: center; }
@@ -239,7 +239,7 @@
 /* ── RECONCILIATION ─────────────────────────────────────────────────────────
    The arithmetic is shown, not asserted. Staff must be able to see WHY the
    system says there is a discrepancy. */
-.md-sum { background: var(--c); border: 1px solid var(--br); border-radius: 10px; padding: 12px; margin: 10px 0; }
+.md-sum { background: var(--c); border: 1px solid var(--br); border-radius:var(--r-md); padding: 12px; margin: 10px 0; }
 .md-sum__row {
   display: flex; justify-content: space-between; gap: 14px; padding: 6px 0;
   font-family: var(--fb); font-size: 13px; color: var(--w);
@@ -247,7 +247,7 @@
 .md-sum__row span:first-child { color: var(--gr); }
 .md-sum__row--total { border-top: 1px solid var(--br); margin-top: 6px; padding-top: 10px; font-weight: 700; }
 .md-sum__row .md-money { font-variant-numeric: tabular-nums; }
-.md-var { border-radius: 10px; padding: 12px; margin: 10px 0; font-family: var(--fb); font-size: 13px; line-height: 1.5; }
+.md-var { border-radius:var(--r-md); padding: 12px; margin: 10px 0; font-family: var(--fb); font-size: 13px; line-height: 1.5; }
 .md-var--ok   { background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.35); color: #A7F3D0; }
 .md-var--warn { background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.40); color: #FCD9A0; }
 .md-var--bad  { background: rgba(239,68,68,.10);  border: 1px solid rgba(239,68,68,.40);  color: #FCA5A5; }
@@ -272,7 +272,7 @@
 
 /* ── ARCHIVE (3 levels, never one giant dropdown) ───────────────────────── */
 .md-arch__season, .md-arch__comp {
-  border: 1px solid var(--br); border-radius: 10px; margin-bottom: 8px; overflow: hidden;
+  border: 1px solid var(--br); border-radius:var(--r-md); margin-bottom: 8px; overflow: hidden;
 }
 .md-arch__head {
   width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
@@ -289,7 +289,7 @@
 
 /* ── EMPTY / LOADING / ERROR ────────────────────────────────────────────── */
 .md-empty, .md-loading, .md-error {
-  text-align: center; padding: 26px 16px; border-radius: 10px;
+  text-align: center; padding: 26px 16px; border-radius:var(--r-md);
   font-family: var(--fb); font-size: 13.5px; line-height: 1.6; border: 1px dashed var(--br);
   color: var(--gr);
 }
@@ -297,7 +297,7 @@
 .md-empty b, .md-error b { color: var(--w); display: block; margin-bottom: 4px; font-family: var(--fc); letter-spacing: .04em; }
 .md-denied {
   border: 1px solid rgba(245,158,11,.4); background: rgba(245,158,11,.07);
-  border-radius: 10px; padding: 14px; font-family: var(--fb); font-size: 13px;
+  border-radius:var(--r-md); padding: 14px; font-family: var(--fb); font-size: 13px;
   line-height: 1.6; color: #FCD9A0;
 }
 .md-denied b { color: var(--w); }
@@ -305,7 +305,7 @@
 /* ── SUB-NAV ────────────────────────────────────────────────────────────── */
 .md-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 2px; }
 .md-tabs button {
-  flex: 0 0 auto; min-height: 44px; padding: 10px 15px; border-radius: 9px;
+  flex: 0 0 auto; min-height: 44px; padding: 10px 15px; border-radius:var(--r-md);
   background: var(--c); border: 1px solid var(--br); color: var(--gr);
   font-family: var(--fc); font-size: 12px; font-weight: 800; letter-spacing: .06em;
   text-transform: uppercase; cursor: pointer; white-space: nowrap;
