@@ -186,3 +186,88 @@
    presenter — that size difference IS the commercial hierarchy. */
 .sq__rail { display: flex; align-items: center; gap: 34px; }
 .sq__raillogo { height: 30px; width: auto; max-width: 150px; object-fit: contain; display: block; opacity: .95; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   GENERALISED — states, opponent light, and the awkward names.
+   The proof was one hand-built page. These rules make the same design work
+   for every fixture and every content state without hardcoding a club.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Opponent counter-light is driven by the confirmed palette, and is simply
+   absent when no human has confirmed one. No guessed colour reaches artwork. */
+.sq__lightR {
+  background: radial-gradient(ellipse at 70% 50%,
+    color-mix(in srgb, var(--sq-opp) 42%, transparent), transparent 66%);
+}
+.sq__grade--solo { mix-blend-mode: normal; opacity: 1; }
+
+/* Crest fallback for a club with no artwork — designed, never a stretched logo. */
+.sq__crest--ini {
+  width: 300px; height: 300px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-circle); background: rgba(255,255,255,.06); border: 3px solid rgba(255,255,255,.18);
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 104px; color: #FFD100;
+}
+
+/* Names: two lines, stepped down, hung from a shared baseline. */
+.sq__team { min-height: 104px; display: flex; align-items: flex-start; justify-content: center; }
+.sq__team--long span { font-size: 42px; display: inline-block; }
+.sq__team--xlong span { font-size: 37px; display: inline-block; }
+
+/* ── FULL TIME: the score becomes the largest thing on the canvas ───────── */
+.sq--score .sq__word { top: 13%; font-size: 92px; letter-spacing: .16em; }
+.sq--score .sq__lock { top: 27%; align-items: center; }
+.sq--score .sq__crest, .sq--score .sq__crest--ini { width: 200px; height: 200px; }
+.sq--score .sq__crest--ini { font-size: 68px; }
+.sq--score .sq__team { min-height: 78px; }
+.sq--score .sq__team span { font-size: 34px; }
+.sq--score .sq__team--long span { font-size: 30px; }
+.sq__scorewrap { flex: 0 0 auto; align-self: center; padding: 0 10px; }
+.sq__score {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 210px; line-height: .84;
+  color: #fff; letter-spacing: .01em; white-space: nowrap; text-shadow: 0 18px 60px rgba(0,0,0,.85);
+}
+.sq__score span { color: var(--sq-lane); padding: 0 12px; }
+
+/* A win is bright and yellow-led. A defeat is stated and dark — no
+   celebration, no apology. A draw sits between them, editorial. */
+.sq--win .sq__score { color: #fff; }
+.sq--loss .sq__score { color: rgba(245,243,237,.82); text-shadow: none; }
+.sq--loss .sq__lightL { opacity: .45; }
+.sq--loss .sq__scrim { background: linear-gradient(180deg, rgba(3,3,3,.9) 0%, rgba(3,3,3,.55) 40%, rgba(3,3,3,.96) 100%); }
+.sq--loss .sq__score span { color: rgba(245,243,237,.5); }
+.sq--draw .sq__score span { color: rgba(245,243,237,.7); }
+
+/* ── POSTPONED: the status is the design; kick-off is demoted ───────────── */
+.sq--status .sq__lock { top: 24%; }
+.sq--status .sq__crest, .sq--status .sq__crest--ini { width: 190px; height: 190px; }
+.sq--status .sq__crest--ini { font-size: 64px; }
+.sq--status .sq__team { min-height: 76px; }
+.sq--status .sq__team span { font-size: 34px; }
+.sq--status .sq__lightL, .sq--status .sq__lightR { opacity: .38; }
+.sq__statusblock { border-top: 7px solid var(--sq-lane); padding-top: 26px; }
+.sq__statusword {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 150px; line-height: .84;
+  letter-spacing: .01em; color: var(--sq-lane); text-shadow: 0 10px 50px rgba(0,0,0,.8);
+}
+.sq__statuswhy {
+  font-family: var(--font-b, 'Manrope', sans-serif); font-size: 27px; line-height: 1.35;
+  color: #fff; margin-top: 16px; max-width: 30ch;
+}
+.sq__statusnext {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 18px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(245,243,237,.66); margin-top: 14px;
+}
+
+/* ── TEAM NEWS: information, so the atmosphere steps back ───────────────── */
+.sq--info .sq__word { font-size: 128px; letter-spacing: .05em; }
+.sq--info .sq__lightL, .sq--info .sq__lightR { opacity: .5; }
+.sq--info .sq__crest, .sq--info .sq__crest--ini { width: 240px; height: 240px; }
+
+/* ── COMPETITION PERSONALITY ─────────────────────────────────────────────
+   Not a logo swap. A cup tie is darker and more restrained; the league is the
+   season's recurring identity and carries more of the club's own colour. */
+.sq--cup-night .sq__scrim { background:
+  linear-gradient(180deg, rgba(2,2,2,.88) 0%, rgba(2,2,2,.18) 28%, rgba(2,2,2,.26) 54%, rgba(2,2,2,.95) 88%),
+  linear-gradient(90deg, rgba(2,2,2,.78) 0%, rgba(2,2,2,0) 46%); }
+.sq--league .sq__lightL { opacity: 1.15; }
+.sq--league .sq__slash { box-shadow: 0 0 70px 16px rgba(255,209,0,.42); }
