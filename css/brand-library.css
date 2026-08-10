@@ -1,0 +1,109 @@
+/* ════════════════════════════════════════════════════════════════════════
+   BRAND LIBRARY — colour as colour, not as hex.
+
+   The point of this screen is that a committee member can check New Bradwell
+   are claret by LOOKING, so the swatches are the loudest thing on each card
+   and the hex codes only exist inside the editor.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.bl__msg,.bl__lede{
+  font-family:var(--font-b,inherit); font-size:13.5px; line-height:1.6;
+  color:var(--lgrey,#b5b5b5); max-width:64ch; margin:0;
+}
+.bl__top{ display:flex; flex-direction:column; gap:14px; margin-bottom:20px; }
+.bl__tabs{ display:flex; flex-wrap:wrap; gap:8px; }
+.bl__tab{
+  min-height:var(--ctl-min-h,44px); padding:8px 15px; cursor:pointer;
+  background:transparent; border:1.5px solid var(--border,#262626);
+  border-radius:var(--r-pill,999px); color:var(--lgrey,#b5b5b5);
+  font-family:var(--font-c,inherit); font-weight:800; font-size:11px;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+.bl__tab:hover{ border-color:var(--yellow,#FFD100); color:var(--yellow,#FFD100); }
+.bl__tab.on{ background:var(--yellow,#FFD100); border-color:var(--yellow,#FFD100); color:#0d0d0d; }
+
+.bl__grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr)); gap:12px; }
+
+.bl-card{
+  background:var(--card,#121212); border:1px solid var(--border,#262626);
+  border-radius:var(--r-lg,14px); padding:14px;
+}
+/* Work still to do sits first and is marked, but quietly — a club whose crest
+   is genuinely monochrome is not an error anyone caused. */
+.bl-card--todo{ border-color:rgba(255,202,107,.32); }
+
+.bl-card__hd{ display:flex; align-items:center; gap:11px; margin-bottom:12px; }
+.bl__crest{ width:40px; height:40px; object-fit:contain; flex:0 0 auto; }
+.bl__crest--ini{
+  display:flex; align-items:center; justify-content:center;
+  border-radius:var(--r-circle); background:var(--card2,#1a1a1a);
+  border:1px solid var(--border,#262626);
+  font-family:var(--font-d,inherit); font-size:13px; color:var(--grey,#8a8a8a);
+}
+.bl-card__id{ flex:1; min-width:0; }
+.bl-card__id h4{
+  margin:0; font-family:var(--font-d,inherit); font-size:15px; letter-spacing:.03em;
+  color:var(--white,#f5f3ed); text-transform:uppercase; line-height:1.1;
+}
+.bl__why{
+  display:block; margin-top:2px; font-family:var(--font-b,inherit);
+  font-size:11px; color:var(--grey,#8a8a8a);
+}
+.bl__st{
+  flex:0 0 auto; font-family:var(--font-c,inherit); font-weight:800; font-size:9.5px;
+  letter-spacing:.1em; text-transform:uppercase; padding:4px 9px;
+  border-radius:var(--r-pill,999px); border:1px solid transparent;
+}
+.bl__st--ok{ color:#7fe0a3; background:rgba(61,220,132,.1); border-color:rgba(61,220,132,.34); }
+.bl__st--locked{ color:var(--yellow,#FFD100); background:rgba(255,209,0,.1); border-color:rgba(255,209,0,.34); }
+.bl__st--todo{ color:#ffca6b; background:rgba(255,202,107,.1); border-color:rgba(255,202,107,.34); }
+
+.bl__sws{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:13px; }
+/* A suggestion is shown differently from a confirmed colour, because they are
+   different kinds of thing and only one of them reaches artwork. */
+.bl__sws--sug .bl__sw i{ border-style:dashed; opacity:.75; }
+.bl__sw{ display:inline-flex; align-items:center; gap:7px; }
+.bl__sw i{
+  width:26px; height:26px; border-radius:var(--r-sm,6px);
+  border:1.5px solid rgba(255,255,255,.22); display:block;
+}
+.bl__sw b{
+  font-family:var(--font-c,inherit); font-weight:700; font-size:10px;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--grey,#8a8a8a);
+}
+.bl__none{ font-family:var(--font-b,inherit); font-size:11.5px; color:var(--muted,#6d6d6d); }
+
+.bl-card__acts{ display:flex; gap:8px; }
+.bl__b{
+  flex:1; min-height:var(--ctl-min-h,44px); cursor:pointer;
+  background:transparent; border:1.5px solid var(--border,#262626);
+  border-radius:var(--r-md,10px); color:var(--lgrey,#b5b5b5);
+  font-family:var(--font-c,inherit); font-weight:800; font-size:11px;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+.bl__b:hover{ border-color:var(--yellow,#FFD100); color:var(--yellow,#FFD100); }
+.bl__b--go{ background:var(--yellow,#FFD100); border-color:var(--yellow,#FFD100); color:#0d0d0d; }
+.bl__b--go:hover{ color:#0d0d0d; filter:brightness(1.06); }
+
+/* Hex lives here and nowhere else. */
+.bl-edit{ display:flex; flex-direction:column; gap:11px; }
+.bl-edit__f{ display:flex; align-items:center; gap:9px; }
+.bl-edit__f > span{
+  flex:1; font-family:var(--font-c,inherit); font-weight:700; font-size:10.5px;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--lgrey,#b5b5b5);
+}
+.bl-edit__f input[type=color]{
+  width:44px; height:34px; padding:0; cursor:pointer;
+  background:transparent; border:1.5px solid var(--border,#262626);
+  border-radius:var(--r-sm,6px);
+}
+.bl-edit__hex{
+  width:92px; padding:8px; font-family:ui-monospace,Menlo,monospace; font-size:12px;
+  background:var(--card2,#1a1a1a); border:1.5px solid var(--border,#262626);
+  border-radius:var(--r-sm,6px); color:var(--white,#f5f3ed);
+}
+
+@media (max-width:600px){
+  .bl__grid{ grid-template-columns:1fr; }
+  .bl-edit__f{ flex-wrap:wrap; }
+}

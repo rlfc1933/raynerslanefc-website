@@ -72,7 +72,7 @@
     { key: 'social', name: 'Social and Marketing',
       ask: 'Are you posting, or making something to post?',
       likely: 'Most often: make a match graphic in Post Studio and share it to your phone.',
-      ids: ['poststudio', 'fwp', 'monthlyfix', 'social', 'fanclub', 'perks'] },
+      ids: ['poststudio', 'brandlibrary', 'fwp', 'monthlyfix', 'social', 'fanclub', 'perks'] },
 
     { key: 'media', name: 'Photos and Media',
       ask: 'Are you adding photographs?',
@@ -135,6 +135,12 @@
     { id: 'poststudio', name: 'Post Studio', effect: 'download',
       desc: 'Make match-day graphics for social media.',
       roles: ['Marketing/Media', 'Committee'] },
+
+    // Opponent colours are a property of the artwork, so this belongs beside
+    // the tool that makes it rather than in a settings screen nobody opens.
+    { id: 'brandlibrary', name: 'Club Colours', effect: 'internal',
+      desc: 'The colours used for each opponent on match graphics. Confirm a club’s colours so they can be used.',
+      roles: ['Marketing/Media', 'Committee', 'Club Management', 'Chairman', 'V Chairman'] },
 
     { id: 'fwp', name: 'Match Tweet Cards', effect: 'download',
       desc: 'Ready-made match graphics sized for X/Twitter.',

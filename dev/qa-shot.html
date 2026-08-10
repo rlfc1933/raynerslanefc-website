@@ -128,6 +128,7 @@
         });
       });
     },
+    'brand-library': function (w) { return w.BrandLibrary && w.BrandLibrary.init(); },
     'prepare-match': function (w) {
       return Promise.all([
         w.fetch('data/club-brands.json').then(function (r) { return r.json(); })

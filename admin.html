@@ -32,6 +32,10 @@
   <script src="js/live-content-events.js"></script>
   <script src="js/live-content-desk.js"></script>
   <script src="js/live-prefill.js"></script>
+  <!-- Opponent colours, and who says so. Reads data/club-brands.json and saves
+       through the portal's own save path, which the server authorises. -->
+  <link rel="stylesheet" href="css/brand-library.css">
+  <script src="js/brand-library.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -1201,6 +1205,12 @@
            Tuesday evening shows the workspace and nothing about live football. -->
       <div id="live-content-desk"></div>
       <div id="pm-hub"></div>
+    </div>
+
+    <!-- BRAND LIBRARY -->
+    <div class="panel" id="panel-brandlibrary">
+      <h2 class="ph">Club colours</h2>
+      <div id="brand-library"></div>
     </div>
 
     <!-- MATCH DAY -->
@@ -4502,6 +4512,7 @@ function openPanel(name) {
   // button) returns to the dashboard instead of leaving the admin entirely.
   try { if (!(history.state && history.state.panel === name)) history.pushState({ panel: name }, '', '#' + name); } catch (e) {}
   if (name === 'preparematch') { try { PrepareMatch.init(); } catch (e) {} }
+  if (name === 'brandlibrary') { try { BrandLibrary.init(); } catch (e) {} }
   if (name === 'squad')     renderSquad();
   if (name === 'committee') { renderCommittee(); loadOfficials(); }
   if (name === 'sponsors')  renderSponsors();
