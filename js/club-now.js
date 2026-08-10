@@ -222,6 +222,11 @@
         var ko = ukEpoch(md.date, md.kickoff);
         if (st === 'armed' && !isNaN(ko) && Date.now() >= ko && Date.now() < ko + 150 * 60000) st = 'live';
         md._state = st; md.isLive = (st === 'live');
+        // Publish the resolved state for presentation-only consumers
+        // (js/game-day.js). This block stays the single authority; anything
+        // that needs the state reads it from here instead of deriving a second
+        // opinion that can drift from this one.
+        try { if (root) root.setAttribute('data-match-state', st); } catch (e) {}
         return md;
       });
   }

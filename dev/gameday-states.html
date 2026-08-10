@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<title>Game Day States — dev</title>
+<style>body{margin:0;background:#111;color:#ddd;font:13px 'Manrope',system-ui;padding:18px}
+h1{font:700 13px/1 'Manrope';letter-spacing:.16em;text-transform:uppercase;color:#FFD100}
+.g{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
+.c{width:430px}.l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8b9296;margin-bottom:6px}
+iframe{width:430px;height:300px;border:1px solid #2b2e31;background:#000}</style></head><body>
+<h1>Game Day — simulated states</h1>
+<div style="color:#8b9296;font-size:12px">Dev simulation only. Production fixture truth is never modified — the state is forced on the rendered page after load.</div>
+<div class="g" id="g"></div>
+<script>
+// Each state is forced client-side inside the frame, so no production data moves.
+var STATES=['(off — normal day)','pre','live','ft-win','ft-draw','ft-loss','off'];
+document.getElementById('g').innerHTML=STATES.map(function(s,i){
+  return '<div class="c"><div class="l">'+s+'</div><iframe data-s="'+s+'" src="/index.html"></iframe></div>';}).join('');
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    document.querySelectorAll('iframe').forEach(function(f){
+      var s=f.getAttribute('data-s'); if(s.indexOf('(')===0) return;
+      try{
+        var d=f.contentDocument.documentElement;
+        d.classList.add('gameday','gameday--'+s,'gameday--home','gameday--duotone');
+        d.style.setProperty('--gd-lane','#FFD100');
+        d.style.setProperty('--gd-opp','#A73666');
+        d.style.setProperty('--gd-bed','#1A5C32');
+      }catch(e){}
+    });
+    window.__ok=true;
+  },5000);
+});
+</script></body></html>

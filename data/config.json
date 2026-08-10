@@ -4,22 +4,59 @@
     "heading": "At the Gate",
     "sub": "Pay on the day — cash or card accepted",
     "prices": [
-      { "label": "General Admission", "price": "£9" },
-      { "label": "Concessions", "price": "£6", "note": "Over-65s, students" },
-      { "label": "Under 16s", "price": "£2" },
-      { "label": "Under 10s", "price": "Free" }
+      {
+        "label": "General Admission",
+        "price": "£9"
+      },
+      {
+        "label": "Concessions",
+        "price": "£6",
+        "note": "Over-65s, students"
+      },
+      {
+        "label": "Under 16s",
+        "price": "£2"
+      },
+      {
+        "label": "Under 10s",
+        "price": "Free"
+      }
     ]
   },
   "seasonTicket": {
     "season": "2026/27",
     "prices": [
-      { "label": "Adults", "price": "£65", "note": "Ages 18–64" },
-      { "label": "Concessions", "price": "£55", "note": "Over-65s" },
-      { "label": "Under 16s", "price": "£15", "note": "" },
-      { "label": "Under 10s", "price": "Free", "note": "" }
+      {
+        "label": "Adults",
+        "price": "£65",
+        "note": "Ages 18–64"
+      },
+      {
+        "label": "Concessions",
+        "price": "£55",
+        "note": "Over-65s"
+      },
+      {
+        "label": "Under 16s",
+        "price": "£15",
+        "note": ""
+      },
+      {
+        "label": "Under 10s",
+        "price": "Free",
+        "note": ""
+      }
     ],
-    "earlyBird": { "prices": "£60 / £50 / £12", "deadline": "2026-07-31", "label": "before 31 July 2026" },
-    "includes": ["Combined Counties Premier North", "Combined Counties League Cup", "Middlesex County Senior Cup"],
+    "earlyBird": {
+      "prices": "£60 / £50 / £12",
+      "deadline": "2026-07-31",
+      "label": "before 31 July 2026"
+    },
+    "includes": [
+      "Combined Counties Premier North",
+      "Combined Counties League Cup",
+      "Middlesex County Senior Cup"
+    ],
     "excludes": "Not valid for FA competitions — the Emirates FA Cup & Isuzu FA Vase",
     "contactEmail": "info@raynerslanefc.co.uk",
     "enquireSubject": "Season Ticket 2026/27"
@@ -28,9 +65,18 @@
   "_kitCorrection": "The home kit is YELLOW / YELLOW / YELLOW. It was briefly recorded here with green shorts, which was wrong and was corrected by the club. The goalkeeper colours are NOT recorded because the club has not confirmed them — that field stays null and the programme prints 'To be confirmed'. An invented goalkeeper colour is exactly the kind of plausible detail that reaches print unchallenged, so it is left empty on purpose. Away colours are unconfirmed for the same reason.",
   "kit": {
     "home": {
-      "shirt": { "name": "Yellow", "hex": "#FFD100" },
-      "shorts": { "name": "Yellow", "hex": "#FFD100" },
-      "socks": { "name": "Yellow", "hex": "#FFD100" },
+      "shirt": {
+        "name": "Yellow",
+        "hex": "#FFD100"
+      },
+      "shorts": {
+        "name": "Yellow",
+        "hex": "#FFD100"
+      },
+      "socks": {
+        "name": "Yellow",
+        "hex": "#FFD100"
+      },
       "goalkeeper": null
     },
     "away": {
@@ -40,5 +86,9 @@
       "goalkeeper": null
     }
   },
-  "updatedAt": "2026-08-07T00:00:00.000Z"
+  "updatedAt": "2026-08-10T03:00:00.000Z",
+  "gameDay": {
+    "enabled": true,
+    "_note": "KILL SWITCH. Set enabled:false to turn game-day homepage theming off everywhere, immediately, without a deploy — data/config.json is fetched at runtime. The homepage falls back to the normal Rayners Lane theme. js/game-day.js checks this BEFORE doing any other work, and any error anywhere in that file also tears the theme down, because a cosmetic feature must never be able to break the club front page on a matchday."
+  }
 }

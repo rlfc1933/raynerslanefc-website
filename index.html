@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
   <link rel="stylesheet" href="css/club-now.css">
+  <link rel="stylesheet" href="css/game-day.css">
   <!-- three.js for the cinematic WebGL hero (free CDN, ES module). If it fails to
        load, the hero degrades gracefully to its existing markup. -->
   <script type="importmap">
@@ -756,6 +757,13 @@
 <script src="js/match-time.js"></script>
 <script src="js/main.js"></script>
 <script src="js/club-now.js?v=8" defer></script>
+<!-- Game day: reads the fixture campaign and the match state that
+     club-now.js already owns, and themes the page from them. It decides no
+     football truth, and any failure tears the theme down rather than
+     breaking the page. Kill switch: data/config.json gameDay.enabled. -->
+<script src="js/brand-palette.js" defer></script>
+<script src="js/creative-campaign.js" defer></script>
+<script src="js/game-day.js" defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     renderLatestNews();

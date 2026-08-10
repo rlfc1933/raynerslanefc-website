@@ -1,0 +1,97 @@
+/* ════════════════════════════════════════════════════════════════════════
+   GAME DAY — the homepage reacting to the fixture.
+
+   Restraint is the whole point. The temptation on a matchday is to repaint the
+   site; that makes it look like the opposition's website and destroys the
+   thing supporters recognise. Rayners Lane stays the master brand and the
+   opponent arrives as counter-LIGHT — glow, edge, accent — never as fill.
+
+   Everything here is additive and scoped under .gameday, so removing that one
+   class returns the page to normal exactly. That is what makes the kill switch
+   and the error fallback trustworthy rather than hopeful.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── the ambient layer ─────────────────────────────────────────────────── */
+/* A single fixed light behind everything. One element, GPU-cheap, no layout
+   cost, and it sits behind content because a matchday should be felt before
+   it is read. */
+.gameday body::before {
+  content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(120% 78% at 6% 0%,
+      color-mix(in srgb, var(--gd-lane, #FFD100) 13%, transparent), transparent 62%),
+    radial-gradient(96% 66% at 98% 8%,
+      color-mix(in srgb, var(--gd-opp, transparent) 15%, transparent), transparent 60%);
+  opacity: 0; transition: opacity 1.4s ease;
+}
+.gameday body::before { opacity: 1; }
+
+/* Only when the opponent's palette is CONFIRMED does the second light exist.
+   An unconfirmed club gets a Lane-led page, which is the honest default. */
+.gameday:not(.gameday--duotone) body::before {
+  background: radial-gradient(120% 78% at 6% 0%,
+    color-mix(in srgb, var(--gd-lane, #FFD100) 13%, transparent), transparent 62%);
+}
+
+/* ── the fixture bar ───────────────────────────────────────────────────── */
+.gameday .cn__head {
+  background: linear-gradient(90deg,
+    var(--gd-bed, #1A5C32) 0%,
+    color-mix(in srgb, var(--gd-bed, #1A5C32) 78%, var(--gd-opp, transparent)) 100%) !important;
+}
+
+/* ── state ─────────────────────────────────────────────────────────────── */
+
+/* PRE-MATCH — anticipation. The lightest touch of the four. */
+.gameday--pre .cn { position: relative; }
+
+/* LIVE — the only state allowed to move. A slow breath on the ambient light,
+   never a flash, never a fake clock. */
+.gameday--live body::before { animation: gd-breathe 6s ease-in-out infinite alternate; }
+@keyframes gd-breathe { from { opacity: .82; } to { opacity: 1; } }
+/* The header is a space-between flex row, so margin-left:auto on the badge
+   collapsed the gap and ran it into the competition name. Give it its own
+   spacing instead of fighting the parent's layout. */
+.gameday--live .cn__head { gap: 14px; }
+.gameday--live .cn__head::after {
+  content: 'LIVE'; flex: 0 0 auto;
+  font-family: var(--font-c, sans-serif); font-size: 11px; font-weight: 800;
+  letter-spacing: .22em; color: #fff;
+  padding: 3px 10px; background: #C81E1E; border-radius: var(--r-xs);
+}
+
+/* FULL TIME — the result colours the page. A win warms it, a defeat cools and
+   quietens it. Neither is loud; the club still has to look like itself the
+   morning after either one. */
+.gameday--ft-win body::before {
+  background: radial-gradient(130% 84% at 12% 0%,
+    color-mix(in srgb, var(--gd-lane, #FFD100) 20%, transparent), transparent 64%);
+}
+.gameday--ft-draw body::before { opacity: .72; }
+.gameday--ft-loss body::before {
+  opacity: .42;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(120,130,140,.10), transparent 60%);
+}
+
+/* POSTPONED — no celebration, and it must not read as matchday. */
+.gameday--off body::before {
+  opacity: .5;
+  background: radial-gradient(110% 66% at 50% 0%,
+    color-mix(in srgb, var(--gd-lane, #FFD100) 9%, transparent), transparent 58%);
+}
+
+/* ── competition personality, carried through from the artwork ─────────── */
+.gameday--cup-night body::before { filter: saturate(.88) contrast(1.05); }
+
+/* ── accessibility and performance ─────────────────────────────────────── */
+/* Score and status legibility must never be traded for atmosphere: the
+   ambient layer sits at z-index -2 and touches no text colour anywhere. */
+@media (prefers-reduced-motion: reduce) {
+  .gameday body::before { transition: none; animation: none !important; }
+}
+/* On a phone the ambient light is cheap but not free, and the hero already
+   carries a photograph. Keep it, halve it. */
+@media (max-width: 600px) {
+  .gameday body::before { opacity: .6; }
+  .gameday--live body::before { animation: none; }
+}
