@@ -26,6 +26,12 @@
   <script src="js/competition-brand.js?v=1"></script>
   <script src="js/brand-palette.js"></script>
   <script src="js/prepare-match.js"></script>
+  <!-- The live half: the club's own match_events, and the bridge that carries
+       an event's facts into Studio so nobody retypes a scorer during a game. -->
+  <link rel="stylesheet" href="css/live-content-desk.css">
+  <script src="js/live-content-events.js"></script>
+  <script src="js/live-content-desk.js"></script>
+  <script src="js/live-prefill.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -1191,6 +1197,9 @@
          here and no football truth is written. -->
     <div class="panel" id="panel-preparematch">
       <h2 class="ph">Prepare match</h2>
+      <!-- The live desk mounts here during a match. Empty otherwise, so a
+           Tuesday evening shows the workspace and nothing about live football. -->
+      <div id="live-content-desk"></div>
       <div id="pm-hub"></div>
     </div>
 
