@@ -22,8 +22,25 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* The generated plate: light, fog, grain, beams, pitch geometry. */
+/* LAYER 1 — the generated photographic plate, when one exists. */
+.cx-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* LAYER 2 — the SVG. On its own it carries the whole frame. Over a photograph
+   it becomes a GRADING pass: club colour, grain and vignette laid on top of
+   real depth. screen blend keeps the photograph's blacks intact while the
+   coloured light adds; without it the SVG's own dark bed would flatten the
+   picture it is supposed to be grading. */
 .cx-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cx-plate--grade { mix-blend-mode: screen; opacity: .82; }
+
+/* A photograph brings its own brightness, so the factual layer needs a floor
+   to stay legible over it — a soft top-and-bottom scrim, not a flat overlay. */
+.cx-photo ~ .cx-inner::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(4,4,4,.86) 0%, rgba(4,4,4,.30) 32%,
+              rgba(4,4,4,.34) 62%, rgba(4,4,4,.92) 100%);
+}
+.cx-inner > * { position: relative; }
 
 /* THE GHOST CREST. Enormous, barely there, anchored off-centre so it reads as
    a watermark in the fabric of the image rather than as a logo someone forgot

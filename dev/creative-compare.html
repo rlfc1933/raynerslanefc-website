@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Generative Comparison — Rayners Lane FC</title>
+<!-- DEV ONLY. Raw plate vs procedural vs final composite, side by side, so the
+     question "what does the generative provider actually add" has a visual
+     answer rather than a written one. Nothing here is locked automatically. -->
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/creative-engine.css">
+<style>
+ body{margin:0;background:#141618;color:#e8e8e8;font:14px/1.5 'Manrope',system-ui,sans-serif}
+ header{background:#0d0f10;border-bottom:1px solid #2a2d30;padding:16px 22px;position:sticky;top:0;z-index:50}
+ h1{margin:0;font:700 15px/1 'Manrope';letter-spacing:.16em;text-transform:uppercase;color:#FFD100}
+ .sub{color:#8d9296;font-size:12.5px;margin-top:6px}
+ .row{padding:24px 22px;border-bottom:1px solid #232629}
+ .rowhead{font:700 13px/1 'Manrope';letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:4px}
+ .note{color:#8d9296;font-size:12.5px;max-width:92ch;margin-bottom:16px}
+ .trio{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+ .col{}
+ .lab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#7f8589;margin-bottom:7px}
+ .lab b{color:#FFD100}
+ .shell{overflow:hidden;border:1px solid #2a2d30;background:#000}
+ .shell>*{transform-origin:top left}
+ img.raw{display:block}
+</style></head><body>
+<header><h1>Generative Comparison — New Bradwell St Peter</h1>
+<div class="sub">Isuzu FA Vase · First Qualifying Round · Sat 15 Aug, 3:00 PM · Tithe Farm — CUP_NIGHT. Raw plate / procedural only / final composite. Nothing locked.</div></header>
+<main id="out"></main>
+
+<script src="../js/brand-palette.js"></script>
+<script src="../js/competition-brand.js"></script>
+<script src="../js/creative-svg.js"></script>
+<script src="../js/creative-campaign.js"></script>
+<script src="../js/creative-recipes.js"></script>
+<script src="../js/creative-brief.js"></script>
+<script src="../js/creative-compose.js"></script>
+<script>
+(async function(){
+  const j=p=>fetch('../'+p+'?t='+Date.now()).then(r=>r.json());
+  const [brands,comps,partners,fixtures,cache]=await Promise.all([
+    j('data/club-brands.json'),j('data/competitions.json'),j('data/partners.json'),
+    j('data/fixtures.json'),j('data/creative-cache.json')]);
+  CreativeCompose.setAssetBase('../');
+  CreativeCampaign.configure({brands,comps,partners,palette:BrandPalette,brand:CompetitionBrand});
+
+  const fx=(fixtures.fixtures||[]).filter(f=>f.opponent==='New Bradwell St Peter')[0];
+  const c=CreativeCampaign.build(fx,'matchday');
+  const rk=CreativeRecipes.pick(c).key;
+  const camp=cache.campaigns['c-20260815-new-bradwell-st-peter'];
+  const out=document.getElementById('out');
+
+  function block(fmtName,cand,scale){
+    const F=CreativeCampaign.format(fmtName);
+    const base=CreativeRecipes.spec(c,F);
+    base._layout=CreativeRecipes.recipes[base._recipe].layout;
+    // procedural-only
+    const proc=Object.assign({},base);
+    // hybrid
+    const hyb=Object.assign({},base,{_photo:cand.file});
+    const w=Math.round(F.w*scale),h=Math.round(F.h*scale);
+    const sh=(html)=>`<div class="shell" style="width:${w}px;height:${h}px">${html}</div>`;
+    return `<div class="row">
+      <div class="rowhead">${F.name} — candidate ${cand.id.toUpperCase()} <span style="color:#7f8589;font-weight:400">(${cand.model}, ${cand.credits} cr)</span></div>
+      <div class="note">${cand.note}</div>
+      <div class="trio">
+        <div class="col"><div class="lab">1 · Raw generative plate</div>
+          <img class="raw" src="../${cand.file}" style="width:${w}px;height:${h}px;object-fit:cover;border:1px solid #2a2d30"></div>
+        <div class="col"><div class="lab">2 · Procedural only <b>(no generation)</b></div>${sh(CreativeCompose.html(c,fmtName,proc))}</div>
+        <div class="col"><div class="lab">3 · <b>Final composite</b></div>${sh(CreativeCompose.html(c,fmtName,hyb))}</div>
+      </div></div>`;
+  }
+
+  let html='';
+  (camp.candidates.square||[]).forEach(cd=>{ html+=block('square',cd,0.34); });
+  (camp.candidates.story||[]).forEach(cd=>{ html+=block('story',cd,0.24); });
+  out.innerHTML=html;
+  document.querySelectorAll('.shell>*').forEach(el=>{
+    const s=el.closest('.shell'); const sc=parseFloat(s.style.width)/el.offsetWidth;
+    el.style.transform=`scale(${sc})`;
+  });
+  window.__ok=true;
+})();
+</script></body></html>

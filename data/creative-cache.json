@@ -1,0 +1,27 @@
+{
+  "_note": "GENERATED BACKGROUND PLATES, CACHED PER CAMPAIGN. A plate is generated once and reused by every content state of that fixture — Matchday, Lineup, Half Time, Full Time all sit on the same artwork, which is what makes them read as one campaign and also what stops the club paying for the same image four times. `locked` means a human chose this candidate; nothing may overwrite a locked plate automatically. Plates contain NO text, crests, sponsor marks or scores — those are deterministic overlays. Provenance is recorded so it is always clear which artwork was machine-generated.",
+  "campaigns": {
+    "c-20260815-new-bradwell-st-peter": {
+      "fixture": "Rayners Lane v New Bradwell St Peter, 15 Aug 2026, Isuzu FA Vase 1Q",
+      "recipe": "CUP_NIGHT",
+      "locked": null,
+      "candidates": {
+        "square": [
+          { "id": "a", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-a.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Overcast daylight through a goal net. Beautiful photograph, ignored the lighting brief, and the net texture competes across the whole frame." },
+          { "id": "b", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-b.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Floodlight bloom, wet grass foreground, dark quiet upper third. Best negative-space compliance. Cool neutral base, which suits our grading layer." },
+          { "id": "seedream", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-seedream.jpg", "model": "seedream_v4_5", "credits": 1, "note": "Followed the brief most literally — pylon left, gold beam, claret counter-light right. Reads as AI concept art, and baked a flat magenta wash into the right side, which is the failure we explicitly briefed against." }
+        ],
+        "story": [
+          { "id": "a", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-story-a.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Genuinely composed vertical: pylon through the upper frame, terraces flanking, white line leading up the centre axis." }
+        ],
+        "x": []
+      },
+      "notGenerated": {
+        "story-b": "blocked — daily generation limit on the grace period",
+        "x-a": "blocked — daily generation limit",
+        "x-b": "blocked — daily generation limit"
+      }
+    }
+  },
+  "updatedAt": "2026-08-10T01:00:00.000Z"
+}

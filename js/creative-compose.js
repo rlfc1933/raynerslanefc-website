@@ -133,7 +133,17 @@
     var L = spec._layout || {};
     var t = C.palette.tokens || {};
     var SVG = mod('CreativeSVG');
+    /* HYBRID PLATE.
+       When a generated photographic plate exists for this campaign it becomes
+       LAYER 1 and the SVG drops to LAYER 2 — a grading pass that carries the
+       club colour, grain and vignette over the photograph rather than trying to
+       BE the photograph. That division is the whole point of the hybrid: the
+       image model supplies depth, wet grass and real light falloff, which SVG
+       cannot fake; the SVG supplies deterministic club colour, which the image
+       model keeps ignoring. With no plate the SVG carries the frame alone,
+       exactly as before, so nothing regresses offline. */
     var plate = SVG && SVG.plateURI ? SVG.plateURI(spec) : '';
+    var photo = spec._photo ? asset(spec._photo) : null;
     var H = headlineFor(C);
 
     var isStory = F.name === 'Story';
@@ -173,7 +183,8 @@
         'style="width:' + F.w + 'px;height:' + F.h + 'px;' +
         '--cx-accent:' + (t.accent || '#FFD100') + ';--cx-ink:' + (t.headline || '#F5F3ED') + ';' +
         '--cx-safe-top:' + F.safeTop + 'px;--cx-safe-bottom:' + F.safeBottom + 'px">' +
-        '<img class="cx-plate" src="' + plate + '" alt="">' +
+        (photo ? '<img class="cx-photo" src="' + esc(photo) + '" alt="">' : '') +
+        '<img class="cx-plate' + (photo ? ' cx-plate--grade' : '') + '" src="' + plate + '" alt="">' +
         '<img class="cx-ghost" src="' + esc(asset('img/badge.png')) + '" alt="" style="width:' + ghostPx + 'px;opacity:' + (L.ghostCrest || 0.05) + '">' +
         '<div class="cx-inner">' +
           '<div class="cx-top">' +
