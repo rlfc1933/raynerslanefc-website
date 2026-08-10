@@ -61,7 +61,11 @@
     return Promise.all([
       fetch('data/club-brands.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch('data/competitions.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
-      fetch('data/partners.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      fetch('data/partners.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      // The generated campaign plates. Without this the Studio draws the
+      // procedural fallback for every fixture, including the ones the club
+      // has real photography for — which is exactly what it was doing.
+      global.CreativePlates ? global.CreativePlates.load() : Promise.resolve(null)
     ]).then(function (r) {
       C.configure({
         brands: r[0], comps: r[1], partners: r[2],
@@ -135,6 +139,10 @@
         'px;overflow:hidden;background:#080808';
       card.innerHTML = SQ.html(campaign, { format: fmt });
       card.setAttribute('data-cinematic', state);
+      // SCALE THE PREVIEW. The old renderer did this at the end of psRender();
+      // returning early from here skipped it entirely and left a 1080px card
+      // overflowing the stage with its headline clipped off the top.
+      try { if (typeof global.psFitCard === 'function') global.psFitCard(size.w, size.h); } catch (e) {}
       return true;
     } catch (e) {
       // A creative failure must never leave the committee looking at nothing.

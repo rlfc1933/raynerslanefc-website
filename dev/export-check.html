@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>Studio export check (dev only)</title>
+<!-- DEV ONLY. Renders the REAL CreativeSquare card with the REAL production CSS
+     into a VISIBLE page, then runs the same html2canvas call the Studio export
+     uses. A hidden panel measures 0x0 and every gradient then has a zero radius,
+     which is a property of the test, not the product — so this page keeps the
+     card on screen. This is the check that would have caught the colour-function
+     crash before a volunteer met it. -->
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/creative-engine.css">
+<link rel="stylesheet" href="../css/creative-square-matchday.css">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="../js/competition-brand.js"></script>
+<script src="../js/brand-palette.js"></script>
+<script src="../js/creative-svg.js"></script>
+<script src="../js/creative-campaign.js"></script>
+<script src="../js/creative-square.js"></script>
+<style>body{background:#0a0a0a;color:#ddd;font:13px/1.7 ui-monospace,Menlo,monospace;padding:18px}
+b{color:#FFD100}.ok{color:#7fe0a3}.bad{color:#ff8080}#stage{position:absolute;left:-20000px;top:0}
+img.t{max-width:190px;border:1px solid #333;margin:6px 8px 0 0;vertical-align:top}</style>
+</head><body>
+<h1 style="font-size:15px">Studio export check — real renderer, real CSS, visible</h1>
+<div id="out">running…</div>
+<div id="stage"></div>
+<script>
+var FORMATS=[['square',1080,1080],['portrait',1080,1350],['story',1080,1920],['x',1600,900]];
+var out=document.getElementById('out'), stage=document.getElementById('stage'), log=[];
+function say(){out.innerHTML=log.join('<br>');}
+function J(u){return fetch(u).then(function(r){return r.ok?r.json():null}).catch(function(){return null});}
+Promise.all([J('../data/club-brands.json'),J('../data/competitions.json'),
+             J('../data/partners.json'),J('../data/fixtures.json')]).then(function(r){
+  CreativeSquare.setAssetBase('../');
+  CreativeCampaign.configure({brands:r[0],comps:r[1],partners:r[2],
+    palette:window.BrandPalette,brand:window.CompetitionBrand});
+  var fx=(r[3].fixtures||[]).filter(function(f){return f.competitionId==='fa-vase'})[0];
+  if(!fx){log.push('<span class=bad>no FA Vase fixture</span>');say();return;}
+  var c=CreativeCampaign.build(fx,'matchday');
+  var i=0,pass=0;
+  (function next(){
+    if(i>=FORMATS.length){log.push('<b>'+pass+'/'+FORMATS.length+' exported</b>');
+      document.title='EXPORT '+pass+'/'+FORMATS.length;say();return;}
+    var F=FORMATS[i++];
+    stage.innerHTML=CreativeSquare.html(c,{format:F[0]});
+    var node=stage.firstChild;
+    (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){
+      html2canvas(node,{backgroundColor:null,useCORS:true,scale:1,width:F[1],height:F[2]})
+        .then(function(cv){
+          var ok=cv.width===F[1]&&cv.height===F[2];
+          // Is there anything actually drawn, or a correctly-sized blank?
+          var x=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data, lit=0;
+          for(var p=0;p<x.length;p+=4*997){ if(x[p]>18||x[p+1]>18||x[p+2]>18) lit++; }
+          var inked=lit>40;
+          if(ok&&inked)pass++;
+          log.push((ok&&inked?'<span class=ok>PASS</span>':'<span class=bad>FAIL</span>')+' '+F[0]+
+            ' → <b>'+cv.width+'x'+cv.height+'</b> '+(inked?'has content':'<span class=bad>BLANK</span>'));
+          log.push('<img class=t src="'+cv.toDataURL('image/png')+'">');say();next();
+        })
+        .catch(function(e){log.push('<span class=bad>THREW</span> '+F[0]+' — '+e.message);say();next();});
+    });
+  })();
+});
+</script></body></html>

@@ -7591,16 +7591,54 @@ function psRender() {
   inner = inner.replace(/#fff(?![0-9a-fA-F])/g, t.text).replace(/rgba\(255,\s*255,\s*255,[^)]*\)/g, t.soft);
   card.innerHTML = inner;
   psAutoFit(card); // shrink any long free-text (scorers, manager quote, announce body) to fit
-  // scale to fit the stage, reserving the exact scaled footprint so nothing leaks
+  psFitCard(W, H);
+}
+
+/**
+ * Scale the preview so the WHOLE designed canvas is visible.
+ *
+ * TWO BUGS LIVED HERE.
+ *
+ * 1. This used to sit at the bottom of psRender(), so when the cinematic
+ *    renderer took over and returned early it never ran at all — the card kept
+ *    its authored 1080px and the headline was clipped off the top of the
+ *    stage. Both render paths now call this, which is why it is a function.
+ *
+ * 2. It fitted on WIDTH only. That is fine for a square but wrong for a story
+ *    at 1080×1920, which then ran far taller than the screen. A design preview
+ *    must CONTAIN — fit both axes, never crop — because the point of it is to
+ *    show the operator everything that will be in the file.
+ *
+ * The card keeps its authored pixel size and is only transformed, because the
+ * export path re-reads those dimensions and must still get 1080×1080.
+ */
+function psFitCard(W, H) {
+  var card = document.getElementById('ps-card');
   var wrap = document.getElementById('ps-card-wrap');
+  if (!card || !wrap) return;
   var stage = wrap.parentNode;
-  var avail = (stage.clientWidth || 360) - 32;
-  var k = Math.min(1, avail / W);
+  var availW = Math.max(160, (stage.clientWidth || 360) - 32);
+  // Leave the operator the controls below the preview; a story that fills the
+  // whole screen means scrolling past it to reach Download.
+  var availH = Math.max(240, Math.round((window.innerHeight || 800) * 0.62));
+  var k = Math.min(1, availW / W, availH / H);
   card.style.position = 'absolute'; card.style.top = '0'; card.style.left = '0';
   card.style.transformOrigin = 'top left';
   card.style.transform = 'scale(' + k + ')';
-  wrap.style.cssText = 'position:relative;width:' + (W * k) + 'px;height:' + (H * k) + 'px;margin:0 auto;overflow:hidden';
+  wrap.style.cssText = 'position:relative;width:' + Math.round(W * k) + 'px;height:' +
+    Math.round(H * k) + 'px;margin:0 auto';
+  return k;
 }
+
+// A resized window changes what "fits" means, and the preview should not need
+// a re-render to stay whole.
+window.addEventListener('resize', function () {
+  try {
+    var c = document.getElementById('ps-card');
+    if (!c || !c.style.width) return;
+    psFitCard(parseFloat(c.style.width), parseFloat(c.style.height));
+  } catch (e) {}
+});
 
 function psFname() { return 'rayners-lane-' + PS.type + '-' + PS.size + '.png'; }
 
@@ -7619,18 +7657,61 @@ function psBuildBlob(cb) {
     if (chip) chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
-  toast('Building your post…');
+  // One export at a time. Two taps used to start two captures over the same
+  // node, and the second restore() could land on the first's stripped render.
+  if (PS._busy) return;
+  PS._busy = true;
+  psExportBusy(true);
+  toast('Creating your image…');
   PS._exporting = true; psRender();                      // rebuild with hints stripped
   var card = document.getElementById('ps-card');
-  card.style.transform = 'scale(1)';                     // capture at full resolution
-  var restore = function () { PS._exporting = false; psRender(); };  // back to the live preview
+  /* CAPTURE THE CARD AT ITS AUTHORED SIZE, IN NORMAL FLOW.
+     psFitCard() leaves it position:absolute inside a wrapper sized to the
+     SCALED footprint. html2canvas measures the element in the page, so an
+     absolutely-positioned 1080px card inside a ~330px box captured the empty
+     region around it — a correctly-sized PNG with nothing in it. Undoing the
+     fit for the duration of the capture is what makes the file match the
+     preview; psRender() in done() puts it all back. */
+  var wrap = document.getElementById('ps-card-wrap');
+  card.style.transform = 'none';
+  card.style.position = 'relative';
+  card.style.top = 'auto'; card.style.left = 'auto';
+  if (wrap) wrap.style.cssText = 'position:relative;width:' + PS_SIZES[PS.size].w +
+    'px;height:' + PS_SIZES[PS.size].h + 'px;margin:0 auto';
+  var done = function () { PS._busy = false; psExportBusy(false); PS._exporting = false; psRender(); };
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
     psAutoFit(card);
     html2canvas(card, { backgroundColor: null, useCORS: true, scale: 2, width: PS_SIZES[PS.size].w, height: PS_SIZES[PS.size].h }).then(function (cv) {
-      restore();
+      done();
       cv.toBlob(function (blob) { cb(blob); }, 'image/png');
-    }).catch(function (e) { restore(); toast('Render failed: ' + e.message, true); });
+    }).catch(function (e) {
+      done();
+      /* A COMMITTEE MEMBER SHOULD NEVER READ A CSS PARSER EXCEPTION.
+         "Attempting to parse an unsupported color function" is a real message
+         this used to put on screen, in a toast, to a volunteer. The detail
+         belongs in the console for whoever maintains the site. */
+      try { console.error('[post-studio] export failed', e); } catch (e2) {}
+      toast('That image could not be created. Nothing has been lost — try again, ' +
+            'and tell whoever looks after the website if it keeps happening.', true);
+    });
   });
+}
+
+/** Busy state on the export controls, so nobody taps a dead button twice. */
+function psExportBusy(on) {
+  try {
+    ['ps-download', 'ps-share'].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.disabled = !!on;
+      if (on) {
+        if (!b.dataset.label) b.dataset.label = b.textContent;
+        if (id === 'ps-download') b.textContent = 'Creating PNG…';
+      } else if (b.dataset.label) {
+        b.textContent = b.dataset.label;
+      }
+    });
+  } catch (e) {}
 }
 
 // COMPUTER (and anywhere): save the PNG straight to the device — Downloads folder
@@ -7876,7 +7957,12 @@ function mfExport(monthKey, forceSave) {
               .catch(function (err) { if (err && err.name === 'AbortError') { resolve(true); return; } psSaveBlob(blob, fname); resolve(true); });
           } else { psSaveBlob(blob, fname); resolve(true); }
         }, 'image/png');
-      }).catch(function (e) { node.remove(); toast('Render failed: ' + e.message, true); resolve(false); });
+      }).catch(function (e) { node.remove();
+        /* Same rule as the Studio export: the parser message goes to the
+           console, the volunteer gets a sentence. */
+        try { console.error('[export] render failed', e); } catch (e2) {}
+        toast('That image could not be created. Nothing has been lost — please try again.', true);
+        resolve(false); });
     });
   });
 }
@@ -8029,7 +8115,12 @@ function fwpExport(ev, forceSave) {
               .catch(function (err) { if (err && err.name === 'AbortError') { resolve(true); return; } psSaveBlob(blob, fname); resolve(true); });
           } else { psSaveBlob(blob, fname); resolve(true); }
         }, 'image/png');
-      }).catch(function (e) { node.remove(); toast('Render failed: ' + e.message, true); resolve(false); });
+      }).catch(function (e) { node.remove();
+        /* Same rule as the Studio export: the parser message goes to the
+           console, the volunteer gets a sentence. */
+        try { console.error('[export] render failed', e); } catch (e2) {}
+        toast('That image could not be created. Nothing has been lost — please try again.', true);
+        resolve(false); });
     });
   });
 }
