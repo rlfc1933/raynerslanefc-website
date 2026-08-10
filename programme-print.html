@@ -14,6 +14,12 @@
 <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<!-- The same campaign resolvers the fixtures page and the social artwork use.
+     Without these the programme cover could not know who we are playing, what
+     their colours are or which competition mark it is entitled to print — so it
+     printed a black page with a badge on it for every fixture of the season. -->
+<script src="js/competition-brand.js?v=1"></script>
+<script src="js/brand-palette.js"></script>
 <link rel="stylesheet" href="brand/tokens.css">
 <style>
   /* Brand values derive from the single source of truth (brand/tokens.css) */
@@ -88,6 +94,16 @@
   .eyebrow{ font-family:var(--fc); font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--g); }
   .body{ font-family:var(--fb); font-size:12.5px; line-height:1.72; color:#222; }
   .body p{ margin-bottom:9px; }
+  /* The opening line of an editorial page, set as a standfirst. Larger, a
+     shade lighter in weight than body copy, with a Lane rule beneath it —
+     this is most of what separates a programme from a printed memo. */
+  .body .standfirst{
+    font-family:var(--fb); font-size:15.5px; line-height:1.42; font-weight:500;
+    color:#111; margin:0 0 12px; padding-bottom:10px;
+    border-bottom:2px solid var(--y); max-width:56ch;
+  }
+  .body .standfirst strong{ font-weight:700; }
+  .page--dark .body .standfirst{ color:#fff; }
   .lead{ font-family:var(--fb); font-size:14.5px; line-height:1.6; color:#1a1a1a; font-weight:500; margin-bottom:12px; }
   .muted{ color:var(--soft); }
   h2.sec{ font-family:var(--fd); font-size:28px; letter-spacing:1px; font-weight:400; color:var(--ink); border-bottom:3px solid var(--y); padding-bottom:6px; margin-bottom:14px; }
@@ -360,6 +376,106 @@
   .backqr .qr img, .backqr .qr canvas, .backqr .qr table{ width:120px; height:120px; }
 
   /* COVER */
+  /* ── THE COVER ─────────────────────────────────────────────────────────
+     A4 portrait. Designed to be kept, not skimmed: one confrontation, one
+     competition, one date, and the club's own light over all of it.
+
+     PRINT NOTE. This relies on background graphics being enabled in the print
+     dialog, which the instruction bar at the top of the page already tells the
+     operator to switch on, and which the existing cover needed too. */
+  .pc{
+    position:relative; overflow:hidden; padding:0; color:#fff;
+    display:flex; flex-direction:column;
+    background:
+      radial-gradient(120% 80% at 50% 0%,   rgba(255,209,0,.10), transparent 60%),
+      radial-gradient(100% 70% at 12% 100%, rgba(26,92,50,.55),  transparent 62%),
+      linear-gradient(168deg,#0f1a12 0%, #0a0a0a 55%, #080808 100%);
+  }
+  /* The opponent's confirmed colour, entering from their side of the lockup —
+     the right, because the cover always reads Rayners Lane first. */
+  .pc--tinted{
+    background:
+      radial-gradient(85% 55% at 100% 62%, color-mix(in srgb, var(--pc-opp) 42%, transparent), transparent 70%),
+      radial-gradient(120% 80% at 50% 0%,   rgba(255,209,0,.10), transparent 60%),
+      radial-gradient(100% 70% at 12% 100%, rgba(26,92,50,.55),  transparent 62%),
+      linear-gradient(168deg,#0f1a12 0%, #0a0a0a 55%, #080808 100%);
+  }
+  .pc__pres{
+    position:relative; z-index:2; display:flex; align-items:center; justify-content:center;
+    gap:10px; background:var(--y); color:#0d0d0d;
+    font-family:var(--fc); font-weight:700; font-size:13px; letter-spacing:.03em;
+    padding:8px 12px;
+  }
+  .pc__pres img{ height:26px; max-width:110px; object-fit:contain; background:#fff; padding:2px 5px; }
+  .pc__pres b{ text-transform:uppercase; }
+  .pc__body{ position:relative; z-index:1; flex:1; padding:15mm 15mm 0; display:flex; flex-direction:column; }
+  /* Low and off the edge, so it is atmosphere behind the baseline block rather
+     than a dark shape sitting on top of the opponent's own crest. */
+  .pc__ghost{
+    position:absolute; right:-52mm; bottom:-26mm; width:145mm; height:145mm;
+    object-fit:contain; opacity:.075; filter:grayscale(1); z-index:0; pointer-events:none;
+  }
+  .pc__head{ display:flex; align-items:center; gap:12px; position:relative; z-index:1; }
+  .pc__badge{ width:64px; height:64px; object-fit:contain; flex:0 0 auto; }
+  .pc__mast{ display:flex; flex-direction:column; min-width:0; }
+  .pc__kick{
+    font-family:var(--fc); font-weight:700; font-size:9.5px; letter-spacing:.26em;
+    text-transform:uppercase; color:var(--y);
+  }
+  .pc__club{ font-family:var(--fd); font-size:34px; line-height:.98; letter-spacing:1px; margin-top:2px; }
+  .pc__season{
+    font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; color:rgba(255,255,255,.55); margin-top:3px;
+  }
+  /* The competition, given the room an issued mark deserves.
+     A FIXED top margin, not `auto`. Two auto margins — one here and one on the
+     date block — split the leftover page equally and opened a 280px void
+     directly under the masthead. The content now sits as one column from the
+     top, and the single remaining gap falls above the baseline block, where it
+     reads as deliberate air rather than a hole in the middle of the cover. */
+  .pc__comp{
+    position:relative; z-index:1; margin:14mm 0 0;
+    display:flex; flex-direction:column; align-items:center; gap:9px; text-align:center;
+  }
+  .pc__mark{ height:96px; width:auto; max-width:72mm; object-fit:contain; }
+  .pc__compname{
+    font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.2em;
+    text-transform:uppercase; color:#fff;
+  }
+  .pc__round{
+    font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--y);
+  }
+  /* The confrontation. Large, because it is the reason the programme exists. */
+  .pc__fix{
+    position:relative; z-index:1; display:grid; grid-template-columns:1fr auto 1fr;
+    align-items:center; gap:5mm; margin:12mm 0 0;
+  }
+  .pc__side{ display:flex; flex-direction:column; align-items:center; gap:11px; min-width:0; }
+  .pc__crest{ width:52mm; height:52mm; object-fit:contain; }
+  .pc__team{
+    font-family:var(--fd); font-size:23px; letter-spacing:.04em; text-align:center;
+    line-height:1.02; text-transform:uppercase; text-wrap:balance;
+  }
+  .pc__v{ font-family:var(--fd); font-size:40px; color:var(--y); letter-spacing:.04em; }
+  .pc__when{
+    position:relative; z-index:1; margin:auto 0 12mm; display:grid;
+    grid-template-columns:auto auto 1fr; gap:0 9mm; align-items:end;
+    border-top:1.5px solid rgba(255,255,255,.16); padding-top:6mm;
+  }
+  .pc__w{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .pc__wl{
+    font-family:var(--fc); font-weight:700; font-size:9px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--y);
+  }
+  .pc__wv{ font-family:var(--fd); font-size:22px; letter-spacing:.03em; }
+  .pc__w--venue .pc__wv{ font-size:15px; line-height:1.15; }
+  .pc__foot{
+    position:relative; z-index:2; background:var(--y); color:#0d0d0d;
+    padding:10px 15mm; display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--fc); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:11px;
+  }
+
   .cover{ background:linear-gradient(160deg,#0d0d0d,#161208 70%); color:#fff; padding:0; display:flex; flex-direction:column; }
   .cover-sponsor{ background:var(--y); color:#0d0d0d; text-align:center; font-family:var(--fc); font-weight:700; font-size:14px; letter-spacing:.04em; padding:9px 12px; }
   .cover-sponsor b{ text-transform:uppercase; }
@@ -508,7 +624,29 @@
   var SITE = 'https://raynerslanefc.co.uk';
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function lines(t){ return String(t||'').split('\n').map(function(l){return l.trim();}).filter(Boolean); }
-  function notes(t){ return lines(t).map(function(l){ return '<p>'+esc(l)+'</p>'; }).join(''); }
+  /* EDITORS WRITE MARKDOWN WHETHER OR NOT WE SUPPORT IT.
+     The Hilltop preview opened with "**OLD PATHS. NEW CHAPTER.**" and that is
+     exactly what came off the printer — four asterisks around the headline of
+     the club's own match preview. Every editorial page runs through notes(),
+     so this is the one place to deal with it.
+
+     Escaping happens FIRST and the markup is added after, so a stray "<" in
+     someone's prose can never become a tag. */
+  function inline(s){
+    return esc(s)
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,;:!?)]|$)/g, '$1<em>$2</em>');
+  }
+  /* A paragraph that is ENTIRELY bold is not a bold paragraph, it is a
+     standfirst — the line an editor writes to open a piece. Setting it as one
+     is what gives these pages the hierarchy a programme is supposed to have. */
+  function notes(t){
+    return lines(t).map(function(l){
+      var m = l.match(/^\*\*(.+)\*\*$/);
+      if (m) return '<p class="standfirst">'+inline(m[1])+'</p>';
+      return '<p>'+inline(l)+'</p>';
+    }).join('');
+  }
   function to12(t){ if(!t||!/^\d{1,2}:\d{2}/.test(t))return t||'3:00 PM'; var p=t.split(':'),h=parseInt(p[0],10),m=p[1].slice(0,2),ap=h>=12?'PM':'AM'; h=h%12; if(h===0)h=12; return h+':'+m+' '+ap; }
   function niceDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
   function shortDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); }
@@ -666,10 +804,27 @@
 
   var cfgKit = null;   // the club's own playing colours, stored once in config
 
+  /* The campaign registries, loaded alongside everything else so the cover can
+     resolve the opponent's confirmed colour and the competition's issued mark
+     BEFORE it renders. A failure here is not fatal: the resolvers stay null and
+     the cover prints Lane-only, which is the correct fallback for a club whose
+     palette nobody has confirmed anyway. */
+  function loadCampaignRegistries() {
+    return Promise.all([
+      fetch('data/club-brands.json').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+      fetch('data/competitions.json').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    ]).then(function (r) {
+      try { if (r[0] && window.BrandPalette) BrandPalette.setRegistry(r[0]); } catch (e) {}
+      try {
+        if (r[1] && r[1].competitions && window.CompetitionBrand) CompetitionBrand.setRegistry(r[1].competitions);
+      } catch (e) {}
+    });
+  }
+
   Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
     fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad'),
-    getJSON('config')
+    getJSON('config'), loadCampaignRegistries()
   ]).then(function (res) {
     cfgKit = (res[10] && res[10].kit) || null;
     var d = res[0]||{}, crests=(res[1]&&res[1].crests)||[], sponsors=(res[2]&&res[2].sponsors)||[], fixtures=(res[3]&&res[3].fixtures)||[];
@@ -767,27 +922,103 @@
     function foot(){ pn++; return '<div class="pcta"><span>RAYNERS LANE FC</span><span>'+CTAS[(pn-1)%CTAS.length]+'</span><span class="pg">'+pn+'</span></div>'; }
     var P=[];
 
-    /* 1 — COVER (themed) */
-    P.push('<div class="page cover" style="background:'+TH.bg+';color:'+TH.ink+'">'+
-      (d.matchSponsor?'<div class="cover-sponsor" style="background:'+TH.accent+';color:'+TH.accentInk+';display:flex;align-items:center;justify-content:center;gap:10px">'+(d.matchSponsorLogo?'<img src="'+esc(d.matchSponsorLogo)+'" alt="'+esc(d.matchSponsor)+'" style="height:30px;max-width:120px;object-fit:contain;background:#fff;padding:3px 6px">':'')+'<span>This match is proudly sponsored by <b>'+esc(d.matchSponsor)+'</b></span></div>':'')+
-      '<div class="cover-top" style="position:relative">'+
-        '<div style="position:absolute;right:-120px;bottom:-110px;width:520px;height:520px;background:url(img/badge.png) center/contain no-repeat;opacity:.05;pointer-events:none"></div>'+
-        '<img class="cover-badge" src="img/badge.png" alt="RLFC">'+
-        '<div class="cover-kicker" style="color:'+TH.accent+'">Official Matchday Programme</div>'+
-        '<div class="cover-title" style="color:'+TH.ink+'">RAYNERS LANE FC</div>'+
-        '<div class="cover-comp" style="color:'+TH.soft+'">'+esc(comp)+'</div>'+
-        '<div class="vs" style="position:relative;z-index:1">'+
-          '<div class="side"><img class="crest" src="img/badge.png"><div class="tn" style="color:'+TH.ink+'">Rayners Lane</div></div>'+
-          '<div class="vstxt" style="color:'+TH.accent+'">VS</div>'+
-          '<div class="side"><img class="crest" src="'+esc(oppCrest)+'"><div class="tn" style="color:'+TH.ink+'">'+esc(opp)+'</div></div>'+
-        '</div>'+
-        '<div class="cover-meta" style="position:relative;z-index:1">'+
-          '<div class="m"><div class="l" style="color:'+TH.accent+'">Date</div><div class="v" style="color:'+TH.ink+'">'+esc(shortDate(d.date)||'2026-27')+'</div></div>'+
-          '<div class="m"><div class="l" style="color:'+TH.accent+'">Kick-off</div><div class="v" style="color:'+TH.ink+'">'+esc(to12(d.kickoff))+'</div></div>'+
-          '<div class="m"><div class="l" style="color:'+TH.accent+'">Venue</div><div class="v" style="font-size:19px;color:'+TH.ink+'">'+esc(venue)+'</div></div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="cover-bottom" style="background:'+TH.accent+';color:'+TH.accentInk+'"><span>The Lane · Yellow Army · Est. 1933</span><span>raynerslanefc.co.uk</span></div>'+
+    /* 1 — COVER
+       ══════════════════════════════════════════════════════════════════════
+       THIS IS THE THING SUPPORTERS KEEP. It used to be a black page with the
+       club badge, the words RAYNERS LANE FC, two crests and a date — visually
+       identical for all twenty-one opponents and all three competitions, and
+       carrying nothing of the fixture except its text.
+
+       It now resolves the same campaign the social artwork and the fixture
+       cards resolve, so an Isuzu FA Vase tie against a claret-and-sky club
+       does not look like a league game against a red one:
+
+         · the opponent's CONFIRMED colour enters from their side of the
+           lockup as a counter-light — never a guess; an unconfirmed club
+           simply gets the Lane-only ground, which still looks deliberate
+         · the competition's ISSUED mark is printed where the club holds one
+           (the Vase mark is vector, which is why it survives A4)
+         · the opponent's crest is a full-bleed ghost behind the type
+         · the masthead is the club, set large, with the season beside it
+
+       LANE STAYS THE MASTER BRAND. Yellow is the key light and the signal
+       colour whether we are home or away. The opponent only ever counter-
+       lights. An away programme must still look like the Lane published it. */
+    var cPal = null, cIdent = null;
+    try {
+      if (window.BrandPalette) {
+        var pr = BrandPalette.resolve(opp);
+        if (pr && pr.usable) cPal = pr;
+      }
+      if (window.CompetitionBrand) {
+        cIdent = CompetitionBrand.identity({ competition: d.competition || '', competitionId: d.competitionId || '' });
+      }
+    } catch (e) { /* a cover must still print without the resolvers */ }
+
+    /* A dark club colour over a near-black cover is not a colour, it is more
+       black. Hilltop's #132654 vanished completely. glowable() lifts it until
+       it can actually be seen while preserving the hue, so it is still their
+       navy rather than a substituted blue. */
+    var oppC = '';
+    if (cPal) {
+      oppC = cPal.primary;
+      try {
+        if (window.BrandPalette && BrandPalette.glowable) oppC = BrandPalette.glowable(cPal.primary, '#0a0a0a');
+      } catch (e) { oppC = cPal.primary; }
+    }
+    var season = d.season || '2026-27';
+    var compMk = (cIdent && cIdent.logo)
+      ? '<img class="pc__mark" src="' + esc(cIdent.logo) + '" alt="' + esc(cIdent.alt || cIdent.label) + '">'
+      : '';
+    var compNm = (cIdent && cIdent.label) ? cIdent.label : comp;
+    var compRd = (cIdent && cIdent.round) ? cIdent.round : '';
+
+    P.push('<div class="page pc' + (oppC ? ' pc--tinted' : '') + '"' +
+        (oppC ? ' style="--pc-opp:' + esc(oppC) + '"' : '') + '>' +
+
+      // Every sponsor obligation the club has sold, before the masthead.
+      (d.matchSponsor
+        ? '<div class="pc__pres">' +
+            (d.matchSponsorLogo ? '<img src="' + esc(d.matchSponsorLogo) + '" alt="' + esc(d.matchSponsor) + '">' : '') +
+            '<span>Today’s match presented by <b>' + esc(d.matchSponsor) + '</b></span>' +
+          '</div>'
+        : '') +
+
+      '<div class="pc__body">' +
+        // The opponent's crest, very large and very faint, on their side.
+        '<img class="pc__ghost" src="' + esc(oppCrest) + '" alt="">' +
+
+        '<div class="pc__head">' +
+          '<img class="pc__badge" src="img/badge.png" alt="Rayners Lane FC">' +
+          '<div class="pc__mast">' +
+            '<span class="pc__kick">Official Matchday Programme</span>' +
+            '<span class="pc__club">Rayners Lane FC</span>' +
+            '<span class="pc__season">Season ' + esc(season) + '</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="pc__comp">' + compMk +
+          '<span class="pc__compname">' + esc(compNm) + '</span>' +
+          (compRd ? '<span class="pc__round">' + esc(compRd) + '</span>' : '') +
+        '</div>' +
+
+        '<div class="pc__fix">' +
+          '<div class="pc__side"><img class="pc__crest" src="img/badge.png" alt="">' +
+            '<span class="pc__team">Rayners Lane</span></div>' +
+          '<span class="pc__v">V</span>' +
+          '<div class="pc__side"><img class="pc__crest" src="' + esc(oppCrest) + '" alt="">' +
+            '<span class="pc__team">' + esc(opp) + '</span></div>' +
+        '</div>' +
+
+        '<div class="pc__when">' +
+          '<div class="pc__w"><span class="pc__wl">Date</span><span class="pc__wv">' + esc(shortDate(d.date) || season) + '</span></div>' +
+          '<div class="pc__w"><span class="pc__wl">Kick-off</span><span class="pc__wv">' + esc(to12(d.kickoff)) + '</span></div>' +
+          '<div class="pc__w pc__w--venue"><span class="pc__wl">Venue</span><span class="pc__wv">' + esc(venue) + '</span></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="pc__foot"><span>The Lane &middot; Yellow Army &middot; Est. 1933</span>' +
+        '<span>raynerslanefc.co.uk</span></div>' +
     '</div>');
 
     // Editorial page — renders only if the editor wrote something (never half-filled).

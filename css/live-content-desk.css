@@ -1,0 +1,94 @@
+/* ════════════════════════════════════════════════════════════════════════
+   LIVE CONTENT DESK — pitchside, one-handed, on a phone.
+
+   The operator is standing at a ground, probably in the cold, probably with
+   one hand on a phone. Every decision here follows from that: big targets,
+   no hover, the newest event at the top, and the action on the event itself
+   rather than behind a menu.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.lcd { background: #101112; border: 1px solid #262a2d; border-radius: var(--r-md); overflow: hidden; }
+.lcd__hd {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; background: #16181a; border-bottom: 1px solid #262a2d;
+  font-family: var(--font-c, sans-serif); font-size: 12px; font-weight: 800;
+  letter-spacing: .18em; text-transform: uppercase; color: #cfd3d6;
+}
+.lcd__live {
+  background: #C81E1E; color: #fff; padding: 3px 9px; border-radius: var(--r-xs);
+  font-size: 10px; letter-spacing: .16em;
+}
+/* Only the live chip moves, and only gently. */
+@media (prefers-reduced-motion: no-preference) {
+  .lcd__live { animation: lcd-pulse 2.2s ease-in-out infinite; }
+  @keyframes lcd-pulse { 0%,100% { opacity: 1 } 50% { opacity: .62 } }
+}
+
+.lcd__score {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 18px 16px; border-bottom: 1px solid #262a2d; background: #0c0d0e;
+}
+.lcd__team { font-family: var(--font-c, sans-serif); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: #9aa0a4; flex: 1 1 0; }
+.lcd__team:last-of-type { text-align: right; }
+.lcd__nums { font-family: var(--font-d, sans-serif); font-size: 46px; line-height: 1; color: #fff; }
+.lcd__nums i { color: var(--yellow, #FFD100); font-style: normal; padding: 0 8px; }
+
+/* The most recent meaningful event, given its own block — this is the thing
+   the operator is reaching for, so it should not be one row among twenty. */
+.lcd__latest {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+  padding: 16px; border-bottom: 1px solid #262a2d;
+  background: linear-gradient(180deg, rgba(255,209,0,.07), transparent);
+}
+.lcd__lbl { grid-column: 1/-1; font-family: var(--font-c, sans-serif); font-size: 10px;
+  font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow, #FFD100); }
+.lcd__lmin { font-family: var(--font-d, sans-serif); font-size: 28px; color: #fff; line-height: 1; }
+.lcd__ltype { font-family: var(--font-c, sans-serif); font-size: 15px; font-weight: 800;
+  letter-spacing: .04em; color: #fff; align-self: center; }
+.lcd__ldet { grid-column: 2; font-size: 14px; color: #b9bec2; }
+
+.lcd__list { list-style: none; margin: 0; padding: 0; max-height: 56vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; }
+.lcd__ev {
+  display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px;
+  padding: 13px 16px; border-bottom: 1px solid #1e2124;
+}
+.lcd__ev--new { background: rgba(255,209,0,.06); }
+.lcd__ev--peak .lcd__type { color: var(--yellow, #FFD100); }
+.lcd__ev--urgent .lcd__type { color: #FF6B6B; }
+.lcd__min { font-family: var(--font-d, sans-serif); font-size: 20px; color: #fff; }
+.lcd__body { min-width: 0; }
+.lcd__type { display: block; font-family: var(--font-c, sans-serif); font-size: 12px;
+  font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #cfd3d6; }
+.lcd__corr { font-style: normal; color: #E0A93B; letter-spacing: .06em; }
+.lcd__detail { display: block; font-size: 14px; color: #b9bec2; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; }
+
+/* 44px minimum, and wide — this gets tapped with cold hands. */
+.lcd__make {
+  min-height: 44px; padding: 0 16px; border-radius: var(--r-sm);
+  background: var(--yellow, #FFD100); color: #0d0d0d; border: 0; cursor: pointer;
+  font-family: var(--font-c, sans-serif); font-size: 12px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+.lcd__make--done { background: transparent; color: #7f8589; border: 1px solid #2f3336; }
+.lcd__make--hero { grid-column: 1/-1; margin-top: 12px; min-height: 52px; font-size: 14px; }
+
+.lcd__msg { padding: 20px 16px; color: #9aa0a4; font-size: 14px; margin: 0; }
+.lcd--down .lcd__hd { color: #E0A93B; }
+.lcd__alt {
+  margin: 0 16px 18px; min-height: 44px; padding: 0 18px; background: transparent;
+  color: #cfd3d6; border: 1px solid #2f3336; border-radius: var(--r-sm); cursor: pointer;
+  font-family: var(--font-c, sans-serif); font-size: 12px; font-weight: 700; letter-spacing: .1em;
+}
+
+/* ── phone ─────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .lcd__ev { grid-template-columns: 46px 1fr; row-gap: 10px; }
+  /* The action moves to its own full-width row rather than shrinking to fit
+     beside the text — a 90px button in a cold hand is a missed tap. */
+  .lcd__make { grid-column: 1/-1; width: 100%; }
+  .lcd__nums { font-size: 38px; }
+  .lcd__list { max-height: none; }
+}

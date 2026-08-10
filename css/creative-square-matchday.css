@@ -1,0 +1,360 @@
+/* ════════════════════════════════════════════════════════════════════════
+   SQUARE · MATCHDAY — blueprint, built from zero.
+
+   WHY THE PREVIOUS ONE FAILED.
+   It was a centred stack: competition, crests, VS, date, sponsors, each in its
+   own polite horizontal band, each sized so everything fitted. Nothing
+   overlapped, nothing cropped, nothing dominated. That is a document layout —
+   it answers "does it all fit" when the question is "does anyone stop
+   scrolling". The photograph underneath got better and the poster did not,
+   because the poster was never the photograph's problem.
+
+   WHAT THIS DOES INSTEAD.
+
+   SCALE CONTRAST. MATCHDAY is 168px on a 1080px canvas — about 15% of the
+   height — set to overflow both edges so it reads as bigger than the frame.
+   Beside it the venue line is 21px. That ratio of 8:1 is what makes a design
+   feel confident; the old one ran about 2:1 and felt like a form.
+
+   LAYERING, NOT STACKING. The crests overlap the lower third of the MATCHDAY
+   type and the type crops behind them. Elements occupying the same space is
+   what separates a composition from a list.
+
+   CONFRONTATION. Two 300px crests — 28% of the canvas each — pushed out to the
+   edges, with a yellow diagonal slash driven between them. The slash is the
+   fixture: two clubs meeting, and something has to give.
+
+   ASYMMETRY. The competition mark sits hard top-left against the light, the
+   fixture facts sit bottom-left, and the right side is deliberately emptier so
+   the floodlight in the plate has somewhere to breathe. Symmetry reads as
+   safe, and safe was the problem.
+
+   IT INTERACTS WITH THE PHOTOGRAPH. The plate's floodlight sits upper-centre
+   and its wet grass sits along the bottom. MATCHDAY is placed so the light
+   burns through it from behind; the fixture facts sit on the grass where there
+   is real texture to anchor them. This layout would be worse on a different
+   plate, which is the point — it was designed for this one.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.sq {
+  position: relative; width: 1080px; height: 1080px; overflow: hidden;
+  background: #050505; color: #F5F3ED;
+  font-family: var(--font-b, 'Manrope', system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── layers 1–2: photograph, then grading ─────────────────────────────── */
+.sq__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sq__grade { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; opacity: .55; }
+/* Legibility floor. Weighted to the bottom, where the facts live, and kept off
+   the upper centre so the floodlight survives. */
+.sq__scrim {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3,3,3,.80) 0%, rgba(3,3,3,.14) 26%,
+                            rgba(3,3,3,.20) 52%, rgba(3,3,3,.93) 88%),
+    linear-gradient(90deg, rgba(3,3,3,.72) 0%, rgba(3,3,3,0) 46%);
+}
+/* Club colour arrives as LIGHT, in pieces — never as a wash over the whole
+   photograph. Yellow from the left where the Lane crest sits, claret from the
+   right where the opponent does. */
+.sq__lightL {
+  position: absolute; left: -18%; top: 18%; width: 62%; height: 66%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,209,0,.34), rgba(255,209,0,0) 68%);
+  mix-blend-mode: screen; pointer-events: none;
+}
+.sq__lightR {
+  position: absolute; right: -20%; top: 26%; width: 56%; height: 60%;
+  background: radial-gradient(ellipse at 70% 50%, rgba(167,54,102,.40), rgba(167,54,102,0) 66%);
+  mix-blend-mode: screen; pointer-events: none;
+}
+
+/* ── ghost crest: shape only, huge, off-grid ───────────────────────────── */
+.sq__ghost {
+  position: absolute; left: -14%; bottom: -26%; width: 74%;
+  filter: grayscale(1) brightness(.42) blur(3px); opacity: .16; pointer-events: none;
+}
+
+/* ── the diagonal collision ────────────────────────────────────────────── */
+/* A hard yellow slash driven between the two clubs. Skewed, full-bleed, and
+   deliberately narrow — it is a cut, not a panel. */
+/* 14 degrees drove the slash straight through the away crest at the vertical
+   position the lockup sits. It has to live in the GAP between the two clubs —
+   a cut between them, not across one of them — so the angle comes down and the
+   height is clipped to the band above the crest baseline. */
+.sq__slash {
+  position: absolute; left: 50%; top: -12%; width: 22px; height: 96%;
+  transform: translateX(-50%) rotate(7deg);
+  background: linear-gradient(180deg, rgba(255,209,0,0), #FFD100 22%, #FFD100 78%, rgba(255,209,0,0));
+  box-shadow: 0 0 60px 12px rgba(255,209,0,.32);
+}
+.sq__slash--ghost {
+  width: 92px; opacity: .09; box-shadow: none;
+  background: linear-gradient(180deg, rgba(255,209,0,0), #FFD100 40%, rgba(255,209,0,0));
+}
+
+/* ── content grid ──────────────────────────────────────────────────────── */
+.sq__in { position: absolute; inset: 0; padding: 54px 56px 46px; display: flex; flex-direction: column; }
+
+/* competition — hard top-left, against the light */
+/* The issued Vase mark is dark artwork, and on a night photograph it
+   disappeared. It is a trademark so it cannot be recoloured — instead it gets
+   its own light: a soft warm pool behind it, which is what a real mark on a
+   dark poster gets anyway. Bigger, too; a competition this size deserves it. */
+.sq__comp { display: flex; align-items: center; gap: 22px; position: relative; }
+.sq__comp::before {
+  content: ''; position: absolute; left: -46px; top: -44px; width: 300px; height: 220px;
+  background: radial-gradient(ellipse at 32% 50%, rgba(255,255,255,.20), rgba(255,255,255,0) 70%);
+  pointer-events: none;
+}
+.sq__complogo { height: 124px; width: auto; max-width: 300px; object-fit: contain; display: block;
+  position: relative; filter: drop-shadow(0 4px 18px rgba(0,0,0,.9)); }
+.sq__compname {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 54px; line-height: .9;
+  letter-spacing: .03em; color: #FFD100;
+}
+.sq__round {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 15px; font-weight: 800;
+  letter-spacing: .26em; text-transform: uppercase; color: rgba(245,243,237,.82);
+  border-left: 3px solid #FFD100; padding-left: 15px; max-width: 12ch; line-height: 1.25;
+}
+
+/* MATCHDAY — 15% of canvas height, overflowing both edges */
+.sq__word {
+  position: absolute; left: -3%; right: -3%; top: 21.5%;
+  font-family: var(--font-d, 'Bebas Neue', sans-serif);
+  font-size: 168px; line-height: .82; letter-spacing: .012em;
+  text-align: center; color: #FFFFFF; white-space: nowrap;
+  text-shadow: 0 10px 60px rgba(0,0,0,.75);
+}
+/* A second copy behind, offset and yellow, so the word has depth rather than
+   sitting flat on the picture like a caption. */
+.sq__word--back {
+  color: transparent; -webkit-text-stroke: 2px rgba(255,209,0,.55);
+  transform: translate(-7px, -9px); text-shadow: none;
+}
+
+/* the confrontation */
+.sq__lock {
+  position: absolute; left: 0; right: 0; top: 33.5%;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0 42px;
+}
+/* A one-line name and a two-line name must still hang from the same baseline,
+   or the two clubs look unequal — which on a fixture graphic reads as a mistake
+   about the football, not about the layout. */
+.sq__side { width: 40%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.sq__team { min-height: 96px; display: flex; align-items: flex-start; justify-content: center; }
+.sq__crest {
+  width: 300px; height: 300px; object-fit: contain; display: block;
+  filter: drop-shadow(0 22px 46px rgba(0,0,0,.85));
+}
+.sq__team {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 52px; line-height: .9;
+  letter-spacing: .02em; color: #fff; text-align: center;
+  text-shadow: 0 4px 20px rgba(0,0,0,.9);
+}
+/* Long names are normal in this division. Two lines, tighter, never shrunk to
+   illegibility and never allowed to push the crests apart. */
+.sq__team--long { font-size: 42px; }
+
+/* fixture facts — bottom-left, on the grass, ranged left not centred */
+.sq__facts { margin-top: auto; }
+.sq__rule { width: 108px; height: 5px; background: #FFD100; margin-bottom: 20px; }
+.sq__date {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 76px; line-height: .88;
+  letter-spacing: .02em; color: #fff;
+}
+.sq__ko { color: #FFD100; }
+.sq__venue {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 21px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: rgba(245,243,237,.80); margin-top: 12px;
+}
+
+/* ── sponsors: presenter high, rail secondary ──────────────────────────── */
+.sq__sponsors {
+  margin-top: 30px; padding-top: 22px; border-top: 1px solid rgba(245,243,237,.16);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 30px;
+}
+.sq__pres { display: flex; flex-direction: column; gap: 9px; }
+.sq__preslbl {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 12px; font-weight: 800;
+  letter-spacing: .24em; text-transform: uppercase; color: rgba(245,243,237,.55);
+}
+.sq__preslogo { height: 58px; width: auto; max-width: 300px; object-fit: contain; display: block; }
+/* Three persistent partners, always present, deliberately smaller than the
+   presenter — that size difference IS the commercial hierarchy. */
+.sq__rail { display: flex; align-items: center; gap: 34px; }
+.sq__raillogo { height: 30px; width: auto; max-width: 150px; object-fit: contain; display: block; opacity: .95; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   GENERALISED — states, opponent light, and the awkward names.
+   The proof was one hand-built page. These rules make the same design work
+   for every fixture and every content state without hardcoding a club.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Opponent counter-light is driven by the confirmed palette, and is simply
+   absent when no human has confirmed one. No guessed colour reaches artwork. */
+.sq__lightR {
+  background: radial-gradient(ellipse at 70% 50%,
+    color-mix(in srgb, var(--sq-opp) 42%, transparent), transparent 66%);
+}
+.sq__grade--solo { mix-blend-mode: normal; opacity: 1; }
+
+/* Crest fallback for a club with no artwork — designed, never a stretched logo. */
+.sq__crest--ini {
+  width: 300px; height: 300px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-circle); background: rgba(255,255,255,.06); border: 3px solid rgba(255,255,255,.18);
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 104px; color: #FFD100;
+}
+
+/* Names: two lines, stepped down, hung from a shared baseline. */
+.sq__team { min-height: 104px; display: flex; align-items: flex-start; justify-content: center; }
+.sq__team--long span { font-size: 42px; display: inline-block; }
+.sq__team--xlong span { font-size: 37px; display: inline-block; }
+
+/* ── FULL TIME: the score becomes the largest thing on the canvas ───────── */
+.sq--score .sq__word { top: 13%; font-size: 92px; letter-spacing: .16em; }
+.sq--score .sq__lock { top: 27%; align-items: center; }
+.sq--score .sq__crest, .sq--score .sq__crest--ini { width: 200px; height: 200px; }
+.sq--score .sq__crest--ini { font-size: 68px; }
+.sq--score .sq__team { min-height: 78px; }
+.sq--score .sq__team span { font-size: 34px; }
+.sq--score .sq__team--long span { font-size: 30px; }
+.sq__scorewrap { flex: 0 0 auto; align-self: center; padding: 0 10px; }
+.sq__score {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 210px; line-height: .84;
+  color: #fff; letter-spacing: .01em; white-space: nowrap; text-shadow: 0 18px 60px rgba(0,0,0,.85);
+}
+.sq__score span { color: var(--sq-lane); padding: 0 12px; }
+
+/* A win is bright and yellow-led. A defeat is stated and dark — no
+   celebration, no apology. A draw sits between them, editorial. */
+.sq--win .sq__score { color: #fff; }
+.sq--loss .sq__score { color: rgba(245,243,237,.82); text-shadow: none; }
+.sq--loss .sq__lightL { opacity: .45; }
+.sq--loss .sq__scrim { background: linear-gradient(180deg, rgba(3,3,3,.9) 0%, rgba(3,3,3,.55) 40%, rgba(3,3,3,.96) 100%); }
+.sq--loss .sq__score span { color: rgba(245,243,237,.5); }
+.sq--draw .sq__score span { color: rgba(245,243,237,.7); }
+
+/* ── POSTPONED: the status is the design; kick-off is demoted ───────────── */
+.sq--status .sq__lock { top: 24%; }
+.sq--status .sq__crest, .sq--status .sq__crest--ini { width: 190px; height: 190px; }
+.sq--status .sq__crest--ini { font-size: 64px; }
+.sq--status .sq__team { min-height: 76px; }
+.sq--status .sq__team span { font-size: 34px; }
+.sq--status .sq__lightL, .sq--status .sq__lightR { opacity: .38; }
+.sq__statusblock { border-top: 7px solid var(--sq-lane); padding-top: 26px; }
+.sq__statusword {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 150px; line-height: .84;
+  letter-spacing: .01em; color: var(--sq-lane); text-shadow: 0 10px 50px rgba(0,0,0,.8);
+}
+.sq__statuswhy {
+  font-family: var(--font-b, 'Manrope', sans-serif); font-size: 27px; line-height: 1.35;
+  color: #fff; margin-top: 16px; max-width: 30ch;
+}
+.sq__statusnext {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 18px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(245,243,237,.66); margin-top: 14px;
+}
+
+/* ── TEAM NEWS: information, so the atmosphere steps back ───────────────── */
+.sq--info .sq__word { font-size: 128px; letter-spacing: .05em; }
+.sq--info .sq__lightL, .sq--info .sq__lightR { opacity: .5; }
+.sq--info .sq__crest, .sq--info .sq__crest--ini { width: 240px; height: 240px; }
+
+/* ── COMPETITION PERSONALITY ─────────────────────────────────────────────
+   Not a logo swap. A cup tie is darker and more restrained; the league is the
+   season's recurring identity and carries more of the club's own colour. */
+.sq--cup-night .sq__scrim { background:
+  linear-gradient(180deg, rgba(2,2,2,.88) 0%, rgba(2,2,2,.18) 28%, rgba(2,2,2,.26) 54%, rgba(2,2,2,.95) 88%),
+  linear-gradient(90deg, rgba(2,2,2,.78) 0%, rgba(2,2,2,0) 46%); }
+.sq--league .sq__lightL { opacity: 1.15; }
+.sq--league .sq__slash { box-shadow: 0 0 70px 16px rgba(255,209,0,.42); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   FORMAT BLUEPRINTS — three more compositions, not three crops.
+
+   The square blueprint is the design LANGUAGE: scale contrast, layered type
+   and crests, a slash between the clubs, facts ranged left, presenter above a
+   secondary rail. What follows re-composes that language for each canvas.
+   Nothing here scales the square; every value is chosen for its own frame.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── PORTRAIT 1080×1350 — the feed workhorse ─────────────────────────────
+   270px taller than square, and the extra height is SPENT, not padded: the
+   headline grows, the crests grow, and the facts get room to breathe rather
+   than everything drifting apart. */
+.sq--f-portrait .sq__in { padding: 62px 60px 54px; }
+.sq--f-portrait .sq__word { top: 20%; font-size: 186px; }
+.sq--f-portrait .sq__lock { top: 31%; }
+.sq--f-portrait .sq__crest, .sq--f-portrait .sq__crest--ini { width: 330px; height: 330px; }
+.sq--f-portrait .sq__crest--ini { font-size: 112px; }
+.sq--f-portrait .sq__team span { font-size: 58px; }
+.sq--f-portrait .sq__date { font-size: 82px; }
+.sq--f-portrait .sq__complogo { height: 136px; }
+.sq--f-portrait .sq__score { font-size: 240px; }
+.sq--f-portrait .sq__statusword { font-size: 168px; }
+
+/* ── STORY 1080×1920 — built vertically, and built around Instagram ──────
+   The top ~250px and bottom ~340px are covered by the app's own interface on
+   a real phone. Nothing factual may sit there, so the padding reserves them
+   outright and only atmosphere runs underneath. Everything else stretches
+   into the enormous middle: this is the one format where the design can be
+   genuinely tall rather than merely large. */
+.sq--f-story .sq__in { padding: 250px 70px 340px; }
+.sq--f-story .sq__word { top: 26%; font-size: 210px; }
+.sq--f-story .sq__lock { top: 37%; padding: 0 56px; }
+.sq--f-story .sq__crest, .sq--f-story .sq__crest--ini { width: 360px; height: 360px; }
+.sq--f-story .sq__crest--ini { font-size: 124px; }
+.sq--f-story .sq__team { min-height: 130px; }
+.sq--f-story .sq__team span { font-size: 64px; }
+.sq--f-story .sq__team--long span { font-size: 52px; }
+.sq--f-story .sq__team--xlong span { font-size: 46px; }
+.sq--f-story .sq__complogo { height: 150px; }
+.sq--f-story .sq__date { font-size: 84px; }
+.sq--f-story .sq__venue { font-size: 25px; }
+.sq--f-story .sq__preslogo { height: 74px; }
+.sq--f-story .sq__raillogo { height: 38px; }
+.sq--f-story .sq__score { font-size: 260px; }
+.sq--f-story .sq__statusword { font-size: 190px; }
+/* A taller frame needs a longer slash and a deeper vignette or the top and
+   bottom read as two separate images. */
+.sq--f-story .sq__slash { height: 108%; width: 26px; }
+.sq--f-story .sq__ghost { width: 92%; bottom: -14%; left: -22%; }
+
+/* ── X 1600×900 — genuinely widescreen ───────────────────────────────────
+   The upright formats stack; this one spreads. The two clubs move out to the
+   left and right thirds with the score or slash holding the centre, the
+   headline sits top-left rather than centred, and the sponsors run along the
+   bottom edge as a band instead of a stacked footer — a footer in a 16:9 frame
+   wastes the only axis the format actually has. */
+.sq--f-x .sq__in { padding: 42px 60px 38px; }
+.sq--f-x .sq__word {
+  top: 8%; left: 58px; right: auto; text-align: left; font-size: 128px; letter-spacing: .02em;
+}
+.sq--f-x .sq__word--back { transform: translate(-5px, -6px); }
+.sq--f-x .sq__lock { top: 30%; padding: 0 70px; align-items: center; }
+.sq--f-x .sq__crest, .sq--f-x .sq__crest--ini { width: 300px; height: 300px; }
+.sq--f-x .sq__side { width: 32%; }
+.sq--f-x .sq__team { min-height: 84px; }
+.sq--f-x .sq__team span { font-size: 46px; }
+.sq--f-x .sq__team--long span { font-size: 38px; }
+.sq--f-x .sq__complogo { height: 96px; }
+.sq--f-x .sq__comp { justify-content: flex-end; }
+.sq--f-x .sq__in > .sq__comp { position: absolute; right: 60px; top: 42px; }
+.sq--f-x .sq__slash { height: 116%; transform: translateX(-50%) rotate(9deg); }
+.sq--f-x .sq__score { font-size: 190px; }
+.sq--f-x .sq__statusword { font-size: 112px; }
+.sq--f-x .sq__date { font-size: 56px; }
+.sq--f-x .sq__venue { font-size: 19px; }
+/* Facts left, sponsors right, on one line along the bottom. */
+.sq--f-x .sq__facts { display: flex; align-items: flex-end; justify-content: space-between; gap: 44px; }
+.sq--f-x .sq__sponsors {
+  margin-top: 0; padding-top: 0; border-top: 0; flex-direction: row; align-items: flex-end; gap: 42px;
+}
+.sq--f-x .sq__preslogo { height: 48px; }
+.sq--f-x .sq__raillogo { height: 26px; }
+.sq--f-x .sq__rule { display: none; }
+.sq--f-x .sq__ghost { width: 52%; left: auto; right: -12%; bottom: -34%; }
+.sq--f-x .sq__statusblock { border-top-width: 5px; padding-top: 18px; }

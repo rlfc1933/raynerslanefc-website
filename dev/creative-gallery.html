@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Creative QA Gallery — Rayners Lane FC</title>
+<!--
+  DEV ONLY. Not linked from the site, noindex, and lives under /dev/.
+
+  A design engine cannot be judged from unit tests. Tests can tell you a
+  postponement picked URGENT_UPDATE; only your eyes can tell you whether the
+  result looks like professional football media or like a branded document.
+  This renders many fixtures and states side by side so the comparison is
+  possible at all — the point is not any single graphic but whether New
+  Bradwell reads differently from Broadfields, and a defeat from a win.
+
+  Artwork is rendered at true deliverable size and CSS-scaled down for display,
+  so what you see is exactly what exports.
+-->
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/creative-engine.css">
+<style>
+  body { margin:0; background:#16181a; color:#e8e8e8; font:14px/1.5 'Manrope',system-ui,sans-serif; }
+  header { position:sticky; top:0; z-index:50; background:#0e1011; border-bottom:1px solid #2a2d30; padding:14px 20px; }
+  h1 { margin:0 0 10px; font:600 15px/1 'Manrope',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#FFD100; }
+  .ctl { display:flex; gap:18px; flex-wrap:wrap; align-items:center; }
+  .ctl label { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8d9296; display:block; margin-bottom:4px; }
+  select { background:#1c1f22; color:#e8e8e8; border:1px solid #34383c; padding:7px 10px; border-radius:4px; font:13px 'Manrope',sans-serif; }
+  main { padding:22px; display:flex; flex-wrap:wrap; gap:30px; align-items:flex-start; }
+  .cell { background:#1a1d1f; border:1px solid #2a2d30; border-radius:6px; padding:12px; }
+  .cap { font-size:11px; letter-spacing:.08em; color:#9aa0a4; margin-bottom:9px; display:flex; justify-content:space-between; gap:14px; }
+  .cap b { color:#FFD100; font-weight:700; }
+  .why { color:#6f757a; font-style:italic; }
+  .shell { overflow:hidden; }
+  .shell > * { transform-origin: top left; }
+  .warn { background:#3a2a12; border:1px solid #6b4c1d; color:#f0d9a8; padding:9px 12px; border-radius:4px; margin:0 22px 4px; font-size:12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Creative QA Gallery</h1>
+  <div class="ctl">
+    <div><label>Fixture</label><select id="f-fixture"></select></div>
+    <div><label>State</label><select id="f-state"></select></div>
+    <div><label>Format</label><select id="f-format"></select></div>
+    <div><label>Style</label><select id="f-style"></select></div>
+    <div><label>Scale</label><select id="f-scale"></select></div>
+  </div>
+</header>
+<div class="warn" id="warn" hidden></div>
+<main id="grid"></main>
+
+<script src="../js/brand-palette.js"></script>
+<script src="../js/competition-brand.js"></script>
+<script src="../js/creative-svg.js"></script>
+<script src="../js/creative-campaign.js"></script>
+<script src="../js/creative-recipes.js"></script>
+<script src="../js/creative-compose.js"></script>
+<script>
+(async function () {
+  const j = (p) => fetch('../' + p + '?t=' + Date.now()).then(r => r.json());
+  const [brands, comps, partners, fixtures] = await Promise.all([
+    j('data/club-brands.json'), j('data/competitions.json'),
+    j('data/partners.json'), j('data/fixtures.json')
+  ]);
+
+  // The gallery is served from /dev/, so repo-root-relative asset paths need
+  // a hop up. Without this every crest and sponsor mark 404s.
+  CreativeCompose.setAssetBase('../');
+
+  CreativeCampaign.configure({
+    brands, comps, partners,
+    palette: window.BrandPalette, brand: window.CompetitionBrand
+  });
+
+  const FX = fixtures.fixtures || [];
+  const byName = (n) => FX.filter(f => (f.opponent || '') === n)[0];
+
+  // A deliberately awkward spread: home and away, league and cup, a confirmed
+  // opponent palette and an unconfirmed one, the longest name in the division,
+  // and the live postponement.
+  const PICKS = [
+    ['New Bradwell St Peter (H, Vase, confirmed palette)', byName('New Bradwell St Peter')],
+    ['Broadfields United (A, league)', byName('Broadfields United')],
+    ['Hilltop (H, POSTPONED)', FX.filter(f => f.id === 'fwp-578241')[0]],
+    ['London Lions (A, FA Cup)', byName('London Lions')],
+    ['Wallingford & Crowmarsh (no palette)', byName('Wallingford & Crowmarsh')],
+    ['Burnham (A, evening KO)', byName('Burnham')]
+  ].filter(p => p[1]);
+
+  const STATES = ['matchday', 'lineup', 'kickoff', 'halftime', 'fulltime', 'postponed', 'motm'];
+  const FORMATS = ['story', 'portrait', 'square', 'x'];
+  const STYLES = ['auto', 'cinematic', 'editorial', 'minimal'];
+
+  // Scores are injected only for the result states, so a win, a draw and a
+  // defeat can be compared against each other on the same fixture.
+  const SCORES = { win: [3, 1], draw: [1, 1], loss: [0, 2] };
+
+  const $ = (id) => document.getElementById(id);
+  const opt = (el, arr, labels) => {
+    el.innerHTML = arr.map((v, i) => `<option value="${v}">${(labels && labels[i]) || v}</option>`).join('');
+  };
+  opt($('f-fixture'), PICKS.map((_, i) => i).concat(['all']), PICKS.map(p => p[0]).concat(['— all fixtures —']));
+  opt($('f-state'), ['all'].concat(STATES, ['fulltime:win', 'fulltime:draw', 'fulltime:loss']));
+  opt($('f-format'), ['all'].concat(FORMATS));
+  opt($('f-style'), STYLES);
+  opt($('f-scale'), ['0.22', '0.3', '0.42', '0.6'], ['22%', '30%', '42%', '60%']);
+  $('f-state').value = 'matchday'; $('f-format').value = 'square'; $('f-scale').value = '0.3';
+
+  const unverified = brands.clubs.filter(c => c.id !== 'rayners-lane' && !c.verified).length;
+  if (unverified) {
+    $('warn').hidden = false;
+    $('warn').textContent = unverified + ' of ' + (brands.clubs.length - 1) +
+      ' opponents have no confirmed palette, so they render on the neutral fallback. ' +
+      'Confirm them in Brand Library to see their real colours. New Bradwell St Peter is confirmed — compare it against the others.';
+  }
+
+  function render() {
+    const fi = $('f-fixture').value, st = $('f-state').value,
+          fo = $('f-format').value, sty = $('f-style').value, sc = parseFloat($('f-scale').value);
+    const fixturesToDo = fi === 'all' ? PICKS : [PICKS[+fi]];
+    const statesToDo = st === 'all' ? STATES : [st];
+    const formatsToDo = fo === 'all' ? FORMATS : [fo];
+    const grid = $('grid'); grid.innerHTML = '';
+
+    fixturesToDo.forEach(([label, fx]) => {
+      statesToDo.forEach(stateSpec => {
+        const [state, variant] = String(stateSpec).split(':');
+        let f = fx;
+        if (state === 'fulltime' || state === 'halftime') {
+          const s = SCORES[variant || 'win'];
+          f = Object.assign({}, fx, { us: s[0], them: s[1] });
+        }
+        const c = CreativeCampaign.build(f, state, { style: sty });
+        if (!c) return;
+        const spec0 = CreativeRecipes.spec(c, CreativeCampaign.format('square'), sty);
+
+        formatsToDo.forEach(fmtName => {
+          const F = CreativeCampaign.format(fmtName);
+          const spec = CreativeRecipes.spec(c, F, sty);
+          spec._layout = CreativeRecipes.recipes[spec._recipe].layout;
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.innerHTML =
+            `<div class="cap"><span>${label} &middot; <b>${stateSpec}</b> &middot; ${F.name}</span>` +
+            `<span class="why">${spec._recipe} — ${spec._why}</span></div>` +
+            `<div class="shell" style="width:${Math.round(F.w * sc)}px;height:${Math.round(F.h * sc)}px">` +
+            CreativeCompose.html(c, fmtName, spec) + `</div>`;
+          cell.querySelector('.shell > *').style.transform = `scale(${sc})`;
+          grid.appendChild(cell);
+        });
+      });
+    });
+  }
+
+  ['f-fixture', 'f-state', 'f-format', 'f-style', 'f-scale']
+    .forEach(id => $(id).addEventListener('change', render));
+  render();
+  window.__renderGallery = render;
+})();
+</script>
+</body>
+</html>

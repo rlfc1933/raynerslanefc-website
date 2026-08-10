@@ -2,12 +2,11 @@
   "sponsors": [
     {
       "name": "Acerbis",
-      "logo": "img/sponsors/kit-sponsor.png",
+      "logo": "",
       "_logoNote": "The approved Acerbis mark was already in the repository under a generic filename, which is why the partner pages had been typesetting the name instead. Found by auditing assets before designing. Not sourced from a search engine.",
       "tier": "Kit Partner",
       "role": "Official Kit Partner",
       "url": "https://www.acerbis.com",
-      "logo": "",
       "note": "Italian since 1973 — our playing kit, supplied free",
       "page": "acerbis.html",
       "feature": false
@@ -49,10 +48,11 @@
       "name": "Ashwood Builders Merchants",
       "tier": "Training Kit Sponsor",
       "role": "Training Kit Sponsor",
-      "logo": "/img/uploads/1781696501761-998412e9-267c-4580-ac6c-1d9e2516584f.jpeg",
+      "logo": "img/sponsors/band/ashwood.png",
       "url": "www.ashwoodbm.com",
       "note": "",
-      "feature": false
+      "feature": false,
+      "_logoNote": "Was /img/uploads/1781696501761-998412e9-267c-4580-ac6c-1d9e2516584f.jpeg — an upload path that no longer exists on disk, so the logo silently failed to render. Repointed at the canonical pre-trimmed band asset, which is the same file the SponsorRail uses."
     },
     {
       "name": "You-Nique Training",

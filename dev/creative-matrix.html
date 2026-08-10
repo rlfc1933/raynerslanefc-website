@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<title>Creative QA Matrix — Rayners Lane FC</title>
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/creative-square-matchday.css">
+<style>
+ body{margin:0;background:#17191b;color:#ddd;font:13px/1.5 'Manrope',system-ui,sans-serif;padding:20px}
+ h1{font:700 13px/1 'Manrope';letter-spacing:.16em;text-transform:uppercase;color:#FFD100;margin:0 0 4px}
+ .sub{color:#868c90;font-size:12px;margin-bottom:20px}
+ .grid{display:flex;flex-wrap:wrap;gap:22px}
+ .cell{}
+ .lab{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#868c90;margin-bottom:6px;max-width:340px}
+ .lab b{color:#FFD100}
+ .box{overflow:hidden;border:1px solid #2b2e31}
+ .box>*{transform-origin:top left}
+ .fh{font:700 12px/1 'Manrope';letter-spacing:.14em;text-transform:uppercase;color:#fff;
+     margin:26px 0 12px;padding-top:18px;border-top:1px solid #2b2e31}
+</style></head><body>
+  <div class="warn" style="background:#1d2733;border-color:#2f4256;color:#bcd2e6"><b>Local preview:</b> crests render as initials by design. LaneCrest verifies each asset before drawing, and that check runs through Netlify's image CDN, which does not exist on localhost. Production resolves the canonical crest assets — verified live.</div>
+
+<h1>Creative QA Matrix</h1>
+<div class="sub">Every cell driven from real fixture data — no per-club code. Square, 1080×1080, shown at 31%.</div>
+<div class="grid" id="g"></div>
+
+<script src="../js/brand-palette.js"></script>
+<script src="../js/competition-brand.js"></script>
+<script src="../js/creative-svg.js"></script>
+<script src="../js/creative-campaign.js"></script>
+<script src="../js/creative-recipes.js"></script>
+<script src="../js/creative-square.js"></script>
+<script>
+(async function(){
+  const j=p=>fetch('../'+p+'?t='+Date.now()).then(r=>r.json());
+  const [brands,comps,partners,fixtures,cache]=await Promise.all([
+    j('data/club-brands.json'),j('data/competitions.json'),j('data/partners.json'),
+    j('data/fixtures.json'),j('data/creative-cache.json')]);
+  CreativeSquare.setAssetBase('../');
+  CreativeCampaign.configure({brands,comps,partners,palette:BrandPalette,brand:CompetitionBrand});
+  const FX=fixtures.fixtures||[];
+  const by=n=>FX.filter(f=>f.opponent===n)[0];
+  const PLATE='img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-b.jpg';
+
+  const CASES=[
+    ['FA VASE · HOME',            by('New Bradwell St Peter'), 'matchday',  null, PLATE],
+    ['FA CUP · AWAY',             by('London Lions'),          'matchday',  null, PLATE],
+    ['LEAGUE · HOME',             by('Wallingford & Crowmarsh'),'matchday', null, PLATE],
+    ['LEAGUE · AWAY (evening)',   by('Broadfields United'),    'matchday',  null, PLATE],
+    ['LEAGUE · HOME, no plate',   by('Wallingford & Crowmarsh'),'matchday', null, null],
+    ['FULL TIME · WIN',           by('New Bradwell St Peter'), 'fulltime',  [3,1], PLATE],
+    ['FULL TIME · DRAW',          by('New Bradwell St Peter'), 'fulltime',  [1,1], PLATE],
+    ['FULL TIME · LOSS',          by('New Bradwell St Peter'), 'fulltime',  [0,2], PLATE],
+    ['POSTPONED (live fixture)',  FX.filter(f=>f.id==='fwp-578241')[0], 'postponed', null, PLATE],
+    ['TEAM NEWS',                 by('New Bradwell St Peter'), 'lineup',    null, PLATE]
+  ].filter(c=>c[1]);
+
+  // Scale each format so every cell is a comparable height on screen.
+  const SC={square:0.30,portrait:0.24,story:0.17,x:0.20};
+
+  function cell(label,fx,state,score,plate,fmt){
+    let f=fx;
+    if(score) f=Object.assign({},fx,{us:score[0],them:score[1]});
+    const c=CreativeCampaign.build(f,state);
+    const rk=CreativeRecipes.pick(c);
+    const spec=CreativeRecipes.spec(c,CreativeCampaign.format(fmt));
+    const treat=c.competition.treatment||'league';
+    const F=CreativeSquare.formats[fmt];
+    const sc=SC[fmt];
+    const html=CreativeSquare.html(c,{plate:plate,spec:spec,format:fmt})
+      .replace('class="sq ','class="sq sq--'+treat+' ');
+    return `<div class="cell"><div class="lab">${label} · <b>${c.opponent}</b><br>${rk.key} — ${rk.why}</div>
+      <div class="box" style="width:${Math.round(F.w*sc)}px;height:${Math.round(F.h*sc)}px">
+        <div style="transform:scale(${sc})">${html}</div></div></div>`;
+  }
+
+  let out='<div class="fh">Square — every competition, venue and state</div><div class="grid">';
+  CASES.forEach(a=>{ out+=cell(a[0],a[1],a[2],a[3],a[4],'square'); });
+  out+='</div>';
+
+  // The other three formats across the states that most test hierarchy.
+  [['story','Story 1080×1920'],['x','X 1600×900'],['portrait','Portrait 1080×1350']].forEach(([fmt,title])=>{
+    out+=`<div class="fh">${title} — separately composed</div><div class="grid">`;
+    [['FA VASE HOME · MATCHDAY',by('New Bradwell St Peter'),'matchday',null,PLATE],
+     ['LEAGUE AWAY · MATCHDAY',by('Broadfields United'),'matchday',null,PLATE],
+     ['FULL TIME · WIN',by('New Bradwell St Peter'),'fulltime',[3,1],PLATE],
+     ['FULL TIME · LOSS',by('New Bradwell St Peter'),'fulltime',[0,2],PLATE],
+     ['POSTPONED',FX.filter(f=>f.id==='fwp-578241')[0],'postponed',null,PLATE]
+    ].filter(a=>a[1]).forEach(a=>{ out+=cell(a[0],a[1],a[2],a[3],a[4],fmt); });
+    out+='</div>';
+  });
+  document.getElementById('g').outerHTML='<div id="g">'+out+'</div>';
+  window.__ok=true;
+})();
+</script></body></html>

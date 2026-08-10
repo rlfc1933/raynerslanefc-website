@@ -1,0 +1,212 @@
+/* ════════════════════════════════════════════════════════════════════════
+   RAYNERS LANE FC — CREATIVE ENGINE
+
+   Layout and typography for generated artwork. The atmosphere lives in SVG
+   (js/creative-svg.js); this file positions the factual layer on top of it.
+
+   HTML2CANVAS-SAFE ON PURPOSE. No backdrop-filter, no CSS mix-blend-mode on
+   anything that carries a fact, no CSS gradients behind text — all of which
+   either fail to rasterise or rasterise differently from what the operator
+   previewed. Everything atmospheric arrives as one <img> holding an SVG, which
+   html2canvas handles reliably. Learned the hard way in this repository once
+   already; not re-learning it.
+
+   Sizes are in px against a fixed canvas (1080/1600 wide), because these are
+   deliverables at exact pixel dimensions, not responsive UI.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.cx {
+  position: relative; overflow: hidden; background: #050505;
+  font-family: var(--font-b, 'Manrope', system-ui, sans-serif);
+  color: var(--cx-ink, #F5F3ED);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* LAYER 1 — the generated photographic plate, when one exists. */
+.cx-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* LAYER 2 — the SVG. On its own it carries the whole frame. Over a photograph
+   it becomes a GRADING pass: club colour, grain and vignette laid on top of
+   real depth. screen blend keeps the photograph's blacks intact while the
+   coloured light adds; without it the SVG's own dark bed would flatten the
+   picture it is supposed to be grading. */
+.cx-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cx-plate--grade { mix-blend-mode: screen; opacity: .82; }
+
+/* A photograph brings its own brightness, so the factual layer needs a floor
+   to stay legible over it — a soft top-and-bottom scrim, not a flat overlay. */
+.cx-photo ~ .cx-inner::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(4,4,4,.86) 0%, rgba(4,4,4,.30) 32%,
+              rgba(4,4,4,.34) 62%, rgba(4,4,4,.92) 100%);
+}
+.cx-inner > * { position: relative; }
+
+/* THE GHOST CREST. Enormous, barely there, anchored off-centre so it reads as
+   a watermark in the fabric of the image rather than as a logo someone forgot
+   to delete. Never near full opacity — at that point it stops being
+   atmosphere and starts competing with the real crests. */
+.cx-ghost {
+  position: absolute; right: -26%; top: 54%; transform: translateY(-50%);
+  height: auto; pointer-events: none;
+  /* BRIGHTNESS 1.6 WAS THE BUG. On a dark ground a brightened watermark stops
+     being a watermark: the first render put a huge glowing RAYNERS LANE disc
+     through the middle of the frame, competing with the two real crests it was
+     meant to sit behind. Knocked back and pushed further off-frame, it now
+     reads as part of the fabric — which is the only version worth having. */
+  /* Blurred, not just dimmed. A crest is a detailed mark — a ring of legible
+     lettering and a griffin — and at watermark scale that detail reads as
+     clutter behind the real crests however far the opacity drops. Blurring it
+     leaves the SHAPE, which is what a watermark is for, and removes the text
+     the eye kept trying to read. */
+  filter: grayscale(1) brightness(0.5) contrast(0.85) blur(7px);
+}
+
+.cx-inner {
+  position: relative; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: calc(var(--cx-safe-top, 40px) + 48px) 64px calc(var(--cx-safe-bottom, 40px) + 44px);
+}
+
+/* ── top: competition + kicker ─────────────────────────────────────────── */
+.cx-comp { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.cx-complogo { height: 46px; width: auto; max-width: 300px; object-fit: contain; display: block; }
+.cx-comp--big .cx-complogo { height: 68px; }
+/* No issued artwork: the competition's proper name, set as type. This is a
+   permitted treatment, so it is designed rather than apologised for. */
+.cx-compname {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif);
+  font-size: 52px; letter-spacing: .05em; color: var(--cx-accent, #FFD100); line-height: 1;
+}
+.cx-comp--big .cx-compname { font-size: 76px; }
+.cx-round {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 17px; font-weight: 800;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(245,243,237,.72);
+  padding-left: 14px; border-left: 2px solid rgba(245,243,237,.24);
+}
+.cx-kicker {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 22px; font-weight: 800;
+  letter-spacing: .26em; text-transform: uppercase; color: rgba(245,243,237,.66);
+}
+
+/* ── the lockup ────────────────────────────────────────────────────────── */
+.cx-body { display: flex; flex-direction: column; gap: 40px; }
+.cx-lock { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; }
+.cx-side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+.cx-crest { object-fit: contain; display: block; filter: drop-shadow(0 10px 30px rgba(0,0,0,.65)); }
+.cx-ini {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-circle); background: rgba(255,255,255,.06);
+  border: 2px solid rgba(255,255,255,.16);
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); color: var(--cx-accent, #FFD100);
+}
+/* Long names are the norm in non-league, not the exception —
+   "New Bradwell St Peter" and "Wallingford & Crowmarsh" both have to fit
+   without shrinking to nothing or spilling out of the frame. */
+.cx-team {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif);
+  font-size: 62px; line-height: .94; letter-spacing: .02em;
+  color: #fff; max-width: 100%; overflow-wrap: break-word; hyphens: auto;
+}
+.cx-mid { flex: 0 0 auto; align-self: center; padding-top: 6%; }
+.cx-vs { font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 104px; line-height: 1; color: var(--cx-accent, #FFD100); }
+.cx-score {
+  font-family: var(--font-d, 'Bebas Neue', sans-serif); font-size: 152px; line-height: .86;
+  color: #fff; letter-spacing: .01em; white-space: nowrap;
+  text-shadow: 0 12px 46px rgba(0,0,0,.7);
+}
+.cx-result { text-align: center; }
+.cx-ftlbl {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 20px; font-weight: 800;
+  letter-spacing: .3em; text-transform: uppercase; color: var(--cx-accent, #FFD100);
+}
+
+/* ── fixture facts ─────────────────────────────────────────────────────── */
+.cx-meta { text-align: center; }
+.cx-date {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 32px; font-weight: 800;
+  letter-spacing: .12em; color: #fff;
+}
+.cx-venue {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 23px; font-weight: 600;
+  letter-spacing: .06em; color: rgba(245,243,237,.68); margin-top: 10px;
+}
+
+/* ── the called-off state ──────────────────────────────────────────────── */
+/* Loudest thing the engine produces, because it has a job: stop a journey. */
+.cx-status { text-align: center; border-top: 5px solid var(--cx-accent, #FFD100); padding-top: 30px; }
+.cx-statusword {
+  display: block; font-family: var(--font-d, 'Bebas Neue', sans-serif);
+  font-size: 120px; line-height: .9; letter-spacing: .02em; color: var(--cx-accent, #FFD100);
+}
+.cx-statuswhy {
+  display: block; margin-top: 18px; font-family: var(--font-b, 'Manrope', sans-serif);
+  font-size: 26px; line-height: 1.4; color: #fff; max-width: 24ch; margin-inline: auto;
+}
+.cx-statusnext {
+  display: block; margin-top: 14px; font-family: var(--font-c, 'Manrope', sans-serif);
+  font-size: 19px; letter-spacing: .08em; color: rgba(245,243,237,.66);
+}
+
+/* A defeat is stated, not dramatised. */
+.cx--muted .cx-score { color: rgba(245,243,237,.9); text-shadow: none; }
+.cx--muted .cx-ftlbl { color: rgba(245,243,237,.6); }
+
+/* ── sponsors: presenter prominent, rail secondary ─────────────────────── */
+.cx-sponsors { display: flex; flex-direction: column; gap: 26px; align-items: center; }
+.cx-pres { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.cx-preslbl {
+  font-family: var(--font-c, 'Manrope', sans-serif); font-size: 14px; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase; color: rgba(245,243,237,.5);
+}
+.cx-preslogo { height: 62px; width: auto; max-width: 60%; object-fit: contain; display: block; }
+/* The rail is deliberately smaller than the presenter. Equal sizing is how a
+   commercial hierarchy quietly stops existing. */
+.cx-rail {
+  display: flex; align-items: center; justify-content: center;
+  gap: 42px; flex-wrap: wrap; padding-top: 22px;
+  border-top: 1px solid rgba(245,243,237,.13); width: 100%;
+}
+.cx-raillogo { height: 34px; width: auto; max-width: 190px; object-fit: contain; display: block; opacity: .92; }
+
+/* ── format-specific composition, not crops ────────────────────────────── */
+
+/* STORY — a tall column. Everything factual inside the zone Instagram's own
+   UI leaves free; only atmosphere runs under the top and bottom bars. */
+.cx--story .cx-inner { padding-left: 76px; padding-right: 76px; }
+.cx--story .cx-body { gap: 56px; }
+.cx--story .cx-vs { font-size: 124px; }
+.cx--story .cx-team { font-size: 74px; }
+.cx--story .cx-compname { font-size: 64px; }
+.cx--story .cx-score { font-size: 190px; }
+.cx--story .cx-lock { gap: 20px; }
+.cx--story .cx-preslogo { height: 74px; }
+.cx--story .cx-raillogo { height: 40px; }
+.cx--story .cx-ghost { top: 40%; right: -22%; }
+
+/* PORTRAIT — the feed workhorse; balanced, slightly tighter than Story. */
+.cx--portrait .cx-body { gap: 44px; }
+.cx--portrait .cx-score { font-size: 168px; }
+
+/* SQUARE — the most compressed of the three uprights. */
+.cx--square .cx-inner { padding-top: 60px; padding-bottom: 56px; }
+.cx--square .cx-body { gap: 32px; }
+.cx--square .cx-score { font-size: 142px; }
+.cx--square .cx-rail { gap: 34px; }
+
+/* X — genuinely landscape: the lockup spreads across the width, the ghost
+   crest moves out of the type's way, and the sponsor rail goes inline. */
+.cx--xlandscape .cx-inner { padding: 46px 68px 42px; }
+.cx--xlandscape .cx-body { gap: 24px; }
+.cx--xlandscape .cx-lock { gap: 56px; align-items: center; }
+.cx--xlandscape .cx-team { font-size: 46px; }
+.cx--xlandscape .cx-vs { font-size: 64px; }
+.cx--xlandscape .cx-score { font-size: 124px; }
+.cx--xlandscape .cx-mid { padding-top: 0; }
+.cx--xlandscape .cx-sponsors { flex-direction: row; align-items: center; justify-content: space-between; gap: 40px; }
+.cx--xlandscape .cx-pres { flex-direction: row; align-items: center; gap: 16px; }
+.cx--xlandscape .cx-preslogo { height: 44px; }
+.cx--xlandscape .cx-rail { border-top: 0; padding-top: 0; width: auto; gap: 34px; }
+.cx--xlandscape .cx-raillogo { height: 28px; }
+.cx--xlandscape .cx-ghost { right: -6%; top: 50%; }
+.cx--xlandscape .cx-statusword { font-size: 96px; }
