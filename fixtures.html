@@ -543,6 +543,24 @@ function fxActs(f) {
     tie on the fixtures page too and not only inside Studio. */
 function fxCompTreatment(f) {
   var id = String((f && f.competitionId) || '').toLowerCase();
+  // COMPETITION ID DOES NOT SURVIVE THE FIXTURE NORMALISER.
+  // The list this page actually renders is normalised before it gets here —
+  // it gains kickoffAt and loses competitionId, season and the share fields.
+  // Locally the raw file is used and the id is present, so every card resolved
+  // correctly in development and EVERY card came out `fxc--other` in
+  // production: no league glow, no cup ground, no Vase. Found by reading the
+  // rendered class names off the live site, not by any test.
+  //
+  // So resolve through the registry that already copes with a label. It maps
+  // "FA Vase 1Q" to fa-vase by alias, which is the same route the competition
+  // NAME on the card has always taken — meaning the treatment can no longer
+  // disagree with the words printed beside it.
+  if (!id && window.CompetitionBrand) {
+    try {
+      var ci = CompetitionBrand.identity(f);
+      if (ci && ci.id) id = String(ci.id).toLowerCase();
+    } catch (e) { /* an unresolvable competition simply stays neutral */ }
+  }
   // The Vase and the Cup are not the same competition and must not look it.
   // They were bucketed together here, so the New Bradwell Vase tie — the
   // fixture this whole creative system was designed around — rendered
