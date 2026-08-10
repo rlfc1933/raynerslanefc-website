@@ -129,6 +129,54 @@
       });
     },
     'brand-library': function (w) { return w.BrandLibrary && w.BrandLibrary.init(); },
+    'studio-shell': function (w) {
+      return new Promise(function (res) {
+        var t = 0;
+        (function go() {
+          if (w.loadPostStudio && w.StudioShell) {
+            w.loadPostStudio();
+            setTimeout(function () {
+              w.StudioShell.init();
+              if (q.get('cat')) w.StudioShell.pick(q.get('cat'));
+              res(true);
+            }, 1500);
+            return;
+          }
+          if (++t > 120) return res(false);
+          setTimeout(go, 100);
+        })();
+      });
+    },
+    /* The REAL Post Studio, rendering a real fixture through the cinematic
+       engine. ?ps=<type>&fmt=<size> chooses the template and format. This
+       exercises admin.html's own psRender(), not a parallel preview. */
+    'studio': function (w) {
+      var type = q.get('ps') || 'matchday', fmt = q.get('fmt') || 'ig';
+      return new Promise(function (res) {
+        var t = 0;
+        (function go() {
+          if (w.loadPostStudio && w.StudioCinematic) {
+            w.loadPostStudio();
+            w.StudioCinematic.prepare().then(function () {
+              var wait = 0;
+              (function seed() {
+                if ((w.psFixtures || []).length) {
+                  w.psSetType(type);
+                  w.PS.size = fmt;
+                  w.psRender();
+                  return res(true);
+                }
+                if (++wait > 120) return res(false);
+                setTimeout(seed, 100);
+              })();
+            });
+            return;
+          }
+          if (++t > 120) return res(false);
+          setTimeout(go, 100);
+        })();
+      });
+    },
     'prepare-match': function (w) {
       return Promise.all([
         w.fetch('data/club-brands.json').then(function (r) { return r.json(); })
@@ -154,12 +202,18 @@
       var doc;
       try { doc = frame.contentDocument; } catch (e) { return fail('cross-origin'); }
       var nodes = doc ? doc.querySelectorAll(sel) : [];
-      if (nodes.length && nodes.length === lastCount) stable++; else stable = 0;
-      lastCount = nodes.length;
-      if (!nodes.length || stable < 8) {
+      // COUNT ALONE IS NOT ENOUGH WHEN A MODULE FILLS AN EXISTING NODE.
+      // #ps-shell is in the markup from the start, so the count settled
+      // instantly and the harness photographed an empty div before the shell
+      // had rendered into it. Track the node's own content as well.
+      var target = nodes[n];
+      var fingerprint = nodes.length + ':' + ((target && target.innerHTML.length) || 0);
+      if (nodes.length && fingerprint === lastCount) stable++; else stable = 0;
+      lastCount = fingerprint;
+      if (!nodes.length || !(target && target.innerHTML.length) || stable < 8) {
         if (++tries > 250) {
           return fail(nodes.length
-            ? 'count never settled for ' + sel + ' (last ' + nodes.length + ')'
+            ? 'content never settled for ' + sel + ' (last ' + lastCount + ')'
             : 'no node matched ' + sel + ' after 25s');
         }
         return setTimeout(wait, 100);
@@ -205,7 +259,29 @@
       stage.innerHTML = '';
       stage.style.width = (width + 52) + 'px';
       stage.appendChild(head);
-      stage.appendChild(clone);
+      // A Studio card is authored at 1080px+ and must be scaled to be seen
+      // whole. Scaling the clone, not the source, so the real card keeps the
+      // exact pixel size the export path depends on.
+      var scale = parseFloat(q.get('scale') || '0');
+      if (scale > 0) {
+        // Measure from the SOURCE node, which is laid out. A detached clone
+        // reports offsetWidth 0, which collapsed the wrapper to nothing and
+        // photographed an empty box.
+        var r = node.getBoundingClientRect();
+        var w = Math.round(r.width || parseFloat(clone.style.width) || width);
+        var h = Math.round(r.height || parseFloat(clone.style.height) || width);
+        var box = document.createElement('div');
+        box.style.cssText = 'transform:scale(' + scale + ');transform-origin:top left;' +
+          'width:' + w + 'px;height:' + h + 'px';
+        box.appendChild(clone);
+        var shell = document.createElement('div');
+        shell.style.cssText = 'overflow:hidden;width:' + Math.ceil(w * scale) +
+          'px;height:' + Math.ceil(h * scale) + 'px';
+        shell.appendChild(box);
+        stage.appendChild(shell);
+      } else {
+        stage.appendChild(clone);
+      }
 
       // Tell the screenshotter the content is settled and how tall it is.
       requestAnimationFrame(function () {

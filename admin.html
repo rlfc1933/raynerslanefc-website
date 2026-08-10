@@ -32,6 +32,21 @@
   <script src="js/live-content-events.js"></script>
   <script src="js/live-content-desk.js"></script>
   <script src="js/live-prefill.js"></script>
+  <!-- THE REAL STUDIO RENDERS THE REAL CREATIVE. One renderer, not two: the
+       committee-facing Studio now draws the same cinematic system the creative
+       engine was built to produce, from the real fixture. Falls back to the
+       original renderer for anything it cannot resolve. -->
+  <link rel="stylesheet" href="css/creative-engine.css">
+  <link rel="stylesheet" href="css/creative-square-matchday.css">
+  <script src="js/creative-svg.js"></script>
+  <script src="js/creative-campaign.js"></script>
+  <script src="js/creative-square.js"></script>
+  <script src="js/studio-cinematic.js"></script>
+  <!-- One question instead of twenty-six buttons. Navigation only: it calls
+       psSetType(), the same function the old buttons called, and "Show every
+       template" restores the original picker. -->
+  <link rel="stylesheet" href="css/studio-shell.css">
+  <script src="js/studio-shell.js"></script>
   <!-- Opponent colours, and who says so. Reads data/club-brands.json and saves
        through the portal's own save path, which the server authorises. -->
   <link rel="stylesheet" href="css/brand-library.css">
@@ -2484,6 +2499,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="div"></div>
 
       <div class="slbl">1 &middot; Choose a post</div>
+      <div id="ps-shell"></div>
       <div class="ps-types" id="ps-types"></div>
       <div class="ps-hint" id="ps-hint"></div>
       <!-- Which match this card is about. Always visible before export, so a
@@ -4535,7 +4551,7 @@ function openPanel(name) {
   if (name === 'radar')      rdrInit();
   if (name === 'trialists')  loadLeads();
   if (name === 'records')    loadRecords();
-  if (name === 'poststudio') loadPostStudio();
+  if (name === 'poststudio') { loadPostStudio(); try { StudioCinematic.init(); } catch (e) {} try { StudioShell.init(); } catch (e) {} }
   if (name === 'monthlyfix') mfInit();
   if (name === 'fwp')        fwpInit();
   if (name === 'clubstats') loadClubStats();
@@ -6587,11 +6603,22 @@ function loadPostStudio() {
 // this logic ever appears, that is the bug.
 function psNextFixture() {
   var today = new Date(); today.setHours(0, 0, 0, 0);
-  return (psFixtures || []).filter(function (f) {
+  // A POSTPONED FIXTURE IS NOT THE NEXT MATCH.
+  // Studio seeded from it, so asking for a Matchday graphic produced a card
+  // reading POSTPONED — and Studio disagreed with the homepage, the fixtures
+  // page and Prepare Match, all of which had already learned to skip these.
+  // A postponement gets its own graphic, chosen deliberately; it is never what
+  // "the next match" means.
+  function playable(f) {
+    var st = String(f.status || '').toLowerCase();
+    return st !== 'postponed' && st !== 'cancelled' && st !== 'abandoned';
+  }
+  var up = (psFixtures || []).filter(function (f) {
     if (!f.date) return false;
     var d = new Date(f.date + 'T12:00:00');
     return d >= today;
-  }).sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0] || null;
+  }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  return up.filter(playable)[0] || up[0] || null;
 }
 // The most recent game with a score. An AFTER-match card seeded from the NEXT
 // fixture is a result card with no result in it — which is what Full-Time did.
@@ -7222,6 +7249,16 @@ function psPartnerBand(W, H, light){
   return out;
 }
 function psRender() {
+  /* THE CINEMATIC ENGINE GETS FIRST REFUSAL.
+     For every state the campaign understands — matchday, countdown, team news,
+     kick off, goal, cards, half time, full time, postponed — the real Studio
+     now draws the same artwork the creative system was designed to produce,
+     from the real fixture. It returns false for anything it cannot resolve
+     (no fixture, registries not loaded, a non-fixture template like a
+     birthday) and the original renderer below runs exactly as before. */
+  try {
+    if (window.StudioCinematic && StudioCinematic.render()) return;
+  } catch (e) { /* fall through to the renderer that has always worked */ }
   var s = PS_SIZES[PS.size], t = PS_THEMES[PS.theme], d = PS.data, W = s.w, H = s.h, midY = H / 2;
   var X = PS.size === 'x', ST = PS.size === 'story';
   var H2 = H - (psHasBand() ? psBandH(H) : 0);   // bottom-content anchor: templates shift up to reserve the band
