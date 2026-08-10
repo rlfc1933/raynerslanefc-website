@@ -31,7 +31,9 @@
    coloured light adds; without it the SVG's own dark bed would flatten the
    picture it is supposed to be grading. */
 .cx-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.cx-plate--grade { mix-blend-mode: screen; opacity: .82; }
+/* Export-safe: html2canvas ignores mix-blend-mode, so preview and file would
+   not match. Opacity alone over a dark ground is close and is identical in both. */
+.cx-plate--grade { opacity: .72; }
 
 /* A photograph brings its own brightness, so the factual layer needs a floor
    to stay legible over it — a soft top-and-bottom scrim, not a flat overlay. */

@@ -45,7 +45,10 @@
 
 /* ── layers 1–2: photograph, then grading ─────────────────────────────── */
 .sq__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.sq__grade { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; opacity: .55; }
+/* No mix-blend-mode: the exporter ignores it, which made the downloaded file
+   differ from the approved preview. Opacity alone reads almost the same over a
+   near-black ground and is the same in both. */
+.sq__grade { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; }
 /* Legibility floor. Weighted to the bottom, where the facts live, and kept off
    the upper centre so the floodlight survives. */
 .sq__scrim {
@@ -58,15 +61,30 @@
 /* Club colour arrives as LIGHT, in pieces — never as a wash over the whole
    photograph. Yellow from the left where the Lane crest sits, claret from the
    right where the opponent does. */
+/* EXPORT-SAFE GRADIENTS.
+   Two things in these layers broke the PNG export, and both were invisible
+   while this renderer only ever lived in a dev gallery nobody downloaded from.
+
+   1. `ellipse at X% Y%` with no explicit size means farthest-corner, which
+      html2canvas 1.4.1 computes as a non-finite radius on a percentage-sized
+      box — "addColorStop: the provided double value is non-finite" — and the
+      whole export throws. Sizing the ellipse explicitly makes the radii
+      deterministic and changes the look barely at all.
+
+   2. `mix-blend-mode: screen` is simply not supported by the exporter. It was
+      not crashing anything; it meant the downloaded file would not match the
+      preview the operator approved. These lights are translucent colour over
+      near-black, where screen and normal are close, so the blend is dropped in
+      favour of the two being the same image. */
 .sq__lightL {
   position: absolute; left: -18%; top: 18%; width: 62%; height: 66%;
-  background: radial-gradient(ellipse at 30% 50%, rgba(255,209,0,.34), rgba(255,209,0,0) 68%);
-  mix-blend-mode: screen; pointer-events: none;
+  background: radial-gradient(ellipse 88% 78% at 30% 50%, rgba(255,209,0,.34), rgba(255,209,0,0) 68%);
+  pointer-events: none;
 }
 .sq__lightR {
   position: absolute; right: -20%; top: 26%; width: 56%; height: 60%;
-  background: radial-gradient(ellipse at 70% 50%, rgba(167,54,102,.40), rgba(167,54,102,0) 66%);
-  mix-blend-mode: screen; pointer-events: none;
+  background: radial-gradient(ellipse 88% 78% at 70% 50%, rgba(167,54,102,.40), rgba(167,54,102,0) 66%);
+  pointer-events: none;
 }
 
 /* ── ghost crest: shape only, huge, off-grid ───────────────────────────── */
@@ -104,7 +122,7 @@
 .sq__comp { display: flex; align-items: center; gap: 22px; position: relative; }
 .sq__comp::before {
   content: ''; position: absolute; left: -46px; top: -44px; width: 300px; height: 220px;
-  background: radial-gradient(ellipse at 32% 50%, rgba(255,255,255,.20), rgba(255,255,255,0) 70%);
+  background: radial-gradient(ellipse 90% 80% at 32% 50%, rgba(255,255,255,.20), rgba(255,255,255,0) 70%);
   pointer-events: none;
 }
 .sq__complogo { height: 124px; width: auto; max-width: 300px; object-fit: contain; display: block;
@@ -196,10 +214,12 @@
 /* Opponent counter-light is driven by the confirmed palette, and is simply
    absent when no human has confirmed one. No guessed colour reaches artwork. */
 .sq__lightR {
-  background: radial-gradient(ellipse at 70% 50%,
-    color-mix(in srgb, var(--sq-opp) 42%, transparent), transparent 66%);
+  /* Pre-mixed in JS as rgba(). color-mix() renders fine in the browser but
+     html2canvas 1.4.1 cannot parse it and aborts the whole PNG export. */
+  background: radial-gradient(ellipse 88% 78% at 70% 50%,
+    var(--sq-oppA, rgba(0,0,0,0)), transparent 66%);
 }
-.sq__grade--solo { mix-blend-mode: normal; opacity: 1; }
+.sq__grade--solo { opacity: 1; }
 
 /* Crest fallback for a club with no artwork — designed, never a stretched logo. */
 .sq__crest--ini {

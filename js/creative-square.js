@@ -42,6 +42,29 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  /**
+   * A hex colour as rgba(), pre-mixed at the given alpha.
+   *
+   * WHY THIS EXISTS RATHER THAN color-mix(). The counter-light used
+   * `color-mix(in srgb, var(--sq-opp) 42%, transparent)`, which every current
+   * browser renders correctly and html2canvas 1.4.1 cannot parse at all — it
+   * throws "Attempting to parse an unsupported color function", and the whole
+   * PNG export fails. That was invisible while this renderer lived only in dev
+   * galleries nobody exported from; putting it in the real Studio put it
+   * straight onto the export path.
+   *
+   * Mixing here instead keeps the preview and the downloaded file identical,
+   * which is the requirement — an export that quietly drops the opponent's
+   * light would be worse than one that fails loudly.
+   */
+  function rgba(hex, alpha) {
+    var h = String(hex || '').trim().replace(/^#/, '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    if (!/^[0-9a-f]{6}$/i.test(h)) return 'rgba(0,0,0,0)';
+    var n = parseInt(h, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+  }
+
   function initials(n) {
     return String(n || '').replace(/\b(fc|afc|utd|united|town|city|st)\b/gi, '')
       .trim().split(/\s+/).map(function (w) { return w[0] || ''; }).join('').slice(0, 3).toUpperCase() || '?';
@@ -195,7 +218,9 @@
     return '' +
     '<div class="sq ' + F.cls + ' sq--' + esc(H.mode) + ' sq--' + esc(H.tone) + '" style="' +
         'width:' + F.w + 'px;height:' + F.h + 'px;' +
-        '--sq-opp:' + (oppLight || 'transparent') + ';--sq-lane:' + (t.accent || '#FFD100') + '">' +
+        '--sq-opp:' + (oppLight || 'transparent') + ';' +
+        '--sq-oppA:' + (oppLight ? rgba(oppLight, 0.42) : 'rgba(0,0,0,0)') + ';' +
+        '--sq-lane:' + (t.accent || '#FFD100') + '">' +
       (photo ? '<img class="sq__photo" src="' + esc(photo) + '" alt="">' : '') +
       '<img class="sq__grade' + (photo ? '' : ' sq__grade--solo') + '" src="' + proc + '" alt="">' +
       '<div class="sq__scrim"></div>' +

@@ -4,15 +4,44 @@
     "c-20260815-new-bradwell-st-peter": {
       "fixture": "Rayners Lane v New Bradwell St Peter, 15 Aug 2026, Isuzu FA Vase 1Q",
       "recipe": "CUP_NIGHT",
-      "locked": null,
+      "locked": {
+        "square": "b",
+        "story": "a",
+        "_why": "Chosen from the recorded evaluation of the generated candidates, not automatically. square-b: floodlight bloom, wet grass foreground, dark quiet upper third — the best negative-space compliance and a cool neutral base that suits the grading layer. story-a: the only genuinely composed vertical. seedream was rejected for baking a flat magenta wash into the right side, which is the failure the brief explicitly warned against.",
+        "_by": "Locked during the integration correction, 10 Aug 2026. Staff may change this in Studio."
+      },
       "candidates": {
         "square": [
-          { "id": "a", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-a.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Overcast daylight through a goal net. Beautiful photograph, ignored the lighting brief, and the net texture competes across the whole frame." },
-          { "id": "b", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-b.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Floodlight bloom, wet grass foreground, dark quiet upper third. Best negative-space compliance. Cool neutral base, which suits our grading layer." },
-          { "id": "seedream", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-seedream.jpg", "model": "seedream_v4_5", "credits": 1, "note": "Followed the brief most literally — pylon left, gold beam, claret counter-light right. Reads as AI concept art, and baked a flat magenta wash into the right side, which is the failure we explicitly briefed against." }
+          {
+            "id": "a",
+            "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-a.jpg",
+            "model": "cinematic_studio_2_5",
+            "credits": 2,
+            "note": "Overcast daylight through a goal net. Beautiful photograph, ignored the lighting brief, and the net texture competes across the whole frame."
+          },
+          {
+            "id": "b",
+            "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-b.jpg",
+            "model": "cinematic_studio_2_5",
+            "credits": 2,
+            "note": "Floodlight bloom, wet grass foreground, dark quiet upper third. Best negative-space compliance. Cool neutral base, which suits our grading layer."
+          },
+          {
+            "id": "seedream",
+            "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-seedream.jpg",
+            "model": "seedream_v4_5",
+            "credits": 1,
+            "note": "Followed the brief most literally — pylon left, gold beam, claret counter-light right. Reads as AI concept art, and baked a flat magenta wash into the right side, which is the failure we explicitly briefed against."
+          }
         ],
         "story": [
-          { "id": "a", "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-story-a.jpg", "model": "cinematic_studio_2_5", "credits": 2, "note": "Genuinely composed vertical: pylon through the upper frame, terraces flanking, white line leading up the centre axis." }
+          {
+            "id": "a",
+            "file": "img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-story-a.jpg",
+            "model": "cinematic_studio_2_5",
+            "credits": 2,
+            "note": "Genuinely composed vertical: pylon through the upper frame, terraces flanking, white line leading up the centre axis."
+          }
         ],
         "x": []
       },
@@ -20,8 +49,13 @@
         "story-b": "blocked — daily generation limit on the grace period",
         "x-a": "blocked — daily generation limit",
         "x-b": "blocked — daily generation limit"
+      },
+      "derives": {
+        "portrait": "square",
+        "x": "square",
+        "_why": "Portrait and X were never generated — the daily limit blocked them. Rather than leave those formats without the campaign photography, they crop the locked square plate, which is the same environment rather than a different one. Regenerating per format would pay twice for one campaign and risk two different-looking worlds for one fixture."
       }
     }
   },
-  "updatedAt": "2026-08-10T01:00:00.000Z"
+  "updatedAt": "2026-08-10T09:00:00.000Z"
 }
