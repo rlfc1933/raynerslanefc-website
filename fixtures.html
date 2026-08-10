@@ -1116,14 +1116,27 @@ function renderCompetitions() {
      poster, nothing that costs a scroll frame. All of it is additive — a
      fixture with no confirmed palette simply renders as it always did. */
 
-  /* The opponent's colour, entering from the right as a wash — the same
-     counter-light idea as the artwork, at UI strength. */
+  /* The opponent's colour, entering as a wash from THEIR side of the lockup —
+     the same counter-light idea as the artwork, at UI strength.
+
+     WHICH SIDE IS NOT A CONSTANT. The lockup is always home-then-away, so the
+     opponent stands on the right when we are at home and on the LEFT when we
+     are away. A wash pinned to one edge is therefore correct half the time and
+     lights the wrong club the other half — which is what it did: "BURNHAM" sat
+     on the left of the card while Burnham's navy and Burnham's crest bled off
+     the right, behind our own name. Both now follow the opponent. */
   .fxc--tinted{
     background:
-      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 13%, transparent) 0%,
-                              transparent 46%),
+      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 16%, transparent) 0%,
+                              transparent 52%),
       var(--card);
     border-color: color-mix(in srgb, var(--fxc-opp) 22%, var(--border));
+  }
+  .fxc--away.fxc--tinted{
+    background:
+      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 16%, transparent) 0%,
+                              transparent 52%),
+      var(--card);
   }
   /* Home stays Lane yellow on the leading edge; away hands that edge to the
      opponent, which is the quickest read of where we are playing. */
@@ -1136,6 +1149,8 @@ function renderCompetitions() {
     width:150px; height:150px; object-fit:contain; opacity:.055;
     filter:grayscale(1) contrast(.9); pointer-events:none; z-index:0;
   }
+  /* Away: the opponent is the left-hand club, so their crest bleeds left. */
+  .fxc--away .fxc__ghost{right:auto; left:-34px}
   .fxc > *:not(.fxc__ghost){position:relative;z-index:1}
 
   /* The competition's own mark, cap-height, top-right. */
@@ -1156,6 +1171,7 @@ function renderCompetitions() {
      it sits under the text instead of beside it. */
   @media (max-width:600px){
     .fxc__ghost{width:104px;right:-26px;opacity:.045}
+    .fxc--away .fxc__ghost{right:auto;left:-26px}
     .fxc__comp{height:20px}
   }
 
