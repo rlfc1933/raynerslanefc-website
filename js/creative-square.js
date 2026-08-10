@@ -117,6 +117,18 @@
         next: c.rearrangedDate ? 'Rearranged for ' + fmtDate(c.rearrangedDate) : 'A new date will be announced'
       };
     }
+    // A GOAL is the loudest thing that happens in a match and must not fall
+    // through to MATCHDAY. It promotes the scorer — the fact everyone wants —
+    // and keeps the running score beneath it.
+    if (st === 'goal') {
+      return { word: 'GOAL', mode: c.score ? 'score' : 'confront', tone: 'peak',
+               who: c.player || '', minute: c.minute || '' };
+    }
+    if (st === 'yellow' || st === 'red') {
+      return { word: st === 'red' ? 'RED CARD' : 'YELLOW CARD', mode: 'info',
+               tone: st === 'red' ? 'urgent' : 'neutral',
+               who: c.player || '', minute: c.minute || '' };
+    }
     if (st === 'fulltime' && c.score) {
       return { word: 'FULL TIME', mode: 'score', tone: c.outcome || 'draw' };
     }
@@ -156,8 +168,17 @@
     // colours. An unconfirmed club gets Lane light alone rather than a guess.
     var oppLight = c.palette.oppUsable ? c.palette.opponent.primary : null;
 
-    var centre = H.mode === 'score'
+    var centre = (H.mode === 'score' && c.score)
       ? '<div class="sq__scorewrap"><div class="sq__score">' + esc(c.score.us) + '<span>&ndash;</span>' + esc(c.score.them) + '</div></div>'
+      : '';
+
+    // Who did it, and when. Only rendered when the feed actually said so —
+    // a goal graphic with a blank name is better than one with a wrong name.
+    var actor = (H.who || H.minute)
+      ? '<div class="sq__actor">' +
+          (H.who ? '<span class="sq__who">' + esc(H.who) + '</span>' : '') +
+          (H.minute ? '<span class="sq__min">' + esc(H.minute) + '</span>' : '') +
+        '</div>'
       : '';
 
     var facts = H.mode === 'status'
@@ -193,6 +214,8 @@
         '<div class="sq__side">' + crest(c.away.crest, c.away.name) +
           '<div class="sq__team ' + away.cls + '"><span>' + away.html + '</span></div></div>' +
       '</div>' +
+
+      actor +
 
       '<div class="sq__in">' +
         competition(c.competition) +
