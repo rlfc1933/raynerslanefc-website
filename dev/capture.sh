@@ -20,7 +20,7 @@ mkdir -p "$OUT"
 
 shot() { # shot <file> <w> <h> <url>
   "$CHROME" --headless --disable-gpu --hide-scrollbars \
-    --force-device-scale-factor=2 --virtual-time-budget=9000 \
+    --force-device-scale-factor=2 --virtual-time-budget=28000 \
     --window-size="$2,$3" --screenshot="$OUT/$1" "$4" >/dev/null 2>&1
   if [ -f "$OUT/$1" ]; then
     printf '  %-38s %s\n' "$1" "$(du -h "$OUT/$1" | cut -f1)"
@@ -29,8 +29,8 @@ shot() { # shot <file> <w> <h> <url>
   fi
 }
 
-card() { # card <file> <selector> <index> <open> <width> <label> <note>
-  local url="$BASE/dev/qa-shot.html?sel=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$2")&n=$3&open=$4&w=$5&label=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$6")&note=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "${7:-}")"
+card() { # card <file> <selector> <index> <open> <width> <label> <note>   (SRC=/page.html to change source)
+  local url="$BASE/dev/qa-shot.html?src=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "${SRC:-/fixtures.html}")&sel=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$2")&n=$3&open=$4&w=$5&label=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$6")&note=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "${7:-}")"
   shot "$1" "$(( $5 + 60 ))" 900 "$url"
 }
 
@@ -53,6 +53,21 @@ card fixture-expanded-finished.png   ".fxc--s-finished"          0 1 1000 "Expan
 echo "── mobile card states ─────────────────────────────────"
 card fixture-mobile-375-collapsed.png ".fxc--away.fxc--league"   0 0 375 "Away league at 375px" "real fixture"
 card fixture-mobile-375-expanded.png  ".fxc--s-upcoming"         0 1 375 "Expanded at 375px" "real fixture"
+
+echo "── programme ──────────────────────────────────────────"
+prog() { # prog <file> <pageIndex> <label>
+  SRC=/programme-print.html card "$1" ".page" "$2" 0 820 "$3" "real programme document"
+}
+shot programme-print-full.png 1000 1420 "$BASE/programme-print.html"
+prog programme-cover.png        0  "Programme — cover"
+prog programme-contents.png     1  "Programme — page 2"
+prog programme-manager.png      2  "Programme — page 3"
+prog programme-opposition.png   3  "Programme — page 4"
+prog programme-p5.png           4  "Programme — page 5"
+prog programme-p6.png           5  "Programme — page 6"
+prog programme-league-table.png 6  "Programme — page 7"
+prog programme-p8.png           7  "Programme — page 8"
+prog programme-sponsors.png     8  "Programme — page 9"
 
 echo
 echo "written to $OUT"

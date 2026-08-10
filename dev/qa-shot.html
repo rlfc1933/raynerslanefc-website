@@ -49,8 +49,11 @@
 
   var stage = document.getElementById('stage');
   var frame = document.getElementById('src');
+  // Any same-origin page on the site, not just the fixtures list.
+  var src = q.get('src') || '/fixtures.html';
+  if (!/^\//.test(src)) src = '/' + src;
   frame.style.width = width + 'px';
-  frame.src = '/fixtures.html';
+  frame.src = src;
 
   function fail(msg) {
     stage.innerHTML = '<p id="err">QA HARNESS: ' + msg + '</p>';
@@ -58,15 +61,25 @@
   }
 
   frame.addEventListener('load', function () {
-    // The page fetches its fixtures, so the node will not exist on load.
-    // Poll briefly rather than guess a delay.
-    var tries = 0;
+    // The page fetches its own data, so the node will not exist on load.
+    //
+    // WAIT FOR THE COUNT TO SETTLE, NOT MERELY TO BE NON-ZERO. The programme
+    // builds its pages progressively; grabbing at the first match caught it
+    // with one page rendered and asked for index 2. Require the match count to
+    // hold steady before taking anything.
+    var tries = 0, lastCount = -1, stable = 0;
     (function wait() {
       var doc;
       try { doc = frame.contentDocument; } catch (e) { return fail('cross-origin'); }
       var nodes = doc ? doc.querySelectorAll(sel) : [];
-      if (!nodes.length) {
-        if (++tries > 60) return fail('no node matched ' + sel + ' after 6s');
+      if (nodes.length && nodes.length === lastCount) stable++; else stable = 0;
+      lastCount = nodes.length;
+      if (!nodes.length || stable < 8) {
+        if (++tries > 250) {
+          return fail(nodes.length
+            ? 'count never settled for ' + sel + ' (last ' + nodes.length + ')'
+            : 'no node matched ' + sel + ' after 25s');
+        }
         return setTimeout(wait, 100);
       }
       var node = nodes[n];
