@@ -1,0 +1,145 @@
+/* ════════════════════════════════════════════════════════════════════════
+   NEXT MATCH & PREPARE MATCH — staff-facing.
+
+   Deliberately quieter than the supporter-facing campaign work. A volunteer
+   is here to do a job on a Tuesday evening, often on a phone, sometimes at the
+   ground in the rain. The opponent's colour appears as a single edge so the
+   card is recognisably THIS fixture, and then gets out of the way.
+
+   Tap targets follow the shared control minimum, because the people using the
+   live half of this are standing pitchside holding a phone in one hand.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.pm-card{
+  position:relative; overflow:hidden;
+  background:var(--card,#121212); border:1px solid var(--border,#262626);
+  border-radius:var(--r-lg,14px); padding:16px 16px 14px; margin:0 0 18px;
+}
+.pm-card:before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--yellow,#FFD100); }
+.pm-card--tinted:before{ background:var(--pm-opp); }
+.pm-card--tinted{
+  background:
+    linear-gradient(255deg, color-mix(in srgb, var(--pm-opp) 14%, transparent) 0%, transparent 54%),
+    var(--card,#121212);
+  border-color: color-mix(in srgb, var(--pm-opp) 26%, var(--border,#262626));
+}
+.pm-card--live:before{ background:#ff4d4d; }
+
+.pm-card__top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+.pm__kicker{
+  font-family:var(--font-c,inherit); font-weight:800; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--yellow,#FFD100);
+}
+.pm__live{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--font-c,inherit); font-weight:800; font-size:10px; letter-spacing:.2em;
+  text-transform:uppercase; color:#ff6b6b;
+}
+.pm__live i{ width:7px; height:7px; border-radius:var(--r-circle); background:#ff4d4d; }
+@media (prefers-reduced-motion: no-preference){
+  .pm__live i{ animation:pmPulse 1.6s ease-in-out infinite; }
+}
+@keyframes pmPulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+.pm__comp{
+  font-family:var(--font-c,inherit); font-weight:700; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--grey,#8a8a8a); text-align:right;
+}
+
+.pm-card__lock{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; }
+.pm__side{ display:flex; flex-direction:column; align-items:center; gap:7px; min-width:0; }
+.pm__crest{ width:44px; height:44px; object-fit:contain; }
+.pm__crest--ini{
+  display:flex; align-items:center; justify-content:center;
+  border-radius:var(--r-circle); background:var(--card2,#1a1a1a); border:1px solid var(--border,#262626);
+  font-family:var(--font-d,inherit); font-size:14px; color:var(--grey,#8a8a8a);
+}
+.pm__team{
+  font-family:var(--font-d,inherit); font-size:13px; letter-spacing:.03em; text-align:center;
+  line-height:1.05; color:var(--white,#f5f3ed); text-transform:uppercase;
+}
+.pm__v{ font-family:var(--font-d,inherit); font-size:15px; color:var(--yellow,#FFD100); }
+.pm__score{ font-family:var(--font-d,inherit); font-size:26px; color:var(--white,#f5f3ed); white-space:nowrap; }
+
+.pm-card__when{
+  margin:12px 0 0; text-align:center;
+  font-family:var(--font-b,inherit); font-size:12.5px; color:var(--lgrey,#b5b5b5);
+}
+.pm__off{ color:#ffca6b; }
+
+/* Preparation state. Grey "to do" is the normal Tuesday state and must never
+   read as a failure; only genuinely completed work goes green. */
+.pm-card__chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:13px; }
+.pm__chip{
+  display:inline-flex; align-items:baseline; gap:6px;
+  border:1px solid var(--border,#262626); border-radius:var(--r-pill,999px);
+  padding:5px 11px; background:rgba(255,255,255,.02);
+}
+.pm__chip b{
+  font-family:var(--font-c,inherit); font-weight:700; font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--lgrey,#b5b5b5);
+}
+.pm__chip i{ font-style:normal; font-family:var(--font-b,inherit); font-size:11px; color:var(--grey,#8a8a8a); }
+.pm__chip--ready{ border-color:rgba(61,220,132,.4); background:rgba(61,220,132,.08); }
+.pm__chip--ready b, .pm__chip--ready i{ color:#7fe0a3; }
+.pm__chip--todo i{ color:var(--muted,#6d6d6d); }
+.pm__chip--notstarted{ opacity:.72; }
+
+.pm-card__acts{ margin-top:14px; }
+.pm__btn{
+  display:block; width:100%; min-height:var(--ctl-min-h,44px);
+  border-radius:var(--r-md,10px); border:1.5px solid var(--border,#262626);
+  background:transparent; color:var(--lgrey,#b5b5b5); cursor:pointer;
+  font-family:var(--font-c,inherit); font-weight:800; font-size:12px;
+  letter-spacing:.1em; text-transform:uppercase;
+}
+.pm__btn--go{ background:var(--yellow,#FFD100); border-color:var(--yellow,#FFD100); color:#0d0d0d; }
+.pm__btn--go:hover{ filter:brightness(1.06); }
+.pm-card--live .pm__btn--go{ background:#ff4d4d; border-color:#ff4d4d; color:#fff; }
+
+/* ── THE HUB ──────────────────────────────────────────────────────────── */
+.pm-hub__none{
+  font-family:var(--font-b,inherit); font-size:14px; line-height:1.6;
+  color:var(--lgrey,#b5b5b5); max-width:56ch;
+}
+.pm-hub__hd{ margin-bottom:22px; }
+.pm-hub__hd h3{
+  font-family:var(--font-d,inherit); font-size:26px; letter-spacing:.03em;
+  color:var(--white,#f5f3ed); margin:6px 0 4px; text-transform:uppercase;
+}
+.pm-hub__hd p{ font-family:var(--font-b,inherit); font-size:13px; color:var(--lgrey,#b5b5b5); margin:0; }
+.pm-hub--tinted .pm-hub__hd{ border-left:4px solid var(--pm-opp); padding-left:13px; }
+
+.pm-ph{ margin-bottom:26px; }
+.pm-ph h4{
+  font-family:var(--font-c,inherit); font-weight:800; font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--grey,#8a8a8a);
+  padding-bottom:7px; margin-bottom:12px; border-bottom:1px solid var(--border,#262626);
+}
+.pm-ph--now h4{ color:var(--yellow,#FFD100); border-bottom-color:rgba(255,209,0,.4); }
+.pm-ph__grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr)); gap:10px; }
+.pm-tile{
+  display:flex; flex-direction:column; gap:4px; text-align:left;
+  min-height:var(--ctl-min-h,44px); padding:13px 14px; cursor:pointer;
+  background:var(--card,#121212); border:1px solid var(--border,#262626);
+  border-radius:var(--r-md,10px);
+}
+.pm-tile:hover{ border-color:var(--yellow,#FFD100); }
+.pm-tile__l{
+  font-family:var(--font-c,inherit); font-weight:800; font-size:12.5px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--white,#f5f3ed);
+}
+.pm-tile__d{ font-family:var(--font-b,inherit); font-size:11.5px; color:var(--grey,#8a8a8a); line-height:1.35; }
+.pm-tile__s{
+  margin-top:4px; font-family:var(--font-c,inherit); font-weight:700; font-size:10px;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--muted,#6d6d6d);
+}
+.pm-tile__s--ready{ color:#7fe0a3; }
+
+/* Pitchside, one-handed, in the rain. */
+@media (max-width:600px){
+  .pm-ph__grid{ grid-template-columns:1fr; }
+  .pm__crest{ width:38px; height:38px; }
+  .pm__team{ font-size:12px; }
+  .pm-hub__hd h3{ font-size:21px; }
+  .pm-card__chips{ gap:5px; }
+}

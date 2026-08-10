@@ -69,5 +69,25 @@ prog programme-league-table.png 6  "Programme — page 7"
 prog programme-p8.png           7  "Programme — page 8"
 prog programme-sponsors.png     8  "Programme — page 9"
 
+
+echo "── staff portal ───────────────────────────────────────"
+staff() { # staff <file> <boot> <selector> <width> <winH> <label>
+  "$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=2 \
+    --virtual-time-budget=28000 --window-size="$(( $4 + 60 )),$5" --screenshot="$OUT/$1" \
+    "$BASE/dev/qa-shot.html?src=%2Fadmin.html&boot=$2&sel=$3&n=0&w=$4&label=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$6")" >/dev/null 2>&1
+  [ -f "$OUT/$1" ] && printf '  %-38s %s\n' "$1" "$(du -h "$OUT/$1" | cut -f1)" || printf '  %-38s FAILED\n' "$1"
+}
+staff dashboard-next-match.png       prepare-match .pm-card 760  560  "Dashboard — next match card"
+staff dashboard-mobile-390.png       prepare-match .pm-card 390  700  "Next match at 390px"
+staff prepare-match.png              prepare-match .pm-hub  940  1250 "Prepare Match hub"
+staff prepare-match-mobile-375.png   prepare-match .pm-hub  375  1450 "Prepare Match at 375px"
+staff live-desk.png                  live-desk     .lcd     940  1100 "Live Content Desk — DEV SIMULATED EVENTS"
+staff live-desk-mobile-390.png       live-desk     .lcd     390  1300 "Live Content Desk at 390px"
+staff brand-library.png              brand-library .bl      1000 1200 "Brand Library — club colours"
+staff brand-library-mobile-375.png   brand-library .bl      375  1500 "Brand Library at 375px"
+
+echo "── review board ───────────────────────────────────────"
+shot product-review.png 1400 1700 "$BASE/dev/product-review.html"
+
 echo
 echo "written to $OUT"

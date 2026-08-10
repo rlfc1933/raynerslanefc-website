@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Product review — Rayners Lane FC (dev only)</title>
+<!--
+  ════════════════════════════════════════════════════════════════════════
+  THE RELEASE REVIEW WALL. DEV ONLY. NOT LINKED. NOT INDEXED.
+
+  Every surface of the release on one page, so a whole release can be judged
+  by looking rather than by reading a report about it.
+
+  IT SHOWS THE REAL THING, NOT A MOCK-UP. Each panel is an <iframe> of the
+  actual page, or a captured screenshot of the actual rendered component. No
+  surface is re-implemented here — if a page is broken, this wall shows it
+  broken, which is the entire point.
+
+  NO SECRETS. It reads only public pages and public data. The portal panels
+  are shown as captures rather than live frames precisely because the portal
+  is behind a PIN and this page must not be a way around one.
+
+  Honest about what it cannot show: anything requiring a live match, or a
+  signed-in session, is labelled as a DEV-simulated or captured view.
+  ════════════════════════════════════════════════════════════════════════
+-->
+<link rel="stylesheet" href="../css/fonts.css">
+<style>
+  :root{
+    --ink:#f5f3ed; --dim:#b5b5b5; --mute:#7d7d7d; --line:#242424;
+    --bg:#080808; --card:#101010; --y:#FFD100;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+  body{font-family:var(--font-b,system-ui);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1500px;margin:0 auto;padding:34px 20px 80px}
+
+  header.pr__hd{border-bottom:2px solid var(--y);padding-bottom:18px;margin-bottom:10px}
+  .pr__kick{font-family:var(--font-c,inherit);font-weight:800;font-size:10.5px;
+    letter-spacing:.26em;text-transform:uppercase;color:var(--y)}
+  h1{font-family:var(--font-d,inherit);font-size:clamp(30px,5vw,50px);letter-spacing:.02em;
+    margin:6px 0 8px;text-transform:uppercase;line-height:.98}
+  .pr__lede{font-size:14.5px;line-height:1.6;color:var(--dim);max-width:70ch;margin:0}
+  .pr__meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .pr__tag{font-family:var(--font-c,inherit);font-weight:700;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--dim);border:1px solid var(--line);
+    border-radius:var(--r-pill,999px);padding:5px 11px}
+
+  h2.pr__sec{font-family:var(--font-c,inherit);font-weight:800;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--mute);margin:44px 0 14px;
+    padding-bottom:8px;border-bottom:1px solid var(--line)}
+
+  .pr__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(430px,100%),1fr));gap:18px}
+  figure.pr__item{margin:0;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r-lg,14px);overflow:hidden;display:flex;flex-direction:column}
+  figcaption{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .pr__t{font-family:var(--font-c,inherit);font-weight:800;font-size:12px;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--ink);display:block}
+  .pr__d{font-size:11.5px;color:var(--mute);display:block;margin-top:3px;line-height:1.4}
+  .pr__badge{display:inline-block;margin-top:7px;font-family:var(--font-c,inherit);font-weight:700;
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;
+    border-radius:var(--r-pill,999px);border:1px solid}
+  .pr__badge--live{color:#7fe0a3;border-color:rgba(61,220,132,.4);background:rgba(61,220,132,.08)}
+  .pr__badge--shot{color:#93c5fd;border-color:rgba(147,197,253,.4);background:rgba(147,197,253,.08)}
+  .pr__badge--sim{color:#ffca6b;border-color:rgba(255,202,107,.4);background:rgba(255,202,107,.08)}
+
+  .pr__frame{width:100%;height:420px;border:0;background:#000;display:block}
+  .pr__shot{width:100%;height:auto;display:block;background:#000}
+  .pr__shot--tall{max-height:520px;object-fit:cover;object-position:top center}
+
+  a.pr__open{display:block;padding:10px 14px;text-align:center;text-decoration:none;
+    font-family:var(--font-c,inherit);font-weight:800;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--dim);border-top:1px solid var(--line)}
+  a.pr__open:hover{color:var(--y)}
+
+  .pr__note{font-size:12.5px;line-height:1.6;color:var(--mute);max-width:70ch;margin:10px 0 0}
+  @media (max-width:600px){ .pr__frame{height:320px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="pr__hd">
+    <span class="pr__kick">Dev only · not indexed · not linked</span>
+    <h1>Product review</h1>
+    <p class="pr__lede">Every surface of the release on one page. Live frames are the real
+      pages; captures are the real rendered components photographed by
+      <code>dev/capture.sh</code>. Nothing here is a mock-up — if a surface is broken,
+      this wall shows it broken.</p>
+    <div class="pr__meta">
+      <span class="pr__tag">Supporter + staff</span>
+      <span class="pr__tag">Desktop + mobile</span>
+      <span class="pr__tag">Regenerate: bash dev/capture.sh</span>
+    </div>
+  </header>
+
+  <h2 class="pr__sec">Supporter — live pages</h2>
+  <div class="pr__grid">
+    <figure class="pr__item">
+      <figcaption><span class="pr__t">Homepage</span>
+        <span class="pr__d">Club Now leads with the next fixture and its competition.</span>
+        <span class="pr__badge pr__badge--live">Live page</span></figcaption>
+      <iframe class="pr__frame" src="../index.html" title="Homepage" loading="lazy"></iframe>
+      <a class="pr__open" href="../index.html" target="_blank" rel="noopener">Open →</a>
+    </figure>
+
+    <figure class="pr__item">
+      <figcaption><span class="pr__t">Fixtures</span>
+        <span class="pr__d">Every card carries its opponent's confirmed colour and competition treatment.</span>
+        <span class="pr__badge pr__badge--live">Live page</span></figcaption>
+      <iframe class="pr__frame" src="../fixtures.html" title="Fixtures" loading="lazy"></iframe>
+      <a class="pr__open" href="../fixtures.html" target="_blank" rel="noopener">Open →</a>
+    </figure>
+
+    <figure class="pr__item">
+      <figcaption><span class="pr__t">Match Centre</span>
+        <span class="pr__d">Live match surface. Football authority unchanged by this release.</span>
+        <span class="pr__badge pr__badge--live">Live page</span></figcaption>
+      <iframe class="pr__frame" src="../match-centre.html" title="Match Centre" loading="lazy"></iframe>
+      <a class="pr__open" href="../match-centre.html" target="_blank" rel="noopener">Open →</a>
+    </figure>
+
+    <figure class="pr__item">
+      <figcaption><span class="pr__t">Programme — print edition</span>
+        <span class="pr__d">A4. Cover resolves the fixture campaign; interior is editorial.</span>
+        <span class="pr__badge pr__badge--live">Live page</span></figcaption>
+      <iframe class="pr__frame" src="../programme-print.html" title="Programme" loading="lazy"></iframe>
+      <a class="pr__open" href="../programme-print.html" target="_blank" rel="noopener">Open →</a>
+    </figure>
+  </div>
+
+  <h2 class="pr__sec">Supporter — fixture states</h2>
+  <div class="pr__grid">
+    <figure class="pr__item"><figcaption><span class="pr__t">Next match — Isuzu FA Vase</span>
+      <span class="pr__d">The hero carries the campaign: issued mark, opponent crest, claret counter-light.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-next-match-fa-vase.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Away league — Burnham</span>
+      <span class="pr__d">Opponent colour and ghost crest on THEIR side of the lockup.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-away-league.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Home league — Ardley United</span>
+      <span class="pr__d">Lane yellow keeps the leading edge at home.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-home-league.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">FA Cup — London Lions</span>
+      <span class="pr__d">A cup tie is a darker ground, distinct from both league and Vase.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-fa-cup.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Neutral fallback</span>
+      <span class="pr__d">An unconfirmed club. Deliberately plain — intentional, not broken.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-neutral-fallback.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Expanded fixture</span>
+      <span class="pr__d">Utilities one tap in, on native &lt;details&gt;.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/fixture-expanded-upcoming.png" alt="" loading="lazy"></figure>
+  </div>
+
+  <h2 class="pr__sec">Programme</h2>
+  <div class="pr__grid">
+    <figure class="pr__item"><figcaption><span class="pr__t">Cover</span>
+      <span class="pr__d">Fixture-specific: issued mark, opponent counter-light, ghosted crest.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/programme-cover.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">The preview</span>
+      <span class="pr__d">Standfirst and Lane rule. Editor markdown no longer prints as asterisks.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/programme-manager.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">League table</span>
+      <span class="pr__d">Frozen into the document on publication, not re-fetched.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/programme-league-table.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Sponsors</span>
+      <span class="pr__d">Commercial obligations, as sold.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/programme-sponsors.png" alt="" loading="lazy"></figure>
+  </div>
+
+  <h2 class="pr__sec">Staff — the portal</h2>
+  <p class="pr__note">The portal is behind a PIN, so these are captures of the real rendered
+    components rather than live frames. This page must not become a way around a login.</p>
+  <div class="pr__grid">
+    <figure class="pr__item"><figcaption><span class="pr__t">Dashboard — next match</span>
+      <span class="pr__d">Crests, competition, kick-off, and what still needs doing. One primary action.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/dashboard-next-match.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Prepare Match</span>
+      <span class="pr__d">One fixture, one workspace: before, during, after.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/prepare-match.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Live Content Desk</span>
+      <span class="pr__d">Authoritative events, each one tap from a finished graphic.</span>
+      <span class="pr__badge pr__badge--sim">DEV-simulated events</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/live-desk.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Brand Library</span>
+      <span class="pr__d">Colour as colour. Four clubs deliberately awaiting a human.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/brand-library.png" alt="" loading="lazy"></figure>
+  </div>
+
+  <h2 class="pr__sec">Mobile — 375 / 390</h2>
+  <div class="pr__grid">
+    <figure class="pr__item"><figcaption><span class="pr__t">Next match · 390</span>
+      <span class="pr__d">No horizontal overflow; full-width primary action.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot" src="screenshots/dashboard-mobile-390.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Prepare Match · 375</span>
+      <span class="pr__d">Single column, pitchside, one-handed.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/prepare-match-mobile-375.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Expanded fixture · 375</span>
+      <span class="pr__d">Facts collapse to one column rather than wrapping to four lines.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/fixture-mobile-375-expanded.png" alt="" loading="lazy"></figure>
+
+    <figure class="pr__item"><figcaption><span class="pr__t">Fixtures · 375</span>
+      <span class="pr__d">The full supporter page at the narrowest supported width.</span>
+      <span class="pr__badge pr__badge--shot">Capture</span></figcaption>
+      <img class="pr__shot pr__shot--tall" src="screenshots/fixtures-mobile-375.png" alt="" loading="lazy"></figure>
+  </div>
+
+</div>
+</body>
+</html>

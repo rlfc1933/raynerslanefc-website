@@ -60,7 +60,89 @@
     document.title = 'QA FAIL';
   }
 
+  /**
+   * Named bootstraps, for pages whose content only renders after a module runs.
+   *
+   * AN ALLOWLIST, NOT AN EVAL. This takes a key, never code from the URL, so a
+   * dev-only page cannot be turned into a way to execute arbitrary script
+   * against the site's own origin.
+   *
+   * It does NOT log anyone in. The portal's PIN gate stays exactly where it is;
+   * these modules read only public JSON (data/fixtures.json, the brand and
+   * competition registries), which is why they can be exercised without a
+   * session. Anything that needs real staff data is not capturable this way,
+   * and should not be.
+   */
+  /**
+   * DEV-ONLY LIVE SIMULATION.
+   *
+   * There is no live match on a Tuesday, and the Live Content Desk correctly
+   * shows nothing without one — so the finished product cannot be photographed
+   * from real data on demand.
+   *
+   * This stubs the READ side only: RLFCLive.eventsFor(), the single function
+   * the desk uses to fetch events. The rows below are shaped exactly like
+   * public.match_events, including dedupe_key, so the desk's real merge,
+   * ordering and dedupe logic run unmodified against them.
+   *
+   * IT WRITES NOTHING. It cannot reach the database, cannot alter a score, and
+   * exists only inside this dev page's iframe. Production football truth is
+   * untouched, which is why simulating here is safe and simulating anywhere
+   * else would not be.
+   */
+  var SIM_EVENTS = [
+    { id: 'sim-1', event_type: 'kickoff',      minute: 0,  side: 'home', dedupe_key: 'ko',
+      occurred_at: '2026-08-15T14:00:00Z' },
+    { id: 'sim-2', event_type: 'goal',         minute: 23, side: 'home', player: 'Jenyo Balogun',
+      score_home_after: 1, score_away_after: 0, dedupe_key: 'g23', occurred_at: '2026-08-15T14:23:00Z' },
+    { id: 'sim-3', event_type: 'goal',         minute: 41, side: 'away', player: 'C. Mullins',
+      score_home_after: 1, score_away_after: 1, dedupe_key: 'g41', occurred_at: '2026-08-15T14:41:00Z' },
+    { id: 'sim-4', event_type: 'half_time',    minute: 45, side: 'home',
+      score_home_after: 1, score_away_after: 1, dedupe_key: 'ht', occurred_at: '2026-08-15T14:45:00Z' },
+    { id: 'sim-5', event_type: 'yellow_card',  minute: 58, side: 'away', player: 'R. Deane',
+      card_colour: 'yellow', dedupe_key: 'y58', occurred_at: '2026-08-15T15:03:00Z' },
+    { id: 'sim-6', event_type: 'substitution', minute: 62, side: 'home', player: 'Beau Pryce',
+      assistant: 'Harry Bonner', dedupe_key: 's62', occurred_at: '2026-08-15T15:07:00Z' },
+    { id: 'sim-7', event_type: 'goal',         minute: 67, side: 'home', player: 'Keiran Barnard-White',
+      score_home_after: 2, score_away_after: 1, dedupe_key: 'g67', occurred_at: '2026-08-15T15:12:00Z' }
+  ];
+
+  var BOOTS = {
+    'live-desk': function (w) {
+      w.RLFCLive = w.RLFCLive || {};
+      w.RLFCLive.eventsFor = function () { return Promise.resolve(SIM_EVENTS.slice()); };
+      return Promise.all([
+        w.fetch('data/club-brands.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (w.BrandPalette) w.BrandPalette.setRegistry(d); }).catch(function () {}),
+        w.fetch('data/competitions.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (d && d.competitions && w.CompetitionBrand) w.CompetitionBrand.setRegistry(d.competitions); }).catch(function () {})
+      ]).then(function () {
+        return w.PrepareMatch && w.PrepareMatch.load();
+      }).then(function () {
+        var f = w.PrepareMatch && w.PrepareMatch._state.fixture;
+        if (!f || !w.LiveContentDesk) return;
+        w.LiveContentDesk.start(f.id, {
+          id: 'fx-' + f.id, fixtureId: f.id, isHome: f.isHome !== false,
+          home: { name: f.isHome !== false ? 'Rayners Lane' : f.opponent },
+          away: { name: f.isHome !== false ? f.opponent : 'Rayners Lane' }
+        });
+      });
+    },
+    'brand-library': function (w) { return w.BrandLibrary && w.BrandLibrary.init(); },
+    'prepare-match': function (w) {
+      return Promise.all([
+        w.fetch('data/club-brands.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (w.BrandPalette) w.BrandPalette.setRegistry(d); }).catch(function () {}),
+        w.fetch('data/competitions.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (d && d.competitions && w.CompetitionBrand) w.CompetitionBrand.setRegistry(d.competitions); }).catch(function () {})
+      ]).then(function () { return w.PrepareMatch && w.PrepareMatch.init(); });
+    }
+  };
+
   frame.addEventListener('load', function () {
+    var boot = BOOTS[q.get('boot') || ''];
+    if (boot) { try { boot(frame.contentWindow); } catch (e) {} }
+
     // The page fetches its own data, so the node will not exist on load.
     //
     // WAIT FOR THE COUNT TO SETTLE, NOT MERELY TO BE NON-ZERO. The programme
