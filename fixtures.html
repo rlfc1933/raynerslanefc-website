@@ -191,12 +191,26 @@
 <div id="footer-placeholder"></div>
 <script src="js/crest.js?v=8"></script>
   <script src="js/competition-brand.js?v=1"></script>
+  <script src="js/brand-palette.js"></script>
   <script>
     /* Load the registry BEFORE the fixture list renders. renderCompetitions()
        also sets it, but that runs after the cards are already on the page — so
        without this the first paint fell back to the feed's abbreviation and
        only corrected on a later render. */
     (function () {
+      /* The club brand registry, so every card can carry its opponent's
+         CONFIRMED colour. Unverified clubs resolve to the neutral fallback,
+         which is what keeps a guessed colour off a public page. */
+      fetch('data/club-brands.json?t=' + Date.now())
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !window.BrandPalette) return;
+          BrandPalette.setRegistry(d);
+          // Repaint once, only if cards are already on the page.
+          try { if (window.__fxLastList) renderFxSeason(window.__fxLastList); } catch (e) {}
+        })
+        .catch(function () {});
+
       fetch('data/competitions.json?t=' + Date.now())
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
@@ -524,6 +538,24 @@ function fxActs(f) {
   '<div class="fxc__acts"><button class="fxc__b fxc__b--mc" onclick="fxMatchCard(\'' + fxEsc(f.id) + '\')"><i class="ico ico-image"></i> Match Card</button></div>';
   return rows;
 }
+/** Which creative treatment this fixture's competition carries — the same
+    classification that drives the social artwork, so a cup tie reads as a cup
+    tie on the fixtures page too and not only inside Studio. */
+function fxCompTreatment(f) {
+  var id = String((f && f.competitionId) || '').toLowerCase();
+  if (id === 'fa-cup' || id === 'fa-vase') return 'cup';
+  if (id.indexOf('ccl-') === 0) return 'league';
+  return 'other';
+}
+
+/** The competition's own mark, small and quiet. Official artwork where the
+    club holds it, nothing where it does not — the full name is already in the
+    meta line, so an empty box here would be noise, not information. */
+function fxCompMark(ident) {
+  if (!ident || !ident.logo) return '';
+  return '<img class="fxc__comp" src="' + fxEsc(ident.logo) + '" alt="' + fxEsc(ident.label || '') + '">';
+}
+
 function fxCard(f) {
   var home = f.isHome !== false, comp = fxComp(f.competition);
   var played = (f.us != null && f.them != null), gone = fxPast(f);
@@ -537,9 +569,28 @@ function fxCard(f) {
   // one that says "Isuzu FA Vase · First Qualifying Round". Home/away keeps
   // the top row to itself, which is a fact about the fixture worth stating
   // once and quietly.
-  return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') + (gone && !played ? ' fxc--gone' : '') + '">' +
+  // ── CAMPAIGN TOKENS, PER FIXTURE ──────────────────────────────────────
+  // Every card used to be the same grey box with a 4px left border — yellow
+  // for home, green for away — so New Bradwell looked exactly like Broadfields
+  // and an FA Vase tie looked exactly like a league game. The campaign palette
+  // already existed; nothing on this page consumed it.
+  //
+  // Each card now carries its opponent's confirmed colour and its competition
+  // treatment. It stays UI — no smoke, no poster — but a supporter scrolling
+  // the list can see these are different matches.
+  var pal = window.BrandPalette ? BrandPalette.resolve(f.opponent) : null;
+  var oppCol = (pal && pal.usable) ? pal.primary : '';
+  var ident = window.CompetitionBrand ? CompetitionBrand.identity(f) : null;
+  var treat = fxCompTreatment(f);
+
+  return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') +
+      (gone && !played ? ' fxc--gone' : '') + ' fxc--' + fxEsc(treat) +
+      (oppCol ? ' fxc--tinted' : '') + '"' +
+      (oppCol ? ' style="--fxc-opp:' + fxEsc(oppCol) + '"' : '') + '>' +
+    (f.oppCrest ? '<img class="fxc__ghost" src="' + fxEsc(f.oppCrest) + '" alt="" aria-hidden="true">' : '') +
     '<div class="fxc__top"><span class="fxc__ha">' +
-      (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span></div>' +
+      (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span>' +
+      fxCompMark(ident) + '</div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + ' &middot; ' + fxCompText(f) + '</div>' +
     fxVenueBlock(f) +
@@ -717,6 +768,10 @@ function fxFromRegistry(fixtures, results) {
 }
 
 function renderFxSeason(list) {
+  // Kept so the palette can trigger one repaint when it lands. The registry is
+  // a separate fetch and usually resolves AFTER first paint, which is why the
+  // opponent tint never appeared on the first attempt at this.
+  window.__fxLastList = list;
   injectFixtureEvents(list);
   window._fxAll = list;
   var now = Date.now();
@@ -1054,7 +1109,57 @@ function renderCompetitions() {
   .fxm__m{font-family:var(--font-d);font-size:30px;letter-spacing:.05em;color:var(--white);line-height:1}
   .fxm__c{font-family:var(--font-c);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
   .fxc{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 14px 12px;margin-bottom:10px;overflow:hidden}
-  .fxc:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+  /* ── CAMPAIGN TREATMENT ────────────────────────────────────────────────
+     A 4px left border was the only thing distinguishing one fixture from
+     another. These rules give each card its opponent's confirmed colour and
+     its competition's character, while staying firmly interface: no smoke, no
+     poster, nothing that costs a scroll frame. All of it is additive — a
+     fixture with no confirmed palette simply renders as it always did. */
+
+  /* The opponent's colour, entering from the right as a wash — the same
+     counter-light idea as the artwork, at UI strength. */
+  .fxc--tinted{
+    background:
+      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 13%, transparent) 0%,
+                              transparent 46%),
+      var(--card);
+    border-color: color-mix(in srgb, var(--fxc-opp) 22%, var(--border));
+  }
+  /* Home stays Lane yellow on the leading edge; away hands that edge to the
+     opponent, which is the quickest read of where we are playing. */
+  .fxc--away.fxc--tinted:before{background:linear-gradient(180deg,var(--fxc-opp),color-mix(in srgb,var(--fxc-opp) 40%,transparent))}
+
+  /* The opponent crest, very large and very faint, bled off the right edge.
+     Shape only — enough to make the card feel like THIS fixture. */
+  .fxc__ghost{
+    position:absolute; right:-34px; top:50%; transform:translateY(-50%);
+    width:150px; height:150px; object-fit:contain; opacity:.055;
+    filter:grayscale(1) contrast(.9); pointer-events:none; z-index:0;
+  }
+  .fxc > *:not(.fxc__ghost){position:relative;z-index:1}
+
+  /* The competition's own mark, cap-height, top-right. */
+  .fxc__comp{height:26px;width:auto;max-width:96px;object-fit:contain;opacity:.92;flex:0 0 auto}
+
+  /* Competition character, kept to a whisper at this size: a cup tie is
+     darker and quieter, the league carries a touch more of the club's own
+     yellow. Enough to tell them apart, not enough to shout. */
+  .fxc--cup{background-color:#0F0F10}
+  .fxc--cup .fxc__ghost{opacity:.075}
+  .fxc--league:before{box-shadow:0 0 14px 1px rgba(255,209,0,.28)}
+
+  @media (prefers-reduced-motion: no-preference){
+    .fxc{transition:border-color .22s var(--ease), transform .22s var(--ease)}
+    .fxc:hover{transform:translateY(-1px)}
+  }
+  /* A phone shows the card at half the width, so the wash has to come back or
+     it sits under the text instead of beside it. */
+  @media (max-width:600px){
+    .fxc__ghost{width:104px;right:-26px;opacity:.045}
+    .fxc__comp{height:20px}
+  }
+
+  .fxc:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:1}
   .fxc--home:before{background:var(--yellow)}
   .fxc--away:before{background:var(--green)}
   .fxc__top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
