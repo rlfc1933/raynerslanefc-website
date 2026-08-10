@@ -543,9 +543,35 @@ function fxActs(f) {
     tie on the fixtures page too and not only inside Studio. */
 function fxCompTreatment(f) {
   var id = String((f && f.competitionId) || '').toLowerCase();
-  if (id === 'fa-cup' || id === 'fa-vase') return 'cup';
+  // The Vase and the Cup are not the same competition and must not look it.
+  // They were bucketed together here, so the New Bradwell Vase tie — the
+  // fixture this whole creative system was designed around — rendered
+  // identically to the London Lions Cup tie, even though the club holds
+  // official Isuzu artwork for one and Emirates artwork for the other.
+  if (id === 'fa-vase') return 'vase';
+  if (id === 'fa-cup') return 'cup';
   if (id.indexOf('ccl-') === 0) return 'league';
   return 'other';
+}
+
+/**
+ * The fixture's state, from the fixture and nothing else.
+ *
+ * NOTE ON LIVE. This page does not own live football truth — js/club-now.js
+ * and js/match-time.js do. A card is only ever marked live when one of those
+ * has published it, never because a kick-off time has passed. A fixture whose
+ * time has gone with no result says "result to follow", which is honest.
+ */
+function fxState(f) {
+  var st = String((f && f.status) || '').toLowerCase();
+  if (st === 'postponed' || st === 'cancelled' || st === 'abandoned') return 'postponed';
+  if (f.us != null && f.them != null) return 'finished';
+  try {
+    var live = window.__rlfcLive;
+    if (live && live.isLive && String(live.fixtureId) === String(f.id)) return 'live';
+  } catch (e) {}
+  if (fxPast(f)) return 'awaiting';
+  return 'upcoming';
 }
 
 /** The competition's own mark, small and quiet. Official artwork where the
@@ -556,13 +582,84 @@ function fxCompMark(ident) {
   return '<img class="fxc__comp" src="' + fxEsc(ident.logo) + '" alt="' + fxEsc(ident.label || '') + '">';
 }
 
+/**
+ * THE EXPANDED FIXTURE — everything that is not the football.
+ *
+ * WHY THIS EXISTS. The collapsed card used to carry six equally-weighted grey
+ * buttons — Drive, Waze, Transport, Calendar, Share, Match Card — which took
+ * roughly forty per cent of its height and were the loudest thing on it. A
+ * supporter scanning the list wants to know who, when, where and what happened;
+ * they want directions once, on the one match they are actually travelling to.
+ *
+ * Nothing has been removed. Every action still exists, one tap further in.
+ *
+ * Built on <details>, deliberately: it is keyboard-operable, screen-reader
+ * announced and open-able with no JavaScript at all, which a div with a click
+ * handler is not.
+ */
+function fxPanel(f, state) {
+  var i = fxVenueInfo(f), ident = window.CompetitionBrand ? CompetitionBrand.identity(f) : null;
+  var home = f.isHome !== false;
+  var rows = '';
+
+  // ── the facts, restated in full where the collapsed card abbreviated them
+  var full = fxDate(f).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  rows += '<dl class="fxx__facts">' +
+    '<div><dt>Competition</dt><dd>' + fxCompText(f) + '</dd></div>' +
+    '<div><dt>Date</dt><dd>' + fxEsc(full) + '</dd></div>' +
+    (state === 'postponed' ? '' : '<div><dt>Kick-off</dt><dd>' + fxKOText(f) + '</dd></div>') +
+    '<div><dt>Venue</dt><dd>' + (home ? 'Home' : 'Away') +
+      (i.ground ? ' &middot; ' + fxEsc(i.ground) : '') + '</dd></div>' +
+  '</dl>';
+
+  if (state === 'postponed') {
+    rows += '<p class="fxx__msg">This fixture will be rearranged. A new date will be announced ' +
+            'here and on the club\'s channels as soon as it is confirmed.</p>';
+  }
+
+  // ── travel, only where we hold verified coordinates AND there is a journey
+  //    left to make. Directions to a game that finished last month is clutter.
+  var travel = (state === 'upcoming' || state === 'live');
+  if (i.usable && travel && !i.groundshare) {
+    var ll = i.v.lat + ',' + i.v.lng;
+    rows += '<div class="fxx__grp"><span class="fxx__lbl">Getting there</span><div class="fxc__acts">' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=driving" target="_blank" rel="noopener"><i class="ico ico-car"></i> Drive</a>' +
+      '<a class="fxc__b" href="https://waze.com/ul?ll=' + ll + '&navigate=yes" target="_blank" rel="noopener"><i class="ico ico-route"></i> Waze</a>' +
+      '<a class="fxc__b" href="https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=transit" target="_blank" rel="noopener"><i class="ico ico-train-front"></i> Transport</a>' +
+    '</div></div>';
+  }
+
+  var util = '<div class="fxx__grp"><span class="fxx__lbl">Share &amp; save</span><div class="fxc__acts">';
+  if (state === 'upcoming') {
+    util += '<a class="fxc__b" href="/.netlify/functions/fixtures-ics"><i class="ico ico-calendar"></i> Calendar</a>';
+  }
+  util += '<button class="fxc__b" data-fxshare="' + fxEsc(f.id) + '" onpointerenter="fxWarmShare(\'' + fxEsc(f.id) + '\')" ontouchstart="fxWarmShare(\'' + fxEsc(f.id) + '\')" onclick="fxShare(\'' + fxEsc(f.id) + '\')">↗ Share</button>' +
+    '<button class="fxc__b fxc__b--mc" onclick="fxMatchCard(\'' + fxEsc(f.id) + '\')"><i class="ico ico-image"></i> Match Card</button>' +
+  '</div></div>';
+  rows += util;
+
+  return '<details class="fxx"><summary class="fxx__s">' +
+      '<span class="fxx__st">' + (state === 'finished' ? 'Match details' : 'Details &amp; travel') + '</span>' +
+      '<span class="fxx__chev" aria-hidden="true"></span>' +
+    '</summary><div class="fxx__p">' + rows + '</div></details>';
+}
+
 function fxCard(f) {
   var home = f.isHome !== false, comp = fxComp(f.competition);
   var played = (f.us != null && f.them != null), gone = fxPast(f);
+  var state = fxState(f);
   var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-  // played → score only. Already gone but no score → honest "result to follow"
-  // (never Directions/countdown for a game that's been and gone). Future → actions.
-  var foot = played ? '' : (gone ? '<div class="fxc__await"><span class="mstat mstat--await">Result to follow</span></div>' : fxActs(f));
+  // THE FOOTBALL LEADS. One state line where a state needs stating, then the
+  // single most relevant action, then everything else folded away.
+  var foot = '';
+  if (state === 'postponed') {
+    foot += '<div class="fxc__state fxc__state--off">Postponed</div>';
+  } else if (state === 'live') {
+    foot += '<div class="fxc__state fxc__state--live"><span class="fxc__pulse"></span>Live</div>';
+  } else if (state === 'awaiting') {
+    foot += '<div class="fxc__await"><span class="mstat mstat--await">Result to follow</span></div>';
+  }
+  foot += fxPanel(f, state);
   // The competition used to appear TWICE on every card: a grey pill up here
   // reading "FA VASE", and the correct sponsored name with its round in the
   // meta line below. One of them had to go, and it was not going to be the
@@ -585,6 +682,7 @@ function fxCard(f) {
 
   return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') +
       (gone && !played ? ' fxc--gone' : '') + ' fxc--' + fxEsc(treat) +
+      ' fxc--s-' + fxEsc(state) +
       (oppCol ? ' fxc--tinted' : '') + '"' +
       (oppCol ? ' style="--fxc-opp:' + fxEsc(oppCol) + '"' : '') + '>' +
     (f.oppCrest ? '<img class="fxc__ghost" src="' + fxEsc(f.oppCrest) + '" alt="" aria-hidden="true">' : '') +
@@ -607,8 +705,24 @@ function fxHero(f) {
   // on the page and was the one place still bypassing CompetitionBrand.
   // Home/away is a fact about the fixture, not a status — it reads as a word
   // beside the venue, not as a second chip competing with the competition.
-  return '<div class="fxh" data-ko="' + d.getTime() + '"><span class="fxh__lbl">Next Match</span>' +
-    '<div class="fxh__comp">' + fxCompText(f) +
+  // THE HERO WAS THE ONE CARD WITH NO CAMPAIGN AT ALL.
+  // Every card in the list below carries its opponent's colour, its ghosted
+  // crest and its competition treatment. The most prominent fixture on the
+  // page — the next match — carried none of it, which meant the Isuzu FA Vase
+  // tie against New Bradwell, the fixture this entire creative system was
+  // designed around, rendered as a plain grey box above thirty-eight cards
+  // that were all more expressive than it.
+  var pal = window.BrandPalette ? BrandPalette.resolve(f.opponent) : null;
+  var oppCol = (pal && pal.usable) ? pal.primary : '';
+  var treat = fxCompTreatment(f);
+  var ident = window.CompetitionBrand ? CompetitionBrand.identity(f) : null;
+
+  return '<div class="fxh fxh--' + fxEsc(treat) + (home ? ' fxh--home' : ' fxh--away') +
+      (oppCol ? ' fxh--tinted' : '') + '" data-ko="' + d.getTime() + '"' +
+      (oppCol ? ' style="--fxc-opp:' + fxEsc(oppCol) + '"' : '') + '>' +
+    (f.oppCrest ? '<img class="fxc__ghost fxh__ghost" src="' + fxEsc(f.oppCrest) + '" alt="" aria-hidden="true">' : '') +
+    '<span class="fxh__lbl">Next Match</span>' +
+    '<div class="fxh__comp">' + fxCompMark(ident) + fxCompText(f) +
       '<span class="fxh__ha' + (home ? ' fxh__ha--home' : '') + '">' + (home ? 'Home' : 'Away') + '</span></div>' +
     fxLock(f) +
     '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + '</div>' +
@@ -1162,6 +1276,95 @@ function renderCompetitions() {
   .fxc--cup{background-color:#0F0F10}
   .fxc--cup .fxc__ghost{opacity:.075}
   .fxc--league:before{box-shadow:0 0 14px 1px rgba(255,209,0,.28)}
+  /* The Vase is not the Cup. Both were rendering as one treatment, so the
+     New Bradwell tie looked like the London Lions tie. The Vase run is the
+     one a club at this level actually dreams about — it gets its own ground
+     and a cooler edge, distinct from the Cup's flatter black. */
+  .fxc--vase{background-color:#0D1014}
+  .fxc--vase .fxc__ghost{opacity:.075}
+  .fxc--vase:before{box-shadow:0 0 14px 1px rgba(196,181,253,.30)}
+
+  /* ── STATE ─────────────────────────────────────────────────────────────
+     A state line only where there is a state worth stating. A normal
+     upcoming league game says nothing, because "upcoming" is the default
+     and a badge saying so is noise. */
+  .fxc__state{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    font-family:var(--font-c); font-weight:800; font-size:10.5px;
+    letter-spacing:.14em; text-transform:uppercase;
+    border-radius:var(--r-sm); padding:7px 10px; margin-top:11px;
+  }
+  .fxc__state--off{color:#ffca6b;background:rgba(255,202,107,.10);border:1px solid rgba(255,202,107,.32)}
+  .fxc__state--live{color:#ff6b6b;background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.34)}
+  .fxc__pulse{width:7px;height:7px;border-radius:var(--r-circle);background:#ff4d4d;flex:0 0 auto}
+  @media (prefers-reduced-motion: no-preference){
+    .fxc__pulse{animation:fxcPulse 1.6s ease-in-out infinite}
+  }
+  @keyframes fxcPulse{0%,100%{opacity:1}50%{opacity:.25}}
+  /* A postponed fixture should not read as loudly as a live one. */
+  .fxc--s-postponed .fxc__lock{opacity:.72}
+
+  /* ── THE EXPANDED FIXTURE ──────────────────────────────────────────────
+     Everything that is not the football, one tap in. Built on <details> so
+     it is keyboard-operable and announced without a line of JavaScript. */
+  .fxx{margin-top:11px;border-top:1px solid var(--border)}
+  .fxx__s{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px 8px 2px; cursor:pointer; list-style:none;
+    font-family:var(--font-c); font-weight:800; font-size:10.5px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--lgrey);
+    min-height:var(--ctl-min-h); box-sizing:border-box;
+  }
+  .fxx__s::-webkit-details-marker{display:none}
+  .fxx__s:hover,.fxx__s:focus-visible{color:var(--yellow)}
+  .fxx__chev{
+    width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+    transform:rotate(45deg) translate(-2px,-2px); flex:0 0 auto;
+  }
+  .fxx[open] .fxx__chev{transform:rotate(-135deg) translate(-2px,-2px)}
+  .fxx__p{padding:4px 2px 2px}
+  .fxx__facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 14px;margin:8px 0 14px}
+  .fxx__facts div{min-width:0}
+  .fxx__facts dt{
+    font-family:var(--font-c);font-weight:700;font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:3px;
+  }
+  .fxx__facts dd{margin:0;font-family:var(--font-b);font-size:12.5px;color:var(--white);line-height:1.35}
+  .fxx__msg{font-family:var(--font-b);font-size:12.5px;line-height:1.5;color:var(--lgrey);margin:0 0 14px}
+  .fxx__grp{margin-bottom:10px}
+  .fxx__lbl{
+    display:block;font-family:var(--font-c);font-weight:700;font-size:9.5px;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+  }
+  .fxx__grp .fxc__acts{margin-top:0}
+
+  /* ── THE HERO CARRIES THE CAMPAIGN TOO ─────────────────────────────────
+     Same system as the cards, one step louder, because this is the fixture
+     the club is actually selling this week. */
+  .fxh{position:relative;overflow:hidden}
+  .fxh--tinted{
+    background:
+      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 22%, transparent) 0%,
+                              transparent 58%),
+      linear-gradient(150deg,#16200f,#0b0b0b 68%);
+    border-color: color-mix(in srgb, var(--fxc-opp) 34%, rgba(255,209,0,.35));
+  }
+  .fxh--away.fxh--tinted{
+    background:
+      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 22%, transparent) 0%,
+                              transparent 58%),
+      linear-gradient(150deg,#16200f,#0b0b0b 68%);
+  }
+  .fxh__ghost{width:210px;height:210px;right:-46px;opacity:.07}
+  .fxh--away .fxh__ghost{right:auto;left:-46px}
+  .fxh__comp{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}
+  .fxh__comp .fxc__comp{height:30px;max-width:112px}
+  .fxh > *:not(.fxh__ghost){position:relative;z-index:1}
+  @media (max-width:600px){
+    .fxh__ghost{width:150px;height:150px;right:-34px}
+    .fxh--away .fxh__ghost{right:auto;left:-34px}
+    .fxh__comp .fxc__comp{height:24px}
+  }
 
   @media (prefers-reduced-motion: no-preference){
     .fxc{transition:border-color .22s var(--ease), transform .22s var(--ease)}
@@ -1172,6 +1375,9 @@ function renderCompetitions() {
   @media (max-width:600px){
     .fxc__ghost{width:104px;right:-26px;opacity:.045}
     .fxc--away .fxc__ghost{right:auto;left:-26px}
+    /* Two fact columns at 375px puts "Combined Counties Premier North" on four
+       lines against a two-word label. One column reads far better. */
+    .fxx__facts{grid-template-columns:1fr;gap:9px}
     .fxc__comp{height:20px}
   }
 

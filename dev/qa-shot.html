@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<title>QA capture harness — Rayners Lane FC (dev only)</title>
+<!--
+  ════════════════════════════════════════════════════════════════════════
+  DEV-ONLY SCREENSHOT HARNESS. NOT LINKED. NOT INDEXED. NOT DEPLOYED CODE.
+
+  WHY THIS EXISTS. Headless Chrome can screenshot a URL but cannot click
+  anything, so it cannot photograph a fixture card's EXPANDED state, and it
+  cannot crop to a single card. Rather than add QA hooks to fixtures.html —
+  which would put test affordances in the file that serves supporters — this
+  page loads the real page in a same-origin iframe, lifts the real rendered
+  node out of it along with the real stylesheets, and presents it alone.
+
+  WHAT IT IS NOT. It does not re-implement a card, mock data, or restyle
+  anything. Every pixel it shows was rendered by fixtures.html from
+  data/fixtures.json. If the real page is broken, this shows it broken.
+
+  Usage: qa-shot.html?sel=.fxc--home&n=0&open=1&w=1000&label=Home%20league
+  ════════════════════════════════════════════════════════════════════════
+-->
+<style>
+  html,body{margin:0;padding:0;background:#050505}
+  #stage{padding:26px;box-sizing:border-box}
+  #lbl{
+    font:700 11px/1.4 ui-monospace,Menlo,monospace; letter-spacing:.14em;
+    text-transform:uppercase; color:#7a7a7a; margin:0 0 12px; padding:0 2px;
+  }
+  #err{font:600 14px/1.5 system-ui;color:#ff8080;padding:20px}
+  iframe#src{position:absolute;left:-10000px;top:0;height:3000px;border:0}
+</style>
+</head>
+<body>
+<div id="stage"><p id="lbl">loading…</p></div>
+<iframe id="src" title="source page"></iframe>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var sel   = q.get('sel')   || '.fxc';
+  var n     = parseInt(q.get('n') || '0', 10);
+  var open  = q.get('open') === '1';
+  var width = parseInt(q.get('w') || '1000', 10);
+  var label = q.get('label') || '';
+  var note  = q.get('note') || '';
+
+  var stage = document.getElementById('stage');
+  var frame = document.getElementById('src');
+  frame.style.width = width + 'px';
+  frame.src = '/fixtures.html';
+
+  function fail(msg) {
+    stage.innerHTML = '<p id="err">QA HARNESS: ' + msg + '</p>';
+    document.title = 'QA FAIL';
+  }
+
+  frame.addEventListener('load', function () {
+    // The page fetches its fixtures, so the node will not exist on load.
+    // Poll briefly rather than guess a delay.
+    var tries = 0;
+    (function wait() {
+      var doc;
+      try { doc = frame.contentDocument; } catch (e) { return fail('cross-origin'); }
+      var nodes = doc ? doc.querySelectorAll(sel) : [];
+      if (!nodes.length) {
+        if (++tries > 60) return fail('no node matched ' + sel + ' after 6s');
+        return setTimeout(wait, 100);
+      }
+      var node = nodes[n];
+      if (!node) return fail('selector ' + sel + ' matched ' + nodes.length + ', index ' + n + ' out of range');
+
+      // Lift the real stylesheets so the clone is styled exactly as rendered.
+      // A cloned <link href="css/fonts.css"> would resolve against /dev/ and
+      // 404, which silently drops every design token and renders the card as
+      // black serif text on black. Copy the browser's resolved URL instead.
+      var pending = 0, done = false;
+      doc.querySelectorAll('style,link[rel="stylesheet"]').forEach(function (s) {
+        if (s.tagName === 'LINK') {
+          var l = document.createElement('link');
+          l.rel = 'stylesheet';
+          l.href = s.href;                       // already absolute
+          pending++;
+          l.addEventListener('load', settle);
+          l.addEventListener('error', settle);
+          document.head.appendChild(l);
+        } else {
+          document.head.appendChild(s.cloneNode(true));
+        }
+      });
+      function settle() { if (--pending <= 0 && !done) { done = true; ready(); } }
+      if (!pending) { done = true; setTimeout(ready, 0); }
+
+      function ready() {
+      var clone = node.cloneNode(true);
+      // Relative asset paths would resolve against /dev/ once moved. Copy the
+      // browser's already-resolved absolute URL across instead.
+      var srcImgs = node.querySelectorAll('img'), dstImgs = clone.querySelectorAll('img');
+      for (var i = 0; i < srcImgs.length; i++) { dstImgs[i].src = srcImgs[i].src; }
+      if (open) {
+        clone.querySelectorAll('details').forEach(function (d) { d.open = true; });
+        if (clone.tagName === 'DETAILS') clone.open = true;
+      }
+
+      var head = document.createElement('p');
+      head.id = 'lbl';
+      head.textContent = (label || sel) + (note ? '  —  ' + note : '');
+      stage.innerHTML = '';
+      stage.style.width = (width + 52) + 'px';
+      stage.appendChild(head);
+      stage.appendChild(clone);
+
+      // Tell the screenshotter the content is settled and how tall it is.
+      requestAnimationFrame(function () {
+        document.title = 'QA READY ' + Math.ceil(document.body.scrollHeight);
+      });
+      }
+    })();
+  });
+})();
+</script>
+</body>
+</html>

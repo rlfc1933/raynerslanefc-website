@@ -65,16 +65,29 @@ function rule(selector, source) {
   return m ? m[1].replace(/\s+/g, ' ').trim() : null;
 }
 
-/** Everything inside a given max-width media query, for the mobile assertions. */
+/**
+ * EVERY block at a given max-width, concatenated.
+ *
+ * Not the first one. A page may legitimately carry several `@media
+ * (max-width:600px)` blocks — the card rules declare one and the hero declares
+ * its own — and the cascade does not care which block a declaration sits in.
+ * Reading only the first made this file fail the moment a second was added,
+ * which is a fault in the test, not in the page.
+ */
 function mediaBlock(maxWidth) {
-  const i = PAGE.indexOf('@media (max-width:' + maxWidth + ')');
-  if (i === -1) return '';
-  let depth = 0, start = PAGE.indexOf('{', i), j = start;
-  for (; j < PAGE.length; j++) {
-    if (PAGE[j] === '{') depth++;
-    else if (PAGE[j] === '}' && --depth === 0) break;
+  const needle = '@media (max-width:' + maxWidth + ')';
+  let out = '', from = 0;
+  for (;;) {
+    const i = PAGE.indexOf(needle, from);
+    if (i === -1) return out;
+    let depth = 0, start = PAGE.indexOf('{', i), j = start;
+    for (; j < PAGE.length; j++) {
+      if (PAGE[j] === '{') depth++;
+      else if (PAGE[j] === '}' && --depth === 0) break;
+    }
+    out += PAGE.slice(start, j) + '\n';
+    from = j + 1;
   }
-  return PAGE.slice(start, j);
 }
 
 // ── 1 · THE TREATMENT IS STILL WIRED UP ─────────────────────────────────────
@@ -154,4 +167,78 @@ test('a club with no confirmed palette gets no tint at all', () => {
 test('a cup tie does not look like a league game', () => {
   assert.ok(rule('.fxc--cup'), 'cup ties carry their own treatment');
   assert.ok(rule('.fxc--league:before'), 'league games carry their own edge');
+});
+
+test('the Vase is not the Cup', () => {
+  // These were bucketed into one treatment, so the New Bradwell Vase tie —
+  // the fixture the whole creative system was designed around — rendered
+  // identically to the London Lions Cup tie, despite the club holding
+  // separate official artwork for each.
+  assert.match(PAGE, /id === 'fa-vase'\) return 'vase'/,
+    'fa-vase must resolve to its own treatment');
+  assert.match(PAGE, /id === 'fa-cup'\) return 'cup'/,
+    'fa-cup keeps its own');
+  assert.ok(rule('.fxc--vase'), 'the Vase needs a treatment to resolve to');
+  assert.notStrictEqual(rule('.fxc--vase'), rule('.fxc--cup'),
+    'and it must not be identical to the Cup');
+});
+
+// ── 5 · THE FOOTBALL LEADS THE CARD ─────────────────────────────────────────
+
+test('the collapsed card does not carry a wall of utility buttons', () => {
+  // Six equally-weighted grey buttons — Drive, Waze, Transport, Calendar,
+  // Share, Match Card — took roughly forty per cent of the card and were the
+  // loudest thing on it. They all still exist, one tap further in.
+  const card = PAGE.slice(PAGE.indexOf('function fxCard'), PAGE.indexOf('function fxHero'));
+  assert.ok(!/fxActs\(/.test(card),
+    'the collapsed card must not render the full action stack inline');
+  assert.match(card, /fxPanel\(f, state\)/,
+    'utilities belong to the expanded panel');
+});
+
+test('nothing was deleted — every utility still exists in the panel', () => {
+  const panel = PAGE.slice(PAGE.indexOf('function fxPanel'), PAGE.indexOf('function fxCard'));
+  ['Drive', 'Waze', 'Transport', 'Calendar', 'Share', 'Match Card'].forEach((label) => {
+    assert.ok(panel.includes('>' + label) || panel.includes(' ' + label + '<') ||
+              panel.includes(label), 're-prioritised, not removed: ' + label);
+  });
+});
+
+test('the expanded fixture is operable without a mouse or JavaScript', () => {
+  // A div with a click handler is neither. <details> is announced, keyboard
+  // operable and open-able with scripting off.
+  assert.match(PAGE, /<details class="fxx">/, 'built on native disclosure');
+  assert.ok(rule('.fxx__s'), 'the summary needs its own styling');
+  assert.match(rule('.fxx__s'), /min-height:var\(--ctl-min-h\)/,
+    'the tap target must meet the shared control minimum');
+});
+
+test('directions are not offered for a match that has already been played', () => {
+  const panel = PAGE.slice(PAGE.indexOf('function fxPanel'), PAGE.indexOf('function fxCard'));
+  assert.match(panel, /travel = \(state === 'upcoming' \|\| state === 'live'\)/,
+    'routing someone to a game that finished last month is clutter');
+});
+
+test('live is only ever claimed by an authority, never derived from the clock', () => {
+  const fn = PAGE.slice(PAGE.indexOf('function fxState'), PAGE.indexOf('function fxPanel'));
+  assert.match(fn, /__rlfcLive/, 'live state comes from the live source');
+  assert.ok(!/Date\.now\(\)\s*[<>]/.test(fn),
+    'a passed kick-off time must never by itself mean the match is live');
+  assert.match(fn, /return 'awaiting'/,
+    'a gone fixture with no result says so honestly');
+});
+
+// ── 6 · THE MOST PROMINENT FIXTURE IS NOT THE PLAINEST ──────────────────────
+
+test('the next-match hero carries the campaign like every card below it', () => {
+  // It carried none of it: no opponent colour, no ghosted crest, no
+  // competition mark. The Isuzu FA Vase tie rendered as a grey box above
+  // thirty-eight cards that were all more expressive than it.
+  const hero = PAGE.slice(PAGE.indexOf('function fxHero'), PAGE.indexOf('function fxCountdown'));
+  assert.match(hero, /BrandPalette\.resolve/, 'the hero resolves the opponent palette');
+  assert.match(hero, /fxCompTreatment\(f\)/, 'and its competition treatment');
+  assert.match(hero, /fxh__ghost/, 'and shows the opponent crest');
+  assert.match(hero, /fxCompMark\(ident\)/, 'and the official competition mark');
+  assert.ok(rule('.fxh--tinted'), 'with a treatment to land in');
+  assert.ok(rule('.fxh--away .fxh__ghost'), 'mirrored for away, same as the cards');
 });
