@@ -242,3 +242,37 @@ test('the next-match hero carries the campaign like every card below it', () => 
   assert.ok(rule('.fxh--tinted'), 'with a treatment to land in');
   assert.ok(rule('.fxh--away .fxh__ghost'), 'mirrored for away, same as the cards');
 });
+
+// ── 7 · THE TREATMENT MUST SURVIVE THE NORMALISER ───────────────────────────
+
+test('a fixture stripped of competitionId still resolves its treatment', () => {
+  // THE PRODUCTION BUG. The list this page renders is normalised first: it
+  // gains kickoffAt and loses competitionId. Locally the raw file is used, so
+  // every card resolved correctly in development and every card came out
+  // `fxc--other` on the live site — no league glow, no cup ground, no Vase.
+  //
+  // Nothing caught it. The classes were applied, the counts were right, and
+  // the tests were green, because the tests read the raw fixtures file.
+  const fn = PAGE.slice(PAGE.indexOf('function fxCompTreatment'),
+                        PAGE.indexOf('function fxState'));
+  assert.match(fn, /CompetitionBrand\.identity\(f\)/,
+    'the treatment must fall back to the competition LABEL, which always survives');
+  assert.ok(fn.indexOf('if (!id') < fn.indexOf("=== 'fa-vase'"),
+    'and it must do so BEFORE deciding the treatment');
+});
+
+test('the label route reaches the same ids the treatment switches on', () => {
+  // If the registry cannot turn "FA Vase 1Q" into fa-vase, the fallback above
+  // is decorative.
+  const CB = require(path.join(ROOT, 'js/competition-brand.js'));
+  CB.setRegistry(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/competitions.json'), 'utf8')).competitions);
+  const FX = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/fixtures.json'), 'utf8')).fixtures;
+  ['fa-vase', 'fa-cup', 'ccl-prem-north'].forEach((id) => {
+    const real = FX.filter((f) => f.competitionId === id)[0];
+    if (!real) return;
+    const stripped = Object.assign({}, real);
+    delete stripped.competitionId;                       // exactly what the normaliser does
+    assert.strictEqual(CB.identity(stripped).id, id,
+      '"' + real.competition + '" must still resolve to ' + id);
+  });
+});
