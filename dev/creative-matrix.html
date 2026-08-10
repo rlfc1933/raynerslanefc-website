@@ -11,8 +11,10 @@
  .cell{}
  .lab{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#868c90;margin-bottom:6px;max-width:340px}
  .lab b{color:#FFD100}
- .box{width:340px;height:340px;overflow:hidden;border:1px solid #2b2e31}
- .box>*{transform-origin:top left;transform:scale(0.3148)}
+ .box{overflow:hidden;border:1px solid #2b2e31}
+ .box>*{transform-origin:top left}
+ .fh{font:700 12px/1 'Manrope';letter-spacing:.14em;text-transform:uppercase;color:#fff;
+     margin:26px 0 12px;padding-top:18px;border-top:1px solid #2b2e31}
 </style></head><body>
 <h1>Creative QA Matrix</h1>
 <div class="sub">Every cell driven from real fixture data — no per-club code. Square, 1080×1080, shown at 31%.</div>
@@ -49,19 +51,41 @@
     ['TEAM NEWS',                 by('New Bradwell St Peter'), 'lineup',    null, PLATE]
   ].filter(c=>c[1]);
 
-  let out='';
-  CASES.forEach(([label,fx,state,score,plate])=>{
+  // Scale each format so every cell is a comparable height on screen.
+  const SC={square:0.30,portrait:0.24,story:0.17,x:0.20};
+
+  function cell(label,fx,state,score,plate,fmt){
     let f=fx;
     if(score) f=Object.assign({},fx,{us:score[0],them:score[1]});
     const c=CreativeCampaign.build(f,state);
     const rk=CreativeRecipes.pick(c);
-    const spec=CreativeRecipes.spec(c,CreativeCampaign.format('square'));
+    const spec=CreativeRecipes.spec(c,CreativeCampaign.format(fmt));
     const treat=c.competition.treatment||'league';
-    const html=CreativeSquare.html(c,{plate:plate,spec:spec});
-    out+=`<div class="cell"><div class="lab">${label} · <b>${c.opponent}</b><br>${rk.key} — ${rk.why}</div>
-      <div class="box">${html.replace('class="sq ','class="sq sq--'+treat+' ')}</div></div>`;
+    const F=CreativeSquare.formats[fmt];
+    const sc=SC[fmt];
+    const html=CreativeSquare.html(c,{plate:plate,spec:spec,format:fmt})
+      .replace('class="sq ','class="sq sq--'+treat+' ');
+    return `<div class="cell"><div class="lab">${label} · <b>${c.opponent}</b><br>${rk.key} — ${rk.why}</div>
+      <div class="box" style="width:${Math.round(F.w*sc)}px;height:${Math.round(F.h*sc)}px">
+        <div style="transform:scale(${sc})">${html}</div></div></div>`;
+  }
+
+  let out='<div class="fh">Square — every competition, venue and state</div><div class="grid">';
+  CASES.forEach(a=>{ out+=cell(a[0],a[1],a[2],a[3],a[4],'square'); });
+  out+='</div>';
+
+  // The other three formats across the states that most test hierarchy.
+  [['story','Story 1080×1920'],['x','X 1600×900'],['portrait','Portrait 1080×1350']].forEach(([fmt,title])=>{
+    out+=`<div class="fh">${title} — separately composed</div><div class="grid">`;
+    [['FA VASE HOME · MATCHDAY',by('New Bradwell St Peter'),'matchday',null,PLATE],
+     ['LEAGUE AWAY · MATCHDAY',by('Broadfields United'),'matchday',null,PLATE],
+     ['FULL TIME · WIN',by('New Bradwell St Peter'),'fulltime',[3,1],PLATE],
+     ['FULL TIME · LOSS',by('New Bradwell St Peter'),'fulltime',[0,2],PLATE],
+     ['POSTPONED',FX.filter(f=>f.id==='fwp-578241')[0],'postponed',null,PLATE]
+    ].filter(a=>a[1]).forEach(a=>{ out+=cell(a[0],a[1],a[2],a[3],a[4],fmt); });
+    out+='</div>';
   });
-  document.getElementById('g').innerHTML=out;
+  document.getElementById('g').outerHTML='<div id="g">'+out+'</div>';
   window.__ok=true;
 })();
 </script></body></html>

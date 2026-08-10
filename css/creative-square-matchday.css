@@ -271,3 +271,90 @@
   linear-gradient(90deg, rgba(2,2,2,.78) 0%, rgba(2,2,2,0) 46%); }
 .sq--league .sq__lightL { opacity: 1.15; }
 .sq--league .sq__slash { box-shadow: 0 0 70px 16px rgba(255,209,0,.42); }
+
+/* ════════════════════════════════════════════════════════════════════════
+   FORMAT BLUEPRINTS — three more compositions, not three crops.
+
+   The square blueprint is the design LANGUAGE: scale contrast, layered type
+   and crests, a slash between the clubs, facts ranged left, presenter above a
+   secondary rail. What follows re-composes that language for each canvas.
+   Nothing here scales the square; every value is chosen for its own frame.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── PORTRAIT 1080×1350 — the feed workhorse ─────────────────────────────
+   270px taller than square, and the extra height is SPENT, not padded: the
+   headline grows, the crests grow, and the facts get room to breathe rather
+   than everything drifting apart. */
+.sq--f-portrait .sq__in { padding: 62px 60px 54px; }
+.sq--f-portrait .sq__word { top: 20%; font-size: 186px; }
+.sq--f-portrait .sq__lock { top: 31%; }
+.sq--f-portrait .sq__crest, .sq--f-portrait .sq__crest--ini { width: 330px; height: 330px; }
+.sq--f-portrait .sq__crest--ini { font-size: 112px; }
+.sq--f-portrait .sq__team span { font-size: 58px; }
+.sq--f-portrait .sq__date { font-size: 82px; }
+.sq--f-portrait .sq__complogo { height: 136px; }
+.sq--f-portrait .sq__score { font-size: 240px; }
+.sq--f-portrait .sq__statusword { font-size: 168px; }
+
+/* ── STORY 1080×1920 — built vertically, and built around Instagram ──────
+   The top ~250px and bottom ~340px are covered by the app's own interface on
+   a real phone. Nothing factual may sit there, so the padding reserves them
+   outright and only atmosphere runs underneath. Everything else stretches
+   into the enormous middle: this is the one format where the design can be
+   genuinely tall rather than merely large. */
+.sq--f-story .sq__in { padding: 250px 70px 340px; }
+.sq--f-story .sq__word { top: 26%; font-size: 210px; }
+.sq--f-story .sq__lock { top: 37%; padding: 0 56px; }
+.sq--f-story .sq__crest, .sq--f-story .sq__crest--ini { width: 360px; height: 360px; }
+.sq--f-story .sq__crest--ini { font-size: 124px; }
+.sq--f-story .sq__team { min-height: 130px; }
+.sq--f-story .sq__team span { font-size: 64px; }
+.sq--f-story .sq__team--long span { font-size: 52px; }
+.sq--f-story .sq__team--xlong span { font-size: 46px; }
+.sq--f-story .sq__complogo { height: 150px; }
+.sq--f-story .sq__date { font-size: 84px; }
+.sq--f-story .sq__venue { font-size: 25px; }
+.sq--f-story .sq__preslogo { height: 74px; }
+.sq--f-story .sq__raillogo { height: 38px; }
+.sq--f-story .sq__score { font-size: 260px; }
+.sq--f-story .sq__statusword { font-size: 190px; }
+/* A taller frame needs a longer slash and a deeper vignette or the top and
+   bottom read as two separate images. */
+.sq--f-story .sq__slash { height: 108%; width: 26px; }
+.sq--f-story .sq__ghost { width: 92%; bottom: -14%; left: -22%; }
+
+/* ── X 1600×900 — genuinely widescreen ───────────────────────────────────
+   The upright formats stack; this one spreads. The two clubs move out to the
+   left and right thirds with the score or slash holding the centre, the
+   headline sits top-left rather than centred, and the sponsors run along the
+   bottom edge as a band instead of a stacked footer — a footer in a 16:9 frame
+   wastes the only axis the format actually has. */
+.sq--f-x .sq__in { padding: 42px 60px 38px; }
+.sq--f-x .sq__word {
+  top: 8%; left: 58px; right: auto; text-align: left; font-size: 128px; letter-spacing: .02em;
+}
+.sq--f-x .sq__word--back { transform: translate(-5px, -6px); }
+.sq--f-x .sq__lock { top: 30%; padding: 0 70px; align-items: center; }
+.sq--f-x .sq__crest, .sq--f-x .sq__crest--ini { width: 300px; height: 300px; }
+.sq--f-x .sq__side { width: 32%; }
+.sq--f-x .sq__team { min-height: 84px; }
+.sq--f-x .sq__team span { font-size: 46px; }
+.sq--f-x .sq__team--long span { font-size: 38px; }
+.sq--f-x .sq__complogo { height: 96px; }
+.sq--f-x .sq__comp { justify-content: flex-end; }
+.sq--f-x .sq__in > .sq__comp { position: absolute; right: 60px; top: 42px; }
+.sq--f-x .sq__slash { height: 116%; transform: translateX(-50%) rotate(9deg); }
+.sq--f-x .sq__score { font-size: 190px; }
+.sq--f-x .sq__statusword { font-size: 112px; }
+.sq--f-x .sq__date { font-size: 56px; }
+.sq--f-x .sq__venue { font-size: 19px; }
+/* Facts left, sponsors right, on one line along the bottom. */
+.sq--f-x .sq__facts { display: flex; align-items: flex-end; justify-content: space-between; gap: 44px; }
+.sq--f-x .sq__sponsors {
+  margin-top: 0; padding-top: 0; border-top: 0; flex-direction: row; align-items: flex-end; gap: 42px;
+}
+.sq--f-x .sq__preslogo { height: 48px; }
+.sq--f-x .sq__raillogo { height: 26px; }
+.sq--f-x .sq__rule { display: none; }
+.sq--f-x .sq__ghost { width: 52%; left: auto; right: -12%; bottom: -34%; }
+.sq--f-x .sq__statusblock { border-top-width: 5px; padding-top: 18px; }

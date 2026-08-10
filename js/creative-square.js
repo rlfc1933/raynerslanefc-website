@@ -132,14 +132,23 @@
    * `plate` is an optional generated photograph; without one the SVG procedural
    * plate carries the frame and the design still holds.
    */
+  /** The four deliverables. Each is a composition, never a crop of another. */
+  var FMT = {
+    square:   { w: 1080, h: 1080, cls: 'sq--f-square' },
+    portrait: { w: 1080, h: 1350, cls: 'sq--f-portrait' },
+    story:    { w: 1080, h: 1920, cls: 'sq--f-story' },
+    x:        { w: 1600, h: 900,  cls: 'sq--f-x' }
+  };
+
   function html(campaign, opts) {
     var o = opts || {};
     var c = campaign;
+    var F = FMT[o.format || 'square'] || FMT.square;
     var H = hierarchy(c);
     var t = (c.palette && c.palette.tokens) || {};
     var SVG = G.CreativeSVG;
     var spec = o.spec || {};
-    var proc = SVG && SVG.plateURI ? SVG.plateURI(Object.assign({ w: 1080, h: 1080, tokens: t }, spec)) : '';
+    var proc = SVG && SVG.plateURI ? SVG.plateURI(Object.assign({ w: F.w, h: F.h, tokens: t }, spec)) : '';
     var photo = o.plate ? A(o.plate) : null;
 
     var home = teamName(c.home.name), away = teamName(c.away.name);
@@ -163,7 +172,8 @@
         (c.venue ? '<div class="sq__venue">' + esc(c.venue) + '</div>' : '');
 
     return '' +
-    '<div class="sq sq--' + esc(H.mode) + ' sq--' + esc(H.tone) + '" style="' +
+    '<div class="sq ' + F.cls + ' sq--' + esc(H.mode) + ' sq--' + esc(H.tone) + '" style="' +
+        'width:' + F.w + 'px;height:' + F.h + 'px;' +
         '--sq-opp:' + (oppLight || 'transparent') + ';--sq-lane:' + (t.accent || '#FFD100') + '">' +
       (photo ? '<img class="sq__photo" src="' + esc(photo) + '" alt="">' : '') +
       '<img class="sq__grade' + (photo ? '' : ' sq__grade--solo') + '" src="' + proc + '" alt="">' +
@@ -191,5 +201,6 @@
     '</div>';
   }
 
-  return { html: html, setAssetBase: setAssetBase, hierarchy: hierarchy, teamName: teamName, fmtDate: fmtDate, fmtKO: fmtKO };
+  return { html: html, formats: FMT, setAssetBase: setAssetBase, hierarchy: hierarchy,
+           teamName: teamName, fmtDate: fmtDate, fmtKO: fmtKO };
 });
