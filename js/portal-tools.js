@@ -50,7 +50,9 @@
     { key: 'match', name: 'Match Day',
       ask: 'Are you preparing for a match, or running one?',
       likely: 'Most often: check the fixture, then fill in the attendance and takings.',
-      ids: ['fixtures', 'matchday', 'mdops', 'venues', 'scanner'] },
+      // Prepare Match leads the area because it is the answer to the question
+      // the area asks; the individual tools remain listed behind it.
+      ids: ['preparematch', 'fixtures', 'matchday', 'mdops', 'venues', 'scanner'] },
 
     { key: 'team', name: 'Team and Squad',
       ask: 'Do you need to update a player?',
@@ -104,6 +106,15 @@
     { id: 'fixtures', name: 'Fixtures and Results', effect: 'public',
       desc: 'Update the season’s matches, kick-off times and final scores. Changes appear on the public website.',
       roles: ['Committee', 'Match Day Secretary', 'Club Secretary', 'Club Management', 'Chairman', 'V Chairman'] },
+
+    // One fixture, one workspace. It opens no new capability of its own — every
+    // tile inside it opens a tool already listed here, and the server re-checks
+    // each of those exactly as before. Its audience is therefore everyone who
+    // does any part of a matchday, which is deliberately wide.
+    { id: 'preparematch', name: 'Prepare Match', effect: 'internal',
+      desc: 'Everything the next fixture needs, in the order a matchday happens: before, during and after.',
+      roles: ['Committee', 'Match Day Secretary', 'Club Secretary', 'Club Management',
+              'Media', 'Social Media', 'Chairman', 'V Chairman'] },
 
     { id: 'mdops', name: 'Match-Day Attendance and Takings', effect: 'internal',
       desc: 'Complete the attendance and takings sheet for each home match. Internal only.',

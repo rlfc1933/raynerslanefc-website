@@ -60,7 +60,34 @@
     document.title = 'QA FAIL';
   }
 
+  /**
+   * Named bootstraps, for pages whose content only renders after a module runs.
+   *
+   * AN ALLOWLIST, NOT AN EVAL. This takes a key, never code from the URL, so a
+   * dev-only page cannot be turned into a way to execute arbitrary script
+   * against the site's own origin.
+   *
+   * It does NOT log anyone in. The portal's PIN gate stays exactly where it is;
+   * these modules read only public JSON (data/fixtures.json, the brand and
+   * competition registries), which is why they can be exercised without a
+   * session. Anything that needs real staff data is not capturable this way,
+   * and should not be.
+   */
+  var BOOTS = {
+    'prepare-match': function (w) {
+      return Promise.all([
+        w.fetch('data/club-brands.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (w.BrandPalette) w.BrandPalette.setRegistry(d); }).catch(function () {}),
+        w.fetch('data/competitions.json').then(function (r) { return r.json(); })
+          .then(function (d) { if (d && d.competitions && w.CompetitionBrand) w.CompetitionBrand.setRegistry(d.competitions); }).catch(function () {})
+      ]).then(function () { return w.PrepareMatch && w.PrepareMatch.init(); });
+    }
+  };
+
   frame.addEventListener('load', function () {
+    var boot = BOOTS[q.get('boot') || ''];
+    if (boot) { try { boot(frame.contentWindow); } catch (e) {} }
+
     // The page fetches its own data, so the node will not exist on load.
     //
     // WAIT FOR THE COUNT TO SETTLE, NOT MERELY TO BE NON-ZERO. The programme

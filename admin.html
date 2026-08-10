@@ -18,6 +18,14 @@
   <script src="js/portal-recent.js"></script>
   <script src="js/portal-home.js"></script>
   <script src="js/portal-safety.js"></script>
+  <!-- Release 2: the fixture, and everything it needs, in one workspace.
+       Navigation and status only — every action opens an EXISTING panel via
+       openPanel(), so the server-side authorisation is unchanged. Owns no
+       football truth: live state is read from the block that publishes it. -->
+  <link rel="stylesheet" href="css/prepare-match.css">
+  <script src="js/competition-brand.js?v=1"></script>
+  <script src="js/brand-palette.js"></script>
+  <script src="js/prepare-match.js"></script>
   <script>
     /* Phase 3: read data/*.json from the GitHub CDN (jsDelivr), which save-data.js
        purges on every commit — so the admin's re-fetch/merge (and everything it
@@ -838,6 +846,10 @@
          Answers "what needs doing" before showing the tool inventory. The
          classic 31-tile list below is preserved untouched and is revealed by
          "View all club tools", so nothing became unreachable. -->
+    <!-- The fixture, above the tool inventory. Empty until PrepareMatch
+         resolves one, so a failure here shows nothing rather than a broken
+         card. -->
+    <div id="pm-next"></div>
     <div id="portal-home"></div>
 
     <!-- DASHBOARD — the classic full tool list. Hidden by default; shown by
@@ -1173,6 +1185,14 @@
     
       </div><!-- /alltools -->
 </div>
+
+    <!-- PREPARE MATCH — one fixture, one workspace, in the order a matchday
+         happens. Every tile opens an existing panel; nothing new is authorised
+         here and no football truth is written. -->
+    <div class="panel" id="panel-preparematch">
+      <h2 class="ph">Prepare match</h2>
+      <div id="pm-hub"></div>
+    </div>
 
     <!-- MATCH DAY -->
     <div class="panel" id="panel-matchday">
@@ -3736,6 +3756,9 @@ function enterApp() {
   initDash();
   addTileInfos();
   try { if (window.PortalHome) PortalHome.init(); } catch (e) {}
+  // The fixture card sits above the front door. Independently wrapped so a
+  // failure resolving it can never stop the dashboard rendering.
+  try { if (window.PrepareMatch) PrepareMatch.init(); } catch (e) {}
   try { if (window.PortalSafety) PortalSafety.init(); } catch (e) {}
   restoreReturnPanel();
 }
@@ -4469,6 +4492,7 @@ function openPanel(name) {
   // Push a history entry so the phone's back gesture (and the browser back
   // button) returns to the dashboard instead of leaving the admin entirely.
   try { if (!(history.state && history.state.panel === name)) history.pushState({ panel: name }, '', '#' + name); } catch (e) {}
+  if (name === 'preparematch') { try { PrepareMatch.init(); } catch (e) {} }
   if (name === 'squad')     renderSquad();
   if (name === 'committee') { renderCommittee(); loadOfficials(); }
   if (name === 'sponsors')  renderSponsors();
@@ -4532,6 +4556,7 @@ function showDash() {
   if (dh) dh.style.display = (window.PortalHome && PortalHome._state.showAll) ? 'block' : 'none';
   initDash();
   try { if (window.PortalHome) PortalHome.refresh(); } catch (e) {}
+  try { if (window.PrepareMatch) PrepareMatch.paint(); } catch (e) {}
 }
 // The in-app "← Back" button: pop the history entry so the device back button
 // stays in sync; fall back to just showing the dashboard.
