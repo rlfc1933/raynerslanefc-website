@@ -205,14 +205,24 @@ test('the league artwork already in the repository is wired up', () => {
   assert.strictEqual(l.sponsorName, 'Cherry Red Records');
 });
 
-test('the FA competitions declare that their artwork must be issued', () => {
+test('the FA competitions carry the artwork the club was issued', () => {
+  // This test used to assert the marks were ABSENT and awaiting issue. The club
+  // has since supplied both, so it now guards the thing that actually matters:
+  // that what is on disk is the supplied file and nobody has substituted a
+  // traced or downloaded lookalike for it.
   ['fa-cup', 'fa-vase'].forEach((id) => {
     const c = COMPS.competitions.find((x) => x.id === id);
-    assert.strictEqual(c.logoStatus, 'official-artwork-required');
-    assert.strictEqual(c.logo, null, 'no substitute may be present');
-    assert.match(c.logoSlot, /^img\/competitions\//, 'a slot must be named for the issued file');
-    assert.match(c.logoNote, /issued/i);
+    assert.strictEqual(c.logoStatus, 'official-supplied');
+    assert.match(c.logo, /^img\/competitions\//, 'issued artwork lives in one place');
+    assert.ok(fs.existsSync(path.join(ROOT, c.logo)), id + ' artwork missing from disk');
+    assert.match(c.logoNote, /supplied by the club/i, 'provenance must be recorded');
+    assert.match(c.logoNote, /Never redraw|Never redraw, recolour|reinterpret|resolution/i);
   });
+});
+
+test('the Vase mark is vector, which the programme needs', () => {
+  const v = COMPS.competitions.find((x) => x.id === 'fa-vase');
+  assert.match(v.logo, /\.svg$/, 'A4 print cannot use a small raster mark');
 });
 
 test('a missing official mark is a permitted state, not a broken one', () => {

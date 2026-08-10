@@ -181,14 +181,13 @@ test('sponsored competitions record who the sponsor is and where that was checke
 test('the FA competitions record that their marks are issued, not downloaded', () => {
   ['fa-cup', 'fa-vase'].forEach((id) => {
     const c = COMPS.filter((x) => x.id === id)[0];
-    // The status string changed from 'issued-by-the-fa' to
-    // 'official-artwork-required' when the creative system gained a real asset
-    // slot: the same fact, stated as an action someone can take. The rule it
-    // encodes is unchanged and still the point of this test.
-    assert.strictEqual(c.logoStatus, 'official-artwork-required');
-    assert.match(c.logoNote, /issued/i);
-    assert.match(c.logoSlot, /^img\/competitions\//,
-      'the issued file needs a named home, or it will be dropped anywhere');
+    // Twice-revised, and worth the note: 'issued-by-the-fa' became
+    // 'official-artwork-required' when the asset slot was built, and then
+    // 'official-supplied' when the club actually provided both marks. The rule
+    // never changed — these are issued, never downloaded — only the state did.
+    assert.strictEqual(c.logoStatus, 'official-supplied');
+    assert.match(c.logo, /^img\/competitions\//,
+      'the issued file has a named home so nothing is dropped anywhere');
   });
   assert.match(REG._brandNote, /Never populate `logo` from a logo-aggregator site/);
 });

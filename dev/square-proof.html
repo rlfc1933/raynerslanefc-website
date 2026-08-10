@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<title>Square Matchday Proof — Rayners Lane FC</title>
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/creative-square-matchday.css">
+<style>
+ body{margin:0;background:#191b1d;color:#ddd;font:13px/1.5 'Manrope',system-ui,sans-serif;padding:20px}
+ h1{font:700 13px/1 'Manrope';letter-spacing:.16em;text-transform:uppercase;color:#FFD100;margin:0 0 16px}
+ .wrap{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+ .lab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#80868a;margin-bottom:8px}
+ .box{overflow:hidden;border:1px solid #2b2e31}
+ .box>*{transform-origin:top left}
+</style></head><body>
+<h1>Square Matchday — rebuilt foreground</h1>
+<div class="wrap">
+  <div><div class="lab">Full size (1080 × 1080) shown at 62%</div>
+    <div class="box" id="b62" style="width:670px;height:670px"></div></div>
+  <div><div class="lab">Thumbnail test — 30%</div>
+    <div class="box" id="b30" style="width:324px;height:324px"></div></div>
+</div>
+<script>
+(async function(){
+  const j=p=>fetch('../'+p+'?t='+Date.now()).then(r=>r.json());
+  const [brands,partners]=await Promise.all([j('data/club-brands.json'),j('data/partners.json')]);
+  const S=partners.sponsors;
+  const nb=brands.clubs.find(c=>c.id==='new-bradwell-st-peter');
+
+  const html = `
+  <div class="sq">
+    <img class="sq__photo" src="../img/creative/c-20260815-new-bradwell-st-peter/CUP_NIGHT-square-b.jpg" alt="">
+    <div class="sq__scrim"></div>
+    <div class="sq__lightL"></div>
+    <div class="sq__lightR"></div>
+    <img class="sq__ghost" src="../img/badge.png" alt="">
+    <div class="sq__slash sq__slash--ghost"></div>
+    <div class="sq__slash"></div>
+
+    <div class="sq__word sq__word--back">MATCHDAY</div>
+    <div class="sq__word">MATCHDAY</div>
+
+    <div class="sq__lock">
+      <div class="sq__side">
+        <img class="sq__crest" src="../img/badge.png" alt="Rayners Lane crest">
+        <div class="sq__team">RAYNERS LANE</div>
+      </div>
+      <div class="sq__side">
+        <img class="sq__crest" src="../${nb.crest}" alt="New Bradwell St Peter crest">
+        <div class="sq__team sq__team--long">NEW BRADWELL<br>ST PETER</div>
+      </div>
+    </div>
+
+    <div class="sq__in">
+      <div class="sq__comp">
+        <img class="sq__complogo" src="../img/competitions/fa-vase.svg" alt="Isuzu FA Vase">
+        <div class="sq__round">First<br>Qualifying<br>Round</div>
+      </div>
+
+      <div class="sq__facts">
+        <div class="sq__rule"></div>
+        <div class="sq__date">SATURDAY 15 AUGUST <span class="sq__ko">&middot; 3:00 PM</span></div>
+        <div class="sq__venue">Tithe Farm, Harrow</div>
+
+        <div class="sq__sponsors">
+          <div class="sq__pres">
+            <span class="sq__preslbl">Home match presented by</span>
+            <img class="sq__preslogo" src="../${S.hdl.white}" alt="Hanlon Dry Lining">
+          </div>
+          <div class="sq__rail">
+            <img class="sq__raillogo" src="../${S.ashwood.white}" alt="Ashwood Builders Merchants">
+            <img class="sq__raillogo" src="../${S.king.white}" alt="The King, Denham">
+            <img class="sq__raillogo" src="../${S.ahiq.white}" alt="AHiQ">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('b62').innerHTML=html;
+  document.getElementById('b30').innerHTML=html;
+  document.querySelector('#b62 .sq').style.transform='scale(0.62)';
+  document.querySelector('#b30 .sq').style.transform='scale(0.30)';
+  window.__ok=true;
+})();
+</script></body></html>

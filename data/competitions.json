@@ -93,10 +93,10 @@
       ],
       "sponsorConfirmed": "Emirates, title partner to end of 2027/28",
       "sponsorSource": "https://www.emirates.com/media-centre/emirates-fa-cup-title-partnership-extended-until-2028/",
-      "logoStatus": "official-artwork-required",
-      "logoNote": "OFFICIAL ARTWORK REQUIRED. FA Challenge Vase rule 3(f): a club shall use the image ISSUED by The Association. Drop the issued file at the logoSlot path and set logo to it. Until then the Studio uses the typographic competition treatment — which is correct and permitted, not a degraded state. Never trace, approximate or download a substitute.",
-      "logo": null,
-      "logoAlt": "Emirates FA Cup logo",
+      "logoStatus": "official-supplied",
+      "logoNote": "Official artwork supplied by the club, Aug 2026. Raster — check resolution before using at large size in print.",
+      "logo": "img/competitions/fa-cup.png",
+      "logoAlt": "Emirates FA Cup",
       "cardName": "Emirates FA Cup",
       "creativeTreatment": "cup-night",
       "logoSlot": "img/competitions/fa-cup.png"
@@ -121,15 +121,15 @@
       ],
       "sponsorConfirmed": "Isuzu UK, title partner to end of 2027/28",
       "sponsorSource": "https://www.thefa.com/news/2025/jun/05/isuzu-partnership-renewal",
-      "logoStatus": "official-artwork-required",
-      "logoNote": "OFFICIAL ARTWORK REQUIRED. FA Challenge Vase rule 3(f): a club shall use the image ISSUED by The Association. Drop the issued file at the logoSlot path and set logo to it. Until then the Studio uses the typographic competition treatment — which is correct and permitted, not a degraded state. Never trace, approximate or download a substitute.",
-      "logo": null,
-      "logoAlt": "Isuzu FA Vase logo",
+      "logoStatus": "official-supplied",
+      "logoNote": "Association-issued artwork supplied by the club, Aug 2026. Vector SVG — scales to any size without loss, which matters for A4 programme print. Never redraw, recolour or reinterpret this mark.",
+      "logo": "img/competitions/fa-vase.svg",
+      "logoAlt": "Isuzu FA Vase",
       "cardName": "Isuzu FA Vase",
       "creativeTreatment": "cup-night",
       "logoSlot": "img/competitions/fa-vase.png"
     }
   ],
-  "updatedAt": "2026-08-09T18:00:00.000Z",
+  "updatedAt": "2026-08-10T02:00:00.000Z",
   "_brandNote": "Competition identity for match cards is resolved from these entries by js/competition-brand.js — one source of truth for every surface. `logo` is null until an OFFICIAL asset is obtained; a null logo makes cards fall back to the text identity, which is the intended behaviour, not a failure. Never populate `logo` from a logo-aggregator site: FA competition marks are issued by The Association to competing clubs and must be the issued image."
 }
