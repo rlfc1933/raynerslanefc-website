@@ -35,9 +35,16 @@ test('the portal actually loads the engine', () => {
   assert.match(ADMIN, /StudioCinematic\.init\(\)/, 'and initialise it when Studio opens');
 });
 
-test('every fixture template routes to the campaign, not the old renderer', () => {
-  ['matchday', 'countdown', 'lineup', 'kickoff', 'goal', 'halftime', 'fulltime', 'offstate']
-    .forEach((t) => assert.match(SRC, new RegExp('\\b' + t + ':\\s*\'', ''), t + ' must map to a campaign state'));
+test('ONLY Match Day routes to the campaign renderer', () => {
+  // CORRECTED AFTER THE 15 AUG INCIDENT. This test used to require eleven
+  // templates to route here, which is the bug itself written down as an
+  // expectation: it made Goal, Half Time and Full Time draw the Match Day
+  // poster. The brief was one cinematic template, not a renderer that consumes
+  // the others.
+  assert.match(SRC, /\bmatchday:\s*'matchday'/);
+  ['goal', 'halftime', 'fulltime', 'lineup', 'kickoff', 'offstate', 'countdown']
+    .forEach((t) => assert.ok(!new RegExp('\\n\\s*' + t + ':\\s*\'').test(SRC),
+      t + ' must keep its own renderer'));
 });
 
 test('non-fixture templates are left alone', () => {
@@ -67,7 +74,8 @@ test('a failure shows the old card, never a blank one', () => {
   assert.match(SRC, /catch \(e\) \{/, 'render must be wrapped');
   assert.match(SRC, /return false;/, 'and signal fallback rather than throwing');
   const fn = SRC.slice(SRC.indexOf('function render()'));
-  assert.match(fn, /if \(!fx\) return false;/, 'no fixture means no cinematic card');
+  assert.match(fn, /if \(!fx\) \{ clearMark\(\); return false; \}/,
+    'no fixture means no cinematic card, and the marker is cleared with it');
 });
 
 test('Studio no longer disagrees with the rest of the site about the next match', () => {

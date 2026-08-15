@@ -82,7 +82,7 @@ test('a throw during export cannot lock the download button forever', () => {
 
 test('the studio does not depend on the campaign registries loading', () => {
   // The registries are fetched. A slow or failed fetch must not mean no Studio.
-  assert.ok(CINE.indexOf('!ready) return false;') > -1,
+  assert.ok(CINE.indexOf('!ready) { clearMark(); return false; }') > -1,
     'not ready simply means the original renderer draws');
 });
 

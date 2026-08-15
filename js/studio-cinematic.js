@@ -30,19 +30,28 @@
 (function (global) {
   'use strict';
 
-  /** Studio template → campaign state. Absent means "not a fixture graphic". */
+  /**
+   * WHICH TEMPLATE THE CINEMATIC RENDERER OWNS.  EXACTLY ONE: MATCH DAY.
+   *
+   * MATCH-DAY INCIDENT, 15 AUGUST 2026. This map used to list eleven templates
+   * — matchday, countdown, preseason, lineup, offstate, kickoff, goal, yellow,
+   * red, halftime, fulltime — so clicking HALF TIME set PS.type correctly, re-
+   * rendered correctly, and drew the Match Day poster. Staff reported the
+   * preview "not switching". It was switching; every switch just landed on the
+   * same picture.
+   *
+   * The brief was to make the MATCH DAY GRAPHIC cinematic. It was not
+   * permission for that one template's renderer to take over Goal, Half Time,
+   * Full Time, Team News and the rest, which have their own designs and their
+   * own fields, and which staff need during a live game.
+   *
+   * A template-specific renderer gets exactly the template it was designed for.
+   * Anything else falls through to the renderer that has always drawn it.
+   * Adding another later is one line here plus a design that has actually been
+   * asked for.
+   */
   var STATE = {
-    matchday:  'matchday',
-    countdown: 'countdown',
-    preseason: 'preseason',
-    lineup:    'lineup',
-    offstate:  'postponed',
-    kickoff:   'kickoff',
-    goal:      'goal',
-    yellow:    'yellow',
-    red:       'red',
-    halftime:  'halftime',
-    fulltime:  'fulltime'
+    matchday: 'matchday'
   };
 
   /** Studio size key → campaign format. */
@@ -111,25 +120,33 @@
    * Draw the cinematic card into Studio's own preview node.
    * Returns true when it rendered, false to let the old renderer run.
    */
+  /** The card is shared, so a stale marker from a previous template must go. */
+  function clearMark() {
+    try {
+      var c = document.getElementById('ps-card');
+      if (c) c.removeAttribute('data-cinematic');
+    } catch (e) {}
+  }
+
   function render() {
     try {
       var PS = global.PS;
-      if (!PS || !ready) return false;
+      if (!PS || !ready) { clearMark(); return false; }
       var state = STATE[PS.type];
-      if (!state) return false;
+      if (!state) { clearMark(); return false; }
 
       var C = global.CreativeCampaign, SQ = global.CreativeSquare;
-      if (!C || !SQ) return false;
+      if (!C || !SQ) { clearMark(); return false; }
 
       var fx = fixture();
-      if (!fx) return false;
+      if (!fx) { clearMark(); return false; }
 
       var campaign = C.build(fx, state);
-      if (!campaign) return false;
+      if (!campaign) { clearMark(); return false; }
       overlay(campaign);
 
       var card = document.getElementById('ps-card');
-      if (!card) return false;
+      if (!card) { clearMark(); return false; }
 
       var fmt = FMT[PS.size] || 'square';
       var size = SQ.formats[fmt];
@@ -159,7 +176,7 @@
   }
 
   global.StudioCinematic = {
-    init: init, prepare: prepare, render: render,
+    init: init, prepare: prepare, render: render, clearMark: clearMark,
     STATE: STATE, FMT: FMT,
     handles: function (t) { return !!STATE[t]; },
     _fixture: fixture, _overlay: overlay,
