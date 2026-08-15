@@ -21,9 +21,14 @@ const FAN = require('./lib/fan/members');
  * gate would hold in the function and leak at the edge.
  */
 function resp(code, obj, seconds, personal) {
+  /* MATCHDAY FRESHNESS. This was max-age=120 with stale-while-revalidate=600,
+     so an edition published at 14:20 could stay invisible to supporters for
+     roughly twelve minutes — which on a matchday is the window that matters
+     most. Thirty seconds, and a short revalidate, keeps the caching benefit
+     while making a newly published programme appear promptly. */
   const cache = personal
     ? 'private, no-store, max-age=0'
-    : 'public, max-age=' + (seconds || 120) + ', stale-while-revalidate=600';
+    : 'public, max-age=' + (seconds || 30) + ', stale-while-revalidate=60';
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',

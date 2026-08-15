@@ -87,10 +87,57 @@ async function season(seasonLabel) {
  * legacy file is exactly how the site came to count down to the game it had
  * just finished.
  */
+/* ── THE MATCH WINDOW ──────────────────────────────────────────────────────
+   How long after kick-off a fixture is still THE match. 150 minutes covers
+   90 plus a generous half-time, stoppages and a delayed start.
+
+   WHY THIS MATTERS MORE THAN IT LOOKS. On 15 August 2026, 37 minutes into the
+   FA Vase tie, the homepage was counting down four days to Burnham and calling
+   New Bradwell "LAST · RESULT TO FOLLOW" — while that match was being played.
+
+   A FIXTURE IS NOT DECIDED BY A STATUS FLAG ALONE. Today's tie was already
+   carrying fixture_status = 'played' with no score at all. currentFrom()
+   required 'scheduled' so it matched nothing; previousFrom() required 'played'
+   so it claimed a game still in progress; nextFrom() then promoted the next
+   one. One premature flag from the ingest side moved the club's most-read
+   panel onto the wrong match.
+
+   So the window is decided by TIME AND RESULT, which are facts, rather than by
+   a status column that something upstream can set early. A fixture inside its
+   window with no score is being played, whatever the flag says. A fixture with
+   a score is over, whatever the flag says. */
+const MATCH_WINDOW_MS = 150 * 60000;
+
+/** Has this fixture actually got a result? Nulls are not a nil-nil draw. */
+function hasResult(f) {
+  return f && f.us != null && f.them != null;
+}
+
+/**
+ * Is this fixture being played right now?
+ * Kicked off, inside the window, and no result recorded yet.
+ */
+function inMatchWindow(f, nowMs) {
+  if (!f || !f.kickoffAt) return false;
+  const ko = Date.parse(f.kickoffAt);
+  if (!isFinite(ko)) return false;
+  const now = nowMs == null ? Date.now() : nowMs;
+  return ko <= now && now < ko + MATCH_WINDOW_MS && !hasResult(f);
+}
+
+/** A called-off game is not being played, whatever the clock says. */
+function calledOff(f) {
+  const s = String((f && f.status) || '').toLowerCase();
+  return s === 'postponed' || s === 'cancelled' || s === 'abandoned';
+}
+
 function nextFrom(list, nowMs) {
   const now = nowMs == null ? Date.now() : nowMs;
   return list
     .filter((f) => f.status === 'scheduled' && f.kickoffAt && Date.parse(f.kickoffAt) > now)
+    // A game currently being played is never "next", even if something
+    // upstream has left it looking scheduled.
+    .filter((f) => !inMatchWindow(f, now))
     .sort((a, b) => Date.parse(a.kickoffAt) - Date.parse(b.kickoffAt))[0] || null;
 }
 
@@ -102,11 +149,9 @@ function nextFrom(list, nowMs) {
 function currentFrom(list, nowMs) {
   const now = nowMs == null ? Date.now() : nowMs;
   return list
-    .filter((f) => f.status === 'scheduled' && f.kickoffAt)
-    .filter((f) => {
-      const ko = Date.parse(f.kickoffAt);
-      return ko <= now && now < ko + 150 * 60000;
-    })
+    // Deliberately NOT gated on status === 'scheduled'. See MATCH_WINDOW_MS.
+    .filter((f) => !calledOff(f))
+    .filter((f) => inMatchWindow(f, now))
     .sort((a, b) => Date.parse(b.kickoffAt) - Date.parse(a.kickoffAt))[0] || null;
 }
 
@@ -115,6 +160,9 @@ function previousFrom(list, nowMs) {
   const now = nowMs == null ? Date.now() : nowMs;
   return list
     .filter((f) => f.status === 'played' && f.kickoffAt && Date.parse(f.kickoffAt) <= now)
+    // A match still inside its window with no result has not become the
+    // PREVIOUS match yet — that is what put a game in progress under "LAST".
+    .filter((f) => !inMatchWindow(f, now))
     .sort((a, b) => Date.parse(b.kickoffAt) - Date.parse(a.kickoffAt))[0] || null;
 }
 
@@ -292,4 +340,5 @@ function shapeLineups(rows, fixture) {
 module.exports = {
   CLUB, shapeFixture, season, results, leagueTable, fixtureDetail, shapeLineups,
   nextFrom, currentFrom, previousFrom, nextProgrammeFrom, formFrom,
+  inMatchWindow, hasResult, MATCH_WINDOW_MS,
 };
