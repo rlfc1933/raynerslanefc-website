@@ -7663,7 +7663,19 @@ function psBuildBlob(cb) {
   PS._busy = true;
   psExportBusy(true);
   toast('Creating your image…');
-  PS._exporting = true; psRender();                      // rebuild with hints stripped
+  /* A THROW HERE USED TO LOCK THE STUDIO FOR THE REST OF THE SESSION.
+     PS._busy is set above; if the re-render threw, nothing cleared it and every
+     later Download silently returned at the guard. On a matchday that is a dead
+     button with no explanation. One template's failure must never disable the
+     export path for the others. */
+  try {
+    PS._exporting = true; psRender();                    // rebuild with hints stripped
+  } catch (err) {
+    PS._busy = false; psExportBusy(false); PS._exporting = false;
+    try { console.error('[post-studio] pre-export render failed', err); } catch (e2) {}
+    toast('That image could not be created. Nothing has been lost — please try again.', true);
+    return;
+  }
   var card = document.getElementById('ps-card');
   /* CAPTURE THE CARD AT ITS AUTHORED SIZE, IN NORMAL FLOW.
      psFitCard() leaves it position:absolute inside a wrapper sized to the

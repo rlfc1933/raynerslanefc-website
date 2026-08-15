@@ -64,7 +64,7 @@
     if (S.all) {
       host.innerHTML = '<div class="pss"><button class="pss__back" onclick="StudioShell.home()">' +
         '&larr; Back to Make something</button></div>';
-      showPicker(true);
+      showPicker();
       return;
     }
 
@@ -77,9 +77,9 @@
               '<span class="pss__cl">' + esc(c.label) + '</span>' +
               '<span class="pss__ch">' + esc(c.hint) + '</span></button>';
           }).join('') + '</div>' +
-          '<button class="pss__all" onclick="StudioShell.showAll()">Show every template</button>' +
+          '<p class="pss__all" id="ps-all-label">…or choose any template below</p>' +
         '</div>';
-      showPicker(false);
+      showPicker();
       return;
     }
 
@@ -98,7 +98,7 @@
             '<div class="pss__ts">' + buttons + '</div></div>';
         }).join('') +
       '</div>';
-    showPicker(false);
+    showPicker();
   }
 
   /** Only offer a template Studio actually has. */
@@ -107,12 +107,32 @@
     catch (e) { return false; }
   }
 
-  /** The original 26-button wall: hidden, never removed. */
-  function showPicker(on) {
+  /**
+   * THE ORIGINAL TEMPLATE PICKER IS NEVER HIDDEN.
+   *
+   * MATCH-DAY INCIDENT, 15 AUG 2026. This used to do
+   * `el.style.display = 'none'`, so opening Post Studio replaced the twenty-five
+   * template buttons the operator knows with five categories. Every control
+   * still worked and nothing was disabled — but the way anyone reaches GOAL had
+   * silently moved, mid-season, during a live match. From the touchline that is
+   * indistinguishable from a frozen studio, and it cost the club goal posts
+   * while the game was being played.
+   *
+   * A guided front door is an ADDITION. It is allowed to suggest a route; it is
+   * not allowed to remove the one people already use. The categories now sit
+   * above the full picker and both are always available, so the new flow can
+   * never strand anyone.
+   *
+   * Kept as a function rather than deleting the calls, so the intent is visible
+   * at every call site instead of looking like the feature was half-removed.
+   */
+  function showPicker() {
     var el = document.getElementById('ps-types');
-    if (el) el.style.display = on ? '' : 'none';
+    if (el) el.style.display = '';
     var hint = document.getElementById('ps-hint');
-    if (hint) hint.style.display = on ? '' : 'none';
+    if (hint) hint.style.display = '';
+    var all = document.getElementById('ps-all-label');
+    if (all) all.style.display = '';
   }
 
   function pick(k)   { S.cat = k; S.all = false; render(); }

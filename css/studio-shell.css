@@ -43,11 +43,10 @@
 .pss__t:hover{ border-color:var(--yellow,#FFD100); color:var(--yellow,#FFD100); }
 .pss__t.on{ background:var(--yellow,#FFD100); border-color:var(--yellow,#FFD100); color:#0d0d0d; }
 
+/* A signpost, not a reveal. The full picker is always on screen beneath this. */
 .pss__all{
-  margin-top:12px; background:none; border:0; cursor:pointer; padding:8px 0;
-  min-height:var(--ctl-min-h,44px);
+  margin:14px 0 0; padding:0;
   font-family:var(--font-c,inherit); font-weight:700; font-size:10.5px; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--muted,#6d6d6d); text-decoration:underline;
+  text-transform:uppercase; color:var(--muted,#6d6d6d);
 }
-.pss__all:hover{ color:var(--yellow,#FFD100); }
 @media (max-width:600px){ .pss__cats{ grid-template-columns:1fr; } }
