@@ -6521,6 +6521,7 @@ var QUOTES = [
 // by thinking about WHEN in the matchday you need it. Grouping only; every key,
 // label, field and render branch is unchanged.
 function POST_TYPES() { return [
+  { key: 'nextup',    label: 'Next Up',          group: 'Before Match' },
   { key: 'matchday',  label: 'Match Day',        group: 'Before Match' },
   { key: 'preseason', label: 'Pre-Season',       group: 'Before Match' },
   { key: 'countdown', label: 'Countdown',        group: 'Before Match' },
@@ -6628,7 +6629,7 @@ function psLastResult() {
   }).sort(function (a, b) { return a.date > b.date ? -1 : 1; })[0] || null;
 }
 // Templates whose card states a fixture. These must never be exported guessing.
-var PS_FIXTURE_TYPES = ['matchday', 'preseason', 'kickoff', 'goal', 'yellow', 'red',
+var PS_FIXTURE_TYPES = ['nextup', 'matchday', 'preseason', 'kickoff', 'goal', 'yellow', 'red',
                         'halftime', 'fulltime', 'lineup', 'countdown', 'offstate'];
 // Cards about a game that has already been played — these look BACKWARDS.
 var PS_RESULT_TYPES = ['fulltime', 'motm'];
@@ -6677,7 +6678,12 @@ function psApplyFixture(id) {
   // correct data, wrong voice. prTo12 is the same converter the programme uses.
   d.date = fxFmtDate(f.date); d.ko = prTo12(f.kickoff || '15:00');
   if (f.venue) d.venue = f.venue; if (f.competition) d.comp = f.competition;
-  if (T === 'matchday' || T === 'offstate') {
+  /* The cards that draw a HOME/AWAY lockup from a single opponent crest.
+     Next Up belongs here with Match Day: leaving it out of this list meant it
+     fell to the generic branch, kept the alphabetically-first crest and
+     defaulted to Home — so it advertised the wrong opponent, at the wrong
+     ground, for the right date. */
+  if (T === 'nextup' || T === 'matchday' || T === 'offstate') {
     d.ha = away ? 'away' : 'home';
     if (f.oppCrest) d.oppCrest = f.oppCrest;
     if (T === 'offstate' && !d.offstate) d.offstate = 'Postponed';
@@ -6770,7 +6776,8 @@ function aiUseHook(hook) {
 // you pick it, so a first-time volunteer never needs a manual to understand them.
 var PS_TYPE_HINT = {
   offstate: 'Game called off — postponed, cancelled or abandoned. Tells supporters before they travel.',
-  matchday: 'Announce the next fixture — opponent, date, kick-off and venue.',
+  nextup: 'Promote an upcoming fixture — days before the game. Says NEXT UP, not today.',
+  matchday: 'Promote TODAY\u2019s fixture. Use Next Up if the game is not today.',
   preseason: 'A pre-season friendly card with the opponent’s crest.',
   countdown: 'Build hype — “X days to go” to kick-off or a big date.',
   lineup: 'Your starting XI (and subs) as a clean team sheet.',
@@ -6828,7 +6835,7 @@ function psPlayerOptions(sel) {
 // field templates per type
 function psFieldDefs() {
   var T = PS.type, d = PS.data;
-  var homeAway = (T === 'matchday' || T === 'preseason') ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">Away</button></div>' : '';
+  var homeAway = (T === 'nextup' || T === 'matchday' || T === 'preseason') ? '<div class="ps-seg" style="margin-bottom:9px"><button class="' + (d.ha !== 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'home\')">Home</button><button class="' + (d.ha === 'away' ? 'on' : '') + '" onclick="psVal(\'ha\',\'away\')">Away</button></div>' : '';
   var crests = (['kickoff', 'halftime', 'fulltime'].indexOf(T) > -1)
     ? '<div class="ps-crestrow"><div class="field"><label class="fl">Home crest</label><select onchange="psVal(\'homeCrest\',this.value)">' + psCrestOptions(d.homeCrest || 'img/badge.png') + '</select></div>' +
       '<div class="field"><label class="fl">Away crest</label><select onchange="psVal(\'awayCrest\',this.value)">' + psCrestOptions(d.awayCrest || (psCrests[1] && psCrests[1].file)) + '</select></div></div>' : '';
@@ -6838,12 +6845,18 @@ function psFieldDefs() {
     ? '<div class="field"><label class="fl">Player</label><select onchange="psVal(\'player\',this.value)">' + psPlayerOptions(d.player) + '</select><div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin-top:4px">Pulls the surname + framed photo from Player Profiles. No photo? It still makes a clean text post.</div></div>' : '';
   var manualName = '<div class="field"><label class="fl">…or type a name <span style="color:var(--gr);font-weight:400">— a new signing, or anyone not in the squad list</span></label><input type="text" value="' + escH(d.manualName || '') + '" placeholder="Surname" oninput="psSet(\'manualName\',this.value)"></div>';
   // Fixture picker — auto-fills the card from the season schedule (Fixtures manager)
-  var fxPick = (['matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1 && psFixtures.length)
+  var fxPick = (['nextup', 'matchday', 'kickoff', 'halftime', 'fulltime'].indexOf(T) > -1 && psFixtures.length)
     ? '<div class="field"><label class="fl"><i class="ico ico-zap"></i> Load from fixture <span style="color:var(--gr);font-weight:400">— auto-fills opponent, date, time, venue' + (['halftime', 'fulltime'].indexOf(T) > -1 ? ' &amp; score' : '') + '</span></label><select onchange="psApplyFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option>' +
       psFixtures.map(function (f) { return '<option value="' + escH(f.id) + '">' + escH(fxFmtDate(f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>'; }).join('') +
       '</select></div>'
     : '';
   switch (T) {
+    case 'nextup': return fxPick + homeAway +
+      '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">For a game that has NOT been played yet. Everything below is filled in from the fixture list \u2014 change it only if the fixture itself has changed.</div>' +
+      '<div class="field"><label class="fl">Opponent <span style="color:var(--gr);font-weight:400">\u2014 who we\u2019re playing</span></label><select onchange="psVal(\'oppCrest\',this.value)">' + psCrestOptions(d.oppCrest || (psCrests[1] && psCrests[1].file)) + '</select></div>' +
+      '<div class="field"><label class="fl">Competition</label><input type="text" value="' + escH(d.comp || 'Combined Counties Premier North') + '" oninput="psSet(\'comp\',this.value)"></div>' +
+      '<div class="ps-crestrow"><div class="field"><label class="fl">Kick-off time</label><input type="text" value="' + escH(d.ko || '3:00 PM') + '" oninput="psSet(\'ko\',this.value)"></div><div class="field"><label class="fl">Date &amp; day</label><input type="text" value="' + escH(d.date || '') + '" placeholder="Sat 22 Aug" oninput="psSet(\'date\',this.value)"></div></div>' +
+      '<div class="field"><label class="fl">Location / venue</label><input type="text" value="' + escH(d.venue || 'Tithe Farm, Harrow') + '" oninput="psSet(\'venue\',this.value)"></div>';
     case 'matchday': return fxPick + homeAway +
       '<div style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:-2px 0 9px">Rayners Lane is pre-loaded. Pick Home/Away to swap which side of the VS we\'re on — Away puts the opponent before the VS.</div>' +
       '<div class="field"><label class="fl">Opponent <span style="color:var(--gr);font-weight:400">— who we\'re playing</span></label><select onchange="psVal(\'oppCrest\',this.value)">' + psCrestOptions(d.oppCrest || (psCrests[1] && psCrests[1].file)) + '</select></div>' +
@@ -7231,7 +7244,7 @@ var psPartners = null, psLastRail = null;
 // Rail is enabled per-template only after that template's bottom content has been
 // re-anchored to H2 (so football never collides with the rail). Verified: matchday.
 // Others roll out one at a time under the same QC gate.
-var PS_BAND_TYPES = { matchday:1 };
+var PS_BAND_TYPES = { nextup:1, matchday:1 };
 var PS_KIT_TYPES  = { lineup:1, motm:1, signing:1, potm:1, birthday:1, goal:1, yellow:1, red:1 };  // player/kit content → home/away
 function psBandFormat(){ return { ig:'square', pt:'portrait', story:'story', x:'landscape' }[PS.size] || 'square'; }
 function psBandContext(){ if (PS_KIT_TYPES[PS.type]) return (PS.data && PS.data.kit === 'away') ? 'away' : 'home'; return 'neutral'; }
@@ -7292,7 +7305,46 @@ function psRender() {
   }
   function pos(p) { return p && p.position ? p.position.toUpperCase() : ''; }
 
-  if (PS.type === 'matchday') {
+  if (PS.type === 'nextup') {
+    /* NEXT UP — an upcoming fixture, days out.
+       A SEPARATE EDITORIAL STATE, NOT A RELABELLED MATCH DAY. Match Day says
+       "the game is today". This says "the game is coming". So the DATE is the
+       hero here rather than the kick-off time, the crests sit back to give it
+       room, and the word NEXT UP carries the card. Committee members were
+       posting Match Day graphics four days early because this did not exist.
+
+       It reuses psImg/psEyebrow/beb/ctr — low-level primitives shared by every
+       template — and owns its own composition and its own render branch. */
+    var nAway = d.ha === 'away';
+    var nCz = X ? 150 : 216;                       // smaller than Match Day, deliberately
+    var nCy = X ? midY - 58 : (ST ? 520 : 372);
+    inner += psEyebrow('NEXT UP', t, ebTop);
+
+    var nHcx = W * 0.265, nAcx = W * 0.735;
+    var nRlCx = nAway ? nAcx : nHcx, nOpCx = nAway ? nHcx : nAcx;
+    var nOpp = d.oppCrest || (psCrests[1] && psCrests[1].file) || 'img/badge.png';
+    inner += '<div style="position:absolute;top:' + (nCy - nCz / 2) + 'px;left:' + (nRlCx - nCz / 2) + 'px">' + psImg('img/badge.png', nCz) + '</div>';
+    inner += '<div style="position:absolute;top:' + (nCy - nCz / 2) + 'px;left:' + (nOpCx - nCz / 2) + 'px">' + psImg(nOpp, nCz) + '</div>';
+    inner += '<div style="position:absolute;top:' + (nCy + nCz / 2 + 10) + 'px;left:' + (nRlCx - 190) + 'px;width:380px;text-align:center;' + beb(32, '#fff') + '">RAYNERS LANE</div>';
+    inner += '<div style="position:absolute;top:' + (nCy + nCz / 2 + 10) + 'px;left:' + (nOpCx - 190) + 'px;width:380px;text-align:center;' + beb(32, '#fff') + '">' + escH(crestName(nOpp)) + '</div>';
+    inner += '<div style="position:absolute;top:' + (nCy - 34) + 'px;left:0;right:0;text-align:center;' + beb(68, t.accent) + '">VS</div>';
+
+    /* Home or away, stated as a word rather than inferred from crest order —
+       a supporter deciding whether to travel should not have to work it out. */
+    var nHaY = nCy + nCz / 2 + 60;
+    inner += ctr(nHaY, '<span style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:4px;color:' + t.accent + '">' +
+      (nAway ? 'AWAY' : 'HOME') + '</span>');
+
+    /* THE DATE IS THE HEADLINE. This is the single thing that separates the
+       card from Match Day: the reader needs the day, not the clock. */
+    var nBy = X ? H2 - 178 : (ST ? H2 - 392 : H2 - 286);
+    var nDate = String(d.date || '').trim();
+    inner += ctr(nBy, '<span style="' + beb(X ? 74 : 96, '#fff') + '">' +
+      escH(nDate ? nDate.toUpperCase() : 'DATE TO BE CONFIRMED') + '</span>');
+    inner += ctr(nBy + (X ? 74 : 96), '<span style="font-family:Manrope,sans-serif;font-size:26px;font-weight:800;letter-spacing:3px;color:' + t.accent + '">KICK-OFF ' + escH(d.ko || '3:00 PM') + '</span>');
+    inner += ctr(nBy + (X ? 112 : 140), '<span style="font-family:Manrope,sans-serif;font-size:19px;letter-spacing:2px;color:rgba(255,255,255,.72)">' + escH((d.venue || 'Tithe Farm, Harrow')).toUpperCase() + '</span>');
+    inner += ctr(nBy + (X ? 142 : 176), '<span style="font-family:Manrope,sans-serif;font-size:17px;letter-spacing:2px;color:rgba(255,255,255,.55)">' + escH(d.comp || 'Combined Counties Premier North') + '</span>');
+  } else if (PS.type === 'matchday') {
     var away = d.ha === 'away';
     var cz = X ? 200 : 290, cy = X ? midY - 30 : (ST ? 600 : 430);
     inner += psEyebrow(away ? 'AWAY DAY' : 'MATCH DAY', t, ebTop);

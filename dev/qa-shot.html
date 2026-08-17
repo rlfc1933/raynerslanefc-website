@@ -164,6 +164,14 @@
                   w.psSetType(type);
                   w.PS.size = fmt;
                   w.psRender();
+                  /* psFitCard scales the preview to the stage, and the stage is
+                     tiny while the panel is hidden. Capture the card at its
+                     authored size and let this page's own ?scale do the fitting,
+                     or the screenshot is scaled twice. */
+                  var c = w.document.getElementById('ps-card');
+                  var wr = w.document.getElementById('ps-card-wrap');
+                  if (c) { c.style.transform = 'none'; c.style.position = 'relative'; c.style.top = 'auto'; c.style.left = 'auto'; }
+                  if (wr) wr.style.cssText = 'position:relative;margin:0 auto';
                   return res(true);
                 }
                 if (++wait > 120) return res(false);
