@@ -39,6 +39,12 @@ function load(win) {
   return w.PrepareMatch;
 }
 
+/* A FIXED MOMENT. These fixtures are dated August 2026; reading the real clock
+   meant the expected "next match" changed as the season went past them, and the
+   suite failed on 16 August having passed on the 15th. Pin the instant so the
+   test measures the selection rule and nothing else. */
+const NOW = Date.parse('2026-08-12T10:00:00Z');
+
 const FIXTURES = [
   { id: 'a', date: '2026-08-11', kickoff: '19:45', opponent: 'Hilltop', status: 'postponed', isHome: true },
   { id: 'b', date: '2026-08-15', kickoff: '15:00', opponent: 'New Bradwell St Peter', status: 'scheduled', isHome: true },
@@ -50,7 +56,7 @@ const FIXTURES = [
 
 test('a postponed fixture is not the match you prepare', () => {
   const PM = load({});
-  const got = PM._pick(FIXTURES);
+  const got = PM._pick(FIXTURES, NOW);
   assert.strictEqual(got.state, 'upcoming');
   assert.strictEqual(got.fixture.opponent, 'New Bradwell St Peter',
     'the postponed Hilltop tie must be skipped in favour of the next playable game');
@@ -59,19 +65,19 @@ test('a postponed fixture is not the match you prepare', () => {
 test('cancelled and abandoned are skipped for the same reason', () => {
   const PM = load({});
   const list = FIXTURES.map((f) => (f.id === 'b' ? Object.assign({}, f, { status: 'cancelled' }) : f));
-  assert.strictEqual(PM._pick(list).fixture.opponent, 'Harefield United');
+  assert.strictEqual(PM._pick(list, NOW).fixture.opponent, 'Harefield United');
 });
 
 test('with nothing ahead, the most recent completed match is offered', () => {
   const PM = load({});
-  const got = PM._pick(FIXTURES.filter((f) => f.status === 'played'));
+  const got = PM._pick(FIXTURES.filter((f) => f.status === 'played'), NOW);
   assert.strictEqual(got.state, 'finished');
   assert.strictEqual(got.fixture.opponent, 'Wallingford');
 });
 
 test('an empty calendar produces no fixture rather than a guess', () => {
   const PM = load({});
-  const got = PM._pick([]);
+  const got = PM._pick([], NOW);
   assert.strictEqual(got.fixture, null);
   assert.strictEqual(got.state, 'none');
 });
@@ -83,12 +89,12 @@ test('a passed kick-off time does not make a match live', () => {
   // Every fixture here is in the past relative to a far-future clock, and no
   // live authority is present. Nothing may claim to be live.
   const past = [{ id: 'p', date: '2020-01-01', kickoff: '15:00', opponent: 'X', status: 'scheduled' }];
-  assert.notStrictEqual(PM._pick(past).state, 'live');
+  assert.notStrictEqual(PM._pick(past, NOW).state, 'live');
 });
 
 test('live is taken from the authority that publishes it', () => {
   const PM = load({ __rlfcLive: { isLive: true, fixtureId: 'c' } });
-  const got = PM._pick(FIXTURES);
+  const got = PM._pick(FIXTURES, NOW);
   assert.strictEqual(got.state, 'live');
   assert.strictEqual(got.fixture.id, 'c', 'and it is that authority’s fixture, not the soonest one');
 });

@@ -73,8 +73,11 @@
     return null;
   }
 
-  function pick(list) {
-    var now = Date.now();
+  function pick(list, nowMs) {
+    // The clock is injectable so a test can pin a moment. Without this the
+    // suite passed on 15 August and failed on 16 August for no code reason,
+    // which is a test that measures the calendar rather than the behaviour.
+    var now = nowMs == null ? Date.now() : nowMs;
     var liveId = liveFixtureId();
     if (liveId) {
       var lf = list.filter(function (f) { return String(f.id) === liveId; })[0];

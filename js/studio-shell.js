@@ -26,7 +26,10 @@
   var CATS = [
     { key: 'match', label: 'From a match', hint: 'Matchday, team news, goals, full time',
       groups: [
-        { label: 'Before the match', types: ['matchday', 'countdown', 'lineup', 'preseason', 'offstate'] },
+        // NEXT UP leads: it is the first thing the club posts about a fixture,
+        // and putting it before Match Day is what stops anyone reaching for a
+        // day-of graphic four days early.
+        { label: 'Before the match', types: ['nextup', 'matchday', 'countdown', 'lineup', 'preseason', 'offstate'] },
         { label: 'During the match',  types: ['kickoff', 'goal', 'yellow', 'red', 'halftime'] },
         { label: 'After the match',   types: ['fulltime', 'motm'] }
       ] },
