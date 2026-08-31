@@ -157,10 +157,10 @@
       "isHome": false,
       "venue": "Berkeley Fields",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
+      "status": "played",
+      "us": 1,
+      "them": 4,
+      "scorers": "Jevan El-Kaffash 86'",
       "shareHeadline": "FOUR MILES DOWN THE ROAD",
       "shareHeadlineAuto": "FOUR MILES DOWN THE ROAD",
       "season": "2026-27",
@@ -725,5 +725,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-08-29T15:58:02.828Z"
+  "updatedAt": "2026-08-31T12:36:02.789Z"
 }
