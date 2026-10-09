@@ -15,6 +15,7 @@
   <!-- Release 1: the attention-led front door. Navigation only — it does not
        touch a single save function, API call or data path. -->
   <script src="js/portal-tools.js"></script>
+  <script src="js/club-os.js"></script>
   <script src="js/portal-recent.js"></script>
   <script src="js/portal-home.js"></script>
   <script src="js/portal-safety.js"></script>
@@ -104,6 +105,7 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/matchday-ops.css">
+  <link rel="stylesheet" href="css/club-os.css">
   <link rel="stylesheet" href="css/portal-home.css">
   <style>
     /* A public change deserves a confirmation you can actually read. */
@@ -2704,8 +2706,54 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <aside class="rdr-drawer" id="rdr-drawer"><div class="rdr-drawer-in" id="rdr-drawer-in"></div></aside>
     </div>
 
+    <div class="panel" id="panel-command">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-clipboard-list"></i> Club Office</div></div>
+      <div data-cos="command"></div>
+    </div>
+
+    <div class="panel" id="panel-commercial">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-briefcase"></i> Sponsorship CRM</div></div>
+      <div data-cos="commercial"></div>
+    </div>
+
+    <div class="panel" id="panel-outreach">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-mail"></i> Business Outreach</div></div>
+      <div data-cos="outreach"></div>
+    </div>
+
+    <div class="panel" id="panel-funding">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-landmark"></i> Grants &amp; Funding</div></div>
+      <div data-cos="funding"></div>
+    </div>
+
+    <div class="panel" id="panel-compliance">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-shield"></i> Compliance Register</div></div>
+      <div data-cos="compliance"></div>
+    </div>
+
+    <div class="panel" id="panel-commsdesk">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-megaphone"></i> Comms Approvals</div></div>
+      <div data-cos="commsdesk"></div>
+    </div>
+
+    <div class="panel" id="panel-coaching">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-camera"></i> Match Analysis</div></div>
+      <div data-cos="coaching"></div>
+    </div>
+
+    <div class="panel" id="panel-clubtasks">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-check"></i> Club Tasks</div></div>
+      <div data-cos="clubtasks"></div>
+    </div>
+
+    <div class="panel" id="panel-rewards">
+      <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-heart"></i> Reward Redemption</div></div>
+      <div data-cos="rewards"></div>
+    </div>
+
     <div class="panel" id="panel-sponsorhub">
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-briefcase"></i> Sponsor Hub</div></div>
+      <div class="snote"><p><strong style="color:var(--w)">Sponsorship enquiries now arrive in the <a href="#commercial" onclick="openPanel('commercial');return false" style="color:var(--y)">Sponsorship CRM</a></strong> — with an owner, the 48-hour clock, proposals, fulfilment and invoices. This older hub stays for reference.</p></div>
       <div class="snote" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06)"><p>Your commercial pipeline. Businesses apply on the <strong style="color:var(--w)">Sponsorships page</strong>; they land here. Track each one from enquiry → quote → paid, build a quote with your bank details, and confirm payment.</p></div>
 
       <div class="slbl"><i class="ico ico-landmark"></i> Your Payment Details <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— saved on this device only, used in quotes</span></div>
@@ -4563,6 +4611,7 @@ function openPanel(name) {
   if (name === 'fanclub')   { renderPatrons(); renderAttendance(); loadFanSignups(); loadLiveAttendance(); }
   if (name === 'perks')     loadPerks();
   if (name === 'sponsorhub') loadSponsorHub();
+  if (window.ClubOS && ClubOS.PANELS.indexOf(name) > -1) ClubOS.open(name);
   if (name === 'radar')      rdrInit();
   if (name === 'trialists')  loadLeads();
   if (name === 'records')    loadRecords();

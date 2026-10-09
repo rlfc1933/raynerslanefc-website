@@ -57,7 +57,7 @@
     { key: 'team', name: 'Team and Squad',
       ask: 'Do you need to update a player?',
       likely: 'Most often: add someone to the squad, or update a profile photograph.',
-      ids: ['squad', 'players', 'trialists'] },
+      ids: ['squad', 'players', 'trialists', 'coaching'] },
 
     { key: 'programme', name: 'Programme',
       ask: 'Are you working on the match-day programme?',
@@ -67,12 +67,12 @@
     { key: 'website', name: 'News and Website',
       ask: 'Are you publishing something to the website?',
       likely: 'Most often: write a news story, or check a drafted one before it goes out.',
-      ids: ['news', 'signoff', 'matchreport', 'motm', 'signing', 'livesite', 'mail'] },
+      ids: ['news', 'commsdesk', 'signoff', 'matchreport', 'motm', 'signing', 'livesite', 'mail'] },
 
     { key: 'social', name: 'Social and Marketing',
       ask: 'Are you posting, or making something to post?',
       likely: 'Most often: make a match graphic in Post Studio and share it to your phone.',
-      ids: ['poststudio', 'brandlibrary', 'fwp', 'monthlyfix', 'social', 'fanclub', 'perks'] },
+      ids: ['poststudio', 'brandlibrary', 'fwp', 'monthlyfix', 'social', 'fanclub', 'perks', 'rewards'] },
 
     { key: 'media', name: 'Photos and Media',
       ask: 'Are you adding photographs?',
@@ -82,12 +82,12 @@
     { key: 'sponsors', name: 'Sponsors',
       ask: 'Are you working on sponsorship?',
       likely: 'Most often: update the sponsor board, or look at who is worth approaching.',
-      ids: ['sponsors', 'radar', 'sponsorhub'] },
+      ids: ['commercial', 'outreach', 'sponsors', 'radar', 'sponsorhub'] },
 
     { key: 'committee', name: 'Reports and Committee',
       ask: 'Are you managing internal club records?',
       likely: 'Most often: write up a meeting, or read enquiries sent through the website.',
-      ids: ['meetings', 'committee', 'staff', 'records', 'supporters', 'clubstats',
+      ids: ['command', 'clubtasks', 'funding', 'compliance', 'meetings', 'committee', 'staff', 'records', 'supporters', 'clubstats',
             'swot', 'playbook', 'analytics', 'users'] },
 
     { key: 'help', name: 'Help',
@@ -205,6 +205,34 @@
       roles: ['Committee', 'Marketing/Media', 'Chairman', 'V Chairman'] },
 
     // ── COMMERCIAL ────────────────────────────────────────────────────────
+    { id: 'command', name: 'Club Office', effect: 'internal',
+      desc: 'What needs a person today: overdue, unowned, enquiries past 48 hours, money owed. Every line opens the real record.',
+      roles: ['Chairman', 'V Chairman', 'Club Secretary', 'Club Management', 'Committee'] },
+    { id: 'commercial', name: 'Sponsorship CRM', effect: 'internal',
+      desc: 'Sponsorship enquiries, deals, proposals, fulfilment and invoices — one record per business, nothing public.',
+      roles: ['Chairman', 'V Chairman', 'Committee', 'Club Management'] },
+    { id: 'outreach', name: 'Business Outreach', effect: 'internal',
+      desc: 'Research local businesses, check whether the club may contact them, draft an approach and get it approved before anyone sends it.',
+      roles: ['Chairman', 'V Chairman', 'Committee', 'Marketing/Media'] },
+    { id: 'funding', name: 'Grants and Funding', effect: 'internal',
+      desc: 'Funding opportunities with source, eligibility and deadline. Nothing is submitted from here.',
+      roles: ['Chairman', 'V Chairman', 'Club Secretary', 'Club Management'] },
+    { id: 'compliance', name: 'Compliance Register', effect: 'internal',
+      desc: 'Affiliation, insurance, ground grading, filings — due dates from the real documents, an owner for each.',
+      roles: ['Club Secretary', 'Chairman', 'V Chairman'] },
+    { id: 'commsdesk', name: 'Comms Approvals', effect: 'internal',
+      desc: 'Announcements go draft → review → approved by someone else → published. Nothing is posted from here.',
+      roles: ['Marketing/Media', 'Chairman', 'V Chairman', 'Committee'] },
+    { id: 'coaching', name: 'Match Analysis', effect: 'internal',
+      desc: 'Tag moments from authorised match footage and write coaching notes. Private to the club.',
+      roles: ['Club Management', 'Chairman', 'V Chairman'] },
+    { id: 'clubtasks', name: 'Club Tasks', effect: 'internal',
+      desc: 'Every job with an owner and a date, including the checklist for the next home match.',
+      roles: ['Committee', 'Match Day Secretary', 'Club Secretary', 'Club Management', 'Chairman', 'V Chairman', 'Marketing/Media'] },
+    { id: 'rewards', name: 'Reward Redemption', effect: 'internal',
+      desc: 'Check a supporter reward against verified gate check-ins and record it as used — once a season.',
+      roles: ['Committee', 'Match Day Secretary', 'Chairman', 'V Chairman', 'Marketing/Media'] },
+
     { id: 'sponsors', name: 'Sponsors', effect: 'public',
       desc: 'Sponsor logos and partners shown on the website and in the programme.',
       roles: ['Chairman', 'V Chairman', 'Committee', 'Marketing/Media'] },
@@ -330,7 +358,7 @@
     'Chairman': {
       title: 'Chairman',
       blurb: 'Oversight of the club, and the only person who can create a staff account.',
-      home:  ['clubstats', 'users', 'sponsors', 'meetings', 'fixtures'],
+      home:  ['command', 'commercial', 'clubstats', 'users', 'meetings'],
       quick: [
         { label: 'Invite somebody to the portal', panel: 'users' },
         { label: 'See how the club is doing',     panel: 'clubstats' },
@@ -341,7 +369,7 @@
     'V Chairman': {
       title: 'Vice Chairman',
       blurb: 'Cover for the Chairman, and the second person who can shut down an account.',
-      home:  ['clubstats', 'users', 'mdops', 'sponsors', 'meetings'],
+      home:  ['command', 'commercial', 'mdops', 'users', 'meetings'],
       quick: [
         { label: 'See how the club is doing', panel: 'clubstats' },
         { label: 'Check staff access',        panel: 'users' },
@@ -352,7 +380,7 @@
     'Club Secretary': {
       title: 'Secretary',
       blurb: 'Fixtures, officials, results and the club’s records.',
-      home:  ['fixtures', 'venues', 'committee', 'meetings', 'records'],
+      home:  ['command', 'compliance', 'fixtures', 'meetings', 'records'],
       quick: [
         { label: 'Check the next fixture',   panel: 'fixtures' },
         { label: 'Add the match officials',  panel: 'committee' },
@@ -364,7 +392,7 @@
     'Treasurer': {
       title: 'Treasurer',
       blurb: 'Match-day takings only. The club’s accounts live in accounting software, not here.',
-      home:  ['mdops', 'clubstats', 'sponsorhub', 'records', 'meetings'],
+      home:  ['command', 'mdops', 'commercial', 'records', 'meetings'],
       quick: [
         { label: 'Finish a takings sheet',    panel: 'mdops' },
         { label: 'See how the club is doing', panel: 'clubstats' }
@@ -374,7 +402,7 @@
     'Team Manager': {
       title: 'Team Manager',
       blurb: 'The squad and the team. Your selection is private and never reaches the website.',
-      home:  ['squad', 'players', 'fixtures', 'trialists', 'programme'],
+      home:  ['squad', 'players', 'fixtures', 'trialists', 'coaching'],
       quick: [
         { label: 'Update the squad',       panel: 'squad' },
         { label: 'Check the next fixture', panel: 'fixtures' },
@@ -405,7 +433,7 @@
     'Match Day Secretary': {
       title: 'Match Day Secretary',
       blurb: 'Running the match day itself — the gate, the scoreboard, the sheet.',
-      home:  ['mdops', 'matchday', 'fixtures', 'scanner', 'venues'],
+      home:  ['mdops', 'matchday', 'fixtures', 'scanner', 'clubtasks'],
       quick: [
         { label: 'Prepare match day',        panel: 'mdops' },
         { label: 'Turn the scoreboard on',   panel: 'matchday' },
@@ -427,7 +455,7 @@
     'Marketing/Media': {
       title: 'Social and Media',
       blurb: 'Graphics, captions and news. Nothing you write goes out until it is approved.',
-      home:  ['poststudio', 'news', 'gallery', 'social', 'signoff'],
+      home:  ['poststudio', 'news', 'gallery', 'social', 'commsdesk'],
       quick: [
         { label: 'Make a match graphic',      panel: 'poststudio' },
         { label: 'Write a news story',        panel: 'news' },
@@ -439,7 +467,7 @@
     'Sponsorship': {
       title: 'Sponsorship and Commercial',
       blurb: 'Sponsors, prospects and deals in progress.',
-      home:  ['sponsors', 'sponsorhub', 'radar', 'programme', 'clubstats'],
+      home:  ['commercial', 'outreach', 'sponsors', 'radar', 'programme'],
       quick: [
         { label: 'Update the sponsor board', panel: 'sponsors' },
         { label: 'Check deals in progress',  panel: 'sponsorhub' },
