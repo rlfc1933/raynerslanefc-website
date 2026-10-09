@@ -1,0 +1,24 @@
+{
+  "name": "rlfc-quality",
+  "private": true,
+  "description": "Rendered-page quality gates for raynerslanefc.co.uk. Lives outside the site root's package.json on purpose: Netlify installs the root deps for functions, and none of this belongs in a function bundle.",
+  "scripts": {
+    "serve": "node server.js",
+    "test": "playwright test",
+    "test:responsive": "playwright test responsive",
+    "test:a11y": "playwright test a11y",
+    "test:visual": "playwright test visual",
+    "test:visual:update": "playwright test visual --update-snapshots",
+    "test:journeys": "playwright test journeys",
+    "test:motion": "playwright test motion",
+    "test:images": "playwright test images",
+    "slop": "playwright test slop",
+    "lighthouse": "node lighthouse.js",
+    "gate": "node gate.js"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "lighthouse": "13.5.0"
+  }
+}

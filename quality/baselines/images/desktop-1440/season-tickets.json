@@ -1,0 +1,9 @@
+[
+ "heavy:images",
+ "no-dimensions:a.nav__brand > img.nav__badge",
+ "no-dimensions:div.nav__crest > img",
+ "no-dimensions:div.st-hero__crest > img",
+ "oversized:a.nav__brand > img.nav__badge",
+ "oversized:div.nav__crest > img",
+ "oversized:div.st-hero__crest > img"
+]

@@ -1,0 +1,10 @@
+[
+ "heavy:images",
+ "no-dimensions:a.nav__brand > img.nav__badge",
+ "no-dimensions:div > img",
+ "no-dimensions:div.nav__crest > img",
+ "no-dimensions:div.player-card__img > img",
+ "oversized:a.nav__brand > img.nav__badge",
+ "oversized:div > img",
+ "oversized:div.nav__crest > img"
+]

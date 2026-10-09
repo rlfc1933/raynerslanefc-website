@@ -115,7 +115,24 @@
   --ctl-pad-y-sm:  10px;
   --ctl-pad-x-sm:  16px;
   --ctl-min-h:     44px;   /* the tap-target floor, on every control */
+
+  /* MOTION — see DESIGN.md "Motion direction". Motion explains a change
+     (where something came from, what just happened, what is live); it never
+     decorates. Four durations, three curves; nothing else. Under
+     prefers-reduced-motion these collapse to instant (a11y.css + the
+     reduced-motion block below), and the motion gate enforces it. */
+  --dur-instant: 90ms;    /* press feedback, toggles */
+  --dur-fast:   160ms;    /* hover, focus, small state changes */
+  --dur-base:   240ms;    /* panels, menus, tabs, cards entering */
+  --dur-slow:   420ms;    /* page-level reveals, score changes — the ceiling for UI */
+  --ease-out:      cubic-bezier(.22, 1, .36, 1);   /* things ARRIVING (enter, expand) */
+  --ease-in:       cubic-bezier(.4, 0, 1, 1);      /* things LEAVING (exit, collapse) */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);     /* things MOVING between two states */
 }
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-instant: 0ms; --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
+}
+html.a11y-reduce-motion { --dur-instant: 0ms; --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; }
 
 /* ════════ REUSABLE HIERARCHY UTILITIES (token-driven, not arbitrary) ════════ */
 .t-hero    { font-family: var(--font-display); font-size: var(--fs-hero); line-height: var(--lh-display); letter-spacing: var(--ls-tight); }

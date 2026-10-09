@@ -26,6 +26,14 @@
 
   var KEY = 'rlfc_consent_v2';
   var GA_ID = 'G-F79MK3P0SR';
+  /* Microsoft Clarity (heatmaps + session replay, for UX journey audits).
+     EMPTY = OFF: nothing is fetched. To switch on, paste the project ID from
+     clarity.microsoft.com → Settings, AND add Clarity to the analytics section
+     of policies.html in the same commit. It rides the SAME analytics consent
+     as GA: never loaded before "Accept", told "denied" on withdrawal. Staff
+     pages (admin.html) do not load this file, so they are never recorded. */
+  var CLARITY_ID = '';
+  var clarityLoaded = false;
   var loaded = false;
 
   /* Consent Mode defaults, set before anything Google could execute.
@@ -66,6 +74,18 @@
     document.head.appendChild(s1);
     global.gtag('js', new Date());
     global.gtag('config', GA_ID);
+    loadClarity();
+  }
+
+  function loadClarity() {
+    if (!CLARITY_ID || clarityLoaded || !analyticsAllowed()) return;
+    clarityLoaded = true;
+    global.clarity = global.clarity || function () { (global.clarity.q = global.clarity.q || []).push(arguments); };
+    var s2 = document.createElement('script');
+    s2.async = true;
+    s2.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(CLARITY_ID);
+    document.head.appendChild(s2);
+    global.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' });
   }
 
   /* Remove what this origin can remove. A cookie set on the exact host can be
@@ -109,6 +129,7 @@
       ad_personalization: 'denied',
     });
     if (allowAnalytics) loadAnalytics();
+    else if (clarityLoaded && global.clarity) global.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
     else if (was) clearAnalyticsCookies();   // withdrawal: stop and tidy up
     document.dispatchEvent(new CustomEvent('lane:consent', { detail: { analytics: !!allowAnalytics } }));
     return read();

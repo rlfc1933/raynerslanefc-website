@@ -1,0 +1,10 @@
+{
+  "_why": "Unit tests that were ALREADY failing on main when the release gate was introduced (2026-10-09, origin/main 1123c76). The gate tolerates exactly these and nothing new. This list may only shrink: fix one, delete its entry.",
+  "unitTests": [
+    { "name": "SUPPORTER DATA IS RESTRICTED AND RESTRAINED", "reason": "pre-existing on main; fan-zone supporter data contract" },
+    { "name": "tests/fan-contact.test.js", "reason": "pre-existing on main; file-level failure" },
+    { "name": "tests/fan-crm.test.js", "reason": "pre-existing on main; file-level failure" },
+    { "name": "CASE 1 — next match is AWAY, and is shown as the next match", "reason": "pre-existing on main; date-dependent next-match logic" },
+    { "name": "CASE 3 — away next match, and a DIFFERENT next home fixture", "reason": "pre-existing on main; date-dependent next-match logic" }
+  ]
+}

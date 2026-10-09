@@ -3,7 +3,9 @@ Thumbs.db
 *.zip
 node_modules/
 .env
-.claude/
+# Local Claude settings stay local; the project's shared skills are versioned.
+.claude/*
+!.claude/skills/
 /sponsors/
 
 # Local Netlify folder
@@ -34,3 +36,11 @@ _source/
 # some name credentials. Nothing in docs/ may contain a secret.
 !docs/
 !docs/**
+
+# Quality system (see docs/QUALITY.md). Goldens and baselines are committed;
+# run output is not.
+quality/.results/
+quality/.report/
+!DESIGN.md
+!PRODUCT.md
+!.claude/skills/**/*.md
