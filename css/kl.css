@@ -88,3 +88,24 @@
 }
 @keyframes kl-rise{from{transform:translateY(105%)}to{transform:none}}
 @keyframes kl-fade{from{opacity:0}to{opacity:1}}
+
+/* ── FLOW: page-to-page continuity (cross-document View Transitions) ───────
+   This moves to show: you stayed in the same club — the nav and the bottom
+   bar hold still, only the page changes. Browsers without support simply
+   navigate. Off under reduced motion. */
+@media (prefers-reduced-motion: no-preference){
+  @view-transition{navigation:auto}
+  .nav{view-transition-name:lane-nav}
+  .bnav{view-transition-name:lane-bnav}
+  ::view-transition-old(root){animation:kl-vt-out 160ms cubic-bezier(.4,0,1,1) both}
+  ::view-transition-new(root){animation:kl-vt-in 320ms cubic-bezier(.16,1,.3,1) both}
+}
+html.a11y-reduce-motion::view-transition-old(root),html.a11y-reduce-motion::view-transition-new(root){animation:none}
+@keyframes kl-vt-out{to{opacity:0}}
+@keyframes kl-vt-in{from{opacity:0;transform:translateY(14px)}}
+
+/* ── FEEDBACK: links in ruled lists — a yellow rule draws under the row ─── */
+.kl-rows a{text-decoration:none;color:inherit;background:linear-gradient(var(--yellow),var(--yellow)) left bottom/0 2px no-repeat;transition:background-size var(--dur-base,220ms) var(--ease-out,cubic-bezier(.16,1,.3,1))}
+.kl-rows a:hover,.kl-rows a:focus-visible{background-size:100% 2px}
+.kl-btn:active{transform:translateY(1px) scale(.99)}
+.kl-w{transition:none}
