@@ -1,0 +1,89 @@
+{
+  "sponsors": [
+    {
+      "name": "Acerbis",
+      "logo": "",
+      "_logoNote": "The approved Acerbis mark was already in the repository under a generic filename, which is why the partner pages had been typesetting the name instead. Found by auditing assets before designing. Not sourced from a search engine.",
+      "tier": "Kit Partner",
+      "role": "Official Kit Partner",
+      "url": "https://www.acerbis.com",
+      "note": "Italian since 1973 — our playing kit, supplied free",
+      "page": "acerbis.html",
+      "feature": false
+    },
+    {
+      "name": "Hanlon Dry Lining",
+      "tier": "Principal Partner",
+      "role": "Home Shirt Sponsor",
+      "url": "",
+      "logo": "img/sponsors/hanlon-dry-lining.png",
+      "note": "Nigel Hanlon — Vice Chairman"
+    },
+    {
+      "name": "McCafferty's",
+      "tier": "Principal Partner",
+      "role": "Away Shirt Sponsor",
+      "url": "https://harrow.mccaffertysbars.com/",
+      "logo": "img/sponsors/mccaffertys.png",
+      "note": "Harrow"
+    },
+    {
+      "name": "The King, Denham",
+      "tier": "Training Wear Sponsor",
+      "role": "Training Wear",
+      "url": "http://www.thekingdenham.co.uk/menu",
+      "logo": "img/sponsors/the-king-denham.png",
+      "note": "",
+      "feature": true
+    },
+    {
+      "name": "Higginson Stairs",
+      "tier": "Programme Sponsor",
+      "role": "Programme",
+      "url": "https://www.higginson.co.uk/",
+      "logo": "",
+      "note": ""
+    },
+    {
+      "name": "Ashwood Builders Merchants",
+      "tier": "Training Kit Sponsor",
+      "role": "Training Kit Sponsor",
+      "logo": "img/sponsors/band/ashwood.png",
+      "url": "www.ashwoodbm.com",
+      "note": "",
+      "feature": false,
+      "_logoNote": "Was /img/uploads/1781696501761-998412e9-267c-4580-ac6c-1d9e2516584f.jpeg — an upload path that no longer exists on disk, so the logo silently failed to render. Repointed at the canonical pre-trimmed band asset, which is the same file the SponsorRail uses."
+    },
+    {
+      "name": "You-Nique Training",
+      "tier": "Community Partner",
+      "role": "Inclusive Fitness — All Abilities",
+      "url": "https://wa.me/447534788777",
+      "logo": "img/partners/younique-logo.png",
+      "note": "Amar Rai · Level 3 PT",
+      "feature": false
+    },
+    {
+      "name": "MJM Sports",
+      "tier": "",
+      "logo": "img/sponsors/mjm-sports.png",
+      "url": "",
+      "blurb": "",
+      "unconfirmed": true,
+      "_note": "TIER WITHDRAWN, DELIBERATELY. This was listed as 'Club Partner' on no evidence beyond a logo file existing in the repository. The Combined Counties League distributes an official 'MJM Sports Programme Advert' to member clubs, so the relationship the evidence supports is with the LEAGUE, not with Rayners Lane. The League advert is handled in data/programme-compliance.json. If the club does hold a direct MJM agreement, set the tier back and delete this note — but that has to come from the club's own records, not from an inference."
+    }
+  ],
+  "affiliations": [
+    {
+      "name": "Combined Counties Football League",
+      "logo": "img/sponsors/combined-counties-league.png",
+      "url": "https://www.combinedcountiesleague.co.uk/"
+    },
+    {
+      "name": "Middlesex FA · England Football",
+      "logo": "img/sponsors/middlesex-fa.png",
+      "url": "https://www.middlesexfa.com/"
+    }
+  ],
+  "updatedAt": "2026-07-27T12:00:00.000Z"
+}

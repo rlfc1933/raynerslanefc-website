@@ -1,0 +1,21 @@
+[
+ "impeccable:all-caps-body:span.gate__sub",
+ "impeccable:em-dash-overuse:body",
+ "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
+ "impeccable:gpt-thin-border-wide-shadow:div.gate",
+ "impeccable:gradient-text:body",
+ "impeccable:hero-eyebrow-chip:div.st-hero__eyebrow",
+ "impeccable:low-contrast:div.st-hero__eyebrow",
+ "impeccable:low-contrast:p.st-hero__lead",
+ "impeccable:side-tab:div.st-inc",
+ "impeccable:skipped-heading:body",
+ "impeccable:undersized-ui-text:#a11y-text-label",
+ "impeccable:undersized-ui-text:a.bnav__item > span.bnav__label",
+ "impeccable:undersized-ui-text:button.bnav__item.bnav__more > span.bnav__label",
+ "impeccable:undersized-ui-text:div.a11y-group > span.a11y-group__label",
+ "impeccable:undersized-ui-text:div.footer__brand > a > span",
+ "impeccable:undersized-ui-text:span.gate__note",
+ "impeccable:undersized-ui-text:span.nav__title-sub",
+ "impeccable:wide-tracking:p.affils",
+ "off-palette:#888888:color"
+]

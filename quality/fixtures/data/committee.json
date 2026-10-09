@@ -1,0 +1,81 @@
+{
+  "members": [
+    {
+      "name": "Nigel Hanlon",
+      "role": "Vice Chairman",
+      "note": "Hanlon Dry Lining \u2014 Home Shirt Sponsor",
+      "photo": "img/committee/nigel-hanlon.jpg"
+    },
+    {
+      "name": "Martin Noblett",
+      "role": "Club President"
+    },
+    {
+      "name": "Gary Pitt",
+      "role": "First Team Manager",
+      "note": "",
+      "bio": "",
+      "photo": "/img/players/gary-pitt.webp",
+      "featured": false
+    },
+    {
+      "name": "Dave Roberts",
+      "role": "Coach",
+      "note": "",
+      "photo": "/img/players/dave-roberts.webp"
+    },
+    {
+      "name": "Louis Blinko",
+      "role": "Coach",
+      "note": "",
+      "photo": "/img/players/louis-blinko.webp"
+    },
+    {
+      "name": "Jenny Pitt",
+      "role": "Matchday Secretary",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Emma Galloway",
+      "role": "Club Secretary",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Russell Nugent",
+      "role": "Programme Editor",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Tony Pratt",
+      "role": "Club Treasurer",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Darren Nugent",
+      "role": "Programme Editor",
+      "note": "",
+      "featured": false
+    },
+    {
+      "name": "Melissa Ansah",
+      "role": "Physio",
+      "note": "",
+      "bio": "",
+      "photo": "",
+      "featured": false
+    },
+    {
+      "name": "Bogdan Caprarus",
+      "role": "Goalkeeping Coach",
+      "note": "",
+      "bio": "",
+      "photo": "",
+      "featured": false
+    }
+  ],
+  "updatedAt": "2026-07-30T12:23:40.113Z"
+}

@@ -1,0 +1,251 @@
+{
+  "_comment": [
+    "WHAT THE LEAGUE ACTUALLY REQUIRES OF A MATCHDAY PROGRAMME.",
+    "",
+    "This file exists so nobody has to remember the rules, and so nobody has to",
+    "take my word for them either. Every entry carries the source it came from and",
+    "the season that source covers, because a rule checked once is a rule that will",
+    "be wrong eventually.",
+    "",
+    "THE CORRECTION THAT PRODUCED THIS FILE.",
+    "The Combined Counties League removed the requirement to PRODUCE a programme at",
+    "its June 2026 AGM. It is tempting to read that as 'nothing is required any",
+    "more'. That reading is wrong, and Rule 8.14 says why: the rule was never about",
+    "compelling production. It opens 'Where physical programmes are produced...' and",
+    "states 'An acceptable match programme shall include any official sponsor",
+    "provided advertisements which shall be forwarded to members by the Board.'",
+    "Those conditions attach to producing one, so they survive the AGM change",
+    "untouched. Rayners Lane is choosing to produce a programme, so they apply.",
+    "",
+    "STATUS VOCABULARY, used honestly:",
+    "  league-when-produced - proven by current League rule, conditional on producing",
+    "  league-baseline      - stated in the published Administration Guide, whose",
+    "                         current edition predates this season; treated as the",
+    "                         baseline until a 26/27 guide supersedes it",
+    "  club-policy          - Rayners Lane chooses to include it",
+    "  recommended          - FA / football good practice",
+    "  optional             - pure editorial choice",
+    "Nothing is labelled a regulation without a rule reference behind it."
+  ],
+
+  "version": 1,
+  "checkedOn": "2026-08-07",
+  "season": "2026-2027",
+  "reviewDue": "2027-07-01",
+
+  "sources": [
+    {
+      "id": "admin-guide",
+      "title": "Combined Counties Football League — Administration Guide",
+      "edition": "2023-2024",
+      "url": "http://www.combinedcountiesleague.co.uk/wp-content/uploads/2024/07/Admin-Guide-2023-2024.pdf",
+      "note": "The current published guide. It predates this season, so it is the baseline, not the last word. Its 'all clubs must produce a match programme' line is superseded by the June 2026 AGM; its description of what an acceptable programme contains is not."
+    },
+    {
+      "id": "rule-8-14",
+      "title": "League Rule 8.14 — match programmes",
+      "edition": "as printed in the Administration Guide",
+      "url": "http://www.combinedcountiesleague.co.uk/wp-content/uploads/2024/07/Admin-Guide-2023-2024.pdf",
+      "note": "Conditional by construction: 'Where physical programmes are produced...'. Applies to Step 5 and 6 matches played under the auspices of the Competition."
+    },
+    {
+      "id": "agm-2026",
+      "title": "CCL AGM June 2026 — programme production no longer mandatory",
+      "edition": "2026",
+      "url": "https://footballinberkshire.co.uk/news/football-news/93161/combined-counties-league-makes-matchday-programme-rule-change",
+      "note": "Press report, not the rule book. Treated as evidence that the PRODUCTION requirement was removed, and as nothing else. Confirm against the 26/27 handbook when the League publishes it."
+    },
+    {
+      "id": "ccl-downloads",
+      "title": "CCL — Information → Downloads (official sponsor artwork)",
+      "edition": "live",
+      "url": "https://www.combinedcountiesleague.co.uk/information/downloads/",
+      "note": "The only place league advert artwork may be taken from. Never a search engine, never redrawn."
+    }
+  ],
+
+  "requirements": [
+    {
+      "id": "both-teams-players",
+      "requirement": "Details of the players — name and playing number — of BOTH sides",
+      "status": "league-baseline",
+      "source": "admin-guide",
+      "quote": "This must, as a minimum, include details of the players (name & playing number) of both sides",
+      "satisfiedBy": "Today's Teams page",
+      "blocking": true,
+      "note": "Squad and player details available at production time. NOT the official team sheet, which is exchanged later, and never the manager's private selection."
+    },
+    {
+      "id": "team-colours",
+      "requirement": "The colours in which the teams will play",
+      "status": "league-baseline",
+      "source": "admin-guide",
+      "quote": "the colours in which the teams will play",
+      "satisfiedBy": "Today's Teams page — kit strip for both clubs",
+      "blocking": true,
+      "note": "Was entirely absent from the programme until this audit. Rayners Lane colours are stored once in data/config.json; the opposition's are confirmed per edition."
+    },
+    {
+      "id": "match-officials",
+      "requirement": "Details of the match officials",
+      "status": "league-baseline",
+      "source": "admin-guide",
+      "quote": "and details of the match officials",
+      "satisfiedBy": "Today's Teams page — officials block",
+      "blocking": true,
+      "note": "Entered once by the Secretary on the fixture, reused here. Never invented: if appointments have not arrived the page says so."
+    },
+    {
+      "id": "league-adverts",
+      "requirement": "Official sponsor-provided advertisements forwarded to members by the Board",
+      "status": "league-when-produced",
+      "source": "rule-8-14",
+      "quote": "An acceptable match programme shall include any official sponsor provided advertisements which shall be forwarded to members by the Board.",
+      "satisfiedBy": "League advert pages, from the official artwork library",
+      "blocking": true,
+      "note": "The one requirement stated inside the rule itself rather than the guide. Artwork comes from the League's Downloads page as supplied — never recreated, never cropped."
+    },
+    {
+      "id": "physical-copies",
+      "requirement": "Complimentary copies: 3 visiting dressing room, 3 match officials' dressing room, max 6 visiting club officials, plus visiting League Officials — before kick-off",
+      "status": "league-when-produced",
+      "source": "rule-8-14",
+      "quote": "at least three complimentary programmes shall be provided in the visiting team dressing room, three in the match official's dressing room and a maximum of six programmes for visiting club officials",
+      "satisfiedBy": "Print checklist — a human task, not a system one",
+      "blocking": false,
+      "note": "Applies only where PHYSICAL programmes are produced. The software cannot verify it and does not pretend to; it prints the checklist."
+    },
+    {
+      "id": "electronic-notify",
+      "requirement": "Where an electronic programme is produced, notify it in the match confirmation; link available to visitors and spectators up to 24 hours before; live for the whole season",
+      "status": "league-when-produced",
+      "source": "rule-8-14",
+      "quote": "Where electronic programmes are produced, this should be notified in the match confirmation.",
+      "satisfiedBy": "Permanent edition URL, copy-link action, and season-long archive",
+      "blocking": false
+    },
+    {
+      "id": "secretary-responsible",
+      "requirement": "The club secretary is responsible for seeing that the programme is produced; the editor role may be delegated",
+      "status": "league-baseline",
+      "source": "admin-guide",
+      "quote": "The club secretary is responsible for seeing that the programme is produced. The role of programme editor is one that may be delegated to another person.",
+      "satisfiedBy": "Secretary sees compliance status and can correct official match details; the Programme Editor builds and publishes the edition",
+      "blocking": false
+    },
+    {
+      "id": "editorial-liability",
+      "requirement": "Comments in the programme are attributed to the club; inappropriate criticism of the FA, County FA, the League, its officers, appointed match officials or another club can lead to a County FA charge",
+      "status": "league-baseline",
+      "source": "admin-guide",
+      "quote": "Be aware that any comments that appear in the club programme are attributed to the club. If any inappropriate criticism is made of the FA, County FA, the League, its officers, appointed match officials or any other club, you could find yourself on a charge with the County FA.",
+      "satisfiedBy": "Editorial review flag before publish",
+      "blocking": false,
+      "note": "The basis for flagging sensitive copy for human review. Flags for a person to read — it never censors on keywords alone."
+    },
+    {
+      "id": "safeguarding",
+      "requirement": "Safeguarding information",
+      "status": "club-policy",
+      "source": null,
+      "satisfiedBy": "Club & Matchday Information page",
+      "blocking": false,
+      "note": "No programme rule requires this. FA affiliation places safeguarding duties on the club; printing them is the club's own choice, and a good one."
+    },
+    {
+      "id": "equality",
+      "requirement": "Equality and discrimination reporting information",
+      "status": "club-policy",
+      "source": null,
+      "satisfiedBy": "Football Is For Everyone page",
+      "blocking": false
+    },
+    {
+      "id": "ground-regulations",
+      "requirement": "Ground regulations and conditions of entry",
+      "status": "club-policy",
+      "source": null,
+      "satisfiedBy": "Club & Matchday Information page",
+      "blocking": false
+    },
+    {
+      "id": "acerbis",
+      "requirement": "Official Kit Partner feature",
+      "status": "optional",
+      "source": null,
+      "satisfiedBy": "Acerbis page from the Programme Library",
+      "blocking": false,
+      "note": "Club editorial. Not a League requirement and must never be presented as one."
+    },
+    {
+      "id": "player-spotlight",
+      "requirement": "Player spotlight / interview",
+      "status": "optional",
+      "source": null,
+      "satisfiedBy": "Editorial feature page",
+      "blocking": false
+    }
+  ],
+
+  "leagueAdverts": [
+    {
+      "id": "pst-sport-2026",
+      "sponsor": "PST Sport",
+      "title": "PST Sport Advert 2026",
+      "season": "2026-2027",
+      "official": "http://www.combinedcountiesleague.co.uk/wp-content/uploads/2026/07/26-27-PST-Sport-CCFL-Programme-Advert.pdf",
+      "fileType": "pdf",
+      "sourcePage": "https://www.combinedcountiesleague.co.uk/information/downloads/",
+      "addedOn": "2026-08-07",
+      "lastChecked": "2026-08-07",
+      "active": true,
+      "note": "Filed by the League as 26-27, uploaded July 2026 — the artwork for this season. No commercial title is claimed here because the League's own material does not state one."
+    },
+    {
+      "id": "cherry-red-2025",
+      "sponsor": "Cherry Red Records",
+      "title": "Cherry Red Records Advert 2025",
+      "season": "2025-2026",
+      "official": "http://www.combinedcountiesleague.co.uk/wp-content/uploads/2025/08/Cherry-Red-Records-Advert-2025.pdf",
+      "fileType": "pdf",
+      "sourcePage": "https://www.combinedcountiesleague.co.uk/information/downloads/",
+      "addedOn": "2026-08-07",
+      "lastChecked": "2026-08-07",
+      "active": true,
+      "note": "Competition title sponsor. Latest artwork the League publishes, dated 2025 — confirm at the season check whether a 26/27 file replaces it."
+    },
+    {
+      "id": "mjm-sports-2024",
+      "sponsor": "MJM Sports",
+      "title": "MJM Sports Programme Advert 2024",
+      "season": "2024-2025",
+      "official": "http://www.combinedcountiesleague.co.uk/wp-content/uploads/2024/07/MJM-Sports-Programme-Advert-2024.pdf",
+      "fileType": "pdf",
+      "sourcePage": "https://www.combinedcountiesleague.co.uk/information/downloads/",
+      "addedOn": "2026-08-07",
+      "lastChecked": "2026-08-07",
+      "active": true,
+      "note": "A LEAGUE advertiser, not a Rayners Lane partner. MJM was previously listed in the club's own sponsor file as 'Club Partner' on no evidence beyond a logo file existing; that designation has been withdrawn pending the club confirming whether a direct relationship exists."
+    }
+  ],
+
+  "printChecklist": [
+    "3 copies in the visiting team dressing room",
+    "3 copies in the match officials' dressing room",
+    "Up to 6 copies for visiting club officials",
+    "Copies for any visiting League Officials",
+    "Copies for any FA or County FA officials attending",
+    "All of the above handed over before kick-off"
+  ],
+
+  "seasonCheck": [
+    "Current League rules and any new Administration Guide",
+    "Which official League adverts apply this season",
+    "League branding assets still current",
+    "Sponsor designations — club partners vs league advertisers",
+    "FA campaign resources still current",
+    "Club officers and contact details",
+    "Admission prices",
+    "Ground details and safeguarding contact"
+  ]
+}

@@ -1,0 +1,19 @@
+[
+ "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
+ "impeccable:gradient-text:body",
+ "impeccable:hero-eyebrow-chip:span.label",
+ "impeccable:kicker-above-heading:body",
+ "impeccable:layout-transition:body",
+ "impeccable:side-tab:#lane-main > div",
+ "impeccable:skipped-heading:body",
+ "impeccable:undersized-ui-text:#a11y-text-label",
+ "impeccable:undersized-ui-text:a.bnav__item > span.bnav__label",
+ "impeccable:undersized-ui-text:button.bnav__item.bnav__more > span.bnav__label",
+ "impeccable:undersized-ui-text:div.a11y-group > span.a11y-group__label",
+ "impeccable:undersized-ui-text:div.footer__brand > a > span",
+ "impeccable:undersized-ui-text:div.tl-item > div.tl-right > div.tl-badge",
+ "impeccable:undersized-ui-text:span.nav__title-sub",
+ "impeccable:wide-tracking:p.affils",
+ "off-palette:#888888:color",
+ "off-radius:3px:div > a"
+]

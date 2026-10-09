@@ -1,0 +1,15 @@
+{
+  "_note": "The Season object. Every fixture now carries `season`, so a season is a FILTER rather than a folder anyone has to move. Rollover = add the new season here and set `current`; nothing needs archiving by hand. Competitions, results, squad, galleries and programmes all key off the same string. The rule is fixed: a season starts 1 July (tools-archive-match.js already uses it).",
+  "current": "2026-27",
+  "startsMonth": 7,
+  "seasons": [
+    {
+      "id": "2026-27",
+      "label": "2026-27",
+      "current": true,
+      "fixtures": 42,
+      "archived": false
+    }
+  ],
+  "updatedAt": "2026-07-27T21:00:00.000Z"
+}

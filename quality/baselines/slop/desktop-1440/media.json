@@ -1,0 +1,21 @@
+[
+ "impeccable:dark-glow:body",
+ "impeccable:dark-glow:div.lane-ring",
+ "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
+ "impeccable:gpt-thin-border-wide-shadow:div.lane-ring",
+ "impeccable:gradient-text:body",
+ "impeccable:hero-eyebrow-chip:div > div.container > span.label",
+ "impeccable:kicker-above-heading:body",
+ "impeccable:layout-transition:body",
+ "impeccable:layout-transition:div.lane-ring",
+ "impeccable:line-length:p.footer__legal",
+ "impeccable:side-tab:#lane-main > div",
+ "impeccable:skipped-heading:body",
+ "impeccable:undersized-ui-text:#a11y-text-label",
+ "impeccable:undersized-ui-text:div.a11y-group > span.a11y-group__label",
+ "impeccable:undersized-ui-text:div.footer__brand > a > span",
+ "impeccable:undersized-ui-text:span.nav__title-sub",
+ "impeccable:wide-tracking:a > div",
+ "impeccable:wide-tracking:p.affils",
+ "off-radius:3px:div > a"
+]

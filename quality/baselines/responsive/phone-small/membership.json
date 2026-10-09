@@ -1,0 +1,17 @@
+[
+ "text-under-12px:a > span",
+ "text-under-12px:a.bnav__item > span.bnav__label",
+ "text-under-12px:button.bnav__item > span.bnav__label",
+ "text-under-12px:div > div",
+ "text-under-12px:div > label",
+ "text-under-12px:div > p",
+ "text-under-12px:div > span",
+ "text-under-12px:div.container > span.label",
+ "text-under-12px:div.footer__col > h4",
+ "text-under-12px:div.nav__title > span.nav__title-sub",
+ "text-under-12px:div.tier-card > div",
+ "text-under-12px:p > a",
+ "text-under-12px:p.affils > span.affils__lbl",
+ "text-under-12px:p.footer__legal > a",
+ "touch-target-under-24px:p.footer__legal > button"
+]

@@ -1,0 +1,26 @@
+{
+  "perks": [
+    {
+      "title": "10% off at McCafferty's",
+      "detail": "Show your Lane Card at the bar on any matchday and get 10% off food & drink.",
+      "code": "LANE10",
+      "sponsor": "McCafferty's",
+      "expiry": "End of 2026-27 season"
+    },
+    {
+      "title": "6th home game free",
+      "detail": "Check in at five home games and your sixth is on the club. Shown automatically on your card.",
+      "code": "",
+      "sponsor": "",
+      "expiry": ""
+    }
+  ],
+  "news": [
+    {
+      "title": "Members get first dibs on 2026-27 season tickets",
+      "body": "Lane family members will get an early window to grab season tickets before they go on general sale. Keep an eye on your inbox.",
+      "date": "2026-06-14"
+    }
+  ],
+  "updatedAt": ""
+}
