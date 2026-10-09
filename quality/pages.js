@@ -50,6 +50,6 @@ const VOLATILE = [
 // Device classes. Names are referenced by the specs to choose where they run.
 const VISUAL_PROJECTS = ['desktop-1440', 'tablet-portrait', 'phone'];
 const A11Y_PROJECTS = ['desktop-1440', 'phone'];
-const TOUCH_PROJECTS = ['tablet-portrait', 'tablet-landscape', 'phone', 'phone-small', 'fold-folded', 'fold-open', 'webkit-iphone'];
+const TOUCH_PROJECTS = ['phone-landscape', 'tablet-portrait', 'tablet-landscape', 'phone', 'phone-small', 'fold-folded', 'fold-open', 'webkit-iphone'];
 
 module.exports = { PUBLIC_PAGES, STAFF_PAGES, VOLATILE, VISUAL_PROJECTS, A11Y_PROJECTS, TOUCH_PROJECTS };

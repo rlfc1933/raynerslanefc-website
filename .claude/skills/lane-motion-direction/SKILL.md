@@ -17,10 +17,14 @@ menu came from. If you can't fill it, don't animate.
   `--ease-in` (exit), `--ease-standard` (state↔state). Ceiling 420ms for UI.
 - Animate `transform`/`opacity` only. No bounce/elastic overshoot. Exits faster than entries.
 - Infinite loops: only LIVE indicators. One-shot everything else.
-- CSS transitions first; WAAPI (`el.animate()`) for sequenced or JS-driven moments.
-  The only approved library is Motion `motion@13.4.3` (vendored ESM, MIT) and only
-  when CSS/WAAPI genuinely can't (cross-browser scroll-linked, springs). GSAP is
-  not used. Never add a second animation runtime.
+- CSS transitions first. Then exactly one of:
+  - **GSAP + ScrollTrigger** (`js/vendor/gsap-3.15.0.min.js`) for scroll-driven
+    storytelling — add the moment to `js/lane-motion.js`, which only loads GSAP on
+    pages that use it and never under reduced motion;
+  - **Motion mini** (`js/vendor/motion-mini-13.4.3.mjs`, `animate`) for component
+    feedback (Staff HQ: see `settle()` in `js/club-os.js`).
+  Never both on one element; never a third library; never hide content until a
+  script runs (start from the visible state).
 - Reduced motion is automatic for token-based CSS (tokens collapse to 0 under
   `prefers-reduced-motion` and `html.a11y-reduce-motion`). For WAAPI/JS, check
   `matchMedia('(prefers-reduced-motion: reduce)').matches ||

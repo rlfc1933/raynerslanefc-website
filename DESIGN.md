@@ -11,13 +11,22 @@ truth and this file is the bug.
 | `css/style.css` `:root` | colour palette, `--nav-h` |
 | `brand/tokens.css` / `tokens.json` | semantic colours (results, cards, print), spacing scale — for graphics & print |
 | `css/a11y.css` | the accessibility panel: text size, contrast, reduce-motion switch |
+| `css/edition.css` | the 2026/27 "Floodlit" edition layer, loaded last on every public page — browser surfaces, hero title card, broadcast panels, partner board, news front, page headers |
 
 ## 1 · Character
 
-Floodlit, not corporate. A 1933 non-league club with the confidence of a much
-bigger one: black ground, one loud yellow, a bottle-green heritage note, big
-condensed numbers. The voice is dry and specific ("A DIVISION UP. SO WHAT.").
-Premium here means **certain, consistent and fast** — not glossy.
+**Floodlit** (2026/27 edition). Matchday graphics under the lights — the
+restraint of a Champions League broadcast, the tempo of a stream, the
+certainty of a club that has been here since 1933. Black ground, one signal
+yellow, a bottle-green heritage note, big condensed numbers, hairline
+structure, real photography. The voice is dry and specific ("A DIVISION UP.
+SO WHAT."). Premium here means **certain, consistent and fast** — not glossy.
+Gen Z energy comes from tempo and type, never from glow or gradient text.
+
+Signature moves: the hero is a title card (the headline arrives once, line by
+line); Club Now is a broadcast panel; sponsors sit on a hairline board like a
+partner wall; news is set as a sports desk front (one lead + running order);
+headings stand alone — no kicker labels above them.
 
 Mode by surface (impeccable vocabulary): public pages **Persuade/Read**; Match
 Centre and fixtures **Read** with live status; Staff HQ (`admin.html`) **Operate**
@@ -84,12 +93,15 @@ bounce/elastic overshoot on UI; no scroll-jacking; nothing auto-plays sound.
 collapse the duration tokens to 0 — only colour/opacity cross-fades ≤ 200ms
 survive. Enforced by `quality/tests/motion.spec.js`.
 
-**Library policy:** CSS transitions + the Web Animations API cover everything
-above. If a genuine need appears that they cannot meet (scroll-linked
-timelines across browsers, spring physics on a draggable), the one approved
-library is **Motion** (`motion@13.4.3`, MIT, vendored ESM, `animate`/`inView`/
-`scroll` only). GSAP is not used — it would be a second animation runtime for
-the same job. Do not add any other.
+**Library policy — two libraries, one job each** (both vendored and pinned in `js/vendor/`, see its README):
+- **CSS transitions + the duration/ease tokens** — the default for everything (hover, focus, press, menus, panels).
+- **GSAP 3.15 + ScrollTrigger** — coordinated, scroll-driven *storytelling* only, loaded by `js/lane-motion.js` on pages
+  that use it (history timeline progress; homepage partner board). Never downloaded under reduced motion.
+- **Motion 13.4 (`animate` from motion/mini, 8 KB)** — component *feedback* in Staff HQ: the record you just changed
+  settles into place so the eye finds it.
+Never the same element animated by two systems; never a library on a page that gains nothing from it;
+never a reveal that delays essential information (fixtures, scores, prices, forms are visible from first paint).
+No React here, so GSAP React and React-specific performance skills do not apply.
 
 ## 6 · Imagery
 

@@ -43,6 +43,7 @@ module.exports = defineConfig({
     { name: 'tablet-portrait',  use: chromium({ viewport: { width: 768, height: 1024 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }) },
     { name: 'tablet-landscape', use: chromium({ viewport: { width: 1180, height: 820 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }) },
     { name: 'phone',            use: chromium({ ...devices['Pixel 7'], browserName: 'chromium', launchOptions: { executablePath } }) },
+    { name: 'phone-landscape',  use: chromium({ viewport: { width: 915, height: 412 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true }) },
     { name: 'phone-small',      use: chromium({ viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }) },
     // Galaxy Z Fold class: the narrow cover screen and the near-square inner screen.
     { name: 'fold-folded',      use: chromium({ viewport: { width: 344, height: 882 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }) },

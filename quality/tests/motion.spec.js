@@ -55,8 +55,9 @@ for (const pg of PUBLIC_PAGES) {
   test(`motion · direction · ${pg.name}`, async ({ page }, testInfo) => {
     test.skip(!MOTION_PROJECTS.includes(testInfo.project.name));
     await page.addInitScript(() => {
-      window.__cls = 0;
-      try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); } catch (e) {}
+      window.__cls = 0; window.__clsSrc = [];
+      try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) { window.__cls += e.value;
+        (e.sources || []).forEach((s) => { const n = s.node; if (n && n.nodeType === 1) window.__clsSrc.push((n.id ? '#' + n.id : n.tagName.toLowerCase() + '.' + String(n.className || '').split(' ')[0]) + ' ' + e.value.toFixed(3)); }); } }).observe({ type: 'layout-shift', buffered: true }); } catch (e) {}
     });
     await open(page, pg.path);
     const anims = await page.evaluate(COLLECT);
@@ -70,7 +71,8 @@ for (const pg of PUBLIC_PAGES) {
       if (/cubic-bezier\([^)]*,\s*-|cubic-bezier\([^)]*,\s*1\.[1-9]/.test(a.easing) && a.props.some((p) => /transform|translate|scale/.test(p))) findings.push(`overshoot-easing:${a.who}:${a.name}`);
     }
     const cls = await page.evaluate(() => window.__cls);
-    if (pg.tier === 1) expect(cls, `layout shift during load (CLS) on ${pg.name}`).toBeLessThan(0.1);
+    const clsSrc = await page.evaluate(() => [...new Set(window.__clsSrc)].slice(0, 8).join(' | '));
+    if (pg.tier === 1) expect(cls, `layout shift during load (CLS) on ${pg.name} — moved: ${clsSrc}`).toBeLessThan(0.1);
     else if (cls >= 0.1) findings.push(`cls-over-0.1`);
     ratchet(testInfo, 'motion', pg.name, findings);
   });

@@ -31,3 +31,10 @@ Gate steps: 1) `npm test` at repo root — no failures beyond `quality/known-fai
 ## After deploy
 Smoke the live URL: home, fixtures, one news article, Staff HQ sign-in.
 `QUALITY_BASE_URL=https://raynerslanefc.co.uk npx playwright test journeys --project=phone`.
+
+## Acceptance rule (club addendum)
+No significant feature is "done" without: a defined user and purpose; a complete
+end-to-end journey; success, error and recovery states; clear ownership where
+someone else must act; correct authorisation and privacy; public ↔ HQ
+consistency; mobile and accessibility; and a passing journey test proving the
+real outcome (see `lane-behaviour-first`).

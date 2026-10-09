@@ -54,6 +54,19 @@
   function stageChip(s) { var c = CLOSED.indexOf(s) > -1 ? ' cos-stage--closed' : (/late|overdue|blocked/.test(s) ? ' cos-stage--warn' : ''); return '<span class="cos-stage' + c + '">' + h(lbl(s)) + '</span>'; }
   function toast(msg, bad) { if (global.toast) global.toast(msg, bad); else alert(msg); }
 
+  // Status feedback (Motion mini, 8 KB, HQ only): after a change, the thing that
+  // changed settles into place so the eye finds it. Never on load, never decorative,
+  // and nothing at all under reduced motion.
+  var _motion = null;
+  function settle(els) {
+    els = [].filter.call(els || [], Boolean); if (!els.length) return;
+    var reduce = (global.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || document.documentElement.classList.contains('a11y-reduce-motion');
+    if (reduce) return;
+    (_motion = _motion || import('/js/vendor/motion-mini-13.4.3.mjs')).then(function (m) {
+      els.forEach(function (el, i) { m.animate(el, { opacity: [0.35, 1], transform: ['translateY(6px)', 'translateY(0)'] }, { duration: 0.24, delay: Math.min(i, 12) * 0.03, ease: [0.22, 1, 0.36, 1] }); });
+    }).catch(function () {});
+  }
+
   function notSetUp(el, r) {
     el.innerHTML = '<div class="cos-empty"><strong>Not connected yet.</strong><p>' + h(r.error) + '</p></div>';
   }
@@ -252,7 +265,7 @@
     };
   }
 
-  function openRecord(area, k, id) {
+  function openRecord(area, k, id, fx) {
     var dl = drawer('<div class="cos-loading">Loading…</div>');
     call('get', { id: id }).then(function (r) {
       if (!r.ok) { dl.querySelector('.cos-drawer__in').innerHTML = '<p class="cos-err">' + h(r.error) + '</p>'; return; }
@@ -303,7 +316,7 @@
             b.disabled = false;
             if (!m.ok) { err.textContent = m.error; return; }
             toast(lbl(to) + (m.effects && m.effects.length ? ' · created ' + m.effects.length + ' follow-up record(s)' : ''));
-            mount(area); openRecord(area, k, it.id);
+            mount(area); openRecord(area, k, it.id, { moved: true });
           });
         };
       });
@@ -323,6 +336,7 @@
           '\n\n—\nRayners Lane FC · Tithe Farm, 151 Rayners Lane, Harrow HA2 0XH\nIf you would rather not hear from the club again, reply "no thanks" and we will remove you.');
       }
       if (k.events) wireEvents(dl, it, area, k);
+      if (fx && fx.moved) settle([dl.querySelector('.cos-stage')].concat([].slice.call(dl.querySelectorAll('.cos-kids li'))));
     });
   }
 

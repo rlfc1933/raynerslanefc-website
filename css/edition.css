@@ -175,7 +175,9 @@ body [data-at-the-gate]{min-height:150px}
 body #home-fixtures,body #fx-next{min-height:180px}
 body #news-grid,body .news-grid{min-height:420px}
 body #squad-grid{min-height:600px}
-@media (max-width:600px){ body #cn-primary{min-height:260px} body [data-at-the-gate]{min-height:200px} }
+@media (max-width:1024px){ body #cn-primary{min-height:330px} body #cn-strip{min-height:70px} }
+@media (max-width:600px){ body #cn-primary{min-height:368px} body #cn-strip{min-height:85px} body [data-at-the-gate]{min-height:200px} }
+@media (max-width:380px){ body #cn-primary{min-height:430px} }
 
 /* ── Reduced motion: the whole layer goes still ──────────────────────────── */
 @media (prefers-reduced-motion: reduce){
@@ -183,3 +185,18 @@ body #squad-grid{min-height:600px}
   body .news-card:hover img{transform:none}
 }
 html.a11y-reduce-motion body .hero__h1,html.a11y-reduce-motion body .hero__sub,html.a11y-reduce-motion body .hero__btns{animation:none}
+
+/* ── History timeline: reading progress (driven by js/lane-motion.js) ─────── */
+body .timeline .tl-progress{position:absolute;top:0;bottom:0;left:calc(var(--tl-spine-x, 50%) - 1px);width:2px;background:var(--yellow);transform:scaleY(0);transform-origin:top center;pointer-events:none;z-index:1}
+body .tl-item .tl-dot{transition:background var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+body .tl-item.is-reached .tl-dot{background:var(--yellow)}
+body .tl-item.is-reached .tl-year{color:var(--yellow)}
+@media (prefers-reduced-motion: reduce){ body .timeline .tl-progress{display:none} }
+@media (max-width:768px){ body .timeline{--tl-spine-x:24px} }
+
+/* Layout stability, part 2 — measured with PerformanceObserver on the rendered pages.
+   Space is reserved for blocks scripts fill after first paint, sized to what they
+   actually render for a logged-out visitor (the common case). */
+@media (min-width:961px){ body #ticker-list{min-height:690px} }
+body #fz-member:empty{min-height:104px}
+body #fancard-mount:empty{min-height:170px}
