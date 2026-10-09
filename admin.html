@@ -10790,20 +10790,11 @@ function saveSigning(msg) { commitDomain('signing', 'entries', 'id', signings, s
 var patrons = [];
 // ── FAN MEMBERS (Supabase — the single fan source of truth) ──
 // ONE helper, used for the member list AND every dashboard count, so there is
-// exactly one fan source. Tries the PIN-gated `admin_members` RPC (uses the
-// public anon key — no server env var needed), then the list-members function
-// (needs SUPABASE_SERVICE_KEY). Returns { configured, members }.
+// exactly one fan source: the list-members function (SUPABASE_SERVICE_KEY,
+// server-side). Returns { configured, members }.
 async function loadMembers() {
-  var sbc = window.RLFC_SUPABASE || {};
-  if (sbc.url && sbc.anonKey) {
-    try {
-      var sr = await fetch(sbc.url + '/rest/v1/rpc/admin_members', { method: 'POST', headers: { apikey: sbc.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
-      if (sr.ok) {
-        var sd = await sr.json();
-        if (Array.isArray(sd)) return { configured: true, members: sd.map(function (m) { return { name: m.name, username: m.username, email: m.email, town: m.town, since: m.since, meaning: m.meaning, lane_no: m.lane_no, created: m.created_at }; }) };
-      }
-    } catch (e) {}
-  }
+  // The anon-key admin_members RPC was closed (it exposed every fan's email to
+  // anyone with an old PIN). Members come only through the server function.
   try {
     var mr = await fetch('/.netlify/functions/list-members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN }) });
     var md = await mr.json();

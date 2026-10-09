@@ -103,9 +103,19 @@ exports.handler = async function (event) {
   };
 
   try {
-    const headers = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+    const headers = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' };
     const r = await fetch(URL + '/rest/v1/submissions', { method: 'POST', headers: headers, body: JSON.stringify(row), signal: AbortSignal.timeout(9000) });
     if (!r.ok) return resp(200, { ok: false, error: 'save-failed' });   // never leak Supabase detail
+    // A sponsorship enquiry is also a commercial lead: put it in front of a
+    // person in Staff HQ with the 48-hour clock running. Best-effort — the
+    // submission is already safely stored, so a Club OS hiccup never loses it
+    // (it stays visible in Records either way).
+    if (type === 'sponsor') {
+      try {
+        const saved = (await r.json())[0] || {};
+        await require('./club-os').intakeEnquiry({ id: saved.id, name: name, email: email, phone: phone, message: payload.message || payload.msg || '', fields: payload });
+      } catch (e) { console.error('[submit-form] club-os intake failed', e && e.message); }
+    }
     return resp(200, { ok: true });
   } catch (e) {
     return resp(200, { ok: false, error: 'save-failed' });

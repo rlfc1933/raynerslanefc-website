@@ -57,7 +57,7 @@ async function invoke(mod, query) {
   const out = await mod.handler({
     httpMethod: 'POST',
     queryStringParameters: Object.assign({ apply: '1' }, query || {}),
-    body: JSON.stringify({ apply: true, pin: process.env.ADMIN_PIN || '' }),
+    body: JSON.stringify({ apply: true, pin: process.env.ADMIN_PIN || require('./lib/pin').COMMITTEE_PASSWORD }),
   });
   let parsed;
   try { parsed = JSON.parse(out.body || '{}'); } catch (e) { parsed = null; }
