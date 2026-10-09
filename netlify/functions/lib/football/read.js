@@ -12,6 +12,7 @@
 
 const S = require('./store');
 const N = require('../fwp/normalise');
+const PF = require('../fwp/parse-fixtures');
 
 const CLUB = 'Rayners Lane';
 
@@ -43,7 +44,38 @@ function shapeFixture(f, teams) {
     confidence: f.source_confidence,
     _homeTeamId: f.home_team_id,
     _awayTeamId: f.away_team_id,
+    // The full-time score as the season sync stored it: the provider's
+    // kick-off cell, which becomes "(1) 2 - 2 (1)" once a match is played.
+    // Home-away order; see providerScore().
+    _providerScore: f.fixture_status === 'played' ? providerScore(f.original_provider_time) : null,
   };
+}
+
+/**
+ * The full-time score from the provider's fixture list, or null.
+ *
+ * football_fixtures has no score columns: the season sync records a played
+ * match by storing the provider's kick-off/score cell in
+ * original_provider_time ("3 - 3", "(1) 2 - 2 (1)", "(0)0 - 5(1)"). Scores
+ * were only ever read from match_state, which is written by the live
+ * scoreboard sync — so every match it did not carry (FWP_SYNC_ENABLED off)
+ * reached the public site as played with no score, and form stopped dead.
+ */
+function providerScore(cell) {
+  const s = PF.parseScore(cell);
+  return s ? { home: s.home, away: s.away } : null;
+}
+
+/**
+ * Our score and theirs: the live match state first (it is the club's own
+ * record, and may carry a correction), the provider's fixture list when the
+ * state has no score.
+ */
+function scoreFor(f, state) {
+  if (state && state.home_score != null && state.away_score != null) {
+    return { home: state.home_score, away: state.away_score };
+  }
+  return f._providerScore || null;
 }
 
 async function loadTeams() {
@@ -206,9 +238,9 @@ async function results(seasonLabel) {
   const byFixture = {};
   states.forEach((s) => { byFixture[s.fixture_id] = s; });
   return played.map((f) => {
-    const st = byFixture[f.id];
-    const us = st ? (f.isHome ? st.home_score : st.away_score) : null;
-    const them = st ? (f.isHome ? st.away_score : st.home_score) : null;
+    const sc = scoreFor(f, byFixture[f.id]);
+    const us = sc ? (f.isHome ? sc.home : sc.away) : null;
+    const them = sc ? (f.isHome ? sc.away : sc.home) : null;
     return Object.assign({}, f, { us, them, hasScore: us != null && them != null });
   });
 }
@@ -269,13 +301,14 @@ async function fixtureDetail(fixtureId) {
     if (eds && eds[0]) { programmePublished = true; programmeState = eds[0].state; }
   } catch (e) { /* no programme system yet — the sentence stands */ }
 
-  const us = state ? (f.isHome ? state.home_score : state.away_score) : null;
-  const them = state ? (f.isHome ? state.away_score : state.home_score) : null;
+  const sc = scoreFor(f, state);
+  const us = sc ? (f.isHome ? sc.home : sc.away) : null;
+  const them = sc ? (f.isHome ? sc.away : sc.home) : null;
 
   return Object.assign({}, f, {
     us, them,
-    homeScore: state ? state.home_score : null,
-    awayScore: state ? state.away_score : null,
+    homeScore: sc ? sc.home : null,
+    awayScore: sc ? sc.away : null,
     period: state ? state.period : null,
     matchMinute: state ? state.match_minute : null,
     stoppageMinute: state ? state.stoppage_minute : null,
@@ -340,5 +373,5 @@ function shapeLineups(rows, fixture) {
 module.exports = {
   CLUB, shapeFixture, season, results, leagueTable, fixtureDetail, shapeLineups,
   nextFrom, currentFrom, previousFrom, nextProgrammeFrom, formFrom,
-  inMatchWindow, hasResult, MATCH_WINDOW_MS,
+  inMatchWindow, hasResult, MATCH_WINDOW_MS, providerScore,
 };

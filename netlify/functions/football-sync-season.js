@@ -158,6 +158,113 @@ async function ensureCompetitions(list, cache) {
   return saved.length;
 }
 
+/**
+ * Which provider fixtures this run writes to the registry: ALL of them.
+ *
+ * The registry row is keyed on the PROVIDER's id (external_provider,
+ * external_fixture_id, season). Reconciling against data/fixtures.json only
+ * decides which of OUR fixtures that row is attached to. It used to decide
+ * whether the row was written at all — only `rec.matched` was upserted — so
+ * the moment the club file stopped agreeing with the provider, the registry
+ * row froze.
+ *
+ * Holyport v Rayners Lane (Oct 2026): postponed on 5 Sep ("P - P"),
+ * re-arranged by the league for 10 Oct, and still sitting on 5 Sep in the
+ * registry a month later with last_synced_at stuck on the day it was called
+ * off. data/fixtures.json is a committed file that is weeks stale (it still has
+ * North Leigh at home on 10 Oct), so a re-arranged fixture is precisely the one
+ * least likely to reconcile by date and opponent — whether the provider keeps
+ * its id or issues a new one, a provider id the club file cannot vouch for
+ * lands in `unmatchedProvider`, and nothing ever wrote it again while the
+ * public read layer kept reading the frozen row.
+ *
+ * An unmatched provider fixture is still written with the provider's facts.
+ * What it does NOT get is a NEW link to one of our fixtures: that still needs a
+ * human (the conflict recorded below). A link the registry already holds for
+ * the same provider id is kept — see buildFixtureRows().
+ */
+function toWrite(rec) {
+  return rec.matched.concat(rec.unmatchedProvider.map((u) => ({
+    provider: u.provider,
+    internal: null,
+    confidence: u.confidence === 'rejected' ? 'rejected' : 'needs_review',
+    unmatched: true,
+  })));
+}
+
+/**
+ * Registry rows for one run. Pure: no network, no clock of its own.
+ *
+ * @param entries   from toWrite()
+ * @param cache     { teamByKey, compByKey }
+ * @param existing  the registry's current rows for the season
+ * @param nowIso    the run's timestamp
+ */
+function buildFixtureRows(entries, cache, existing, nowIso) {
+  const rows = entries.map((m) => {
+    const p = m.provider;
+    const homeName = p.isHome ? R.CLUB : p.opponent;
+    const awayName = p.isHome ? p.opponent : R.CLUB;
+    // A played fixture reports no kick-off time, so fall back to the club's
+    // own record rather than inventing 15:00.
+    const koTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
+    const koEpoch = koTime ? MT.parseLondonKickoff(p.date, koTime) : NaN;
+    return {
+      internal_fixture_id: m.internal ? m.internal.id : null,
+      external_provider: 'fwp',
+      external_fixture_id: p.externalFixtureId,
+      season: SEASON,
+      competition_id: cache.compByKey[(p.competitionSlug || F.slug(p.competition)) + '|' + SEASON] || null,
+      home_team_id: cache.teamByKey[F.clubKey(homeName)] || null,
+      away_team_id: cache.teamByKey[F.clubKey(awayName)] || null,
+      scheduled_kickoff_at: isFinite(koEpoch) ? new Date(koEpoch).toISOString() : null,
+      club_timezone: 'Europe/London',
+      original_provider_date: p.date,
+      original_provider_time: p.providerKoCell || null,
+      venue: (m.internal && m.internal.venue) || null,
+      // "P - P" on the provider's list is a postponement, not a fixture that is
+      // still on. Writing it as 'scheduled' kept a called-off match looking live.
+      fixture_status: p.played ? 'played' : (p.postponed ? 'postponed' : 'scheduled'),
+      is_home_fixture: p.isHome,
+      first_team: true,
+      programme_eligible: R.programmeEligible(p),
+      source_updated_at: nowIso,
+      last_synced_at: nowIso,
+      sync_status: 'ok',
+      source_confidence: m.confidence,
+    };
+  });
+
+  // ── never overwrite a known fact with a blank ──────────────────────────
+  // This upsert replaces the whole row. That was tolerable while a person
+  // pressed a button occasionally; now that it runs every twenty minutes, a
+  // single provider response that omits a kick-off time or a venue would
+  // quietly erase one — and the next run would erase it again, so nobody
+  // would ever catch it in the act.
+  //
+  // A provider that says nothing is not a provider that says "nothing".
+  const known = {};
+  (existing || []).forEach((e) => { known[e.external_fixture_id] = e; });
+  // internal_fixture_id is UNIQUE. An unmatched row may keep the link it
+  // already has, but never one this run has just given to another row — one
+  // collision would fail the whole batch and freeze every fixture at once.
+  const claimed = new Set(rows.map((r) => r.internal_fixture_id).filter(Boolean));
+  const KEEP = ['scheduled_kickoff_at', 'venue', 'internal_fixture_id'];
+  let preserved = 0;
+  rows.forEach((row) => {
+    const prev = known[row.external_fixture_id];
+    if (!prev) return;
+    KEEP.forEach((f) => {
+      if (row[f] == null && prev[f] != null) {
+        if (f === 'internal_fixture_id' && claimed.has(prev[f])) return;
+        row[f] = prev[f]; preserved++;
+        if (f === 'internal_fixture_id') claimed.add(prev[f]);
+      }
+    });
+  });
+  return { rows, preserved };
+}
+
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
@@ -195,10 +302,14 @@ exports.handler = async function (event) {
     const internal = await loadInternalFixtures();
     const rec = R.reconcileSeason(parsed.fixtures, internal);
 
+    // Every fixture the provider lists is written under its own provider id —
+    // see toWrite() for why the unmatched ones are included.
+    const entries = toWrite(rec);
+
     // One pass to collect identities, one batch to write them.
     const teamNames = [];
     const comps = [];
-    for (const m of rec.matched) {
+    for (const m of entries) {
       const p = m.provider;
       teamNames.push({ name: p.isHome ? R.CLUB : p.opponent, providerSlug: p.homeSlug });
       teamNames.push({ name: p.isHome ? p.opponent : R.CLUB, providerSlug: p.awaySlug });
@@ -226,58 +337,11 @@ exports.handler = async function (event) {
       crestsRestored = patches.length;
     } catch (e) { /* the fixture sync is more important than the artwork */ }
 
-    const fixtureRows = rec.matched.map((m) => {
-      const p = m.provider;
-      const homeName = p.isHome ? R.CLUB : p.opponent;
-      const awayName = p.isHome ? p.opponent : R.CLUB;
-      // A played fixture reports no kick-off time, so fall back to the club's
-      // own record rather than inventing 15:00.
-      const koTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
-      const koEpoch = koTime ? MT.parseLondonKickoff(p.date, koTime) : NaN;
-      return {
-        internal_fixture_id: m.internal ? m.internal.id : null,
-        external_provider: 'fwp',
-        external_fixture_id: p.externalFixtureId,
-        season: SEASON,
-        competition_id: cache.compByKey[(p.competitionSlug || F.slug(p.competition)) + '|' + SEASON] || null,
-        home_team_id: cache.teamByKey[F.clubKey(homeName)] || null,
-        away_team_id: cache.teamByKey[F.clubKey(awayName)] || null,
-        scheduled_kickoff_at: isFinite(koEpoch) ? new Date(koEpoch).toISOString() : null,
-        club_timezone: 'Europe/London',
-        original_provider_date: p.date,
-        original_provider_time: p.providerKoCell || null,
-        venue: (m.internal && m.internal.venue) || null,
-        fixture_status: p.played ? 'played' : 'scheduled',
-        is_home_fixture: p.isHome,
-        first_team: true,
-        programme_eligible: R.programmeEligible(p),
-        source_updated_at: new Date().toISOString(),
-        last_synced_at: new Date().toISOString(),
-        sync_status: 'ok',
-        source_confidence: m.confidence,
-      };
-    });
-    // ── never overwrite a known fact with a blank ──────────────────────────
-    // This upsert replaces the whole row. That was tolerable while a person
-    // pressed a button occasionally; now that it runs every twenty minutes, a
-    // single provider response that omits a kick-off time or a venue would
-    // quietly erase one — and the next run would erase it again, so nobody
-    // would ever catch it in the act.
-    //
-    // A provider that says nothing is not a provider that says "nothing".
     const existing = await S.rest('football_fixtures?season=eq.' + encodeURIComponent(SEASON) +
       '&select=external_fixture_id,scheduled_kickoff_at,venue,internal_fixture_id') || [];
-    const known = {};
-    existing.forEach((e) => { known[e.external_fixture_id] = e; });
-    const KEEP = ['scheduled_kickoff_at', 'venue', 'internal_fixture_id'];
-    let preserved = 0;
-    fixtureRows.forEach((row) => {
-      const prev = known[row.external_fixture_id];
-      if (!prev) return;
-      KEEP.forEach((f) => {
-        if (row[f] == null && prev[f] != null) { row[f] = prev[f]; preserved++; }
-      });
-    });
+    const built = buildFixtureRows(entries, cache, existing, new Date().toISOString());
+    const fixtureRows = built.rows;
+    const preserved = built.preserved;
 
     const savedFixtures = await S.rest('football_fixtures?on_conflict=external_provider,external_fixture_id,season', {
       method: 'POST', body: fixtureRows,
@@ -330,4 +394,4 @@ exports.handler = async function (event) {
   }
 };
 
-exports._internal = { clubSeason, competitionType };
+exports._internal = { clubSeason, competitionType, toWrite, buildFixtureRows };

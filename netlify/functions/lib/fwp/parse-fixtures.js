@@ -98,6 +98,9 @@ function parseFixtureList(html) {
     if (!date || !opponent) continue;
 
     const score = parseScore(koCell);
+    // "P - P" is the provider saying the match was called off on this date. It
+    // is neither a kick-off time nor a score, and it is not "scheduled" either.
+    const postponed = !score && /^P\s*-\s*P$/i.test(koCell);
     fixtures.push({
       externalFixtureId, season, date,
       kickoff: parseKickoff(koCell),          // null once played
@@ -108,6 +111,7 @@ function parseFixtureList(html) {
       awayTeam: isHome ? opponent : 'Rayners Lane',
       opponentKey: N.clubKey(opponent),
       played: !!score,
+      postponed,
       homeScore: score ? score.home : null,
       awayScore: score ? score.away : null,
       htHomeScore: score ? score.htHome : null,
