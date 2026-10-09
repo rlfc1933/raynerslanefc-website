@@ -23,7 +23,7 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm
 
 // A signing key so md-auth will actually mint and verify tokens under test.
 process.env.MD_TOKEN_SECRET = process.env.MD_TOKEN_SECRET || 'test-secret-at-least-16-chars-long';
-process.env.ADMIN_PIN = process.env.ADMIN_PIN || 'test-pin-1234';
+process.env.ADMIN_PIN = '1933';   // the committee password (lib/pin.js)
 
 const AUTH = require('../netlify/functions/lib/md-auth.js');
 const AUTHZ = require('../netlify/functions/lib/authz.js');

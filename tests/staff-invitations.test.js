@@ -19,7 +19,7 @@ const { makeDriver } = require('./helpers/staff-store-driver.js');
 const STORE = require('../netlify/functions/lib/staff-store.js');
 
 process.env.MD_TOKEN_SECRET = process.env.MD_TOKEN_SECRET || 'test-secret-at-least-16-chars-long';
-process.env.ADMIN_PIN = process.env.ADMIN_PIN || 'test-pin-1234';
+process.env.ADMIN_PIN = '1933';   // the committee password (lib/pin.js)
 const PIN = process.env.ADMIN_PIN;
 
 const ROOT = path.join(__dirname, '..');

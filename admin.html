@@ -784,7 +784,7 @@
 <!-- PIN -->
 <div id="pin-screen">
   <img src="img/badge.png" class="pin-logo" alt="RLFC">
-  <div><div class="pin-title">THE LANE ADMIN</div><div class="pin-sub">Staff access only &mdash; PIN required</div></div>
+  <div><div class="pin-title">THE LANE ADMIN</div><div class="pin-sub">Enter the committee password</div></div>
   <div class="pin-dots" id="pdots"></div>
   <div class="pin-err" id="perr"></div>
   <div class="pin-grid">
@@ -3761,7 +3761,7 @@ var analyticsPin = ''; // the chairman's analytics password this session (for pr
 // ── RENDER PIN DOTS ──
 function renderDots() {
   var h = '';
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < 4; i++) {
     h += '<div class="pin-dot' + (i < pinVal.length ? ' filled' : '') + '"></div>';
   }
   document.getElementById('pdots').innerHTML = h;
@@ -3770,10 +3770,10 @@ renderDots();
 
 // ── PIN ENTRY ──
 function pp(n) {
-  if (pinVal.length >= 8) return;
+  if (pinVal.length >= 4) return;
   pinVal += String(n);
   renderDots();
-  if (pinVal.length === 8) {
+  if (pinVal.length === 4) {
     setTimeout(checkPin, 100);
   }
 }
@@ -3924,8 +3924,8 @@ async function checkPin() {
     // A missing env var looks identical to "everyone forgot the PIN" unless we
     // say so — that ambiguity already cost a day once.
     err.textContent = notConfigured
-      ? 'No PIN is set on the server (ADMIN_PIN) — ask the chairman'
-      : 'Wrong PIN — try again';
+      ? 'Sign-in is not available right now — try again'
+      : 'Wrong password — try again';
     pinVal = '';
     renderDots();
     setTimeout(function() { err.textContent = ''; }, notConfigured ? 6000 : 2000);
@@ -4039,6 +4039,20 @@ function staffDefaultUsers() {
   });
 }
 function showRoleLogin() {
+  // ONE committee password (1933) is the whole login now — no second
+  // "who's signing in" screen. Everyone who has it gets the full portal.
+  try {
+    sessionStorage.setItem('rlfc_staff', JSON.stringify({ username: 'Committee', name: 'Committee', role: 'Committee', title: 'Committee', isChairman: true, at: Date.now() }));
+  } catch (e) {}
+  try { if (window.MDOps) MDOps.mintSession(PIN, 'Committee', PIN); } catch (e) {}
+  try {
+    fetch('/.netlify/functions/staff-logins', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: PIN, username: 'Committee', role: 'Committee' })
+    });
+  } catch (e) {}
+  enterApp();
+  return;
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'none';
   var rs = document.getElementById('role-screen'); rs.style.display = 'flex';
@@ -4233,6 +4247,7 @@ async function submitRoleLogin() {
   function boot() {
     try {
       if (sessionStorage.getItem('rlfc_admin_ok') !== '1') return;
+      if (PIN !== '1933' && PIN.length !== 4) return;   // a session from the old 8-digit PIN — ask again
       if (staffSession()) enterApp(); else showRoleLogin();
     } catch (e) {}
   }

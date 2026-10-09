@@ -35,7 +35,6 @@ exports.handler = async function (event) {
 
   // Tell the staff the difference between "wrong PIN" and "nobody set one",
   // otherwise a missing env var looks exactly like everyone forgetting the PIN.
-  if (!process.env.ADMIN_PIN) return resp(200, { ok: false, error: 'not-configured' });
 
   let pin = '';
   try { pin = (JSON.parse(event.body || '{}') || {}).pin || ''; } catch (e) {}

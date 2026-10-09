@@ -33,7 +33,7 @@ function hash(pw) { return crypto.createHash('sha256').update(String(pw) + ':' +
 // The shared committee password. Already present in admin.html and therefore
 // already public — reading it from an env var lets the club move it out of the
 // client without a code change here.
-const SHARED_PW = process.env.STAFF_DEFAULT_PW || '20raynerslanefc26';
+const SHARED_PW = adminOk.COMMITTEE_PASSWORD;
 
 function resp(code, obj) {
   return {
