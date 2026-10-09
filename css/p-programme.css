@@ -1,0 +1,115 @@
+/* ════════════════════════════════════════════════════════════════════════
+   PROGRAMME — one edition, read (Kit Launch, 2026/27)
+   Title card over Tithe Farm carrying the fixture, then the edition itself
+   set like a printed programme: the cover as an object, sections divided by
+   hairlines and Bebas heads — no boxes, no chips, no numbered kickers.
+   Markup comes from js/programme-reader.js + js/programme-cover.js.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.pg1-ph{min-height:clamp(420px,66svh,760px)}
+.pg1-title{font-size:min(clamp(3.6rem,10vw,10.5rem),20svh);max-width:14ch}
+/* The reader rewrites the heading as "Home <span>v Away</span>". */
+.pg1-title > span:not(.kl-line){display:block;color:var(--yellow)}
+@media (max-width:699px){.pg1-title{font-size:min(16vw,15svh)}}
+
+/* ── THE COVER, printed (same stock as the library) ─────────────────── */
+body .pc{background:var(--yellow);color:#080808;border:0;border-radius:var(--r-xs);
+  box-shadow:0 1px 0 rgba(8,8,8,.4),0 22px 44px -22px rgba(0,0,0,.9);padding:12% 7% 7%}
+body .pc::after{content:none}
+body .pc::before{content:"";position:absolute;left:0;right:0;top:0;height:3%;
+  background:#1A5C32}
+body .pc__top{color:#080808;font-family:var(--font-body);font-weight:800;font-size:max(12px,4.2cqw);letter-spacing:.06em;line-height:1.3}
+body .pc__v{color:#080808;font-size:max(14px,7cqw)}
+body .pc__teams{font-size:max(16px,9.5cqw);line-height:.92;color:#080808;text-transform:uppercase}
+body .pc__teams .pc__opp{color:#1A5C32}
+body .pc__foot{color:#141414;font-family:var(--font-body);font-weight:700;font-size:max(12px,3.6cqw);letter-spacing:.02em;text-transform:none;line-height:1.35}
+body .pc__sponsor{color:#242424;font-size:max(12px,3.4cqw)}
+body .pc__crest--ini{background:rgba(8,8,8,.08);border:2px solid #080808;color:#080808}
+
+/* ── THE READER ─────────────────────────────────────────────────────── */
+body .pr{max-width:none;width:min(100% - 32px,920px);margin-inline:auto;padding:clamp(40px,7vw,88px) 0 clamp(64px,9vw,128px)}
+body .pr-cover{margin:0 auto clamp(36px,6vw,64px);max-width:min(440px,82vw)}
+
+/* Notes stated once, plainly — a yellow rule above, no side-tab card. */
+body .pr-note,body .pr-preview,.pr-joined{background:none;border:0;border-top:3px solid var(--yellow);border-radius:0;padding:14px 0 0;margin:0 0 28px;
+  font-family:var(--font-body);font-weight:600;font-size:15px;line-height:1.6;letter-spacing:0;text-transform:none;color:var(--white)}
+
+/* Contents — a sticky rail of words. */
+body .pr-toc{gap:22px;padding:0;margin:0 0 8px;background:#080808;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));scrollbar-width:none}
+body .pr-toc::-webkit-scrollbar{display:none}
+body .pr-toc a{background:none;border:0;border-bottom:3px solid transparent;border-radius:0;padding:0 2px;min-height:48px;display:inline-flex;align-items:center;
+  font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.01em;text-transform:none;color:#AAAAAA;text-decoration:none}
+body .pr-toc a:hover,body .pr-toc a:focus-visible{color:var(--white);border-bottom-color:var(--yellow)}
+
+/* Sections — hairline, Bebas head, reading measure. No 01/02 markers. */
+body .pr-sec{padding:clamp(40px,6vw,72px) 0;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-sec__n{display:none}
+body .pr-sec__h{font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(2.6rem,6vw,5rem);line-height:.88;letter-spacing:0;margin:0 0 clamp(20px,3vw,32px)}
+body .pr-body{font-family:var(--font-body);font-size:clamp(1rem,1.25vw,1.125rem);line-height:1.75;color:rgba(245,243,237,.86);max-width:65ch}
+body .pr-body p{margin:0 0 1.2em}
+body .pr-lead{font-size:clamp(1.2rem,1.8vw,1.5rem);line-height:1.5;font-weight:600;color:var(--white)}
+
+/* Facts — big tabular values on hairlines. */
+body .pr-facts{gap:0;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-fact{background:none;border:0;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));padding:16px 16px 18px 0}
+body .pr-fact__l,body .pr-person__r,body .pr-tier__h,body .pr-xi__lbl{font-family:var(--font-body);font-weight:800;font-size:13px;letter-spacing:.01em;text-transform:none;color:#AAAAAA}
+body .pr-fact__v{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);line-height:.95;color:var(--white)}
+
+/* People and partners — ruled lists, not tiles. */
+body .pr-people{gap:0 32px;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-person{background:none;border:0;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));padding:14px 0}
+body .pr-person__n{font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--white)}
+body .pr-tier__h{color:var(--yellow);margin-bottom:6px}
+body .pr-sponsors{gap:0 28px}
+body .pr-sponsor{background:none;border:0;border-radius:0;padding:10px 0;font-family:var(--font-display);font-size:clamp(1.6rem,2.6vw,2.2rem);line-height:1;text-transform:uppercase;color:var(--white)}
+body a.pr-sponsor:hover{color:var(--yellow)}
+
+/* The table and the run of results. */
+body .pr-table{font-size:14px}
+body .pr-table th{font-family:var(--font-body);font-weight:800;font-size:12px;letter-spacing:.02em;text-transform:none;color:#AAAAAA;border-bottom:2px solid var(--white)}
+body .pr-table td{border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));color:rgba(245,243,237,.86)}
+body .pr-table tr.is-us td{background:var(--yellow);color:#080808;font-weight:800}
+body .pr-table tr.is-opp td{background:rgba(245,243,237,.06)}
+body .pr-freshness{font-size:13px;color:#AAAAAA}
+body .pr-fixtures{gap:0;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-fix{background:none;border:0;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));padding:16px 0;min-height:44px;font-family:var(--font-body);font-weight:600;font-size:15px;color:var(--white);text-decoration:none}
+body a.pr-fix:hover{color:var(--yellow)}
+body .pr-fix--today{background:var(--yellow);color:#080808;padding-inline:14px;border-bottom-color:var(--yellow)}
+body .pr-fix__s{font-family:var(--font-display);font-size:1.9rem;line-height:1;color:inherit}
+
+/* Team sheets — two columns divided by a hairline, numbers big. */
+body .pr-xi{gap:0 40px}
+body .pr-xi__side{background:none;border:0;border-top:2px solid var(--white);border-radius:0;padding:16px 0 0}
+body .pr-xi__name{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);line-height:.95;text-transform:uppercase}
+body .pr-xi__crest{width:40px;height:40px}
+body .pr-xi ul{list-style:none;margin:0;padding:0}
+body .pr-xi__row{border-bottom:1px solid var(--ed-line,rgba(245,243,237,.09));padding:8px 0;font-size:15px}
+body .pr-xi__no{min-width:32px;font-family:var(--font-display);font-size:1.4rem;line-height:1;color:var(--yellow)}
+body .pr-xi__wait{font-size:16px;color:rgba(245,243,237,.78);max-width:60ch}
+
+/* Buttons inside the edition speak the Kit Launch vocabulary. */
+body .pr .btn{min-height:52px;padding:14px 24px;border-radius:var(--r-sm);font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;text-transform:none;
+  background:transparent;color:var(--white);border:2px solid rgba(245,243,237,.55);box-shadow:none}
+body .pr .btn:hover{border-color:var(--white);color:var(--white);transform:none;box-shadow:none}
+body .pr .btn-primary{background:var(--yellow);color:#080808;border-color:var(--yellow)}
+body .pr .btn-primary:hover{background:#C9A200;border-color:#C9A200;color:#080808}
+body .pr-cta{margin-top:28px}
+body .pr-credit{text-align:left;font-size:13px;color:#AAAAAA;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-legal{font-size:13px;color:#AAAAAA}
+
+/* The member gate — an invitation, set as a poster beside the cover. */
+body .pr-gate{padding:0 0 clamp(24px,4vw,48px)}
+@media (min-width:820px){body .pr-gate{grid-template-columns:minmax(0,340px) 1fr;gap:clamp(40px,5vw,72px);align-items:end}}
+body .pr-gate__cover{max-width:min(340px,78vw)}
+body .pr-gate__eyebrow{font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;text-transform:none;color:var(--yellow)}
+body .pr-gate__h{font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(2.8rem,6vw,5.5rem);line-height:.88;letter-spacing:0}
+body .pr-gate__p{font-size:clamp(1rem,1.3vw,1.15rem);color:rgba(245,243,237,.86)}
+body .pr-gate__list{gap:0 28px;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+body .pr-gate__list li{padding:12px 0;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16));font-family:var(--font-body);font-weight:700;font-size:15px;letter-spacing:.01em;text-transform:none}
+body .pr-gate__list li::before{content:none}
+body .pr-gate__score,body .pr-gate__mc{font-size:14px;color:#AAAAAA}
+
+/* Unavailable / loading — said plainly, not boxed. */
+body .pr .pl-empty{background:none;border:0;border-radius:0;padding:clamp(24px,5vw,56px) 0;text-align:left}
+body .pr .pl-empty__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.8rem,6.5vw,6rem);line-height:.88;text-transform:uppercase;letter-spacing:0;color:var(--white);margin:0 0 18px;max-width:16ch}
+body .pr .pl-empty__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.6;color:rgba(245,243,237,.78);max-width:56ch;margin:0 0 26px}

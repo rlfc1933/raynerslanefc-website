@@ -1,0 +1,32 @@
+/* ════════════════════════════════════════════════════════════════════════
+   NEWS ARTICLE — an editorial reading page (Kit Launch, 2026/27)
+   The headline is the hero, the photograph runs edge to edge, the story
+   is set at a reading measure with room to breathe. Nothing boxed.
+   ════════════════════════════════════════════════════════════════════════ */
+.ar{background:#080808;color:var(--white)}
+
+/* Title card — the headline, as large as a long sentence can stand. */
+.ar-ph{min-height:clamp(420px,62svh,720px);border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+.ar-ph .kl-ph__inner{gap:22px;padding-top:clamp(40px,7vw,88px)}
+.ar-back{justify-self:start;display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-body);font-weight:800;font-size:14px;
+  color:#AAAAAA;text-decoration:none}
+.ar-back::before{content:"\2190";margin-right:10px;color:var(--yellow)}
+.ar-back:hover{color:var(--white)}
+.ar-meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:14px;color:#AAAAAA;max-width:none}
+.ar-meta b{color:var(--yellow);font-weight:800}
+.ar-meta time{color:var(--white)}
+.ar-meta:empty,.ar-meta span:empty,.ar-meta b:empty{display:none}
+.ar-title{font-size:clamp(3rem,8.4vw,8.25rem);line-height:.86;max-width:20ch;text-wrap:balance}
+@media (max-width:699px){.ar-title{font-size:clamp(2.75rem,13vw,4.5rem)}}
+
+/* The photograph — full bleed, never boxed. */
+.ar-fig{margin:0;background:#141414}
+.ar-fig img{display:block;width:100%;height:auto;max-height:86svh;object-fit:cover}
+
+/* The story — 65 characters a line, generous rhythm. */
+.ar-wrap{padding:clamp(48px,8vw,112px) 0 clamp(64px,9vw,128px)}
+.ar-body{max-width:65ch;margin-inline:auto}
+.ar-body p{font-family:var(--font-body);font-size:clamp(1.0625rem,1.25vw,1.1875rem);line-height:1.75;color:rgba(245,243,237,.86);margin:0 0 1.45em}
+.ar-body p:first-child{font-size:clamp(1.25rem,1.9vw,1.6rem);line-height:1.5;font-weight:600;color:var(--white);margin-bottom:1.3em}
+.ar-body a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-underline-offset:4px;text-decoration-thickness:2px}
+.ar-end{max-width:65ch;margin:clamp(40px,6vw,72px) auto 0;padding-top:24px;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}

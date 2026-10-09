@@ -12,12 +12,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .article-hero{background:var(--dark);padding:64px 0 48px;border-bottom:1px solid var(--border)}
-    .article-body{max-width:720px;margin:0 auto;padding:48px 24px}
-    .article-body p{font-family:var(--font-b);font-size:17px;color:var(--lgrey);line-height:1.9;margin-bottom:20px}
-    .article-img{width:100%;aspect-ratio:16/9;object-fit:cover;margin-bottom:32px}
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -32,36 +26,41 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/news-article.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Newsroom","item":"https://raynerslanefc.co.uk/news.html"},{"@type":"ListItem","position":3,"name":"News Article","item":"https://raynerslanefc.co.uk/news-article.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-news-article.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<div class="article-hero">
-  <div class="container">
-    <a href="index.html" style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">← Back to News</a>
-    <div style="height:20px"></div>
-    <div id="art-cat" style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px"></div>
-    <h1 id="art-title" style="font-family:var(--font-d);font-size:clamp(36px,6vw,72px);letter-spacing:.03em;line-height:.95;color:var(--white);margin-bottom:16px"></h1>
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <span id="art-date" style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em"></span>
-      <span id="art-author" style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em"></span>
+<main id="main">
+<article class="ar">
+  <!-- TITLE CARD. The headline is the hero: set big, on black, with the
+       category, date and byline above it in plain words. -->
+  <header class="kl-ph kl-ph--short ar-ph">
+    <div class="kl-wrap kl-ph__inner">
+      <a class="ar-back" href="news.html">Back to News</a>
+      <p class="kl-ph__meta ar-meta"><b id="art-cat"></b><time id="art-date"></time><span id="art-author"></span></p>
+      <h1 class="kl-ph__title ar-title" id="art-title"><span class="kl-line"><span>Club news</span></span></h1>
       <!-- PUBLIC share. Taps out a branded card for THIS story and hands it to
            the phone's share sheet — WhatsApp, Messages, Instagram. No login,
            nothing to design. Every share carries the card and the link back. -->
-      <button id="art-share" type="button" style="display:none;align-items:center;gap:8px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r-md);font-family:var(--font-c);font-size:12.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;padding:11px 18px;min-height:44px;cursor:pointer;-webkit-tap-highlight-color:transparent">
-        <i class="ico ico-smartphone"></i> Share
-      </button>
+      <div class="kl-ph__acts"><button id="art-share" type="button" class="kl-btn kl-btn--solid" style="display:none">Share this story</button></div>
     </div>
-  </div>
-</div>
+  </header>
 
-<div class="article-body">
-  <img id="art-img" src="" alt="" class="article-img" style="display:none">
-  <div id="art-body"></div>
-  <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border)">
-    <a href="index.html" style="font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow)">← All News</a>
+  <!-- The photograph, edge to edge. Only a real photograph: a crest or a
+       generated stand-in is never stretched across the page. -->
+  <figure class="ar-fig" id="art-fig" hidden>
+    <img id="art-img" alt="" width="1600" height="900" style="display:none">
+  </figure>
+
+  <div class="kl-wrap ar-wrap">
+    <div class="ar-body" id="art-body"></div>
+    <p class="ar-end"><a class="kl-more" href="news.html">All news</a></p>
   </div>
-</div>
+</article>
+</main>
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
@@ -94,13 +93,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainEntityOfPage: _aCanon, articleSection: art.category || 'News'
       }
     });
-    document.getElementById('art-title').textContent = art.title;
+    // The headline goes inside the title card's line mask, so it arrives the
+    // way every page title on the site does.
+    const t = document.getElementById('art-title');
+    const line = document.createElement('span'); line.className = 'kl-line';
+    const inner = document.createElement('span'); inner.textContent = art.title;
+    line.appendChild(inner); t.replaceChildren(line);
     document.getElementById('art-cat').textContent = art.category || 'Club News';
-    document.getElementById('art-date').textContent = art.date || '';
+    const dt = document.getElementById('art-date');
+    const when = art.date ? new Date(/T/.test(art.date) ? art.date : art.date + 'T12:00:00') : null;
+    dt.textContent = when && !isNaN(when)
+      ? when.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : (art.date || '');
+    if (art.date) dt.dateTime = art.date;
     document.getElementById('art-author').textContent = art.author ? 'By '+art.author : '';
-    if (art.image) {
+    // A crest is not a photograph, and neither is a generated news-*.svg
+    // stand-in — the same rule the newsroom's lead slot follows.
+    const isPhoto = !!art.image && !/(^|\/)img\/crests\//i.test(art.image) &&
+      !/(^|\/)img\/news\/news-[a-z-]+\.svg$/i.test(art.image);
+    if (isPhoto) {
       const img = document.getElementById('art-img');
+      const fig = document.getElementById('art-fig');
+      img.onerror = () => { fig.hidden = true; };
       img.src = art.image; img.alt = art.title || 'Article image'; img.style.display='block';
+      fig.hidden = false;
     }
     document.getElementById('art-body').innerHTML = (art.body||'')
       .split('\n').filter(l=>l.trim())
@@ -123,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       else setTimeout(warm, 1200);
     }
   } catch(e) {
-    document.getElementById('art-body').innerHTML = '<p style="color:var(--grey)">Article not found.</p>';
+    document.getElementById('art-body').innerHTML = '<p>Article not found.</p>';
   }
 });
 </script>

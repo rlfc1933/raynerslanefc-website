@@ -26,30 +26,6 @@
 <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
 <link rel="stylesheet" href="css/programme-lib.css?v=8">
-<style>
-  .pa-head{ text-align:center; padding:48px 16px 8px; }
-  .pa-head .label{ font-family:var(--font-c); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--yellow); }
-  .pa-head h1{ font-family:var(--font-d); font-size:clamp(40px,8vw,72px); letter-spacing:.02em; color:#fff; line-height:.95; margin:6px 0; }
-  .pa-head p{ font-family:var(--font-b); font-size:15px; color:var(--grey); max-width:560px; margin:0 auto; }
-  .pa-grid{ max-width:1080px; margin:24px auto 60px; padding:0 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr)); gap:18px; }
-  .pa-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; display:flex; flex-direction:column; }
-  .pa-cover{ aspect-ratio:210/297; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18px 14px; color:#fff; }
-  .pa-cover .ko{ font-family:var(--font-c); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
-  .pa-cover .ttl{ font-family:var(--font-d); font-size:24px; line-height:.95; margin:4px 0; }
-  .pa-cover .vs{ display:flex; align-items:center; gap:8px; margin:10px 0; }
-  .pa-cover .vs img{ width:44px; height:44px; object-fit:contain; }
-  .pa-cover .vs span{ font-family:var(--font-d); font-size:20px; }
-  .pa-cover .opp{ font-family:var(--font-d); font-size:18px; letter-spacing:.02em; }
-  .pa-cover .meta{ font-family:var(--font-c); font-size:10px; letter-spacing:.06em; margin-top:auto; opacity:.85; }
-  .pa-body{ padding:12px 14px 14px; }
-  .pa-body .d{ font-family:var(--font-c); font-size:12px; color:var(--grey); letter-spacing:.05em; text-transform:uppercase; }
-  .pa-body .o{ font-family:var(--font-d); font-size:22px; color:#fff; letter-spacing:.02em; margin:2px 0 10px; }
-  .pa-actions{ display:flex; gap:8px; }
-  .pa-actions a{ flex:1; text-align:center; font-family:var(--font-c); font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; padding:9px; border-radius:var(--r-md); text-decoration:none; }
-  .pa-read{ background:var(--yellow); color:#0d0d0d; }
-  .pa-print{ background:transparent; color:var(--yellow); border:1px solid rgba(255,209,0,.45); }
-  .pa-empty{ text-align:center; font-family:var(--font-b); color:var(--grey); padding:60px 16px; }
-</style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -64,18 +40,23 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/programmes.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Matchday Programmes","item":"https://raynerslanefc.co.uk/programmes.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-programmes.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
 <main id="main">
-  <header class="page-header">
-    <div class="container">
-      <span class="label">The Lane collection</span>
-      <h1 class="page-header__h">Matchday <span>Programmes</span></h1>
-      <p class="page-header__p">Free digital matchday programmes for Fan Zone members — line-ups, the table, our partners and the story of the club. Join once and every home edition is yours to keep.</p>
+  <!-- TITLE CARD. Bottle green — the heritage colour — because this is the
+       club's collection: every home edition, kept. -->
+  <section class="kl-ph kl-ph--green pg-ph" aria-labelledby="ph-title">
+    <div class="kl-wrap kl-ph__inner">
+      <p class="kl-ph__meta">The Lane collection</p>
+      <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Matchday</span></span><span class="kl-line"><span>Programmes</span></span></h1>
+      <p class="kl-ph__line">Free digital matchday programmes for Fan Zone members — line-ups, the table, our partners and the story of the club. Join once and every home edition is yours to keep.</p>
     </div>
-  </header>
+  </section>
 
   <div class="pl">
     <div id="programme-library">

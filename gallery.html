@@ -27,24 +27,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr)); gap:2px; }
-    .gallery-item { aspect-ratio:4/3; overflow:hidden; position:relative; cursor:pointer; background:var(--card); }
-    .gallery-item img { width:100%; height:100%; object-fit:cover; transition:transform .4s; display:block; }
-    .gallery-item:hover img { transform:scale(1.05); }
-    .gallery-item-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .3s; display:flex; align-items:flex-end; }
-    .gallery-item:hover .gallery-item-overlay { background:rgba(0,0,0,.4); }
-    .gallery-item-label { font-family:var(--font-c); font-size:13px; font-weight:700; color:white; padding:12px 14px; opacity:0; transition:opacity .3s; letter-spacing:.06em; }
-    .gallery-item:hover .gallery-item-label { opacity:1; }
-    .gallery-item-credit { font-family:var(--font-c); font-size:11px; font-weight:600; color:rgba(255,255,255,.72); padding:0 14px 12px; opacity:0; transition:opacity .3s; letter-spacing:.04em; }
-    .gallery-item:hover .gallery-item-credit { opacity:1; }
-    /* Lightbox */
-    #lightbox { position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:1000; display:none; align-items:center; justify-content:center; }
-    #lightbox.open { display:flex; }
-    #lightbox img { max-width:90vw; max-height:90vh; object-fit:contain; }
-    #lb-close { position:absolute; top:20px; right:20px; background:none; border:1px solid rgba(255,255,255,.3); color:white; font-family:var(--font-c); font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 16px; cursor:pointer; }
-    .gallery-empty { grid-column:1/-1; padding:80px 24px; text-align:center; }
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -59,57 +41,62 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/gallery.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Gallery","item":"https://raynerslanefc.co.uk/gallery.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-gallery.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<div style="background:var(--yellow);padding:72px 0 56px;position:relative;overflow:hidden">
-  <div aria-hidden="true" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--font-d);font-size:200px;color:rgba(0,0,0,.06);pointer-events:none">GALLERY</div>
-  <div class="container" style="position:relative;z-index:1">
-    <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.7);display:block;margin-bottom:12px">The Lane</span>
-    <h1 style="font-family:var(--font-d);font-size:clamp(56px,9vw,110px);letter-spacing:.02em;line-height:.9;color:var(--black);margin-bottom:16px">GALLERY</h1>
-    <p style="font-family:var(--font-c);font-size:17px;font-weight:500;color:rgba(0,0,0,.7);letter-spacing:.04em">Matchday. Ground. Squad. All things The Lane.</p>
+<main id="main">
+<!-- TITLE CARD over Tithe Farm from above. -->
+<section class="kl-ph ga-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media" aria-hidden="true">
+    <img src="img/ground/tithe-farm-aerial-wide-1600.webp" alt="" width="1600" height="898" fetchpriority="high">
   </div>
-</div>
-
-<section class="section">
-  <div class="container">
-
-    <!-- Filter -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px" id="gallery-filters">
-      <button class="filter-btn active" onclick="filterGallery('all',this)"
-        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:var(--card);border:1px solid var(--yellow);padding:8px 16px;cursor:pointer">All</button>
-      <button class="filter-btn" onclick="filterGallery('matchday',this)"
-        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Match Day</button>
-      <button class="filter-btn" onclick="filterGallery('ground',this)"
-        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Ground</button>
-      <button class="filter-btn" onclick="filterGallery('squad',this)"
-        style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:var(--card);border:1px solid var(--border);padding:8px 16px;cursor:pointer">Squad</button>
-    </div>
-
-    <div class="gallery-grid" id="gallery-grid">
-      <!-- Items rendered by JS from data/gallery.json -->
-    </div>
-
-    <!-- Upload prompt -->
-    <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div>
-        <div style="font-family:var(--font-c);font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Got photos from match day?</div>
-        <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.04em">Send them to us and we'll add them to the gallery.</div>
-      </div>
-      <a href="mailto:info@raynerslanefc.co.uk?subject=Gallery%20Photos"
-         style="display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:11px 20px;text-decoration:none">
-        Send Photos &rarr;
-      </a>
-    </div>
-
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">The Lane</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Gallery</span></span></h1>
+    <p class="kl-ph__line">Matchday. Ground. Squad. All things The Lane.</p>
   </div>
 </section>
 
+<!-- Filter — words on a hairline, the chosen one underlined. -->
+<nav class="ga-tabs" aria-label="Filter photographs">
+  <div class="kl-wrap ga-tabs__row" id="gallery-filters">
+    <button class="filter-btn active" type="button" aria-pressed="true" onclick="filterGallery('all',this)">All</button>
+    <button class="filter-btn" type="button" aria-pressed="false" onclick="filterGallery('matchday',this)">Match Day</button>
+    <button class="filter-btn" type="button" aria-pressed="false" onclick="filterGallery('ground',this)">Ground</button>
+    <button class="filter-btn" type="button" aria-pressed="false" onclick="filterGallery('squad',this)">Squad</button>
+  </div>
+</nav>
+
+<!-- The wall: edge to edge, hairline gutters, no frames. -->
+<section class="ga-wall" aria-label="Photographs">
+  <div class="gallery-grid" id="gallery-grid">
+    <!-- Items rendered by JS from data/gallery.json -->
+  </div>
+</section>
+
+<!-- Upload prompt — the yellow field. -->
+<section class="kl-sec kl-sec--yellow ga-send" aria-labelledby="ga-send-h">
+  <div class="kl-wrap ga-send__grid">
+    <h2 class="kl-h2" id="ga-send-h">Got photos from match day?</h2>
+    <div>
+      <p class="kl-p ga-send__p">Send them to us and we'll add them to the gallery.</p>
+      <a class="kl-btn kl-btn--ink" href="mailto:info@raynerslanefc.co.uk?subject=Gallery%20Photos">Send photos</a>
+    </div>
+  </div>
+</section>
+</main>
+
 <!-- Lightbox -->
-<div id="lightbox">
-  <button id="lb-close" onclick="closeLightbox()">✕ Close</button>
-  <img id="lb-img" alt="">
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph">
+  <button id="lb-close" type="button" onclick="closeLightbox()">Close</button>
+  <figure class="lb-fig">
+    <img id="lb-img" alt="">
+    <figcaption id="lb-cap"></figcaption>
+  </figure>
 </div>
 
 <div id="twitter-placeholder"></div>
@@ -153,9 +140,9 @@ async function loadGallery() {
 function filterGallery(cat, btn) {
   activeFilter = cat;
   document.querySelectorAll(".filter-btn").forEach(b => {
-    b.style.color = "var(--grey)"; b.style.borderColor = "var(--border)";
+    b.classList.remove("active"); b.setAttribute("aria-pressed", "false");
   });
-  btn.style.color = "var(--yellow)"; btn.style.borderColor = "var(--yellow)";
+  btn.classList.add("active"); btn.setAttribute("aria-pressed", "true");
   renderGallery();
 }
 
@@ -163,7 +150,7 @@ function renderGallery() {
   var filtered = activeFilter === "all" ? galleryItems : galleryItems.filter(i => i.cat === activeFilter);
   var grid = document.getElementById("gallery-grid");
   if (!filtered.length) {
-    grid.innerHTML = '<div class="gallery-empty" style="grid-column:1/-1;padding:60px 24px;text-align:center"><div style="font-family:var(--font-d);font-size:28px;color:var(--white)">No photos yet</div><div style="font-family:var(--font-c);font-size:14px;color:var(--grey);margin-top:8px">Send us your match day photos!</div></div>';
+    grid.innerHTML = '<div class="gallery-empty"><p class="gallery-empty__h">No photos yet</p><p class="kl-p">Send us your match day photos.</p></div>';
     return;
   }
   // Pipeline 4: the photographer's name is part of the record, not metadata.
@@ -177,24 +164,36 @@ function renderGallery() {
     var full  = item.src;
     var thumb = item.thumb || item.src;
     var label = item.label || "";
-    var credit = item.credit ? '<div class="gallery-item-credit">\u{1F4F7} ' + esc(item.credit) + '</div>' : "";
-    return '<div class="gallery-item" onclick="openLightbox(' + JSON.stringify(full).replace(/"/g,"&quot;") + ',' + JSON.stringify(label).replace(/"/g,"&quot;") + ')">' +
-      '<img src="' + esc(thumb) + '" alt="' + esc(label || "Rayners Lane FC match day photo") + '" loading="lazy">' +
-      '<div class="gallery-item-overlay">' +
-        '<div class="gallery-item-label">' + esc(label) + '</div>' + credit +
-      '</div></div>';
+    var credit = item.credit ? '<span class="gallery-item-credit">Photo: ' + esc(item.credit) + '</span>' : "";
+    // A button, so the wall works from the keyboard as well as the mouse.
+    return '<button type="button" class="gallery-item" onclick="openLightbox(' + JSON.stringify(full).replace(/"/g,"&quot;") + ',' + JSON.stringify(label).replace(/"/g,"&quot;") + ',this)">' +
+      '<img src="' + esc(thumb) + '" alt="' + esc(label || "Rayners Lane FC match day photo") + '" loading="lazy" width="800" height="600">' +
+      '<span class="gallery-item-overlay">' +
+        '<span class="gallery-item-label">' + esc(label) + '</span>' + credit +
+      '</span></button>';
   }).join("");
 }
 
-function openLightbox(src, label) {
-  document.getElementById("lb-img").src = src;
+var lbReturn = null;
+function openLightbox(src, label, from) {
+  var img = document.getElementById("lb-img");
+  img.src = src; img.alt = label || "Rayners Lane FC photograph";
+  var cap = document.getElementById("lb-cap");
+  if (cap) cap.textContent = label || "";
+  lbReturn = from || null;
   document.getElementById("lightbox").classList.add("open");
   document.body.style.overflow = "hidden";
+  document.getElementById("lb-close").focus();
 }
 function closeLightbox() {
   document.getElementById("lightbox").classList.remove("open");
   document.body.style.overflow = "";
+  if (lbReturn && lbReturn.focus) lbReturn.focus();
+  lbReturn = null;
 }
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && document.getElementById("lightbox").classList.contains("open")) closeLightbox();
+});
 document.getElementById("lightbox").addEventListener("click", function(e) {
   if (e.target === this) closeLightbox();
 });

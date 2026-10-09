@@ -1,0 +1,74 @@
+/* ════════════════════════════════════════════════════════════════════════
+   GALLERY — the wall (Kit Launch, 2026/27)
+   Photography edge to edge with hairline gutters and no frames. The first
+   picture is set large, like a contact sheet's selected frame. Captions
+   appear on hover/focus (always, on touch screens). The lightbox keeps its
+   ids (#lightbox, #lb-img, #lb-close) and gains a caption and Escape.
+   ════════════════════════════════════════════════════════════════════════ */
+.ga-ph{min-height:clamp(440px,74svh,860px)}
+
+.ga-tabs{background:#080808;border-bottom:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+.ga-tabs__row{display:flex;gap:clamp(8px,2.4vw,28px);overflow-x:auto;scrollbar-width:none}
+.ga-tabs__row::-webkit-scrollbar{display:none}
+.filter-btn{flex:none;min-height:56px;padding:0 4px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer;
+  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;color:#AAAAAA;
+  transition:color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+.filter-btn:hover{color:var(--white)}
+.filter-btn.active{color:var(--white);border-bottom-color:var(--yellow)}
+.filter-btn:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
+
+/* ── THE WALL ─────────────────────────────────────────────────────────── */
+.ga-wall{background:#080808;padding:3px 0}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+@media (min-width:700px){.gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1200px){.gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.gallery-item{position:relative;display:block;width:100%;aspect-ratio:4/3;overflow:hidden;margin:0;padding:0;border:0;border-radius:0;
+  background:#141414;cursor:zoom-in;color:var(--white);text-align:left}
+.gallery-item:first-child{grid-column:1 / -1;aspect-ratio:16/10}
+@media (min-width:700px){.gallery-item:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}}
+.gallery-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform var(--dur-slow) var(--ease-out)}
+.gallery-item:hover img{transform:scale(1.02)}
+.gallery-item:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px;z-index:1}
+.gallery-item-overlay{position:absolute;inset:auto 0 0 0;display:flex;flex-direction:column;gap:2px;padding:44px 16px 14px;
+  background:linear-gradient(180deg,rgba(8,8,8,0),rgba(8,8,8,.82));opacity:0;transition:opacity var(--dur-fast) var(--ease-standard)}
+.gallery-item:hover .gallery-item-overlay,.gallery-item:focus-visible .gallery-item-overlay{opacity:1}
+@media (hover:none){.gallery-item:first-child .gallery-item-overlay{opacity:1}}
+
+/* No holes at the end of the wall: the last picture widens to close the row. */
+@media (max-width:699px){.gallery-item:last-child:nth-child(even){grid-column:1 / -1;aspect-ratio:16/10}}
+@media (min-width:700px) and (max-width:1199px){
+  .gallery-item:last-child:nth-child(3n+2){grid-column:span 2;aspect-ratio:auto}
+  .gallery-item:last-child:nth-child(3n+1):not(:first-child){grid-column:1 / -1;aspect-ratio:21/9}
+}
+@media (min-width:1200px){
+  .gallery-item:last-child:nth-child(4n){grid-column:span 2;aspect-ratio:auto}
+  .gallery-item:last-child:nth-child(4n+3){grid-column:span 3;aspect-ratio:auto}
+  .gallery-item:last-child:nth-child(4n+2):not(:first-child){grid-column:1 / -1;aspect-ratio:21/9}
+}
+.gallery-item-label{font-family:var(--font-display);font-size:clamp(1.3rem,2vw,1.8rem);line-height:.95;text-transform:uppercase;color:var(--white)}
+.gallery-item:first-child .gallery-item-label{font-size:clamp(1.8rem,3.4vw,3.2rem)}
+.gallery-item-credit{font-family:var(--font-body);font-weight:600;font-size:12px;color:#AAAAAA}
+@media (max-width:420px){.gallery-item:not(:first-child) .gallery-item-label{font-size:1.15rem}}
+.gallery-empty{grid-column:1/-1;padding:clamp(56px,9vw,112px) 16px;width:min(100% - 32px,1360px);margin-inline:auto}
+.gallery-empty__h{font-family:var(--font-display);font-size:clamp(2.8rem,6vw,5rem);line-height:.9;text-transform:uppercase;margin:0 0 12px;color:var(--white)}
+
+/* ── SEND PHOTOS ──────────────────────────────────────────────────────── */
+.ga-send__grid{display:grid;gap:24px;align-items:end}
+@media (min-width:900px){.ga-send__grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+.ga-send .kl-h2{max-width:12ch}
+.ga-send__p{color:#080808;font-weight:600;margin-bottom:22px}
+
+/* ── LIGHTBOX ─────────────────────────────────────────────────────────── */
+#lightbox{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;background:rgba(8,8,8,.96);padding:64px 16px 24px}
+#lightbox.open{display:flex}
+.lb-fig{margin:0;display:grid;gap:12px;justify-items:center;max-width:100%}
+#lightbox img{max-width:min(92vw,1600px);max-height:80vh;object-fit:contain;display:block}
+#lb-cap{font-family:var(--font-display);font-size:clamp(1.4rem,2.4vw,2rem);line-height:1;text-transform:uppercase;color:var(--white);text-align:center}
+#lb-cap:empty{display:none}
+#lb-close{position:absolute;top:12px;right:16px;min-height:48px;padding:0 20px;background:transparent;border:2px solid rgba(245,243,237,.55);border-radius:var(--r-sm);
+  color:var(--white);font-family:var(--font-body);font-weight:800;font-size:15px;cursor:pointer}
+#lb-close:hover{border-color:var(--white)}
+#lb-close:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+
+@media (prefers-reduced-motion:reduce){.gallery-item img{transition:none}.gallery-item:hover img{transform:none}}
+html.a11y-reduce-motion .gallery-item:hover img{transform:none}

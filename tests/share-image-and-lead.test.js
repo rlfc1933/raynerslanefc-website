@@ -78,24 +78,30 @@ test('the newsroom can tell a photograph from a stand-in', () => {
 });
 
 test('a lead with no photograph gets no picture frame', () => {
-  assert.match(NEWS, /if \(featured && !photo\) card\.className = 'featured-card featured-card--type';/);
-  assert.match(NEWS, /if \(!\(featured && !photo\)\) imgWrap\.appendChild\(img\);/,
-    'the empty image element must not be appended at all');
+  // 2026/27 sports-desk front: makeLead() builds the lead. The picture well is
+  // only created inside `if (photo)`, so a crest or stand-in never gets one.
+  const fn = NEWS.match(/function makeLead\(a\) \{[\s\S]*?\n\}/)[0];
+  assert.match(fn, /var photo = hasPhoto\(a\);/);
+  assert.match(fn, /'nw-lead__story' \+ \(photo \? ' has-photo' : ' is-type'\)/);
+  assert.match(fn, /if \(photo\) \{[\s\S]*?link\.appendChild\(fig\);[\s\S]*?\}/,
+    'the image element must only be appended when there is a photograph');
 });
 
 test('the typographic lead is designed, not just an absence', () => {
-  const css = NEWS.match(/\.featured-card--type \{[^}]*\}/)[0];
-  assert.match(css, /border-top: 4px solid var\(--yellow\)/,
-    'it should read as a masthead, not as a card that failed to load');
-  assert.match(NEWS, /\.featured-card--type \.featured-title \{ font-size: clamp\(/,
+  const css = read('css/p-news.css');
+  assert.match(css, /\.is-type \.nw-lead__title\{font-size:clamp\(/,
     'the headline becomes the artwork, so it has to be sized like it');
+  assert.match(css, /\.is-type \.nw-lead__body\{padding-top:/,
+    'it should read as a front page, not as a card that failed to load');
 });
 
-test('secondary cards keep their thumbnail', () => {
-  // The stand-in works fine at that size; only the lead slot was the problem.
-  const fn = NEWS.match(/function makeCard\(a, featured\) \{[\s\S]*?\n\}/)[0];
-  assert.ok(!/if \(!photo\) return/.test(fn),
-    'non-featured cards must still render an image');
+test('the running order is set in type, never in stretched stand-ins', () => {
+  // Below the lead the desk is a ruled running order: date, category, headline.
+  const fn = NEWS.match(/function makeRow\(a\) \{[\s\S]*?\n\}/)[0];
+  assert.match(fn, /nw-row__date/);
+  assert.match(fn, /nw-row__cat/);
+  assert.match(fn, /nw-row__title/);
+  assert.ok(!/createElement\('img'\)/.test(fn), 'no thumbnails in the running order');
 });
 
 // ── 3 · THE LIVE PILL THAT MEANT NOTHING ────────────────────────────────────

@@ -27,189 +27,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    /* ── NEWSROOM LAYOUT ── */
-    .newsroom-header {
-      background: var(--black);
-      border-bottom: 3px solid var(--yellow);
-      padding: 0;
-    }
-    .newsroom-topbar {
-      background: var(--yellow);
-      padding: 8px 0;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .newsroom-topbar-left {
-      display: flex; align-items: center; gap: 16px;
-    }
-    .newsroom-masthead {
-      font-family: var(--font-d); font-size: clamp(36px,7vw,72px);
-      letter-spacing: .04em; color: var(--white); line-height: 1;
-      padding: 24px 0 20px;
-    }
-    .newsroom-masthead span { color: var(--yellow); }
-    /* .live-badge removed — see the newsroom top bar. */
-    /* SOURCE FILTER TABS */
-    .source-tabs {
-      display: flex; gap: 0; border-bottom: 1px solid var(--border);
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-    }
-    .source-tab {
-      background: none; border: none; border-bottom: 3px solid transparent;
-      color: var(--grey); font-family: var(--font-c); font-size: 13px;
-      font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      padding: 14px 20px; cursor: pointer; transition: all .2s;
-      white-space: nowrap; -webkit-tap-highlight-color: transparent;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .source-tab:hover { color: var(--white); }
-    .source-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
-    .source-dot {
-      width: 8px; height: 8px; border-radius:var(--r-circle); flex-shrink: 0;
-    }
-    /* NEWS GRID LAYOUT */
-    .newsroom-layout {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 2px;
-      align-items: start;
-    }
-    .newsroom-main { min-width: 0; }
-    .newsroom-sidebar {
-      position: sticky; top: 72px;
-      display: flex; flex-direction: column; gap: 2px;
-    }
-    /* FEATURED STORY */
-    .featured-card {
-      background: var(--card); display: block; text-decoration: none;
-      transition: background .2s; cursor: pointer;
-    }
-    .featured-card:hover { background: var(--card2); }
-    /* THE LEAD STORY WITH NO PHOTOGRAPH.
-       Not an empty image well — a masthead-style block where the headline is
-       the artwork. Yellow rule top and bottom, generous space, the club's
-       colours doing the work a picture would have done. */
-    .featured-card--type {
-      background: linear-gradient(180deg, #101010 0%, var(--card) 100%);
-      border-top: 4px solid var(--yellow);
-      border-bottom: 1px solid var(--border);
-    }
-    .featured-card--type .featured-body { padding: 44px 32px 40px; }
-    .featured-card--type .featured-title { font-size: clamp(38px, 5.2vw, 68px); }
-    .featured-img {
-      width: 100%; aspect-ratio: 16/9; object-fit: cover;
-      display: block;
-    }
-    .featured-body { padding: 28px 32px 32px; }
-    .featured-source-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: var(--font-c); font-size: 10px; font-weight: 700;
-      letter-spacing: .16em; text-transform: uppercase;
-      padding: 4px 10px; margin-bottom: 14px;
-    }
-    .featured-title {
-      font-family: var(--font-d); font-size: clamp(28px,4vw,44px);
-      letter-spacing: .03em; color: var(--white); line-height: 1.1;
-      margin-bottom: 14px;
-    }
-    .featured-excerpt {
-      font-family: var(--font-b); font-size: 16px; color: var(--grey);
-      line-height: 1.75; margin-bottom: 20px;
-    }
-    /* SECONDARY GRID */
-    .secondary-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
-    }
-    .news-card {
-      background: var(--card); display: block; text-decoration: none;
-      transition: background .2s;
-    }
-    .news-card:hover { background: var(--card2); }
-    .news-card-img {
-      width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
-    }
-    .news-card-body { padding: 16px 20px 20px; }
-    .news-card-source {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-family: var(--font-c); font-size: 9px; font-weight: 700;
-      letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px;
-    }
-    .news-card-title {
-      font-family: var(--font-d); font-size: clamp(17px,2vw,22px);
-      letter-spacing: .03em; color: var(--white); line-height: 1.2;
-      margin-bottom: 8px;
-    }
-    .news-card-meta {
-      font-family: var(--font-c); font-size: 11px; color: var(--grey);
-      letter-spacing: .06em; margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-    /* SIDEBAR */
-    .sidebar-section {
-      background: var(--card); padding: 20px;
-    }
-    .sidebar-title {
-      font-family: var(--font-d); font-size: 22px; letter-spacing: .04em;
-      color: var(--white); margin-bottom: 4px;
-    }
-    .sidebar-label {
-      font-family: var(--font-c); font-size: 10px; font-weight: 700;
-      letter-spacing: .18em; text-transform: uppercase; color: var(--yellow);
-      display: block; margin-bottom: 12px;
-    }
-    .ticker-item {
-      border-bottom: 1px solid var(--border); padding: 12px 0;
-    }
-    .ticker-item:last-child { border-bottom: none; }
-    .ticker-source {
-      font-family: var(--font-c); font-size: 9px; font-weight: 700;
-      letter-spacing: .14em; text-transform: uppercase; margin-bottom: 5px;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .ticker-title {
-      font-family: var(--font-c); font-size: 13px; font-weight: 700;
-      color: var(--white); line-height: 1.35;
-    }
-    .ticker-time {
-      font-family: var(--font-c); font-size: 10px; color: var(--grey);
-      letter-spacing: .06em; margin-top: 4px;
-    }
-    /* REFRESH NOTICE */
-    .refresh-bar {
-      background: var(--dark); border-bottom: 1px solid var(--border);
-      padding: 8px 0;
-    }
-    /* LOADING */
-    .skeleton {
-      background: var(--card); animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer {
-      0%,100%{ opacity: 1 } 50%{ opacity: .5 }
-    }
-    .load-placeholder {
-      background: var(--card); padding: 32px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-c); font-size: 13px; color: var(--grey);
-      letter-spacing: .08em; min-height: 200px;
-    }
-    @media(max-width: 960px) {
-      .newsroom-layout { grid-template-columns: 1fr; }
-      .newsroom-sidebar { position: static; }
-      .secondary-grid { grid-template-columns: 1fr; }
-    }
-    @media(max-width: 600px) {
-      .featured-body { padding: 20px; }
-    }
-    /* Public share button on our own news cards. Big enough to hit with a thumb,
-     quiet enough not to compete with the story. */
-  .news-share{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:transparent;
-    border:1px solid var(--border);border-radius:var(--r-sm);color:var(--grey);font-family:var(--font-c);
-    font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;
-    min-height:36px;cursor:pointer;transition:color .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
-  .news-share:hover{color:var(--yellow);border-color:var(--yellow)}
-  .news-share:disabled{opacity:.6}
-  .news-card-meta,.featured-card .news-card-meta{display:flex;align-items:center;gap:10px}
-</style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -224,150 +41,74 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/news.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Newsroom","item":"https://raynerslanefc.co.uk/news.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-news.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- NEWSROOM HEADER -->
-<div class="newsroom-header">
-  <!-- Top yellow bar -->
-  <div class="newsroom-topbar">
-    <div class="container newsroom-topbar-left">
-      <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.6)">
-        <i class="ico ico-newspaper"></i> Rayners Lane FC Newsroom
-      </span>
-      <!-- A pulsing red "LIVE & AUTO-UPDATING" badge sat here. LIVE on this site
-           means a match is being played right now — that is what the red dot
-           says everywhere else, and spending it on "this page refreshes itself"
-           both devalues the signal and tells the supporter about the plumbing.
-           The timestamp below is the honest version of the same claim. -->
-    </div>
-    <div class="container" style="margin-left:auto">
-      <span id="last-updated" style="font-family:var(--font-c);font-size:10px;color:rgba(0,0,0,.7);letter-spacing:.08em"></span>
-    </div>
+<main id="main">
+<!-- TITLE CARD. The newsroom's masthead is the drenched yellow poster: the
+     page's name as large as the screen allows, one plain line, the honest
+     timestamp of the last refresh. -->
+<section class="kl-ph kl-ph--yellow nw-ph" aria-labelledby="ph-title">
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">Rayners Lane FC newsroom <span id="last-updated" class="nw-ph__upd"></span></p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>News</span></span></h1>
+    <p class="kl-ph__line">Club news from Tithe Farm, with non-league, FA and Combined Counties League coverage alongside it.</p>
   </div>
+</section>
 
-  <!-- Masthead -->
-  <div class="container">
-    <h1 class="newsroom-masthead">
-      THE LANE<br><span>NEWSROOM</span>
-    </h1>
-  </div>
-
-  <!-- Source filter tabs -->
-  <div class="container" style="padding-bottom:0">
-    <div class="source-tabs" id="source-tabs">
-      <button class="source-tab active" data-source="all" onclick="filterSource('all',this)">
-        <div class="source-dot" style="background:var(--yellow)"></div>
-        All News
-      </button>
-      <button class="source-tab" data-source="club" onclick="filterSource('club',this)">
-        <div class="source-dot" style="background:#FFD100"></div>
-        Club News
-      </button>
-      <button class="source-tab" data-source="nonleague" onclick="filterSource('nonleague',this)">
-        <div class="source-dot" style="background:#EF4444"></div>
-        Non-League
-      </button>
-      <button class="source-tab" data-source="fa" onclick="filterSource('fa',this)">
-        <div class="source-dot" style="background:#1D4ED8"></div>
-        FA &amp; League
-      </button>
+<!-- Source filter. Plain words on a hairline — the active one is underlined. -->
+<nav class="nw-tabs" aria-label="Filter news by source">
+  <div class="kl-wrap">
+    <div class="nw-tabs__row" id="source-tabs">
+      <button class="source-tab active" type="button" aria-pressed="true" data-source="all" onclick="filterSource('all',this)">All news</button>
+      <button class="source-tab" type="button" aria-pressed="false" data-source="club" onclick="filterSource('club',this)">Club news</button>
+      <button class="source-tab" type="button" aria-pressed="false" data-source="nonleague" onclick="filterSource('nonleague',this)">Non-League</button>
+      <button class="source-tab" type="button" aria-pressed="false" data-source="fa" onclick="filterSource('fa',this)">FA &amp; League</button>
     </div>
   </div>
-</div>
+</nav>
 
-<!-- MAIN NEWSROOM -->
-<div style="background:var(--black);padding:2px 0 48px">
-  <div class="container" style="padding-top:2px">
-    <div class="newsroom-layout">
+<!-- THE LEAD. One story, full width: its photograph large, its headline in
+     Bebas. A story with no photograph is set as type — never a stretched crest. -->
+<section class="nw-lead" id="featured-wrap" aria-label="Lead story">
+  <div class="kl-wrap"><p class="nw-loading">Loading the latest news…</p></div>
+</section>
 
-      <!-- MAIN COLUMN -->
-      <div class="newsroom-main">
-        <!-- Featured -->
-        <div id="featured-wrap">
-          <div class="load-placeholder skeleton">Loading latest news...</div>
-        </div>
-        <!-- Secondary grid -->
-        <div class="secondary-grid" id="secondary-grid" style="margin-top:2px"></div>
-        <!-- Load more -->
-        <div id="load-more-wrap" style="display:none;margin-top:2px">
-          <button onclick="loadMore()" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--lgrey);font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:16px;cursor:pointer;transition:all .2s"
-            onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--lgrey)'">
-            Load More Articles
-          </button>
-        </div>
-      </div>
+<!-- THE RUNNING ORDER. Date, category, headline — ruled, like a sports desk. -->
+<section class="nw-order" aria-labelledby="nw-order-h">
+  <div class="kl-wrap">
+    <h2 class="kl-h2 nw-order__h" id="nw-order-h">Running order</h2>
+    <ol class="nw-rows" id="secondary-grid"></ol>
+    <div id="load-more-wrap" class="nw-more" style="display:none">
+      <button type="button" class="kl-btn kl-btn--line" onclick="loadMore()">Load more stories</button>
+    </div>
+  </div>
+</section>
 
-      <!-- SIDEBAR -->
-      <div class="newsroom-sidebar">
-        <!-- Latest ticker -->
-        <div class="sidebar-section">
-          <span class="sidebar-label">Breaking &amp; Latest</span>
-          <div id="ticker-list">
-            <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.06em;padding:12px 0">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Club badge + social -->
-        <div class="sidebar-section" style="background:linear-gradient(160deg,var(--green),#060E06);text-align:center;padding:32px 20px">
-          <img src="img/badge.png" alt="RLFC" style="width:72px;height:72px;object-fit:contain;margin:0 auto 14px;display:block">
-          <div style="font-family:var(--font-d);font-size:24px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">Rayners Lane FC</div>
-          <div style="font-family:var(--font-c);font-size:11px;color:var(--muted);letter-spacing:.1em;margin-bottom:20px">Est. 1933 · Harrow</div>
-          <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener"
-             style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:11px;font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;text-decoration:none;margin-bottom:6px">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            Follow @RaynersLaneFC
-          </a>
-          <a href="programme.html"
-             style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--yellow);padding:11px;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--black);text-decoration:none">
-            <i class="ico ico-newspaper"></i> Match Day Programme
-          </a>
-        </div>
-
-        <!-- Sources info -->
-        <div class="sidebar-section">
-          <span class="sidebar-label">News Sources</span>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#FFD100;flex-shrink:0"></div>
-              <div>
-                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Rayners Lane FC</div>
-                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official club news · live</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#EF4444;flex-shrink:0"></div>
-              <div>
-                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The Non-League Paper</div>
-                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Non-league football news · live</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#1D4ED8;flex-shrink:0"></div>
-              <div>
-                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">The FA</div>
-                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Official FA announcements · live</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:8px;height:8px;border-radius:var(--r-circle);background:#22C55E;flex-shrink:0"></div>
-              <div>
-                <div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--white)">Combined Counties League</div>
-                <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.04em">Division news · live</div>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-            <div style="font-family:var(--font-c);font-size:10px;color:var(--grey);letter-spacing:.06em">Auto-refreshes every 5 minutes</div>
-          </div>
-        </div>
-
+<!-- Where it comes from. Stated plainly, once. -->
+<section class="kl-sec nw-src" aria-labelledby="nw-src-h">
+  <div class="kl-wrap nw-src__grid">
+    <div>
+      <h2 class="kl-h2" id="nw-src-h">Sources</h2>
+      <p class="kl-p nw-src__p">Auto-refreshes every 5 minutes.</p>
+      <div class="nw-src__acts">
+        <a class="kl-btn kl-btn--solid" href="programme.html">Match Day Programme</a>
+        <a class="kl-btn kl-btn--line" href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener">Follow @RaynersLaneFC</a>
       </div>
     </div>
+    <ul class="kl-rows nw-src__list">
+      <li><b>Rayners Lane FC</b><span>Official club news</span></li>
+      <li><b>The Non-League Paper</b><span>Non-league football news</span></li>
+      <li><b>The FA</b><span>Official FA announcements</span></li>
+      <li><b>Combined Counties League</b><span>Division news</span></li>
+    </ul>
   </div>
-</div>
+</section>
+</main>
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>
@@ -377,11 +118,10 @@
 <script src="js/share-news.js"></script>
 <script>
 var SOURCES = {
-  club:      { label:'Rayners Lane FC',  colour:'#FFD100', text:'#000' },
-  club:      { label:'Rayners Lane FC',  colour:'#FFD100', text:'#000' },
-  nonleague: { label:'Non-League Paper', colour:'#EF4444', text:'#fff' },
-  fa:        { label:'The FA',           colour:'#1D4ED8', text:'#fff' },
-  ccl:       { label:'Combined Counties',colour:'#22C55E', text:'#000' },
+  club:      { label:'Rayners Lane FC' },
+  nonleague: { label:'Non-League Paper' },
+  fa:        { label:'The FA' },
+  ccl:       { label:'Combined Counties' },
 };
 
 // Club articles all live in data/news.json — the club's own newsroom.
@@ -391,22 +131,14 @@ var allArticles = [];
 var displayCount = 12;
 var activeSource = 'all';
 var IMG_FALLBACK = 'img/news/news-default.svg';
-// Crest artwork lives in img/crests/. It is a badge on a transparent or flat
-// background — fine as a small thumbnail beside a headline, wrong as a
-// full-bleed hero. Anything from that folder is refused the featured slot.
-function newsHeroImage(a, featured) {
-  var src = a.image || '';
-  var isCrest = /(^|\/)img\/crests\//i.test(src);
-  if (featured && isCrest) return IMG_FALLBACK;
-  return src || IMG_FALLBACK;
-}
 
 /**
  * Does this article actually have a PHOTOGRAPH?
  *
  * A crest is not one, and neither is one of the generated news-*.svg
- * stand-ins. Stretched across a 500px lead slot both read as a broken image:
- * the newsroom's most valuable space filled with a faint watermark.
+ * stand-ins. Stretched across the full-width lead slot both read as a broken
+ * image: the newsroom's most valuable space filled with a faint watermark —
+ * or worse, the other club's badge as the biggest thing on our page.
  *
  * The club does not always have a picture, and inventing one is not an option,
  * so the lead story simply stops pretending. hasPhoto() drives a typographic
@@ -439,12 +171,10 @@ async function loadExtraNews() {
           // "External" now means exactly one thing: an off-site http link that
           // should open in a new tab. An article can carry an INTERNAL link
           // (e.g. trials.html) and still be ours — those open in the same tab.
-          // Previously any non-http link was ignored and rewritten to
-          // news-article.html?id=, which sent people to an article with an
-          // empty body. That's what the old third-party cards became.
           var isExt = !!(a.link && /^https?:/i.test(a.link));
           extra.push({ source:'club', priority:0, id:a.id, title:a.title,
             excerpt:a.excerpt||'', image:a.image||IMG_FALLBACK,
+            category:a.category||'', shareHeadline:a.shareHeadline||'',
             date:a.date||'',
             link: a.link ? a.link : ('news-article.html?id=' + a.id),
             external: isExt });
@@ -462,7 +192,7 @@ async function loadExtraNews() {
           var src = a.key || 'nonleague';
           extra.push({ source:src, priority:src==='club'?0:2,
             title:a.title, excerpt:a.excerpt||'',
-            image:a.image||imgForSource(src),
+            image:a.image||'',
             date:a.date||'', link:a.link||'#', external:true });
         }
       });
@@ -483,136 +213,128 @@ async function loadExtraNews() {
     renderNewsroom();
   }
   var el = document.getElementById('last-updated');
-  if (el) el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-}
-
-function imgForSource(src) {
-  var m = { club:IMG_FALLBACK, nonleague:'img/news/news-league.svg',
-            fa:'img/news/news-league.svg', ccl:'img/news/news-matchday.svg' };
-  return m[src] || IMG_FALLBACK;
+  if (el) el.textContent = '· Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 
 function filterSource(source, btn) {
   activeSource = source;
-  document.querySelectorAll('.source-tab').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
+  document.querySelectorAll('.source-tab').forEach(function(b){
+    b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
+  });
+  btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
   displayCount = 12;
   renderNewsroom();
 }
 
 function loadMore() { displayCount += 12; renderNewsroom(); }
 
-function makeCard(a, featured) {
-  var src = SOURCES[a.source] || SOURCES.club;
-  var href = a.link || '#';
-  var target = a.external ? ' target="_blank" rel="noopener"' : '';
-  var dateStr = a.date ? new Date(a.date).toLocaleDateString('en-GB',{day:'numeric',month:featured?'long':'short',year:'numeric'}) : '';
-  var excerpt = (a.excerpt || '').slice(0, featured ? 280 : 120);
-  if (a.excerpt && a.excerpt.length > (featured ? 280 : 120)) excerpt += '...';
+function el(tag, cls, text) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
 
-  var card = document.createElement('a');
-  card.href = href;
-  if (a.external) { card.target = '_blank'; card.rel = 'noopener'; }
-  card.className = featured ? 'featured-card' : 'news-card';
+// What a story is filed under: the club's own category, or the outlet's name.
+function categoryOf(a) {
+  if (a.source === 'club') return a.category || 'Club';
+  return (SOURCES[a.source] || SOURCES.club).label;
+}
 
+function fmtDate(d, long) {
+  if (!d) return '';
+  // A bare YYYY-MM-DD is a calendar day, not midnight UTC — read it at noon
+  // so no time zone can move it to the day before.
+  var t = new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T12:00:00' : d);
+  if (isNaN(t)) return '';
+  return t.toLocaleDateString('en-GB', { day:'numeric', month: long ? 'long' : 'short', year:'numeric' });
+}
+
+function linkTo(a, cls) {
+  var link = el('a', cls);
+  link.href = a.link || '#';
+  if (a.external) { link.target = '_blank'; link.rel = 'noopener'; }
+  return link;
+}
+
+// ── Share, on OUR stories only ──────────────────────────────────────
+// Third-party feed items (Non-League Paper, The FA) aren't ours to make a
+// Rayners Lane card out of, and they have no article id to link back to.
+// The button sits beside the link, never inside it: a <button> inside an <a>
+// is invalid, and a tap on Share must not navigate to the article.
+function shareButton(a, cls) {
+  if (!(a.source === 'club' && a.id && !a.external && window.rlShareArticle)) return null;
+  var sh = el('button', cls, 'Share');
+  sh.type = 'button';
+  sh.setAttribute('aria-label', 'Share: ' + (a.title || 'this story'));
+  var payload = { id: a.id, title: a.title, image: a.image, category: a.category,
+                  shareHeadline: a.shareHeadline || '' };
+  // Warm the card on first touch/hover — that lands before the click, so the
+  // tap itself has no await in front of navigator.share() and iOS still
+  // considers the gesture live. Warming every row on load would render a
+  // dozen 1080x1080 canvases nobody asked for.
+  var warmed = false;
+  var warm = function () {
+    if (warmed || !window.rlPrebuildCard) return;
+    warmed = true; window.rlPrebuildCard(payload);
+  };
+  sh.addEventListener('pointerenter', warm);
+  sh.addEventListener('touchstart', warm, { passive: true });
+  sh.addEventListener('click', function (ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    window.rlShareArticle(payload, sh);
+  });
+  return sh;
+}
+
+function makeLead(a) {
   var photo = hasPhoto(a);
-  if (featured && !photo) card.className = 'featured-card featured-card--type';
+  var art = el('article', 'nw-lead__story' + (photo ? ' has-photo' : ' is-type'));
+  var link = linkTo(a, 'nw-lead__link');
 
-  var img = document.createElement('img');
-  // An opponent CREST is not a photograph, and it must never fill the lead slot
-  // — the newsroom's most valuable image ends up advertising the other club,
-  // cropped so their name is the biggest thing on our page. The edge function
-  // (netlify/edge-functions/meta.js) already applies exactly this rule to
-  // og:image for the same reason; this is the on-page half of it.
-  img.src = newsHeroImage(a, featured);
-  img.alt = a.title || '';
-  img.className = featured ? 'featured-img' : 'news-card-img';
-  img.loading = 'lazy';
-  img.onerror = function(){ this.src = IMG_FALLBACK; };
-
-  var imgWrap = document.createElement('div');
-  imgWrap.className = featured ? '' : 'news-card-img-wrap';
-  // No photograph, no picture frame. Secondary cards keep their small stand-in
-  // (it works at thumbnail size); only the lead slot goes typographic.
-  if (!(featured && !photo)) imgWrap.appendChild(img);
-
-  var badge = document.createElement('div');
-  badge.className = featured ? 'featured-source-badge' : 'news-card-source';
-  badge.style.color = src.colour;
-  if (featured) {
-    badge.style.background = src.colour;
-    badge.style.color = src.text;
-  }
-  var dot = document.createElement('div');
-  dot.style.cssText = 'width:6px;height:6px;border-radius:var(--r-circle);background:' + src.colour + ';flex-shrink:0';
-  badge.appendChild(dot);
-  badge.appendChild(document.createTextNode(src.label));
-
-  var title = document.createElement('div');
-  title.className = featured ? 'featured-title' : 'news-card-title';
-  title.textContent = a.title || '';
-
-  var body = document.createElement('div');
-  body.className = featured ? 'featured-body' : 'news-card-body';
-  body.appendChild(badge);
-  body.appendChild(title);
-
-  if (excerpt) {
-    var ex = document.createElement('div');
-    ex.className = featured ? 'featured-excerpt' : '';
-    if (!featured) ex.style.cssText = 'font-family:var(--font-b);font-size:13px;color:var(--grey);line-height:1.6;margin-bottom:10px';
-    ex.textContent = excerpt;
-    body.appendChild(ex);
+  if (photo) {
+    var fig = el('div', 'nw-lead__media');
+    var img = document.createElement('img');
+    img.src = a.image; img.alt = '';
+    img.width = 1600; img.height = 900;
+    img.decoding = 'async';
+    img.onerror = function(){ fig.remove(); art.className = 'nw-lead__story is-type'; };
+    fig.appendChild(img);
+    link.appendChild(fig);
   }
 
-  var meta = document.createElement('div');
-  meta.className = featured ? '' : 'news-card-meta';
-  meta.style.cssText = 'font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.06em;' + (featured?'display:flex;align-items:center;gap:10px;':'');
-  if (dateStr) meta.textContent = dateStr;
-  if (featured) {
-    var arrow = document.createElement('span');
-    arrow.style.color = 'var(--yellow)';
-    arrow.style.fontWeight = '700';
-    arrow.textContent = ' Read More →';
-    meta.appendChild(arrow);
-  }
-  // ── Share, on OUR stories only ──────────────────────────────────────
-  // Third-party feed items (Non-League Paper, The FA) aren't ours to make a
-  // Rayners Lane card out of, and they have no article id to link back to.
-  // Only club articles get a Share button.
-  if (a.source === 'club' && a.id && !a.external && window.rlShareArticle) {
-    var sh = document.createElement('button');
-    sh.type = 'button';
-    sh.className = 'news-share';
-    sh.innerHTML = '<i class="ico ico-smartphone"></i> Share';
-    sh.setAttribute('aria-label', 'Share: ' + (a.title || 'this story'));
-    // The card is an <a>. Without stopping the event, tapping Share would
-    // navigate to the article instead of sharing it — and a <button> inside an
-    // <a> is invalid HTML besides, so it's appended to the card, not the link body.
-    var payload = { id: a.id, title: a.title, image: a.image, category: a.category,
-                    shareHeadline: a.shareHeadline || '' };
-    // Warm the card on first touch/hover — that lands before the click, so the
-    // tap itself has no await in front of navigator.share() and iOS still
-    // considers the gesture live. Warming every card on load would render a
-    // dozen 1080x1080 canvases nobody asked for.
-    var warmed = false;
-    var warm = function () {
-      if (warmed || !window.rlPrebuildCard) return;
-      warmed = true; window.rlPrebuildCard(payload);
-    };
-    sh.addEventListener('pointerenter', warm);
-    sh.addEventListener('touchstart', warm, { passive: true });
-    sh.addEventListener('click', function (ev) {
-      ev.preventDefault(); ev.stopPropagation();
-      window.rlShareArticle(payload, sh);
-    });
-    meta.appendChild(sh);
-  }
-  body.appendChild(meta);
+  var wrap = el('div', 'kl-wrap nw-lead__body');
+  var meta = el('p', 'nw-lead__meta');
+  var date = fmtDate(a.date, true);
+  if (date) { var t = el('time', '', date); t.dateTime = a.date; meta.appendChild(t); }
+  meta.appendChild(el('b', '', categoryOf(a)));
+  wrap.appendChild(meta);
+  wrap.appendChild(el('h2', 'nw-lead__title', a.title || ''));
+  var ex = (a.excerpt || '');
+  if (ex.length > 280) ex = ex.slice(0, 280).replace(/\s+\S*$/, '') + '…';
+  if (ex) wrap.appendChild(el('p', 'nw-lead__ex', ex));
+  wrap.appendChild(el('span', 'nw-lead__go', a.external ? 'Read at source' : 'Read the story'));
+  link.appendChild(wrap);
+  art.appendChild(link);
 
-  card.appendChild(imgWrap);
-  card.appendChild(body);
-  return card;
+  var sh = shareButton(a, 'kl-btn kl-btn--line nw-lead__share');
+  if (sh) { var bar = el('div', 'kl-wrap nw-lead__bar'); bar.appendChild(sh); art.appendChild(bar); }
+  return art;
+}
+
+function makeRow(a) {
+  var li = el('li', 'nw-row');
+  var link = linkTo(a, 'nw-row__link');
+  var date = fmtDate(a.date, false);
+  var t = el('time', 'nw-row__date', date || '');
+  if (date) t.dateTime = a.date;
+  link.appendChild(t);
+  link.appendChild(el('b', 'nw-row__cat', categoryOf(a)));
+  link.appendChild(el('h3', 'nw-row__title', a.title || ''));
+  li.appendChild(link);
+  var sh = shareButton(a, 'nw-row__share');
+  if (sh) li.appendChild(sh);
+  return li;
 }
 
 function renderNewsroom() {
@@ -630,49 +352,24 @@ function renderNewsroom() {
   if (!featWrap) return;
 
   if (!filtered.length) {
-    featWrap.innerHTML = '<div class="load-placeholder"><div style="text-align:center"><div style="font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:8px">No articles found</div><div style="font-family:var(--font-c);font-size:13px;color:var(--grey)">Follow @RaynersLaneFC for the latest</div></div></div>';
+    if (!allArticles.length) return;   // still loading — keep the loading line
+    featWrap.innerHTML = '<div class="kl-wrap nw-none"><p class="nw-none__h">No stories from this source right now.</p>' +
+      '<p class="kl-p">Follow @RaynersLaneFC for the latest.</p></div>';
     secGrid.innerHTML = '';
+    if (moreWrap) moreWrap.style.display = 'none';
     return;
   }
 
   featWrap.innerHTML = '';
-  featWrap.appendChild(makeCard(filtered[0], true));
+  featWrap.appendChild(makeLead(filtered[0]));
 
   secGrid.innerHTML = '';
   filtered.slice(1, displayCount).forEach(function(a) {
-    secGrid.appendChild(makeCard(a, false));
+    secGrid.appendChild(makeRow(a));
   });
 
   if (moreWrap) moreWrap.style.display = filtered.length > displayCount ? 'block' : 'none';
-  renderTicker(filtered.slice(0, 8));
-}
-
-function renderTicker(articles) {
-  var el = document.getElementById('ticker-list');
-  if (!el) return;
-  el.innerHTML = '';
-  articles.forEach(function(a) {
-    var src = SOURCES[a.source] || SOURCES.club;
-    var ago = a.date ? timeAgo(a.date) : '';
-    var item = document.createElement('div');
-    item.className = 'ticker-item';
-    item.innerHTML = '<div class="ticker-source" style="color:' + src.colour + '">' +
-      '<div style="width:6px;height:6px;border-radius:var(--r-circle);background:' + src.colour + '"></div>' + src.label + '</div>' +
-      '<div class="ticker-title">' + (a.title||'') + '</div>' +
-      (ago ? '<div class="ticker-time">' + ago + '</div>' : '');
-    item.querySelector('.ticker-title').addEventListener('click', function() {
-      if (a.external) window.open(a.link,'_blank'); else window.location.href = a.link;
-    });
-    item.querySelector('.ticker-title').style.cursor = 'pointer';
-    el.appendChild(item);
-  });
-}
-
-function timeAgo(d) {
-  var s = (Date.now() - new Date(d)) / 1000;
-  if (s < 3600)   return Math.floor(s/60) + 'm ago';
-  if (s < 86400)  return Math.floor(s/3600) + 'h ago';
-  if (s < 604800) return Math.floor(s/86400) + 'd ago';
-  return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
 </script>
+</body>
+</html>
