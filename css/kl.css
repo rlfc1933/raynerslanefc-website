@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════════════════════════════════════
+   KIT LAUNCH — the 2026/27 public-site vocabulary, shared by every page.
+   Read DESIGN.md first. The rules, in one breath:
+     · Photography full-bleed, the page's name set as large as the screen
+       allows (Bebas, uppercase by the face itself), one line of plain copy.
+     · Colour by the FIELD: yellow owns whole sections, bottle green owns
+       membership, black carries photography. Never yellow as sprinkles.
+     · Structure is hairlines and type. No boxed cards, no pills, no glow,
+       no gradient text, no icon-in-a-circle, no "eyebrow" kickers.
+     · Numbers are tabular and big — football is numbers.
+     · Motion: a CSS title-card arrival only; GSAP scroll work lives in
+       js/lane-motion.js. Everything is still under reduced motion.
+   ════════════════════════════════════════════════════════════════════════ */
+.kl-wrap{width:min(100% - 32px,1360px);margin-inline:auto}
+@media (min-width:900px){.kl-wrap{width:min(100% - 80px,1360px)}}
+
+/* Shared type */
+.kl-h2{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,7.4vw,6.5rem);line-height:.86;letter-spacing:-.005em;text-transform:uppercase;color:var(--white);margin:0}
+.kl-more{font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--white);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px;text-decoration-color:var(--yellow);min-height:44px;display:inline-flex;align-items:center}
+.kl-more:hover{color:var(--yellow)}
+
+/* Buttons — rectangles with intent. Solid = the action; line = the alternative. */
+.kl-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 24px;border-radius:var(--r-sm);
+  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;text-decoration:none;white-space:nowrap;
+  transition:background var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),transform var(--dur-instant) var(--ease-out)}
+.kl-btn:active{transform:translateY(1px)}
+.kl-btn--solid{background:var(--yellow);color:#080808;border:2px solid var(--yellow)}
+.kl-btn--solid:hover{background:#FFE14D;border-color:#FFE14D}
+.kl-btn--line{background:transparent;color:var(--white);border:2px solid rgba(245,243,237,.55)}
+.kl-btn--line:hover{border-color:var(--white)}
+.kl-btn--ink{background:#080808;color:var(--yellow);border:2px solid #080808}
+.kl-btn--ink:hover{background:#1A1A1A}
+.kl-btn--inkline{background:transparent;color:#080808;border:2px solid #080808}
+.kl-btn--inkline:hover{background:rgba(8,8,8,.08)}
+.kl-btn:focus-visible,.kl-more:focus-visible,.kl-bug:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.kl-gate .kl-btn:focus-visible{outline-color:#080808}
+
+/* ── PAGE TITLE CARD (.kl-ph) ───────────────────────────────────────────
+   Every inside page opens with one. Markup:
+   <section class="kl-ph" aria-labelledby="ph-title">
+     <div class="kl-ph__media" aria-hidden="true"><img …></div>   (optional)
+     <div class="kl-wrap kl-ph__inner">
+       <p class="kl-ph__meta">Short context line</p>                (optional)
+       <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Fixtures</span></span></h1>
+       <p class="kl-ph__line">One sentence of plain copy.</p>
+       <div class="kl-ph__acts">…kl-btn…</div>                        (optional)
+     </div>
+   </section>
+   Modifiers: --yellow (drenched poster, no photo), --green, --short (no
+   photo, less height — for utility pages). */
+.kl-ph{position:relative;isolation:isolate;overflow:hidden;background:#080808;color:var(--white);display:grid;align-items:end;min-height:clamp(420px,72svh,820px)}
+.kl-ph__media{position:absolute;inset:0;z-index:-2}
+.kl-ph__media img,.kl-ph__media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.kl-ph__media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.45) 0%,rgba(8,8,8,.1) 35%,rgba(8,8,8,.88) 100%),linear-gradient(90deg,rgba(8,8,8,.5),rgba(8,8,8,0) 65%)}
+.kl-ph__inner{padding:clamp(40px,8vw,96px) 0 clamp(32px,5vw,56px);display:grid;gap:18px}
+.kl-ph__meta{font-family:var(--font-body);font-weight:700;font-size:14px;color:var(--white);margin:0;max-width:60ch}
+.kl-ph__title{font-family:var(--font-display);font-weight:400;font-size:min(clamp(4.5rem,15vw,15rem),26svh);line-height:.8;letter-spacing:-.01em;text-transform:uppercase;margin:0;color:var(--white)}
+.kl-ph__title em{font-style:normal;color:var(--yellow)}
+.kl-ph__line{font-family:var(--font-body);font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.5;max-width:52ch;margin:0;color:var(--white)}
+.kl-ph__acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.kl-ph--short{min-height:0}
+.kl-ph--short .kl-ph__inner{padding:clamp(48px,7vw,88px) 0 clamp(28px,4vw,44px)}
+.kl-ph--yellow{background:var(--yellow);color:#080808}
+.kl-ph--yellow .kl-ph__title,.kl-ph--yellow .kl-ph__line,.kl-ph--yellow .kl-ph__meta{color:#080808}
+.kl-ph--yellow .kl-ph__title em{color:#080808;-webkit-text-stroke:0}
+.kl-ph--green{background:var(--green,#1A5C32)}
+@media (max-width:699px){.kl-ph__title{font-size:min(24vw,22svh)}}
+
+.kl-line{display:block;overflow:hidden;padding-top:.04em}
+.kl-line > span{display:block}
+
+/* Section rhythm for inside pages */
+.kl-sec{padding:clamp(56px,9vw,120px) 0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.kl-sec__head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:clamp(24px,4vw,44px)}
+.kl-sec--yellow{background:var(--yellow);color:#080808;border-top:0}
+.kl-sec--yellow .kl-h2{color:#080808}
+.kl-sec--green{background:var(--green,#1A5C32);border-top:0}
+.kl-p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;max-width:60ch;margin:0 0 1em}
+
+/* Ruled list — the house alternative to a grid of cards */
+.kl-rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.kl-rows > li{border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14));padding:18px 0}
+
+/* Arrival, once, CSS only */
+@media (prefers-reduced-motion: no-preference){
+  html:not(.a11y-reduce-motion) .kl-ph .kl-line > span{animation:kl-rise var(--dur-slow,.9s) cubic-bezier(.16,.84,.24,1) both}
+  html:not(.a11y-reduce-motion) .kl-ph__line,html:not(.a11y-reduce-motion) .kl-ph__acts,html:not(.a11y-reduce-motion) .kl-ph__meta{animation:kl-fade .7s .3s ease-out both}
+}
+@keyframes kl-rise{from{transform:translateY(105%)}to{transform:none}}
+@keyframes kl-fade{from{opacity:0}to{opacity:1}}

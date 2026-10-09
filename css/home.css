@@ -8,29 +8,6 @@
    no pills, no glow. Numbers are tabular and big because football is numbers.
    ════════════════════════════════════════════════════════════════════════ */
 
-.kl-wrap{width:min(100% - 32px,1360px);margin-inline:auto}
-@media (min-width:900px){.kl-wrap{width:min(100% - 80px,1360px)}}
-
-/* Shared type */
-.kl-h2{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,7.4vw,6.5rem);line-height:.86;letter-spacing:-.005em;text-transform:uppercase;color:var(--white);margin:0}
-.kl-more{font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--white);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px;text-decoration-color:var(--yellow);min-height:44px;display:inline-flex;align-items:center}
-.kl-more:hover{color:var(--yellow)}
-
-/* Buttons — rectangles with intent. Solid = the action; line = the alternative. */
-.kl-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 24px;border-radius:var(--r-sm);
-  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;text-decoration:none;white-space:nowrap;
-  transition:background var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),transform var(--dur-instant) var(--ease-out)}
-.kl-btn:active{transform:translateY(1px)}
-.kl-btn--solid{background:var(--yellow);color:#080808;border:2px solid var(--yellow)}
-.kl-btn--solid:hover{background:#FFE14D;border-color:#FFE14D}
-.kl-btn--line{background:transparent;color:var(--white);border:2px solid rgba(245,243,237,.55)}
-.kl-btn--line:hover{border-color:var(--white)}
-.kl-btn--ink{background:#080808;color:var(--yellow);border:2px solid #080808}
-.kl-btn--ink:hover{background:#1A1A1A}
-.kl-btn--inkline{background:transparent;color:#080808;border:2px solid #080808}
-.kl-btn--inkline:hover{background:rgba(8,8,8,.08)}
-.kl-btn:focus-visible,.kl-more:focus-visible,.kl-bug:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
-.kl-gate .kl-btn:focus-visible{outline-color:#080808}
 
 /* ① TITLE CARD ─────────────────────────────────────────────────────────── */
 .kl-hero{position:relative;min-height:calc(100svh - var(--nav-h));display:grid;grid-template-rows:1fr auto;overflow:hidden;background:#080808;isolation:isolate}
@@ -50,8 +27,6 @@
   font-size:min(clamp(5.5rem,21vw,22rem),29svh);line-height:.8;letter-spacing:-.012em}
 /* Phones: the name fills the width — it is the picture, not a caption. */
 @media (max-width:699px){.kl-hero__word{font-size:min(33vw,24svh)}}
-.kl-line{display:block;overflow:hidden;padding-top:.04em}
-.kl-line > span{display:block}
 .kl-hero__word em{font-style:normal;color:var(--yellow)}
 .kl-hero__foot{display:grid;gap:20px;align-items:end}
 @media (min-width:900px){.kl-hero__foot{grid-template-columns:minmax(0,44ch) auto;justify-content:space-between}}
@@ -212,8 +187,6 @@ html.a11y-reduce-motion .kl-hero__video{display:none}
   html:not(.a11y-reduce-motion) .kl-hero__foot{animation:kl-fade .7s .35s ease-out both}
   html:not(.a11y-reduce-motion) .kl-bug{animation:kl-up .6s .5s cubic-bezier(.16,.84,.24,1) both}
 }
-@keyframes kl-rise{from{transform:translateY(105%)}to{transform:none}}
-@keyframes kl-fade{from{opacity:0}to{opacity:1}}
 @keyframes kl-up{from{transform:translateY(100%)}to{transform:none}}
 
 /* ── The FAQ and the alerts bar, set as editorial type — not a wall of boxes.
