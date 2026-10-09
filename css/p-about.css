@@ -1,0 +1,154 @@
+/* ABOUT / THE CLUB — Kit Launch. Ground from the air, then the club in
+   type: who we are, the chairman's words, the gaffer on green, the people as
+   a ruled list, Tithe Farm full-bleed, the gate poster in yellow. */
+
+/* Identity */
+.ab-who__grid{display:grid;gap:28px}
+@media (min-width:980px){.ab-who__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:64px;align-items:start}}
+.ab-who__body p{font-family:var(--font-body);font-size:clamp(1rem,1.25vw,1.1rem);line-height:1.7;color:rgba(245,243,237,.86);margin:0 0 1.1em;max-width:60ch}
+.ab-who__body .ab-who__lead{font-size:clamp(1.25rem,2vw,1.6rem);line-height:1.45;color:var(--white);font-weight:500}
+.ab-nums{display:grid;margin:clamp(48px,7vw,88px) 0 0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+@media (min-width:760px){.ab-nums{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ab-nums > div{padding:22px 0 24px;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14));display:grid;gap:10px;align-content:start}
+@media (min-width:760px){.ab-nums > div{padding:22px 24px 8px 0;border-bottom:0}.ab-nums > div + div{border-left:1px solid var(--ed-line,rgba(245,243,237,.14));padding-left:24px}}
+.ab-nums dt{font-family:var(--font-display);font-size:clamp(5rem,10vw,9rem);line-height:.8;color:var(--yellow);font-variant-numeric:tabular-nums}
+.ab-nums dd{margin:0;font-family:var(--font-body);font-size:15px;line-height:1.55;color:rgba(245,243,237,.86);max-width:32ch}
+
+/* Shared splits (the .bio-split class is kept as the structural hook; Kit
+   Launch sets its own proportions here) */
+#chairman .bio-split,#manager .bio-split{display:grid;grid-template-columns:1fr;gap:clamp(28px,5vw,72px);align-items:end}
+@media (min-width:900px){
+  #chairman .bio-split{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+  #manager .bio-split--rev{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)}
+}
+.ab-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+
+.ab-portrait{margin:0;position:relative;overflow:hidden;border-radius:var(--r-md);background:#141414;aspect-ratio:4/5}
+.ab-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%}
+.ab-portrait figcaption{position:absolute;left:0;right:0;bottom:0;padding:48px 20px 18px;background:linear-gradient(0deg,rgba(8,8,8,.85),rgba(8,8,8,0));display:grid;gap:6px}
+.ab-portrait__name{font-family:var(--font-display);font-size:clamp(2.6rem,5vw,4.4rem);line-height:.85;color:var(--white);text-transform:uppercase}
+.ab-portrait__role{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--yellow)}
+/* Phones: the portraits are 600-800px originals, so they sit as an inset
+   beside the name rather than full-width (stays sharp at 3x). */
+@media (max-width:899px){
+  .ab-portrait{aspect-ratio:auto;background:none;border-radius:0;overflow:visible;display:grid;grid-template-columns:min(45%,220px) minmax(0,1fr);gap:16px;align-items:end}
+  .ab-portrait img,.ab-portrait picture{position:static;display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border-radius:var(--r-md)}
+  .ab-portrait figcaption{position:static;background:none;padding:0}
+  .ab-portrait--boss{grid-template-columns:min(60%,290px)}
+  .ab-portrait--boss picture img{border-radius:var(--r-md)}
+}
+
+/* Chairman */
+.ab-chair{background:#080808;padding:clamp(56px,9vw,120px) 0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.ab-chair__text .kl-h2{font-size:clamp(2.8rem,5.6vw,5rem)}
+.ab-quote{margin:clamp(24px,3vw,36px) 0 clamp(24px,3vw,32px);padding:0}
+.ab-quote p{font-family:var(--font-body);font-weight:600;font-size:clamp(1.35rem,2.2vw,1.9rem);line-height:1.35;color:var(--white);margin:0;max-width:34ch;padding-top:18px;border-top:2px solid var(--yellow)}
+.ab-quote em{font-style:normal;color:var(--yellow)}
+.ab-quote footer{font-family:var(--font-body);font-weight:700;font-size:15px;color:#AAAAAA;margin-top:18px}
+.ab-chair .kl-p{color:rgba(245,243,237,.86)}
+
+/* Manager, on heritage green */
+.ab-boss__name{font-family:var(--font-display);font-weight:400;font-size:clamp(5rem,13vw,12rem);line-height:.8;text-transform:uppercase;color:var(--white);margin:0}
+.ab-boss__role{font-family:var(--font-body);font-weight:800;font-size:15px;color:var(--yellow);margin:18px 0 20px}
+.ab-boss .kl-p{color:#F5F3ED}
+.ab-portrait--boss{background:#236B3C}
+.ab-boss .kl-btn--line{border-color:rgba(245,243,237,.8)}
+
+/* Committee — names and roles on hairlines */
+.ab-people > li{display:grid;gap:4px 24px;align-items:baseline;padding:16px 0}
+@media (min-width:760px){.ab-people > li{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);padding:18px 0}}
+.ab-people__name,.ab-people__btn{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,3.6vw,3.2rem);line-height:.95;text-transform:uppercase;color:var(--white)}
+.ab-people__btn{background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:left;min-height:44px;display:inline-flex;align-items:center;gap:12px;text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:.06em;text-underline-offset:.12em}
+.ab-people__btn:hover{color:var(--yellow)}
+.ab-people__btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.ab-people__role{font-family:var(--font-body);font-weight:800;font-size:15px;color:var(--yellow)}
+.ab-people__note{font-family:var(--font-body);font-size:14px;color:#AAAAAA;line-height:1.45}
+.ab-people > li.ab-people__row--vac{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;padding:20px 0}
+.ab-people__vac{font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--white)}
+.ab-people > li:hover .ab-people__name{color:var(--yellow)}
+
+/* Profile sheet (opened from a committee name with a bio) */
+.ab-sheet{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px}
+.ab-sheet__scrim{position:absolute;inset:0;background:rgba(8,8,8,.8);border:0;padding:0;cursor:pointer}
+.ab-sheet__card{position:relative;max-width:460px;width:100%;background:#0E0E0E;border-top:4px solid var(--yellow);border-radius:var(--r-lg);overflow:hidden;max-height:88vh;overflow-y:auto}
+.ab-sheet__x{position:absolute;top:12px;right:12px;z-index:2;width:44px;height:44px;border-radius:var(--r-sm);background:rgba(8,8,8,.7);border:1px solid rgba(245,243,237,.3);color:var(--white);font:800 18px/1 var(--font-body);cursor:pointer}
+.ab-sheet__x:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.ab-sheet__ph{aspect-ratio:1/1;max-height:360px;overflow:hidden;background:#141414}
+.ab-sheet__ph img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.ab-sheet__in{padding:22px 24px 26px}
+.ab-sheet__name{font-family:var(--font-display);font-size:2.4rem;line-height:.95;text-transform:uppercase;color:var(--white);margin:0}
+.ab-sheet__role{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--yellow);margin:8px 0 0}
+.ab-sheet__note{font-family:var(--font-body);font-size:14px;color:#AAAAAA;margin:8px 0 0}
+.ab-sheet__bio{font-family:var(--font-body);font-size:15px;line-height:1.7;color:rgba(245,243,237,.86);margin:14px 0 0}
+
+/* Tithe Farm, full-bleed */
+.ab-ground{position:relative;min-height:min(86svh,820px);display:flex;align-items:flex-end;isolation:isolate;overflow:hidden;background:#080808}
+.ab-ground__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.ab-ground__shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,8,8,.1) 25%,rgba(8,8,8,.9) 100%),linear-gradient(90deg,rgba(8,8,8,.5),rgba(8,8,8,0) 65%)}
+.ab-ground__in{padding:48px 0 clamp(40px,6vw,64px)}
+.ab-ground__h{font-family:var(--font-display);font-weight:400;font-size:clamp(4.5rem,15vw,15rem);line-height:.8;text-transform:uppercase;color:var(--white);margin:0}
+.ab-ground__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;color:#F5F3ED;max-width:48ch;margin:18px 0 18px}
+
+/* Getting here */
+.ab-here__grid{display:grid;gap:clamp(36px,5vw,72px)}
+@media (min-width:1000px){.ab-here__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.ab-here .kl-h2{margin-bottom:28px}
+.ab-ways > li{display:grid;gap:6px;padding:20px 0}
+@media (min-width:600px){.ab-ways > li{grid-template-columns:8rem minmax(0,1fr);gap:20px}}
+.ab-ways h3{font-family:var(--font-display);font-weight:400;font-size:1.7rem;line-height:1;text-transform:uppercase;color:var(--yellow);margin:0;letter-spacing:0}
+.ab-ways p{font-family:var(--font-body);font-size:15px;line-height:1.65;color:rgba(245,243,237,.86);margin:0}
+.ab-ways strong{color:var(--white)}
+.ab-here .kl-more{margin-top:16px}
+.ab-here__media{display:grid;gap:16px}
+.ab-map{position:relative;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden;background:#141414}
+.ab-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(1) brightness(.75) contrast(1.05)}
+.ab-shot{margin:0}
+.ab-shot img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r-md);display:block}
+.ab-shot figcaption{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;padding-top:10px}
+
+/* Admission poster */
+.ab-gate__grid{display:grid;gap:40px;align-items:end}
+@media (min-width:980px){.ab-gate__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+.ab-gate .kl-h2{font-size:clamp(3.6rem,10vw,9rem);margin-bottom:22px}
+.ab-gate__p{font-family:var(--font-body);font-weight:600;font-size:16px;line-height:1.55;color:#080808;max-width:44ch;margin:0 0 12px}
+.ab-gate__p a{color:#080808;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;overflow-wrap:anywhere}
+.ab-gate a:focus-visible{outline:3px solid #080808;outline-offset:2px}
+.kl-sec--yellow .gate{border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;color:#080808}
+body .kl-sec--yellow .gate__head{background:transparent!important;border:0;border-bottom:2px solid #080808;padding:0 0 12px;display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+.kl-sec--yellow .gate__eyebrow{font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);color:#080808}
+.kl-sec--yellow .gate__eyebrow .ico{display:none}
+.kl-sec--yellow .gate__sub{font-family:var(--font-body);font-weight:700;font-size:14px;color:#080808;text-transform:none;letter-spacing:0}
+.kl-sec--yellow .gate__grid{grid-template-columns:1fr 1fr}
+.kl-sec--yellow .gate__row{text-align:left;align-items:flex-start;padding:16px 16px 18px 0;border-right:0;border-bottom:2px solid #080808;flex-direction:column-reverse;justify-content:flex-end;gap:6px}
+.kl-sec--yellow .gate__row:nth-child(odd){border-right:2px solid #080808}
+.kl-sec--yellow .gate__row:nth-child(even){padding-left:18px}
+.kl-sec--yellow .gate__row:nth-child(1),.kl-sec--yellow .gate__row:nth-child(2){border-bottom:2px solid #080808}
+.kl-sec--yellow .gate__price{font-family:var(--font-display);font-size:clamp(3.4rem,7vw,6rem);line-height:.85;color:#080808;font-variant-numeric:tabular-nums}
+.kl-sec--yellow .gate__label{font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:0;text-transform:none;color:#080808}
+.kl-sec--yellow .gate__note{font-size:13px;font-weight:600;color:#141414;letter-spacing:0}
+
+/* Affiliations — a ruled index of names */
+.ab-aff{display:grid;gap:28px}
+@media (min-width:900px){.ab-aff{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:start}}
+.ab-aff__list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+@media (min-width:640px){.ab-aff__list{columns:2;column-gap:32px}}
+.ab-aff__list li{break-inside:avoid;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.ab-aff__list a{display:flex;align-items:center;min-height:56px;padding:10px 0;font-family:var(--font-body);font-weight:700;font-size:16px;line-height:1.35;color:var(--white);text-decoration:none}
+.ab-aff__list a:hover{color:var(--yellow)}
+.ab-aff__list a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+/* Community partner */
+.ab-partner__grid{display:grid;gap:clamp(28px,5vw,64px)}
+@media (min-width:900px){.ab-partner__grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:start}}
+.ab-partner__logo{background:#000000;border-radius:var(--r-md);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:clamp(24px,4vw,48px)}
+.ab-partner__logo img{width:100%;max-width:360px;height:auto}
+.ab-partner .kl-h2{margin-bottom:22px}
+.ab-partner__p{color:rgba(245,243,237,.86)}
+.ab-partner__p strong{color:var(--white)}
+.ab-partner__who{max-width:60ch;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;margin:0 0 18px}
+.ab-partner__list{margin-bottom:20px}
+.ab-partner__list > li{padding:12px 0;font-family:var(--font-body);font-weight:600;font-size:16px;color:var(--white)}
+.ab-partner__more{display:flex;gap:24px;margin:10px 0 0}
+.ab-partner .kl-btn{white-space:normal;text-align:center}
+.ab-partner__grid > div{min-width:0}
+.ab-partner__fine{font-family:var(--font-body);font-size:13px;color:#AAAAAA;margin:6px 0 0}

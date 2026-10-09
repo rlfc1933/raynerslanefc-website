@@ -58,39 +58,6 @@
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://raynerslanefc.co.uk/innovation.html" }
   }
   </script>
-  <style>
-    /* An essay, not a product page. The restraint is the design: one column, a
-       real reading measure, nothing to click through, no gallery. */
-    .ess-hero{position:relative;overflow:hidden;padding:clamp(92px,14vh,180px) 0 clamp(56px,8vw,92px);
-      background:radial-gradient(120% 90% at 78% -20%,rgba(255,209,0,.13) 0%,transparent 58%),
-                 linear-gradient(168deg,var(--green) 0%,#0a1c10 48%,var(--black) 100%)}
-    .ess-eyebrow{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.26em;
-      text-transform:uppercase;color:var(--yellow);margin-bottom:20px}
-    .ess-h1{font-family:var(--font-d);font-size:clamp(42px,6.4vw,88px);line-height:.96;letter-spacing:.01em;
-      color:var(--white);max-width:17ch;margin-bottom:20px}
-    .ess-h1 span{color:var(--yellow)}
-    .ess-standfirst{font-family:var(--font-b);font-size:clamp(16px,2vw,21px);font-weight:300;line-height:1.65;
-      color:var(--lgrey);max-width:52ch}
-    .ess{background:var(--black);padding:clamp(44px,7vw,82px) 0 clamp(60px,9vw,108px)}
-    .ess-body{max-width:62ch}
-    .ess-body p{font-family:var(--font-b);font-size:clamp(15.5px,1.7vw,18px);line-height:1.9;color:var(--lgrey);margin-bottom:26px}
-    .ess-body p.lead{font-size:clamp(19px,2.3vw,25px);line-height:1.6;color:var(--white);font-weight:300;margin-bottom:32px}
-    .ess-body h2{font-family:var(--font-d);font-size:clamp(26px,3.4vw,42px);line-height:1.05;letter-spacing:.02em;
-      color:var(--white);margin:52px 0 20px}
-    .ess-body h2 span{color:var(--yellow)}
-    .ess-body strong{color:var(--white);font-weight:600}
-    .ess-pull{border-left:3px solid var(--yellow);padding:4px 0 4px 26px;margin:40px 0}
-    .ess-pull p{font-family:var(--font-d);font-size:clamp(23px,3.2vw,36px);line-height:1.16;letter-spacing:.02em;
-      color:var(--white);margin:0}
-    .ess-end{border-top:1px solid var(--border);margin-top:60px;padding-top:32px}
-    .ess-end p{font-family:var(--font-b);font-size:14px;line-height:1.85;color:var(--grey);max-width:58ch;margin-bottom:20px}
-    .ess-cta{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);color:var(--black);
-      font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
-      padding:15px 28px;text-decoration:none;border:2px solid var(--yellow);transition:transform .2s}
-    .ess-cta:hover{transform:translateY(-2px)}
-    .ess-cta--ghost{background:transparent;color:var(--yellow)}
-    .ess-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -105,20 +72,23 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/innovation.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Technology & The Lane","item":"https://raynerslanefc.co.uk/innovation.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-innovation.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<section class="ess-hero">
-  <div class="container">
-    <div class="ess-eyebrow">Rayners Lane FC &middot; Est. 1933</div>
-    <h1 class="ess-h1">A club of 1933, living in <span>the world of now.</span></h1>
-    <p class="ess-standfirst">Why a volunteer-run community club in Harrow decided that technology was not a luxury, and what it changed about us.</p>
+<section class="kl-ph kl-ph--yellow ess-ph" aria-labelledby="ph-title">
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">A club of 1933, living in the world of now.</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Technology</span></span><span class="kl-line"><span>&amp; The Lane</span></span></h1>
+    <p class="kl-ph__line">Why a volunteer-run community club in Harrow decided that technology was not a luxury, and what it changed about us.</p>
   </div>
 </section>
 
 <section class="ess">
-  <div class="container">
+  <div class="kl-wrap">
     <div class="ess-body">
 
       <p class="lead">Rayners Lane has been here since 1933. Ninety-odd years of the same corner of Harrow, the same yellow, the same reliance on people who give up their Saturdays for nothing. None of that is the part we ever wanted to change.</p>
@@ -168,8 +138,8 @@
       <div class="ess-end">
         <p>Rayners Lane FC play at Tithe Farm Sports &amp; Social Club, Harrow, in the Combined Counties Premier Division North. If you want to play, volunteer, support or partner with the club, we would like to hear from you.</p>
         <div class="ess-ctas">
-          <a class="ess-cta" href="investment.html">Partner with the club</a>
-          <a class="ess-cta ess-cta--ghost" href="contact.html">Get in touch</a>
+          <a class="kl-btn kl-btn--solid" href="investment.html">Partner with the club</a>
+          <a class="kl-btn kl-btn--line" href="contact.html">Get in touch</a>
         </div>
       </div>
 

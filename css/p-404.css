@@ -1,0 +1,20 @@
+/* 404 — one drenched yellow poster. The number is the picture, the line is
+   the joke, the routes are the way home. */
+.e4{min-height:calc(100svh - var(--nav-h,72px));position:relative}
+.e4::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;
+  background:repeating-linear-gradient(90deg,#080808 0 56px,var(--yellow) 56px 112px,#1A5C32 112px 168px,var(--yellow) 168px 224px)}
+.e4__in{gap:22px;align-content:end}
+.e4__num{font-family:var(--font-display);font-size:min(clamp(7rem,30vw,26rem),34svh);line-height:.78;letter-spacing:-.02em;color:#080808;margin:0;font-variant-numeric:tabular-nums}
+.e4__title{font-size:min(clamp(3.6rem,10vw,9.5rem),17svh)}
+@media (max-width:699px){.e4__title{font-size:min(17vw,13svh)}}
+.e4__line{font-weight:600;min-height:3em}
+.e4__routes{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+@media (min-width:900px){
+  .e4__in{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"num num" "title title" "line routes";align-items:end;column-gap:40px}
+  .e4__num{grid-area:num;font-size:min(30vw,38svh)}
+  .e4__title{grid-area:title;font-size:min(9.6vw,17svh)}
+  .e4__line{grid-area:line;align-self:center;margin:0}
+  .e4__routes{grid-area:routes;justify-content:flex-end;margin:0}
+}
+.e4 .kl-btn:focus-visible{outline-color:#080808}
+@media (max-width:480px){.e4__routes .kl-btn{flex:1 1 100%}}

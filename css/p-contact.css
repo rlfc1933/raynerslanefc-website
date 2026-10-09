@@ -1,0 +1,46 @@
+/* CONTACT — Kit Launch. The address is the signature; the form is the point. */
+.ct-mail{background:#080808;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.ct-mail__in{padding:clamp(28px,4vw,48px) 0;display:grid;gap:6px}
+.ct-mail__k{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;margin:0}
+.ct-mail__a{font-family:var(--font-display);font-size:clamp(2.1rem,7.4vw,6.5rem);line-height:.9;color:var(--white);text-decoration:none;overflow-wrap:anywhere;
+  text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:.06em;text-underline-offset:.1em;min-height:44px;display:inline-block;justify-self:start}
+.ct-mail__a:hover{color:var(--yellow)}
+.ct-mail__a:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}
+
+.ct-split{display:grid;gap:28px}
+@media (min-width:900px){.ct-split{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:start}}
+.ct-rows > li{display:grid;gap:4px;padding:22px 0}
+@media (min-width:700px){.ct-rows > li{grid-template-columns:minmax(0,14rem) minmax(0,1fr);column-gap:24px}.ct-rows__n{grid-column:2}}
+.ct-rows p{margin:0}
+.ct-rows__k{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;padding-top:6px}
+.ct-rows__v{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.6rem);line-height:1;color:var(--white);overflow-wrap:anywhere}
+.ct-rows__n{font-family:var(--font-body);font-size:15px;color:#AAAAAA}
+.ct-rows a{color:inherit;text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:4px}
+.ct-rows a:hover{color:var(--yellow)}
+.ct-rows__n a{color:var(--white);display:inline-flex;min-height:44px;align-items:center}
+
+/* Where — the yellow poster, prices on ink rules */
+.ct-where__grid{display:grid;gap:40px;align-items:end}
+@media (min-width:980px){.ct-where__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+.ct-where .kl-h2{font-size:clamp(3.4rem,9vw,8.5rem)}
+.ct-where__addr{font-family:var(--font-body);font-weight:700;font-size:clamp(1.1rem,1.6vw,1.35rem);line-height:1.45;color:#080808;margin:22px 0 24px}
+.ct-where__acts{display:flex;flex-wrap:wrap;gap:10px}
+
+/* The shared gate block (js/components.js initGate) re-set on the yellow field */
+.kl-sec--yellow .gate{border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;color:#080808}
+body .kl-sec--yellow .gate__head{background:transparent!important;border:0;border-bottom:2px solid #080808;padding:0 0 12px;display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+.kl-sec--yellow .gate__eyebrow{font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);color:#080808}
+.kl-sec--yellow .gate__eyebrow .ico{display:none}
+.kl-sec--yellow .gate__sub{font-family:var(--font-body);font-weight:700;font-size:14px;color:#080808;text-transform:none;letter-spacing:0}
+.kl-sec--yellow .gate__grid{grid-template-columns:1fr 1fr}
+.kl-sec--yellow .gate__row{text-align:left;align-items:flex-start;padding:16px 16px 18px 0;border-right:0;border-bottom:2px solid #080808;flex-direction:column-reverse;justify-content:flex-end;gap:6px}
+.kl-sec--yellow .gate__row:nth-child(odd){border-right:2px solid #080808}
+.kl-sec--yellow .gate__row:nth-child(even){padding-left:18px}
+.kl-sec--yellow .gate__row:nth-child(1),.kl-sec--yellow .gate__row:nth-child(2){border-bottom:2px solid #080808}
+.kl-sec--yellow .gate__price{font-family:var(--font-display);font-size:clamp(3.4rem,7vw,6rem);line-height:.85;color:#080808;font-variant-numeric:tabular-nums}
+.kl-sec--yellow .gate__label{font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:0;text-transform:none;color:#080808}
+.kl-sec--yellow .gate__note{font-size:13px;font-weight:600;color:#141414;letter-spacing:0}
+
+/* Sponsor */
+.ct-two__p{color:rgba(245,243,237,.86);font-size:clamp(1.1rem,1.6vw,1.35rem)}
+.ct-two__acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}

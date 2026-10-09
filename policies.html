@@ -27,130 +27,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .policy-nav {
-      background:var(--card); border:1px solid var(--border);
-      padding:24px 28px; margin-bottom:48px; border-radius:var(--r-xs);
-    }
-    .policy-nav h2 {
-      font-family:var(--font-c); font-size:11px; font-weight:700;
-      letter-spacing:.18em; text-transform:uppercase; color:var(--yellow);
-      margin-bottom:16px;
-    }
-    .policy-nav ul {
-      display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
-      gap:6px; list-style:none;
-    }
-    .policy-nav li a {
-      font-family:var(--font-c); font-size:14px; font-weight:600;
-      letter-spacing:.04em; color:var(--lgrey); transition:color .2s;
-      display:flex; align-items:center; gap:8px;
-    }
-    .policy-nav li a:hover { color:var(--yellow); }
-    .policy-nav li a::before {
-      content:""; width:4px; height:4px; border-radius:var(--r-circle);
-      background:var(--yellow); flex-shrink:0;
-    }
-    .policy-section {
-      margin-bottom:64px; scroll-margin-top:90px;
-    }
-    .policy-section h2 {
-      font-family:var(--font-d); font-size:clamp(32px,4vw,52px);
-      letter-spacing:.03em; color:var(--white); margin-bottom:8px;
-    }
-    .policy-section h2 span { color:var(--yellow); }
-    .policy-divider {
-      width:40px; height:3px; background:var(--yellow); margin:12px 0 24px;
-    }
-    .policy-body {
-      font-family:var(--font-b); font-size:15px; color:var(--lgrey);
-      line-height:1.85; max-width:780px;
-    }
-    .policy-body p { margin-bottom:14px; }
-    .policy-body h3 {
-      font-family:var(--font-c); font-size:13px; font-weight:700;
-      letter-spacing:.14em; text-transform:uppercase; color:var(--white);
-      margin:24px 0 10px;
-    }
-    .policy-body ul {
-      list-style:none; margin-bottom:14px; display:flex;
-      flex-direction:column; gap:6px;
-    }
-    .policy-body ul li {
-      padding-left:20px; position:relative; color:var(--lgrey);
-    }
-    .policy-body ul li::before {
-      content:""; position:absolute; left:0; top:9px;
-      width:6px; height:6px; border-radius:var(--r-circle);
-      background:var(--yellow); flex-shrink:0;
-    }
-    .policy-body strong { color:var(--white); font-weight:600; }
-    .policy-body a { color:var(--yellow); text-decoration:underline; }
-    .emergency-box {
-      background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3);
-      border-left:4px solid #EF4444; padding:20px 24px;
-      margin:24px 0; border-radius:0 var(--r-xs) var(--r-xs) 0;
-    }
-    .emergency-box h3 {
-      font-family:var(--font-c); font-size:12px; font-weight:700;
-      letter-spacing:.16em; text-transform:uppercase; color:#EF4444;
-      margin-bottom:10px;
-    }
-    .emergency-box p {
-      font-family:var(--font-b); font-size:14px; color:var(--lgrey);
-      line-height:1.7; margin:0;
-    }
-    .emergency-box strong { color:var(--white); }
-    .info-box {
-      background:rgba(255,209,0,.06); border:1px solid rgba(255,209,0,.2);
-      border-left:4px solid var(--yellow); padding:20px 24px;
-      margin:24px 0; border-radius:0 var(--r-xs) var(--r-xs) 0;
-    }
-    .info-box p {
-      font-family:var(--font-b); font-size:14px; color:var(--lgrey);
-      line-height:1.7; margin:0;
-    }
-    .policy-tag {
-      display:inline-flex; align-items:center; gap:6px;
-      background:var(--green); color:rgba(255,255,255,.8);
-      font-family:var(--font-c); font-size:10px; font-weight:700;
-      letter-spacing:.14em; text-transform:uppercase;
-      padding:4px 10px; border-radius:var(--r-xs); margin-bottom:12px;
-    }
-    .policy-date {
-      font-family:var(--font-c); font-size:12px; color:var(--grey);
-      letter-spacing:.08em; margin-bottom:20px;
-    }
-    .conduct-grid {
-      display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
-      gap:2px; margin:20px 0;
-    }
-    .conduct-card {
-      background:var(--card); padding:24px 20px;
-      border-top:3px solid var(--border);
-    }
-    .conduct-card.yellow { border-top-color:var(--yellow); }
-    .conduct-card.green  { border-top-color:var(--green-light,#22783F); }
-    .conduct-card h3 {
-      font-family:var(--font-c); font-size:13px; font-weight:700;
-      letter-spacing:.14em; text-transform:uppercase; color:var(--yellow);
-      margin-bottom:14px;
-    }
-    .conduct-card ul {
-      list-style:none; display:flex; flex-direction:column; gap:8px;
-    }
-    .conduct-card ul li {
-      font-family:var(--font-b); font-size:13px; color:var(--lgrey);
-      line-height:1.6; padding-left:16px; position:relative;
-    }
-    .conduct-card ul li::before {
-      content:""; position:absolute; left:0; top:8px;
-      width:5px; height:5px; border-radius:var(--r-circle); background:var(--yellow);
-    }
-    hr.policy-hr {
-      border:none; border-top:1px solid var(--border); margin:56px 0;
-    }
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -165,55 +41,55 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/policies.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Policies & Legal","item":"https://raynerslanefc.co.uk/policies.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-policies.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- PAGE HEADER -->
-<div class="page-header" data-title="POLICIES">
-  <div class="container">
-    <div class="page-header__eyebrow">
-      <span class="label">FA Charter Standard Community Club &middot; Middlesex County FA</span>
-    </div>
-    <h1 class="page-header__h">Club <span>Policies</span></h1>
-    <p class="page-header__meta">Rayners Lane FC &middot; Tithe Farm Sports &amp; Social Club LTD &middot; Last reviewed May 2026</p>
+<section class="kl-ph kl-ph--green kl-ph--short po-ph" aria-labelledby="ph-title">
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">FA Charter Standard Community Club &middot; Middlesex County FA</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Club</span></span><span class="kl-line"><span>Policies</span></span></h1>
+    <p class="kl-ph__line">Rayners Lane FC &middot; Tithe Farm Sports &amp; Social Club LTD &middot; Last reviewed May 2026. Questions to <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>.</p>
   </div>
-    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px"><i class="ico ico-mail"></i> <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
-</div>
-</div>
+</section>
 
-<section class="section">
-  <div class="container">
+<section class="po">
+  <div class="kl-wrap po__grid">
 
-    <!-- QUICK NAV -->
-    <div class="policy-nav">
-      <h2>Jump to policy</h2>
-      <ul>
-        <li><a href="#safeguarding">Safeguarding &amp; Child Welfare</a></li>
-        <li><a href="#equality">Equality &amp; Anti-Discrimination</a></li>
-        <li><a href="#antibullying">Anti-Bullying Policy</a></li>
-        <li><a href="#conduct">Codes of Conduct</a></li>
-        <li><a href="#respect">FA Respect Policy</a></li>
-        <li><a href="#photography">Photography &amp; Filming</a></li>
-        <li><a href="#social-media">Social Media Policy</a></li>
-        <li><a href="#health-safety">Health &amp; Safety</a></li>
-        <li><a href="#complaints">Complaints Procedure</a></li>
-        <li><a href="#cctv">CCTV Policy</a></li>
-        <li><a href="#privacy">Privacy Policy (GDPR)</a></li>
-        <li><a href="#cookies">Cookie Policy</a></li>
-        <li><a href="#accessibility">Accessibility</a></li>
-      </ul>
-    </div>
+    <aside class="po__aside">
+      <nav class="po-index" aria-labelledby="po-index-h">
+        <h2 class="po-index__h" id="po-index-h">On this page</h2>
+        <ol>
+          <li><a href="#safeguarding">Safeguarding &amp; Child Welfare</a></li>
+          <li><a href="#equality">Equality &amp; Anti-Discrimination</a></li>
+          <li><a href="#antibullying">Anti-Bullying Policy</a></li>
+          <li><a href="#conduct">Codes of Conduct</a></li>
+          <li><a href="#respect">FA Respect Policy</a></li>
+          <li><a href="#photography">Photography &amp; Filming</a></li>
+          <li><a href="#social-media">Social Media Policy</a></li>
+          <li><a href="#health-safety">Health &amp; Safety</a></li>
+          <li><a href="#complaints">Complaints Procedure</a></li>
+          <li><a href="#cctv">CCTV Policy</a></li>
+          <li><a href="#privacy">Privacy Policy (GDPR)</a></li>
+          <li><a href="#fan-zone-terms">Fan Zone Terms</a></li>
+          <li><a href="#cookies">Cookie Policy</a></li>
+          <li><a href="#accessibility">Accessibility</a></li>
+        </ol>
+      </nav>
+    </aside>
+
+    <div class="po__body">
 
     <!-- ═══ 1. SAFEGUARDING ═══ -->
     <div class="policy-section" id="safeguarding">
-      <span class="policy-tag">FA Required</span>
       <h2>Safeguarding <span>&amp; Child Welfare</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+      <p class="policy-date">FA Required &middot; Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</p>
 
       <div class="emergency-box">
-        <h3><i class="ico ico-triangle-alert"></i> If a Child is at Immediate Risk</h3>
+        <h3>If a Child is at Immediate Risk</h3>
         <p>
           Call <strong>999</strong> immediately.<br>
           FA Safeguarding Team: <strong>0800 169 1863</strong><br>
@@ -228,7 +104,7 @@
         <h3>Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Emma Galloway</span></h3>
         <p>Rayners Lane FC has a designated Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Emma Galloway</span> (CWO) who is responsible for safeguarding matters at the club. The CWO has completed The FA Safeguarding Children Workshop and holds a current FA-Enhanced DBS certificate.</p>
         <div class="info-box">
-          <p><strong style="color:var(--yellow)">Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Emma Galloway</span>:</strong> <span class="js-official" data-role="welfareOfficer">Emma Galloway</span> (Club Secretary)<br>Contact: <a href="contact.html">club contact page</a> &middot; Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH</p>
+          <p><strong>Club Welfare Officer: <span class="js-official" data-role="welfareOfficer">Emma Galloway</span>:</strong> <span class="js-official" data-role="welfareOfficer">Emma Galloway</span> (Club Secretary)<br>Contact: <a href="contact.html">club contact page</a> &middot; Tithe Farm Social Club, 151 Rayners Lane, Harrow HA2 0XH</p>
         </div>
 
         <h3>Key Principles</h3>
@@ -247,14 +123,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 2. EQUALITY ═══ -->
     <div class="policy-section" id="equality">
-      <span class="policy-tag">FA Required</span>
       <h2>Equality <span>&amp; Anti-Discrimination</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+      <p class="policy-date">FA Required &middot; Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC is committed to promoting equality and opposing all forms of discrimination. The club is responsible for setting standards and values to apply throughout the club at every level.</p>
@@ -275,14 +147,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 3. ANTI-BULLYING ═══ -->
     <div class="policy-section" id="antibullying">
-      <span class="policy-tag">FA Required</span>
       <h2>Anti-Bullying <span>Policy</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</div>
+      <p class="policy-date">FA Required &middot; Adopted by Rayners Lane FC Committee &middot; Reviewed May 2026</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC is committed to providing a safe, friendly and supportive environment for all participants. Bullying of any kind is unacceptable at our club and will not be tolerated.</p>
@@ -303,14 +171,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 4. CODES OF CONDUCT ═══ -->
     <div class="policy-section" id="conduct">
-      <span class="policy-tag">FA Respect Programme</span>
       <h2>Codes of <span>Conduct</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">In accordance with The FA Respect Programme &middot; Reviewed May 2026</div>
+      <p class="policy-date">FA Respect Programme &middot; In accordance with The FA Respect Programme &middot; Reviewed May 2026</p>
 
       <div class="conduct-grid">
 
@@ -362,13 +226,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 5. FA RESPECT ═══ -->
     <div class="policy-section" id="respect">
-      <span class="policy-tag">FA Required</span>
       <h2>FA Respect <span>Policy</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">FA Required</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC fully supports and implements The FA&apos;s Respect programme. We are committed to creating a safe, positive and enjoyable football environment for everyone involved in the game.</p>
@@ -386,13 +247,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 6. PHOTOGRAPHY ═══ -->
     <div class="policy-section" id="photography">
-      <span class="policy-tag">Safeguarding</span>
       <h2>Photography <span>&amp; Filming Policy</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">Safeguarding</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC recognises the need to ensure the welfare and safety of all young people in football. In line with The FA&apos;s guidance, we have adopted the following policy on photography and filming at club events.</p>
@@ -411,13 +269,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 7. SOCIAL MEDIA ═══ -->
     <div class="policy-section" id="social-media">
-      <span class="policy-tag">Club Policy</span>
       <h2>Social Media <span>Policy</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">Club Policy</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC recognises the value of social media in promoting the club and engaging with supporters. All club members, players, officials and volunteers are expected to use social media responsibly.</p>
@@ -438,13 +293,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 8. HEALTH & SAFETY ═══ -->
     <div class="policy-section" id="health-safety">
-      <span class="policy-tag">Club Policy</span>
       <h2>Health <span>&amp; Safety</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">Club Policy</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC is committed to maintaining a safe environment for all players, officials, volunteers and spectators at Tithe Farm Social Club and at all away fixtures.</p>
@@ -469,13 +321,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 9. COMPLAINTS ═══ -->
     <div class="policy-section" id="complaints">
-      <span class="policy-tag">FA Required</span>
       <h2>Complaints <span>Procedure</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">FA Required</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC takes all complaints seriously and is committed to resolving them fairly, promptly and confidentially.</p>
@@ -497,25 +346,21 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ CCTV POLICY ═══ -->
     <div class="policy-section" id="cctv">
-      <span class="policy-tag">Security &middot; UK GDPR</span>
       <h2>CCTV &amp; <span>Surveillance Policy</span></h2>
+      <p class="policy-date">Security &middot; UK GDPR</p>
       <p class="policy-p">Rayners Lane FC and Tithe Farm Sports &amp; Social Club LTD may operate CCTV cameras on and around the ground for the purposes of safety, security and crime prevention. Any footage is held securely in accordance with UK GDPR and the Data Protection Act 2018.</p>
       <h3 class="policy-sh">Retention Period</h3>
       <p class="policy-p">CCTV footage is retained for a maximum of 30 days unless required in connection with an incident, complaint or legal proceeding, in which case it may be retained for longer.</p>
       <h3 class="policy-sh">Access Requests</h3>
-      <p class="policy-p">Access to CCTV footage is restricted to authorised personnel and, where required, law enforcement. To request access to footage in which you appear, contact us at <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>.</p>
+      <p class="policy-p">Access to CCTV footage is restricted to authorised personnel and, where required, law enforcement. To request access to footage in which you appear, contact us at <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>.</p>
     </div>
 
     <!-- ═══ 10. PRIVACY POLICY ═══ -->
     <div class="policy-section" id="privacy">
-      <span class="policy-tag">GDPR &middot; UK Law</span>
       <h2>Privacy <span>Notice</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">Effective: August 2026 &middot; Version privacy-2026-08 &middot; Controller: Rayners Lane Football Club Limited (Company No. 17110511)</div>
+      <p class="policy-date">GDPR &middot; UK Law &middot; Effective: August 2026 &middot; Version privacy-2026-08 &middot; Controller: Rayners Lane Football Club Limited (Company No. 17110511)</p>
 
       <div class="policy-body">
         <p>Rayners Lane Football Club Limited (&ldquo;the Club&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is the data controller for this website and for Fan Zone. We handle your information under the UK General Data Protection Regulation and the Data Protection Act 2018. This notice is written to be read, not to be survived &mdash; if anything below is unclear, ask us and we will explain it.</p>
@@ -589,14 +434,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 10b. FAN ZONE TERMS ═══ -->
     <div class="policy-section" id="fan-zone-terms">
-      <span class="policy-tag">Fan Zone</span>
       <h2>Fan Zone <span>Terms</span></h2>
-      <div class="policy-divider"></div>
-      <div class="policy-date">Effective: August 2026 &middot; Version fanzone-terms-2026-08</div>
+      <p class="policy-date">Fan Zone &middot; Effective: August 2026 &middot; Version fanzone-terms-2026-08</p>
 
       <div class="policy-body">
         <p>Fan Zone is operated by Rayners Lane Football Club Limited (Company No. 17110511).</p>
@@ -613,13 +454,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 11. COOKIES ═══ -->
     <div class="policy-section" id="cookies">
-      <span class="policy-tag">UK Law</span>
       <h2>Cookie <span>Policy</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">UK Law</p>
 
       <div class="policy-body">
         <p>Our website (<strong>raynerslanefc.co.uk</strong>) uses minimal cookies necessary for the site to function. We do not use advertising cookies or sell data to advertisers.</p>
@@ -635,13 +473,10 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- ═══ 12. ACCESSIBILITY ═══ -->
     <div class="policy-section" id="accessibility">
-      <span class="policy-tag">Club Commitment</span>
       <h2>Accessibility <span>Statement</span></h2>
-      <div class="policy-divider"></div>
+      <p class="policy-date">Club Commitment</p>
 
       <div class="policy-body">
         <p>Rayners Lane FC is committed to ensuring this website is accessible to as many people as possible, including those with disabilities.</p>
@@ -657,23 +492,17 @@
       </div>
     </div>
 
-    <hr class="policy-hr">
-
     <!-- BOTTOM CTA -->
-    <div style="background:var(--card);border:1px solid var(--border);padding:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div>
-        <div class="label" style="margin-bottom:8px">Questions about our policies?</div>
-        <p style="font-family:var(--font-b);font-size:15px;color:var(--lgrey);max-width:480px;line-height:1.6">
-          Contact <span class="js-official" data-role="chairman">Pete Singh</span> (Chairman) or any committee member via the club contact page.
-          For safeguarding concerns contact Middlesex County FA directly.
-        </p>
-      </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <a class="btn btn-primary" href="contact.html">Contact the Club</a>
-        <a class="btn btn-outline" href="https://www.middlesexfa.com/about-us/welfare" target="_blank">Middlesex FA Welfare</a>
+    <div class="po-ask">
+      <h2 class="po-ask__h">Questions about our policies?</h2>
+      <p class="po-ask__p">Contact <span class="js-official" data-role="chairman">Pete Singh</span> (Chairman) or any committee member via the club contact page.
+        For safeguarding concerns contact Middlesex County FA directly.</p>
+      <div class="po-ask__acts">
+        <a class="kl-btn kl-btn--solid" href="contact.html">Contact the club</a>
+        <a class="kl-btn kl-btn--line" href="https://www.middlesexfa.com/about-us/welfare" target="_blank" rel="noopener">Middlesex FA welfare</a>
       </div>
     </div>
-
+    </div>
   </div>
 </section>
 
@@ -704,6 +533,22 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", polInit);
   else polInit();
+})();
+// The index marks the policy you are reading (aria-current), so the sticky
+// column on desktop doubles as a "you are here".
+(function () {
+  if (!("IntersectionObserver" in window)) return;
+  var links = {};
+  document.querySelectorAll(".po-index a[href^='#']").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  var current = null;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting || !links[e.target.id]) return;
+      if (current) current.removeAttribute("aria-current");
+      current = links[e.target.id]; current.setAttribute("aria-current", "true");
+    });
+  }, { rootMargin: "-60px 0px -70% 0px" });
+  document.querySelectorAll(".policy-section[id]").forEach(function (s) { io.observe(s); });
 })();
 </script>
 </body>

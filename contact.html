@@ -30,28 +30,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
-    .contact-form input,.contact-form textarea,.contact-form select{
-      width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);
-      font-family:var(--font-b);font-size:15px;padding:14px 16px;border-radius:var(--r-xs);
-      transition:border-color .2s;outline:none;resize:vertical
-    }
-    .contact-form input:focus,.contact-form textarea:focus,.contact-form select:focus{border-color:var(--yellow)}
-    .contact-form select option{background:var(--dark)}
-    .contact-form label{font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:8px}
-    .contact-form .field{margin-bottom:20px}
-    .email-hero{
-      background:var(--yellow);padding:32px 40px;
-      display:flex;align-items:center;gap:20px;margin-bottom:2px;flex-wrap:wrap;
-    }
-    .email-hero-icon{font-size:40px;flex-shrink:0}
-    .email-hero-text{flex:1}
-    .email-hero-label{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.7);margin-bottom:4px}
-    .email-hero-address{font-family:var(--font-d);font-size:clamp(24px,4vw,40px);letter-spacing:.04em;color:var(--black)}
-    .email-hero-address a{color:var(--black)}
-    @media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -66,171 +44,129 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/contact.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Contact","item":"https://raynerslanefc.co.uk/contact.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-forms.css">
+<link rel="stylesheet" href="css/p-contact.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<div class="page-header" data-title="CONTACT">
-  <div class="container">
-    <div class="page-header__eyebrow"><span class="label">Get in Touch</span></div>
-    <h1 class="page-header__h">Contact <span>the Club</span></h1>
-    <p class="page-header__meta">Sponsorship &middot; Media &middot; General Enquiries &middot; Vacancies</p>
+<section class="kl-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media" aria-hidden="true">
+    <img src="img/ground/tithe-farm-aerial-clubhouse-1600.jpg" data-no-opt
+         srcset="img/ground/tithe-farm-aerial-clubhouse-800.jpg 800w, img/ground/tithe-farm-aerial-clubhouse-1600.jpg 1600w"
+         sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1600" height="898" alt="" fetchpriority="high" decoding="async">
   </div>
-</div>
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">Tithe Farm Social Club &middot; 151 Rayners Lane, Harrow HA2 0XH</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Contact</span></span></h1>
+    <p class="kl-ph__line">Sponsorship, media, general enquiries and vacancies. One inbox, read by the club.</p>
+  </div>
+</section>
 
-<section class="section">
-  <div class="container">
+<!-- The address, set as the page's signature -->
+<section class="ct-mail" aria-label="Email the club">
+  <div class="kl-wrap ct-mail__in">
+    <p class="ct-mail__k">General enquiries</p>
+    <a class="ct-mail__a" href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>
+  </div>
+</section>
 
-    <!-- EMAIL HERO -->
-    <div class="email-hero">
-      <div class="email-hero-icon"><i class="ico ico-mail"></i></div>
-      <div class="email-hero-text">
-        <div class="email-hero-label">General Enquiries</div>
-        <div class="email-hero-address"><a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></div>
-      </div>
+<section class="kf-sec" aria-labelledby="ct-form-h">
+  <div class="kl-wrap kf-grid">
+    <div class="kf-aside">
+      <h2 class="kl-h2" id="ct-form-h">Send a<br>message</h2>
+      <p>We&rsquo;d love to hear from you. Tell us what it&rsquo;s about and someone from the club will reply as soon as they can.</p>
     </div>
 
-    <div class="contact-grid">
-      <!-- Form -->
-      <div style="background:var(--card);padding:48px 40px">
-        <span class="label">Send a Message</span>
-        <div class="divider"></div>
-        <h2 style="font-family:var(--font-d);font-size:40px;letter-spacing:.04em;margin-bottom:32px">
-          We'd love to <span style="color:var(--yellow)">hear from you</span>
-        </h2>
-        <form class="contact-form" onsubmit="return laneSubmit(this,'contact',{thanksMsg:'Thanks for getting in touch — we’ll reply as soon as we can.'})">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div class="field">
-              <label for="cont-f1">First Name</label>
-              <input id="cont-f1" type="text" name="first_name" placeholder="John" required>
-            </div>
-            <div class="field">
-              <label for="cont-f2">Last Name</label>
-              <input id="cont-f2" type="text" name="last_name" placeholder="Smith" required>
-            </div>
-          </div>
-          <div class="field">
-            <label for="cont-f3">Your Email Address</label>
-            <input id="cont-f3" type="email" name="email" placeholder="john@example.com" required>
-          </div>
-          <div class="field">
-            <label for="cont-f4">Enquiry Type</label>
-            <select id="cont-f4" name="subject">
-              <option value="">Select a category</option>
-              <option>Sponsorship &amp; Commercial</option>
-              <option>Media &amp; Press</option>
-              <option>Club Vacancies</option>
-              <option>Player Trials</option>
-              <option>General Enquiry</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="cont-f5">Message</label>
-            <textarea id="cont-f5" name="body" rows="5" placeholder="Tell us how we can help..." required></textarea>
-          </div>
-          <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">
-            Send Message
-          </button>
-          <p style="font-family:var(--font-c);font-size:12px;color:var(--grey);margin-top:12px;text-align:center;letter-spacing:.04em">
-            Or email us directly:
-            <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>
-          </p>
-        </form>
+    <form class="contact-form kf" onsubmit="return laneSubmit(this,'contact',{thanksMsg:'Thanks for getting in touch — we’ll reply as soon as we can.'})">
+      <div class="kf__row">
+        <div class="kf__field">
+          <label class="kf__label" for="cont-f1">First name</label>
+          <input id="cont-f1" type="text" name="first_name" placeholder="John" autocomplete="given-name" required>
+        </div>
+        <div class="kf__field">
+          <label class="kf__label" for="cont-f2">Last name</label>
+          <input id="cont-f2" type="text" name="last_name" placeholder="Smith" autocomplete="family-name" required>
+        </div>
       </div>
+      <div class="kf__field">
+        <label class="kf__label" for="cont-f3">Your email address</label>
+        <input id="cont-f3" type="email" name="email" placeholder="john@example.com" autocomplete="email" required>
+      </div>
+      <div class="kf__field">
+        <label class="kf__label" for="cont-f4">Enquiry type</label>
+        <select id="cont-f4" name="subject">
+          <option value="">Select a category</option>
+          <option>Sponsorship &amp; Commercial</option>
+          <option>Media &amp; Press</option>
+          <option>Club Vacancies</option>
+          <option>Player Trials</option>
+          <option>General Enquiry</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="kf__field">
+        <label class="kf__label" for="cont-f5">Message</label>
+        <textarea id="cont-f5" name="body" rows="5" placeholder="Tell us how we can help..." required></textarea>
+      </div>
+      <div class="kf__submit">
+        <button class="kl-btn kl-btn--solid" type="submit">Send message</button>
+        <p class="kf__fine">Or email us directly: <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></p>
+      </div>
+    </form>
+  </div>
+</section>
 
-      <!-- Info -->
-      <div style="display:flex;flex-direction:column;gap:2px">
+<!-- Who to ask, as a ruled list -->
+<section class="kl-sec" aria-labelledby="ct-who-h">
+  <div class="kl-wrap ct-split">
+    <h2 class="kl-h2" id="ct-who-h">Direct<br>contacts</h2>
+    <ul class="kl-rows ct-rows">
+      <li>
+        <p class="ct-rows__k">General &amp; sponsorship</p>
+        <p class="ct-rows__v"><a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></p>
+      </li>
+      <li>
+        <p class="ct-rows__k">Chairman</p>
+        <p class="ct-rows__v">Pete Singh</p>
+        <p class="ct-rows__n">Via <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></p>
+      </li>
+      <li>
+        <p class="ct-rows__k">Safeguarding &amp; welfare</p>
+        <p class="ct-rows__v"><span class="js-official" data-role="welfareOfficer">Emma Galloway</span> (CWO)</p>
+        <p class="ct-rows__n">FA Safeguarding: <a href="tel:08001691863">0800 169 1863</a></p>
+      </li>
+    </ul>
+  </div>
+</section>
 
-        <div style="background:linear-gradient(160deg,var(--green) 0%,#0A1A0F 100%);padding:40px;flex:1">
-          <!-- Aerial of the ground, so visitors can picture where they're heading -->
-          <picture>
-            <source type="image/webp" srcset="img/ground/tithe-farm-aerial-clubhouse-800.webp 800w, img/ground/tithe-farm-aerial-clubhouse-1600.webp 1600w" sizes="(max-width:900px) 100vw, 520px">
-            <img src="img/ground/tithe-farm-aerial-clubhouse-800.jpg" data-no-opt
-              srcset="img/ground/tithe-farm-aerial-clubhouse-800.jpg 800w, img/ground/tithe-farm-aerial-clubhouse-1600.jpg 1600w" sizes="(max-width:900px) 100vw, 520px"
-              alt="Aerial view of Tithe Farm, home of Rayners Lane FC — the 3G pitch and clubhouse"
-              style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r-md);display:block;margin-bottom:24px" loading="lazy" decoding="async">
-          </picture>
-          <span class="label" style="color:rgba(255,255,255,.5)">Club Address</span>
-          <div class="divider"></div>
-          <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.3;margin-bottom:20px">
-            Tithe Farm Social Club<br>
-            <span style="color:var(--yellow)">151 Rayners Lane</span><br>
-            Harrow HA2 0XH
-          </div>
-          <a class="btn btn-outline" href="https://maps.google.com/maps?q=51.570435,-0.365073"
-             target="_blank" style="border-color:rgba(255,255,255,.3);color:var(--white)">
-            Get Directions
-          </a>
-          <div data-at-the-gate style="margin-top:26px"></div>
-        </div>
-
-        <div style="background:var(--card);padding:32px 40px">
-          <span class="label" style="margin-bottom:16px;display:block">Direct Contacts</span>
-          <div style="display:flex;flex-direction:column;gap:16px">
-            <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
-              <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px">General &amp; Sponsorship</div>
-              <a href="mailto:info@raynerslanefc.co.uk" style="font-family:var(--font-c);font-size:17px;font-weight:700;color:var(--white);letter-spacing:.04em;transition:color .2s"
-                 onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--white)'">
-                info@raynerslanefc.co.uk
-              </a>
-            </div>
-            <div style="border-bottom:1px solid var(--border);padding-bottom:16px">
-              <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px">Chairman</div>
-              <div style="font-family:var(--font-c);font-size:16px;color:var(--white);letter-spacing:.04em">Pete Singh</div>
-              <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);margin-top:2px;letter-spacing:.04em">
-                Via <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>
-              </div>
-            </div>
-            <div>
-              <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px">Safeguarding &amp; Welfare</div>
-              <div style="font-family:var(--font-c);font-size:16px;color:var(--white);letter-spacing:.04em"><span class="js-official" data-role="welfareOfficer">Emma Galloway</span> (CWO)</div>
-              <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);margin-top:2px;letter-spacing:.04em">
-                FA Safeguarding: <strong style="color:var(--white)">0800 169 1863</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:var(--card2);padding:28px 40px">
-          <span class="label" style="margin-bottom:14px;display:block">Follow The Lane</span>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <a href="https://twitter.com/RaynersLaneFC" target="_blank" rel="noopener"
-               style="display:flex;align-items:center;gap:12px;font-family:var(--font-c);font-size:14px;font-weight:600;letter-spacing:.06em;color:var(--lgrey);transition:color .2s"
-               onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color=''">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              @RaynersLaneFC on X
-            </a>
-            <a href="https://instagram.com/raynerslanefc" target="_blank" rel="noopener"
-               style="display:flex;align-items:center;gap:12px;font-family:var(--font-c);font-size:14px;font-weight:600;letter-spacing:.06em;color:var(--lgrey);transition:color .2s"
-               onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color=''">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-              @raynerslanefc on Instagram
-            </a>
-            <a href="https://youtube.com/channel/UCN6SkwSIRK86x9Wk0AFoydA" target="_blank" rel="noopener"
-               style="display:flex;align-items:center;gap:12px;font-family:var(--font-c);font-size:14px;font-weight:600;letter-spacing:.06em;color:var(--lgrey);transition:color .2s"
-               onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color=''">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-              YouTube Channel
-            </a>
-          </div>
-        </div>
-
-        <div style="background:var(--card);padding:28px 40px;border-left:4px solid var(--yellow)">
-          <span class="label" style="margin-bottom:10px;display:block">Sponsorship Enquiries</span>
-          <p style="font-family:var(--font-b);font-size:14px;color:var(--lgrey);line-height:1.7;margin-bottom:16px">
-            View our 2026-27 Commercial Sponsorship Guide or get in touch about shirt sponsorship,
-            pitch-side advertising and matchday partnerships.
-          </p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <a class="btn btn-primary" href="investment.html" style="font-size:12px;padding:10px 18px">View Packages</a>
-            <a href="mailto:info@raynerslanefc.co.uk" class="btn btn-outline" style="font-size:12px;padding:10px 18px">Email Us</a>
-          </div>
-        </div>
-
+<!-- Where — drenched yellow, the matchday poster -->
+<section class="kl-sec kl-sec--yellow ct-where" aria-labelledby="ct-where-h">
+  <div class="kl-wrap ct-where__grid">
+    <div>
+      <h2 class="kl-h2" id="ct-where-h">Tithe Farm<br>Social Club</h2>
+      <p class="ct-where__addr">151 Rayners Lane<br>Harrow HA2 0XH</p>
+      <div class="ct-where__acts">
+        <a class="kl-btn kl-btn--ink" href="https://maps.google.com/maps?q=51.570435,-0.365073" target="_blank" rel="noopener">Get directions</a>
       </div>
     </div>
+    <div class="ct-gate" data-at-the-gate></div>
+  </div>
+</section>
 
+<!-- Sponsorship -->
+<section class="kl-sec" aria-labelledby="ct-spon-h">
+  <div class="kl-wrap ct-split">
+    <h2 class="kl-h2" id="ct-spon-h">Sponsor<br>The Lane</h2>
+    <div>
+      <p class="kl-p ct-two__p">View our 2026-27 Commercial Sponsorship Guide or get in touch about shirt sponsorship, pitch-side advertising and matchday partnerships.</p>
+      <div class="ct-two__acts">
+        <a class="kl-btn kl-btn--solid" href="investment.html">View packages</a>
+        <a class="kl-btn kl-btn--line" href="mailto:info@raynerslanefc.co.uk">Email us</a>
+      </div>
+    </div>
   </div>
 </section>
 

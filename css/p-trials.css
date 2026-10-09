@@ -1,0 +1,5 @@
+/* TRIALS — Kit Launch. The club's own footage up top; the entry sheet below. */
+/* Guardian block: hidden until the date of birth says under 18 (trAge() adds .on) */
+.tr-guardian{display:none;gap:clamp(22px,3vw,30px);padding:24px 0 8px;border-top:2px solid var(--yellow)}
+.tr-guardian.on{display:grid}
+.tr-guardian__h{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);line-height:1;color:var(--yellow);margin:0}

@@ -1,0 +1,14 @@
+/* VOLUNTEER — Kit Launch. The roles as a ruled list, the offer form on green. */
+.vo-list > li{display:grid;gap:8px 32px;padding:clamp(20px,2.6vw,30px) 0}
+@media (min-width:900px){.vo-list > li{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);grid-template-areas:"name d" "when d";align-items:start}.vo-list__name{grid-area:name}.vo-list__d{grid-area:d;padding-top:4px}.vo-list__when{grid-area:when}}
+.vo-list__name{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,4.4vw,3.8rem);line-height:.9;letter-spacing:0;text-transform:uppercase;color:var(--white);margin:0}
+.vo-list__d{font-family:var(--font-body);font-size:16px;line-height:1.6;color:rgba(245,243,237,.86);margin:0;max-width:56ch}
+.vo-list__when{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--yellow);margin:0}
+.vo-list > li:hover .vo-list__name{color:var(--yellow)}
+
+.vo-apply{background:var(--green,#1A5C32)}
+.vo-apply .kf input,.vo-apply .kf select,.vo-apply .kf textarea{border-bottom-color:rgba(245,243,237,.6)}
+.vo-apply .kf input::placeholder,.vo-apply .kf textarea::placeholder{color:#AAAAAA}
+.vo-apply .kf__label small{color:#F5F3ED}
+.vo-apply .kf select option{background:#1A5C32}
+.vo-apply .kf input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #1A5C32 inset}

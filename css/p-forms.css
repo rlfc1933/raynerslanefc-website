@@ -1,0 +1,55 @@
+/* ════════════════════════════════════════════════════════════════════════
+   FORMS — Kit Launch (contact, trials, volunteer)
+   The form is the point of these pages, so it is set like a printed entry
+   sheet: a clear label, a large calm field on a single underline, generous
+   targets (56px), nothing boxed. Focus turns the rule yellow and thickens it;
+   keyboard focus also gets the house outline.
+   ════════════════════════════════════════════════════════════════════════ */
+.kf{display:grid;gap:clamp(22px,3vw,30px)}
+.kf__row{display:grid;gap:clamp(22px,3vw,30px)}
+@media (min-width:600px){.kf__row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}}
+.kf__field{display:grid;gap:6px;min-width:0}
+.kf__label{font-family:var(--font-body);font-weight:700;font-size:15px;line-height:1.3;color:var(--white);letter-spacing:0;text-transform:none;margin:0}
+.kf__label small{font-weight:600;font-size:13px;color:#AAAAAA;margin-left:6px}
+.kf__hint{max-width:60ch;font-family:var(--font-body);font-size:13px;line-height:1.5;color:#AAAAAA;margin:2px 0 0}
+
+.kf input[type=text],.kf input[type=email],.kf input[type=tel],.kf input[type=date],.kf select,.kf textarea{
+  -webkit-appearance:none;appearance:none;width:100%;min-height:56px;margin:0;
+  background:transparent;color:var(--white);
+  font-family:var(--font-body);font-weight:500;font-size:18px;line-height:1.4;
+  border:0;border-bottom:1px solid rgba(245,243,237,.38);border-radius:0;
+  padding:14px 0 12px;outline:none;box-shadow:none;
+  transition:border-color var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard)}
+.kf textarea{min-height:120px;resize:vertical;padding-top:14px}
+.kf input::placeholder,.kf textarea::placeholder{color:#8F8F8F;opacity:1}
+.kf input:hover,.kf select:hover,.kf textarea:hover{border-bottom-color:rgba(245,243,237,.7)}
+.kf input:focus,.kf select:focus,.kf textarea:focus{border-bottom-color:var(--yellow);box-shadow:0 1px 0 0 var(--yellow)}
+.kf input:focus-visible,.kf select:focus-visible,.kf textarea:focus-visible{outline:2px solid var(--yellow);outline-offset:4px}
+.kf input[type=date]{color-scheme:dark}
+.kf input:-webkit-autofill{-webkit-text-fill-color:#F5F3ED;-webkit-box-shadow:0 0 0 1000px #0E0E0E inset;caret-color:#F5F3ED}
+.kf select{cursor:pointer;padding-right:36px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1 1l7 7 7-7' fill='none' stroke='%23FFD100' stroke-width='2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 4px center;background-size:16px 10px}
+.kf select option{background:#141414;color:#F5F3ED}
+
+/* Consent: a big tick box, the words beside it, nothing boxed */
+.kf__check{display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px;align-items:start;cursor:pointer;
+  font-family:var(--font-body);font-size:15px;line-height:1.6;color:#F5F3ED;padding:16px 0;border-top:1px solid rgba(245,243,237,.14);border-bottom:1px solid rgba(245,243,237,.14);min-height:56px}
+.kf__check input{width:26px;height:26px;margin:1px 0 0;accent-color:var(--yellow);cursor:pointer}
+.kf__check a,.kf__fine a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:3px}
+.kf__check strong{color:var(--white)}
+
+.kf__submit{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;margin-top:6px}
+.kf__submit .kl-btn{min-height:60px;padding:16px 32px;font-size:16px;cursor:pointer;font-family:var(--font-body)}
+.kf__submit .kl-btn:disabled{opacity:.6;cursor:progress}
+@media (max-width:599px){.kf__submit .kl-btn{width:100%}}
+.kf__fine{font-family:var(--font-body);font-size:13px;line-height:1.6;color:#AAAAAA;margin:0;max-width:56ch}
+
+/* The page body: a label column beside the form on wide screens */
+.kf-sec{padding:clamp(48px,8vw,112px) 0}
+.kf-grid{display:grid;gap:clamp(36px,6vw,72px)}
+@media (min-width:1000px){.kf-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:start}}
+.kf-aside{display:grid;gap:22px;align-content:start}
+@media (min-width:1000px){.kf-aside{position:sticky;top:calc(var(--nav-h,72px) + 32px)}}
+.kf-aside .kl-h2{font-size:clamp(3rem,6vw,5.5rem)}
+.kf-aside p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:rgba(245,243,237,.86);margin:0;max-width:44ch}

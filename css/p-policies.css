@@ -1,0 +1,67 @@
+/* POLICIES — a calm reading layout. A sticky index on desktop, one column
+   at a real measure, headings in the display face on hairlines. The one loud
+   thing on the page is the safeguarding emergency block, and it should be. */
+.po-ph .kl-ph__title{font-size:min(clamp(4rem,12vw,11rem),22svh)}
+.po-ph .kl-ph__line a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:4px;overflow-wrap:anywhere}
+
+.po{padding:clamp(40px,6vw,88px) 0 clamp(64px,9vw,120px);background:#080808}
+.po__grid{display:grid;gap:40px}
+@media (min-width:1000px){.po__grid{grid-template-columns:minmax(0,17rem) minmax(0,1fr);gap:clamp(48px,6vw,96px);align-items:start}}
+.po__body{min-width:0;max-width:72ch}
+
+/* Index */
+.po-index__h{font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:0;color:#AAAAAA;margin:0 0 10px;line-height:1.3}
+.po-index ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.po-index li{border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.po-index a{display:flex;align-items:center;min-height:44px;padding:8px 0;font-family:var(--font-body);font-weight:700;font-size:15px;line-height:1.3;color:rgba(245,243,237,.86);text-decoration:none;transition:color var(--dur-fast) var(--ease-standard)}
+.po-index a:hover{color:var(--white)}
+.po-index a[aria-current="true"]{color:var(--yellow)}
+.po-index a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+@media (max-width:999px){
+  .po-index ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));column-gap:24px;border-top:0}
+  .po-index li:first-child,.po-index li{border-top:0}
+}
+@media (min-width:1000px){
+  .po__aside{position:sticky;top:calc(var(--nav-h,72px) + 24px);max-height:calc(100svh - var(--nav-h,72px) - 48px);overflow:auto;scrollbar-width:thin}
+}
+
+/* Sections */
+.policy-section{scroll-margin-top:calc(var(--nav-h,72px) + 24px);padding:clamp(40px,5vw,64px) 0 8px;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.policy-section:first-child{padding-top:0;border-top:0}
+.policy-section h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2.5rem,5vw,4.4rem);line-height:.9;letter-spacing:0;text-transform:uppercase;color:var(--white);margin:0 0 12px}
+.policy-section h2 span{color:inherit}
+.policy-date{max-width:30rem;font-family:var(--font-body);font-weight:700;font-size:14px;line-height:1.5;color:#AAAAAA;margin:0 0 26px;letter-spacing:0}
+.policy-body,.policy-p{font-family:var(--font-body);font-size:clamp(1rem,1.25vw,1.075rem);line-height:1.75;color:rgba(245,243,237,.86)}
+.policy-body p,.policy-p{margin:0 0 1.1em}
+.policy-body h3,.policy-sh{font-family:var(--font-body);font-weight:800;font-size:17px;letter-spacing:0;text-transform:none;line-height:1.35;color:var(--white);margin:32px 0 10px}
+.policy-body ul{list-style:none;margin:0 0 1.2em;padding:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.policy-body ul li{padding:10px 0 10px 22px;position:relative;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.policy-body ul li::before{content:"";position:absolute;left:0;top:1.3em;width:10px;height:2px;background:var(--yellow)}
+.policy-body strong{color:var(--white);font-weight:700}
+.policy-section a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:3px;overflow-wrap:anywhere}
+.policy-section a:hover{color:var(--yellow)}
+
+/* Emergency: the one drenched block */
+.emergency-box{background:var(--yellow);color:#080808;padding:clamp(20px,3vw,32px);margin:0 0 32px;border-radius:0}
+.emergency-box h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.8rem);line-height:.95;text-transform:uppercase;letter-spacing:0;color:#080808;margin:0 0 12px}
+.emergency-box p{font-family:var(--font-body);font-size:16px;line-height:1.75;color:#080808;margin:0}
+.emergency-box strong{color:#080808;font-weight:800;font-variant-numeric:tabular-nums}
+.policy-section .emergency-box a{color:#080808;text-decoration-color:#080808}
+.policy-section .emergency-box a:focus-visible{outline:3px solid #080808;outline-offset:2px}
+
+.info-box{padding:16px 0;margin:20px 0;border-top:2px solid var(--yellow);border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.info-box p{margin:0;font-size:15px;line-height:1.7}
+
+/* Codes of conduct: three ruled columns, not three cards */
+.conduct-grid{display:grid;gap:8px 32px;margin:8px 0 24px}
+@media (min-width:760px){.conduct-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.conduct-card{background:transparent;padding:16px 0 0;border-top:2px solid var(--yellow)}
+.conduct-card h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.6rem,2.2vw,2rem);line-height:1;text-transform:uppercase;letter-spacing:0;color:var(--white);margin:0 0 10px}
+.conduct-card ul{list-style:none;margin:0;padding:0}
+.conduct-card ul li{font-family:var(--font-body);font-size:15px;line-height:1.55;color:rgba(245,243,237,.86);padding:9px 0;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+
+/* The closing ask */
+.po-ask{margin-top:clamp(48px,6vw,72px);padding-top:28px;border-top:2px solid var(--yellow);display:grid;gap:16px}
+.po-ask__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.4rem,4.6vw,4rem);line-height:.9;text-transform:uppercase;color:var(--white);margin:0}
+.po-ask__p{font-family:var(--font-body);font-size:16px;line-height:1.65;color:rgba(245,243,237,.86);margin:0;max-width:56ch}
+.po-ask__acts{display:flex;flex-wrap:wrap;gap:10px}

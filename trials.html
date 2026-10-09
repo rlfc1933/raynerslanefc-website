@@ -23,23 +23,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .tr-hero{padding:64px 0 28px;text-align:center}
-    .tr-hero .label{color:var(--yellow)}
-    .tr-hero h1{font-family:var(--font-d);font-size:clamp(44px,7vw,86px);letter-spacing:.02em;color:var(--white);line-height:.92;margin:10px 0 14px}
-    .tr-hero h1 span{color:var(--yellow)}
-    .tr-hero p{font-family:var(--font-b);font-size:16px;color:var(--grey);line-height:1.7;max-width:560px;margin:0 auto}
-    .tr-form{max-width:640px;margin:0 auto 64px;background:linear-gradient(160deg,#132A1E,#0A1A10 60%,#080808);border:1px solid var(--border);border-radius:var(--r-lg);padding:30px 26px}
-    .tr-row{display:flex;gap:14px;flex-wrap:wrap}.tr-row>div{flex:1;min-width:180px}
-    .tr-l{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lgrey);margin:14px 0 6px}
-    .tr-form input,.tr-form select,.tr-form textarea{width:100%;background:var(--black);border:1px solid var(--border);border-radius:var(--r-md);color:var(--white);font-family:var(--font-b);font-size:15px;padding:11px 13px;outline:none}
-    .tr-form input:focus,.tr-form select:focus,.tr-form textarea:focus{border-color:var(--yellow)}
-    .tr-guardian{display:none;border-left:3px solid var(--yellow);background:rgba(255,209,0,.05);padding:4px 16px 16px;margin-top:14px;border-radius:0 var(--r-md) var(--r-md) 0}
-    .tr-guardian.on{display:block}
-    .tr-note{font-family:var(--font-c);font-size:11px;color:var(--grey);margin-top:6px}
-    .tr-submit{width:100%;margin-top:22px;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:var(--r-md);font-family:var(--font-c);font-size:16px;font-weight:800;letter-spacing:.04em;padding:14px;cursor:pointer}
-    .tr-private{font-family:var(--font-c);font-size:11px;color:var(--grey);margin-top:14px;line-height:1.5}
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -54,31 +37,45 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/trials.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"First-Team Trials & Registration","item":"https://raynerslanefc.co.uk/trials.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-forms.css">
+<link rel="stylesheet" href="css/p-trials.css">
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<section class="tr-hero">
-  <div class="container">
-    <span class="label">Play for The Lane &middot; Est. 1933</span>
-    <h1>First-Team <span>Trials</span></h1>
-    <p>Trials for 2026-27 have finished &mdash; but we're always watching for players. Register your interest and we'll keep you on file for the next round and for cover during the season.</p>
+<section class="kl-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media" aria-hidden="true">
+    <img src="video/hero-poster-1440.jpg"
+         srcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
+         sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
+  </div>
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">Play for The Lane &middot; Est. 1933</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>First-team</span></span><span class="kl-line"><span>Trials</span></span></h1>
+    <p class="kl-ph__line">Trials for 2026-27 have finished &mdash; but we&rsquo;re always watching for players. Register your interest and we&rsquo;ll keep you on file for the next round and for cover during the season.</p>
   </div>
 </section>
 
-<section style="padding:0 0 20px">
-  <div class="container">
-    <form class="tr-form" name="player-trial" onsubmit="return trialSubmit(this)">
+<section class="kf-sec" aria-labelledby="tr-form-h">
+  <div class="kl-wrap kf-grid">
+    <div class="kf-aside">
+      <h2 class="kl-h2" id="tr-form-h">Register<br>your<br>interest</h2>
+      <p>Tell us where you play and when you&rsquo;re free. Applicants under 18 also need a parent or guardian name and email &mdash; safeguarding.</p>
+    </div>
+
+    <form class="tr-form kf" name="player-trial" onsubmit="return trialSubmit(this)">
       <input type="hidden" name="lead_source" value="player">
       <input type="hidden" name="age_group" id="tr-agegroup">
       <p style="display:none"><label>Leave blank: <input name="bot-field"></label></p>
 
-      <div class="tr-row">
-        <div><label for="tria-f1" class="tr-l">Full name *</label><input id="tria-f1" type="text" name="name" required></div>
-        <div><label for="tr-dob" class="tr-l">Date of birth *</label><input type="date" name="dob" id="tr-dob" required onchange="trAge()"></div>
+      <div class="kf__row">
+        <div class="kf__field"><label for="tria-f1" class="kf__label tr-l">Full name *</label><input id="tria-f1" type="text" name="name" autocomplete="name" required></div>
+        <div class="kf__field"><label for="tr-dob" class="kf__label tr-l">Date of birth *</label><input type="date" name="dob" id="tr-dob" required onchange="trAge()"></div>
       </div>
-      <div class="tr-row">
-        <div><label for="tria-f2" class="tr-l">Preferred position *</label>
+      <div class="kf__row">
+        <div class="kf__field"><label for="tria-f2" class="kf__label tr-l">Preferred position *</label>
           <select id="tria-f2" name="position" required>
             <option value="">Select…</option>
             <option>Goalkeeper</option><option>Right-back</option><option>Centre-back</option>
@@ -86,38 +83,49 @@
             <option>Attacking midfield</option><option>Winger</option><option>Striker</option>
           </select>
         </div>
-        <div><label for="tria-f3" class="tr-l">Current / last club</label><input id="tria-f3" type="text" name="current_club" placeholder="Optional"></div>
+        <div class="kf__field"><label for="tria-f3" class="kf__label tr-l">Current / last club</label><input id="tria-f3" type="text" name="current_club" placeholder="Optional"></div>
       </div>
-      <div class="tr-row">
-        <div><label for="tria-f4" class="tr-l">Email *</label><input id="tria-f4" type="email" name="email" required></div>
-        <div><label for="tria-f5" class="tr-l">Phone *</label><input id="tria-f5" type="tel" name="phone" required></div>
+      <div class="kf__row">
+        <div class="kf__field"><label for="tria-f4" class="kf__label tr-l">Email *</label><input id="tria-f4" type="email" name="email" autocomplete="email" required></div>
+        <div class="kf__field"><label for="tria-f5" class="kf__label tr-l">Phone *</label><input id="tria-f5" type="tel" name="phone" autocomplete="tel" required></div>
       </div>
-      <label for="tria-f6" class="tr-l">Where do you live? *</label>
-      <input id="tria-f6" type="text" name="location" placeholder="Town or postcode area — e.g. South Harrow, HA2" required>
+      <div class="kf__field">
+        <label for="tria-f6" class="kf__label tr-l">Where do you live? *</label>
+        <input id="tria-f6" type="text" name="location" placeholder="Town or postcode area — e.g. South Harrow, HA2" required>
+      </div>
 
-      <label for="tria-f7" class="tr-l">Previous injuries</label>
-      <textarea id="tria-f7" name="injuries" rows="2" placeholder="Optional — anything ongoing or recent"></textarea>
-      <div class="tr-note">Only so we can look after you properly. Held in confidence by the management team.</div>
+      <div class="kf__field">
+        <label for="tria-f7" class="kf__label tr-l">Previous injuries</label>
+        <textarea id="tria-f7" name="injuries" rows="2" placeholder="Optional — anything ongoing or recent"></textarea>
+        <p class="kf__hint tr-note">Only so we can look after you properly. Held in confidence by the management team.</p>
+      </div>
 
-      <label for="tria-f8" class="tr-l">Availability</label>
-      <textarea id="tria-f8" name="availability" rows="2" placeholder="e.g. Tuesday training + Saturday matches"></textarea>
+      <div class="kf__field">
+        <label for="tria-f8" class="kf__label tr-l">Availability</label>
+        <textarea id="tria-f8" name="availability" rows="2" placeholder="e.g. Tuesday training + Saturday matches"></textarea>
+      </div>
 
       <!-- Shown + required automatically when the applicant is under 18 -->
       <div class="tr-guardian" id="tr-guardian">
-        <label for="tr-guardian-name" class="tr-l">Parent / guardian name *</label><input type="text" name="guardian_name" id="tr-guardian-name" autocomplete="off">
-        <label for="tr-guardian-email" class="tr-l">Parent / guardian email *</label><input type="email" name="guardian_email" id="tr-guardian-email" autocomplete="off">
-        <label for="tr-guardian-phone" class="tr-l">Parent / guardian phone</label><input type="tel" name="guardian_phone" id="tr-guardian-phone" autocomplete="off">
-        <div class="tr-note">Required for applicants under 18 — safeguarding.</div>
+        <p class="tr-guardian__h">Parent or guardian</p>
+        <div class="kf__field"><label for="tr-guardian-name" class="kf__label tr-l">Parent / guardian name *</label><input type="text" name="guardian_name" id="tr-guardian-name" autocomplete="off"></div>
+        <div class="kf__row">
+          <div class="kf__field"><label for="tr-guardian-email" class="kf__label tr-l">Parent / guardian email *</label><input type="email" name="guardian_email" id="tr-guardian-email" autocomplete="off"></div>
+          <div class="kf__field"><label for="tr-guardian-phone" class="kf__label tr-l">Parent / guardian phone</label><input type="tel" name="guardian_phone" id="tr-guardian-phone" autocomplete="off"></div>
+        </div>
+        <p class="kf__hint tr-note">Required for applicants under 18 — safeguarding.</p>
       </div>
 
       <!-- GDPR consent (health data — age + injuries; applicants can be children) -->
-      <label class="tr-consent" style="display:flex;gap:10px;align-items:flex-start;font-family:var(--font-b);font-size:12.5px;color:var(--lgrey);line-height:1.6;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;margin-top:4px;cursor:pointer">
-        <input type="checkbox" name="consent" id="tr-consent" value="yes" style="width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--yellow)">
-        <span>I consent to Rayners Lane FC storing these details — including age and any injury information — to assess this trial application. Only club staff can see it, it’s kept for up to <strong style="color:var(--white)">24 months</strong>, and you can ask us to delete it any time at <a href="mailto:info@raynerslanefc.co.uk" style="color:var(--yellow);text-decoration:underline">info@raynerslanefc.co.uk</a>. See our <a href="policies.html#privacy" style="color:var(--yellow);text-decoration:underline">privacy policy</a>.</span>
+      <label class="kf__check tr-consent">
+        <input type="checkbox" name="consent" id="tr-consent" value="yes">
+        <span>I consent to Rayners Lane FC storing these details — including age and any injury information — to assess this trial application. Only club staff can see it, it’s kept for up to <strong>24 months</strong>, and you can ask us to delete it any time at <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>. See our <a href="policies.html#privacy">privacy policy</a>.</span>
       </label>
 
-      <button type="submit" class="tr-submit">Register my interest</button>
-      <div class="tr-private"><i class="ico ico-lock"></i> Your details go privately to the club management team only, never shown on the site. Health information is stored securely and never leaves the club.</div>
+      <div class="kf__submit">
+        <button type="submit" class="kl-btn kl-btn--solid tr-submit">Register my interest</button>
+      </div>
+      <p class="kf__fine tr-private">Your details go privately to the club management team only, never shown on the site. Health information is stored securely and never leaves the club.</p>
     </form>
   </div>
 </section>
