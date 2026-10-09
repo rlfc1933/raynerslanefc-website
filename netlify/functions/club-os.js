@@ -30,7 +30,7 @@ function resp(code, obj) {
     'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' },
     body: JSON.stringify(obj) };
 }
-const fail = (error, extra) => resp(200, Object.assign({ ok: false, error }, extra || {}));
+const fail = (error, extra) => Object.assign({ ok: false, error }, extra || {});
 
 // ── Supabase REST ──────────────────────────────────────────────────────────
 async function sb(method, path, body, prefer) {
@@ -324,7 +324,7 @@ A.rewards = async (b) => {
 A.redeem = async (b, actor) => {
   const st = await A.rewards(b); if (!st.ok) return st;
   const r = st.rewards.find((x) => x.key === b.reward_key); if (!r) return fail('Unknown reward.');
-  if (r.redeemed) { const when = st.redemptions.find((x) => x.reward_key === r.key); return fail(`Already redeemed${when ? ' on ' + when.redeemed_at.slice(0, 10) + ' (by ' + when.redeemed_by + ')' : ''}. It can only be used once a season.`); }
+  if (r.redeemed) { const when = st.redemptions.find((x) => x.reward_key === r.key); return fail(`Already redeemed${when && when.redeemed_at ? ' on ' + String(when.redeemed_at).slice(0, 10) + ' (by ' + when.redeemed_by + ')' : ''}. It can only be used once a season.`); }
   if (!r.earned) return fail(`Not earned yet: ${st.verified_home_visits} verified home visit(s) this season, needs ${r.games}.`);
   try {
     await sb('POST', 'hq_redemptions', { lane_no: st.lane_no, reward_key: r.key, season: st.season, visits_at_redemption: st.verified_home_visits,
@@ -413,18 +413,18 @@ const WRITES = new Set(['create', 'update', 'move', 'pay', 'saveOrg', 'suppress'
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   if (event.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
-  let b; try { b = JSON.parse(event.body || '{}'); } catch (e) { return fail('Bad request.'); }
+  let b; try { b = JSON.parse(event.body || '{}'); } catch (e) { return resp(200, fail('Bad request.')); }
   if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
-  const fn = A[b.action]; if (!fn) return fail('Unknown action.');
+  const fn = A[b.action]; if (!fn) return resp(200, fail('Unknown action.'));
   const actor = str(b.actor, 80);
-  if (WRITES.has(b.action) && !actor) return fail('Tell us who you are (top of Staff HQ) — every change is signed.');
-  if (!SB_KEY) return fail('The club database is not connected (SUPABASE_SERVICE_KEY not set).', { notSetUp: true });
+  if (WRITES.has(b.action) && !actor) return resp(200, fail('Tell us who you are (top of Staff HQ) — every change is signed.'));
+  if (!SB_KEY) return resp(200, fail('The club database is not connected (SUPABASE_SERVICE_KEY not set).', { notSetUp: true }));
   try { return resp(200, await fn(b, actor)); }
   catch (e) {
-    if (e.notSetUp) return fail('Club OS is not set up yet: run supabase/migrations/20261009120000_club_os.sql once in Supabase → SQL Editor.', { notSetUp: true });
-    if (e.message && !e.status) return fail(e.message);       // validation messages from clean*()
+    if (e.notSetUp) return resp(200, fail('Club OS is not set up yet: run supabase/migrations/20261009120000_club_os.sql once in Supabase → SQL Editor.', { notSetUp: true }));
+    if (e.message && !e.status) return resp(200, fail(e.message));       // validation messages from clean*()
     console.error('[club-os]', b.action, e.status, e.message);
-    return fail('The database refused that change. Nothing was saved. (' + (e.code || e.status) + ')');
+    return resp(200, fail('The database refused that change. Nothing was saved. (' + (e.code || e.status) + ')'));
   }
 };
 exports._test = { A, cleanItemFields, cleanOrgFields, seasonOf, LADDER };

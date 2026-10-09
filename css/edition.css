@@ -1,0 +1,185 @@
+/* ════════════════════════════════════════════════════════════════════════
+   THE LANE — 2026/27 EDITION · "FLOODLIT"
+   Loaded LAST on every public page. A re-skin, not a rebuild: every id,
+   class hook and behaviour the site's scripts rely on is untouched.
+
+   Direction (DESIGN.md §1): broadcast-grade, not corporate. Think matchday
+   graphics under the floodlights — black ground, one signal yellow, big
+   condensed numbers, hairline structure, real photography. Premium here
+   means certain, consistent and fast. Gen Z energy comes from tempo and
+   type, never from glow, gradient text or decoration.
+
+   Rules this file enforces:
+     · Surfaces are flat. Depth comes from tone steps and 1px hairlines,
+       not glows, coloured halos or gradient washes.
+     · One yellow thing per view is the action. Status yellow (LIVE, score)
+       is the only other use.
+     · No kicker labels stacked above headings; a heading speaks for itself.
+     · Uppercase is for short labels only, tracked ≤ .08em, ≥ 12px.
+     · Links inside text are underlined (WCAG 1.4.1), not colour-only.
+   Specificity: rules are prefixed with `body` so they win over the inline
+   <style> blocks pages carry, without !important.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --ed-line: rgba(245,243,237,.09);     /* the hairline */
+  --ed-line-2: rgba(245,243,237,.16);
+  --ed-surface: #0E0E0E;                /* one step up from the ground */
+  --ed-surface-2: #141414;
+  --ed-text-2: #C9C7C0;                 /* secondary text on black, 11:1 */
+}
+
+/* ── Browser surfaces: the parts nobody draws, drawn ────────────────────── */
+::selection{background:var(--yellow);color:#080808}
+html{caret-color:var(--yellow);scrollbar-color:#2a2a2a #080808;-webkit-text-size-adjust:100%}
+body{font-variant-numeric:tabular-nums lining-nums;text-rendering:optimizeLegibility}
+body :focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+/* In-text links: underlined so they are not told apart by colour alone. */
+body p a:not(.btn):not([class*="btn"]),body .about-block a:not(.btn),body dd a{
+  text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent)}
+body p a:not(.btn):hover{text-decoration-color:currentColor}
+
+/* ── Type discipline ─────────────────────────────────────────────────────── */
+body .label{font-size:12px;letter-spacing:.08em}
+body h1,body h2,body h3{text-wrap:balance}
+body p{text-wrap:pretty}
+
+/* ── Buttons: flat, decisive ─────────────────────────────────────────────── */
+body .btn{transition:background var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard),transform var(--dur-instant) var(--ease-out)}
+body .btn:active{transform:translateY(1px)}
+body .btn-primary{box-shadow:none}
+body .btn-primary:hover{background:#FFE14D}
+
+/* ── Hero: the matchday title card ───────────────────────────────────────── */
+body .hero__eyebrow{display:none}                 /* the heading speaks for itself */
+body .hero__h1{font-size:clamp(3.5rem,8.4vw,6rem);line-height:.86;letter-spacing:-.005em;margin-bottom:20px}
+body .hero__sub{font-family:var(--font-body);color:var(--ed-text-2);font-size:clamp(1rem,1.25vw,1.125rem);letter-spacing:0;max-width:44ch;margin-bottom:32px}
+body .hero__shirts img{filter:none}
+body .hero__shirts .hs-lbl{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+/* Install: a quiet secondary, never a second glowing primary. */
+body .install-cta{background:transparent;color:var(--white);border:1.5px solid var(--ed-line-2);box-shadow:none;letter-spacing:.02em;font-size:13px;min-height:44px}
+body .install-cta:hover{transform:none;box-shadow:none;border-color:var(--yellow);color:var(--yellow)}
+body .install-cta em{opacity:.75}
+/* One authored moment: the title card arrives once, line by line. */
+@media (prefers-reduced-motion: no-preference){
+  html:not(.a11y-reduce-motion) body .hero__h1{animation:ed-title 680ms var(--ease-out) both}
+  html:not(.a11y-reduce-motion) body .hero__sub,html:not(.a11y-reduce-motion) body .hero__btns{animation:ed-rise var(--dur-slow) var(--ease-out) both;animation-delay:180ms}
+}
+@keyframes ed-title{from{clip-path:inset(0 0 100% 0);transform:translateY(.12em)}to{clip-path:inset(0 0 0 0);transform:none}}
+@keyframes ed-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Club Now becomes a broadcast panel: solid, hairlined, legible over video. */
+body .gl-on .hero__right,body .hero__right{background:rgba(8,8,8,.78)!important;-webkit-backdrop-filter:none;backdrop-filter:none;border-left:1px solid var(--ed-line)}
+body .cn__head,body .gl-on .hero__right .cn__head{background:#080808!important;border-bottom:1px solid var(--ed-line)}
+body .cn__brand{letter-spacing:.08em}
+body .cn__status{letter-spacing:.06em}
+body .cn__wdl--l{color:#fff}
+
+/* Phones/tablets: Club Now leads as a solid card (matchday first), then the
+   title card. club-now.css owns the order; this owns the surface. */
+@media (max-width:1024px){
+  body .hero__right.hero__right--cn{background:var(--ed-surface)!important;border:1px solid var(--ed-line);border-radius:var(--r-md);margin:12px 16px 4px}
+}
+@media (max-width:600px){ body .hero__right.hero__right--cn{margin:8px 12px 4px} }
+
+/* ── Section rhythm and headings ─────────────────────────────────────────── */
+body .section-header{padding-bottom:18px;border-bottom:1px solid var(--ed-line);margin-bottom:36px;align-items:flex-end}
+body .section-header .label,body .section-header .divider,body .section-header + .divider{display:none}
+body .section-title{font-size:clamp(2.5rem,5.2vw,4.25rem)}
+body .divider{background:var(--yellow);height:2px;width:32px}
+
+/* ── Partner wall: the broadcast sponsor board ───────────────────────────── */
+body .partners{background:#080808;border-color:var(--ed-line)}
+body .partners__eyebrow{font-family:var(--font-display);font-size:clamp(2rem,3.4vw,2.75rem);letter-spacing:.01em;text-transform:none;color:var(--white);margin-bottom:6px}
+body .partners__sub{font-size:14px;letter-spacing:0;color:var(--ed-text-2)}
+body .ptr-grid{gap:1px;background:var(--ed-line);border:1px solid var(--ed-line);border-radius:var(--r-md);overflow:hidden;max-width:1040px}
+body .ptr-card,body .ptr-card--principal,body .ptr-card--kit{background:var(--ed-surface);border:0;border-radius:var(--r-xs);box-shadow:none;flex:1 1 200px;min-height:132px;
+  transition:background var(--dur-fast) var(--ease-standard)}
+body .ptr-card--principal{flex:1 1 300px;min-height:170px}
+body .ptr-card--principal::before{display:none}
+body .ptr-card:hover,body .ptr-card--cta:hover{transform:none;box-shadow:none;background:#161616}
+body .ptr-card img{filter:none}
+body .ptr-card .ptr-role{font-size:12px;letter-spacing:.06em;color:var(--muted)}
+body .ptr-card--principal .ptr-role{color:var(--yellow);opacity:1}
+body .ptr-card--cta{background:var(--ed-surface);border:0}
+body .ptr-affcard{background:var(--ed-surface);border:1px solid var(--ed-line);box-shadow:none}
+body .ptr-affcard:hover{transform:none;border-color:var(--yellow)}
+body .ptr-aff__lbl{font-size:12px;letter-spacing:.08em}
+body .kitp-band{background:#0B0B0B;border-color:var(--ed-line)}
+body .kitp__logo{filter:none}
+@media (max-width:900px){ body .kitp{padding-left:16px;padding-right:16px;grid-template-columns:1fr} }
+body .kitp__eyebrow{letter-spacing:.08em;font-size:12px}
+
+/* ── Spotlight (MOTM / signing): flat cards, no halos ────────────────────── */
+body .spot-card{box-shadow:none;background:var(--ed-surface)!important;border-color:var(--ed-line)}
+body .spot-card::after{display:none}
+body .spot-badge{font-size:12px;letter-spacing:.08em}
+
+/* ── News: editorial tiles ───────────────────────────────────────────────── */
+body .news-card{border:1px solid var(--ed-line);border-radius:var(--r-md);overflow:hidden;background:var(--ed-surface);transition:border-color var(--dur-fast) var(--ease-standard)}
+body .news-card:hover{border-color:rgba(255,209,0,.55)}
+body .news-card img{transition:transform var(--dur-slow) var(--ease-out)}
+body .news-card:hover img{transform:scale(1.03)}
+body .news-card__cat{letter-spacing:.06em;font-size:12px}
+
+/* Short list (the homepage's four): one lead story + a running order, the
+   way a sports desk sets a front. Longer lists keep the newsroom grid. */
+@media (min-width:900px){
+  body .news-grid:not(:has(.news-card:nth-child(5))){grid-template-columns:1.55fr 1fr;gap:12px}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card--featured{grid-row:span 3;min-height:560px}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card:not(.news-card--featured){flex-direction:row;align-items:stretch;min-height:0}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card:not(.news-card--featured) .news-card__img{width:38%;aspect-ratio:auto;min-height:150px}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card:not(.news-card--featured) .news-card__img img{object-fit:cover;width:100%;height:100%}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card:not(.news-card--featured) .news-card__content{padding:18px 56px 18px 20px;display:flex;flex-direction:column;justify-content:center}
+  body .news-grid:not(:has(.news-card:nth-child(5))) .news-card__arrow{bottom:16px;right:16px}
+}
+body .news-card__title{letter-spacing:.01em}
+body .news-card__cat{align-self:flex-start;width:auto}
+body .news-card__arrow{border-color:var(--ed-line-2)}
+
+/* Kicker labels stacked on headings are retired: the heading carries itself. */
+body .label:has(+ h1),body .label:has(+ h2),body .label:has(+ h3),body .label:has(+ .divider + h2),
+body .label:has(+ .section-title),body .label:has(+ .divider + .section-title){display:none}
+
+/* Matchday admission: flat panel, heritage green kept to a hairline accent. */
+body .gate__head,body .gate-head{background:var(--ed-surface)!important;border-bottom:1px solid var(--ed-line)}
+
+/* ── Gate prices, notices, callouts: no coloured side-stripes ────────────── */
+body .gate{box-shadow:none;border-color:var(--ed-line)}
+body .gate__sub{text-transform:none;letter-spacing:.01em;font-size:13px}
+body .notify-bar,body .faq-item,body .info-box,body .chairman-quote,body .how-to-order,body .emergency-box,body .mnotice,body .newsroom-header,body .st-inc,body .ess-pull,body .conduct-card{
+  border-left-width:1px;border-left-color:var(--ed-line)}
+body .faq-item{border:1px solid var(--ed-line);border-radius:var(--r-md);background:var(--ed-surface)}
+
+/* ── Page headers: title card, no green wash ─────────────────────────────── */
+body .page-header{background:#080808;border-bottom:1px solid var(--ed-line);padding:72px 0 44px}
+body .page-header::after{color:rgba(245,243,237,.03)}
+body .page-header__eyebrow{display:none}
+body .page-header__h{font-size:clamp(3rem,7vw,6rem);line-height:.9;letter-spacing:-.005em}
+body .page-header__meta{font-family:var(--font-body);color:var(--ed-text-2);letter-spacing:0;font-size:clamp(1rem,1.3vw,1.125rem);max-width:60ch}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+body .footer{background:#080808;border-top:1px solid var(--ed-line)}
+body .footer__col h4{font-size:12px;letter-spacing:.08em}
+body .footer__social a{border-radius:var(--r-sm);border-color:var(--ed-line-2)}
+body .footer__social a:hover{background:transparent}
+body .footer__bottom{border-top-color:var(--ed-line)}
+
+/* ── Floating accessibility control: flat, still findable ────────────────── */
+body .a11y-fab{box-shadow:0 6px 18px rgba(0,0,0,.45)}
+body #a11y-panel{box-shadow:0 18px 40px rgba(0,0,0,.6)}
+
+/* ── Layout stability: reserve space for data that arrives after paint ──── */
+body #cn-primary{min-height:220px}
+body [data-at-the-gate]{min-height:150px}
+body #home-fixtures,body #fx-next{min-height:180px}
+body #news-grid,body .news-grid{min-height:420px}
+body #squad-grid{min-height:600px}
+@media (max-width:600px){ body #cn-primary{min-height:260px} body [data-at-the-gate]{min-height:200px} }
+
+/* ── Reduced motion: the whole layer goes still ──────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  body .news-card img,body .btn{transition:none}
+  body .news-card:hover img{transform:none}
+}
+html.a11y-reduce-motion body .hero__h1,html.a11y-reduce-motion body .hero__sub,html.a11y-reduce-motion body .hero__btns{animation:none}

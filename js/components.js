@@ -1115,6 +1115,11 @@ function initComponents(currentPage) {
    native cursor (doesn't hide it) so forms, the admin panel and accessibility
    are never compromised. Desktop fine-pointers only; off under reduced-motion. */
 function initLaneCursor() {
+  // RETIRED in the 2026/27 edition: a decorative glow that followed the pointer
+  // carried no meaning, ran a requestAnimationFrame loop for the life of the
+  // page, and fought the real focus/hover states. DESIGN.md §5: motion must
+  // explain a change. The native cursor and the hover states do that job.
+  return;
   if (window._laneCursorReady) return;
   var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
