@@ -1,0 +1,79 @@
+/* ════════════════════════════════════════════════════════════════════════
+   SEASON TICKETS — the yellow poster world (Kit Launch 2026/27)
+   The title card and the price board are one drenched yellow sheet, the
+   prices set as huge tabular numbers on 2px black rules, like the gate
+   poster on the homepage. Then black for the detail, hairlines for structure.
+   Every id initSeason() and initGate() write to is kept.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Title card: the poster's top half */
+.st-ph{min-height:0}
+.st-ph .kl-ph__inner{padding:clamp(40px,7vw,96px) 0 clamp(12px,2vw,24px)}
+.st-ph__meta{display:flex;align-items:center;gap:12px;font-size:15px}
+.st-ph__meta img{width:44px;height:44px;object-fit:contain;flex:0 0 auto}
+
+/* The price board */
+.st-prices{background:var(--yellow);color:#080808;padding:clamp(16px,2vw,24px) 0 clamp(48px,7vw,96px);position:relative}
+.st-prices::after{content:"";position:absolute;left:0;right:0;bottom:0;height:14px;
+  background:repeating-linear-gradient(90deg,#080808 0 56px,var(--yellow) 56px 112px,#1A5C32 112px 168px,var(--yellow) 168px 224px)}
+.st-prices__h{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.st-board{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid #080808}
+.st-price{display:flex;flex-direction:column;gap:2px;padding:18px 0 22px;border-bottom:2px solid #080808;min-width:0}
+.st-price:nth-child(odd){border-right:2px solid #080808;padding-right:14px}
+.st-price:nth-child(even){padding-left:16px}
+.st-price__label{font-family:var(--font-body);font-weight:800;font-size:15px;line-height:1.3}
+.st-price__note{font-family:var(--font-body);font-weight:600;font-size:13px;color:#111111;min-height:1.3em}
+.st-price__n{font-family:var(--font-display);font-weight:400;font-size:clamp(4.6rem,22vw,7rem);line-height:.84;margin-top:10px;font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+.st-price__n small{font-size:.48em;vertical-align:.82em;margin-right:.04em;letter-spacing:0}
+@media (min-width:900px){
+  .st-board{grid-template-columns:repeat(4,1fr)}
+  .st-price,.st-price:nth-child(odd),.st-price:nth-child(even){padding:22px 22px 28px;border-right:2px solid #080808}
+  .st-price:first-child{padding-left:0}
+  .st-price:last-child{border-right:0}
+  .st-price__n{font-size:clamp(7rem,11vw,11rem)}
+}
+
+/* Early bird — a black strip across the poster (removed after its deadline) */
+.st-early{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin:28px 0 0;padding:16px 18px;background:#080808;color:var(--white);border-radius:var(--r-sm)}
+.st-early__tag{font-family:var(--font-display);font-size:1.7rem;line-height:1;color:var(--yellow);text-transform:uppercase}
+.st-early__body{font-family:var(--font-body);font-size:15px;font-weight:600;line-height:1.5}
+.st-early__body b{color:var(--yellow);font-weight:800}
+
+/* What it covers */
+.st-covers{border-top:0}
+.st-covers__grid,.st-buy__grid{display:grid;gap:28px}
+@media (min-width:900px){.st-covers__grid,.st-buy__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:48px;align-items:start}}
+.st-comps{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line-2)}
+.st-comps li{font-family:var(--font-display);font-size:clamp(1.9rem,4.2vw,3.2rem);line-height:.95;color:var(--white);padding:18px 0 16px;border-bottom:1px solid var(--ed-line-2)}
+.st-know{margin-top:28px;display:grid;gap:6px}
+.st-know__h{font-family:var(--font-body);font-weight:800;font-size:15px;color:var(--yellow);margin:0}
+.st-know__p{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2);margin:0;max-width:52ch}
+.st-know__p b{color:var(--white)}
+
+/* How to buy — the address is the button */
+.st-buy__p{color:var(--ed-text-2)}
+.st-mail{display:inline-flex;align-items:center;min-height:52px;font-family:var(--font-display);font-size:clamp(1.7rem,6.6vw,3.6rem);line-height:1;color:var(--yellow);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:8px;overflow-wrap:anywhere;word-break:break-word}
+.st-mail:hover{color:var(--white)}
+.st-mail:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}
+
+/* The gate, set as a smaller board on hairlines (markup from initGate) */
+.st-gate__head{flex-wrap:wrap}
+.st-gate__intro{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;color:var(--ed-text-2);margin:0;max-width:34ch}
+body .st-gate .gate{background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible}
+body .st-gate .gate__head{background:transparent!important;border:0;padding:0 0 14px}
+body .st-gate .gate__eyebrow{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body .st-gate .gate__sub{font-family:var(--font-body);font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--ed-text-2)}
+body .st-gate .gate__grid{grid-template-columns:1fr 1fr;border-top:1px solid var(--ed-line-2)}
+body .st-gate .gate__row{text-align:left;align-items:flex-start;padding:18px 16px 20px 0;border-right:0;border-bottom:1px solid var(--ed-line-2);gap:8px}
+body .st-gate .gate__row:nth-child(odd){border-right:1px solid var(--ed-line-2)}
+body .st-gate .gate__row:nth-child(even){padding-left:16px}
+body .st-gate .gate__price{font-size:clamp(3.4rem,12vw,5.5rem);line-height:.85;color:var(--white);letter-spacing:0}
+body .st-gate .gate__label{font-size:14px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--white)}
+body .st-gate .gate__note{font-size:13px;font-weight:600;color:#AAAAAA;letter-spacing:0}
+@media (min-width:900px){
+  body .st-gate .gate__grid{grid-template-columns:repeat(4,1fr)}
+  body .st-gate .gate__row,body .st-gate .gate__row:nth-child(odd),body .st-gate .gate__row:nth-child(even){padding:20px 20px 24px;border-right:1px solid var(--ed-line-2);border-bottom:0}
+  body .st-gate .gate__row:first-child{padding-left:0}
+  body .st-gate .gate__row:last-child{border-right:0}
+  body .st-gate .gate__grid{border-bottom:1px solid var(--ed-line-2)}
+}

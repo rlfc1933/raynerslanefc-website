@@ -1,0 +1,242 @@
+/* ════════════════════════════════════════════════════════════════════════
+   FAN ZONE — the green world of the Lane Card (Kit Launch 2026/27)
+   Drenched heritage green title card with the yellow Lane Card as the hero
+   object; the join panel and member home set as type on hairlines; the
+   supporter's own card (rendered by js/fan-zone.js) is that same yellow
+   card; the loyalty ladder a numbered ruled list with big numerals on green.
+   Every hook the scripts use is kept: #fz-member, #fz-account,
+   #fancard-mount, #fz-members, #fz-ladder, #nums-sec/#fz-nums, #fz-wall.
+   css/fan-zone.css is shared with other pages, so this file overrides it
+   here rather than editing it.
+   ════════════════════════════════════════════════════════════════════════ */
+.hidden{display:none}
+
+/* ── Title card ─────────────────────────────────────────────────────────── */
+.fz-ph{min-height:0}
+.fz-ph__grid{display:grid;align-items:center;gap:0}
+.fz-ph__inner{padding-bottom:clamp(20px,4vw,56px)}
+.fz-ph__card{display:flex;justify-content:center;padding:8px 0 clamp(48px,7vw,80px);perspective:1200px}
+@media (min-width:900px){
+  .fz-ph{min-height:clamp(520px,76svh,820px)}
+  .fz-ph__grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px}
+  .fz-ph__inner{padding-bottom:clamp(40px,6vw,80px)}
+  .fz-ph__card{padding:0}
+}
+.fz-lanecard{width:min(84%,460px);aspect-ratio:1.586;background:var(--yellow);color:#080808;border-radius:var(--r-lg);padding:clamp(18px,4vw,28px);box-sizing:border-box;
+  display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 1fr auto auto;gap:6px 14px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.55);transform:rotate(-5deg);transition:transform var(--dur-slow) var(--ease-out)}
+.fz-lanecard:hover{transform:rotate(-2deg) translateY(-4px)}
+.fz-lanecard img{grid-row:1;grid-column:1;width:clamp(48px,11vw,64px);height:auto;aspect-ratio:1}
+.fz-lanecard__club{grid-row:1;grid-column:2;align-self:center;font-family:var(--font-body);font-weight:800;font-size:13px;line-height:1.3}
+.fz-lanecard__hearts{grid-row:1;grid-column:2;justify-self:end;align-self:start;display:flex;gap:5px}
+.fz-lanecard__hearts i{width:15px;height:15px;background:#080808;clip-path:path('M7.5 13.6 1.5 7.8A3.6 3.6 0 0 1 7.5 3a3.6 3.6 0 0 1 6 4.8Z')}
+.fz-lanecard__hearts i.off{opacity:.25}
+.fz-lanecard__name{grid-column:1 / -1;grid-row:3;font-family:var(--font-display);font-size:clamp(2.2rem,7vw,3.2rem);line-height:.88;text-transform:uppercase}
+.fz-lanecard__no{grid-column:1 / -1;grid-row:4;font-family:var(--font-body);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+@media (max-width:420px){.fz-lanecard__club{display:none}}
+@media (prefers-reduced-motion:reduce){.fz-lanecard{transition:none}}
+
+/* ── Bands (black sections on hairlines) ─────────────────────────────────── */
+.fz-band{background:#080808;padding:clamp(48px,8vw,104px) 0;border-top:1px solid var(--ed-line-2)}
+.fz-band--join{border-top:0}
+.fz-split{display:grid;gap:28px}
+@media (min-width:1000px){.fz-split{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:56px;align-items:start}}
+.fz-lead-p{color:var(--ed-text-2);margin-top:20px}
+body #fz-member:empty{min-height:0}
+
+/* ── Join / sign-in panel (markup: js/fan-zone-member.js) ────────────────── */
+body .fz-join{max-width:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;display:grid;gap:0 56px}
+body .fz-join__eyebrow{display:none}
+body .fz-join__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.4rem,4.4vw,4.2rem);line-height:.9;text-transform:uppercase;color:var(--white);margin:0 0 18px;max-width:18ch}
+body .fz-join__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:var(--ed-text-2);margin:0 0 22px;max-width:46ch}
+body .fz-join form{border-top:2px solid var(--white);padding-top:22px;min-width:0}
+body .fz-join label{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--white);margin-bottom:8px}
+body .fz-join input[type=text],body .fz-join input[type=email]{min-height:52px;border-radius:var(--r-sm);border:1px solid rgba(245,243,237,.28);background:#0E0E0E;font-size:16px;font-family:var(--font-body)}
+body .fz-join input:focus{outline:3px solid var(--yellow);outline-offset:2px;border-color:transparent}
+body .fz-join .fz-join__check{display:flex;gap:12px;align-items:flex-start;font-weight:400}
+body .fz-join__check span{font-weight:500;font-size:14px;color:var(--ed-text-2)}
+body .fz-join__check input{width:20px;height:20px;accent-color:var(--yellow)}
+body .fz-join .btn{min-height:52px;font-size:15px;letter-spacing:.01em;text-transform:none;border-radius:var(--r-sm)}
+body .fz-join__legal{font-size:13px;color:#AAAAAA}
+body .fz-join__legal a{color:var(--white);text-decoration-color:var(--yellow)}
+body .fz-join__alt{text-align:left;font-size:14px;color:#AAAAAA}
+body .fz-join__alt button{color:var(--yellow);font-weight:800;min-height:44px;padding:0 4px}
+@media (min-width:1000px){
+  body .fz-join{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+  body .fz-join > *{grid-column:1}
+  body .fz-join > form,body .fz-join > .fz-join__legal,body .fz-join > #fzj-msg,body .fz-join > .fz-join__alt{grid-column:2}
+  body .fz-join > form{grid-row:1 / span 3;align-self:start}
+}
+
+/* ── Member home (signed in) ─────────────────────────────────────────────── */
+body .fz-welcome{margin:0 0 28px}
+body .fz-welcome__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.8rem,7vw,6rem);line-height:.86;text-transform:uppercase;color:var(--white)}
+body .fz-welcome__sub{font-family:var(--font-body);font-size:16px;color:var(--ed-text-2);margin-top:10px}
+body .fz-welcome__sub b{font-variant-numeric:tabular-nums}
+body .fz-grid{gap:0 40px;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
+body .fz-card{padding:22px 0 28px;border:0;border-top:1px solid var(--ed-line-2);border-radius:0;background:transparent}
+body .fz-card__h{font-family:var(--font-display);font-weight:400;font-size:clamp(1.7rem,2.4vw,2.2rem);line-height:.95;letter-spacing:0;text-transform:uppercase;color:var(--white);margin:0 0 14px}
+body .fz-card p{font-size:15px;color:var(--ed-text-2)}
+body .fz-hist li{background:transparent;border-radius:0;border-bottom:1px solid var(--ed-line);padding:12px 0}
+body .fz-hist a{min-height:44px;display:inline-flex;align-items:center;font-size:14px}
+body .fz-prefs span,body .fz-note{font-size:14px;color:var(--ed-text-2)}
+body .fz-prefs input[type=checkbox]{width:20px;height:20px;accent-color:var(--yellow)}
+body .fz-prefs input[type=text],body .fz-prefs input[type=tel]{width:100%;box-sizing:border-box;min-height:48px;border-radius:var(--r-sm);border:1px solid rgba(245,243,237,.28);background:#0E0E0E;color:var(--white);font-size:16px;padding:10px 12px}
+body .fz-card .btn{background:transparent;color:var(--white);border:2px solid rgba(245,243,237,.55);padding:10px 18px;min-height:48px;text-transform:none;letter-spacing:.01em;font-size:14px;border-radius:var(--r-sm)}
+
+/* ── The account row ─────────────────────────────────────────────────────── */
+.fz-acct{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:clamp(28px,4vw,44px);padding:16px 0;border-top:1px solid var(--ed-line-2);border-bottom:1px solid var(--ed-line-2)}
+.fz-acct__av{width:44px;height:44px;border-radius:var(--r-circle);flex-shrink:0;background:#1A5C32;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:var(--white);overflow:hidden}
+.fz-acct__av img{width:100%;height:100%;object-fit:cover}
+.fz-acct__main{flex:1 1 200px;min-width:0}
+.fz-acct__hi{font-family:var(--font-display);font-size:1.7rem;line-height:1;text-transform:uppercase;color:var(--white)}
+.fz-acct__sub{font-family:var(--font-body);font-size:14px;color:#AAAAAA;margin-top:4px}
+.fz-acct__sub b{color:var(--yellow);font-variant-numeric:tabular-nums}
+.fz-acct__btn{flex-shrink:0;min-height:44px;font-family:var(--font-body);font-size:14px;font-weight:800;padding:10px 18px;border-radius:var(--r-sm);border:2px solid rgba(245,243,237,.55);background:transparent;color:var(--white);cursor:pointer;transition:border-color var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard)}
+.fz-acct__btn:hover{border-color:var(--white)}
+.fz-acct__btn--y{background:var(--yellow);color:#080808;border-color:var(--yellow)}
+.fz-acct__btn--y:hover{border-color:var(--yellow)}
+
+/* ── Buttons used inside the JS-rendered card ────────────────────────────── */
+.fz-btn{min-height:52px;transition:background var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+.fz-btn--y{background:var(--yellow);color:#080808;border-color:var(--yellow)}
+.fz-btn--g{background:transparent;color:var(--white);border-color:rgba(245,243,237,.55)}
+.fz-btn--g:hover{border-color:var(--white)}
+.fz-btn:focus-visible,.fz-acct__btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.fz-btn:active{transform:translateY(1px)}
+
+/* ── The card mount ──────────────────────────────────────────────────────── */
+/* Signed-out note in place of the card */
+.fz-note-card{border-top:2px solid var(--white);padding-top:22px}
+.fz-note-card__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,3.4vw,3rem);line-height:.92;text-transform:uppercase;color:var(--white);margin:0 0 12px}
+.fz-note-card__p{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2);margin:0 0 22px;max-width:46ch}
+
+/* The supporter's own card — the yellow Lane Card, for real */
+.vipcard{position:relative;width:min(100%,460px);margin:0 0 28px;border-radius:var(--r-lg);overflow:hidden;background:var(--yellow);color:#080808;box-shadow:0 30px 60px -24px rgba(0,0,0,.6)}
+.vipcard__crestbg{position:absolute;right:-40px;bottom:-50px;width:220px;height:220px;background:url('../img/badge-512.png') center/contain no-repeat;opacity:.1;pointer-events:none}
+.vipcard__sheen{display:none}
+.vipcard__head{position:relative;display:flex;align-items:center;gap:12px;padding:20px 20px 0}
+.vipcard__crest{width:48px;height:48px;object-fit:contain}
+.vipcard__brand{flex:1;min-width:0}
+.vipcard__club{font-family:var(--font-display);font-size:1.4rem;line-height:1;text-transform:uppercase}
+.vipcard__estd{font-family:var(--font-body);font-weight:700;font-size:12px;margin-top:3px;color:#111111}
+.vipcard__tier{font-family:var(--font-body);font-weight:800;font-size:12px;color:var(--yellow);background:#080808;padding:6px 10px;border-radius:var(--r-xs);white-space:nowrap}
+.vipcard__tier .ico{display:none}
+.vipcard__body{position:relative;display:flex;align-items:center;gap:14px;padding:18px 20px 14px}
+.vipcard__av{width:64px;height:64px;border-radius:var(--r-md);flex-shrink:0;object-fit:cover;background:#080808;color:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem}
+.vipcard__who{min-width:0}
+.vipcard__vlabel{font-family:var(--font-body);font-weight:800;font-size:12px;color:#111111}
+.vipcard__name{font-family:var(--font-display);font-size:clamp(2rem,6vw,2.6rem);line-height:.92;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vipcard__meta{font-family:var(--font-body);font-weight:600;font-size:13px;margin-top:4px;color:#111111}
+.vipcard__founding{display:inline-block;margin-top:6px;font-family:var(--font-body);font-weight:800;font-size:12px;border-bottom:2px solid #080808}
+.vipcard__founding .ico{display:none}
+.vipcard__strip{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding:14px 20px 16px;border-top:2px solid #080808}
+.vipcard__no span{display:block;font-family:var(--font-body);font-weight:800;font-size:12px}
+.vipcard__no b{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,10vw,4rem);line-height:.85;font-variant-numeric:tabular-nums;margin-top:4px}
+.vipcard__qr{background:#FFFFFF;border-radius:var(--r-sm);padding:6px;flex-shrink:0}
+.vipcard__qr img{display:block;width:92px;height:92px}
+.vipcard__foot{font-family:var(--font-body);font-weight:700;font-size:12px;padding:0 20px 16px;color:#111111}
+
+/* Everything below the card: hearts, numbers, rewards, actions */
+.fz-extras{max-width:none}
+.fz-hearts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 18px;font-size:18px;color:var(--yellow);line-height:1.4}
+.fz-hearts--none{font-family:var(--font-body);font-size:15px;color:var(--ed-text-2)}
+.fz-hearts__more{font-family:var(--font-body);font-weight:800;font-size:14px}
+.fz-hearts__streak{font-family:var(--font-body);font-weight:800;font-size:14px;color:#080808;background:var(--yellow);padding:4px 10px;border-radius:var(--r-xs)}
+.fancard__stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--white);border-bottom:1px solid var(--ed-line-2)}
+.fancard__stat{padding:16px 12px 18px 0;border-right:1px solid var(--ed-line-2)}
+.fancard__stat + .fancard__stat{padding-left:14px}
+.fancard__stat:last-child{border-right:0}
+.fancard__num{font-family:var(--font-display);font-size:clamp(3rem,8vw,4.5rem);line-height:.85;color:var(--white);font-variant-numeric:tabular-nums}
+.fancard__lbl{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA;margin-top:6px}
+.fancard__meaning{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.2rem);line-height:1;text-transform:uppercase;color:var(--white);margin:22px 0 0}
+.fz-next{margin:24px 0 0}
+.fz-next__row{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-body);font-weight:800;font-size:14px;margin-bottom:8px}
+.fz-next__t{color:var(--white)}
+.fz-next__n{color:var(--yellow);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fz-next__bar{height:6px;background:rgba(245,243,237,.14);overflow:hidden}
+.fz-next__fill{height:100%;background:var(--yellow)}
+.fz-rewards{margin:28px 0 0}
+.fz-rewards__h{font-family:var(--font-body);font-weight:800;font-size:14px;color:#AAAAAA;margin:0 0 10px}
+.fz-rewards__list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line-2)}
+.fz-reward{display:grid;grid-template-columns:3.4rem minmax(0,1fr) auto;gap:14px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--ed-line-2)}
+.fz-reward__n{font-family:var(--font-display);font-size:2.6rem;line-height:.85;color:#8F8F8F;font-variant-numeric:tabular-nums}
+.fz-reward__body{min-width:0;display:grid;gap:3px}
+.fz-reward__t{font-family:var(--font-display);font-size:1.5rem;line-height:1;text-transform:uppercase;color:var(--white)}
+.fz-reward__d,.fz-reward__by{font-family:var(--font-body);font-size:14px;line-height:1.45;color:#AAAAAA}
+.fz-reward__by{font-weight:700;color:var(--ed-text-2)}
+.fz-reward__s{font-family:var(--font-body);font-weight:800;font-size:13px;color:#8F8F8F}
+.fz-reward.is-got .fz-reward__n,.fz-reward.is-got .fz-reward__s{color:var(--yellow)}
+.fancard__foot{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+
+/* ── Member perks ────────────────────────────────────────────────────────── */
+.fz-locked{border-top:2px solid var(--white);padding-top:22px}
+.fz-locked__t{font-family:var(--font-display);font-size:clamp(2rem,3.4vw,3rem);line-height:.92;text-transform:uppercase;color:var(--white);margin:0 0 12px}
+.fz-locked__p{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2);margin:0 0 22px;max-width:46ch}
+.fz-perks{display:grid;border-top:2px solid var(--white)}
+.fz-voucher{padding:20px 0 22px;border-bottom:1px solid var(--ed-line-2)}
+.fz-voucher__tag{display:block;font-family:var(--font-body);font-weight:800;font-size:13px;color:var(--yellow);margin-bottom:6px}
+.fz-voucher__title{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);line-height:.95;text-transform:uppercase;color:var(--white);margin-bottom:8px}
+.fz-voucher__detail{font-family:var(--font-body);font-size:15px;line-height:1.5;color:var(--ed-text-2);margin-bottom:12px}
+.fz-voucher__foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.fz-voucher__code{font-family:var(--font-display);font-size:1.8rem;line-height:1;letter-spacing:.06em;color:#080808;background:var(--yellow);padding:6px 12px 4px;border-radius:var(--r-xs)}
+.fz-voucher__exp{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA}
+.fz-mnews{margin-top:28px;display:grid;border-top:1px solid var(--ed-line-2)}
+.fz-mnews__item{padding:16px 0;border-bottom:1px solid var(--ed-line-2)}
+.fz-mnews__t{font-family:var(--font-body);font-weight:800;font-size:16px;color:var(--white);margin-bottom:4px}
+.fz-mnews__b{font-family:var(--font-body);font-size:15px;line-height:1.55;color:var(--ed-text-2)}
+.fz-mnews__d{font-family:var(--font-body);font-weight:700;font-size:13px;color:var(--yellow);margin-top:6px}
+
+/* ── The loyalty ladder — big numerals on green ──────────────────────────── */
+.fz-ladder-sec .kl-sec__head{flex-wrap:wrap}
+.fz-ladder-sec__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:rgba(245,243,237,.92);margin:0;max-width:44ch}
+.fz-ladder-sec__p strong{color:var(--yellow)}
+.fz-ladder{list-style:none;margin:0;padding:0;border-top:2px solid var(--white)}
+.fz-rung{display:grid;grid-template-columns:clamp(5.2rem,22vw,11rem) minmax(0,1fr);gap:4px clamp(16px,3vw,40px);align-items:center;padding:clamp(14px,2vw,22px) 0;border-bottom:1px solid rgba(245,243,237,.28)}
+.fz-rung__g{font-family:var(--font-display);font-size:clamp(5rem,16vw,10rem);line-height:.8;color:var(--white);font-variant-numeric:tabular-nums;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.fz-rung__g small{font-family:var(--font-body);font-weight:800;font-size:13px;color:rgba(245,243,237,.88);line-height:1}
+.fz-rung__body{min-width:0;display:grid;gap:6px}
+.fz-rung__t{font-family:var(--font-display);font-size:clamp(2rem,4.4vw,3.6rem);line-height:.9;text-transform:uppercase;color:var(--white)}
+.fz-rung__d{font-family:var(--font-body);font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.5;color:rgba(245,243,237,.92);max-width:52ch}
+.fz-rung__on{grid-column:2;font-family:var(--font-body);font-weight:800;font-size:13px;color:#080808;background:var(--yellow);padding:4px 10px;border-radius:var(--r-xs);justify-self:start}
+.fz-rung.on .fz-rung__g{color:var(--yellow)}
+@media (min-width:900px){
+  .fz-rung{grid-template-columns:11rem minmax(0,1fr) auto}
+  .fz-rung__on{grid-column:3}
+}
+
+/* ── By the numbers ──────────────────────────────────────────────────────── */
+.fz-nums{display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--ed-line-2)}
+.fz-num{padding:18px 14px 20px 0;border-bottom:1px solid var(--ed-line-2);display:flex;flex-direction:column;gap:8px}
+.fz-num:nth-child(odd){border-right:1px solid var(--ed-line-2)}
+.fz-num:nth-child(even){padding-left:16px}
+.fz-num:last-child:nth-child(odd){border-right:0}
+.fz-num b{font-family:var(--font-display);font-weight:400;font-size:clamp(3.6rem,13vw,7rem);line-height:.84;color:var(--white);font-variant-numeric:tabular-nums}
+.fz-num span{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+@media (min-width:900px){
+  .fz-nums{grid-template-columns:repeat(4,1fr)}
+  .fz-num,.fz-num:nth-child(odd),.fz-num:nth-child(even){padding:22px 20px 24px;border-right:1px solid var(--ed-line-2)}
+  .fz-num:first-child{padding-left:0}
+  .fz-num:last-child{border-right:0}
+}
+
+/* ── Patrons wall — names on hairlines, not tiles ────────────────────────── */
+.fz-wall{display:grid;gap:0 40px;border-top:2px solid var(--white)}
+@media (min-width:900px){.fz-wall{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.fz-wall__empty{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2);padding-top:20px;max-width:52ch;margin:0}
+.patron{position:relative;padding:20px 0 24px;border-bottom:1px solid var(--ed-line-2);display:grid;grid-template-columns:56px minmax(0,1fr);gap:4px 16px;align-content:start}
+.patron__crown{grid-column:1 / -1;font-family:var(--font-body);font-weight:800;font-size:13px;color:var(--yellow);margin-bottom:8px}
+.patron__photo{grid-row:span 4;width:56px;height:56px;border-radius:var(--r-circle);object-fit:cover;background:#1A5C32;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.5rem;color:var(--white)}
+.patron--featured .patron__crown + .patron__photo{grid-row:2 / span 4}
+.patron__name{margin:0;font-weight:400;font-family:var(--font-display);font-size:clamp(1.8rem,2.6vw,2.4rem);line-height:.92;text-transform:uppercase;color:var(--white);overflow-wrap:anywhere}
+.patron--featured .patron__name{color:var(--yellow)}
+.patron__meta{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA}
+.patron__quote{font-family:var(--font-body);font-size:15px;line-height:1.5;color:var(--ed-text-2);margin-top:8px}
+.patron__badges{display:flex;flex-wrap:wrap;gap:4px 0;margin-top:8px}
+.patron__badge{font-family:var(--font-body);font-weight:700;font-size:13px;color:var(--white)}
+.patron__badge + .patron__badge::before{content:"\00B7";margin:0 8px;color:#8F8F8F}
+
+/* ── Give back — the yellow sign-off ─────────────────────────────────────── */
+.fz-give__grid{display:grid;gap:24px}
+@media (min-width:900px){.fz-give__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:end}}
+.fz-give__p{font-family:var(--font-body);font-weight:600;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:#080808;margin:0 0 22px;max-width:48ch}

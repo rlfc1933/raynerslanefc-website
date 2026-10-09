@@ -27,136 +27,6 @@
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
-  <style>
-    .fz-hero{position:relative;overflow:hidden;padding:64px 0 48px;background:linear-gradient(160deg,var(--green) 0%,#06120a 70%);text-align:center}
-    .fz-hero::after{content:"THE LANE FAMILY";position:absolute;right:-10px;bottom:-24px;font-family:var(--font-d);font-size:90px;color:rgba(255,255,255,.04);white-space:nowrap;pointer-events:none}
-    .fz-hero .label{color:var(--yellow)}
-    .fz-hero h1{font-family:var(--font-d);font-size:clamp(44px,8vw,84px);letter-spacing:.03em;line-height:.92;margin:10px 0 14px;position:relative;z-index:1}
-    .fz-hero h1 span{color:var(--yellow)}
-    .fz-hero p{font-family:var(--font-b);font-size:16px;color:rgba(255,255,255,.7);max-width:560px;margin:0 auto;position:relative;z-index:1}
-    .fz-wrap{max-width:1000px;margin:0 auto;padding:48px 20px}
-    .fz-sec{margin-bottom:56px}
-    .fz-sec__head{text-align:center;margin-bottom:26px}
-    .fz-sec__head .label{display:block;margin-bottom:8px}
-    .fz-sec__head h2{font-family:var(--font-d);font-size:clamp(30px,5vw,52px);letter-spacing:.03em}
-    .fz-sec__head h2 span{color:var(--yellow)}
-    /* fan card */
-    .fancard{max-width:420px;margin:0 auto;border-radius:var(--r-xl);overflow:hidden;background:linear-gradient(150deg,#13160d,#0a0a0a);border:1px solid var(--border);box-shadow:0 30px 70px -34px rgba(0,0,0,.9)}
-    .fancard__top{background:linear-gradient(135deg,var(--green),#06120a);padding:22px 22px 18px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
-    .fancard__top::after{content:"";position:absolute;right:-26px;top:-26px;width:130px;height:130px;border-radius:var(--r-circle);background:radial-gradient(circle,rgba(255,209,0,.2),transparent 70%)}
-    .fancard__photo{width:78px;height:78px;border-radius:var(--r-lg);object-fit:cover;background:#000;border:2px solid rgba(255,255,255,.16);flex-shrink:0;position:relative;z-index:1}
-    .fancard__id{position:relative;z-index:1;min-width:0}
-    .fancard__tier{display:inline-block;font-family:var(--font-c);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0d0d0d;background:var(--yellow);padding:3px 9px;border-radius:var(--r-xs);margin-bottom:6px}
-    .fancard__name{font-family:var(--font-d);font-size:28px;letter-spacing:.03em;color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .fancard__since{font-family:var(--font-c);font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.6);margin-top:4px}
-    .fancard__stats{display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;border-top:1px solid var(--border)}
-    .fancard__stat{padding:16px 6px;border-right:1px solid var(--border)}
-    .fancard__stat:last-child{border-right:none}
-    .fancard__num{font-family:var(--font-d);font-size:32px;color:var(--yellow);line-height:1}
-    .fancard__lbl{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
-    .fancard__foot{padding:16px 18px;display:flex;gap:8px;flex-wrap:wrap}
-    /* Geometry from the shared --ctl-* tokens, same as .btn / .cn__btn /
-       .cal-btn. Local: flex:1 and the min-width, which are about this row. */
-    .fz-btn{flex:1;min-width:130px;min-height:var(--ctl-min-h);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-family:var(--font-c);font-size:var(--ctl-fs);font-weight:var(--ctl-weight);letter-spacing:var(--ctl-ls);text-transform:uppercase;padding:var(--ctl-pad-y) var(--ctl-pad-x);border-radius:var(--ctl-radius);cursor:pointer;border:var(--ctl-border) solid transparent;-webkit-tap-highlight-color:transparent;text-decoration:none}
-    .fz-btn--y{background:var(--yellow);color:#0d0d0d;border-color:var(--yellow)}
-    .fz-btn--g{background:var(--card);color:#fff;border-color:var(--border)}
-    .fz-btn:active{opacity:.85}
-    .fancard__meaning{padding:0 18px 18px;font-family:var(--font-b);font-style:italic;font-size:14px;color:var(--lgrey);line-height:1.6}
-    .memcard__bar{display:flex;align-items:center;gap:12px;padding:13px 18px;background:linear-gradient(90deg,#0c0c0c,#141414);border-bottom:1px solid var(--border)}
-    .memcard__badge{width:34px;height:34px;object-fit:contain;flex-shrink:0}
-    .memcard__title{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--grey)}
-    .memcard__no{font-family:var(--font-d);font-size:21px;letter-spacing:.06em;color:var(--yellow);line-height:1}
-    .memcard__qr{display:flex;flex-direction:column;align-items:center;padding:16px 18px;border-top:1px solid var(--border)}
-    .memcard__qr img{width:122px;height:122px;background:#fff;border-radius:var(--r-md);padding:7px}
-    .memcard__qrnote{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--yellow);margin-top:9px;text-align:center}
-    /* ── PREMIUM VIP MEMBERSHIP CARD ── */
-    .vipcard{position:relative;max-width:420px;margin:0 auto 22px;border-radius:var(--r-xl);overflow:hidden;background:linear-gradient(140deg,#1d3f17 0%,#0f2110 42%,#070707 100%);border:1px solid rgba(255,209,0,.45);box-shadow:0 34px 80px -30px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.07)}
-    .vipcard__crestbg{position:absolute;right:-36px;bottom:-44px;width:215px;height:215px;background:url('img/badge.png') center/contain no-repeat;opacity:.08;pointer-events:none}
-    .vipcard__sheen{position:absolute;inset:0;background:linear-gradient(118deg,transparent 32%,rgba(255,255,255,.08) 46%,rgba(255,209,0,.06) 50%,transparent 62%);pointer-events:none}
-    .vipcard__head{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:18px 20px 0}
-    .vipcard__crest{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 7px rgba(0,0,0,.6))}
-    .vipcard__brand{flex:1;min-width:0}
-    .vipcard__club{font-family:var(--font-d);font-size:19px;letter-spacing:.04em;color:#fff;line-height:1}
-    .vipcard__estd{font-family:var(--font-c);font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);margin-top:4px}
-    .vipcard__tier{font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#0d0d0d;background:linear-gradient(90deg,#fff3bf,var(--yellow));padding:5px 10px;border-radius:var(--r-sm);white-space:nowrap;box-shadow:0 2px 10px -2px rgba(255,209,0,.5)}
-    .vipcard__body{position:relative;z-index:1;display:flex;align-items:center;gap:15px;padding:18px 20px 16px}
-    .vipcard__av{width:66px;height:66px;border-radius:var(--r-lg);flex-shrink:0;object-fit:cover;background:linear-gradient(160deg,#2a2a2a,#000);border:1.5px solid rgba(255,209,0,.45);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:27px;color:#fff}
-    .vipcard__who{min-width:0}
-    .vipcard__vlabel{font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--yellow);margin-bottom:4px}
-    .vipcard__name{font-family:var(--font-d);font-size:28px;letter-spacing:.03em;color:#fff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .vipcard__meta{font-family:var(--font-c);font-size:10.5px;letter-spacing:.05em;color:rgba(255,255,255,.62);margin-top:6px}
-    .vipcard__founding{display:inline-block;margin-top:9px;font-family:var(--font-c);font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0d0d0d;background:linear-gradient(90deg,#fff,#ffe680);border-radius:var(--r-sm);padding:3px 9px}
-    .vipcard__strip{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 20px;border-top:1px dashed rgba(255,255,255,.22)}
-    .vipcard__no span{display:block;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5)}
-    .vipcard__no b{font-family:var(--font-d);font-size:36px;letter-spacing:.08em;color:var(--yellow);line-height:1;display:block;margin-top:3px}
-    .vipcard__qr{background:#fff;border-radius:var(--r-lg);padding:8px;flex-shrink:0}
-    .vipcard__qr img{display:block;width:92px;height:92px}
-    .vipcard__foot{position:relative;z-index:1;text-align:center;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:12px 0 16px}
-    .fz-extras{max-width:420px;margin:0 auto}
-    /* form */
-    .fz-form{max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:26px}
-    .fz-form .fl{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin:14px 0 6px}
-    .fz-form input,.fz-form textarea{width:100%;background:var(--dark,#0f0f0f);border:1px solid var(--border);border-radius:var(--r-md);color:#fff;font-family:var(--font-b);font-size:15px;padding:12px 14px}
-    .fz-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .fz-private{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.04em;margin-top:14px;display:flex;gap:8px;align-items:flex-start}
-    /* perks ladder */
-    .fz-ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:10px}
-    .fz-rung{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--border);border-radius:var(--r-md);padding:18px 14px;text-align:center}
-    .fz-rung.on{border-top-color:var(--yellow);background:rgba(255,209,0,.05)}
-    .fz-rung__g{font-family:var(--font-d);font-size:30px;color:var(--yellow);line-height:1}
-    .fz-rung__t{font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-top:6px}
-    .fz-rung__d{font-family:var(--font-b);font-size:12px;color:var(--grey);margin-top:4px;line-height:1.5}
-    /* patrons wall */
-    .fz-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:14px}
-    .patron{background:linear-gradient(160deg,var(--card),var(--dark,#0f0f0f));border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;text-align:center;position:relative}
-    .patron--featured{border-color:var(--yellow);box-shadow:0 0 0 1px rgba(255,209,0,.3)}
-    .patron__crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--yellow);color:#0d0d0d;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:var(--r-pill)}
-    .patron__photo{width:64px;height:64px;border-radius:var(--r-circle);object-fit:cover;background:var(--green);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:26px;color:#fff}
-    .patron__name{font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:#fff;line-height:1}
-    .patron__meta{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin-top:6px}
-    .patron__quote{font-family:var(--font-b);font-style:italic;font-size:12.5px;color:var(--lgrey);line-height:1.5;margin-top:10px}
-    .patron__badges{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:10px}
-    .patron__badge{font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border:1px solid rgba(255,209,0,.25);border-radius:var(--r-pill);padding:3px 8px}
-    .fz-give{background:linear-gradient(135deg,var(--green),#06120a);border-radius:var(--r-xl);padding:34px 26px;text-align:center;position:relative;overflow:hidden}
-    .fz-give h3{font-family:var(--font-d);font-size:clamp(28px,5vw,44px);letter-spacing:.03em;margin-bottom:10px}
-    .fz-give h3 span{color:var(--yellow)}
-    .fz-give p{font-family:var(--font-b);font-size:15px;color:rgba(255,255,255,.75);max-width:560px;margin:0 auto 20px;line-height:1.7}
-    .hidden{display:none}
-    .fz-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(110px,100%),1fr));gap:2px;background:var(--border);border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border)}
-    .fz-num{background:linear-gradient(160deg,var(--card),#0c0c0c);padding:22px 12px;text-align:center}
-    .fz-num b{display:block;font-family:var(--font-d);font-size:clamp(30px,6vw,40px);color:var(--yellow);line-height:1}
-    .fz-num span{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:6px;display:block}
-    /* ── ACCOUNT BAR ── */
-    .fz-acct{display:flex;align-items:center;gap:14px;background:linear-gradient(160deg,var(--card),#0c0c0c);border:1px solid var(--border);border-top:3px solid var(--yellow);border-radius:var(--r-lg);padding:14px 18px;margin-bottom:26px}
-    .fz-acct__av{width:46px;height:46px;border-radius:var(--r-circle);flex-shrink:0;background:linear-gradient(160deg,#1f1f1f,#0c0c0c);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff;overflow:hidden}
-    .fz-acct__av img{width:100%;height:100%;object-fit:cover}
-    .fz-acct__main{flex:1;min-width:0}
-    .fz-acct__hi{font-family:var(--font-d);font-size:19px;letter-spacing:.03em;color:#fff;line-height:1.1}
-    .fz-acct__sub{font-family:var(--font-c);font-size:11px;letter-spacing:.05em;color:var(--grey);margin-top:2px}
-    .fz-acct__sub b{color:var(--yellow)}
-    .fz-acct__btn{flex-shrink:0;font-family:var(--font-c);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:9px 15px;border-radius:var(--r-md);border:1px solid var(--border);background:none;color:var(--grey);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,color .2s}
-    .fz-acct__btn:hover{border-color:var(--yellow);color:var(--yellow)}
-    .fz-acct__btn--y{background:var(--yellow);color:#0d0d0d;border-color:var(--yellow)}
-    /* ── MEMBER PERKS / VOUCHERS ── */
-    .fz-perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}
-    .fz-voucher{position:relative;background:linear-gradient(160deg,#16300f,#0b160a);border:1px solid rgba(255,209,0,.28);border-radius:var(--r-lg);padding:20px 20px 18px;overflow:hidden}
-    .fz-voucher::after{content:"";position:absolute;left:-9px;top:50%;width:18px;height:18px;border-radius:var(--r-circle);background:var(--bg,#0a0a0a);transform:translateY(-50%);box-shadow:calc(100% + 18px) 0 0 var(--bg,#0a0a0a)}
-    .fz-voucher__tag{display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0d0d0d;background:var(--yellow);border-radius:var(--r-sm);padding:3px 9px;margin-bottom:11px}
-    .fz-voucher__title{font-family:var(--font-d);font-size:24px;letter-spacing:.02em;color:#fff;line-height:1.05;margin-bottom:7px}
-    .fz-voucher__detail{font-family:var(--font-b);font-size:13px;color:var(--lgrey,#b9b9b9);line-height:1.5;margin-bottom:13px}
-    .fz-voucher__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px dashed rgba(255,255,255,.16);padding-top:11px}
-    .fz-voucher__code{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.14em;color:var(--yellow);background:rgba(255,209,0,.1);border:1px dashed rgba(255,209,0,.4);border-radius:var(--r-sm);padding:5px 11px}
-    .fz-voucher__exp{font-family:var(--font-c);font-size:10px;letter-spacing:.04em;color:var(--grey)}
-    .fz-mnews{margin-top:16px;display:flex;flex-direction:column;gap:10px}
-    .fz-mnews__item{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--r-md);padding:14px 16px}
-    .fz-mnews__t{font-family:var(--font-c);font-size:14px;font-weight:700;letter-spacing:.02em;color:#fff;margin-bottom:4px}
-    .fz-mnews__b{font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.55}
-    .fz-mnews__d{font-family:var(--font-c);font-size:10px;letter-spacing:.06em;color:var(--yellow);margin-top:6px;text-transform:uppercase}
-    .fz-locked{text-align:center;background:linear-gradient(160deg,var(--card),#0c0c0c);border:1px dashed var(--border);border-radius:var(--r-lg);padding:34px 24px}
-    .fz-locked__ic{font-size:34px;margin-bottom:10px}
-    .fz-locked__t{font-family:var(--font-d);font-size:26px;letter-spacing:.03em;color:#fff;margin-bottom:8px}
-    .fz-locked__p{font-family:var(--font-b);font-size:14px;color:var(--grey);line-height:1.6;max-width:380px;margin:0 auto 18px}
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -171,72 +41,118 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/fan-zone.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Fan Zone","item":"https://raynerslanefc.co.uk/fan-zone.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<script src="js/lane-motion.js" defer></script>
+<link rel="stylesheet" href="css/p-fan-zone.css">
+  <style>
+    /* The .fz-btn family (buttons inside the JS-rendered Lane Card and the
+       auth sheet). Geometry from the shared --ctl-* tokens, like .btn,
+       .cn__btn and .cal-btn; colour lives in css/p-fan-zone.css. */
+    .fz-btn{min-height:var(--ctl-min-h);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-family:var(--font-body);font-size:var(--ctl-fs);font-weight:var(--ctl-weight);letter-spacing:var(--ctl-ls);padding:var(--ctl-pad-y) var(--ctl-pad-x);border-radius:var(--ctl-radius);cursor:pointer;border:var(--ctl-border) solid transparent;-webkit-tap-highlight-color:transparent;text-decoration:none}
+  </style>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- HERO -->
-<section class="fz-hero">
-  <div class="container">
-    <span class="label">The Lane Family &middot; Est. 1933</span>
-    <h1>This Is <span>Your</span> Club Too.</h1>
-    <p>We love our fans. So let's prove it. Build your free Lane fan card, check in at every match, climb the loyalty ladder — and get championed as a patron of The Lane.</p>
+<!-- ══ TITLE CARD — the green world of the Lane Card ══ -->
+<section class="kl-ph kl-ph--green fz-ph" aria-labelledby="ph-title">
+  <div class="kl-wrap fz-ph__grid">
+    <div class="kl-ph__inner fz-ph__inner">
+      <p class="kl-ph__meta">The Lane Family &middot; Est. 1933</p>
+      <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Fan</span></span><span class="kl-line"><span>Zone<em>.</em></span></span></h1>
+      <p class="kl-ph__line">This is your club too. Build your free Lane Card, show it at the gate, collect a yellow heart every game and climb the loyalty ladder.</p>
+      <div class="kl-ph__acts">
+        <a class="kl-btn kl-btn--solid" href="#fz-member">Join free</a>
+        <a class="kl-btn kl-btn--line" href="fan-zone-guide.html">How it works</a>
+      </div>
+    </div>
+    <div class="fz-ph__card" aria-hidden="true">
+      <div class="fz-lanecard" id="kl-lanecard">
+        <img src="img/badge-512.png" width="64" height="64" alt="">
+        <span class="fz-lanecard__club">Rayners Lane FC<br>Est. 1933</span>
+        <span class="fz-lanecard__name">The Lane Card</span>
+        <span class="fz-lanecard__no">No. 1933</span>
+        <span class="fz-lanecard__hearts"><i></i><i></i><i></i><i></i><i></i><i class="off"></i></span>
+      </div>
+    </div>
   </div>
 </section>
 
-<div class="fz-wrap">
+<!-- ══ JOIN / MEMBER HOME + ACCOUNT ROW ══ -->
+<div class="fz-band fz-band--join">
+  <div class="kl-wrap">
+    <!-- MEMBER HOME / JOIN PANEL — filled by js/fan-zone-member.js.
+         Deliberately empty in the served HTML: nothing personal is ever baked
+         into a static page, and an empty block cannot flash the wrong name. -->
+    <section class="fz-sec" id="fz-member" aria-live="polite"></section>
 
-  <!-- MEMBER HOME / JOIN PANEL — filled by js/fan-zone-member.js.
-       Deliberately empty in the served HTML: nothing personal is ever baked
-       into a static page, and an empty block cannot flash the wrong name. -->
-  <section class="fz-sec" id="fz-member" aria-live="polite"></section>
-
-  <!-- ACCOUNT BAR (sign in / out) — the original Lane Card account row -->
-  <div id="fz-account"></div>
-
-  <!-- BY THE NUMBERS (social proof) -->
-  <section class="fz-sec" id="nums-sec" style="display:none">
-    <div class="fz-nums" id="fz-nums"></div>
-  </section>
-
-  <!-- FAN CARD -->
-  <section class="fz-sec" id="card-sec">
-    <div class="fz-sec__head"><span class="label">Your Membership</span><h2>Your <span>Lane Card</span></h2></div>
-    <div id="fancard-mount"></div>
-  </section>
-
-  <!-- MEMBERS AREA — vouchers, promos & member news -->
-  <section class="fz-sec" id="members-sec">
-    <div class="fz-sec__head"><span class="label">Members Only</span><h2>Your <span>Member Perks</span></h2></div>
-    <div id="fz-members"></div>
-  </section>
-
-  <!-- PERKS LADDER -->
-  <section class="fz-sec">
-    <div class="fz-sec__head"><span class="label">Give to Get Back</span><h2>The Loyalty <span>Ladder</span></h2></div>
-    <div class="fz-ladder" id="fz-ladder"></div>
-    <p style="text-align:center;font-family:var(--font-b);color:var(--grey);font-size:13px;margin-top:16px">Every match you check in to moves you up. Hit the top tiers and you're a <strong style="color:var(--yellow)">Patron of The Lane</strong> — featured on our wall and first in line for matchday rewards.</p>
-  </section>
-
-  <!-- OFFICIAL SIGN-UP removed (Phase 0): joining is now a single Supabase
-       account via the "Create My Account" button on the membership card above. -->
-
-  <!-- PATRONS WALL -->
-  <section class="fz-sec">
-    <div class="fz-sec__head"><span class="label">Hall of The Lane</span><h2>Our <span>Patrons</span></h2></div>
-    <div class="fz-wall" id="fz-wall"></div>
-  </section>
-
-  <!-- GIVE TO GIVE BACK -->
-  <section class="fz-sec">
-    <div class="fz-give">
-      <h3>Sponsor a <span>Matchday</span></h3>
-      <p>Love The Lane? Put your name on the day. Sponsor a matchball, back a matchday, or buy the team a post-match meal. We'll champion you on the wall, in the programme and across our socials — because when our fans give, we give back louder.</p>
-      <a href="investment.html" class="fz-btn fz-btn--y" style="display:inline-block;max-width:280px">See Patron &amp; Sponsor Options</a>
-    </div>
-  </section>
-
+    <!-- ACCOUNT BAR (sign in / out) — the original Lane Card account row -->
+    <div id="fz-account"></div>
+  </div>
 </div>
+
+<!-- ══ YOUR LANE CARD ══ -->
+<section class="fz-band fz-band--card" id="card-sec" aria-labelledby="fz-card-h">
+  <div class="kl-wrap fz-split">
+    <div class="fz-split__lead">
+      <h2 class="kl-h2" id="fz-card-h">Your Lane<br>Card</h2>
+      <p class="kl-p fz-lead-p">Your own Lane number and QR code. Show it at the turnstile, and the club adds a yellow heart after every game you're at.</p>
+    </div>
+    <div id="fancard-mount"></div>
+  </div>
+</section>
+
+<!-- ══ MEMBERS AREA — vouchers, promos & member news ══ -->
+<section class="fz-band" id="members-sec" aria-labelledby="fz-perks-h">
+  <div class="kl-wrap fz-split">
+    <div class="fz-split__lead">
+      <h2 class="kl-h2" id="fz-perks-h">Member<br>perks</h2>
+    </div>
+    <div id="fz-members"></div>
+  </div>
+</section>
+
+<!-- ══ THE LOYALTY LADDER — numbered by games, on the green ══ -->
+<section class="kl-sec kl-sec--green fz-ladder-sec" aria-labelledby="fz-ladder-h">
+  <div class="kl-wrap">
+    <div class="kl-sec__head">
+      <h2 class="kl-h2" id="fz-ladder-h">The loyalty<br>ladder</h2>
+      <p class="fz-ladder-sec__p">Every match you check in to moves you up. Hit the top tiers and you're a <strong>Patron of The Lane</strong>: featured on our wall and first in line for matchday rewards.</p>
+    </div>
+    <ol class="fz-ladder" id="fz-ladder" aria-label="Loyalty tiers by games attended"></ol>
+  </div>
+</section>
+
+<!-- ══ BY THE NUMBERS (only real numbers; shown by fan-zone.js) ══ -->
+<section class="fz-band fz-band--nums" id="nums-sec" style="display:none" aria-label="The Lane family by the numbers">
+  <div class="kl-wrap">
+    <div class="fz-nums" id="fz-nums"></div>
+  </div>
+</section>
+
+<!-- OFFICIAL SIGN-UP removed (Phase 0): joining is now a single Supabase
+     account via the "Create My Account" button on the membership card above. -->
+
+<!-- ══ GIVE TO GIVE BACK ══ -->
+<section class="kl-sec kl-sec--yellow fz-give" aria-labelledby="fz-give-h">
+  <div class="kl-wrap fz-give__grid">
+    <h2 class="kl-h2" id="fz-give-h">Sponsor a<br>matchday</h2>
+    <div>
+      <p class="fz-give__p">Love The Lane? Put your name on the day. Sponsor a matchball, back a matchday, or buy the team a post-match meal. We'll champion you on the wall, in the programme and across our socials, because when our fans give, we give back louder.</p>
+      <a href="investment.html" class="kl-btn kl-btn--ink">See patron &amp; sponsor options</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PATRONS WALL ══ -->
+<section class="fz-band" aria-labelledby="fz-wall-h">
+  <div class="kl-wrap">
+    <div class="kl-sec__head">
+      <h2 class="kl-h2" id="fz-wall-h">Our patrons</h2>
+    </div>
+    <div class="fz-wall" id="fz-wall"></div>
+  </div>
+</section>
 
 <div id="footer-placeholder"></div>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>

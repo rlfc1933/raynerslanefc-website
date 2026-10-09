@@ -202,7 +202,7 @@ function renderAccountBar() {
     var btns = SB
       ? '<button class="fz-acct__btn" onclick="openAuth(\'login\')">Log in</button><button class="fz-acct__btn fz-acct__btn--y" style="margin-left:6px" onclick="openAuth(\'signup\')">Join</button>'
       : (f ? '<button class="fz-acct__btn fz-acct__btn--y" onclick="signIn()">Log in</button>' : '<button class="fz-acct__btn fz-acct__btn--y" onclick="openCardEditor()">Join Free</button>');
-    el.innerHTML = '<div class="fz-acct"><div class="fz-acct__av"><i class="ico ico-sparkles"></i></div>' +
+    el.innerHTML = '<div class="fz-acct">' +
       '<div class="fz-acct__main"><div class="fz-acct__hi">' + (f && !SB ? 'Welcome back' : 'Join The Lane') + '</div>' +
       '<div class="fz-acct__sub">' + sub + '</div></div>' + btns + '</div>';
     return;
@@ -268,10 +268,10 @@ async function doSignup() {
 async function renderMembers() {
   var el = document.getElementById('fz-members'); if (!el) return;
   if (!isSignedIn()) {
-    el.innerHTML = '<div class="fz-locked"><div class="fz-locked__ic"><i class="ico ico-lock"></i></div>' +
+    el.innerHTML = '<div class="fz-locked">' +
       '<div class="fz-locked__t">Members-only perks</div>' +
       '<div class="fz-locked__p">Vouchers, promos and exclusive member news live here. Create your free Lane account (or log in) to unlock them.</div>' +
-      '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="signIn()">' + (getFan() ? 'Log in' : 'Join Free') + '</button></div>';
+      '<button class="fz-btn fz-btn--y" onclick="signIn()">' + (getFan() ? 'Log in' : 'Join Free') + '</button></div>';
     return;
   }
   var perks = [], news = [];
@@ -295,7 +295,7 @@ async function renderMembers() {
         '<div class="fz-mnews__b">' + esc(n.body) + '</div>' + (dt ? '<div class="fz-mnews__d">' + dt + '</div>' : '') + '</div>';
     }).join('') + '</div>';
   }
-  if (!html) html = '<div class="fz-locked"><div class="fz-locked__ic"><i class="ico ico-heart"></i></div><div class="fz-locked__t">You&rsquo;re all set</div><div class="fz-locked__p">No perks live right now — as a member you&rsquo;ll be first to know when they drop.</div></div>';
+  if (!html) html = '<div class="fz-locked"><div class="fz-locked__t">You&rsquo;re all set</div><div class="fz-locked__p">No perks live right now — as a member you&rsquo;ll be first to know when they drop.</div></div>';
   el.innerHTML = html;
 }
 
@@ -334,19 +334,19 @@ function renderFanCard() {
   var f = getFan();
   if (f && !isSignedIn()) {
     mount.innerHTML =
-      '<div class="fancard" style="text-align:center;padding:34px 24px">' +
-        '<div style="font-family:var(--font-d);font-size:28px;letter-spacing:.03em;margin-bottom:8px">You&rsquo;re logged out</div>' +
-        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">Your Lane Card is safely saved on this device. Log in to see it, your hearts and your member perks.</p>' +
-        '<button class="fz-btn fz-btn--y" style="max-width:260px;margin:0 auto" onclick="signIn()">Log in as ' + esc(f.username || 'me') + '</button>' +
+      '<div class="fancard fz-note-card">' +
+        '<h3 class="fz-note-card__h">You&rsquo;re logged out</h3>' +
+        '<p class="fz-note-card__p">Your Lane Card is safely saved on this device. Log in to see it, your hearts and your member perks.</p>' +
+        '<button class="fz-btn fz-btn--y" onclick="signIn()">Log in as ' + esc(f.username || 'me') + '</button>' +
       '</div>';
     return;
   }
   if (!f) {
     mount.innerHTML =
-      '<div class="fancard" style="text-align:center;padding:34px 24px">' +
-        '<div style="font-family:var(--font-d);font-size:30px;letter-spacing:.03em;margin-bottom:8px">Get Your Lane Membership</div>' +
-        '<p style="font-family:var(--font-b);color:var(--grey);font-size:14px;line-height:1.6;margin-bottom:20px">A free membership card — your own Lane number &amp; QR code. Show it at the turnstile and collect a yellow heart every game.</p>' +
-        '<button class="fz-btn fz-btn--y" style="max-width:240px;margin:0 auto" onclick="joinOrCreate(\'signup\')">' + (SB ? 'Create My Account' : 'Create My Card') + '</button>' +
+      '<div class="fancard fz-note-card">' +
+        '<h3 class="fz-note-card__h">Get your Lane membership</h3>' +
+        '<p class="fz-note-card__p">A free membership card: your own Lane number &amp; QR code. Show it at the turnstile and collect a yellow heart every game.</p>' +
+        '<button class="fz-btn fz-btn--y" onclick="joinOrCreate(\'signup\')">' + (SB ? 'Create My Account' : 'Create My Card') + '</button>' +
       '</div>';
     return;
   }
@@ -360,14 +360,14 @@ function renderFanCard() {
     : '<div class="fancard__photo" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;color:#fff">' + esc(initials) + '</div>';
   var maxHearts = 16, hearts = '';
   for (var i = 0; i < Math.min(games, maxHearts); i++) hearts += '<i class="ico ico-heart"></i>';
-  if (games > maxHearts) hearts += ' <span style="font-family:var(--font-c);font-size:12px;color:var(--yellow);font-weight:700">+' + (games - maxHearts) + '</span>';
+  if (games > maxHearts) hearts += ' <span class="fz-hearts__more">+' + (games - maxHearts) + '</span>';
   var streak = attendStreak(f);
   var streakBadge = streak >= 2
-    ? '<span style="float:right;font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.04em;color:#fb923c;background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.3);border-radius:999px;padding:2px 10px"><i class="ico ico-flame"></i> ' + streak + ' in a row</span>'
+    ? '<span class="fz-hearts__streak">' + streak + ' in a row</span>'
     : '';
   var heartsRow = games
-    ? '<div style="padding:14px 18px 4px;font-size:17px;line-height:1.5;letter-spacing:1px">' + streakBadge + hearts + '</div>'
-    : '<div style="padding:14px 18px 2px;font-family:var(--font-b);font-size:12.5px;color:var(--grey);line-height:1.5">No hearts yet — show your card at the gate and the club adds a <i class="ico ico-heart"></i> after every game.</div>';
+    ? '<div class="fz-hearts">' + streakBadge + '<span class="fz-hearts__row">' + hearts + '</span></div>'
+    : '<p class="fz-hearts fz-hearts--none">No hearts yet. Show your card at the gate and the club adds a <i class="ico ico-heart"></i> after every game.</p>';
 
   // Progress bar to the next reward (anticipation)
   var nr = nextReward(f);
@@ -376,32 +376,28 @@ function renderFanCard() {
     var prev = prevRewardThreshold(home), span = (nr.reward.home - prev) || 1;
     var pct = Math.max(4, Math.min(100, Math.round(((home - prev) / span) * 100)));
     nextHtml =
-      '<div style="padding:8px 18px 14px">' +
-        '<div style="display:flex;justify-content:space-between;font-family:var(--font-c);font-size:11px;letter-spacing:.04em;margin-bottom:6px">' +
-          '<span style="color:#fff;font-weight:700">' + esc(nr.reward.title) + '</span>' +
-          '<span style="color:var(--yellow);font-weight:700">' + nr.left + ' to go</span>' +
+      '<div class="fz-next">' +
+        '<div class="fz-next__row">' +
+          '<span class="fz-next__t">' + esc(nr.reward.title) + '</span>' +
+          '<span class="fz-next__n">' + nr.left + ' to go</span>' +
         '</div>' +
-        '<div style="height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">' +
-          '<div style="height:100%;width:' + pct + '%;border-radius:999px;background:linear-gradient(90deg,#FFD100,#fbbf24)"></div>' +
-        '</div>' +
+        '<div class="fz-next__bar"><div class="fz-next__fill" style="width:' + pct + '%"></div></div>' +
       '</div>';
   }
 
   // All rewards — unlocked shine, locked tease (mystery), each "powered by" its sponsor
   var rewardsHtml =
-    '<div style="padding:2px 18px 16px"><div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-bottom:8px"><i class="ico ico-gift"></i> Rewards</div>' +
+    '<div class="fz-rewards"><h3 class="fz-rewards__h">Rewards by home games</h3><ol class="fz-rewards__list">' +
     REWARDS.map(function (r) {
       var got = home >= r.home;
-      var powered = r.sponsor ? '<span style="display:inline-block;font-family:var(--font-c);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4ade80;background:rgba(34,197,94,.12);border-radius:4px;padding:2px 7px;margin-top:5px"><i class="ico ico-zap"></i> Powered by ' + esc(r.sponsor) + '</span>' : '';
-      if (got) {
-        return '<div style="background:rgba(255,209,0,.08);border:1px solid rgba(255,209,0,.3);border-radius:8px;padding:9px 12px;margin-bottom:6px">' +
-          '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:#fff"><i class="ico ico-check"></i> ' + esc(r.title) + '</div>' +
-          '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey);line-height:1.4">' + esc(r.note) + '</div>' + powered + '</div>';
-      }
-      return '<div style="background:rgba(255,255,255,.02);border:1px dashed var(--border);border-radius:8px;padding:9px 12px;margin-bottom:6px;opacity:.72">' +
-        '<div style="font-family:var(--font-c);font-size:13px;font-weight:700;color:var(--lgrey,#bbb)"><i class="ico ico-lock"></i> ' + esc(r.title) + '</div>' +
-        '<div style="font-family:var(--font-b);font-size:11px;color:var(--grey)">' + (r.home - home) + ' more home game' + ((r.home - home) > 1 ? 's' : '') + ' to unlock</div>' + powered + '</div>';
-    }).join('') + '</div>';
+      var powered = r.sponsor ? '<span class="fz-reward__by">Powered by ' + esc(r.sponsor) + '</span>' : '';
+      var left = r.home - home;
+      return '<li class="fz-reward' + (got ? ' is-got' : '') + '">' +
+        '<span class="fz-reward__n" data-kl-count="' + r.home + '">' + r.home + '</span>' +
+        '<span class="fz-reward__body"><span class="fz-reward__t">' + esc(r.title) + '</span>' +
+        '<span class="fz-reward__d">' + (got ? esc(r.note) : left + ' more home game' + (left > 1 ? 's' : '') + ' to unlock') + '</span>' + powered + '</span>' +
+        '<span class="fz-reward__s">' + (got ? 'Unlocked' : 'Locked') + '</span></li>';
+    }).join('') + '</ol></div>';
   var avatar = f.photo
     ? '<img class="vipcard__av" src="' + f.photo + '" alt="' + esc(f.name || 'Fan') + '">'
     : '<div class="vipcard__av">' + esc(initials) + '</div>';
@@ -433,15 +429,15 @@ function renderFanCard() {
     // ── everything else lives below the card, not on it ──
     '<div class="fz-extras">' +
       heartsRow +
-      '<div class="fancard__stats" style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);margin-top:8px">' +
+      '<div class="fancard__stats">' +
         '<div class="fancard__stat"><div class="fancard__num">' + games + '</div><div class="fancard__lbl">Hearts</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + home + '</div><div class="fancard__lbl">At Home</div></div>' +
         '<div class="fancard__stat"><div class="fancard__num">' + nextMilestone(games) + '</div><div class="fancard__lbl">To Next Tier</div></div>' +
       '</div>' +
-      (f.meaning ? '<div class="fancard__meaning" style="padding:14px 2px 4px">&ldquo;' + esc(f.meaning) + '&rdquo;</div>' : '') +
-      '<div style="margin-top:10px">' + nextHtml + rewardsHtml + '</div>' +
-      '<div class="fancard__foot" style="padding:6px 0 0">' +
-        '<button class="fz-btn fz-btn--y" onclick="saveToPhone()"><i class="ico ico-smartphone"></i> Save to Phone</button>' +
+      (f.meaning ? '<p class="fancard__meaning">&ldquo;' + esc(f.meaning) + '&rdquo;</p>' : '') +
+      nextHtml + rewardsHtml +
+      '<div class="fancard__foot">' +
+        '<button class="fz-btn fz-btn--y" onclick="saveToPhone()">Save to Phone</button>' +
         '<button class="fz-btn fz-btn--g" onclick="openCardEditor()">Edit Profile</button>' +
       '</div>' +
     '</div>';
@@ -558,11 +554,15 @@ function renderLadder(f) {
     { g: 25, t: 'Lane Legend',     i: '<i class="ico ico-trophy"></i>', d: 'Matchday VIP — shout-outs, programme mention, coin toss.' },
     { g: 50, t: 'Terrace Royalty', i: '<i class="ico ico-crown"></i>', d: 'Ever-present. After-season party invite + club pin badge.' },
   ];
+  // A ruled ladder: the big numeral is the number of games that earns the
+  // rung, the line beside it is what it gets you. Reached rungs go yellow.
   el.innerHTML = rungs.map(function (r) {
     var on = games >= r.g;
-    return '<div class="fz-rung' + (on ? ' on' : '') + '"><div class="fz-rung__g">' + r.i + ' ' + r.g + '</div>' +
-      '<div class="fz-rung__t">' + r.t + (on ? ' <i class="ico ico-check"></i>' : '') + '</div>' +
-      '<div class="fz-rung__d">' + r.d + '</div></div>';
+    return '<li class="fz-rung' + (on ? ' on' : '') + '">' +
+      '<span class="fz-rung__g"><span data-kl-count="' + r.g + '">' + r.g + '</span><small>' + (r.g === 1 ? 'game' : 'games') + '</small></span>' +
+      '<span class="fz-rung__body"><span class="fz-rung__t">' + r.t + '</span>' +
+      '<span class="fz-rung__d">' + r.d + '</span></span>' +
+      (on ? '<span class="fz-rung__on">Reached</span>' : '') + '</li>';
   }).join('');
 }
 
@@ -573,7 +573,7 @@ async function renderWall() {
     var d = await (await fetch('data/patrons.json?t=' + Date.now())).json();
     var list = d.patrons || [];
     if (!list.length) {
-      el.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-family:var(--font-b);color:var(--grey);padding:30px">Our patrons wall is just getting started. Get to the games, climb the ladder, and be one of the first names up here. <i class="ico ico-heart"></i></div>';
+      el.innerHTML = '<p class="fz-wall__empty">Our patrons wall is just getting started. Get to the games, climb the ladder, and be one of the first names up here.</p>';
       return;
     }
     var fom = d.fanOfMonth;
@@ -585,9 +585,9 @@ async function renderWall() {
       var badges = (p.badges || []).map(function (b) { return '<span class="patron__badge">' + esc(b) + '</span>'; }).join('');
       var years = p.since ? (2026 - parseInt(p.since)) : null;
       return '<div class="patron' + (featured ? ' patron--featured' : '') + '">' +
-        (featured ? '<div class="patron__crown"><i class="ico ico-star"></i> Fan of the Month</div>' : '') +
+        (featured ? '<div class="patron__crown">Fan of the Month</div>' : '') +
         photo +
-        '<div class="patron__name">' + esc(p.username || 'Lane Fan') + '</div>' +
+        '<h3 class="patron__name">' + esc(p.username || 'Lane Fan') + '</h3>' +
         '<div class="patron__meta">' + (p.town ? esc(p.town) + ' &middot; ' : '') + (years != null ? years + ' yrs a fan' : '') + (p.games ? ' &middot; ' + p.games + ' games' : '') + '</div>' +
         (p.quote ? '<div class="patron__quote">&ldquo;' + esc(p.quote) + '&rdquo;</div>' : '') +
         (badges ? '<div class="patron__badges">' + badges + '</div>' : '') +

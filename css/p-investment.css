@@ -1,0 +1,85 @@
+/* ════════════════════════════════════════════════════════════════════════
+   INVESTMENT — "Back The Lane" (Kit Launch 2026/27)
+   Confident B2B: the club's own footage under the title, reach as big
+   tabular numbers, the packages as a ruled comparison (package · included
+   · not included · enquire) rather than pricing cards, partners on
+   hairlines, and the enquiry form intact on the green field.
+   ════════════════════════════════════════════════════════════════════════ */
+.inv-ph .kl-ph__media img{object-position:50% 40%}
+
+/* Reach */
+.inv-reach{border-top:0}
+.inv-reach__grid{display:grid;gap:36px}
+@media (min-width:1000px){.inv-reach__grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:56px;align-items:start}}
+.inv-reach__p{color:var(--ed-text-2);margin-top:20px}
+.inv-stats{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:1px solid var(--ed-line-2)}
+.inv-stat{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:8px;padding:18px 14px 20px 0;border-bottom:1px solid var(--ed-line-2);min-width:0}
+.inv-stat:nth-child(odd){border-right:1px solid var(--ed-line-2)}
+.inv-stat:nth-child(even){padding-left:16px}
+.inv-stat dt{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+.inv-stat dd{margin:0;font-family:var(--font-display);font-size:clamp(3.6rem,13vw,6.5rem);line-height:.84;color:var(--white);font-variant-numeric:tabular-nums}
+@media (min-width:700px){
+  .inv-stats{grid-template-columns:repeat(3,1fr)}
+  .inv-stat,.inv-stat:nth-child(odd),.inv-stat:nth-child(even){padding:20px 18px 22px;border-right:1px solid var(--ed-line-2)}
+  .inv-stat:nth-child(3n+1){padding-left:0}
+  .inv-stat:nth-child(3n){border-right:0}
+}
+
+/* Packages — the ruled comparison */
+.inv-pk__lede{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;color:var(--ed-text-2);margin:0;max-width:34ch}
+.inv-pk .kl-sec__head{flex-wrap:wrap}
+.inv-cols{display:none}
+.inv-pk__list{list-style:none;margin:0;padding:0;border-top:2px solid var(--white)}
+.inv-row{display:grid;gap:14px;padding:24px 0 28px;border-bottom:1px solid var(--ed-line-2)}
+.inv-row--lead{border-top:6px solid var(--yellow);margin-top:-2px}
+.inv-row__name{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,3.4vw,3.2rem);line-height:.9;text-transform:uppercase;color:var(--white);margin:0}
+.inv-row__term{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--yellow);margin:8px 0 0}
+.inv-row__in,.inv-row__out{list-style:none;margin:0;padding:0}
+.inv-row__in li,.inv-row__out li{font-family:var(--font-body);font-size:15px;line-height:1.45;padding:7px 0;border-bottom:1px solid var(--ed-line)}
+.inv-row__in li:last-child,.inv-row__out li:last-child{border-bottom:0}
+.inv-row__in li{color:var(--white)}
+.inv-row__out li{color:#8F8F8F;text-decoration:line-through;text-decoration-color:rgba(143,143,143,.6)}
+.inv-row__out:empty{display:none}
+.inv-row__text{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2);margin:0;max-width:56ch}
+.inv-row__go{justify-self:start}
+@media (min-width:1000px){
+  .inv-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr) 190px;gap:28px;padding:0 0 12px;font-family:var(--font-body);font-weight:800;font-size:13px;color:#AAAAAA}
+  .inv-row{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr) 190px;gap:28px;align-items:start;padding:28px 0 30px}
+  .inv-row__out:empty{display:block}
+  .inv-row--bespoke .inv-row__text{grid-column:2 / 4}
+  .inv-row__go{justify-self:end}
+  .inv-row__in li:first-child,.inv-row__out li:first-child{padding-top:0}
+}
+
+/* Current partners — a hairline partner wall */
+.inv-now__grid{display:grid;gap:28px}
+@media (min-width:1000px){.inv-now__grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:56px;align-items:start}}
+.inv-partners{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line-2)}
+.inv-partner{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:4px 18px;padding:16px 0;border-bottom:1px solid var(--ed-line-2);min-height:44px}
+.inv-partner__mark{grid-row:1 / 3;width:96px;height:56px;display:flex;align-items:center;justify-content:center;background:#F5F3ED;border-radius:var(--r-xs);padding:6px 10px;box-sizing:border-box}
+.inv-partner__mark img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.inv-partner__name{grid-column:2;font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);line-height:1;text-transform:uppercase;color:var(--white);text-decoration:none}
+a.inv-partner__name:hover{color:var(--yellow)}
+.inv-partner__role{grid-column:2;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+.inv-partner--kit .inv-partner__role{color:var(--yellow)}
+.inv-partner:not(:has(.inv-partner__mark)){grid-template-columns:minmax(0,1fr)}
+.inv-partner:not(:has(.inv-partner__mark)) > *{grid-column:1}
+
+/* Apply — the enquiry form on the green field */
+.inv-apply__grid{display:grid;gap:36px}
+@media (min-width:1000px){.inv-apply__grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:64px;align-items:start}}
+.inv-apply__p{color:rgba(245,243,237,.92);margin-top:20px}
+.inv-apply__mail{font-family:var(--font-body);font-weight:700;font-size:15px;color:var(--white);margin:0}
+.inv-apply__mail a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:4px}
+.spon-form{display:grid;gap:0;min-width:0}
+.spon-row{display:grid;gap:0 16px}
+@media (min-width:560px){.spon-row{grid-template-columns:1fr 1fr}}
+.spon-row > div{min-width:0}
+.spon-l{display:block;font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--white);margin:16px 0 8px}
+.spon-form input,.spon-form select,.spon-form textarea{width:100%;box-sizing:border-box;min-height:52px;background:#080808;border:1px solid rgba(245,243,237,.28);border-radius:var(--r-sm);color:var(--white);font-family:var(--font-body);font-size:16px;padding:12px 14px}
+.spon-form select{-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,#F5F3ED 50%),linear-gradient(135deg,#F5F3ED 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+.spon-form textarea{min-height:110px;resize:vertical;line-height:1.5}
+.spon-form input::placeholder,.spon-form textarea::placeholder{color:#8F8F8F}
+.spon-form input:focus-visible,.spon-form select:focus-visible,.spon-form textarea:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.spon-go{width:100%;margin-top:22px;cursor:pointer}
+.spon-note{font-family:var(--font-body);font-size:14px;color:rgba(245,243,237,.88);margin:12px 0 0;max-width:60ch}

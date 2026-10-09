@@ -1,0 +1,73 @@
+/* ════════════════════════════════════════════════════════════════════════
+   ACERBIS — Official Kit Partner (Kit Launch 2026/27)
+   Led by the photograph of the shirt itself: the title card is a poster
+   with a player in the Acerbis kit standing behind the name, then the kit
+   as a photography rail, the facts as big numbers on hairlines, and the
+   story set editorially. No card chrome anywhere.
+   The photos are 800px wide; --shot-cap keeps each one drawn at or below
+   its native resolution on every screen density.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--shot-cap:560px}
+@media (min-resolution:1.5dppx){:root{--shot-cap:400px}}
+@media (min-resolution:2.25dppx){:root{--shot-cap:300px}}
+@media (min-resolution:2.8dppx){:root{--shot-cap:262px}}
+
+/* Title card — black field, the shirt on the right, the name across it */
+.acb-ph{min-height:clamp(560px,80svh,860px)}
+.acb-ph__shot{position:absolute;z-index:-1;top:0;bottom:0;right:0;width:min(58vw,var(--shot-cap));}
+.acb-ph__shot img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.acb-ph__shot::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080808 0%,rgba(8,8,8,.25) 38%,rgba(8,8,8,0) 60%),linear-gradient(180deg,rgba(8,8,8,0) 45%,rgba(8,8,8,.92) 100%)}
+@media (min-width:900px){
+  .acb-ph__shot{width:min(44vw,var(--shot-cap))}
+  .acb-ph__shot::after{background:linear-gradient(90deg,#080808 0%,rgba(8,8,8,0) 30%),linear-gradient(180deg,rgba(8,8,8,0) 70%,rgba(8,8,8,.85) 100%)}
+}
+.acb-ph__inner{position:relative}
+.acb-ph__meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.acb-wordmark-txt{font-family:var(--font-display);font-size:1.9rem;line-height:1;letter-spacing:.06em;color:var(--yellow)}
+.acb-wordmark{height:34px;width:auto;max-width:150px;object-fit:contain}
+.acb-ph .kl-ph__line{max-width:46ch;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+@media (max-width:699px){.acb-ph .kl-ph__title{font-size:min(19vw,17svh)}}
+
+/* Facts */
+.acb-facts-sec{background:#080808;padding:0 0 clamp(40px,6vw,72px)}
+.acb-facts{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:1px solid var(--ed-line-2)}
+.acb-fact{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:8px;padding:18px 14px 20px 0;border-bottom:1px solid var(--ed-line-2);min-width:0}
+.acb-fact:nth-child(odd){border-right:1px solid var(--ed-line-2)}
+.acb-fact:nth-child(even){padding-left:16px}
+.acb-fact:last-child{border-right:0}
+.acb-fact dt{font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+.acb-fact dd{margin:0;font-family:var(--font-display);font-size:clamp(3.6rem,13vw,6.5rem);line-height:.84;color:var(--white);font-variant-numeric:tabular-nums}
+@media (min-width:900px){
+  .acb-facts{grid-template-columns:repeat(5,1fr)}
+  .acb-fact,.acb-fact:nth-child(odd),.acb-fact:nth-child(even){padding:22px 20px 24px;border-right:1px solid var(--ed-line-2)}
+  .acb-fact:first-child{padding-left:0}
+  .acb-fact:last-child{border-right:0}
+}
+
+/* The kit rail */
+.acb-rail{list-style:none;margin:0;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding-inline:max(16px,calc((100% - 1360px)/2));scroll-padding-inline:max(16px,calc((100% - 1360px)/2));scrollbar-width:thin}
+@media (min-width:900px){.acb-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;overflow:visible;padding:0;width:min(100% - 80px,1360px);margin-inline:auto}.acb-shot{flex:none}}
+.acb-rail:focus-visible{outline:2px solid var(--yellow);outline-offset:-2px}
+.acb-shot{flex:0 0 min(78vw,var(--shot-cap),340px);scroll-snap-align:start;margin:0}
+.acb-shot img{display:block;width:100%;height:auto;aspect-ratio:800/1071;object-fit:cover;border-radius:var(--r-md);background:#141414}
+.acb-shot__cap{font-family:var(--font-body);font-size:14px;line-height:1.45;color:var(--ed-text-2);margin:12px 0 0}
+.acb-shot__cap b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.7rem;line-height:1;text-transform:uppercase;color:var(--white);margin-bottom:4px}
+
+/* Story */
+.acb-story{display:grid;gap:32px}
+@media (min-width:1000px){.acb-story{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px 64px}.acb-story .kl-h2{grid-column:1 / -1}}
+.acb-story__body p{font-family:var(--font-body);font-size:clamp(1rem,1.25vw,1.1rem);line-height:1.65;color:var(--ed-text-2);margin:0 0 1em;max-width:60ch}
+.acb-story__body strong{color:var(--white);font-weight:700}
+.acb-divs{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line-2);align-self:start}
+.acb-div{padding:20px 0 22px;border-bottom:1px solid var(--ed-line-2)}
+.acb-div__t{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,3.6vw,3.4rem);line-height:.9;text-transform:uppercase;color:#8F8F8F;margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.acb-div__t span{font-family:var(--font-body);font-weight:800;font-size:14px;text-transform:none;color:var(--yellow)}
+.acb-div--on .acb-div__t{color:var(--white)}
+.acb-div__d{font-family:var(--font-body);font-size:15px;line-height:1.5;color:#AAAAAA;margin:8px 0 0;max-width:46ch}
+.acb-div--on .acb-div__d{color:var(--ed-text-2)}
+
+/* Thank you */
+.acb-thanks__q{font-family:var(--font-display);font-size:clamp(2.6rem,6.4vw,6rem);line-height:.95;color:var(--white);margin:0 0 28px;max-width:20ch}
+.acb-thanks__q em{font-style:normal;color:var(--yellow)}
+.acb-thanks__p{color:rgba(245,243,237,.92);margin-bottom:26px}
