@@ -1,0 +1,322 @@
+/* ════════════════════════════════════════════════════════════════════════
+   FIXTURES — the club's broadcast schedule (Kit Launch, 2026/27)
+   Read with css/kl.css. The page is one ruled schedule under a title card:
+     · dates and kick-offs are big, tabular Bebas — football is numbers
+     · a home fixture is marked by a yellow rule down its date, not a chip
+     · a result is the score on each club's line plus one bold W / D / L
+     · the three views are a plain segmented underline, not pills
+   The campaign treatment (opponent wash, ghost crest, competition ground)
+   stays inline in fixtures.html beside the code and tests that own it.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.fx-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+
+/* ── Title card: the next match, said plainly under the name ───────────── */
+.fx-ph .kl-ph__media img{object-position:62% 40%}
+.fx-ph__next{margin:10px 0 0;padding-top:18px;border-top:1px solid rgba(245,243,237,.28);max-width:780px;
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;font-family:var(--font-body);color:#F5F3ED}
+.fx-ph__next[hidden]{display:none}
+.fx-ph__k{font-family:var(--font-body);font-weight:800;font-size:14px;color:#FFD100}
+.fx-ph__next a{font-family:var(--font-display);font-size:clamp(1.9rem,3.6vw,3rem);line-height:1;text-transform:uppercase;
+  color:#F5F3ED;text-decoration:none;letter-spacing:.005em}
+.fx-ph__next a:hover{color:#FFD100}
+.fx-ph__next a:focus-visible{outline:3px solid #FFD100;outline-offset:3px}
+.fx-ph__w{flex-basis:100%;font-weight:700;font-size:15px;color:#F5F3ED}
+
+/* ── The schedule ──────────────────────────────────────────────────────── */
+.fx-sched{background:#080808;padding:clamp(28px,4vw,48px) 0 clamp(64px,9vw,120px)}
+
+/* Segmented underline. Three words on one hairline; the open one is white
+   with a yellow underline. Scrolls sideways inside itself at 344px rather
+   than pushing the page. */
+.tab-row{display:flex;gap:clamp(18px,3.4vw,44px);border-bottom:1px solid rgba(245,243,237,.16);
+  overflow-x:auto;scrollbar-width:none;margin-bottom:clamp(28px,4vw,48px)}
+.tab-row::-webkit-scrollbar{display:none}
+.tab-btn{flex:0 0 auto;appearance:none;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;
+  padding:14px 0 12px;min-height:52px;cursor:pointer;border-radius:0;
+  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.005em;color:#AAAAAA;white-space:nowrap;
+  transition:color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+.tab-btn:hover{color:#F5F3ED}
+.tab-btn.active{color:#F5F3ED;border-bottom-color:#FFD100}
+.tab-btn:focus-visible{outline:3px solid #FFD100;outline-offset:2px}
+@media (max-width:380px){.tab-row{gap:12px}.tab-btn{font-size:13px}}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.fx-loading,.fx-empty{font-family:var(--font-body);font-size:15px;color:#AAAAAA;padding:32px 0;border-top:1px solid rgba(245,243,237,.14)}
+.fx-empty a{color:#FFD100}
+.fx-attr{font-family:var(--font-body);font-size:13px;color:#8F8F8F;margin-top:28px}
+.fx-attr a{color:#F5F3ED;text-decoration:underline;text-decoration-color:#FFD100;text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px}
+.fx-attr--split{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 16px}
+
+/* ── Month groups ──────────────────────────────────────────────────────── */
+.fxm{margin-top:clamp(52px,7vw,96px)}
+.fxm:first-child{margin-top:0}
+.fxm__h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:2px solid #F5F3ED}
+.fxm__m{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,7.4vw,6.5rem);line-height:.84;letter-spacing:-.005em;
+  text-transform:uppercase;color:#F5F3ED;margin:0}
+.fxm__y{color:#8F8F8F}
+.fxm__c{font-family:var(--font-body);font-weight:800;font-size:13px;color:#AAAAAA;white-space:nowrap;padding-bottom:4px}
+
+/* ── One fixture, one ruled row ────────────────────────────────────────── */
+.fxc{position:relative;overflow:hidden;display:grid;
+  grid-template-columns:clamp(76px,10vw,150px) minmax(0,1fr) auto;
+  grid-template-areas:"date main side" ". foot foot";
+  column-gap:clamp(14px,2.6vw,40px);align-items:start;
+  padding:clamp(16px,2vw,24px) 0;border-bottom:1px solid rgba(245,243,237,.14)}
+/* The rule. Yellow down the date for a home game; nothing for away. */
+.fxc:before{content:"";position:absolute;left:0;top:clamp(16px,2vw,24px);bottom:clamp(16px,2vw,24px);width:4px;background:transparent;z-index:2}
+.fxc--home:before{background:#FFD100}
+.fxc__date{grid-area:date;padding-left:clamp(14px,1.6vw,22px)}
+.fxc__date time{display:flex;flex-direction:column;gap:6px}
+.fxc__dd{font-family:var(--font-display);font-size:clamp(3.2rem,6vw,5.6rem);line-height:.8;color:#F5F3ED;font-variant-numeric:tabular-nums;letter-spacing:0}
+.fxc__dm{font-family:var(--font-body);font-weight:800;font-size:13px;color:#AAAAAA;white-space:nowrap}
+.fxc__main{grid-area:main;min-width:0}
+.fxc__side{grid-area:side;text-align:right;min-width:clamp(56px,8vw,120px)}
+.fxc__foot{grid-area:foot;min-width:0}
+
+/* The lockup: home line, away line, goals at the edge of each. */
+.fxc__lock{display:grid;gap:4px;max-width:720px}
+.fxc__team{display:flex;align-items:center;gap:12px;min-width:0}
+.fxc__crest{width:30px;height:30px;object-fit:contain;flex:0 0 30px}
+.fxc__ph{width:30px;height:30px;flex:0 0 30px;border-radius:var(--r-circle);background:#1A1A1A;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.02em;color:#AAAAAA}
+.fxc__nm{font-family:var(--font-display);font-size:clamp(1.6rem,2.7vw,2.5rem);line-height:.95;text-transform:uppercase;color:#F5F3ED;
+  min-width:0;overflow-wrap:anywhere;letter-spacing:.005em}
+.fxc__sc{margin-left:auto;padding-left:16px;font-family:var(--font-display);font-size:clamp(1.9rem,3vw,2.8rem);line-height:.9;
+  color:#F5F3ED;font-variant-numeric:tabular-nums}
+.fxc__lock--played .fxc__team:not(.fxc__team--us) .fxc__nm{color:#AAAAAA}
+
+.fxc__meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:12px;font-family:var(--font-body);font-size:13px;line-height:1.4}
+.fxc__ha{font-weight:800;color:#F5F3ED}
+.fxc--home .fxc__ha{color:#FFD100}
+.fxc__cn{color:#AAAAAA;font-weight:600}
+.fxc__comp{height:22px;width:auto;max-width:90px;object-fit:contain;opacity:.92}
+.fxc__venue{font-family:var(--font-body);font-size:13px;color:#8F8F8F;margin-top:4px;line-height:1.45}
+.fxc__venue .ico{display:none}
+.fxc__addr{display:inline;color:#8F8F8F}
+.fxc__addr:before{content:" \00B7 "}
+.fxc__note{font-family:var(--font-body);font-weight:700;font-size:13px;color:#F5F3ED;margin-top:6px}
+.fxc__tbc{font-family:var(--font-body);font-weight:600;font-size:13px;color:#8F8F8F;margin-top:4px}
+
+/* Right column: kick-off before, result after. */
+.fxc__ko{display:block;font-family:var(--font-display);font-size:clamp(2.2rem,4.2vw,3.8rem);line-height:.82;color:#F5F3ED;font-variant-numeric:tabular-nums}
+.fxc__ko--off{color:#8F8F8F}
+.fxc__res{display:block;font-family:var(--font-display);font-size:clamp(3.2rem,6vw,5.6rem);line-height:.8}
+.fxc__res abbr{text-decoration:none;border:0;cursor:default}
+.fxc__res--W{color:#FFD100}
+.fxc__res--D{color:#F5F3ED}
+.fxc__res--L{color:#8F8F8F}
+
+/* States — words, not boxes. */
+.fxc__state{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--font-body);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.fxc__state--off{color:#FFD100}
+.fxc__state--live{color:#FFD100}
+.fxc__pulse{width:8px;height:8px;border-radius:var(--r-circle);background:#FFD100;flex:0 0 auto}
+@media (prefers-reduced-motion: no-preference){html:not(.a11y-reduce-motion) .fxc__pulse{animation:fxcPulse 1.6s ease-in-out infinite}}
+@keyframes fxcPulse{0%,100%{opacity:1}50%{opacity:.25}}
+.fxc--s-postponed .fxc__lock{opacity:.6}
+.fxc__await{margin-top:10px}
+.fxc__await .mstat{font-size:13px;letter-spacing:.04em;text-transform:none;font-family:var(--font-body)}
+
+/* ── The fold: details, travel, share ──────────────────────────────────── */
+.fxx{margin-top:6px}
+.fxx__s::-webkit-details-marker{display:none}
+.fxx__s::marker{content:""}
+.fxx__s:hover,.fxx__s:focus-visible{color:#FFD100}
+.fxx__s:focus-visible{outline:3px solid #FFD100;outline-offset:2px}
+.fxx__st{text-decoration:underline;text-decoration-color:rgba(245,243,237,.35);text-underline-offset:5px;text-decoration-thickness:1px}
+.fxx__chev{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translate(-2px,-2px);flex:0 0 auto}
+.fxx[open] .fxx__chev{transform:rotate(-135deg) translate(-2px,-2px)}
+.fxx__p{padding:10px 0 6px;border-top:1px solid rgba(245,243,237,.14);margin-top:4px}
+.fxx__facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 24px;margin:8px 0 18px}
+.fxx__facts div{min-width:0}
+.fxx__facts dt{font-family:var(--font-body);font-weight:700;font-size:12px;color:#8F8F8F;margin-bottom:4px}
+.fxx__facts dd{margin:0;font-family:var(--font-body);font-size:14px;font-weight:600;color:#F5F3ED;line-height:1.4}
+.fxx__msg{font-family:var(--font-body);font-size:14px;line-height:1.5;color:#F5F3ED;margin:0 0 14px;max-width:60ch}
+.fxx__grp{margin-bottom:6px;display:flex;flex-wrap:wrap;align-items:center;gap:0 22px}
+.fxx__lbl{font-family:var(--font-body);font-weight:700;font-size:12px;color:#8F8F8F;flex-basis:100%}
+@media (max-width:760px){.fxx__facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Actions are words with a yellow underline — no boxes, no icons. */
+.fxc__acts{display:flex;flex-wrap:wrap;gap:0 22px}
+.fxc__b{appearance:none;background:none;border:0;border-radius:0;padding:0;cursor:pointer;display:inline-flex;align-items:center;min-height:44px;
+  font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.005em;color:#F5F3ED;text-decoration:underline;
+  text-decoration-color:#FFD100;text-decoration-thickness:2px;text-underline-offset:5px}
+.fxc__b .ico{display:none}
+.fxc__b:hover{color:#FFD100}
+.fxc__b:focus-visible{outline:3px solid #FFD100;outline-offset:2px}
+
+/* ── Next match — the broadcast's opening card ─────────────────────────── */
+.fxh{margin-bottom:clamp(28px,4vw,48px);position:relative;overflow:hidden;isolation:isolate;border-top:2px solid #F5F3ED;border-bottom:1px solid rgba(245,243,237,.14);
+  padding:clamp(18px,2.6vw,30px) 0 clamp(22px,3vw,36px)}
+.fxh > *:not(.fxh__ghost){position:relative;z-index:1}
+.fxh__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
+.fxh__lbl{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3vw,2.6rem);line-height:1;text-transform:uppercase;color:#FFD100;margin:0;letter-spacing:.01em}
+.fxh__comp{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+.fxh__comp .fxc__comp{height:26px;max-width:110px}
+.fxh__ha{font-weight:800;color:#F5F3ED;padding-left:14px;border-left:1px solid rgba(245,243,237,.28)}
+.fxh__ha--home{color:#FFD100}
+.fxh__body{display:grid;gap:clamp(18px,3vw,40px);align-items:end;margin-top:clamp(18px,3vw,36px)}
+@media (min-width:900px){.fxh__body{grid-template-columns:minmax(0,1fr) auto}}
+.fxh .fxc__lock{gap:clamp(4px,1vw,10px)}
+.fxh .fxc__team{gap:clamp(12px,1.6vw,22px)}
+.fxh .fxc__crest,.fxh .fxc__ph{width:clamp(44px,5.6vw,84px);height:clamp(44px,5.6vw,84px);flex-basis:clamp(44px,5.6vw,84px)}
+.fxh .fxc__ph{font-size:clamp(16px,2vw,26px)}
+.fxh .fxc__nm{font-size:clamp(2.6rem,7.2vw,7rem);line-height:.86}
+.fxh__when{display:flex;flex-direction:column;gap:8px}
+@media (min-width:900px){.fxh__when{text-align:right;align-items:flex-end}}
+.fxh__ko{font-family:var(--font-display);font-size:clamp(4rem,10vw,9.5rem);line-height:.78;color:#FFD100;font-variant-numeric:tabular-nums}
+.fxh__day{font-family:var(--font-body);font-weight:800;font-size:clamp(15px,1.4vw,18px);color:#F5F3ED}
+
+/* Countdown: four tabular numbers on one hairline, no tiles. */
+.fxh__cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(22px,3vw,40px);border-top:1px solid rgba(245,243,237,.14)}
+.fxh__u{padding:14px 0 0 clamp(10px,1.6vw,22px);border-left:1px solid rgba(245,243,237,.14)}
+.fxh__u:first-child{border-left:0;padding-left:0}
+.fxh__n{font-family:var(--font-display);font-size:clamp(3rem,7vw,6.4rem);line-height:.84;color:#F5F3ED;font-variant-numeric:tabular-nums}
+.fxh__l{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA;margin-top:6px}
+.fxh__kickoff{grid-column:1/-1;padding-top:14px;font-family:var(--font-display);font-size:clamp(3rem,7vw,6.4rem);line-height:.84;color:#FFD100;text-transform:uppercase}
+.fxh__foot{margin-top:clamp(18px,2.6vw,30px);display:flex;flex-wrap:wrap;align-items:center;gap:0 26px}
+.fxh__foot > .fxc__venue,.fxh__foot > .fxc__note,.fxh__foot > .fxc__tbc{flex-basis:100%;margin-bottom:6px}
+.fxh__foot .fxc__venue{font-size:14px;color:#F5F3ED;margin:0}
+.fxh__foot .fxc__addr{color:#AAAAAA}
+.fxh__foot .fxc__acts{gap:0 26px}
+
+/* At the gate — the matchday prices as a drenched yellow strip. */
+.fx-gate{margin:0 0 clamp(52px,7vw,96px)}
+body .fx-gate[data-at-the-gate]:empty{min-height:0}
+body .fx-gate .gate{background:#FFD100;color:#080808;border:0;border-radius:0;box-shadow:none;display:grid;align-items:stretch}
+@media (min-width:900px){body .fx-gate .gate{grid-template-columns:minmax(0,.8fr) minmax(0,2fr)}}
+body .fx-gate .gate__head{background:transparent!important;border:0;border-bottom:2px solid #080808;padding:20px clamp(16px,2.4vw,28px);display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+@media (min-width:900px){body .fx-gate .gate__head{border-bottom:0;border-right:2px solid #080808;justify-content:center}}
+body .fx-gate .gate__eyebrow{font-family:var(--font-display);font-size:clamp(2rem,3.4vw,3rem);line-height:.9;color:#080808;text-transform:uppercase;letter-spacing:.005em}
+body .fx-gate .gate__eyebrow .ico{display:none}
+body .fx-gate .gate__sub{font-family:var(--font-body);font-weight:700;font-size:14px;color:#080808;text-transform:none;letter-spacing:0}
+body .fx-gate .gate__grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+body .fx-gate .gate__row{padding:18px clamp(12px,1.8vw,24px) 20px;text-align:left;border:0;border-right:2px solid #080808;gap:8px}
+body .fx-gate .gate__row:last-child{border-right:0}
+body .fx-gate .gate__price{font-family:var(--font-display);font-size:clamp(3rem,5vw,4.6rem);line-height:.84;color:#080808;font-variant-numeric:tabular-nums}
+body .fx-gate .gate__label{font-family:var(--font-body);font-weight:800;font-size:13px;letter-spacing:0;text-transform:none;color:#080808}
+body .fx-gate .gate__note{font-size:13px;color:#080808;font-weight:600;text-transform:none;letter-spacing:0}
+@media (max-width:600px){
+  body .fx-gate .gate__grid{grid-template-columns:1fr 1fr}
+  body .fx-gate .gate__row{border-right:0;border-bottom:2px solid #080808}
+  body .fx-gate .gate__row:nth-child(odd){border-right:2px solid #080808}
+  body .fx-gate .gate__row:nth-last-child(-n+2){border-bottom:0}
+}
+
+/* Called off — the shared notice, set as a ruled entry. */
+.fxm .mnotice{background:transparent;border-left-width:4px;padding:18px 0 18px 18px;margin:0;border-bottom:1px solid rgba(245,243,237,.14)}
+.mnotice__h b{font-family:var(--font-display);font-size:clamp(1.6rem,2.6vw,2.4rem);font-weight:400;line-height:.95;color:#F5F3ED;text-transform:uppercase}
+.fxm .mstat{font-size:13px}
+.fxm .mnotice__was,.fxm .mnotice__next{font-size:13px;color:#AAAAAA;font-family:var(--font-body)}
+.fxm .mnotice__why{font-size:14px}
+
+/* Competitions — reference, ruled and quiet. */
+.fxcomp{border:0;background:transparent}
+.fxcomp__r{display:grid;gap:6px;padding:20px 0;border-bottom:1px solid rgba(245,243,237,.14)}
+@media (min-width:900px){.fxcomp__r{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);column-gap:40px;align-items:baseline}
+  .fxcomp__note{grid-column:2}}
+.fxcomp__n{font-family:var(--font-display);font-size:clamp(1.7rem,2.6vw,2.4rem);line-height:.95;color:#F5F3ED;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.fxcomp__st{font-family:var(--font-body);font-weight:800;font-size:13px;text-transform:none;letter-spacing:0;color:#FFD100}
+.fxcomp__s{font-family:var(--font-body);font-weight:800;font-size:14px}
+.fxcomp__s--ok{color:#F5F3ED}
+.fxcomp__s--wait{color:#FFD100}
+.fxcomp__s--out{color:#8F8F8F}
+.fxcomp__note{font-family:var(--font-body);font-size:14px;color:#AAAAAA;line-height:1.5;max-width:60ch}
+
+/* Legacy feed fallback (TheSportsDB) — same ruled language. */
+.fx-next{border-top:2px solid #F5F3ED;padding:18px 0 22px;margin-bottom:28px}
+.fx-next__lbl{font-family:var(--font-display);font-size:2rem;line-height:1;text-transform:uppercase;color:#FFD100}
+.fx-next__teams{font-family:var(--font-display);font-size:clamp(2.4rem,6vw,5rem);line-height:.9;text-transform:uppercase;color:#F5F3ED;margin-top:10px}
+.fx-next__meta{font-family:var(--font-body);font-weight:700;font-size:15px;color:#F5F3ED;margin-top:10px}
+.fx-rlbl{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,4.4vw,3.6rem);line-height:.9;text-transform:uppercase;color:#F5F3ED;margin:0 0 18px}
+.fx-res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid rgba(245,243,237,.14)}
+.fx-res__m{font-family:var(--font-body);font-weight:700;font-size:15px;color:#F5F3ED}
+.fx-res__d{color:#8F8F8F;font-size:13px;margin-left:6px}
+.fx-res__s{font-family:var(--font-display);font-size:2.2rem;line-height:1;font-variant-numeric:tabular-nums;color:#F5F3ED}
+.fx-res__s.w{color:#FFD100}.fx-res__s.l{color:#8F8F8F}
+
+/* Form guide — five bold letters, newest first. */
+.fx-form{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:2px solid #F5F3ED}
+.fx-form__g{padding:18px clamp(10px,1.8vw,24px) 20px;border-left:1px solid rgba(245,243,237,.14);display:flex;flex-direction:column;gap:12px;min-width:0}
+.fx-form__g:first-child{border-left:0;padding-left:0}
+.fx-form__dot{font-family:var(--font-display);font-size:clamp(4.4rem,11vw,10rem);line-height:.78;color:#F5F3ED}
+.fx-form__dot.w{color:#FFD100}.fx-form__dot.d{color:#F5F3ED}.fx-form__dot.l{color:#8F8F8F}
+.fx-form__opp{font-family:var(--font-body);font-weight:600;font-size:14px;color:#AAAAAA;line-height:1.35}
+.fx-form__opp b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.7rem;line-height:1;color:#F5F3ED;margin-top:4px;font-variant-numeric:tabular-nums}
+@media (max-width:640px){
+  .fx-form{grid-template-columns:1fr}
+  .fx-form__g{flex-direction:row;align-items:center;gap:18px;border-left:0;border-bottom:1px solid rgba(245,243,237,.14);padding:14px 0}
+  .fx-form__dot{font-size:4.2rem;width:2.6rem}
+}
+
+/* League table — the standings on hairlines; our row is the yellow field. */
+.fx-table-wrap{overflow-x:auto}
+.fx-table{width:100%;border-collapse:collapse;font-family:var(--font-body);font-variant-numeric:tabular-nums}
+.lt-cap{caption-side:top;text-align:left;padding:0 0 16px;font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,4.4vw,3.6rem);line-height:.9;color:#F5F3ED}
+.lt-cap span{display:block;font-family:var(--font-body);font-size:14px;font-weight:700;text-transform:none;color:#AAAAAA;margin-top:8px}
+.fx-table th{font-size:12px;font-weight:800;color:#AAAAAA;text-align:center;padding:12px 8px;border-top:2px solid #F5F3ED;border-bottom:1px solid rgba(245,243,237,.14)}
+.fx-table th.l,.fx-table td.l{text-align:left}
+.lt th.pts-h{color:#F5F3ED}
+.fx-table td{font-size:15px;font-weight:600;color:#AAAAAA;text-align:center;height:56px;padding:0 8px;border-bottom:1px solid rgba(245,243,237,.14)}
+.lt td.lt-pos{width:52px;font-family:var(--font-display);font-size:1.7rem;font-weight:400;color:#F5F3ED}
+.lt td.l{padding-left:6px}
+.lt-team{display:flex;align-items:center;gap:12px;min-width:0}
+.lt-crest{width:28px;height:28px;object-fit:contain;flex:0 0 28px}
+.lt-crest--ini{border-radius:var(--r-circle);background:#1A1A1A;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:12px;color:#AAAAAA}
+.lt-name{font-weight:700;font-size:15px;color:#F5F3ED;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt td.pts{font-family:var(--font-display);font-weight:400;font-size:1.9rem;color:#F5F3ED}
+.lt tbody tr:hover td{background:rgba(245,243,237,.03)}
+.lt tr.me td,.lt tr.me:hover td{background:#FFD100;color:#080808;border-bottom-color:#FFD100}
+.lt tr.me .lt-name,.lt tr.me td.lt-pos,.lt tr.me td.pts{color:#080808}
+.lt tr.me .lt-crest--ini{background:#080808;color:#FFD100}
+@media (max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}.lt td.lt-pos{width:40px}}
+
+/* ── Calendar — the green field ────────────────────────────────────────── */
+.fx-cal__grid{display:grid;gap:clamp(32px,5vw,72px);align-items:start}
+@media (min-width:980px){.fx-cal__grid{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}}
+.fx-cal .kl-h2{max-width:11ch}
+.fx-cal__sub{margin-top:22px;color:#F5F3ED}
+.fx-cal__btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.fx-cal .kl-btn--line{border-color:rgba(245,243,237,.6)}
+.fx-cal__how{border-top-color:rgba(245,243,237,.3)}
+.fx-cal__how > li{border-bottom-color:rgba(245,243,237,.3);font-family:var(--font-body);font-size:15px;line-height:1.55;color:#F5F3ED;display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:12px}
+.fx-cal__how b{font-family:var(--font-display);font-weight:400;font-size:1.6rem;line-height:1;text-transform:uppercase;color:#FFD100}
+.fx-cal__how a{display:inline-flex;align-items:center;min-height:44px;color:#F5F3ED;text-decoration:underline;text-decoration-color:#FFD100;text-underline-offset:4px;overflow-wrap:anywhere}
+@media (max-width:480px){.fx-cal__how > li{grid-template-columns:1fr;gap:4px}.fx-cal__btns .kl-btn{width:100%}}
+
+/* Toast (share feedback) */
+.fx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(160%);background:#141414;border-top:2px solid #FFD100;padding:12px 16px;z-index:9999;
+  transition:transform var(--dur-base) var(--ease-out);font-family:var(--font-body);font-size:14px;color:#F5F3ED;max-width:90vw}
+.fx-toast.on{transform:translateX(-50%) translateY(0)}
+.fx-toast a{color:#FFD100;margin-left:8px;font-weight:800;font-size:13px}
+
+/* ── Phones ────────────────────────────────────────────────────────────── */
+@media (max-width:600px){
+  .fxc{grid-template-columns:62px minmax(0,1fr) auto;column-gap:12px}
+  .fxc__date{padding-left:12px}
+  .fxc__dd{font-size:2.7rem}
+  .fxc__dm{font-size:12px;white-space:normal;line-height:1.25}
+  .fxc__crest,.fxc__ph{width:22px;height:22px;flex-basis:22px}
+  .fxc__ph{font-size:10px}
+  .fxc__nm{font-size:1.45rem}
+  .fxc__sc{font-size:1.6rem;padding-left:10px}
+  .fxc__side{min-width:0}
+  .fxc__ko{font-size:1.9rem}
+  .fxc__res{font-size:2.8rem}
+  .fxc__team{gap:9px}
+  .fxh__foot .fxc__acts{gap:0 20px}
+  .fxc__meta{display:block;margin-top:10px}
+  .fxc__meta .fxc__ha{margin-right:8px}
+  .fxc__main .fxc__comp{display:none}
+  .fxc__main .fxc__addr{display:none}
+  .fxh__ha{border-left:0;padding-left:0}
+}
+@media (max-width:380px){
+  .fxc{grid-template-columns:54px minmax(0,1fr) auto;column-gap:10px}
+  .fxc__date{padding-left:10px}
+  .fxc__dd{font-size:2.4rem}
+  .fxc__nm{font-size:1.3rem}
+  .fxc__crest,.fxc__ph{display:none}
+}

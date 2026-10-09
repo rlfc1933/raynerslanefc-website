@@ -225,7 +225,7 @@
     return '<div class="mc-xi">' +
       '<div class="mc-xi__h">' + esc(name) + '</div>' +
       '<ul>' + side.starters.map(row).join('') + '</ul>' +
-      (used.length ? '<div class="mc-xi__h" style="margin-top:14px">Substitutes used</div><ul>' +
+      (used.length ? '<div class="mc-xi__h mc-xi__h--subs">Substitutes used</div><ul>' +
         used.map(row).join('') + '</ul>' : '') + '</div>';
   }
 
@@ -254,7 +254,7 @@
       var words = member
         ? (after ? 'Read the matchday programme' : 'Read today’s programme')
         : (after ? 'Unlock matchday programme — free' : 'Unlock today’s programme — free');
-      return '<div class="mc-prog"><a class="cn__btn cn__btn--y" href="programme.html?id=' +
+      return '<div class="mc-prog"><a class="kl-btn kl-btn--solid" href="programme.html?id=' +
         encodeURIComponent(f.id) + '">' + words + '</a></div>';
     }
     if (t.state === 'upcoming' || t.state === 'awaiting') {
@@ -326,7 +326,7 @@
       '<div class="mc-empty__h">' + esc(msg) + '</div>' +
       '<p class="mc-empty__p">' + esc(help ||
         'When The Lane are playing, the live score, the clock and every goal appear here automatically.') + '</p>' +
-      '<a class="btn btn-primary" href="fixtures.html">Fixtures &amp; Results</a></div>';
+      '<a class="kl-btn kl-btn--solid" href="fixtures.html">Fixtures &amp; Results</a></div>';
   }
 
   function fetchFixture(id) {

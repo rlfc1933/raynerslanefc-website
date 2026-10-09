@@ -28,19 +28,6 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
   <link rel="stylesheet" href="css/icons.css">
-  <style>
-    .tab-row { display:flex; gap:2px; margin-bottom:2px; }
-    .tab-btn {
-      flex:1; background:var(--card); border:none; color:var(--grey);
-      font-family:var(--font-c); font-size:13px; font-weight:700;
-      letter-spacing:.1em; text-transform:uppercase; padding:16px 12px;
-      cursor:pointer; transition:background .2s,color .2s; border-bottom:3px solid transparent;
-    }
-    .tab-btn:hover { color:var(--white); background:var(--card2); }
-    .tab-btn.active { color:var(--yellow); border-bottom-color:var(--yellow); background:var(--card2); }
-    .tab-panel { display:none; }
-    .tab-panel.active { display:block; }
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -55,136 +42,91 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/fixtures.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Fixtures & Results","item":"https://raynerslanefc.co.uk/fixtures.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<link rel="stylesheet" href="css/p-fixtures.css">
+<script src="js/lane-motion.js" defer></script>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- PAGE HEADER -->
-<div class="page-header" data-title="FIXTURES">
-  <div class="container">
-    <div class="page-header__eyebrow"><span class="label">Combined Counties Premier Division North &middot; Step 5</span></div>
-    <h1 class="page-header__h">Fixtures <span>&amp; Results</span></h1>
-    <p class="page-header__meta">2026-27 season &middot; Combined Counties Premier Division North, plus cup football</p>
+<!-- ══════════════════════════════════════════════════════════════════════
+     FIXTURES — the club's broadcast schedule (Kit Launch, 2026/27).
+     Title card over club footage, the next match said plainly beneath the
+     name, then one ruled schedule: big tabular dates, kick-off times, a
+     yellow rule for home games, results as score + bold W/D/L. Every word
+     of football below the title comes from the registry (js/football-data.js)
+     or data/*.json — nothing is typed in here.
+     ══════════════════════════════════════════════════════════════════════ -->
+<section class="kl-ph fx-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media" aria-hidden="true">
+    <img src="video/hero-poster-1440.jpg"
+         srcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
+         sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
   </div>
-    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px"><i class="ico ico-mail"></i> <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
-</div>
-</div>
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">2026-27 &middot; Combined Counties Premier Division North &middot; Step 5</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Fixtures</span></span></h1>
+    <p class="kl-ph__line">Every Rayners Lane game this season, league and cup, with the results as they come in.</p>
+    <!-- The next match, stated plainly. Filled by renderFxSeason() from the
+         same "next" the schedule below picks, so the two can never disagree. -->
+    <p class="fx-ph__next" id="fx-ph-next" aria-live="polite" hidden></p>
+  </div>
+</section>
 
-<section class="section">
-  <div class="container">
+<section class="fx-sched" aria-label="Fixtures, results and league table">
+  <div class="kl-wrap">
 
-    <!-- ═══ LIVE FIXTURES, RESULTS & TABLE (top of page) ═══ -->
-    <!-- The page header already says FIXTURES & RESULTS in 90px Bebas. A second
-         heading saying "Fixtures, Results & Table" directly beneath it was the
-         same sentence twice, and "Updates automatically →" was meta-commentary
-         about the CMS pointed at the homepage. A supporter wants the football;
-         the tabs below already say what each panel holds. -->
-
-    <div class="tab-row">
-      <button class="tab-btn active" data-tab="fixtures">Fixtures &amp; Results</button>
-      <button class="tab-btn" data-tab="table">League Table</button>
-      <button class="tab-btn" data-tab="form">Form Guide</button>
+    <!-- One plain segmented underline. Same three panels, same data-tab hooks. -->
+    <div class="tab-row" role="tablist" aria-label="Season views">
+      <button class="tab-btn active" data-tab="fixtures" role="tab" id="tabbtn-fixtures" aria-controls="tab-fixtures" aria-selected="true">Fixtures &amp; Results</button>
+      <button class="tab-btn" data-tab="table" role="tab" id="tabbtn-table" aria-controls="tab-table" aria-selected="false" tabindex="-1">League Table</button>
+      <button class="tab-btn" data-tab="form" role="tab" id="tabbtn-form" aria-controls="tab-form" aria-selected="false" tabindex="-1">Form Guide</button>
     </div>
 
-    <div class="tab-panel active" id="tab-fixtures">
+    <div class="tab-panel active" id="tab-fixtures" role="tabpanel" aria-labelledby="tabbtn-fixtures">
       <div id="fx-next"></div>
-      <div data-at-the-gate style="margin:2px 0 20px"></div>
-      <div id="fx-results"><div class="fx-loading">Loading results…</div></div>
+      <div data-at-the-gate class="fx-gate"></div>
+      <div id="fx-results"><div class="fx-loading">Loading fixtures&hellip;</div></div>
       <!-- Every competition we're in, and where each one stands. A cup with no
            fixtures listed is not a gap in the data — it's a draw that hasn't
-           been made, and the page now says so instead of leaving supporters to
-           guess. Driven by data/competitions.json. -->
+           been made, and the page says so. Driven by data/competitions.json. -->
       <div id="fx-comps"></div>
       <div class="fx-attr">Live fixtures &amp; results via TheSportsDB</div>
     </div>
-    <div class="tab-panel" id="tab-table">
-      <!-- OUR OWN league table — rendered from live standings so it's fully on
-           brand: our fonts and colours, opponent crest beside each club, and the
-           Rayners Lane row highlighted. Data comes from the fetch-table function
-           (live Wikipedia standings, server-side, cached 15 min) so it updates
-           itself through the season. Replaced the Football Web Pages iframe,
-           which is cross-origin and can't be styled. -->
-      <div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--card)">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--card2);border-bottom:1px solid var(--border)">
-          <span style="font-family:var(--font-d);font-size:22px;letter-spacing:.03em;color:var(--white)">Premier Division North</span>
-          <span style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow)"><span style="color:#22C55E">●</span> Live &middot; 2026-27</span>
-        </div>
-        <div id="fx-table" style="overflow-x:auto"><div class="fx-loading">Loading table…</div></div>
-      </div>
-      <div class="fx-attr" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div class="tab-panel" id="tab-table" role="tabpanel" aria-labelledby="tabbtn-table">
+      <!-- OUR OWN league table, rendered from the registry's standings (with the
+           legacy Wikipedia reader as fallback). The caption names the league. -->
+      <div id="fx-table" class="fx-table-wrap"><div class="fx-loading">Loading table&hellip;</div></div>
+      <div class="fx-attr fx-attr--split">
         <span>Standings via <a href="https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA) — updates automatically</span>
-        <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Live on Football Web Pages →</a>
+        <a href="https://www.footballwebpages.co.uk/combined-counties-league-premier-division-north/league-table" target="_blank" rel="noopener">Live on Football Web Pages &rarr;</a>
       </div>
     </div>
-    <div class="tab-panel" id="tab-form">
-      <div id="fx-form"><div class="fx-loading">Loading form…</div></div>
+    <div class="tab-panel" id="tab-form" role="tabpanel" aria-labelledby="tabbtn-form">
+      <div id="fx-form"><div class="fx-loading">Loading form&hellip;</div></div>
     </div>
 
-    <div class="div" style="height:1px;background:var(--border);margin:40px 0"></div>
+  </div>
+</section>
 
-    <!-- ═══ CALENDAR SYNC ═══ -->
-    <div class="cal-sync" id="calendar">
-      <h2 class="cal-sync__title">Get Fixtures on <span style="color:var(--yellow)">Your Phone</span></h2>
-      <p class="cal-sync__sub">One tap. All fixtures sync automatically — every postponement, rescheduled game and new cup tie updates itself.</p>
-      <div class="cal-sync__btns">
-
-        <a class="cal-btn cal-btn--apple"
-           href="webcal://raynerslanefc.co.uk/.netlify/functions/fixtures-ics">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-          iPhone / Apple Calendar
-        </a>
-
-        <a class="cal-btn cal-btn--google"
-           href="https://calendar.google.com/calendar/r?cid=webcal://raynerslanefc.co.uk/.netlify/functions/fixtures-ics"
-           target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Android / Google Calendar
-        </a>
-
-        <a class="cal-btn cal-btn--ics"
-           href="/.netlify/functions/fixtures-ics"
-           download>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Download .ics
-        </a>
-
-      </div>
-      <div style="margin-top:16px;padding:14px 18px;background:rgba(255,209,0,.05);border:1px solid rgba(255,209,0,.12);border-radius:var(--r-xs)">
-        <p style="font-family:var(--font-c);font-size:13px;color:var(--lgrey);letter-spacing:.03em;line-height:1.7">
-          <strong style="color:var(--yellow)"><i class="ico ico-smartphone"></i> iPhone:</strong> Tap "iPhone / Apple Calendar" &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.<br>
-          <strong style="color:var(--yellow)"><i class="ico ico-bot"></i> Android:</strong> Tap "Android / Google Calendar" &rarr; sign in &rarr; tap Add. Syncs every few hours.<br>
-          <strong style="color:var(--yellow)"><i class="ico ico-save"></i> Other:</strong> Download the .ics and open with Outlook, Thunderbird etc.
-        </p>
+<!-- ═══ CALENDAR SYNC — the green field ═══ -->
+<section class="kl-sec kl-sec--green fx-cal" id="calendar" aria-labelledby="cal-title">
+  <div class="kl-wrap fx-cal__grid">
+    <div>
+      <h2 class="kl-h2" id="cal-title">Get fixtures on your phone</h2>
+      <p class="kl-p fx-cal__sub">One tap. All fixtures sync automatically — every postponement, rescheduled game and new cup tie updates itself.</p>
+      <div class="fx-cal__btns">
+        <a class="kl-btn kl-btn--solid" href="webcal://raynerslanefc.co.uk/.netlify/functions/fixtures-ics">iPhone / Apple Calendar</a>
+        <a class="kl-btn kl-btn--line" href="https://calendar.google.com/calendar/r?cid=webcal://raynerslanefc.co.uk/.netlify/functions/fixtures-ics" target="_blank" rel="noopener">Android / Google Calendar</a>
+        <a class="kl-btn kl-btn--line" href="/.netlify/functions/fixtures-ics" download>Download .ics</a>
       </div>
     </div>
-
-    <!-- ═══ MORE FROM THE CLUB ═══
-         Was a panel linking out to the club's old third-party platform. That
-         account was deleted, so it pointed at a 404. Match detail lives on our
-         own pages now. -->
-        <div style="margin-top:24px;background:var(--card);border:1px solid var(--border);padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div>
-        <div class="label" style="margin-bottom:6px">Official Club Platform</div>
-        <p style="font-family:var(--font-c);font-size:15px;font-weight:600;color:var(--lgrey);letter-spacing:.04em">
-          Full match reports, squad and player profiles across the site
-        </p>
-      </div>
-      <a class="btn btn-outline" href="fixtures.html">
-        Match Reports &rarr;
-      </a>
-    </div>
-
+    <ol class="kl-rows fx-cal__how">
+      <li><b>iPhone</b> Tap &ldquo;iPhone / Apple Calendar&rdquo; &rarr; iOS asks to subscribe &rarr; tap Subscribe. Done. Updates automatically.</li>
+      <li><b>Android</b> Tap &ldquo;Android / Google Calendar&rdquo; &rarr; sign in &rarr; tap Add. Syncs every few hours.</li>
+      <li><b>Other</b> Download the .ics and open with Outlook, Thunderbird etc.</li>
+      <li><b>Questions</b> <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></li>
+    </ol>
   </div>
 </section>
 
@@ -230,15 +172,28 @@
 (function () {
   function fxInit() {
     try { initComponents("fixtures.html"); } catch (e) {}
-    // Tab switching
-    document.querySelectorAll(".tab-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var target = btn.dataset.tab;
-        document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
-        document.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
-        btn.classList.add("active");
-        var panel = document.getElementById("tab-" + target);
-        if (panel) panel.classList.add("active");
+    // Tab switching — a real tablist: click, or arrow keys between tabs.
+    var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab-btn"));
+    function fxSelectTab(btn, focus) {
+      var target = btn.dataset.tab;
+      tabs.forEach(function (b) {
+        b.classList.remove("active"); b.setAttribute("aria-selected", "false"); b.setAttribute("tabindex", "-1");
+      });
+      document.querySelectorAll(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active"); btn.setAttribute("aria-selected", "true"); btn.removeAttribute("tabindex");
+      var panel = document.getElementById("tab-" + target);
+      if (panel) panel.classList.add("active");
+      if (focus) btn.focus();
+    }
+    tabs.forEach(function (btn, i) {
+      btn.addEventListener("click", function () { fxSelectTab(btn); });
+      btn.addEventListener("keydown", function (e) {
+        var k = e.key, j = -1;
+        if (k === "ArrowRight") j = (i + 1) % tabs.length;
+        else if (k === "ArrowLeft") j = (i - 1 + tabs.length) % tabs.length;
+        else if (k === "Home") j = 0;
+        else if (k === "End") j = tabs.length - 1;
+        if (j > -1) { e.preventDefault(); fxSelectTab(tabs[j], true); }
       });
     });
     loadFixturesData();
@@ -490,21 +445,34 @@ function fxDate(f) { var ms = MatchTime.kickoffEpoch(f); return isFinite(ms) ? n
 // Absolute ISO for structured data. "2026-08-01T15:00:00" with no offset is
 // ambiguous to a search engine as well as to a browser.
 function fxISO(f) { var ms = MatchTime.kickoffEpoch(f); return isFinite(ms) ? new Date(ms).toISOString() : ''; }
+/* The lockup, set the way a broadcast scoreboard sets it: the home club on
+   the first line, the away club on the second, each with its own goals at
+   the right-hand edge. Us/them are already oriented by the read layer, so the
+   home line takes `us` when we are at home and `them` when we are away. */
 function fxLock(f) {
   var home = f.isHome !== false;
   var OP = { name: f.opponent || 'TBC', crest: f.oppCrest || '' };
   var L = home ? RL : OP, R = home ? OP : RL;
-  var mid;
-  if (f.us != null && f.them != null) {
-    var ls = home ? f.us : f.them, rs = home ? f.them : f.us;
-    var cls = f.us > f.them ? 'w' : (f.us === f.them ? 'd' : 'l');
-    mid = '<span class="fxc__score ' + cls + '">' + ls + '–' + rs + '</span>';
-  } else mid = '<span class="fxc__vs">VS</span>';
-  return '<div class="fxc__lock">' +
-    '<div class="fxc__team">' + fxCrestEl(L.crest, L.name) + '<span class="fxc__nm">' + fxEsc(L.name.toUpperCase()) + '</span></div>' +
-    mid +
-    '<div class="fxc__team">' + fxCrestEl(R.crest, R.name) + '<span class="fxc__nm">' + fxEsc(R.name.toUpperCase()) + '</span></div>' +
+  var played = (f.us != null && f.them != null);
+  var ls = played ? (home ? f.us : f.them) : null, rs = played ? (home ? f.them : f.us) : null;
+  function line(t, goals, isUs) {
+    return '<div class="fxc__team' + (isUs ? ' fxc__team--us' : '') + '">' + fxCrestEl(t.crest, t.name) +
+      '<span class="fxc__nm">' + fxEsc(t.name) + '</span>' +
+      (played ? '<span class="fxc__sc">' + goals + '</span>' : '') + '</div>';
+  }
+  return '<div class="fxc__lock' + (played ? ' fxc__lock--played' : '') + '"' +
+      (played ? ' aria-label="' + fxEsc(L.name + ' ' + ls + ', ' + R.name + ' ' + rs) + '"' : '') + '>' +
+    line(L, ls, home) + line(R, rs, !home) +
   '</div>';
+}
+/* W / D / L, as one bold letter. Type, not a coloured chip. */
+function fxResult(f) {
+  if (f.us != null && f.them != null) {
+    var v = f.us > f.them ? 'W' : (f.us === f.them ? 'D' : 'L');
+    var word = v === 'W' ? 'Won' : (v === 'D' ? 'Drew' : 'Lost');
+    return '<span class="fxc__res fxc__res--' + v + '"><abbr title="' + word + '">' + v + '</abbr></span>';
+  }
+  return '';
 }
 /* Venue block: real ground + address, or an honest "to be confirmed".
    Never a dead button, never a guessed location. */
@@ -598,7 +566,7 @@ function fxState(f) {
     meta line, so an empty box here would be noise, not information. */
 function fxCompMark(ident) {
   if (!ident || !ident.logo) return '';
-  return '<img class="fxc__comp" src="' + fxEsc(ident.logo) + '" alt="' + fxEsc(ident.label || '') + '">';
+  return '<img class="fxc__comp" src="' + fxEsc(ident.logo) + '" alt="' + fxEsc(ident.label || '') + '" width="26" height="26">';
 }
 
 /**
@@ -663,11 +631,25 @@ function fxPanel(f, state) {
     '</summary><div class="fxx__p">' + rows + '</div></details>';
 }
 
+/* The date as a broadcast schedule sets it: the day huge and tabular, the
+   weekday and month small beneath. Read in club time. */
+function fxDateCol(f) {
+  var d = fxDate(f);
+  if (!isFinite(d.getTime())) return '<div class="fxc__date"><span class="fxc__dd">TBC</span></div>';
+  var tz = { timeZone: 'Europe/London' };
+  var dd = d.toLocaleDateString('en-GB', Object.assign({ day: '2-digit' }, tz));
+  var wd = d.toLocaleDateString('en-GB', Object.assign({ weekday: 'short' }, tz));
+  var mo = d.toLocaleDateString('en-GB', Object.assign({ month: 'short' }, tz));
+  var full = d.toLocaleDateString('en-GB', Object.assign({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }, tz));
+  return '<div class="fxc__date"><time datetime="' + fxEsc(fxISO(f)) + '">' +
+    '<span class="fxc__dd" aria-hidden="true">' + fxEsc(dd) + '</span>' +
+    '<span class="fxc__dm" aria-hidden="true">' + fxEsc(wd) + ' ' + fxEsc(mo) + '</span>' +
+    '<span class="fx-vh">' + fxEsc(full) + '</span></time></div>';
+}
 function fxCard(f) {
   var home = f.isHome !== false, comp = fxComp(f.competition);
   var played = (f.us != null && f.them != null), gone = fxPast(f);
   var state = fxState(f);
-  var ds = fxDate(f).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
   // THE FOOTBALL LEADS. One state line where a state needs stating, then the
   // single most relevant action, then everything else folded away.
   var foot = '';
@@ -679,25 +661,22 @@ function fxCard(f) {
     foot += '<div class="fxc__await"><span class="mstat mstat--await">Result to follow</span></div>';
   }
   foot += fxPanel(f, state);
-  // The competition used to appear TWICE on every card: a grey pill up here
-  // reading "FA VASE", and the correct sponsored name with its round in the
-  // meta line below. One of them had to go, and it was not going to be the
-  // one that says "Isuzu FA Vase · First Qualifying Round". Home/away keeps
-  // the top row to itself, which is a fact about the fixture worth stating
-  // once and quietly.
   // ── CAMPAIGN TOKENS, PER FIXTURE ──────────────────────────────────────
-  // Every card used to be the same grey box with a 4px left border — yellow
-  // for home, green for away — so New Bradwell looked exactly like Broadfields
-  // and an FA Vase tie looked exactly like a league game. The campaign palette
-  // already existed; nothing on this page consumed it.
-  //
-  // Each card now carries its opponent's confirmed colour and its competition
-  // treatment. It stays UI — no smoke, no poster — but a supporter scrolling
-  // the list can see these are different matches.
+  // Each row carries its opponent's confirmed colour (a faint wash from THEIR
+  // side) and its competition treatment. Home is a yellow rule down the date
+  // column — a rule, not a chip — and the words "Home"/"Away" say it again for
+  // anyone who cannot see the rule.
   var pal = window.BrandPalette ? BrandPalette.resolve(f.opponent) : null;
   var oppCol = (pal && pal.usable) ? pal.primary : '';
   var ident = window.CompetitionBrand ? CompetitionBrand.identity(f) : null;
   var treat = fxCompTreatment(f);
+
+  // The right-hand column: the kick-off before, the result after.
+  var side;
+  if (played) side = fxResult(f);
+  else if (state === 'postponed') side = '<span class="fxc__ko fxc__ko--off">P&ndash;P</span>';
+  else if (state === 'awaiting') side = '';
+  else side = '<span class="fxc__ko">' + fxEsc(fxKOText(f)) + '</span>';
 
   return '<article class="fxc ' + (home ? 'fxc--home' : 'fxc--away') +
       (gone && !played ? ' fxc--gone' : '') + ' fxc--' + fxEsc(treat) +
@@ -705,55 +684,57 @@ function fxCard(f) {
       (oppCol ? ' fxc--tinted' : '') + '"' +
       (oppCol ? ' style="--fxc-opp:' + fxEsc(oppCol) + '"' : '') + '>' +
     (f.oppCrest ? '<img class="fxc__ghost" src="' + fxEsc(f.oppCrest) + '" alt="" aria-hidden="true">' : '') +
-    '<div class="fxc__top"><span class="fxc__ha">' +
-      (home ? '<i class="ico ico-house"></i> Home' : '<i class="ico ico-bus"></i> Away') + '</span>' +
-      fxCompMark(ident) + '</div>' +
-    fxLock(f) +
-    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + ' &middot; ' + fxCompText(f) + '</div>' +
-    fxVenueBlock(f) +
-    foot +
+    fxDateCol(f) +
+    '<div class="fxc__main">' +
+      fxLock(f) +
+      '<div class="fxc__meta"><span class="fxc__ha">' + (home ? 'Home' : 'Away') + '</span>' +
+        '<span class="fxc__cn">' + fxCompText(f) + '</span>' + fxCompMark(ident) + '</div>' +
+      fxVenueBlock(f) +
+    '</div>' +
+    '<div class="fxc__side">' + side + '</div>' +
+    '<div class="fxc__foot">' + foot + '</div>' +
   '</article>';
 }
 function fxHero(f) {
   var comp = fxComp(f.competition), home = f.isHome !== false;
   var d = fxDate(f);
-  var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  // The competition names itself here through the shared resolver, exactly as
-  // it does on the homepage card: "Isuzu FA Vase · First Qualifying Round",
-  // not a grey pill reading "FA VASE". This block is the most prominent thing
-  // on the page and was the one place still bypassing CompetitionBrand.
-  // Home/away is a fact about the fixture, not a status — it reads as a word
-  // beside the venue, not as a second chip competing with the competition.
-  // THE HERO WAS THE ONE CARD WITH NO CAMPAIGN AT ALL.
-  // Every card in the list below carries its opponent's colour, its ghosted
-  // crest and its competition treatment. The most prominent fixture on the
-  // page — the next match — carried none of it, which meant the Isuzu FA Vase
-  // tie against New Bradwell, the fixture this entire creative system was
-  // designed around, rendered as a plain grey box above thirty-eight cards
-  // that were all more expressive than it.
+  var ds = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/London' });
+  // THE NEXT MATCH, AS THE BROADCAST'S OPENING CARD.
+  // The competition names itself through the shared resolver ("Isuzu FA Vase
+  // · First Qualifying Round", not a grey pill). Home/away is a word, not a
+  // chip. It carries the same campaign as every row below it: the opponent's
+  // confirmed colour, their ghosted crest and the competition treatment.
   var pal = window.BrandPalette ? BrandPalette.resolve(f.opponent) : null;
   var oppCol = (pal && pal.usable) ? pal.primary : '';
   var treat = fxCompTreatment(f);
   var ident = window.CompetitionBrand ? CompetitionBrand.identity(f) : null;
 
   return '<div class="fxh fxh--' + fxEsc(treat) + (home ? ' fxh--home' : ' fxh--away') +
-      (oppCol ? ' fxh--tinted' : '') + '" data-ko="' + d.getTime() + '"' +
+      (oppCol ? ' fxh--tinted' : '') + '" data-ko="' + d.getTime() + '" role="region" aria-labelledby="fxh-title"' +
       (oppCol ? ' style="--fxc-opp:' + fxEsc(oppCol) + '"' : '') + '>' +
     (f.oppCrest ? '<img class="fxc__ghost fxh__ghost" src="' + fxEsc(f.oppCrest) + '" alt="" aria-hidden="true">' : '') +
-    '<span class="fxh__lbl">Next Match</span>' +
-    '<div class="fxh__comp">' + fxCompMark(ident) + fxCompText(f) +
-      '<span class="fxh__ha' + (home ? ' fxh__ha--home' : '') + '">' + (home ? 'Home' : 'Away') + '</span></div>' +
-    fxLock(f) +
-    '<div class="fxc__meta">' + ds + ' &middot; ' + fxKOText(f) + '</div>' +
-    fxVenueBlock(f) +
-    '<div class="fxh__cd" id="fx-cd"></div>' + fxActs(f) + '</div>';
+    '<div class="fxh__head">' +
+      '<h2 class="fxh__lbl" id="fxh-title">Next match</h2>' +
+      '<div class="fxh__comp">' + fxCompMark(ident) + '<span>' + fxCompText(f) + '</span>' +
+        '<span class="fxh__ha' + (home ? ' fxh__ha--home' : '') + '">' + (home ? 'Home' : 'Away') + '</span></div>' +
+    '</div>' +
+    '<div class="fxh__body">' +
+      fxLock(f) +
+      '<div class="fxh__when">' +
+        '<span class="fxh__ko">' + fxEsc(fxKOText(f)) + '</span>' +
+        '<span class="fxh__day">' + fxEsc(ds) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fxh__cd" id="fx-cd" role="timer" aria-label="Time until kick-off"></div>' +
+    '<div class="fxh__foot">' + fxVenueBlock(f) + fxActs(f) + '</div>' +
+  '</div>';
 }
 function fxCountdown() {
   var h = document.querySelector('.fxh'); if (!h) return;
   var ko = Number(h.getAttribute('data-ko')), el = document.getElementById('fx-cd'); if (!el) return;
   function tick() {
     var ms = ko - Date.now();
-    if (ms <= 0) { el.innerHTML = '<div class="fxh__u" style="min-width:auto;padding:6px 14px"><div class="fxh__n" style="font-size:17px">KICK OFF</div></div>'; return; }
+    if (ms <= 0) { el.innerHTML = '<span class="fxh__kickoff">Kick off</span>'; clearInterval(window._fxCd); return; }
     var s = Math.floor(ms / 1000);
     var u = [[Math.floor(s / 86400), 'Days'], [Math.floor(s % 86400 / 3600), 'Hrs'], [Math.floor(s % 3600 / 60), 'Min'], [s % 60, 'Sec']];
     el.innerHTML = u.map(function (x) {
@@ -761,6 +742,22 @@ function fxCountdown() {
     }).join('');
   }
   tick(); clearInterval(window._fxCd); window._fxCd = setInterval(tick, 1000);
+}
+/* The title card's one plain sentence about the next match. Same `next` the
+   schedule picked (pinned first, else soonest), so they never disagree; with
+   no next match the line simply stays hidden. */
+function fxTitleNext(f) {
+  var el = document.getElementById('fx-ph-next'); if (!el) return;
+  if (!f) { el.hidden = true; el.innerHTML = ''; return; }
+  var home = f.isHome !== false;
+  var teams = home ? ('Rayners Lane v ' + (f.opponent || 'TBC')) : ((f.opponent || 'TBC') + ' v Rayners Lane');
+  var day = fxDate(f).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/London' });
+  var ground = fxVenue(f);
+  el.innerHTML = '<span class="fx-ph__k">Next</span> ' +
+    '<a href="#fx-next">' + fxEsc(teams) + '</a>' +
+    '<span class="fx-ph__w">' + fxEsc(day) + ' &middot; ' + fxEsc(fxKOText(f)) +
+      (ground ? ' &middot; ' + fxEsc(ground) : '') + '</span>';
+  el.hidden = false;
 }
 function fxToast(msg, links) {
   var t = document.getElementById('fx-toast');
@@ -930,6 +927,7 @@ function renderFxSeason(list) {
   var nextEl = document.getElementById('fx-next');
   nextEl.innerHTML = next ? fxHero(next) : '';
   if (next) fxCountdown();
+  fxTitleNext(next);
 
   var html = '', rest = upcoming.filter(function (f) { return !next || f.id !== next.id; });
   if (rest.length) {
@@ -941,7 +939,8 @@ function renderFxSeason(list) {
     });
     html += order.map(function (k) {
       var g = months[k];
-      return '<section class="fxm"><div class="fxm__h"><span class="fxm__m">' + fxEsc(k.split(' ')[0].toUpperCase()) + '</span>' +
+      return '<section class="fxm"><div class="fxm__h"><h2 class="fxm__m">' + fxEsc(k.split(' ')[0]) +
+        ' <span class="fxm__y">' + fxEsc(k.split(' ')[1] || '') + '</span></h2>' +
         '<span class="fxm__c">' + g.length + ' game' + (g.length > 1 ? 's' : '') + '</span></div>' + g.map(fxCard).join('') + '</section>';
     }).join('');
   }
@@ -949,7 +948,7 @@ function renderFxSeason(list) {
   // their diary needs to find it here and be told plainly, with the reason and
   // whether a new date exists yet. Disappearing would be worse than wrong.
   if (calledOff.length) {
-    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">POSTPONED</span>' +
+    html += '<section class="fxm"><div class="fxm__h"><h2 class="fxm__m"><span>POSTPONED</span></h2>' +
       '<span class="fxm__c">' + calledOff.length + ' game' + (calledOff.length > 1 ? 's' : '') + '</span></div>' +
       calledOff.sort(function (a, b) { return dt(a) - dt(b); }).map(function (f) {
         // Shared .mstat / .mnotice vocabulary — the same words and the same
@@ -977,7 +976,7 @@ function renderFxSeason(list) {
   // the score has been entered yet. They never sit in "upcoming".
   var done = played.concat(awaiting).sort(function (a, b) { return dt(b) - dt(a); });
   if (done.length) {
-    html += '<section class="fxm"><div class="fxm__h"><span class="fxm__m">RESULTS</span><span class="fxm__c">' + done.length + ' played</span></div>' +
+    html += '<section class="fxm"><div class="fxm__h"><h2 class="fxm__m">Results</h2><span class="fxm__c">' + done.length + ' played</span></div>' +
       done.map(fxCard).join('') + '</section>';
   }
   document.getElementById('fx-results').innerHTML = html || '<div class="fx-empty">Fixtures are released soon — check back.</div>';
@@ -1050,12 +1049,17 @@ function renderFxForm(fx) {
   var el = document.getElementById('fx-form');
   if (!fx.results || !fx.results.length) { el.innerHTML = '<div class="fx-empty">Form appears once results come in.</div>'; return; }
   var last5 = fx.results.slice(0, 5);
+  // Five bold letters, newest first, each with the game it came from beneath.
   var dots = last5.map(function(r){
     var v = r.us > r.them ? 'W' : (r.us === r.them ? 'D' : 'L');
     var cls = v === 'W' ? 'w' : (v === 'D' ? 'd' : 'l');
-    return '<span class="fx-form__dot ' + cls + '">' + v + '</span>';
+    // Score set home-first, the way the fixture itself reads.
+    var h = r.isHome !== false;
+    var opp = r.opponent ? '<span class="fx-form__opp">' + (h ? 'v ' : 'at ') + fxEsc(r.opponent) +
+      (r.us != null ? ' <b>' + (h ? r.us + '&ndash;' + r.them : r.them + '&ndash;' + r.us) + '</b>' : '') + '</span>' : '';
+    return '<li class="fx-form__g"><span class="fx-form__dot ' + cls + '">' + v + '</span>' + opp + '</li>';
   }).join('');
-  el.innerHTML = '<div class="fx-rlbl">Last ' + last5.length + ' (newest first)</div><div class="fx-form">' + dots + '</div>';
+  el.innerHTML = '<h2 class="fx-rlbl">Last ' + last5.length + ', newest first</h2><ol class="fx-form">' + dots + '</ol>';
 }
 
 // The 20 CCL Prem North clubs, alphabetical, all zeros — used if the live fetch
@@ -1088,14 +1092,16 @@ function renderFxTable(rows) {
     '<th scope="col" class="hide">W</th><th scope="col" class="hide">D</th><th scope="col" class="hide">L</th>' +
     '<th scope="col" class="hide">GF</th><th scope="col" class="hide">GA</th>' +
     '<th scope="col">GD</th><th scope="col" class="pts-h">Pts</th></tr>';
+  // A column the source did not send prints a dash, never "undefined".
+  function n(x) { return (x == null || x === '' || /undefined|NaN/.test(String(x))) ? '&ndash;' : fxEsc(String(x)); }
   var body = rows.map(function(t){
     return '<tr class="' + (t.rlfc ? 'me' : '') + '">' +
-      '<td class="lt-pos">' + t.pos + '</td>' +
+      '<td class="lt-pos">' + n(t.pos) + '</td>' +
       '<td class="l"><span class="lt-team">' + fxCrestHtml(t.team) + '<span class="lt-name">' + fxEsc(t.team) + '</span></span></td>' +
-      '<td>' + t.pld + '</td>' +
-      '<td class="hide">' + t.w + '</td><td class="hide">' + t.d + '</td><td class="hide">' + t.l + '</td>' +
-      '<td class="hide">' + (t.gf || 0) + '</td><td class="hide">' + (t.ga || 0) + '</td>' +
-      '<td>' + fxEsc(String(t.gd)) + '</td><td class="pts">' + t.pts + '</td></tr>';
+      '<td>' + n(t.pld) + '</td>' +
+      '<td class="hide">' + n(t.w) + '</td><td class="hide">' + n(t.d) + '</td><td class="hide">' + n(t.l) + '</td>' +
+      '<td class="hide">' + n(t.gf) + '</td><td class="hide">' + n(t.ga) + '</td>' +
+      '<td>' + n(t.gd) + '</td><td class="pts">' + n(t.pts) + '</td></tr>';
   }).join('');
   var league = (window.CompetitionBrand && CompetitionBrand.identity('ccl-prem-north').label)
     || 'Combined Counties Premier Division North';
@@ -1152,8 +1158,8 @@ function renderCompetitions() {
       });
       el.innerHTML =
         '<section class="fxm" style="margin-top:26px"><div class="fxm__h">' +
-          '<span class="fxm__m">COMPETITIONS ' + fxEsc(d.season || '') + '</span>' +
-          '<span class="fxm__c">' + list.length + '</span></div>' +
+          '<h2 class="fxm__m">Competitions <span class="fxm__y">' + fxEsc(d.season || '') + '</span></h2>' +
+          '<span class="fxm__c">' + list.length + ' competitions</span></div>' +
         '<div class="fxcomp">' + list.map(function (c) {
           var st = FX_COMP_STATE[c.state] || { lbl: c.state, cls: 'wait' };
           var n = counts[c.short] || 0;
@@ -1171,297 +1177,76 @@ function renderCompetitions() {
 }
 </script>
 <style>
-  /* A called-off fixture: stated plainly, not hidden and not dressed up as a
-     result. Amber because it is information, not a loss. */
-  /* .fx-off was this page's private vocabulary for a called-off match, drawn
-     differently from the homepage's. Replaced by the shared .mnotice/.mstat
-     system in style.css; only the heading type stays local. */
-  .mnotice{margin-bottom:9px}
-  .mnotice__h b{font-family:var(--font-d);font-size:19px;letter-spacing:.4px;font-weight:400;color:var(--white)}
-  .fx-loading,.fx-empty{font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.04em;padding:28px 4px;text-align:center}
-  .fx-attr{font-family:var(--font-c);font-size:11px;color:var(--grey);letter-spacing:.05em;margin-top:14px}
-  .fx-attr a{color:var(--yellow)}
-  /* Competition states — deliberately quiet. This is reference, not a headline. */
-  .fxcomp{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--card)}
-  .fxcomp__r{padding:13px 16px;border-bottom:1px solid var(--border)}
-  .fxcomp__r:last-child{border-bottom:none}
-  .fxcomp__n{font-family:var(--font-d);font-size:20px;letter-spacing:.03em;color:var(--white);display:flex;align-items:center;gap:9px;flex-wrap:wrap;line-height:1.15}
-  .fxcomp__st{font-family:var(--font-c);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);background:rgba(255,209,0,.12);border-radius:var(--r-xs);padding:3px 7px}
-  .fxcomp__s{font-family:var(--font-c);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
-  .fxcomp__s--ok{color:#7fe0a3}
-  .fxcomp__s--wait{color:var(--yellow)}
-  .fxcomp__s--out{color:var(--grey)}
-  .fxcomp__note{font-family:var(--font-b);font-size:13px;color:var(--lgrey,#bbb);line-height:1.5;margin-top:5px}
-  .fx-next{background:linear-gradient(135deg,var(--green),#06120a);border:1px solid #21402b;border-radius:var(--r-lg);padding:22px 24px;margin-bottom:18px}
-  .fx-next__lbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
-  .fx-next__teams{font-family:var(--font-d);font-size:clamp(26px,4.5vw,38px);letter-spacing:.03em;color:#fff;line-height:1;margin-top:6px}
-  .fx-next__meta{font-family:var(--font-c);font-size:13px;letter-spacing:.06em;color:rgba(255,255,255,.7);margin-top:8px}
-  .fx-rlbl{font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin:6px 0 10px}
-  .fx-res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 4px;border-bottom:1px solid var(--border)}
-  .fx-res__m{font-family:var(--font-c);font-size:15px;color:#fff;letter-spacing:.02em}
-  .fx-res__d{color:var(--grey);font-size:12px;margin-left:4px}
-  .fx-res__s{font-family:var(--font-d);font-size:22px;letter-spacing:.06em;padding:2px 10px;border-radius:var(--r-sm)}
-  .fx-res__s.w{color:#22C55E;background:rgba(34,197,94,.1)} .fx-res__s.d{color:#FBBF24;background:rgba(251,191,36,.1)} .fx-res__s.l{color:#EF4444;background:rgba(239,68,68,.1)}
-  .fx-form{display:flex;gap:8px}
-  .fx-form__dot{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;color:#fff}
-  .fx-form__dot.w{background:#22C55E} .fx-form__dot.d{background:#FBBF24;color:#0d0d0d} .fx-form__dot.l{background:#EF4444}
-  .lt-cap{caption-side:top;text-align:left;padding:0 0 14px;
-    font-family:var(--font-d);font-size:clamp(20px,2.4vw,28px);letter-spacing:.03em;color:var(--white)}
-  .lt-cap span{display:block;font-family:var(--font-c);font-size:11px;font-weight:700;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);margin-top:5px}
-  .fx-table{width:100%;border-collapse:collapse;font-family:var(--font-c)}
-  .fx-table th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--grey);text-align:center;padding:12px 6px;border-bottom:1px solid var(--border)}
-  .fx-table th.l,.fx-table td.l{text-align:left}
-  .fx-table td{font-size:14px;color:var(--lgrey);text-align:center;padding:11px 6px;border-bottom:1px solid var(--border)}
-  .fx-table td.pts{font-weight:800;color:#fff}
-  .fx-table tr.me td{background:rgba(255,209,0,.1);color:#fff}
-  .fx-table tr.me td.l{color:var(--yellow);font-weight:700}
-  @media(max-width:560px){.fx-table th.hide,.fx-table td.hide{display:none}}
-  /* ── Our branded league table (crest-led, RLFC highlighted) ── */
-  .lt th{padding-top:14px;padding-bottom:14px}
-  .lt th.pts-h{color:var(--yellow)}
-  .lt td{height:52px;padding-top:0;padding-bottom:0}
-  .lt td.lt-pos{width:46px;font-family:var(--font-d);font-size:19px;letter-spacing:.02em;color:var(--lgrey)}
-  .lt td.l{padding-left:14px}
-  .lt-team{display:flex;align-items:center;gap:11px;min-width:0}
-  .lt-crest{width:27px;height:27px;object-fit:contain;flex:0 0 27px}
-  .lt-crest--ini{border-radius:var(--r-circle);background:linear-gradient(160deg,#242424,#0b0b0b);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:10px;color:var(--yellow)}
-  .lt-name{font-family:var(--font-c);font-weight:600;font-size:15px;letter-spacing:.01em;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .lt td.pts{font-family:var(--font-d);font-weight:400;font-size:20px;letter-spacing:.03em;color:var(--yellow)}
-  .lt tbody tr:hover td,.lt tbody tr:hover td{background:rgba(255,255,255,.02)}
-  .lt tr.me td{background:rgba(255,209,0,.1)}
-  .lt tr.me td:first-child{box-shadow:inset 3px 0 0 var(--yellow)}
-  .lt tr.me .lt-name{color:var(--yellow);font-weight:700}
-  .lt tr.me td.lt-pos{color:var(--yellow)}
-  .lt tr.me td.pts{color:#fff}
-  .lt tr:last-child td{border-bottom:0}
-  /* FWP embed: fit the third-party iframe cleanly into its branded frame */
-  /* ── FIXTURE CARDS — crest-led lockups, month-sectioned, colour-coded ── */
-  .fxm{margin-bottom:26px}
-  .fxm__h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px}
-  .fxm__m{font-family:var(--font-d);font-size:30px;letter-spacing:.05em;color:var(--white);line-height:1}
-  .fxm__c{font-family:var(--font-c);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
-  .fxc{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 14px 12px;margin-bottom:10px;overflow:hidden}
-  /* ── CAMPAIGN TREATMENT ────────────────────────────────────────────────
-     A 4px left border was the only thing distinguishing one fixture from
-     another. These rules give each card its opponent's confirmed colour and
-     its competition's character, while staying firmly interface: no smoke, no
-     poster, nothing that costs a scroll frame. All of it is additive — a
-     fixture with no confirmed palette simply renders as it always did. */
+  /* ════════════════════════════════════════════════════════════════════════
+     FIXTURES — the campaign treatment, kept beside the code that drives it.
+     The page's look lives in css/p-fixtures.css. These few rules stay here
+     because tests/fixture-card-campaign.test.js reads them from this file:
+     they are the regressions that bit (the wash and ghost crest lighting the
+     wrong club on away fixtures; the Vase looking like the Cup). In the
+     ruled schedule they are deliberately quiet: a faint wash from the
+     opponent's side of the row, never a box around it.
+     ════════════════════════════════════════════════════════════════════════ */
 
-  /* The opponent's colour, entering as a wash from THEIR side of the lockup —
-     the same counter-light idea as the artwork, at UI strength.
-
-     WHICH SIDE IS NOT A CONSTANT. The lockup is always home-then-away, so the
-     opponent stands on the right when we are at home and on the LEFT when we
-     are away. A wash pinned to one edge is therefore correct half the time and
-     lights the wrong club the other half — which is what it did: "BURNHAM" sat
-     on the left of the card while Burnham's navy and Burnham's crest bled off
-     the right, behind our own name. Both now follow the opponent. */
+  /* The opponent's confirmed colour enters from THEIR side. Home lists us
+     first, so the opponent is the second line and the wash comes from the
+     right; away hands the leading edge to them. */
   .fxc--tinted{
     background:
-      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 16%, transparent) 0%,
-                              transparent 52%),
-      var(--card);
-    border-color: color-mix(in srgb, var(--fxc-opp) 22%, var(--border));
+      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 7%, transparent) 0%,
+                              transparent 42%);
   }
   .fxc--away.fxc--tinted{
     background:
-      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 16%, transparent) 0%,
-                              transparent 52%),
-      var(--card);
+      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 7%, transparent) 0%,
+                              transparent 42%);
   }
-  /* Home stays Lane yellow on the leading edge; away hands that edge to the
-     opponent, which is the quickest read of where we are playing. */
-  .fxc--away.fxc--tinted:before{background:linear-gradient(180deg,var(--fxc-opp),color-mix(in srgb,var(--fxc-opp) 40%,transparent))}
 
-  /* The opponent crest, very large and very faint, bled off the right edge.
-     Shape only — enough to make the card feel like THIS fixture. */
+  /* The opponent crest, very large and very faint, bled off the edge that
+     belongs to them. Shape only. */
   .fxc__ghost{
-    position:absolute; right:-34px; top:50%; transform:translateY(-50%);
-    width:150px; height:150px; object-fit:contain; opacity:.055;
-    filter:grayscale(1) contrast(.9); pointer-events:none; z-index:0;
+    position:absolute; right:-40px; top:50%; transform:translateY(-50%);
+    width:170px; height:170px; object-fit:contain; opacity:.04;
+    filter:grayscale(1); pointer-events:none; z-index:0;
   }
-  /* Away: the opponent is the left-hand club, so their crest bleeds left. */
-  .fxc--away .fxc__ghost{right:auto; left:-34px}
+  .fxc--away .fxc__ghost{right:auto; left:-40px}
   .fxc > *:not(.fxc__ghost){position:relative;z-index:1}
 
-  /* The competition's own mark, cap-height, top-right. */
-  .fxc__comp{height:26px;width:auto;max-width:96px;object-fit:contain;opacity:.92;flex:0 0 auto}
+  /* Competition character, as ground and rule weight: a cup tie sits on a
+     lifted ground with a heavier home rule; the Vase lifts once more so it
+     never reads as the Cup; the league is the plain broadcast default. */
+  .fxc--league:before{width:4px}
+  .fxc--cup{background-color:#0E0E0E}
+  .fxc--cup:before{width:8px}
+  .fxc--vase{background-color:#141414}
+  .fxc--vase:before{width:8px}
+  .fxc--vase .fxc__ghost{opacity:.07}
 
-  /* Competition character, kept to a whisper at this size: a cup tie is
-     darker and quieter, the league carries a touch more of the club's own
-     yellow. Enough to tell them apart, not enough to shout. */
-  .fxc--cup{background-color:#0F0F10}
-  .fxc--cup .fxc__ghost{opacity:.075}
-  .fxc--league:before{box-shadow:0 0 14px 1px rgba(255,209,0,.28)}
-  /* The Vase is not the Cup. Both were rendering as one treatment, so the
-     New Bradwell tie looked like the London Lions tie. The Vase run is the
-     one a club at this level actually dreams about — it gets its own ground
-     and a cooler edge, distinct from the Cup's flatter black. */
-  .fxc--vase{background-color:#0D1014}
-  .fxc--vase .fxc__ghost{opacity:.075}
-  .fxc--vase:before{box-shadow:0 0 14px 1px rgba(196,181,253,.30)}
-
-  /* ── STATE ─────────────────────────────────────────────────────────────
-     A state line only where there is a state worth stating. A normal
-     upcoming league game says nothing, because "upcoming" is the default
-     and a badge saying so is noise. */
-  .fxc__state{
-    display:flex; align-items:center; justify-content:center; gap:7px;
-    font-family:var(--font-c); font-weight:800; font-size:10.5px;
-    letter-spacing:.14em; text-transform:uppercase;
-    border-radius:var(--r-sm); padding:7px 10px; margin-top:11px;
-  }
-  .fxc__state--off{color:#ffca6b;background:rgba(255,202,107,.10);border:1px solid rgba(255,202,107,.32)}
-  .fxc__state--live{color:#ff6b6b;background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.34)}
-  .fxc__pulse{width:7px;height:7px;border-radius:var(--r-circle);background:#ff4d4d;flex:0 0 auto}
-  @media (prefers-reduced-motion: no-preference){
-    .fxc__pulse{animation:fxcPulse 1.6s ease-in-out infinite}
-  }
-  @keyframes fxcPulse{0%,100%{opacity:1}50%{opacity:.25}}
-  /* A postponed fixture should not read as loudly as a live one. */
-  .fxc--s-postponed .fxc__lock{opacity:.72}
-
-  /* ── THE EXPANDED FIXTURE ──────────────────────────────────────────────
-     Everything that is not the football, one tap in. Built on <details> so
-     it is keyboard-operable and announced without a line of JavaScript. */
-  .fxx{margin-top:11px;border-top:1px solid var(--border)}
+  /* The expanded fixture — everything that is not the football, one tap in.
+     Built on <details>: keyboard-operable and announced with no script. */
   .fxx__s{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    padding:11px 8px 2px; cursor:pointer; list-style:none;
-    font-family:var(--font-c); font-weight:800; font-size:10.5px;
-    letter-spacing:.12em; text-transform:uppercase; color:var(--lgrey);
-    min-height:var(--ctl-min-h); box-sizing:border-box;
+    display:inline-flex; align-items:center; gap:10px; cursor:pointer; list-style:none;
+    font-family:var(--font-body); font-weight:800; font-size:13px; letter-spacing:.01em;
+    color:#AAAAAA; min-height:var(--ctl-min-h); box-sizing:border-box; padding:0;
   }
-  .fxx__s::-webkit-details-marker{display:none}
-  .fxx__s:hover,.fxx__s:focus-visible{color:var(--yellow)}
-  .fxx__chev{
-    width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
-    transform:rotate(45deg) translate(-2px,-2px); flex:0 0 auto;
-  }
-  .fxx[open] .fxx__chev{transform:rotate(-135deg) translate(-2px,-2px)}
-  .fxx__p{padding:4px 2px 2px}
-  .fxx__facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 14px;margin:8px 0 14px}
-  .fxx__facts div{min-width:0}
-  .fxx__facts dt{
-    font-family:var(--font-c);font-weight:700;font-size:9.5px;letter-spacing:.13em;
-    text-transform:uppercase;color:var(--muted);margin-bottom:3px;
-  }
-  .fxx__facts dd{margin:0;font-family:var(--font-b);font-size:12.5px;color:var(--white);line-height:1.35}
-  .fxx__msg{font-family:var(--font-b);font-size:12.5px;line-height:1.5;color:var(--lgrey);margin:0 0 14px}
-  .fxx__grp{margin-bottom:10px}
-  .fxx__lbl{
-    display:block;font-family:var(--font-c);font-weight:700;font-size:9.5px;
-    letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;
-  }
-  .fxx__grp .fxc__acts{margin-top:0}
 
-  /* ── THE HERO CARRIES THE CAMPAIGN TOO ─────────────────────────────────
-     Same system as the cards, one step louder, because this is the fixture
-     the club is actually selling this week. */
-  .fxh{position:relative;overflow:hidden}
+  /* The next-match block carries the campaign too, one step louder. */
   .fxh--tinted{
     background:
-      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 22%, transparent) 0%,
-                              transparent 58%),
-      linear-gradient(150deg,#16200f,#0b0b0b 68%);
-    border-color: color-mix(in srgb, var(--fxc-opp) 34%, rgba(255,209,0,.35));
+      linear-gradient(255deg, color-mix(in srgb, var(--fxc-opp) 14%, transparent) 0%,
+                              transparent 55%);
   }
   .fxh--away.fxh--tinted{
     background:
-      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 22%, transparent) 0%,
-                              transparent 58%),
-      linear-gradient(150deg,#16200f,#0b0b0b 68%);
+      linear-gradient(105deg, color-mix(in srgb, var(--fxc-opp) 14%, transparent) 0%,
+                              transparent 55%);
   }
-  .fxh__ghost{width:210px;height:210px;right:-46px;opacity:.07}
-  .fxh--away .fxh__ghost{right:auto;left:-46px}
-  .fxh__comp{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}
-  .fxh__comp .fxc__comp{height:30px;max-width:112px}
-  .fxh > *:not(.fxh__ghost){position:relative;z-index:1}
-  @media (max-width:600px){
-    .fxh__ghost{width:150px;height:150px;right:-34px}
-    .fxh--away .fxh__ghost{right:auto;left:-34px}
-    .fxh__comp .fxc__comp{height:24px}
-  }
+  .fxh__ghost{width:170px;height:170px;right:-20px;opacity:.07}
+  .fxh--away .fxh__ghost{right:auto;left:-20px}
 
-  @media (prefers-reduced-motion: no-preference){
-    .fxc{transition:border-color .22s var(--ease), transform .22s var(--ease)}
-    .fxc:hover{transform:translateY(-1px)}
-  }
-  /* A phone shows the card at half the width, so the wash has to come back or
-     it sits under the text instead of beside it. */
   @media (max-width:600px){
-    .fxc__ghost{width:104px;right:-26px;opacity:.045}
-    .fxc--away .fxc__ghost{right:auto;left:-26px}
-    /* Two fact columns at 375px puts "Combined Counties Premier North" on four
-       lines against a two-word label. One column reads far better. */
-    .fxx__facts{grid-template-columns:1fr;gap:9px}
-    .fxc__comp{height:20px}
+    .fxc__ghost{width:120px;height:120px;right:-30px;opacity:.045}
+    .fxc--away .fxc__ghost{right:auto;left:-30px}
   }
-
-  .fxc:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:1}
-  .fxc--home:before{background:var(--yellow)}
-  .fxc--away:before{background:var(--green)}
-  .fxc__top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-  .fxc__tag{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-xl);border:1px solid transparent}
-  .tag-league{background:rgba(255,209,0,.14);color:var(--yellow);border-color:rgba(255,209,0,.4)}
-  .tag-facup{background:rgba(255,202,107,.14);color:#ffca6b;border-color:rgba(255,202,107,.4)}
-  .tag-favase{background:rgba(196,181,253,.14);color:#c4b5fd;border-color:rgba(196,181,253,.4)}
-  .tag-friendly{background:rgba(147,197,253,.14);color:#93c5fd;border-color:rgba(147,197,253,.4)}
-  .tag-charity{background:rgba(255,157,157,.14);color:#ff9d9d;border-color:rgba(255,157,157,.4)}
-  .fxc__ha{font-family:var(--font-c);font-weight:800;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase}
-  .fxc--home .fxc__ha{color:var(--yellow)}
-  .fxc--away .fxc__ha{color:#7fe0a3}
-  .fxc__lock{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
-  .fxc__team{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
-  .fxc__crest{width:52px;height:52px;object-fit:contain}
-  .fxc__ph{width:52px;height:52px;border-radius:var(--r-circle);background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:17px;letter-spacing:.04em;color:var(--grey)}
-  .fxc__nm{font-family:var(--font-d);font-size:15px;letter-spacing:.04em;color:var(--white);text-align:center;line-height:1.05;word-break:break-word}
-  .fxc__vs{font-family:var(--font-d);font-size:16px;color:var(--yellow);letter-spacing:.06em}
-  .fxc__score{font-family:var(--font-d);font-size:26px;letter-spacing:.04em;white-space:nowrap}
-  .fxc__score.w{color:#3ddc84}.fxc__score.d{color:var(--yellow)}.fxc__score.l{color:#ef4444}
-  .fxc__meta{font-family:var(--font-c);font-weight:600;font-size:12px;color:var(--lgrey);text-align:center;margin-top:10px;letter-spacing:.03em}
-  .fxc__venue{font-family:var(--font-b);font-size:11.5px;color:var(--grey);text-align:center;margin-top:3px}
-  .fxc__addr{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
-  .fxc__note{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7fe0a3;background:rgba(26,92,50,.18);border:1px solid rgba(26,92,50,.5);border-radius:var(--r-md);padding:6px 8px;text-align:center;margin-top:8px}
-  .fxc__tbc{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffca6b;text-align:center;margin-top:6px}
-  .fxc--gone{opacity:.9}
-  .fxc__await{font-family:var(--font-c);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);text-align:center;margin-top:10px;border-top:1px solid var(--border);padding-top:9px}
-  .fxc__acts{display:flex;gap:6px;margin-top:11px}
-  .fxc__b{flex:1;background:transparent;border:1px solid var(--border);color:var(--lgrey);border-radius:var(--r-md);padding:8px 4px;font-family:var(--font-c);font-weight:700;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block}
-  .fxc__b--mc{border-color:rgba(255,209,0,.45);color:var(--yellow);background:rgba(255,209,0,.06)}
-  .fxc__b--mc:hover{background:rgba(255,209,0,.14);border-color:var(--yellow);color:var(--yellow)}
-  .fxc__b:hover{border-color:var(--yellow);color:var(--yellow)}
-  /* next match — elevated hero with countdown */
-  .fxh{background:linear-gradient(150deg,#16200f,#0b0b0b 68%);border:1px solid rgba(255,209,0,.35);border-radius:var(--r-lg);padding:18px 16px 14px;margin-bottom:22px}
-  /* The competition, named properly, leading the next-match block. Set as type
-     rather than as a chip: a competition is the match's identity, not a tag
-     filed against it. The round sits inside fxCompText's own markup. */
-  .fxh__comp{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:14px;
-    display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-  .fxh__ha{font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;
-    color:var(--grey);padding-left:12px;border-left:1px solid var(--border)}
-  .fxh__ha--home{color:var(--white)}
-  @media(max-width:520px){
-    /* Stack rather than let both halves wrap into themselves — same failure the
-       homepage eyebrow had at 390. */
-    .fxh__comp{flex-direction:column;gap:5px}
-    .fxh__ha{padding-left:0;border-left:0}
-  }
-  .fxh__lbl{display:block;font-family:var(--font-c);font-weight:800;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--yellow);text-align:center;margin-bottom:10px}
-  .fxh .fxc__crest,.fxh .fxc__ph{width:68px;height:68px}
-  .fxh .fxc__ph{font-size:22px}
-  .fxh .fxc__nm{font-size:19px}
-  .fxh__cd{display:flex;justify-content:center;gap:8px;margin-top:14px}
-  .fxh__u{text-align:center;min-width:50px;background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:6px 4px}
-  .fxh__n{font-family:var(--font-d);font-size:24px;color:var(--yellow);line-height:1}
-  .fxh__l{font-family:var(--font-c);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:2px}
-  .fx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--card2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--r-md);padding:11px 14px;z-index:9999;transition:transform .35s;font-family:var(--font-b);font-size:13px;color:var(--white);box-shadow:0 12px 34px rgba(0,0,0,.6);max-width:90vw}
-  .fx-toast.on{transform:translateX(-50%) translateY(0)}
-  .fx-toast a{color:var(--yellow);margin-left:8px;font-family:var(--font-c);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
-  @media(max-width:420px){ .fxc__nm{font-size:13px} .fxh .fxc__nm{font-size:16px} .fxc__crest,.fxc__ph{width:46px;height:46px} }
 </style>
   <script src="js/sponsor-rail.js"></script>
 <script src="js/share-news.js"></script>

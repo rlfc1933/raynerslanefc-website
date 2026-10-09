@@ -1,0 +1,133 @@
+/* ════════════════════════════════════════════════════════════════════════
+   MATCH CENTRE — a broadcast scoreboard (Kit Launch, 2026/27)
+   Read with css/kl.css. Replaces css/match-centre.css on this page.
+     · the SCORE (or the countdown) is the loudest thing on the page, set as
+       large as the screen allows, tabular so a changing digit never shifts
+     · the clubs are in Bebas; the state is a word and a dot, not a banner
+     · events and line-ups are ruled lists — minute, mark, name, club
+     · readable at arm's length, outdoors, on a phone, in the cold
+   Colours only from the house palette. Everything is still under reduced
+   motion except colour.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.mc-ph{min-height:clamp(340px,52svh,600px)}
+.mc-ph .kl-ph__media img{object-position:50% 46%}
+.mc-ph .kl-ph__title{font-size:min(clamp(4rem,12vw,12rem),20svh)}
+@media (max-width:699px){.mc-ph .kl-ph__title{font-size:min(22vw,18svh)}}
+
+.mc{background:#080808;padding:0 0 clamp(64px,9vw,120px)}
+
+/* ── State line — a dot and a word on a hairline ───────────────────────── */
+.mc-status{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:18px 0;border-bottom:1px solid rgba(245,243,237,.16);
+  font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#AAAAAA}
+.mc-status--live{color:#FFD100}
+.mc-status--delayed{color:#FFD100}
+.mc-status--ft{color:#F5F3ED}
+.mc-dot{width:10px;height:10px;border-radius:var(--r-circle);background:currentColor;flex:none}
+@media (prefers-reduced-motion: no-preference){
+  html:not(.a11y-reduce-motion) .mc-status--live .mc-dot{animation:mcPulse 1.6s ease-in-out infinite}
+}
+@keyframes mcPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.mc-status__note{margin-left:auto;font-weight:600;font-size:14px;letter-spacing:0;text-transform:none;color:#AAAAAA}
+
+/* ── The board ─────────────────────────────────────────────────────────── */
+.mc-board{padding:clamp(28px,5vw,64px) 0 clamp(28px,4vw,48px);border-bottom:2px solid #F5F3ED;text-align:center}
+.mc-comp{font-family:var(--font-body);font-weight:800;font-size:clamp(14px,1.3vw,16px);color:#F5F3ED;margin-bottom:clamp(20px,3.6vw,44px)}
+.mc-lock{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:clamp(10px,3vw,48px)}
+.mc-team{display:flex;flex-direction:column;align-items:center;gap:clamp(10px,1.4vw,18px);min-width:0}
+.mc-crest{width:clamp(52px,7vw,112px);height:clamp(52px,7vw,112px);object-fit:contain}
+.mc-crest--ini{display:flex;align-items:center;justify-content:center;border-radius:var(--r-circle);background:#1A1A1A;
+  font-family:var(--font-display);font-size:clamp(18px,2.4vw,34px);color:#AAAAAA}
+.mc-name{font-family:var(--font-display);font-size:clamp(1.7rem,4.6vw,4.4rem);line-height:.88;text-transform:uppercase;color:#F5F3ED;
+  overflow-wrap:anywhere;letter-spacing:.005em}
+.mc-team--us .mc-name{color:#FFD100}
+.mc-ha{font-family:var(--font-body);font-weight:800;font-size:13px;color:#AAAAAA}
+.mc-mid{display:flex;align-items:center;justify-content:center;align-self:center}
+/* The single loudest element on the page. */
+.mc-score{font-family:var(--font-display);font-size:clamp(5.6rem,19vw,17rem);line-height:.78;color:#F5F3ED;white-space:nowrap;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.mc-score > span{color:#8F8F8F;font-size:.42em;vertical-align:.62em;padding:0 .08em}
+.mc-vs{font-family:var(--font-display);font-size:clamp(2.4rem,6vw,5rem);line-height:1;color:#8F8F8F}
+.mc-clock{margin-top:clamp(16px,2.4vw,28px);font-family:var(--font-display);font-size:clamp(1.8rem,3.4vw,3rem);line-height:1;text-transform:uppercase;color:#F5F3ED}
+.mc-clock--live{color:#FFD100;font-variant-numeric:tabular-nums}
+.mc-meta{margin-top:14px;font-family:var(--font-body);font-weight:600;font-size:15px;color:#AAAAAA;line-height:1.6}
+
+/* Countdown — four tabular numbers on one hairline, no tiles. */
+.mc-countdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:clamp(28px,4vw,52px) auto 0;max-width:1100px;border-top:1px solid rgba(245,243,237,.16);text-align:left}
+.mc-cd-unit{padding:16px 0 0 clamp(10px,2vw,28px);border-left:1px solid rgba(245,243,237,.16)}
+.mc-cd-unit:first-child{border-left:0;padding-left:0}
+.mc-cd-num{font-family:var(--font-display);font-size:clamp(3.4rem,10vw,9rem);line-height:.8;color:#FFD100;font-variant-numeric:tabular-nums}
+.mc-cd-lbl{margin-top:8px;font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA}
+.mc-ko{grid-column:1/-1;padding-top:16px;font-family:var(--font-display);font-size:clamp(3.4rem,10vw,9rem);line-height:.8;color:#FFD100}
+
+/* Programme — one action, or one honest sentence. */
+.mc-prog{margin:28px 0 0;text-align:center}
+.mc-prog__wait{margin:22px auto 0;max-width:52ch;text-align:center;font-family:var(--font-body);font-size:15px;line-height:1.5;color:#AAAAAA}
+
+/* ── Section heads ─────────────────────────────────────────────────────── */
+.mc-h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.6rem,6vw,5rem);line-height:.86;text-transform:uppercase;color:#F5F3ED;
+  margin:clamp(48px,7vw,88px) 0 0;padding-bottom:12px;border-bottom:2px solid #F5F3ED;letter-spacing:-.005em}
+
+/* ── Events — a ruled running order ────────────────────────────────────── */
+.mc-events{list-style:none;margin:0;padding:0}
+.mc-ev{display:grid;grid-template-columns:clamp(64px,8vw,110px) 28px minmax(0,1fr) auto;align-items:center;gap:clamp(10px,2vw,24px);
+  padding:16px 0;border-bottom:1px solid rgba(245,243,237,.14);position:relative}
+.mc-ev--us:before{content:"";position:absolute;left:-14px;top:14px;bottom:14px;width:3px;background:#FFD100}
+@media (max-width:899px){.mc-ev--us:before{left:-10px}}
+.mc-ev__min{font-family:var(--font-display);font-size:clamp(1.9rem,3vw,2.8rem);line-height:.9;color:#F5F3ED;font-variant-numeric:tabular-nums}
+.mc-ev__icon{font-size:16px;line-height:1;text-align:center;color:#AAAAAA}
+.mc-ev--goal .mc-ev__icon{color:#FFD100}
+.mc-ev--goal .mc-ev__min{color:#FFD100}
+.mc-ev__who{font-family:var(--font-display);font-size:clamp(1.4rem,2.2vw,2rem);line-height:.95;text-transform:uppercase;color:#F5F3ED;display:block}
+.mc-ev__what{display:block;margin-top:4px;font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA}
+.mc-ev__team{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA;text-align:right;max-width:16ch}
+.mc-card{display:inline-block;width:12px;height:16px;border-radius:var(--r-xs);vertical-align:middle}
+.mc-card--y{background:#FFD100}
+.mc-card--r{background:#F5F3ED;outline:2px solid #8F8F8F;outline-offset:-2px}
+
+/* ── Line-ups — two ruled team sheets ──────────────────────────────────── */
+.mc-lineups{display:grid;gap:clamp(28px,4vw,64px);margin-top:clamp(20px,3vw,32px)}
+@media (min-width:760px){.mc-lineups{grid-template-columns:1fr 1fr}}
+.mc-xi{min-width:0}
+.mc-xi ul{list-style:none;margin:0;padding:0;border-top:1px solid rgba(245,243,237,.16)}
+.mc-xi__h{font-family:var(--font-display);font-size:clamp(1.8rem,2.8vw,2.6rem);line-height:.95;text-transform:uppercase;color:#F5F3ED;margin:0 0 12px}
+.mc-xi__h--subs{margin-top:28px;font-size:clamp(1.4rem,2vw,1.8rem);color:#AAAAAA}
+.mc-xi__row{display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid rgba(245,243,237,.14);
+  font-family:var(--font-body);font-weight:600;font-size:16px;color:#F5F3ED}
+.mc-xi__row > :nth-child(2){flex:1;min-width:0}
+.mc-xi__no{min-width:2.2ch;font-family:var(--font-display);font-size:1.7rem;line-height:.9;color:#FFD100;text-align:right;font-variant-numeric:tabular-nums}
+.mc-xi__mark{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA;white-space:nowrap}
+.mc-xi__mark--c{color:#F5F3ED}
+.mc-xi__link{color:inherit;text-decoration:underline;text-decoration-color:#FFD100;text-decoration-thickness:2px;text-underline-offset:4px}
+.mc-xi__link:hover,.mc-xi__link:focus-visible{color:#FFD100}
+.mc-xi__link:focus-visible{outline:3px solid #FFD100;outline-offset:2px}
+
+/* ── Previous / all / next ─────────────────────────────────────────────── */
+.mc-nav{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;margin-top:clamp(48px,7vw,88px);
+  padding-top:16px;border-top:2px solid #F5F3ED}
+.mc-nav a{font-family:var(--font-display);font-size:clamp(1.4rem,2.4vw,2.2rem);line-height:1;text-transform:uppercase;color:#F5F3ED;
+  text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.mc-nav a:hover{color:#FFD100}
+.mc-nav a:focus-visible{outline:3px solid #FFD100;outline-offset:3px}
+.mc-nav > :nth-child(2){font-family:var(--font-body);font-weight:800;font-size:14px;text-transform:none;text-decoration:underline;text-decoration-color:#FFD100;text-decoration-thickness:2px;text-underline-offset:5px}
+.mc-nav > :nth-child(3){justify-content:flex-end;text-align:right}
+
+/* ── Empty / waiting ───────────────────────────────────────────────────── */
+.mc-empty{padding:clamp(40px,7vw,88px) 0;border-bottom:1px solid rgba(245,243,237,.16)}
+.mc-empty__h{font-family:var(--font-display);font-size:clamp(2.6rem,6vw,5rem);line-height:.88;color:#F5F3ED;margin-bottom:16px;max-width:16ch}
+.mc-empty__p{font-family:var(--font-body);font-size:16px;color:#AAAAAA;line-height:1.6;max-width:52ch;margin:0 0 24px}
+
+.mc-credit{margin-top:28px;font-family:var(--font-body);font-size:13px;color:#8F8F8F}
+.mc-credit:empty{display:none}
+
+/* ── Phones ────────────────────────────────────────────────────────────── */
+@media (max-width:600px){
+  .mc-status__note{margin-left:0;flex-basis:100%}
+  .mc-lock{gap:8px}
+  .mc-name{font-size:clamp(1.3rem,6.4vw,1.8rem)}
+  .mc-score{font-size:clamp(4.6rem,24vw,7rem)}
+  .mc-ev{grid-template-columns:48px 20px minmax(0,1fr);row-gap:4px}
+  .mc-ev__team{grid-column:3;text-align:left;max-width:none}
+  .mc-nav{grid-template-columns:1fr 1fr}
+  .mc-nav > :nth-child(2){grid-column:1/-1;grid-row:2;justify-self:center}
+}

@@ -28,7 +28,6 @@
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
-  <link rel="stylesheet" href="css/match-centre.css?v=7">
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -43,30 +42,48 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/match-centre.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"Match Centre","item":"https://raynerslanefc.co.uk/match-centre.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<link rel="stylesheet" href="css/p-match-centre.css">
+<script src="js/lane-motion.js" defer></script>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<main id="main">
-  <header class="page-header">
-    <div class="container">
-      <span class="label">Live from the ground</span>
-      <h1 class="page-header__h">Match <span>Centre</span></h1>
-      <p class="page-header__p">The score, the clock and every goal — updating on its own while The Lane are playing, home or away.</p>
-    </div>
-  </header>
+<!-- ══════════════════════════════════════════════════════════════════════
+     MATCH CENTRE — a broadcast scoreboard (Kit Launch, 2026/27).
+     The establishing shot of Tithe Farm, the page's name, then the board:
+     the score or the countdown as large as the screen allows, the clubs in
+     Bebas, events and line-ups as ruled lists. Everything inside
+     #match-centre is rendered by js/match-centre.js from the club registry.
+     ══════════════════════════════════════════════════════════════════════ -->
+<section class="kl-ph mc-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media" aria-hidden="true">
+    <picture>
+      <source type="image/webp" srcset="img/ground/tithe-farm-aerial-wide-800.webp 800w, img/ground/tithe-farm-aerial-wide-1600.webp 1600w" sizes="(max-aspect-ratio: 16/9) 178svh, 100vw">
+      <img src="img/ground/tithe-farm-aerial-wide-1600.jpg" data-no-opt
+           srcset="img/ground/tithe-farm-aerial-wide-800.jpg 800w, img/ground/tithe-farm-aerial-wide-1600.jpg 1600w"
+           sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async">
+    </picture>
+  </div>
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">Live from the ground</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Match</span></span><span class="kl-line"><span>Centre</span></span></h1>
+    <p class="kl-ph__line">The score, the clock and every goal &mdash; updating on its own while The Lane are playing, home or away.</p>
+  </div>
+</section>
 
-  <div class="mc">
+<section class="mc" aria-label="Scoreboard">
+  <div class="kl-wrap">
     <!-- Everything below is rendered by js/match-centre.js from the club's own
          normalised data. No provider markup is ever inserted here. -->
     <div id="match-centre" aria-live="polite" aria-atomic="false">
       <div class="mc-empty">
-        <div class="mc-empty__h">Loading the Match Centre…</div>
+        <div class="mc-empty__h">Loading the Match Centre&hellip;</div>
         <p class="mc-empty__p">One moment while we check whether The Lane are playing.</p>
       </div>
     </div>
   </div>
-</main>
+</section>
 
 <div id="footer-placeholder"></div>
 <script src="js/consent.js?v=1"></script>
@@ -78,7 +95,7 @@
 <script src="js/live-config.js"></script>
 <script src="js/live-match.js"></script>
 <script src="js/crest.js?v=8"></script>
-<script src="js/match-centre.js?v=8"></script>
+<script src="js/match-centre.js?v=9"></script>
 <script>
   initComponents("match-centre.html");
 </script>
