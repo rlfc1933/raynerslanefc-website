@@ -1,0 +1,75 @@
+/* ════════════════════════════════════════════════════════════════════════
+   THE SQUAD — a kit-launch line-up. Builds on css/kl.css.
+   Title card: seven of the squad's own portraits stood shoulder to shoulder.
+   Below: players as large portraits in a tight editorial grid, grouped by
+   position. No boxes around them: photo, then the name and role as type.
+   Markup for the grid comes from js/squad.js.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Title card: the line-up ─────────────────────────────────────────── */
+.sq-ph{min-height:clamp(520px,82svh,900px)}
+.sq-ph .kl-ph__media.sq-ph__lineup{display:flex;gap:2px;background:#080808}
+.sq-ph .sq-ph__lineup img{position:relative;inset:auto;flex:1 1 0;min-width:0;width:auto;height:100%;object-fit:cover;object-position:center 18%}
+.sq-ph .sq-ph__lineup::after{background:linear-gradient(180deg,rgba(8,8,8,.35) 0%,rgba(8,8,8,0) 30%,rgba(8,8,8,.55) 62%,rgba(8,8,8,.96) 100%),linear-gradient(90deg,rgba(8,8,8,.62) 0%,rgba(8,8,8,0) 55%)}
+@media (max-width:699px){.sq-ph .sq-ph__lineup img:nth-child(n+4){display:none}}
+@media (min-width:700px) and (max-width:1099px){.sq-ph .sq-ph__lineup img:nth-child(n+6){display:none}}
+
+/* ── Position filter: words, underlined when chosen. Sticks under the nav
+      so the choice stays in reach down a long grid. ───────────────────── */
+.sq-list{background:#080808;padding:0 0 clamp(56px,8vw,104px)}
+.sq .sq-filter{position:sticky;top:var(--nav-h,64px);z-index:5;display:flex;flex-wrap:wrap;gap:0 clamp(12px,2.4vw,32px);margin:0;padding:6px 0 0;background:#080808;border-bottom:1px solid rgba(245,243,237,.14)}
+.sq .sq-filter .filter-tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;border-radius:0;margin:0 0 -1px;padding:10px 2px;min-height:48px;min-width:44px;
+  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:0;text-transform:none;color:#AAAAAA;cursor:pointer;
+  transition:color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+.sq .sq-filter .filter-tab:hover{background:none;color:var(--white);border-color:rgba(245,243,237,.4)}
+.sq .sq-filter .filter-tab.active{background:none;color:var(--white);border-color:var(--yellow)}
+.sq .sq-filter .filter-tab:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+@media (max-width:420px){.sq .sq-filter .filter-tab{font-size:14px}}
+
+/* ── Groups ──────────────────────────────────────────────────────────── */
+.sq .squad-grid{display:block;min-height:600px}
+.sq .squad-group{padding-top:clamp(48px,7vw,104px)}
+.sq .squad-group-label{display:flex;align-items:flex-end;gap:clamp(10px,1.6vw,22px);margin:0 0 clamp(20px,3vw,36px);padding:0;background:none;
+  font-family:var(--font-display);font-weight:400;text-transform:uppercase;color:var(--white);line-height:.8}
+.sq .squad-group-label__n{font-size:clamp(6rem,15vw,13rem);color:var(--yellow);font-variant-numeric:tabular-nums;line-height:.74;letter-spacing:-.02em}
+.sq .squad-group-label__t{font-size:clamp(2.6rem,6.4vw,5.6rem);padding-bottom:.02em}
+
+/* ── The line-up grid ────────────────────────────────────────────────── */
+.sq .squad-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,52px) clamp(10px,1.4vw,20px)}
+@media (min-width:700px){.sq .squad-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1100px){.sq .squad-row{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.sq .player-card{position:relative;display:block;background:none;padding:0;overflow:visible;color:var(--white);text-decoration:none;border-radius:0}
+.sq .player-card:hover{background:none}
+.sq .player-card__img{display:block;position:relative;aspect-ratio:3/4;overflow:hidden;background:#141414;border-radius:0}
+.sq .player-card__img img{width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block;padding:0;opacity:1;transition:transform var(--dur-slow) var(--ease-out)}
+.sq .player-card:hover .player-card__img img{transform:scale(1.035)}
+.sq .player-card__img.is-placeholder{display:grid;place-items:center;background:#0E0E0E;box-shadow:inset 0 0 0 1px rgba(245,243,237,.1)}
+.sq .player-card__init{font-family:var(--font-display);font-size:clamp(4rem,10vw,8rem);line-height:1;color:#8F8F8F}
+
+/* The shirt number sits on the photo's bottom edge, half on, half off. */
+.sq .player-card__num{position:absolute;inset:0 0 auto 0;aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:flex-end;padding-right:4px;
+  font-family:var(--font-display);font-size:clamp(5rem,9vw,8.5rem);line-height:.72;color:var(--yellow);font-variant-numeric:tabular-nums;
+  transform:translateY(.38em);pointer-events:none;background:none;top:0;right:0}
+
+.sq .player-card__name{display:block;margin:14px 0 0;font-family:var(--font-body);color:var(--white);line-height:1;letter-spacing:0}
+.sq .player-card__first{display:block;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;margin-bottom:4px}
+.sq .player-card__last{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(1.9rem,2.9vw,2.9rem);line-height:.88;text-transform:uppercase;overflow-wrap:anywhere;transition:color var(--dur-fast) var(--ease-standard)}
+.sq .player-card:hover .player-card__last{color:var(--yellow)}
+.sq .player-card__pos{display:block;margin-top:8px;font-family:var(--font-body);font-weight:700;font-size:13px;letter-spacing:0;text-transform:none;color:var(--yellow)}
+.sq .player-card:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}
+
+/* ── Officials: a ruled list ─────────────────────────────────────────── */
+.sq-off{background:#080808}
+.sq-off__rows{max-width:960px}
+.sq-off__rows > li{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 24px;padding:20px 0}
+.sq-off__name{font-family:var(--font-display);font-size:clamp(2.2rem,4.6vw,4rem);line-height:.9;text-transform:uppercase;color:var(--white)}
+.sq-off__role{font-family:var(--font-body);font-weight:700;font-size:15px;color:#AAAAAA}
+.sq-off__mail{margin:28px 0 0}
+
+/* ── Trials: the yellow field ────────────────────────────────────────── */
+.sq-trials__in{display:grid;gap:28px;align-items:end}
+.sq-trials .kl-p{color:#080808;font-weight:600}
+@media (min-width:900px){.sq-trials__in{grid-template-columns:1.3fr 1fr;gap:64px}.sq-trials .kl-h2{max-width:9ch}}
+
+@media (prefers-reduced-motion: reduce){.sq .player-card__img img{transition:none}.sq .player-card:hover .player-card__img img{transform:none}}

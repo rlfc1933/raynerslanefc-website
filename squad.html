@@ -27,16 +27,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .tab-badge-sheet { background:rgba(255,209,0,.15); color:var(--yellow); }
-    .tab-badge-live  { background:rgba(34,197,94,.15);  color:#22C55E; }
-    .sheet-setup-banner {
-      background:rgba(255,209,0,.07); border:1px solid rgba(255,209,0,.2);
-      border-left:4px solid var(--yellow); padding:20px 24px;
-      margin-bottom:2px; display:none;
-    }
-    .sheet-setup-banner.visible { display:block; }
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -51,99 +41,78 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/squad.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"The Squad","item":"https://raynerslanefc.co.uk/squad.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<link rel="stylesheet" href="css/p-squad.css">
+<script src="js/lane-motion.js" defer></script>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<!-- PAGE HEADER -->
-<div class="page-header" data-title="SQUAD">
-  <div class="container">
-    <div class="page-header__eyebrow">
-      <span class="label">2026-27 Season &middot; Manager: Gary Pitt</span>
-    </div>
-    <h1 class="page-header__h">The <span>Squad</span></h1>
-    <p class="page-header__meta">Combined Counties Premier Division North &middot; Step 5 &middot; Tithe Farm</p>
-    <a href="acerbis.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;text-decoration:none;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)">
-      <i class="ico ico-shirt" aria-hidden="true" style="color:var(--yellow)"></i> Kit by <span style="color:var(--yellow)">Acerbis</span>
-    </a>
+<div class="sq">
+<!-- TITLE CARD: the line-up. Seven of the squad's own portraits, shoulder to
+     shoulder, the way a kit launch stands its players in a row. -->
+<section class="kl-ph sq-ph" aria-labelledby="ph-title">
+  <div class="kl-ph__media sq-ph__lineup" aria-hidden="true">
+      <img src="img/players/mateo-dos-reis.webp" alt="" width="800" height="1071" fetchpriority="high">
+      <img src="img/players/alfie-campbell.webp" alt="" width="800" height="1071" fetchpriority="high">
+      <img src="img/players/ati-diamond.webp" alt="" width="800" height="1071" fetchpriority="high">
+      <img src="img/players/jalen-johnson.webp" alt="" width="800" height="1071">
+      <img src="img/players/temi-animashaun.webp" alt="" width="800" height="1071">
+      <img src="img/players/jevan-el-kaffash.webp" alt="" width="800" height="1071">
+      <img src="img/players/michael-adefolami.webp" alt="" width="800" height="1071">
   </div>
-    <div style="font-family:var(--font-c);font-size:13px;color:var(--yellow);letter-spacing:.06em;margin-top:12px"><i class="ico ico-mail"></i> <a href='mailto:info@raynerslanefc.co.uk' style='color:var(--yellow)'>info@raynerslanefc.co.uk</a></div>
-</div>
-</div>
-
-<section class="section">
-  <div class="container">
-
-    <!-- Management strip -->
-
-
-    <!-- One view, no tabs. There was a second tab here linking out to the club's
-         old third-party platform; the club deleted that account, so it pointed at
-         a 404. The squad renders from the club's own squad.json / players.json
-         and that is now the only source. -->
-
-    <!-- TAB 1: Styled Player Cards (Google Sheet) -->
-    <div id="tab-cards">
-      <div style="background:var(--card);border:1px solid var(--border);padding:2px">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
-
-          <div class="filter-tabs" style="margin:0">
-            <button class="filter-tab active" data-pos="all">All</button>
-            <button class="filter-tab" data-pos="goalkeeper">GK</button>
-            <button class="filter-tab" data-pos="defender">DEF</button>
-            <button class="filter-tab" data-pos="midfielder">MID</button>
-            <button class="filter-tab" data-pos="forward">FWD</button>
-          </div>
-        </div>
-        <div style="padding:2px">
-          <div class="squad-grid" id="squad-grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Club officials. Moved BELOW the squad: the first faces on a page
-         called The Squad should be the players. This block also appears on
-         about.html — it is duplicated here deliberately for context, not as
-         the page's headline. -->
-    <h2 style="font-family:var(--font-d);font-size:clamp(28px,4vw,40px);letter-spacing:.03em;color:var(--white);margin:48px 0 14px">Club Officials</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:2px;margin-bottom:48px">
-      <div style="background:var(--green);padding:24px 20px;border-top:3px solid var(--yellow)">
-        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Pete Singh</div>
-        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)">Club Chairman</div>
-      </div>
-      <div style="background:var(--card);padding:24px 20px;border-top:3px solid var(--yellow)">
-        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Gary Pitt</div>
-        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)">First Team Manager</div>
-      </div>
-      <div style="background:var(--card2);padding:24px 20px;border-top:3px solid var(--border)">
-        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Nigel Hanlon</div>
-        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lgrey)">Vice Chairman</div>
-      </div>
-      <div style="background:var(--card2);padding:24px 20px;border-top:3px solid var(--border)">
-        <div style="font-family:var(--font-d);font-size:28px;letter-spacing:.04em;color:var(--white);line-height:1.1;margin-bottom:6px">Martin Noblett</div>
-        <div style="font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lgrey)">Club President</div>
-      </div>
-    </div>
-
-    <!-- Trials CTA -->
-    <div style="background:linear-gradient(135deg,var(--green),#0A2014);padding:28px 32px;margin-bottom:40px;border-left:4px solid var(--yellow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div>
-        <div class="label" style="margin-bottom:6px"><i class="ico ico-football"></i> Summer Trials 2026</div>
-        <div style="font-family:var(--font-d);font-size:26px;letter-spacing:.04em">Wear the Yellow of The Lane?</div>
-        <p style="font-family:var(--font-c);font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.04em;margin-top:4px">Gary Pitt is building The Lane's 2026-27 squad. Wear the yellow. Play for Harrow. Register for trials at Tithe Farm.</p>
-      </div>
-      <a class="btn btn-primary" href="trials.html">Register Now</a>
-    </div>
-
+  <div class="kl-wrap kl-ph__inner">
+    <p class="kl-ph__meta">2026-27 Season &middot; Manager: Gary Pitt</p>
+    <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>The</span></span><span class="kl-line"><span>Squad</span></span></h1>
+    <p class="kl-ph__line">Combined Counties Premier Division North &middot; Step 5 &middot; Tithe Farm.</p>
+    <div class="kl-ph__acts"><a class="kl-more" href="acerbis.html">Kit by Acerbis</a></div>
   </div>
 </section>
 
-<style>
-@keyframes pulse {
-  0%,100% { opacity:1; transform:scale(1); }
-  50%      { opacity:.5; transform:scale(1.3); }
-}
-</style>
+<!-- THE LINE-UP. One view, no tabs. There was a second tab here linking out to
+     the club's old third-party platform; the club deleted that account, so it
+     pointed at a 404. The squad renders from the club's own squad.json /
+     players.json (js/squad.js) and that is now the only source. -->
+<section class="sq-list" id="tab-cards" aria-label="First-team squad">
+  <div class="kl-wrap">
+    <div class="sq-filter filter-tabs" role="group" aria-label="Show position">
+      <button type="button" class="filter-tab active" data-pos="all">All</button>
+      <button type="button" class="filter-tab" data-pos="goalkeeper">Goalkeepers</button>
+      <button type="button" class="filter-tab" data-pos="defender">Defenders</button>
+      <button type="button" class="filter-tab" data-pos="midfielder">Midfielders</button>
+      <button type="button" class="filter-tab" data-pos="forward">Forwards</button>
+    </div>
+    <div class="squad-grid" id="squad-grid"></div>
+  </div>
+</section>
+
+<!-- Club officials. BELOW the squad: the first faces on a page called The
+     Squad should be the players. This block also appears on about.html; it is
+     duplicated here deliberately for context, not as the page's headline. -->
+<section class="kl-sec sq-off" aria-labelledby="sq-off-h">
+  <div class="kl-wrap">
+    <div class="kl-sec__head"><h2 class="kl-h2" id="sq-off-h">Club officials</h2></div>
+    <ul class="kl-rows sq-off__rows">
+      <li><span class="sq-off__name">Pete Singh</span><span class="sq-off__role">Club Chairman</span></li>
+      <li><span class="sq-off__name">Gary Pitt</span><span class="sq-off__role">First Team Manager</span></li>
+      <li><span class="sq-off__name">Nigel Hanlon</span><span class="sq-off__role">Vice Chairman</span></li>
+      <li><span class="sq-off__name">Martin Noblett</span><span class="sq-off__role">Club President</span></li>
+    </ul>
+    <p class="sq-off__mail"><a class="kl-more" href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a></p>
+  </div>
+</section>
+
+<!-- Trials: the yellow owns the whole field. -->
+<section class="kl-sec kl-sec--yellow sq-trials" aria-labelledby="sq-trials-h">
+  <div class="kl-wrap sq-trials__in">
+    <h2 class="kl-h2" id="sq-trials-h">Wear the yellow of The Lane?</h2>
+    <div>
+      <p class="kl-p">Summer Trials 2026. Gary Pitt is building The Lane&rsquo;s 2026-27 squad. Register for trials at Tithe Farm.</p>
+      <a class="kl-btn kl-btn--ink" href="trials.html">Register now</a>
+    </div>
+  </div>
+</section>
+</div>
 
 <div id="twitter-placeholder"></div>
 <div id="footer-placeholder"></div>

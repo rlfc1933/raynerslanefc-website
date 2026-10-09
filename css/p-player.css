@@ -1,0 +1,62 @@
+/* ════════════════════════════════════════════════════════════════════════
+   PLAYER — a full-bleed portrait title card, then the season as big
+   tabular numbers on hairlines. Builds on css/kl.css. Markup is rendered by
+   the inline script in player.html (renderPlayer / statBlock / matchBlock).
+   ════════════════════════════════════════════════════════════════════════ */
+.pl{background:#080808}
+.pl-loading{min-height:70svh;display:grid;place-items:center;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA}
+
+/* ── Title card ──────────────────────────────────────────────────────── */
+.pl-ph{min-height:clamp(560px,88svh,920px)}
+@media (max-width:899px){.pl-ph{min-height:max(480px,calc(100svh - 190px))}}
+.pl-ph__photo{position:absolute;inset:0;z-index:-2;background:#141414}
+.pl-ph__photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 14%}
+.pl-ph__photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.3) 0%,rgba(8,8,8,0) 30%,rgba(8,8,8,.6) 62%,rgba(8,8,8,.97) 100%)}
+.pl-ph .kl-ph__title{font-size:min(clamp(4.5rem,13vw,13rem),24svh);overflow-wrap:anywhere}
+.pl-ph--long .kl-ph__title{font-size:min(clamp(3.6rem,9.6vw,10rem),20svh)}
+@media (max-width:699px){
+  .pl-ph .kl-ph__title{font-size:min(22vw,20svh)}
+  .pl-ph--long .kl-ph__title{font-size:min(15vw,16svh)}
+}
+.pl-ph__nick{font-weight:800;color:var(--yellow)}
+
+/* The shirt number: huge, yellow, half hidden behind the portrait. */
+.pl-ph__num{position:absolute;z-index:-3;right:0;top:50%;transform:translateY(-50%);font-family:var(--font-display);font-size:min(78svh,62vw);line-height:.8;color:var(--yellow);font-variant-numeric:tabular-nums;pointer-events:none;letter-spacing:-.02em}
+
+@media (min-width:900px){
+  /* Desktop: the portrait bleeds off the top, right and bottom edges and the
+     name stands on the black beside it, crossing into the photo. */
+  .pl-ph__photo{left:auto;width:clamp(380px,46vw,700px)}
+  .pl-ph__photo::after{background:linear-gradient(90deg,#080808 0%,rgba(8,8,8,.6) 18%,rgba(8,8,8,0) 50%),linear-gradient(180deg,rgba(8,8,8,0) 55%,rgba(8,8,8,.85) 100%)}
+  .pl-ph--num .pl-ph__num{z-index:-1;right:calc(clamp(380px,46vw,700px) - .18em);top:auto;bottom:-.08em;transform:none;font-size:min(80svh,52vw)}
+  .pl-ph--num .kl-ph__title{color:var(--white)}
+  .pl-ph .kl-ph__inner{padding-bottom:clamp(48px,7vw,88px)}
+}
+.pl-ph--type .pl-ph__num{color:#080808;z-index:-1}
+
+/* ── The season: big numbers on hairlines ────────────────────────────── */
+.pl-season{background:#080808}
+.pl-season__in{display:grid;gap:clamp(24px,4vw,44px)}
+@media (min-width:900px){.pl-season__in{grid-template-columns:minmax(0,1fr) minmax(0,2fr);align-items:start;column-gap:clamp(40px,6vw,96px)}.pl-season__in .kl-h2{grid-row:span 2}}
+.pl-bio{color:var(--white);margin:0}
+.pl .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(16px,3vw,40px);margin:0;background:none}
+@media (min-width:700px){.pl .stat-grid{grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr))}}
+.pl .stat-card{background:none;border-top:1px solid rgba(245,243,237,.22);padding:14px 0 22px;text-align:left;border-radius:0}
+.pl .stat-num{font-family:var(--font-display);font-weight:400;font-size:clamp(4.5rem,10vw,9rem);line-height:.84;letter-spacing:-.01em;color:var(--white);font-variant-numeric:tabular-nums}
+.pl .stat-card:first-child .stat-num{color:var(--yellow)}
+.pl .stat-lbl{font-family:var(--font-body);font-weight:700;font-size:14px;letter-spacing:0;text-transform:none;color:#AAAAAA;margin-top:10px}
+.pl .stat-empty{font-family:var(--font-body);font-size:clamp(1.15rem,2vw,1.6rem);font-weight:600;line-height:1.4;color:var(--white);max-width:34ch;margin:0;padding:18px 0 0;border:0;border-top:1px solid rgba(245,243,237,.22)}
+
+/* ── Every match: a ruled list ───────────────────────────────────────── */
+.pl-matches{background:#080808}
+.pl .match-list{display:block}
+.pl .match-list > li{padding:0}
+.pl .match-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px 20px;align-items:baseline;padding:18px 0;background:none;border:0;text-decoration:none;color:var(--white);min-height:44px}
+.pl a.match-row:hover .mr-opp{color:var(--yellow)}
+.pl a.match-row:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.pl .mr-date{font-family:var(--font-body);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:#AAAAAA;font-variant-numeric:tabular-nums}
+.pl .mr-opp{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);line-height:.95;text-transform:uppercase;color:var(--white);transition:color var(--dur-fast) var(--ease-standard)}
+.pl .mr-what{font-family:var(--font-body);font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--yellow);text-align:right}
+@media (max-width:640px){.pl .match-row{grid-template-columns:1fr}.pl .mr-what{text-align:left}}
+
+.pl-back{padding:28px 0 clamp(48px,7vw,88px);border-top:1px solid rgba(245,243,237,.14)}

@@ -12,26 +12,6 @@
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/icons.css">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .player-hero { background:var(--black); min-height:420px; display:grid; grid-template-columns:360px 1fr; overflow:hidden; border-bottom:3px solid var(--yellow); }
-    .player-hero-img { position:relative; overflow:hidden; background:linear-gradient(160deg,var(--green),#060E08); display:flex; align-items:flex-end; justify-content:center; }
-    .player-hero-img img { width:100%; height:100%; object-fit:cover; object-position:top; }
-    .player-hero-img .player-number { position:absolute; top:-20px; right:-10px; font-family:var(--font-d); font-size:200px; color:rgba(255,209,0,.08); line-height:1; }
-    .player-hero-info { padding:48px 40px; display:flex; flex-direction:column; justify-content:flex-end; }
-    .stat-empty{font-family:var(--font-b);font-size:14px;color:var(--grey);line-height:1.6;max-width:520px;margin-top:22px;padding-left:14px;border-left:2px solid rgba(255,209,0,.35)}
-    .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(120px,100%),1fr)); gap:2px; margin-top:32px; }
-    .stat-card { background:var(--card); padding:20px; text-align:center; }
-    .stat-num { font-family:var(--font-d); font-size:48px; letter-spacing:.04em; color:var(--yellow); line-height:1; }
-    .stat-lbl { font-family:var(--font-c); font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--grey); margin-top:4px; }
-    .match-list { display:flex; flex-direction:column; gap:2px; }
-    .match-row { display:grid; grid-template-columns:120px 1fr auto; gap:16px; align-items:center; background:var(--card); padding:14px 18px; text-decoration:none; border-left:3px solid transparent; }
-    a.match-row:hover { border-left-color:var(--yellow); }
-    .mr-date { font-family:var(--font-c); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--grey); }
-    .mr-opp { font-family:var(--font-b); font-size:15px; color:var(--white); }
-    .mr-what { font-family:var(--font-c); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--yellow); text-align:right; }
-    @media(max-width:640px) { .match-row { grid-template-columns:1fr; gap:4px; } .mr-what { text-align:left; } }
-    @media(max-width:768px) { .player-hero { grid-template-columns:1fr; } .player-hero-img { min-height:300px; } .player-hero-info { padding:24px; } }
-  </style>
   <!-- lane-schema:start -->
   <!-- The club entity, baked in rather than injected by JS.
        js/components.js also builds this, but at runtime — which Googlebot sees
@@ -46,14 +26,15 @@
   <script type="application/ld+json" id="lane-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","@id":"https://raynerslanefc.co.uk/player.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://raynerslanefc.co.uk/"},{"@type":"ListItem","position":2,"name":"The Squad","item":"https://raynerslanefc.co.uk/squad.html"},{"@type":"ListItem","position":3,"name":"Player Profile","item":"https://raynerslanefc.co.uk/player.html"}]}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/kl.css">
+<link rel="stylesheet" href="css/p-player.css">
+<script src="js/lane-motion.js" defer></script>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<div id="player-content">
-  <div style="min-height:60vh;display:flex;align-items:center;justify-content:center">
-    <div style="font-family:var(--font-c);font-size:14px;color:var(--grey);letter-spacing:.08em">Loading...</div>
-  </div>
+<div id="player-content" class="pl">
+  <div class="pl-loading" role="status">Loading the player&hellip;</div>
 </div>
 
 <div id="twitter-placeholder"></div>
@@ -122,42 +103,54 @@ function renderPlayer(p, record) {
       memberOf: { '@type': 'SportsTeam', name: 'Rayners Lane FC', '@id': 'https://raynerslanefc.co.uk/#team' }
     }
   });
-  var posColour = {Goalkeeper:'#1A5C32',Defender:'#1A3A6E',Midfielder:'#6B3A1F',Forward:'#EF4444'}[p.position] || '#FFD100';
+  var parts = String(p.name || '').split(/\s+/).filter(Boolean);
+  var first = parts.length > 1 ? parts[0] : '';
+  var last = parts.length > 1 ? parts.slice(1).join(' ') : (p.name || '');
+  var num = Number(p.number) > 0 ? String(p.number) : '';
+  var meta = [p.position, p.role && p.role !== p.position ? p.role : '', p.age ? 'Age ' + p.age : '', p.nationality].filter(Boolean).map(esc).join(' &middot; ');
 
-  var html = '<div class="player-hero">' +
-    '<div class="player-hero-img">' +
-      '<div class="player-number" aria-hidden="true">' + (p.number||'') + '</div>' +
-      (p.photo
-        ? '<img src="' + p.photo + '" alt="' + p.name + '">'
-        : '<img src="img/players/player-' + getIllustration(p.position) + '.svg" alt="' + (p.name||'') + '">') +
-    '</div>' +
-    '<div class="player-hero-info">' +
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
-        '<div style="background:' + posColour + ';font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:white;padding:4px 12px">' + (p.position||'') + '</div>' +
-        (p.nationality ? '<div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.08em">' + p.nationality + '</div>' : '') +
+  // Title card: the portrait bleeds off the right edge (full-bleed behind the
+  // type on a phone), the shirt number huge behind it, the name set as large
+  // as the screen allows. No photo yet: the yellow field, and the name alone.
+  // Long surnames step the title down a size so they never run off a phone.
+  var longest = parts.reduce(function (n, w) { return Math.max(n, w.length); }, 0);
+  var html = '<section class="kl-ph pl-ph' + (p.photo ? '' : ' kl-ph--yellow pl-ph--type') + (longest > 9 ? ' pl-ph--long' : '') + (num ? ' pl-ph--num' : '') + '" aria-labelledby="ph-title">' +
+      (num ? '<span class="pl-ph__num" aria-hidden="true">' + esc(num) + '</span>' : '') +
+      (p.photo ? '<div class="kl-ph__media pl-ph__photo"><img src="' + esc(p.photo) + '" alt="' + esc(p.name || '') + '" width="800" height="1071" fetchpriority="high"></div>' : '') +
+      '<div class="kl-wrap kl-ph__inner">' +
+        (meta ? '<p class="kl-ph__meta">' + meta + '</p>' : '') +
+        '<h1 class="kl-ph__title" id="ph-title">' +
+          (first ? '<span class="kl-line"><span>' + esc(first) + '</span></span>' : '') +
+          '<span class="kl-line"><span>' + esc(last) + '</span></span></h1>' +
+        (p.nickname ? '<p class="kl-ph__line pl-ph__nick">&ldquo;' + esc(p.nickname) + '&rdquo;</p>' : '') +
       '</div>' +
-      '<h1 style="font-family:var(--font-d);font-size:clamp(48px,7vw,90px);letter-spacing:.03em;color:var(--white);line-height:.9;margin:0 0 8px">' + (p.name||'') + '</h1>' +
-      (p.nickname ? '<div style="font-family:var(--font-c);font-size:16px;color:var(--yellow);letter-spacing:.08em;margin-bottom:16px">"' + p.nickname + '"</div>' : '') +
-      (p.bio ? '<div style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.75;max-width:540px">' + p.bio + '</div>' : '') +
-      // Statistics the club has not recorded are shown as "–", never as 0.
-      // A zero is a claim — "he has played no games" — and right now the club
-      // simply hasn't counted. The squad modal (js/squad.js pmStat) has always
-      // done this; the full profile was the one place still printing noughts.
-      // The whole block hides when there is nothing real to show at all, rather
-      // than presenting a row of dashes as though it were a record.
-      statBlock(p, record) +
-    '</div>' +
-  '</div>' +
-  '<div style="background:var(--dark);padding:16px 0;border-bottom:1px solid var(--border)">' +
-    '<div class="container"><a href="squad.html" style="font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">&larr; Back to Squad</a></div>' +
-  '</div>' +
-  matchBlock(record);
+    '</section>' +
+    '<section class="kl-sec pl-season" aria-labelledby="pl-season-h">' +
+      '<div class="kl-wrap pl-season__in">' +
+        '<h2 class="kl-h2" id="pl-season-h">This season</h2>' +
+        (p.bio ? '<p class="kl-p pl-bio">' + esc(p.bio) + '</p>' : '') +
+        // Statistics the club has not recorded are shown as "–", never as 0.
+        // A zero is a claim — "he has played no games" — and right now the club
+        // simply hasn't counted. The squad modal (js/squad.js pmStat) has always
+        // done this; the full profile was the one place still printing noughts.
+        // The whole block hides when there is nothing real to show at all, rather
+        // than presenting a row of dashes as though it were a record.
+        statBlock(p, record) +
+      '</div>' +
+    '</section>' +
+    matchBlock(record) +
+    '<div class="pl-back"><div class="kl-wrap"><a class="kl-more" href="squad.html">Back to the squad</a></div></div>';
 
   document.getElementById('player-content').innerHTML = html;
 }
 
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
 function statCard(val, label) {
-  return '<div class="stat-card"><div class="stat-num">' + val + '</div><div class="stat-lbl">' + label + '</div></div>';
+  // A genuine tally (not the shirt number) counts up once when first seen
+  // (data-kl-count, driven by js/lane-motion.js).
+  var count = /^\d+$/.test(String(val)) && label !== 'Squad No.' ? ' data-kl-count="' + val + '"' : '';
+  return '<div class="stat-card"><div class="stat-num"' + count + '>' + val + '</div><div class="stat-lbl">' + label + '</div></div>';
 }
 // A number the club has actually recorded, or an em-dash. Never a fabricated 0.
 function statVal(v) { return (v == null || Number(v) === 0) ? '&ndash;' : v; }
@@ -209,15 +202,15 @@ function matchBlock(record) {
     var inner = '<span class="mr-date">' + when + '</span>' +
       '<span class="mr-opp">' + label + '</span>' +
       '<span class="mr-what">' + line + '</span>';
-    return m.matchCentre
+    return '<li>' + (m.matchCentre
       ? '<a class="match-row" href="' + m.matchCentre + '">' + inner + '</a>'
-      : '<div class="match-row">' + inner + '</div>';
+      : '<div class="match-row">' + inner + '</div>') + '</li>';
   }).join('');
-  return '<div style="background:var(--dark);padding:40px 0;border-bottom:1px solid var(--border)">' +
-    '<div class="container">' +
-      '<h2 style="font-family:var(--font-d);font-size:32px;letter-spacing:.04em;color:var(--white);margin:0 0 18px">Every Match</h2>' +
-      '<div class="match-list">' + rows + '</div>' +
-    '</div></div>';
+  return '<section class="kl-sec pl-matches" aria-labelledby="pl-matches-h">' +
+    '<div class="kl-wrap">' +
+      '<div class="kl-sec__head"><h2 class="kl-h2" id="pl-matches-h">Every match</h2></div>' +
+      '<ol class="kl-rows match-list">' + rows + '</ol>' +
+    '</div></section>';
 }
 
 function getIllustration(pos) {

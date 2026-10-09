@@ -1,0 +1,58 @@
+/* ════════════════════════════════════════════════════════════════════════
+   HISTORY — a long read. "Since 1933" on Tithe Farm, then the club's story:
+   the year as a huge numeral on the left, the story on the right, a hairline
+   spine between them. js/lane-motion.js (GSAP) fills that spine in yellow
+   (.tl-progress, positioned by edition.css from --tl-spine-x) and adds
+   .is-reached to each year as the reader arrives. Without it, nothing is
+   missing. Markup comes from the inline renderer in history.html.
+   ════════════════════════════════════════════════════════════════════════ */
+.hs{background:#080808}
+.hs-ph .kl-ph__media img{object-position:center 60%}
+.hs-ph .kl-ph__title em{color:var(--yellow)}
+
+.hs-read{padding:clamp(24px,5vw,64px) 0 clamp(56px,9vw,120px)}
+
+/* The spine. Phone: down the left edge. Desktop: between numeral and story. */
+.hs .timeline{position:relative;--tl-spine-x:1px}
+.hs .timeline::before{content:"";position:absolute;top:0;bottom:0;left:0;width:1px;background:rgba(245,243,237,.18)}
+.hs-list{list-style:none;margin:0;padding:0}
+
+.hs .tl-item{display:grid;grid-template-columns:minmax(0,1fr);padding:clamp(40px,7vw,96px) 0 clamp(40px,7vw,96px) 22px;border-bottom:1px solid rgba(245,243,237,.1);margin:0}
+.hs .tl-item:last-child{border-bottom:0}
+.hs .tl-left{padding:0;text-align:left}
+.hs .tl-right{padding:30px 0 0}
+
+.hs .tl-year{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(5.5rem,24vw,13rem);line-height:.8;letter-spacing:-.015em;color:#8F8F8F;font-variant-numeric:tabular-nums;
+  transition:color var(--dur-slow) var(--ease-out)}
+.hs .tl-year--long{font-size:clamp(4.2rem,17vw,9.5rem)}
+.hs .tl-item.is-reached .tl-year{color:var(--yellow)}
+.hs .tl-item.is-honour .tl-year{color:var(--white)}
+.hs .tl-item.is-honour.is-reached .tl-year{color:var(--yellow)}
+
+.hs .tl-badge{display:block;margin:0 0 16px;padding:0;background:none;font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:0;text-transform:none;color:var(--yellow)}
+.hs .tl-title{margin:0 0 12px;font-family:var(--font-display);font-weight:400;font-size:clamp(2.3rem,4.6vw,4.4rem);line-height:.9;letter-spacing:0;text-transform:uppercase;color:var(--white);max-width:16ch}
+.hs .tl-body{margin:0;font-family:var(--font-body);font-size:clamp(1.02rem,1.35vw,1.2rem);line-height:1.62;color:var(--white);max-width:54ch}
+
+@media (min-width:900px){
+  .hs .timeline{--tl-spine-x:42%}
+  .hs .timeline::before{left:42%}
+  .hs .tl-item{grid-template-columns:42% minmax(0,1fr);padding-left:0}
+  .hs .tl-left{padding-right:clamp(32px,4vw,64px);text-align:right}
+  .hs .tl-year{margin:0;position:sticky;top:calc(var(--nav-h,64px) + 32px);font-size:clamp(6rem,11.5vw,13rem)}
+  .hs .tl-year--long{font-size:clamp(4.6rem,8vw,9.5rem)}
+  .hs .tl-right{padding-left:clamp(32px,4.4vw,72px);padding-top:.6rem}
+}
+
+/* Reduced motion: no spine fill, no reached state, so every year is set in
+   full white from the start. */
+@media (prefers-reduced-motion: reduce){.hs .tl-year{color:var(--white);transition:none}}
+html.a11y-reduce-motion .hs .tl-year{color:var(--white);transition:none}
+
+/* Close: the yellow field. */
+.hs-years{margin:0 0 clamp(20px,3vw,36px);display:flex;align-items:flex-end;gap:14px;color:#080808}
+.hs-years__n{font-family:var(--font-display);font-weight:400;font-size:clamp(7rem,18vw,15rem);line-height:.74;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hs-years__t{font-family:var(--font-body);font-weight:800;font-size:clamp(1rem,1.6vw,1.3rem);padding-bottom:.3em}
+.hs-next__in{display:grid;gap:28px;align-items:end}
+.hs-next .kl-h2{max-width:12ch}
+.hs-next__acts{display:flex;flex-wrap:wrap;gap:10px}
+@media (min-width:900px){.hs-next__in{grid-template-columns:1fr auto}}

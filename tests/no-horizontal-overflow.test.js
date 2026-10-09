@@ -75,10 +75,11 @@ test('no public page hard-codes a wide grid column INLINE', () => {
 });
 
 test('class-based fixed tracks are collapsed by a breakpoint', () => {
-  // The legitimate pattern, held so it stays legitimate.
-  // news.html used to be held here for its 340px sidebar track; the 2026/27
-  // sports-desk front has no sidebar and no fixed track left to collapse.
-  [['player.html', '.player-hero']].forEach(([file, sel]) => {
+  // The legitimate pattern, held so it stays legitimate. news.html (340px
+  // sidebar) and player.html (.player-hero split) were the two cases; the
+  // 2026/27 redesign retired both fixed tracks, so the list is empty until a
+  // page needs the pattern again.
+  [].forEach(([file, sel]) => {
     const src = read(file);
     const esc = sel.replace('.', '\\.');
     assert.match(src, new RegExp(esc + '\\s*\\{[^}]*grid-template-columns:\\s*[^;}]*\\d{3}px'),
