@@ -159,7 +159,15 @@
       us: d.previous.us, them: d.previous.them,
     }) : null;
     if (!next && !prev) return null;
-    return { next: next, results: prev ? [prev] : [] };
+    // The last five, newest first — the registry already orients each score
+    // from our side. The previous match leads; the form fills the rest, so the
+    // "Last 5" strip is five results, not one.
+    var results = prev ? [prev] : [];
+    (d.form || []).forEach(function (r) {
+      if (prev && r.id && d.previous && r.id === d.previous.id) return;
+      results.push({ opponent: r.opponent, isHome: r.isHome, kickoffAt: r.date, us: r.us, them: r.them });
+    });
+    return { next: next, results: results };
   }
 
   /**
