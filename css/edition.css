@@ -69,8 +69,8 @@ body .install-cta em{opacity:.75}
 @keyframes ed-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* Club Now becomes a broadcast panel: solid, hairlined, legible over video. */
-body .gl-on .hero__right,body .hero__right{background:rgba(8,8,8,.78)!important;-webkit-backdrop-filter:none;backdrop-filter:none;border-left:1px solid var(--ed-line)}
-body .cn__head,body .gl-on .hero__right .cn__head{background:#080808!important;border-bottom:1px solid var(--ed-line)}
+html.gl-on body .hero__right,body .hero__right{background:rgba(8,8,8,.78)!important;-webkit-backdrop-filter:none;backdrop-filter:none;border-left:1px solid var(--ed-line)}
+body .cn__head,html.gl-on body .hero__right .cn__head{background:#080808!important;border-bottom:1px solid var(--ed-line)}
 body .cn__brand{letter-spacing:.08em}
 body .cn__status{letter-spacing:.06em}
 body .cn__wdl--l{color:#fff}

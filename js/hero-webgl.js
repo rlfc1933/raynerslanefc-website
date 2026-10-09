@@ -408,6 +408,11 @@ import * as THREE from 'three';
 
 /* ───────────────── cinematic headline reveal (DOM, runs always) ───────────────── */
 function initHeroType(hero) {
+  // RETIRED in the 2026/27 edition: a per-letter blur-in (up to 3s before the
+  // last letter landed) followed by an endless float on every letter. It delayed
+  // the most important words on the page and competed with the edition's single
+  // title reveal (css/edition.css). DESIGN.md §5: one authored moment.
+  return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var h1 = hero.querySelector('.hero__h1');
   if (!h1 || h1.dataset.split) return;
