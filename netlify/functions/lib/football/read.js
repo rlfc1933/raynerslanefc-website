@@ -319,7 +319,10 @@ async function fixtureDetail(fixtureId) {
     matchMinute: state ? state.match_minute : null,
     stoppageMinute: state ? state.stoppage_minute : null,
     isLive: !!(state && state.is_live),
-    isFinal: !!(state && state.is_final),
+    // The provider's fixture list marking a match played (with its full-time
+    // cell stored) is final too: a result with no live scoreboard is still a
+    // result, not "awaiting live update" days later.
+    isFinal: !!(state && state.is_final) || (f.status === 'played' && !!sc && !(state && state.is_live)),
     referee: state ? state.referee : null,
     lastSyncedAt: state ? state.last_synced_at : null,
     events: (events || []).map((e) => ({

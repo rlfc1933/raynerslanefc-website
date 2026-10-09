@@ -340,3 +340,21 @@ test('a scheduled fixture never borrows a score from its kick-off cell', () => {
     original_provider_time: 'P - P', home_team_id: 1, away_team_id: 2, is_home_fixture: true }, T);
   assert.strictEqual(pp._providerScore, null);
 });
+
+test('a played fixture with only the provider score is FINAL — not "awaiting live update"', async () => {
+  const realFetch = global.fetch;
+  global.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes('/rest/v1/football_teams')) return reply(200, Object.keys(T).map((k) => T[k]));
+    if (u.includes('/rest/v1/football_competitions')) return reply(200, []);
+    if (u.includes('/rest/v1/football_fixtures')) return reply(200, REGISTRY.filter((r) => r.external_fixture_id === '578338'));
+    if (u.includes('/rest/v1/match_state')) return reply(200, []);
+    return reply(200, []);
+  };
+  try {
+    const d = await READ.fixtureDetail('fwp-578338');
+    assert.ok(d, 'detail returned');
+    assert.strictEqual(d.isFinal, true);
+    assert.deepStrictEqual([d.us, d.them], [0, 2], 'Easington 2-0 Rayners Lane, from our side');
+  } finally { global.fetch = realFetch; }
+});

@@ -320,3 +320,7 @@ body .fx-gate .gate__note{font-size:13px;color:#080808;font-weight:600;text-tran
   .fxc__nm{font-size:1.3rem}
   .fxc__crest,.fxc__ph{display:none}
 }
+
+/* Whose prices these are: the strip is Tithe Farm's gate, shown on an away
+   week too, so it says so rather than implying it is the next match's price. */
+.fx-gate__where{font-family:var(--font-body);font-weight:800;font-size:14px;color:var(--white);margin:clamp(28px,4vw,44px) 0 10px}
