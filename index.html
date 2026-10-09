@@ -122,6 +122,7 @@
   <script type="application/ld+json" id="lane-site">{"@context":"https://schema.org","@type":"WebSite","@id":"https://raynerslanefc.co.uk/#website","url":"https://raynerslanefc.co.uk/","name":"Rayners Lane FC","publisher":{"@id":"https://raynerslanefc.co.uk/#team"},"inLanguage":"en-GB"}</script>
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
+<link rel="stylesheet" href="css/home.css">
 <script src="js/lane-motion.js" defer></script>
 </head>
 <body>
@@ -146,140 +147,181 @@
 </style>
 <div class="livebar" id="rlfc-livebar"></div>
 
-<!-- ══════════ HERO ══════════ -->
-<section class="hero" style="isolation:isolate">
-  <!-- No-WebGL / reduced-motion fallback: a still poster behind the hero.
-       Hidden once the live WebGL scene takes over (html.gl-on). -->
-  <!-- The hero still, as a real <img> rather than a CSS background.
-       As a background it was invisible to the preload scanner and was only
-       requested once the stylesheet had parsed and the element had been laid
-       out: measured on production, the request did not START until 1186ms,
-       though the file itself took only 77ms to arrive. An <img> is discovered
-       in the raw HTML, and srcset stops a phone downloading the 1920×1080
-       desktop encode (131KB) when a 960-wide one (43KB) is what it will show. -->
-  <div class="hero__poster" aria-hidden="true">
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     HOMEPAGE — 2026/27 "KIT LAUNCH" EDITION
+     The club presented the way the big clubs launch a season: real Lane
+     photography full-bleed, the name set huge, yellow owning whole fields.
+     Every number on this page comes from the club's football registry or
+     data/*.json — nothing is typed in by hand and nothing is invented.
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ① TITLE CARD — the club's name, the next match, one action -->
+<section class="kl-hero" aria-labelledby="kl-hero-title">
+  <div class="kl-hero__media" aria-hidden="true">
     <img src="video/hero-poster-1440.jpg"
          srcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
-         sizes="100vw" width="1920" height="1080" alt=""
-         fetchpriority="high" decoding="async">
+         sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
+    <video class="kl-hero__video" muted loop playsinline preload="none" poster="video/hero-poster-1440.jpg"
+           data-src="video/hero.mp4" data-src-mobile="video/hero-mobile.mp4"></video>
   </div>
-  <!-- Hidden source for the WebGL video texture (the club footage is rendered
-       INSIDE the GL scene, behind the morphing particles, so it travels with
-       them). Mobile / reduced-motion never load it — poster only. -->
-  <video id="hero-video-src" muted loop playsinline webkit-playsinline preload="none"
-         data-src="video/hero.mp4" data-src-mobile="video/hero-mobile.mp4" aria-hidden="true"
-         style="position:absolute;width:2px;height:2px;opacity:0;pointer-events:none;left:-10px;top:-10px"></video>
-  <style>
-    /* ── LIVING VOID: one fixed WebGL canvas behind the whole page ──
-       body forms a stacking context so the canvas (z-index:-1) sits above the
-       page's black backdrop but behind ALL content. Transparent sections reveal
-       the morphing particle field as you scroll → continuous, never "cuts off".
-       Opaque sections (--dark/--card) give natural breaks. Nav, banners and
-       modals keep their own high z-index and are unaffected. */
-    html{background:#080808}
-    body{isolation:isolate}
-    #hero-gl{position:fixed!important;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
-    .hero__poster{position:absolute;inset:0;z-index:0;pointer-events:none;
-      background:#080808;opacity:.45;transition:opacity .9s ease}
-    .hero__poster img{width:100%;height:100%;object-fit:cover;display:block}
-    /* Was `.gl-on .hero__poster{display:none}`, which fired the instant WebGL
-       was detected and left the hero black for the whole of the video load.
-       The still now hands over only when the video has frames (html.gl-video),
-       and fades rather than snaps. */
-    .gl-video .hero__poster{opacity:0}
-    @media (prefers-reduced-motion: reduce){ .hero__poster{transition:none} }
-    /* Frosted info panel — translucent so the living-void graphics glow behind
-       the "Born in Harrow" copy, while the blur keeps the text crisp. */
-    .gl-on .hero__right{background:linear-gradient(160deg,rgba(20,44,31,.62) 0%,rgba(11,27,17,.56) 55%,rgba(8,8,8,.46) 100%)!important;
-      -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
-    .gl-on .hero__right .cn__head{background:rgba(26,92,50,.88)!important} /* keep the Club Now header legible over video */
-  </style>
-  <div class="hero__left">
-    <div class="hero__shirts" id="hero-shirts"></div>
-    <div class="hero__eyebrow">
-      <div class="hero__eyebrow-line"></div>
-      <span class="label">Harrow, London &middot; Est. 1933</span>
+  <div class="kl-hero__shade" aria-hidden="true"></div>
+  <div class="kl-hero__inner">
+    <div class="kl-hero__top">
+      <img class="kl-hero__crest" src="img/badge-512.png" width="64" height="64" alt="">
+      <p class="kl-hero__meta">Harrow &middot; Founded 1933 &middot; Combined Counties Premier North</p>
     </div>
-    <h1 class="hero__h1">
-      YELLOW.<br>
-      THE LANE.<br>
-      <em>HARROW.</em>
+    <h1 class="kl-hero__word" id="kl-hero-title">
+      <span class="kl-line"><span>Rayners</span></span>
+      <span class="kl-line"><span>Lane<em>.</em></span></span>
     </h1>
-    <p class="hero__sub">
-      Rayners Lane FC. Community built, Harrow proud. Yellow first, always. The Lane backs itself — since 1933.
-    </p>
-    <div class="hero__btns">
-      <a class="btn btn-primary" href="fixtures.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        Fixtures &amp; Results
-      </a>
-      <a class="btn btn-outline" href="squad.html">Meet the Squad</a>
-    </div>
-    <button class="install-cta js-install" onclick="laneInstall()">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
-      <span>Install The Lane App <em>— free, on your home screen</em></span>
-    </button>
-  </div>
-  <style>
-    .install-cta{margin-top:18px;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#fff3bf,var(--yellow));color:#0d0d0d;border:none;border-radius:var(--r-pill);padding:11px 20px;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;box-shadow:0 8px 24px -8px rgba(255,209,0,.6);transition:transform .18s,box-shadow .18s;-webkit-tap-highlight-color:transparent}
-    .install-cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(255,209,0,.75)}
-    .install-cta em{font-style:normal;font-weight:600;opacity:.7}
-    @media(max-width:600px){.install-cta em{display:none}}
-  </style>
-
-  <!-- ══ CLUB NOW — the living command centre (js/club-now.js) ══
-       Grows the old Next-Match badge into a one-glance state-of-the-club block,
-       layered over the WebGL video with the existing .gl-on legibility gradient.
-       Flips to a LIVE score on matchday; shows next match + countdown otherwise;
-       strip = position / last result / last-5 form with honest pre-season states. -->
-  <div class="hero__right hero__right--cn">
-    <div id="club-now" class="cn" aria-label="Club Now — the club's live match centre">
-      <div class="cn__head">
-        <span class="cn__brand">Club Now</span>
-        <span class="cn__status" id="cn-status">The Lane</span>
+    <div class="kl-hero__foot">
+      <p class="kl-hero__line">Community built. Harrow proud. Yellow first, always &mdash; The Lane backs itself, and has since 1933.</p>
+      <div class="kl-hero__acts">
+        <a class="kl-btn kl-btn--solid" href="fixtures.html">Fixtures &amp; results</a>
+        <a class="kl-btn kl-btn--line" href="fan-zone.html">Join The Lane &mdash; free</a>
       </div>
-      <div class="cn__body">
-        <div class="cn__primary" id="cn-primary" aria-live="polite">
-          <div class="cn__skel">Loading the latest from The Lane&hellip;</div>
+    </div>
+  </div>
+  <!-- The next match as a broadcast lower third. Filled from the registry
+       (js/home.js); if that is unreachable it says so, it never guesses. -->
+  <a class="kl-bug" id="kl-bug" href="match-centre.html" aria-live="polite">
+    <span class="kl-bug__label">Next match</span>
+    <span class="kl-bug__body"><span class="kl-bug__loading">Loading the next fixture&hellip;</span></span>
+  </a>
+</section>
+
+<!-- Member welcome (shown only to a recognised Fan Zone member — css switches it) -->
+<section class="kl-wrap" aria-label="Your Fan Zone">
+  <div class="fan-strip">
+    <div class="fan-strip__t">
+      <p class="fan-strip__h">Welcome back, <span data-fan-name></span>.</p>
+      <p class="fan-strip__p">Your Lane Card, your programmes and your match history are waiting.</p>
+    </div>
+    <div class="fan-strip__a">
+      <a href="programmes.html">Read the programme</a>
+      <a href="fan-zone.html">My Fan Zone</a>
+    </div>
+  </div>
+</section>
+
+<!-- ② MATCH CENTRE — the live-aware block (js/club-now.js): live score on a
+     matchday, full time for 24 hours after, otherwise the countdown. -->
+<section class="kl-centre" aria-labelledby="kl-centre-h">
+  <div class="kl-wrap kl-centre__grid">
+    <div class="kl-centre__lead">
+      <h2 class="kl-h2" id="kl-centre-h">Match<br>centre</h2>
+      <p class="kl-centre__table" id="kl-table" aria-live="polite"></p>
+    </div>
+    <div class="hero__right hero__right--cn kl-centre__cn">
+      <div id="club-now" class="cn" aria-label="Club Now — the club's live match centre">
+        <div class="cn__head">
+          <span class="cn__brand">Club Now</span>
+          <span class="cn__status" id="cn-status">The Lane</span>
         </div>
-        <div class="cn__strip" id="cn-strip"></div>
+        <div class="cn__body">
+          <div class="cn__primary" id="cn-primary" aria-live="polite">
+            <div class="cn__skel">Loading the latest from The Lane&hellip;</div>
+          </div>
+          <div class="cn__strip" id="cn-strip"></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════ AT THE GATE — matchday admission (data/config.json) ══════════ -->
-<section class="section" style="padding:22px 0 0" aria-label="Your Fan Zone">
-  <div class="container">
-    <!-- Shown only to a recognised member — CSS does the switching from the
-         .is-fan-member class js/fan-account.js puts on <html>, so a logged-out
-         visitor sees the ordinary club homepage and nothing flashes.
-         Deliberately restrained: the homepage is the club's front door, not a
-         private dashboard. A name, a Lane number, and two ways in. -->
-    <div class="fan-strip">
-      <div class="fan-strip__t">
-        <p class="fan-strip__h">Welcome back, <span data-fan-name></span>.</p>
-        <p class="fan-strip__p">Your Lane Card, your programmes and your match history are waiting.</p>
+<!-- ③ THE RUN — results and the fixtures ahead, as one strip in time order -->
+<section class="kl-run" aria-labelledby="kl-run-h">
+  <div class="kl-wrap kl-run__head">
+    <h2 class="kl-h2" id="kl-run-h">The run</h2>
+    <a class="kl-more" href="fixtures.html">Full fixture list</a>
+  </div>
+  <ol class="kl-run__rail" id="kl-run" tabindex="0" aria-label="Recent results and upcoming fixtures, scroll sideways"></ol>
+</section>
+
+<!-- ④ MATCHDAY — drenched yellow poster: what it costs and how to get in -->
+<section class="kl-gate" aria-labelledby="kl-gate-h">
+  <div class="kl-wrap kl-gate__grid">
+    <div>
+      <h2 class="kl-gate__h" id="kl-gate-h">Pay on<br>the gate.</h2>
+      <p class="kl-gate__p" id="kl-gate-sub">Cash or card at Tithe Farm, 151 Rayners Lane, HA2 0XH. Rayners Lane station is a short walk.</p>
+      <div class="kl-gate__acts">
+        <a class="kl-btn kl-btn--ink" href="season-tickets.html">2026/27 season tickets</a>
+        <a class="kl-btn kl-btn--inkline" href="https://www.google.com/maps/dir/?api=1&amp;destination=Tithe+Farm+Social+Club+HA2+0XH" target="_blank" rel="noopener">Directions</a>
       </div>
-      <div class="fan-strip__a">
-        <a href="programmes.html">Read the programme</a>
-        <a href="fan-zone.html">My Fan Zone</a>
+    </div>
+    <dl class="kl-gate__prices" id="kl-prices" aria-label="Matchday admission prices"></dl>
+  </div>
+</section>
+
+<!-- ⑤ NEWS — a sports-desk front: one lead, a running order -->
+<section class="kl-news" aria-labelledby="kl-news-h">
+  <div class="kl-wrap">
+    <div class="kl-run__head">
+      <h2 class="kl-h2" id="kl-news-h">From the Lane</h2>
+      <a class="kl-more" href="news.html">All news</a>
+    </div>
+    <div class="news-grid" id="news-grid"></div>
+  </div>
+</section>
+
+<!-- Man of the Match / new signing (js below shows it only when there is one) -->
+<section class="spotlight" id="spotlight" style="display:none">
+  <div class="kl-wrap">
+    <div class="spotlight__grid" id="spotlight-grid"></div>
+  </div>
+</section>
+
+<!-- ⑥ THE SQUAD — every player, every shirt number, swipe through -->
+<section class="kl-squad" aria-labelledby="kl-squad-h">
+  <div class="kl-wrap kl-run__head">
+    <h2 class="kl-h2" id="kl-squad-h">The squad</h2>
+    <a class="kl-more" href="squad.html">Meet them all</a>
+  </div>
+  <ol class="kl-squad__rail" id="kl-squad" tabindex="0" aria-label="First-team squad, scroll sideways"></ol>
+</section>
+
+<!-- ⑦ THE LANE CARD — the free membership, drenched green -->
+<section class="kl-card" aria-labelledby="kl-card-h">
+  <div class="kl-wrap kl-card__grid">
+    <div class="kl-card__visual" aria-hidden="true">
+      <div class="kl-lanecard" id="kl-lanecard">
+        <img src="img/badge-512.png" width="56" height="56" alt="">
+        <span class="kl-lanecard__name">The Lane Card</span>
+        <span class="kl-lanecard__no">No. 1933</span>
+        <span class="kl-lanecard__hearts"><i></i><i></i><i></i><i></i><i></i><i class="off"></i></span>
+      </div>
+    </div>
+    <div>
+      <h2 class="kl-h2" id="kl-card-h">Your free<br>Lane Card.</h2>
+      <p class="kl-card__p">Scan in at the gate, collect a yellow heart every home game, and the rewards come to you: your sixth home game is on us, then a drink on the house, then matchday VIP.</p>
+      <div class="kl-hero__acts">
+        <a class="kl-btn kl-btn--solid" href="fan-zone.html?join=1">Get your card</a>
+        <a class="kl-btn kl-btn--line" href="fan-zone-guide.html">How it works</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section" style="padding:28px 0 0" aria-label="Matchday admission prices">
-  <div class="container" style="max-width:760px">
-    <div data-at-the-gate></div>
-    <div style="text-align:center;margin-top:16px">
-      <a href="season-tickets.html" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--yellow);text-decoration:none">
-        Here every week? Get a 2026/27 season ticket
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
+<!-- ⑧ THE CHAIRMAN — the club's voice, set like a poster -->
+<section class="kl-voice" aria-label="From the chairman">
+  <div class="kl-wrap">
+    <blockquote class="kl-voice__q">&ldquo;Yellow kit. Harrow heart. <em>This is The Lane.</em>&rdquo;</blockquote>
+    <p class="kl-voice__who">Pete Singh, Club Chairman &middot; <a href="about.html#chairman">Read more</a></p>
+  </div>
+</section>
+
+<!-- ⑨ BACK THE LANE — sponsorship, stated plainly -->
+<section class="kl-back" aria-labelledby="kl-back-h">
+  <div class="kl-wrap kl-back__grid">
+    <h2 class="kl-h2" id="kl-back-h">Put your business in front of Harrow.</h2>
+    <div>
+      <p class="kl-back__p">Shirts, matchballs, pitch-side boards, the programme, or something bespoke. Tell us what you're after; the commercial team replies within 48 hours with a proposal built around your business.</p>
+      <a class="kl-btn kl-btn--solid" href="investment.html#apply">Partner with The Lane</a>
     </div>
   </div>
 </section>
+
 
 <!-- ══════════ SPOTLIGHT — MOTM & NEW SIGNING ══════════ -->
 <style>
@@ -305,11 +347,6 @@
   .spot-card--sign .spot-meta b{color:#4ade80}
   .spot-desc{font-family:var(--font-b);font-size:13.5px;color:var(--lgrey);line-height:1.6;margin-top:10px}
 </style>
-<section class="spotlight" id="spotlight" style="display:none">
-  <div class="container">
-    <div class="spotlight__grid" id="spotlight-grid"></div>
-  </div>
-</section>
 
 <!-- ══════════ OFFICIAL PARTNERS ══════════ -->
 <style>
@@ -405,33 +442,22 @@
   </div>
 </section>
 
-<!-- ══════════ IDENTITY STRIPE ══════════ -->
-<!-- This was four 64px "statistics": 1933, 90+, CCL, HA2. Two of them were the
-     same fact — founded in 1933 is why it is 90+ years — and the other two were
-     an abbreviation and a postcode district set in the type reserved for goals
-     and league position. Numbers that big should be football.
-
-     What the block is actually for is the one thing a stranger needs: who this
-     club is, where it plays and at what level. So it says that, in a sentence,
-     the way a sign outside a ground would. It also happens to be the answer to
-     "who are Rayners Lane FC", "where do they play" and "what league are they
-     in" — stated once, in plain words, where a person and an answer engine can
-     both read it. The founding year keeps its display size, because 1933 is the
-     one number here that genuinely carries weight. -->
-<div class="stripe">
-  <div class="container">
-    <div class="stripe__inner stripe__inner--id">
-      <p class="stripe__id" data-reveal>
-        <span class="stripe__est">Est. <b>1933</b></span>
-        <span class="stripe__say">Rayners Lane Football Club play at
-          <b>Tithe Farm Sports &amp; Social Club</b>, Rayners Lane, Harrow HA2 0XH,
-          in the <b>Combined Counties Premier Division North</b> &mdash; Step 5 of
-          the English football pyramid.</span>
-      </p>
+<!-- ⑩ TITHE FARM — home, from above -->
+<section class="kl-ground" aria-labelledby="kl-ground-h">
+  <img class="kl-ground__img" src="img/ground/tithe-farm-aerial-wide-1600.jpg"
+       srcset="img/ground/tithe-farm-aerial-wide-800.jpg 800w, img/ground/tithe-farm-aerial-wide-1600.jpg 1600w"
+       sizes="100vw" width="1600" height="898" loading="lazy" decoding="async"
+       alt="Tithe Farm from the air: the pitch, the clubhouse and the houses of Rayners Lane around it">
+  <div class="kl-ground__shade" aria-hidden="true"></div>
+  <div class="kl-wrap kl-ground__in">
+    <h2 class="kl-ground__h" id="kl-ground-h">Tithe Farm</h2>
+    <p class="kl-ground__p">151 Rayners Lane, Harrow HA2 0XH. Piccadilly &amp; Metropolitan lines to Rayners Lane, then a short walk. Bar open on matchdays.</p>
+    <div class="kl-hero__acts">
+      <a class="kl-btn kl-btn--solid" href="https://www.google.com/maps/dir/?api=1&amp;destination=Tithe+Farm+Social+Club+HA2+0XH" target="_blank" rel="noopener">Get directions</a>
+      <a class="kl-btn kl-btn--line" href="about.html#ground">About the ground</a>
     </div>
   </div>
-</div>
-
+</section>
 
 <!-- ══════════ ALERTS BAR ══════════ -->
 <div class="container" style="padding-top:48px">
@@ -447,179 +473,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         Sync to Apple / Google Calendar
       </a>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ LATEST NEWS — from data/news.json ══════════
-     Was a live feed from the club's old third-party platform, pulled through a
-     CORS proxy. The club deleted that account, so the feed 404s and the section
-     rendered nothing. It now reads the club's own news.json — the same file the
-     newsroom and the staff portal use. One source, ours, no middleman. -->
-<section class="section">
-  <div class="container">
-    <div class="section-header">
-      <div>
-        <span class="label">From The Lane</span>
-        <div class="divider"></div>
-        <h2 class="section-title">Latest <span>News</span></h2>
-      </div>
-      <a class="btn btn-outline" href="news.html">All News</a>
-    </div>
-    <div class="news-grid" id="news-grid"></div>
-  </div>
-</section>
-
-<!-- ══════════ CHAIRMAN STATEMENT ══════════ -->
-<section class="section section--dark" style="padding:72px 0">
-  <div class="container">
-    <div style="display:grid;grid-template-columns:auto 1fr;gap:56px;align-items:center;max-width:960px">
-      <div style="flex-shrink:0">
-        <img src="img/badge.png" alt="Rayners Lane FC" style="width:140px;height:140px;object-fit:contain;opacity:.9">
-      </div>
-      <div>
-        <span class="label" style="margin-bottom:16px;display:block">From the Chairman</span>
-        <blockquote style="font-family:var(--font-d);font-size:clamp(28px,3.5vw,48px);letter-spacing:.02em;color:var(--white);line-height:1.1;margin-bottom:20px">
-          "Yellow kit. Harrow heart.<br>
-          <span style="color:var(--yellow)">This is The Lane."</span>
-        </blockquote>
-        <div style="font-family:var(--font-c);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)">
-          Pete Singh &mdash; Club Chairman
-        </div>
-        <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
-          <a class="btn btn-primary" href="about.html#chairman">Read More</a>
-          <a class="btn btn-outline" href="contact.html">Get Involved</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ BE PART OF THE LANE (conversion front door) ══════════ -->
-<style>
-  .join{padding:64px 0;background:linear-gradient(180deg,#0a0a0a,#0e0e0e)}
-  .join__head{text-align:center;max-width:560px;margin:0 auto 36px}
-  .join__head .label{color:var(--yellow)}
-  .join__head p{font-family:var(--font-b);font-size:15px;color:var(--lgrey);line-height:1.7;margin-top:12px}
-  .join__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1000px;margin:0 auto}
-  .join__card{position:relative;display:flex;flex-direction:column;background:linear-gradient(160deg,var(--card),#0b0b0b);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 24px;text-decoration:none;transition:transform .2s,border-color .2s,box-shadow .2s;overflow:hidden}
-  .join__card:hover{transform:translateY(-5px);border-color:var(--yellow);box-shadow:0 22px 50px -24px rgba(255,209,0,.45)}
-  .join__card--y{background:linear-gradient(160deg,#1c1a0a,#0c0c0c);border-color:rgba(255,209,0,.45)}
-  .join__ic{font-size:30px;margin-bottom:14px}
-  .join__t{font-family:var(--font-d);font-size:26px;letter-spacing:.03em;color:#fff;line-height:1}
-  .join__d{font-family:var(--font-b);font-size:13.5px;color:var(--lgrey);line-height:1.6;margin-top:8px;flex:1}
-  .join__go{font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-top:16px;display:inline-flex;align-items:center;gap:6px}
-  .join__tag{position:absolute;top:14px;right:14px;font-family:var(--font-c);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#0d0d0d;background:var(--yellow);border-radius:var(--r-xs);padding:3px 8px}
-  @media(max-width:760px){.join__grid{grid-template-columns:1fr}.join{padding:48px 0}}
-</style>
-<section class="join">
-  <div class="container">
-    <div class="join__head">
-      <span class="label">This Is Your Club Too</span>
-      <h2 class="section-title">Be Part of <span>The Lane</span></h2>
-      <p>You don't have to play to belong. Three ways to make The Lane yours — pick one, or all three.</p>
-    </div>
-    <div class="join__grid">
-      <a class="join__card" href="fixtures.html">
-        <div class="join__ic"><i class="ico ico-football"></i></div>
-        <div class="join__t">Come to a Game</div>
-        <div class="join__d">Saturdays &amp; Tuesdays at Tithe Farm, minutes from Rayners Lane tube. First time? You're very welcome.</div>
-        <span class="join__go">See Fixtures &rarr;</span>
-      </a>
-      <a class="join__card join__card--y" href="fan-zone.html">
-        <span class="join__tag">Free</span>
-        <div class="join__ic"><i class="ico ico-heart"></i></div>
-        <div class="join__t">Join the Family</div>
-        <div class="join__d">Grab your free Lane membership card &amp; number. Collect a yellow heart every game and unlock rewards.</div>
-        <span class="join__go">Get Your Card &rarr;</span>
-      </a>
-      <a class="join__card" href="investment.html">
-        <div class="join__ic"><i class="ico ico-handshake"></i></div>
-        <div class="join__t">Back the Club</div>
-        <div class="join__d">Sponsor a matchball, a matchday or the shirts. We champion every partner across the club — loudly.</div>
-        <span class="join__go">Partner With Us &rarr;</span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ UPCOMING FIXTURES ══════════ -->
-<section class="section section--card">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div>
-        <span class="label">2026-27 Season</span>
-        <div class="divider"></div>
-        <h2 class="section-title">Upcoming <span>Fixtures</span></h2>
-      </div>
-      <a class="btn btn-outline" href="fixtures.html">All Fixtures + Sync to Phone</a>
-    </div>
-    <div class="fixtures-list" id="home-fixtures">
-      <div class="fixture-row" style="grid-template-columns:1fr">
-        <div>
-          <div style="font-family:var(--font-d);font-size:22px;letter-spacing:.04em;color:var(--white);margin-bottom:4px">
-            Combined Counties Premier Division North — Fixtures Coming Soon
-          </div>
-          <div style="font-family:var(--font-c);font-size:13px;color:var(--grey);letter-spacing:.05em">
-            Gary Pitt's squad is taking shape. The 2026-27 schedule drops soon.
-            <a href="fixtures.html#calendar" style="color:var(--yellow);margin-left:8px">Subscribe now &rarr;</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
-      <a class="btn btn-primary" href="fixtures.html#calendar">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-        Apple Calendar
-      </a>
-      <a class="btn btn-outline" href="fixtures.html#calendar">Google Calendar</a>
-    </div>
-  </div>
-</section>
-
-<!-- Sponsors are shown in the Official Partners band near the top of the page -->
-
-<!-- ══════════ GROUND ══════════ -->
-<section style="padding:0">
-  <div class="ground">
-    <div class="ground__info" data-reveal>
-      <span class="label">Home Ground</span>
-      <div class="divider"></div>
-      <h2 class="section-title" style="font-size:clamp(36px,4vw,60px)">Tithe Farm<br><span>Social Club</span></h2>
-      <div class="ground__address">
-        151 Rayners Lane<br>Harrow, Middlesex<br>HA2 0XH
-      </div>
-      <p style="font-family:var(--font-b);font-size:15px;color:var(--grey);line-height:1.8;max-width:440px;margin-top:8px">
-        Our home. Tube: Rayners Lane station (Piccadilly &amp; Metropolitan lines) is a short walk away.
-        Tithe Farm Social Club bar open on match days.
-      </p>
-      <div class="ground__directions" style="margin-top:28px">
-        <a class="btn btn-primary" href="https://maps.google.com/maps?q=51.570435,-0.365073" target="_blank">Get Directions</a>
-        <a class="btn btn-outline" href="about.html#ground">About the Ground</a>
-      </div>
-    </div>
-    <div class="ground__map">
-      <iframe title="Map to Tithe Farm, Rayners Lane FC ground, Harrow" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d620.7!2d-0.3651601!3d51.5699654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTHCsDM0JzExLjkiTiAwwrAyMSc1NC42Ilc!5e0!3m2!1sen!2suk!4v1"
-        width="100%" height="100%" style="min-height:480px;border:0;filter:grayscale(1) brightness(.7) contrast(1.1)" allowfullscreen loading="lazy">
-      </iframe>
-    </div>
-  </div>
-</section>
-
-<div id="twitter-placeholder"></div>
-<!-- ═══ EMAIL BAR ═══ -->
-<div style="background:var(--yellow);padding:20px 0">
-  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-    <div style="display:flex;align-items:center;gap:16px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      <div>
-        <div style="font-family:var(--font-c);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,0,0,.7)">General Enquiries</div>
-        <a href="mailto:info@raynerslanefc.co.uk" style="font-family:var(--font-d);font-size:clamp(18px,2.5vw,28px);letter-spacing:.04em;color:var(--black)">info@raynerslanefc.co.uk</a>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn" style="background:var(--black);color:var(--yellow);border:2px solid var(--black);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 20px" href="mailto:info@raynerslanefc.co.uk">Email the Club</a>
-      <a class="btn" style="background:transparent;color:var(--black);border:2px solid var(--black);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 20px" href="contact.html">Contact Page</a>
     </div>
   </div>
 </div>
@@ -682,50 +535,6 @@
   </div>
 </section>
 
-<!-- ══════════ WELCOME TO TITHE FARM — cinematic full-bleed aerial ══════════ -->
-<style>
-  .titheband{position:relative;overflow:hidden;isolation:isolate}
-  .titheband__bg{position:absolute;inset:0;z-index:-2;display:block}
-  .titheband__bg img{width:100%;height:100%;object-fit:cover;
-    /* keep the pitch + clubhouse in frame as the crop narrows on phones */
-    object-position:center 46%}
-  /* dark gradient for legibility only — the photo stays visible, not washed out */
-  .titheband__overlay{position:absolute;inset:0;z-index:-1;
-    background:linear-gradient(90deg,rgba(8,8,8,.82) 0%,rgba(8,8,8,.55) 45%,rgba(8,8,8,.30) 100%),
-               linear-gradient(0deg,rgba(8,8,8,.75) 0%,rgba(8,8,8,0) 40%)}
-  .titheband__content{position:relative;min-height:clamp(420px,58vh,620px);
-    display:flex;flex-direction:column;justify-content:center;padding-top:70px;padding-bottom:70px}
-  .titheband__eyebrow{font-family:var(--font-c);font-size:13px;font-weight:800;letter-spacing:.28em;
-    text-transform:uppercase;color:var(--yellow)}
-  .titheband__title{font-family:var(--font-d);font-size:clamp(64px,11vw,150px);line-height:.9;
-    letter-spacing:.02em;color:var(--white);margin:14px 0 0;text-shadow:0 4px 30px rgba(0,0,0,.5)}
-  .titheband__rule{width:84px;height:5px;background:var(--yellow);border-radius:var(--r-xs);margin:20px 0 18px}
-  .titheband__sub{font-family:var(--font-c);font-size:clamp(17px,2.4vw,24px);font-weight:600;
-    letter-spacing:.06em;text-transform:uppercase;color:var(--white);opacity:.9}
-  .titheband__cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
-  .titheband .btn-outline{color:var(--white);border-color:rgba(255,255,255,.55);backdrop-filter:blur(2px)}
-  .titheband .btn-outline:hover{border-color:var(--yellow);color:var(--yellow)}
-</style>
-<section class="titheband" aria-label="Tithe Farm, home of Rayners Lane FC">
-  <picture class="titheband__bg">
-    <source type="image/webp" srcset="img/ground/tithe-farm-aerial-wide-800.webp 800w, img/ground/tithe-farm-aerial-wide-1600.webp 1600w" sizes="100vw">
-    <img src="img/ground/tithe-farm-aerial-wide-1600.jpg" data-no-opt
-      srcset="img/ground/tithe-farm-aerial-wide-800.jpg 800w, img/ground/tithe-farm-aerial-wide-1600.jpg 1600w" sizes="100vw"
-      alt="Aerial view of Tithe Farm, home of Rayners Lane FC — the 3G pitch, clubhouse and surrounding Harrow" loading="lazy" decoding="async">
-  </picture>
-  <div class="titheband__overlay"></div>
-  <div class="container titheband__content" data-reveal>
-    <span class="titheband__eyebrow">Home of The Lane</span>
-    <h2 class="titheband__title">TITHE FARM</h2>
-    <div class="titheband__rule"></div>
-    <p class="titheband__sub">Harrow, Middlesex &middot; Since 1933</p>
-    <div class="titheband__cta">
-      <a class="btn btn-primary" href="https://maps.google.com/maps?q=51.570435,-0.365073" target="_blank" rel="noopener">Get Directions</a>
-      <a class="btn btn-outline" href="fixtures.html">See Fixtures</a>
-    </div>
-  </div>
-</section>
-
 <div id="footer-placeholder"></div>
 
 <script src="js/consent.js?v=1"></script>
@@ -733,7 +542,7 @@
 <script src="js/fan-boot.js?v=1"></script>
 <script>document.addEventListener("DOMContentLoaded",function(){initComponents("index.html");});</script>
 <!-- Cinematic WebGL hero (progressive enhancement; degrades to the static hero). -->
-<script type="module" src="js/hero-webgl.js"></script>
+
 <!-- Supabase config (public anon key) so the live scoreboard can read the
      real-time live_match row. Falls back to matchday.json if absent. -->
 <script src="js/supabase-config.js"></script>
@@ -756,6 +565,7 @@
     })();
   </script>
 <script src="js/football-data.js"></script>
+<script src="js/home.js" defer></script>
 <script src="js/match-time.js"></script>
 <script src="js/main.js"></script>
 <script src="js/club-now.js?v=8" defer></script>

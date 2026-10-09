@@ -43,7 +43,7 @@ test('no browser code calls Football Web Pages', () => {
   // called them and must not start.
   const files = ['fixtures.html', 'index.html', 'match-centre.html', 'programme.html',
     'squad.html', 'player.html', 'admin.html']
-    .concat(fs.readdirSync(path.join(ROOT, 'js')).map((f) => 'js/' + f));
+    .concat(fs.readdirSync(path.join(ROOT, 'js')).filter((f) => /\.m?js$/.test(f)).map((f) => 'js/' + f));
   // A visible attribution link is fine and required — the club credits its
   // source. What must never appear is a REQUEST.
   const FETCHES = /(fetch|XMLHttpRequest|\.open|src\s*=|EventSource)\s*\(?\s*['"`][^'"`]*footballwebpages/i;

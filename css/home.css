@@ -1,0 +1,227 @@
+/* ════════════════════════════════════════════════════════════════════════
+   HOMEPAGE — "KIT LAUNCH" (2026/27)
+   The visual world: a season-launch campaign for a club that has been here
+   since 1933. Real Lane photography full-bleed. The name set as large as the
+   screen allows. Colour by the FIELD, not by the accent: yellow owns whole
+   sections (the matchday poster), bottle green owns the membership, black
+   carries photography. Structure is hairlines and type — no boxed cards,
+   no pills, no glow. Numbers are tabular and big because football is numbers.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.kl-wrap{width:min(100% - 32px,1360px);margin-inline:auto}
+@media (min-width:900px){.kl-wrap{width:min(100% - 80px,1360px)}}
+
+/* Shared type */
+.kl-h2{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,7.4vw,6.5rem);line-height:.86;letter-spacing:-.005em;text-transform:uppercase;color:var(--white);margin:0}
+.kl-more{font-family:var(--font-body);font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--white);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px;text-decoration-color:var(--yellow);min-height:44px;display:inline-flex;align-items:center}
+.kl-more:hover{color:var(--yellow)}
+
+/* Buttons — rectangles with intent. Solid = the action; line = the alternative. */
+.kl-btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 24px;border-radius:var(--r-sm);
+  font-family:var(--font-body);font-weight:800;font-size:15px;letter-spacing:.01em;text-decoration:none;white-space:nowrap;
+  transition:background var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),transform var(--dur-instant) var(--ease-out)}
+.kl-btn:active{transform:translateY(1px)}
+.kl-btn--solid{background:var(--yellow);color:#080808;border:2px solid var(--yellow)}
+.kl-btn--solid:hover{background:#FFE14D;border-color:#FFE14D}
+.kl-btn--line{background:transparent;color:var(--white);border:2px solid rgba(245,243,237,.55)}
+.kl-btn--line:hover{border-color:var(--white)}
+.kl-btn--ink{background:#080808;color:var(--yellow);border:2px solid #080808}
+.kl-btn--ink:hover{background:#1A1A1A}
+.kl-btn--inkline{background:transparent;color:#080808;border:2px solid #080808}
+.kl-btn--inkline:hover{background:rgba(8,8,8,.08)}
+.kl-btn:focus-visible,.kl-more:focus-visible,.kl-bug:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.kl-gate .kl-btn:focus-visible{outline-color:#080808}
+
+/* ① TITLE CARD ─────────────────────────────────────────────────────────── */
+.kl-hero{position:relative;min-height:calc(100svh - var(--nav-h));display:grid;grid-template-rows:1fr auto;overflow:hidden;background:#080808;isolation:isolate}
+.kl-hero__media{position:absolute;inset:0;z-index:-2}
+.kl-hero__media img,.kl-hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.kl-hero__video{opacity:0;transition:opacity 900ms var(--ease-out)}
+.kl-hero__video.is-on{opacity:1}
+.kl-hero__shade{position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(8,8,8,.55) 0%,rgba(8,8,8,.15) 30%,rgba(8,8,8,.35) 55%,rgba(8,8,8,.92) 100%),
+             linear-gradient(90deg,rgba(8,8,8,.55) 0%,rgba(8,8,8,0) 60%)}
+.kl-hero__inner{width:min(100% - 32px,1440px);margin-inline:auto;display:flex;flex-direction:column;justify-content:space-between;padding:28px 0 36px;gap:24px}
+@media (min-width:900px){.kl-hero__inner{width:min(100% - 80px,1440px);padding:40px 0 44px}}
+.kl-hero__top{display:flex;align-items:center;gap:14px}
+.kl-hero__crest{width:56px;height:56px;object-fit:contain}
+.kl-hero__meta{font-family:var(--font-body);font-weight:700;font-size:14px;color:var(--white);letter-spacing:.01em;max-width:32ch;line-height:1.35}
+.kl-hero__word{font-family:var(--font-display);font-weight:400;text-transform:uppercase;color:var(--white);margin:auto 0 0;
+  font-size:min(clamp(5.5rem,21vw,22rem),29svh);line-height:.8;letter-spacing:-.012em}
+/* Phones: the name fills the width — it is the picture, not a caption. */
+@media (max-width:699px){.kl-hero__word{font-size:min(33vw,24svh)}}
+.kl-line{display:block;overflow:hidden;padding-top:.04em}
+.kl-line > span{display:block}
+.kl-hero__word em{font-style:normal;color:var(--yellow)}
+.kl-hero__foot{display:grid;gap:20px;align-items:end}
+@media (min-width:900px){.kl-hero__foot{grid-template-columns:minmax(0,44ch) auto;justify-content:space-between}}
+.kl-hero__line{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.2rem);line-height:1.5;color:var(--white);max-width:44ch}
+.kl-hero__acts{display:flex;flex-wrap:wrap;gap:10px}
+
+/* The lower third — the next match, broadcast style */
+.kl-bug{position:relative;display:grid;grid-template-columns:auto 1fr;align-items:stretch;background:#080808;border-top:1px solid rgba(245,243,237,.14);text-decoration:none;color:var(--white);min-height:84px}
+.kl-bug__label{display:flex;align-items:center;padding:0 22px 0 88px;background:var(--yellow);color:#080808;font-family:var(--font-display);font-size:clamp(1.3rem,2vw,1.8rem);letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.kl-bug__body{display:flex;align-items:center;gap:clamp(14px,3vw,40px);padding:12px clamp(16px,3vw,40px);flex-wrap:wrap}
+.kl-bug__loading,.kl-bug__none{font-family:var(--font-body);font-size:15px;color:rgba(245,243,237,.8)}
+.kl-bug__crest{width:44px;height:44px;object-fit:contain}
+.kl-bug__vs{font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.6rem);line-height:1;text-transform:uppercase;letter-spacing:.005em}
+.kl-bug__vs small{font-family:var(--font-body);font-weight:800;font-size:13px;color:var(--yellow);margin-left:8px;letter-spacing:.04em;vertical-align:middle}
+.kl-bug__when{font-family:var(--font-body);font-weight:700;font-size:15px;color:#E6E4DD;line-height:1.35}
+.kl-bug__when span{display:block;font-weight:500;color:#AAAAAA;font-size:14px}
+.kl-bug__count{margin-left:auto;display:flex;gap:16px;font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.6rem);line-height:1;color:var(--yellow);font-variant-numeric:tabular-nums}
+.kl-bug__count span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.kl-bug__count small{font-family:var(--font-body);font-weight:700;font-size:12px;color:#AAAAAA}
+.kl-bug__live{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-weight:800;font-size:13px;color:#fff;background:#C8102E;padding:6px 10px;border-radius:var(--r-xs)}
+.kl-bug__live::before{content:"";width:8px;height:8px;border-radius:var(--r-circle);background:#fff;animation:kl-live 1.4s ease-in-out infinite}
+@keyframes kl-live{50%{opacity:.25}}
+.kl-bug:hover .kl-bug__vs{color:var(--yellow)}
+@media (max-width:640px){
+  .kl-bug{grid-template-columns:1fr}
+  .kl-bug__label{padding:10px 16px;font-size:1.15rem}
+  .kl-bug__count{margin-left:0}
+}
+
+/* ② MATCH CENTRE — Club Now, set as a broadcast panel beside a title */
+.kl-centre{padding:clamp(56px,8vw,112px) 0;background:#080808;border-bottom:1px solid var(--ed-line)}
+.kl-centre__grid{display:grid;gap:32px;align-items:start}
+@media (min-width:1000px){.kl-centre__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}}
+.kl-centre__table{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);color:var(--ed-text-2);margin-top:20px;max-width:36ch;line-height:1.5}
+.kl-centre__table b{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,6vw,5rem);line-height:.9;color:var(--yellow);display:block;letter-spacing:0}
+body .hero__right.kl-centre__cn{position:static!important;order:0!important;margin:0!important;border:1px solid var(--ed-line)!important;border-radius:var(--r-md)!important;background:#0E0E0E!important;overflow:hidden;min-height:0}
+body .kl-centre__cn .cn__head{background:#0E0E0E!important}
+
+/* ③ THE RUN — results and fixtures in one sideways strip */
+.kl-run,.kl-squad{padding:clamp(56px,8vw,104px) 0;background:#080808}
+.kl-run__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+.kl-run__rail,.kl-squad__rail{list-style:none;margin:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:max(16px,calc((100% - 1360px)/2));
+  padding-inline:max(16px,calc((100% - 1360px)/2));scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+@media (min-width:900px){.kl-run__rail,.kl-squad__rail{padding-inline:max(40px,calc((100% - 1360px)/2));scroll-padding-inline:max(40px,calc((100% - 1360px)/2))}}
+.kl-run__rail:focus-visible,.kl-squad__rail:focus-visible{outline:2px solid var(--yellow);outline-offset:-2px}
+.kl-run__item{flex:0 0 clamp(200px,22vw,250px);scroll-snap-align:start;border-left:1px solid var(--ed-line);padding:4px 22px 8px;display:flex;flex-direction:column;gap:10px;min-height:220px}
+.kl-run__item:last-child{border-right:1px solid var(--ed-line)}
+.kl-run__date{font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA}
+.kl-run__opp{font-family:var(--font-display);font-size:1.75rem;line-height:.95;text-transform:uppercase;color:var(--white)}
+.kl-run__ha{font-family:var(--font-body);font-weight:800;font-size:12px;color:#AAAAAA}
+.kl-run__score{margin-top:auto;font-family:var(--font-display);font-size:4.2rem;line-height:.85;color:var(--white);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:10px}
+.kl-run__res{font-family:var(--font-body);font-weight:800;font-size:13px;padding:3px 7px;border-radius:var(--r-xs);line-height:1}
+.kl-run__res--W{background:#22C55E;color:#06210f}
+.kl-run__res--D{background:#AAAAAA;color:#111}
+.kl-run__res--L{background:#EF4444;color:#fff}
+.kl-run__tbc{margin-top:auto;font-family:var(--font-body);font-weight:700;font-size:14px;color:#AAAAAA;line-height:1.35}
+.kl-run__ko{margin-top:auto;font-family:var(--font-display);font-size:3.2rem;line-height:.85;color:var(--white);font-variant-numeric:tabular-nums}
+.kl-run__item.is-next{background:var(--yellow);border-left-color:var(--yellow)}
+.kl-run__item.is-next *{color:#080808}
+.kl-run__item.is-next .kl-run__flag{display:inline-block}
+.kl-run__flag{display:none;font-family:var(--font-body);font-weight:800;font-size:12px;background:#080808;color:var(--yellow)!important;padding:3px 7px;border-radius:var(--r-xs);align-self:flex-start}
+
+/* ④ MATCHDAY POSTER — drenched yellow */
+.kl-gate{background:var(--yellow);color:#080808;padding:clamp(64px,9vw,128px) 0;position:relative}
+.kl-gate::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;
+  background:repeating-linear-gradient(90deg,#080808 0 56px,var(--yellow) 56px 112px,#1A5C32 112px 168px,var(--yellow) 168px 224px)}
+.kl-gate__grid{display:grid;gap:44px;align-items:end}
+@media (min-width:980px){.kl-gate__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+.kl-gate__h{font-family:var(--font-display);font-weight:400;text-transform:uppercase;font-size:clamp(4rem,11vw,10rem);line-height:.82;letter-spacing:-.01em;color:#080808;margin:0}
+.kl-gate__p{font-family:var(--font-body);font-weight:600;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;max-width:40ch;margin:22px 0 26px;color:#080808}
+.kl-gate__acts{display:flex;gap:10px;flex-wrap:wrap}
+.kl-gate__prices{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:2px solid #080808}
+.kl-gate__price{padding:18px 0 22px;border-bottom:2px solid #080808}
+.kl-gate__price:nth-child(odd){border-right:2px solid #080808;padding-right:16px}
+.kl-gate__price:nth-child(even){padding-left:20px}
+.kl-gate__price dt{font-family:var(--font-body);font-weight:800;font-size:15px;line-height:1.3}
+.kl-gate__price dt small{display:block;font-weight:600;font-size:13px;color:#111111}
+.kl-gate__price dd{margin:0;font-family:var(--font-display);font-size:clamp(4rem,8vw,7rem);line-height:.85;font-variant-numeric:tabular-nums}
+
+/* ⑤ NEWS FRONT on the new ground */
+.kl-news{padding:clamp(56px,8vw,104px) 0;background:#080808}
+.kl-news .news-grid{gap:16px}
+body .kl-news .news-card{background:transparent!important;border:0!important;border-radius:0}
+.kl-news .news-card__img{border-radius:var(--r-md);overflow:hidden}
+.kl-news .news-card--featured .news-card__img{border-radius:var(--r-md)}
+.kl-news .news-card:not(.news-card--featured){border-top:1px solid var(--ed-line)!important;padding-top:16px}
+.kl-news .news-card__title{font-family:var(--font-display);font-size:clamp(1.5rem,2.2vw,2rem);line-height:.98;text-transform:uppercase}
+.kl-news .news-card--featured .news-card__title{font-size:clamp(2.4rem,4.4vw,4.2rem)}
+.kl-news .news-card__cat{background:transparent!important;color:var(--yellow)!important;padding:0!important;font-weight:800;letter-spacing:.04em}
+
+/* ⑥ THE SQUAD — sticker-album portraits, shirt numbers big */
+.kl-squad{border-top:1px solid var(--ed-line)}
+.kl-squad__item{flex:0 0 clamp(190px,19vw,240px);scroll-snap-align:start;margin-right:12px}
+.kl-squad__item a{display:block;text-decoration:none;color:var(--white)}
+.kl-squad__ph{position:relative;aspect-ratio:3/4;border-radius:var(--r-md);overflow:hidden;background:#141414}
+.kl-squad__ph img{width:100%;height:100%;object-fit:cover;transition:transform var(--dur-slow) var(--ease-out)}
+.kl-squad__item a:hover img{transform:scale(1.04)}
+.kl-squad__no{position:absolute;left:10px;bottom:4px;font-family:var(--font-display);font-size:4.5rem;line-height:.8;color:var(--yellow);text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.kl-squad__ph::after{content:"";position:absolute;inset:auto 0 0 0;height:45%;background:linear-gradient(0deg,rgba(8,8,8,.75),rgba(8,8,8,0))}
+.kl-squad__no{z-index:1}
+.kl-squad__name{display:block;font-family:var(--font-display);font-size:1.6rem;line-height:.95;text-transform:uppercase;margin-top:12px}
+.kl-squad__pos{display:block;font-family:var(--font-body);font-weight:700;font-size:13px;color:#AAAAAA;margin-top:4px}
+
+/* ⑦ THE LANE CARD — drenched heritage green */
+.kl-card{background:#1A5C32;padding:clamp(64px,9vw,120px) 0;overflow:hidden}
+.kl-card__grid{display:grid;gap:48px;align-items:center}
+@media (min-width:900px){.kl-card__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.kl-card__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:rgba(245,243,237,.92);max-width:42ch;margin:22px 0 26px}
+.kl-card .kl-btn--line{border-color:rgba(255,255,255,.7)}
+.kl-card__visual{display:flex;justify-content:center;perspective:1200px}
+.kl-lanecard{width:min(100%,420px);aspect-ratio:1.586;background:var(--yellow);color:#080808;border-radius:var(--r-lg);padding:24px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto auto;gap:8px 16px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.55);transform:rotate(-5deg);transition:transform var(--dur-slow) var(--ease-out)}
+.kl-lanecard:hover{transform:rotate(-2deg) translateY(-4px)}
+.kl-lanecard img{grid-row:1;width:56px;height:56px}
+.kl-lanecard__name{grid-column:1/-1;font-family:var(--font-display);font-size:clamp(2rem,4vw,2.8rem);line-height:.9;text-transform:uppercase;align-self:end}
+.kl-lanecard__no{grid-column:1/-1;font-family:var(--font-body);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+.kl-lanecard__hearts{grid-row:1;grid-column:2;justify-self:end;display:flex;gap:6px}
+.kl-lanecard__hearts i{width:16px;height:16px;background:#080808;clip-path:path('M8 14.5 1.6 8.3A3.9 3.9 0 0 1 8 3.2a3.9 3.9 0 0 1 6.4 5.1Z')}
+.kl-lanecard__hearts i.off{opacity:.25}
+
+/* ⑧ VOICE */
+.kl-voice{background:#080808;padding:clamp(72px,10vw,140px) 0;border-bottom:1px solid var(--ed-line)}
+.kl-voice__q{font-family:var(--font-display);font-size:clamp(3rem,8.6vw,8rem);line-height:.86;color:var(--white);margin:0;max-width:16ch}
+.kl-voice__q em{font-style:normal;color:var(--yellow)}
+.kl-voice__who{font-family:var(--font-body);font-weight:700;font-size:15px;color:#AAAAAA;margin-top:26px}
+.kl-voice__who a{color:var(--white);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--yellow)}
+
+/* ⑨ BACK THE LANE */
+.kl-back{background:#080808;padding:clamp(64px,9vw,120px) 0}
+.kl-back__grid{display:grid;gap:28px;align-items:end}
+@media (min-width:900px){.kl-back__grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+.kl-back__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:var(--ed-text-2);margin:0 0 24px;max-width:46ch}
+
+/* ⑩ TITHE FARM */
+.kl-ground{position:relative;min-height:min(86svh,820px);display:flex;align-items:flex-end;isolation:isolate;overflow:hidden}
+.kl-ground__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.kl-ground__shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,8,8,0) 30%,rgba(8,8,8,.88) 100%)}
+.kl-ground__in{padding:48px 0 56px}
+.kl-ground__h{font-family:var(--font-display);font-weight:400;font-size:clamp(4.5rem,15vw,15rem);line-height:.8;text-transform:uppercase;color:var(--white);margin:0}
+.kl-ground__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;color:rgba(245,243,237,.9);max-width:46ch;margin:18px 0 24px}
+
+/* Partners, notify and FAQ adopt the new rhythm */
+body .kitp-band{background:#080808;border-top:1px solid var(--ed-line)}
+body .partners{padding:clamp(56px,8vw,104px) 0}
+body #club-faq{border-top:1px solid var(--ed-line)}
+
+/* Reduced motion: the photograph stays still */
+@media (prefers-reduced-motion: reduce){.kl-hero__video{display:none}.kl-lanecard,.kl-squad__ph img{transition:none}.kl-bug__live::before{animation:none}}
+html.a11y-reduce-motion .kl-hero__video{display:none}
+
+/* ── Title-card intro: CSS, not script, so the club's name can never be left
+   hidden by a failed download. Plays once; GSAP (lane-motion.js) owns the
+   scroll-driven part that follows. ────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference){
+  html:not(.a11y-reduce-motion) .kl-line > span{animation:kl-rise var(--dur-slow,.9s) cubic-bezier(.16,.84,.24,1) both}
+  html:not(.a11y-reduce-motion) .kl-line:nth-child(2) > span{animation-delay:.09s}
+  html:not(.a11y-reduce-motion) .kl-hero__top,
+  html:not(.a11y-reduce-motion) .kl-hero__foot{animation:kl-fade .7s .35s ease-out both}
+  html:not(.a11y-reduce-motion) .kl-bug{animation:kl-up .6s .5s cubic-bezier(.16,.84,.24,1) both}
+}
+@keyframes kl-rise{from{transform:translateY(105%)}to{transform:none}}
+@keyframes kl-fade{from{opacity:0}to{opacity:1}}
+@keyframes kl-up{from{transform:translateY(100%)}to{transform:none}}
+
+/* ── The FAQ and the alerts bar, set as editorial type — not a wall of boxes.
+   Hairline rules between answers, the question in the display face. ─────── */
+body #club-faq .faq-grid{gap:0 48px}
+body #club-faq .faq-item{background:transparent;border:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14));border-radius:0;padding:24px 0 28px;box-shadow:none}
+body #club-faq .faq-item h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.3rem,1.6vw,1.6rem);line-height:1.05;letter-spacing:.01em;margin:0 0 12px}
+body .notify-bar{background:transparent;border:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14));border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14));border-radius:0;box-shadow:none;text-align:left;display:grid;gap:12px 32px;align-items:center}
+@media (min-width:900px){body .notify-bar{grid-template-columns:auto 1fr auto}}
+body .notify-bar__title{font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);text-transform:uppercase;margin:0}
+body .notify-bar__sub{margin:0}

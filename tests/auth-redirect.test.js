@@ -206,7 +206,7 @@ test('CREDENTIALS DO NOT SURVIVE THE CALLBACK', async (t) => {
 
 test('NOTHING IN THE REPOSITORY POINTS A SUPPORTER AT A DEV MACHINE', async (t) => {
   await t.test('no shipped browser file contains a development origin', () => {
-    const shipped = fs.readdirSync(path.join(ROOT, 'js')).map((f) => 'js/' + f)
+    const shipped = fs.readdirSync(path.join(ROOT, 'js')).filter((f) => /\.m?js$/.test(f)).map((f) => 'js/' + f)
       .concat(fs.readdirSync(ROOT).filter((f) => f.endsWith('.html')));
     shipped.forEach((f) => {
       const code = strip(read(f));

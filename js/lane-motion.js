@@ -13,6 +13,10 @@
         "where am I in the club's story".
      2. Home: the partner board settles into place once as it arrives —
         sponsors are acknowledged, not flashed.
+     3. Home hero: as you scroll away from the title card the photograph
+        pushes in and the name lifts off — the broadcast "cut" from the
+        opening shot into the match centre. Scrubbed to the scrollbar, so
+        it is exactly as fast as the reader.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -21,7 +25,8 @@
   if (reduce) return;
   var hasTimeline = !!document.getElementById('tl-list');
   var hasBoard = !!document.querySelector('.ptr-grid');
-  if (!hasTimeline && !hasBoard) return;
+  var hasHero = !!document.querySelector('.kl-hero');
+  if (!hasTimeline && !hasBoard && !hasHero) return;
 
   function load(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
   function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
@@ -40,6 +45,7 @@
         }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
         if (hasTimeline) timeline(gsap);
         if (hasBoard) board(gsap);
+        if (hasHero) hero(gsap);
       })
       .catch(function () { /* no motion is a fine outcome */ });
   });
@@ -64,6 +70,14 @@
       var mo = new MutationObserver(function () { if (build()) mo.disconnect(); });
       mo.observe(list, { childList: true });
     }
+  }
+
+  function hero(gsap) {
+    var sec = document.querySelector('.kl-hero');
+    var media = sec.querySelector('.kl-hero__media'), word = sec.querySelector('.kl-hero__word');
+    var tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom top', scrub: 0.4 } });
+    if (media) tl.fromTo(media, { scale: 1 }, { scale: 1.12, ease: 'none' }, 0);
+    if (word) tl.fromTo(word, { yPercent: 0 }, { yPercent: -18, ease: 'none' }, 0);
   }
 
   function board(gsap) {

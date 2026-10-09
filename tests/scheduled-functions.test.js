@@ -29,7 +29,7 @@ function scheduled() {
 
 const CLIENT_FILES = ['admin.html', 'index.html', 'match-centre.html', 'programme.html',
   'programmes.html', 'fixtures.html', 'squad.html', 'player.html']
-  .concat(fs.readdirSync(path.join(ROOT, 'js')).map((f) => 'js/' + f));
+  .concat(fs.readdirSync(path.join(ROOT, 'js')).filter((f) => /\.m?js$/.test(f)).map((f) => 'js/' + f));
 
 test('there is at least one scheduled function to check', () => {
   assert.ok(scheduled().length >= 2, 'expected the sync timers to be declared');

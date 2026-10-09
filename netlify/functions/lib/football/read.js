@@ -46,8 +46,8 @@ function shapeFixture(f, teams) {
     _awayTeamId: f.away_team_id,
     // The full-time score as the season sync stored it: the provider's
     // kick-off cell, which becomes "(1) 2 - 2 (1)" once a match is played.
-    // Home-away order; see providerScore().
-    _providerScore: f.fixture_status === 'played' ? providerScore(f.original_provider_time) : null,
+    // Turned into home-away order; see providerScore().
+    _providerScore: f.fixture_status === 'played' ? providerScore(f.original_provider_time, isHome) : null,
   };
 }
 
@@ -61,9 +61,15 @@ function shapeFixture(f, teams) {
  * scoreboard sync — so every match it did not carry (FWP_SYNC_ENABLED off)
  * reached the public site as played with no score, and form stopped dead.
  */
-function providerScore(cell) {
+function providerScore(cell, isHome) {
+  // The club's FWP list is written from OUR side (an H/A column and one
+  // opponent), so its score cell reads "our goals - their goals", home or
+  // away. Proof: the official table had us on 4 points from 10 on 9 Oct 2026
+  // — only true if Burnham 0-1 (A), Harefield 0-5 (A) and Easington 0-2 (A)
+  // were defeats. Reading the cell as home-away turned those into wins.
   const s = PF.parseScore(cell);
-  return s ? { home: s.home, away: s.away } : null;
+  if (!s) return null;
+  return isHome === false ? { home: s.away, away: s.home } : { home: s.home, away: s.away };
 }
 
 /**

@@ -60,8 +60,8 @@ function providerList(edits) {
 /** What Football Web Pages showed for Rayners Lane on 9 Oct 2026. */
 const OCT_9 = [
   { id: '578325', date: '26/9/2026', ko: HT(2, 2, 1, 1) },     // Bedfont 2-2
-  { id: '578264', date: '29/9/2026', ko: HT(0, 5, 0, 1) },     // Harefield 0-5 (we won)
-  { id: '578338', date: '3/10/2026', ko: HT(0, 2, 0, 0) },     // Easington 0-2 (we won)
+  { id: '578264', date: '29/9/2026', ko: HT(0, 5, 0, 1) },     // Harefield: we lost 0-5 (FWP writes OUR goals first)
+  { id: '578338', date: '3/10/2026', ko: HT(0, 2, 0, 0) },     // Easington: we lost 0-2
   { id: '578349', date: '10/4/2027', ko: '3pm' },              // North Leigh moved to April
 ];
 
@@ -303,11 +303,13 @@ test('played fixtures with no live match state still carry their full-time score
   const res = await withRegistry(() => READ.results('2026-2027'));
   const by = {};
   res.forEach((r) => { by[r.id] = r; });
-  // Ours first: every one of these was away.
+  // The club's FWP list reads OUR goals first, home or away (proved by the
+  // official table — 4 points from 10 games on 9 Oct — and by North Greenford,
+  // where the live scoreboard's home-away 4-1 is the list's "1 - 4").
   assert.deepStrictEqual([by['fwp-578325'].us, by['fwp-578325'].them, by['fwp-578325'].hasScore], [2, 2, true]);
-  assert.deepStrictEqual([by['fwp-578264'].us, by['fwp-578264'].them, by['fwp-578264'].hasScore], [5, 0, true],
-    'Harefield 0-5 Rayners Lane is a 5-0 win');
-  assert.deepStrictEqual([by['fwp-578338'].us, by['fwp-578338'].them, by['fwp-578338'].hasScore], [2, 0, true]);
+  assert.deepStrictEqual([by['fwp-578264'].us, by['fwp-578264'].them, by['fwp-578264'].hasScore], [0, 5, true],
+    'Harefield "0 - 5" on our list is a 0-5 defeat, not a win');
+  assert.deepStrictEqual([by['fwp-578338'].us, by['fwp-578338'].them, by['fwp-578338'].hasScore], [0, 2, true]);
 });
 
 test('the live match state still wins where it exists — the "3 - 3" form is unchanged', async () => {
@@ -322,7 +324,7 @@ test('the form guide no longer stops at 31 August', async () => {
   const res = await withRegistry(() => READ.results('2026-2027'));
   const form = READ.formFrom(res, { limit: 5 });
   assert.deepStrictEqual(form.map((f) => f.opponent + ' ' + f.outcome), [
-    'Easington Sports W', 'Harefield United W', 'Bedfont D',
+    'Easington Sports L', 'Harefield United L', 'Bedfont D',
     'North Greenford United L', 'Wallingford & Crowmarsh D',
   ]);
   const prev = READ.previousFrom(res, NOW_9_OCT);
