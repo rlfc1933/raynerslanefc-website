@@ -29,6 +29,8 @@ function shapeFixture(f, teams) {
     // The authoritative instant. Consumers compare against Date.now(); they must
     // never re-parse a local date string — that is what broke Los Angeles.
     kickoffAt: f.scheduled_kickoff_at,
+    // false: only the date is known (stored at 12:00 London) — show no time.
+    kickoffTimeConfirmed: f.kickoff_time_confirmed !== false,
     clubTimezone: f.club_timezone || 'Europe/London',
     homeTeam: home && home.canonical_name,
     awayTeam: away && away.canonical_name,

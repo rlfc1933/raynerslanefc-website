@@ -75,7 +75,7 @@ async function createPlayers(unresolved) {
       external_provider: 'fwp', provider_name: u.name,
       current_team_id: u.teamId,
       // Never 'confirmed' from a provider string alone. A human decides.
-      identity_status: u.status === 'name_used_at_another_club' ? 'needs_review' : 'provisional',
+      identity_status: u.status === 'name_used_at_another_club' ? 'name_at_another_club' : 'provisional',
       active: true,
     })),
     headers: { Prefer: 'return=representation' },

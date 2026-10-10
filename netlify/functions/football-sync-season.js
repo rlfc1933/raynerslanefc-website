@@ -207,8 +207,14 @@ function buildFixtureRows(entries, cache, existing, nowIso) {
     const awayName = p.isHome ? p.opponent : R.CLUB;
     // A played fixture reports no kick-off time, so fall back to the club's
     // own record rather than inventing 15:00.
-    const koTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
-    const koEpoch = koTime ? MT.parseLondonKickoff(p.date, koTime) : NaN;
+    const knownTime = p.kickoff || (m.internal && m.internal.kickoff) || null;
+    // A fixture first seen AFTER it was played (a re-arranged match the
+    // provider re-issued under a new id, e.g. Hilltop on Tue 8 Sep 2026) has a
+    // date but no recorded kick-off. It used to be stored with NO instant at
+    // all, so it sorted nowhere and vanished from every page. Store the date at
+    // midday London and say the time is unconfirmed — never a guessed 15:00.
+    const koTime = knownTime || '12:00';
+    const koEpoch = MT.parseLondonKickoff(p.date, koTime);
     return {
       internal_fixture_id: m.internal ? m.internal.id : null,
       external_provider: 'fwp',
@@ -218,6 +224,7 @@ function buildFixtureRows(entries, cache, existing, nowIso) {
       home_team_id: cache.teamByKey[F.clubKey(homeName)] || null,
       away_team_id: cache.teamByKey[F.clubKey(awayName)] || null,
       scheduled_kickoff_at: isFinite(koEpoch) ? new Date(koEpoch).toISOString() : null,
+      kickoff_time_confirmed: !!knownTime,
       club_timezone: 'Europe/London',
       original_provider_date: p.date,
       original_provider_time: p.providerKoCell || null,
@@ -254,6 +261,11 @@ function buildFixtureRows(entries, cache, existing, nowIso) {
   rows.forEach((row) => {
     const prev = known[row.external_fixture_id];
     if (!prev) return;
+    // A real kick-off time already on record beats the midday placeholder.
+    if (!row.kickoff_time_confirmed && prev.scheduled_kickoff_at && prev.kickoff_time_confirmed !== false &&
+        String(prev.scheduled_kickoff_at).slice(0, 10) === String(row.scheduled_kickoff_at || '').slice(0, 10)) {
+      row.scheduled_kickoff_at = prev.scheduled_kickoff_at; row.kickoff_time_confirmed = true; preserved++;
+    }
     KEEP.forEach((f) => {
       if (row[f] == null && prev[f] != null) {
         if (f === 'internal_fixture_id' && claimed.has(prev[f])) return;
@@ -263,6 +275,22 @@ function buildFixtureRows(entries, cache, existing, nowIso) {
     });
   });
   return { rows, preserved };
+}
+
+/**
+ * Provider ids this run's (validated, complete) list no longer carries, that
+ * were never played: they were postponed or re-arranged under a new id.
+ * Refuses to act on a suspiciously short list — a half-loaded page must never
+ * mark a season postponed.
+ */
+function supersededRows(existing, writtenIds, listedCount) {
+  if (!listedCount || listedCount < 10) return [];
+  const listed = new Set(writtenIds.map(String));
+  return (existing || [])
+    .filter((e) => (e.external_provider || 'fwp') === 'fwp' && e.first_team !== false)
+    .filter((e) => !listed.has(String(e.external_fixture_id)))
+    .filter((e) => ['scheduled', 'awaiting_result', 'unknown'].includes(e.fixture_status))
+    .map((e) => String(e.external_fixture_id));
 }
 
 exports.handler = async function (event) {
@@ -338,7 +366,7 @@ exports.handler = async function (event) {
     } catch (e) { /* the fixture sync is more important than the artwork */ }
 
     const existing = await S.rest('football_fixtures?season=eq.' + encodeURIComponent(SEASON) +
-      '&select=external_fixture_id,scheduled_kickoff_at,venue,internal_fixture_id') || [];
+      '&select=external_fixture_id,scheduled_kickoff_at,kickoff_time_confirmed,venue,internal_fixture_id,fixture_status,external_provider,first_team') || [];
     const built = buildFixtureRows(entries, cache, existing, new Date().toISOString());
     const fixtureRows = built.rows;
     const preserved = built.preserved;
@@ -350,6 +378,26 @@ exports.handler = async function (event) {
     counters.warning_count += 0;
     counters.records_updated += fixtureRows.length;
     const written = fixtureRows.map((f) => f.external_fixture_id);
+
+    // ── superseded fixtures ───────────────────────────────────────────────
+    // FWP re-issues a NEW id when the league re-arranges a match (Hilltop
+    // 11 Aug → 8 Sep was 578241 → 590749; Holyport 5 Sep → 10 Oct was
+    // 578296 → 593622) and simply drops a postponed fixture that has no new
+    // date yet (Wokingham, 19 Sep). The old ids were never touched again, so
+    // they stayed "scheduled" forever — a duplicate Holyport, a phantom
+    // Wokingham, a Hilltop on the wrong night. A fixture the provider's full,
+    // validated season list no longer carries, and that was never played, is
+    // marked postponed and superseded — kept for history, never deleted.
+    const stale = supersededRows(existing, written, parsed.fixtures.length);
+    if (stale.length) {
+      await S.rest('football_fixtures?season=eq.' + encodeURIComponent(SEASON) +
+        '&external_provider=eq.fwp&external_fixture_id=in.(' + stale.map(encodeURIComponent).join(',') + ')', {
+        method: 'PATCH',
+        body: { fixture_status: 'postponed', sync_status: 'superseded', last_synced_at: new Date().toISOString() },
+        headers: { Prefer: 'return=minimal' },
+      });
+      counters.records_updated += stale.length;
+    }
 
     // Disagreements go to a human, never to an automatic overwrite.
     for (const c of rec.conflicts) {
@@ -378,6 +426,7 @@ exports.handler = async function (event) {
       season: SEASON,
       summary: rec.summary,
       fixturesWritten: written.length,
+      superseded: stale,
       // Said out loud: how many facts this run declined to erase.
       fieldsPreserved: preserved,
       crestsRestored,
@@ -394,4 +443,4 @@ exports.handler = async function (event) {
   }
 };
 
-exports._internal = { clubSeason, competitionType, toWrite, buildFixtureRows };
+exports._internal = { clubSeason, competitionType, toWrite, buildFixtureRows, supersededRows };
