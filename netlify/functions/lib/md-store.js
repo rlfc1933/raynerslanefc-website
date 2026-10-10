@@ -50,15 +50,11 @@ let _fixtureCache = null;
 let _fixtureCacheAt = 0;
 const FIXTURE_TTL = 30 * 1000;   // a match day changes fast; 30s is plenty
 
-async function fetchFixtures(force) {
-  const now = Date.now();
-  if (!force && _fixtureCache && (now - _fixtureCacheAt) < FIXTURE_TTL) return _fixtureCache;
-
+async function fetchClubFile() {
   const origins = [];
   if (process.env.URL) origins.push(process.env.URL.replace(/\/$/, '') + '/data/fixtures.json');
   if (process.env.DEPLOY_URL) origins.push(process.env.DEPLOY_URL.replace(/\/$/, '') + '/data/fixtures.json');
   origins.push('https://raw.githubusercontent.com/rlfc1933/raynerslanefc-website/main/data/fixtures.json');
-
   let lastErr = null;
   for (const url of origins) {
     try {
@@ -67,12 +63,58 @@ async function fetchFixtures(force) {
       const d = await r.json();
       const list = (d && d.fixtures) || [];
       if (!Array.isArray(list) || !list.length) { lastErr = new Error(url + ' → empty'); continue; }
-      _fixtureCache = list;
-      _fixtureCacheAt = now;
       return list;
     } catch (e) { lastErr = e; }
   }
   throw lastErr || new Error('fixtures unavailable');
+}
+
+/**
+ * The season's fixtures in the club-file shape matchday records use.
+ *
+ * PRIMARY: the football registry — the same source the public site and HQ
+ * read. data/fixtures.json is a committed file that went weeks stale (North
+ * Leigh "at home on 10 Oct", no re-arranged Hilltop), so Match Day Ops offered
+ * fixtures that were not being played. Club-file entries the registry does not
+ * know are appended (records made against them must keep resolving); a
+ * superseded registry row is kept, marked, so its record shows as a conflict
+ * rather than vanishing.
+ */
+async function registryFixtures() {
+  try {
+    const READ = require('./football/read');
+    const season = process.env.FWP_SEASON || '2026-2027';
+    const list = await READ.season(season);
+    return (list || []).filter((f) => f && f.kickoffAt).map((f) => {
+      const ms = Date.parse(f.kickoffAt);
+      const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date(ms));
+      const kickoff = f.kickoffTimeConfirmed === false ? '' : new Intl.DateTimeFormat('en-GB',
+        { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ms));
+      return {
+        id: f.id, date, kickoff, opponent: f.opponent, isHome: f.isHome !== false,
+        venue: f.venue || '', competition: f.competition || '', competitionId: f.competitionId || '',
+        season: MDC.seasonOf(date), status: f.status, superseded: !!f.superseded, source: 'registry',
+      };
+    });
+  } catch (e) { return []; }
+}
+
+async function fetchFixtures(force) {
+  const now = Date.now();
+  if (!force && _fixtureCache && (now - _fixtureCacheAt) < FIXTURE_TTL) return _fixtureCache;
+  const reg = await registryFixtures();
+  let file = [];
+  try { file = await fetchClubFile(); } catch (e) { if (!reg.length) throw e; }
+  // The same match can carry a different id in each source (the club file
+  // named cup ties by hand) — so a file entry on the same London day against
+  // the same opponent is the registry's fixture, not a second one.
+  const known = new Set(reg.map((f) => f.id));
+  const sameMatch = new Set(reg.map((f) => f.date + '|' + String(f.opponent || '').trim().toLowerCase()));
+  const list = reg.length ? reg.concat(file.filter((f) => f && !known.has(f.id) &&
+    !sameMatch.has(f.date + '|' + String(f.opponent || '').trim().toLowerCase()))) : file;
+  _fixtureCache = list;
+  _fixtureCacheAt = now;
+  return list;
 }
 
 /** One fixture by id, or null. */
@@ -85,7 +127,7 @@ async function fixtureById(id) {
 async function homeFixtures(season) {
   const list = await fetchFixtures();
   return list
-    .filter(f => f && f.isHome !== false)
+    .filter(f => f && f.isHome !== false && !f.superseded)
     .filter(f => !season || (f.season || MDC.seasonOf(f.date)) === season)
     .sort((a, b) => (a.date + (a.kickoff || '')).localeCompare(b.date + (b.kickoff || '')));
 }
