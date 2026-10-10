@@ -161,45 +161,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function loadExtraNews() {
-  var extra = [];
-  try {
-    var r = await fetch('data/news.json?t=' + Date.now());
-    if (r.ok) {
-      var d = await r.json();
-      (d.articles || []).forEach(function(a) {
-        if (!allArticles.find(function(x){ return x.title === a.title; })) {
-          // "External" now means exactly one thing: an off-site http link that
-          // should open in a new tab. An article can carry an INTERNAL link
-          // (e.g. trials.html) and still be ours — those open in the same tab.
-          var isExt = !!(a.link && /^https?:/i.test(a.link));
-          extra.push({ source:'club', priority:0, id:a.id, title:a.title,
-            excerpt:a.excerpt||'', image:a.image||IMG_FALLBACK,
-            category:a.category||'', shareHeadline:a.shareHeadline||'',
-            date:a.date||'',
-            link: a.link ? a.link : ('news-article.html?id=' + a.id),
-            external: isExt });
-        }
-      });
-    }
-  } catch(e) {}
-
-  try {
-    var res = await fetch('/.netlify/functions/fetch-news');
-    if (res.ok) {
-      var data = await res.json();
-      (data.articles || []).forEach(function(a) {
-        if (!allArticles.find(function(x){ return x.title === a.title; })) {
-          var src = a.key || 'nonleague';
-          extra.push({ source:src, priority:src==='club'?0:2,
-            title:a.title, excerpt:a.excerpt||'',
-            image:a.image||'',
-            date:a.date||'', link:a.link||'#', external:true });
-        }
-      });
-    }
-  } catch(e) {}
-
-  if (extra.length) {
+  // The club's own stories render the moment they arrive; the outside feed
+  // (a serverless fetch that can take seconds on a cold start) is merged in
+  // when it lands. Supporters never wait on someone else's RSS for our news.
+  function merge(extra) {
+    if (!extra.length) return;
     allArticles = allArticles.concat(extra);
     allArticles.sort(function(a,b) {
       if (a.priority !== b.priority) return a.priority - b.priority;
@@ -212,6 +178,50 @@ async function loadExtraNews() {
     });
     renderNewsroom();
   }
+
+  var club = [];
+  try {
+    var r = await fetch('data/news.json?t=' + Date.now());
+    if (r.ok) {
+      var d = await r.json();
+      (d.articles || []).forEach(function(a) {
+        if (!allArticles.find(function(x){ return x.title === a.title; })) {
+          // "External" now means exactly one thing: an off-site http link that
+          // should open in a new tab. An article can carry an INTERNAL link
+          // (e.g. trials.html) and still be ours — those open in the same tab.
+          var isExt = !!(a.link && /^https?:/i.test(a.link));
+          club.push({ source:'club', priority:0, id:a.id, title:a.title,
+            excerpt:a.excerpt||'', image:a.image||IMG_FALLBACK,
+            category:a.category||'', shareHeadline:a.shareHeadline||'',
+            date:a.date||'',
+            link: a.link ? a.link : ('news-article.html?id=' + a.id),
+            external: isExt });
+        }
+      });
+    }
+  } catch(e) {}
+  merge(club);
+
+  var feed = [];
+  try {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function(){ ctl.abort(); }, 8000) : null;
+    var res = await fetch('/.netlify/functions/fetch-news', ctl ? { signal: ctl.signal } : undefined);
+    if (timer) clearTimeout(timer);
+    if (res.ok) {
+      var data = await res.json();
+      (data.articles || []).forEach(function(a) {
+        if (!allArticles.find(function(x){ return x.title === a.title; })) {
+          var src = a.key || 'nonleague';
+          feed.push({ source:src, priority:src==='club'?0:2,
+            title:a.title, excerpt:a.excerpt||'',
+            image:a.image||'',
+            date:a.date||'', link:a.link||'#', external:true });
+        }
+      });
+    }
+  } catch(e) {}
+  merge(feed);
   var el = document.getElementById('last-updated');
   if (el) el.textContent = '· Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
