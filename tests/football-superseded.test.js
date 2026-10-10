@@ -51,3 +51,18 @@ test('a short or empty provider list never marks the season postponed', () => {
   assert.deepStrictEqual(supersededRows(existing, ['1', '2'], 2), []);
   assert.deepStrictEqual(supersededRows(existing, [], 0), []);
 });
+
+test('a superseded postponement points at its re-arranged fixture (and only the same fixture)', () => {
+  const READ = require('../netlify/functions/lib/football/read');
+  const list = [
+    { id: 'fwp-578241', opponent: 'Hilltop', isHome: true, competitionId: 1, status: 'postponed', superseded: true, kickoffAt: '2026-08-11T18:45:00Z' },
+    { id: 'fwp-590749', opponent: 'Hilltop', isHome: true, competitionId: 1, status: 'played', kickoffAt: '2026-09-08T11:00:00Z', kickoffTimeConfirmed: false },
+    { id: 'fwp-578417', opponent: 'Hilltop', isHome: false, competitionId: 1, status: 'scheduled', kickoffAt: '2026-12-04T19:45:00Z' },
+    { id: 'fwp-578321', opponent: 'Wokingham Town', isHome: true, competitionId: 1, status: 'postponed', superseded: true, kickoffAt: '2026-09-19T14:00:00Z' },
+    { id: 'fwp-578486', opponent: 'Wokingham Town', isHome: false, competitionId: 1, status: 'scheduled', kickoffAt: '2027-01-16T15:00:00Z' },
+  ];
+  READ.linkRearranged(list);
+  assert.strictEqual(list[0].rearrangedTo.id, 'fwp-590749');
+  assert.strictEqual(list[0].rearrangedTo.status, 'played');
+  assert.strictEqual(list[3].rearrangedTo, undefined, 'the AWAY reverse fixture is not the re-arranged home game');
+});

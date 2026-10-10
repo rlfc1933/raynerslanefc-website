@@ -107,13 +107,35 @@ async function season(seasonLabel) {
       (seasonLabel ? '&season=eq.' + encodeURIComponent(seasonLabel) : '') +
       '&order=scheduled_kickoff_at.asc'),
   ]);
-  return (fixtures || []).map((f) => {
+  const list = (fixtures || []).map((f) => {
     const shaped = shapeFixture(f, teams);
     const c = comps[f.competition_id];
     shaped.competition = c ? c.canonical_name : null;
     shaped.competitionType = c ? c.competition_type : null;
+    shaped.superseded = f.sync_status === 'superseded';
     return shaped;
   });
+  return linkRearranged(list);
+}
+
+/**
+ * A postponed fixture the provider re-issued under a new id points at its
+ * re-arranged date. Same opponent, same home/away, same competition, later,
+ * not itself called off — in a league that is the same fixture (each side
+ * hosts the other once), so "Hilltop H, 11 Aug, P-P" reads "re-arranged:
+ * played Tue 8 Sep" instead of "a new date will be announced".
+ */
+function linkRearranged(list) {
+  list.forEach((f) => {
+    if (f.status !== 'postponed' || !f.superseded) return;
+    const t0 = Date.parse(f.kickoffAt);
+    const next = list.filter((g) => g !== f && g.status !== 'postponed' && g.status !== 'cancelled' &&
+      g.opponent === f.opponent && g.isHome === f.isHome && g.competitionId === f.competitionId &&
+      Date.parse(g.kickoffAt) > t0)
+      .sort((a, b) => Date.parse(a.kickoffAt) - Date.parse(b.kickoffAt))[0];
+    if (next) f.rearrangedTo = { id: next.id, kickoffAt: next.kickoffAt, status: next.status, kickoffTimeConfirmed: next.kickoffTimeConfirmed };
+  });
+  return list;
 }
 
 /**
@@ -382,6 +404,7 @@ function shapeLineups(rows, fixture) {
 }
 
 module.exports = {
+  linkRearranged,
   CLUB, shapeFixture, season, results, leagueTable, fixtureDetail, shapeLineups,
   nextFrom, currentFrom, previousFrom, nextProgrammeFrom, formFrom,
   inMatchWindow, hasResult, MATCH_WINDOW_MS, providerScore,

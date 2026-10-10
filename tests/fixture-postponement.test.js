@@ -129,7 +129,9 @@ test('both next-match selectors use the shared rule, not a score check', () => {
 
 test('the fixtures page keeps it out of upcoming AND out of results', () => {
   const s = read('fixtures.html');
-  assert.match(s, /var calledOff = sorted\.filter\(function \(f\) \{ return MatchTime\.isCalledOff\(f\); \}\)/);
+  // Called off stays out of upcoming/results; one re-arranged AND since played
+  // is history (its result is listed) rather than a standing notice.
+  assert.match(s, /var calledOff = sorted\.filter\(function \(f\) \{ return MatchTime\.isCalledOff\(f\) && !f\.rearrangedPlayed; \}\)/);
   assert.match(s, /var live      = sorted\.filter\(function \(f\) \{ return !MatchTime\.isCalledOff\(f\); \}\)/);
   ['played', 'awaiting', 'upcoming'].forEach((b) =>
     assert.ok(new RegExp('var ' + b + '\\s+= live\\.filter').test(s),
@@ -148,7 +150,7 @@ test('the public list displays it, with the reason and the TBC', () => {
 
 test('a rearranged date is displayed once it exists', () => {
   const s = read('fixtures.html');
-  assert.match(s, /f\.rearrangedDate\s*\n?\s*\? 'Rearranged for '/);
+  assert.match(s, /f\.rearrangedDate\s*\n?\s*\? \(f\.rearrangedPlayed \? 'Re-arranged and played on ' : 'Rearranged for '\)/);
 });
 
 // ── 5 · IT CAN NEVER GO LIVE ────────────────────────────────────────────────

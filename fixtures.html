@@ -276,7 +276,7 @@ async function loadFixturesData() {
       return hit ? Object.assign({}, f, {
         status: hit.status,
         postponedReason: hit.postponedReason || '',
-        rearrangedDate: hit.rearrangedDate || null,
+        rearrangedDate: hit.rearrangedDate || f.rearrangedDate || null,
       }) : f;
     });
   }
@@ -880,7 +880,11 @@ function fxFromRegistry(fixtures, results) {
       // page that format a day rather than an instant.
       kickoffAt: f.kickoffAt,
       date: londonDate(f.kickoffAt),
-      kickoff: londonTime(f.kickoffAt),
+      // A date-only fixture (re-arranged, first seen after it was played) has
+      // no confirmed time: show none rather than the stored placeholder.
+      kickoff: f.kickoffTimeConfirmed === false ? '' : londonTime(f.kickoffAt),
+      rearrangedDate: f.rearrangedTo ? f.rearrangedTo.kickoffAt : null,
+      rearrangedPlayed: !!(f.rearrangedTo && f.rearrangedTo.status === 'played'),
       // The registry's crest if it has one, otherwise the club's own library.
       // This adapter originally carried NO crest at all, which is the defect
       // that took every opponent badge off this page.
@@ -914,7 +918,10 @@ function renderFxSeason(list) {
   // "upcoming" and could be picked as the next match, and the morning after the
   // date it had been called off it moved into RESULTS as a game "awaiting a
   // score" — a match that was never played, filed as one that was.
-  var calledOff = sorted.filter(function (f) { return MatchTime.isCalledOff(f); });
+  // A postponement whose re-arranged match has since been PLAYED is history,
+  // not a notice: its result is in the results list. Everything else that was
+  // called off stays visible — with its new date when there is one.
+  var calledOff = sorted.filter(function (f) { return MatchTime.isCalledOff(f) && !f.rearrangedPlayed; });
   var live      = sorted.filter(function (f) { return !MatchTime.isCalledOff(f); });
   // Classify by TIME, not by whether a score was typed in.
   var played   = live.filter(hasScore);                                        // finished, score known
@@ -967,8 +974,8 @@ function renderFxSeason(list) {
             (f.kickoff ? ' · ' + fxEsc(f.kickoff) : '') + '</div>' +
           (f.postponedReason ? '<div class="mnotice__why">' + fxEsc(f.postponedReason) + '</div>' : '') +
           '<div class="mnotice__next">' + (f.rearrangedDate
-            ? 'Rearranged for ' + fxEsc(new Date(f.rearrangedDate).toLocaleDateString('en-GB',
-                { weekday: 'long', day: 'numeric', month: 'long' }))
+            ? (f.rearrangedPlayed ? 'Re-arranged and played on ' : 'Rearranged for ') + fxEsc(new Date(f.rearrangedDate).toLocaleDateString('en-GB',
+                { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/London' }))
             : 'A rearranged date will be announced once confirmed.') + '</div>' +
         '</div>';
       }).join('') + '</section>';
