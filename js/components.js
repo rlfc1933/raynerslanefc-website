@@ -940,16 +940,19 @@ function initComponents(currentPage) {
     }
   });
 
-  // Register service worker + auto-reload once when a new version takes over,
-  // so an updated site is never stuck behind a stale cache.
+  // Register the service worker. A new version is let in quietly, and the page
+  // is NOT reloaded when it takes over: the worker is network-first, so the
+  // next navigation already gets fresh files, and a forced reload here used to
+  // throw away whatever a supporter was typing into a form.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function(){});
-    var _swRefreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (_swRefreshing) return;
-      _swRefreshing = true;
-      window.location.reload();
-    });
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      function letIn(w) { if (w && navigator.serviceWorker.controller) w.postMessage({ type: 'SKIP_WAITING' }); }
+      letIn(reg.waiting);
+      reg.addEventListener('updatefound', function () {
+        var w = reg.installing; if (!w) return;
+        w.addEventListener('statechange', function () { if (w.state === 'installed') letIn(w); });
+      });
+    }).catch(function(){});
   }
 
   // ── ONE-TAP INSTALL ("Add to Home Screen") ──
@@ -964,9 +967,13 @@ function initComponents(currentPage) {
   window.addEventListener('appinstalled', function(){
     document.querySelectorAll('.js-install').forEach(function(b){ b.style.display = 'none'; });
   });
-  // Already installed? Hide install buttons.
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-    document.querySelectorAll('.js-install').forEach(function(b){ b.style.display = 'none'; });
+  // Already installed, or a browser that cannot install from a button? Hide
+  // the button: an enabled "Install" that only shows an alert is a dead end.
+  // It reappears the moment the browser offers its prompt (above). iPhone
+  // Safari keeps it, because there the alert's Share-menu steps are the way.
+  var _canManual = /iphone|ipad|ipod/i.test(navigator.userAgent) && /safari/i.test(navigator.userAgent) && !/crios|fxios|edgios/i.test(navigator.userAgent);
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || !_canManual) {
+    document.querySelectorAll('.js-install').forEach(function(b){ if (!window._lanePrompt) b.style.display = 'none'; });
   }
   window.laneInstall = function() {
     if (window._lanePrompt) {
@@ -1037,23 +1044,39 @@ function initComponents(currentPage) {
 
 
   // ── PWA INSTALL PROMPT ──
+  // Offered once, on a phone, only where installing is actually possible
+  // (the browser handed us its install prompt, or iPhone Safari's Share menu),
+  // and never again once dismissed or installed. It used to appear on every
+  // page view, including in browsers that cannot install anything.
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (!isStandalone) {
+  var isIOSSafari = isIOS && /safari/i.test(navigator.userAgent) && !/crios|fxios|edgios/i.test(navigator.userAgent);
+  var pwaDismissed = false;
+  try { pwaDismissed = localStorage.getItem('rlfc_pwa_dismissed') === '1'; } catch (e) {}
+  function showPwaBanner(viaPrompt) {
+    if (isStandalone || pwaDismissed || document.getElementById('pwa-banner')) return;
+    if (!window.matchMedia('(max-width: 900px)').matches) return;
     var banner = document.createElement('div');
     banner.id = 'pwa-banner';
     banner.style.cssText = 'background:#FFD100;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10001;';
-    var icon = isIOS
-      ? '<i class="ico ico-arrow-up"></i> Tap <strong>Share</strong> then <strong>Add to Home Screen</strong> to install The Lane app'
-      : '<i class="ico ico-arrow-up"></i> Tap <strong>Add to Home Screen</strong> to install The Lane app';
+    var text = viaPrompt
+      ? 'Add The Lane to your home screen for fixtures and scores in one tap.'
+      : 'Add The Lane to your home screen: tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.';
     banner.innerHTML =
       '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
         '<img src="/img/badge.png" alt="" aria-hidden="true" style="width:32px;height:32px;object-fit:contain;flex-shrink:0">' +
-        '<div style="font-family:var(--font-c);font-size:12px;font-weight:600;color:#000;letter-spacing:.02em;line-height:1.4">' + icon + '</div>' +
+        '<div style="font-family:var(--font-c);font-size:13px;font-weight:600;color:#000;line-height:1.4">' + text + '</div>' +
       '</div>' +
-      '<button onclick="dismissPWA()" type="button" aria-label="Dismiss app install prompt" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 10px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x" aria-hidden="true"></i></button>';
+      (viaPrompt ? '<button onclick="laneInstall()" type="button" style="background:#080808;color:#FFD100;border:none;border-radius:6px;font-family:var(--font-c);font-size:13px;font-weight:800;min-height:44px;padding:0 14px;cursor:pointer;flex-shrink:0">Install</button>' : '') +
+      '<button onclick="dismissPWA()" type="button" aria-label="Dismiss app install prompt" style="background:rgba(0,0,0,.15);border:none;color:#000;font-family:var(--font-c);font-size:11px;font-weight:700;min-width:44px;min-height:44px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent"><i class="ico ico-x" aria-hidden="true"></i></button>';
     document.body.insertBefore(banner, document.body.firstChild);
   }
+  if (isIOSSafari) showPwaBanner(false);
+  window.addEventListener('beforeinstallprompt', function () { showPwaBanner(true); });
+  window.addEventListener('appinstalled', function () {
+    try { localStorage.setItem('rlfc_pwa_dismissed', '1'); } catch (e) {}
+    var b = document.getElementById('pwa-banner'); if (b) b.remove();
+  });
 
   // ── COOKIE BANNER ──
   // Ask again whenever no decision has been recorded — including in a fresh

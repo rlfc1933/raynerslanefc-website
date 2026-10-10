@@ -2,11 +2,24 @@
 // Always tries the live network so updates show immediately; the cache is only
 // an offline fallback. (The old cache-first version froze the site on returning
 // visitors and made deploys look like they hadn't happened.)
-var CACHE = 'rlfc-v16'; // bump on deploy → old caches purged, new assets picked up cleanly
+//
+// UPDATE LIFECYCLE (see .claude/skills/rayners-pwa-reliability).
+// A new worker INSTALLS but does not take over on its own: it waits until a
+// page tells it the moment is safe ({type:'SKIP_WAITING'}). Public pages do
+// that straight away (the fetch strategy is network-first, so nothing on screen
+// changes); Staff HQ asks the person, and never while they have unsaved work.
+// The old worker called skipWaiting() on install and the public pages reloaded
+// on every controller change — a forced reload in the middle of a form.
+//
+// VERSION is what Staff HQ shows in its "update ready" bar. Bump it together
+// with CACHE whenever shipped HTML/JS/CSS changes; nothing else triggers an
+// update prompt (the old prompt compared admin.html's etag, which changes on
+// every data save, so it appeared after every save).
+var VERSION = '2026.10.09-hq1';
+var CACHE = 'rlfc-v17'; // bump on deploy → old caches purged, new assets picked up cleanly
 var CORE = ['/', '/index.html', '/css/style.css', '/css/icons.css', '/js/components.js', '/js/main.js', '/img/badge.png'];
 
 self.addEventListener('install', function (e) {
-  self.skipWaiting();
   // {cache:'reload'} is load-bearing: a plain addAll() is allowed to fill the
   // SW cache FROM THE BROWSER'S HTTP CACHE, so a fresh install right after a
   // deploy can bake a stale file in and serve it until the next CACHE bump.
@@ -26,6 +39,13 @@ self.addEventListener('activate', function (e) {
       return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+// A page decides when the waiting worker takes over, and can ask its version.
+self.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.type === 'SKIP_WAITING') { self.skipWaiting(); return; }
+  if (d.type === 'GET_VERSION' && e.ports && e.ports[0]) e.ports[0].postMessage({ version: VERSION, cache: CACHE });
 });
 
 // ── Web Push: match alerts ──

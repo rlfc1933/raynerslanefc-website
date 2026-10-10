@@ -151,14 +151,19 @@ test('every action opens an existing panel rather than acting directly', () => {
 test('a failure resolving the fixture cannot take the dashboard down', () => {
   assert.match(SRC, /\.catch\(function \(\) \{ S\.loaded = true; return S; \}\)/,
     'load() must resolve rather than reject');
-  assert.match(ADMIN, /try \{ if \(window\.PrepareMatch\) PrepareMatch\.init\(\); \} catch \(e\) \{\}/,
-    'and the dashboard hook must be wrapped independently of PortalHome');
+  // Lane HQ (Oct 2026): the dashboard fixture card and the hub are now drawn
+  // by js/hq-shell.js from the football REGISTRY, not data/fixtures.json, so
+  // the dashboard hook is the shell's — still independently wrapped.
+  assert.match(ADMIN, /try \{ if \(window\.HQShell\) HQShell\.init\(\); \} catch \(e\) \{\}/,
+    'and the dashboard hook must be wrapped independently');
 });
 
 test('the hub is wired to a real panel and initialiser', () => {
   assert.match(ADMIN, /<div class="panel" id="panel-preparematch">/);
   assert.match(ADMIN, /if \(name === 'preparematch'\)/);
-  assert.match(ADMIN, /<div id="pm-next"><\/div>/, 'the dashboard needs a mount point');
+  assert.match(ADMIN, /<div id="hq-match"><\/div>/, 'the workflow needs a mount point');
+  assert.ok(!/PrepareMatch\.init\(\)/.test(ADMIN.replace(/<!--[\s\S]*?-->/g, '')),
+    'the fixtures.json card must no longer be painted into HQ');
 });
 
 test('the staff card asks for the confirmed palette only', () => {

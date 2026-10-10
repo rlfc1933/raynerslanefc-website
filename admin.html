@@ -17,8 +17,18 @@
   <script src="js/portal-tools.js"></script>
   <script src="js/club-os.js"></script>
   <script src="js/portal-recent.js"></script>
-  <script src="js/portal-home.js"></script>
   <script src="js/portal-safety.js"></script>
+  <!-- LANE HQ shell: one navigation, the Command Centre, matchday preparation,
+       one notification system, and an honest install/update lifecycle.
+       Fixtures come from the football registry (football-data.js), never from
+       data/fixtures.json; every date is Europe/London (hq-time.js). The old
+       front door (portal-home.js) and the fixtures.json next-match card are
+       no longer loaded. -->
+  <script src="js/football-data.js"></script>
+  <script src="js/hq-time.js"></script>
+  <script src="js/hq-model.js"></script>
+  <script src="js/hq-shell.js"></script>
+  <script src="js/hq-pwa.js"></script>
   <!-- Release 2: the fixture, and everything it needs, in one workspace.
        Navigation and status only — every action opens an EXISTING panel via
        openPanel(), so the server-side authorisation is unchanged. Owns no
@@ -107,6 +117,7 @@
   <link rel="stylesheet" href="css/matchday-ops.css">
   <link rel="stylesheet" href="css/club-os.css">
   <link rel="stylesheet" href="css/portal-home.css">
+  <link rel="stylesheet" href="css/hq.css">
   <style>
     /* A public change deserves a confirmation you can actually read. */
     .portal-said{position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483000;
@@ -851,36 +862,36 @@
 
 <!-- APP -->
 <div id="app">
-  <div class="app-hdr">
-    <img src="img/badge.png" alt="RLFC">
-    <div class="app-ttl">Admin Panel</div>
-    <span id="staff-who" style="display:none;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--y);background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.3);padding:5px 10px;border-radius:20px;white-space:nowrap"></span>
-    <button class="bell-btn" id="bell-btn" onclick="toggleNotifs()" title="Things to do">
-      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-      <span class="bell-badge" id="bell-badge" style="display:none">0</span>
+  <header class="app-hdr hq-top">
+    <a class="hq-top__brand" href="#" data-hq-go="home" aria-label="Lane HQ, Command centre"><img src="img/badge.png" alt="" width="30" height="30"><span>Lane HQ</span></a>
+    <span class="hq-top__where" id="hq-where" aria-live="polite">Command centre</span>
+    <span class="hq-top__sp"></span>
+    <span id="staff-who" hidden></span>
+    <button type="button" class="bell-btn" id="bell-btn" aria-label="Notifications" aria-haspopup="dialog" aria-controls="notif-panel" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="bell-badge" id="bell-badge" style="display:none"></span>
     </button>
-    <button class="install-btn" id="admin-install" onclick="adminInstall()" title="Add to home screen">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7M9 11l3 3 3-3"/></svg>
-      <span>Install</span>
-    </button>
-    <a href="index.html" style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);background:none;border:1px solid var(--br);padding:6px 12px;border-radius:6px;text-decoration:none"><i class="ico ico-house"></i></a>
-    <button class="hlp-btn" onclick="openPanel('siteguide')" title="Help and guides" aria-label="Help and guides">?</button>
-    <button class="lock-btn" onclick="lock()">Lock</button>
-  </div>
+    <button type="button" class="hlp-btn" onclick="openPanel('siteguide')" aria-label="Help and guides">?</button>
+    <div class="hq-account">
+      <button type="button" id="hq-account-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="hq-account-menu">Account</button>
+      <div class="hq-menu" id="hq-account-menu" role="menu" hidden></div>
+    </div>
+  </header>
+  <div class="hq-frame">
+  <nav class="hq-nav" id="hq-nav" aria-label="Lane HQ"></nav>
   <div class="dash">
 
-    <!-- ═══ PORTAL HOME (Release 1) ═══════════════════════════════════════
-         Answers "what needs doing" before showing the tool inventory. The
-         classic 31-tile list below is preserved untouched and is revealed by
-         "View all club tools", so nothing became unreachable. -->
-    <!-- The fixture, above the tool inventory. Empty until PrepareMatch
-         resolves one, so a failure here shows nothing rather than a broken
-         card. -->
-    <div id="pm-next"></div>
-    <div id="portal-home"></div>
+    <!-- ═══ THE COMMAND CENTRE (js/hq-shell.js) ═══════════════════════════
+         What needs doing, money in, supporters, the next match from the
+         football registry, programmes, my work and recent activity. Every
+         tool is reached through the one HQ navigation (js/hq-model.js). -->
+    <div id="pm-next" hidden></div>
+    <main id="hq-home" aria-label="Command centre"></main>
 
-    <!-- DASHBOARD — the classic full tool list. Hidden by default; shown by
-         PortalHome.toggleAll(). Every tile, panel id and hash still works. -->
+    <!-- RETIRED: the classic tile list and its fixtures.json "Next Match"
+         editor. Kept in the page (hidden, unreachable from navigation) so no
+         panel id or initialiser that reads it breaks; every tool it linked to
+         is in the HQ navigation. -->
     <div id="dash-home" style="display:none">
       <div class="hq-hero">
         <div class="hq-eyebrow">Rayners Lane FC &middot; Staff HQ</div>
@@ -1217,7 +1228,10 @@
          happens. Every tile opens an existing panel; nothing new is authorised
          here and no football truth is written. -->
     <div class="panel" id="panel-preparematch">
-      <h2 class="ph">Prepare match</h2>
+      <h2 class="ph">Matchday preparation</h2>
+      <!-- The fixture, its checklist and its related work, from the football
+           registry (js/hq-shell.js renderMatch). -->
+      <div id="hq-match"></div>
       <!-- The live desk mounts here during a match. Empty otherwise, so a
            Tuesday evening shows the workspace and nothing about live football. -->
       <div id="live-content-desk"></div>
@@ -3661,6 +3675,14 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
     <div id="rec-detail" class="rec-detail" onclick="if(event.target===this)recCloseDetail()"></div>
 
   </div>
+  </div><!-- /.hq-frame -->
+</div>
+<nav id="hq-tabbar" aria-label="Lane HQ quick navigation"></nav>
+<div id="hq-sheet" role="dialog" aria-modal="true" aria-label="All HQ sections" hidden>
+  <div class="hq-sheet__panel">
+    <div class="hq-sheet__bar"><h2>All sections</h2><button type="button" class="hq-sheet__close">Close</button></div>
+    <div id="hq-sheet-body"></div>
+  </div>
 </div>
 
 <!-- QR SCANNER (turnstile) -->
@@ -3678,8 +3700,8 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
 </div>
 
 <!-- NOTIFICATION CENTRE -->
-<div class="notif" id="notif-panel">
-  <div class="notif__hdr"><span><i class="ico ico-bell"></i> To Do</span><button onclick="toggleNotifs()" style="background:none;border:none;color:var(--gr);font-size:20px;cursor:pointer;line-height:1">&times;</button></div>
+<div class="notif" id="notif-panel" role="dialog" aria-label="Notifications">
+  <div class="notif__hdr"><span>Notifications</span><button type="button" class="hq-link" id="hq-notes-all" hidden>Mark all as read</button><button type="button" class="hq-btn hq-btn--sm hq-btn--ghost" data-hq-notes-close>Close</button></div>
   <div id="notif-list"></div>
 </div>
 
@@ -3710,74 +3732,34 @@ try { PIN = sessionStorage.getItem('rlfc_admin_pin') || ''; } catch (e) {}
 
 const BUILD_HOOK = 'https://api.netlify.com/build_hooks/6a10e5d0c22b131a9544d269';
 
-// ── INSTALL THIS ADMIN AS AN APP ──
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function(){}); }
-
-// ── AUTO-UPDATE: never let a tab run stale code after a fix ships ──
-// If admin.html is redeployed while this tab/PWA stays open, the staffer would
-// keep running the OLD code (silently reintroducing fixed bugs on their device
-// — exactly how a save fix "didn't work" for someone who never reloaded). We
-// remember this page's version on load and, on a timer + whenever the tab is
-// refocused, check whether the deployed admin.html changed. If it did, we show
-// a one-tap "Update now" bar that reloads to the new version.
-(function () {
-  var baseTag = null, prompted = false;
-  // Compare the file's CONTENT LENGTH, not etag/last-modified. Every Save fires a
-  // Netlify rebuild, which re-stamps admin.html with a fresh etag even when the
-  // file is byte-identical — that made "A new version is ready" pop after every
-  // live-score tap. Content-length only changes when admin.html actually changes.
-  function stamp(res) { return res.headers.get('content-length') || res.headers.get('etag') || null; }
-  function showReloadBar() {
-    if (prompted || document.getElementById('rlfc-update-bar')) return;
-    // NEVER interrupt someone mid-count. Match Day Ops holds a gate tally with
-    // unsynced taps; throwing an "Update now" bar over that — which reloads —
-    // is how a volunteer loses the crowd figure. Ask again once they are saved.
-    try { if (window.MDOps && MDOps.isBusy && MDOps.isBusy()) { setTimeout(check, 60000); return; } } catch (e) {}
-    prompted = true;
-    var bar = document.createElement('div');
-    bar.id = 'rlfc-update-bar';
-    bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:2147483647;background:#FFD100;color:#080808;font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;padding:13px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer';
-    bar.innerHTML = '<span><i class="ico ico-refresh-cw"></i> A new version of Lane HQ is ready</span><span style="background:#080808;color:#FFD100;padding:6px 12px;border-radius:8px;white-space:nowrap">Update now</span>';
-    // Remember where the user was so the reload puts them back on the SAME
-    // screen. Landing on the dashboard every time an update lands is what made
-    // this feel like being kicked out of the app.
-    bar.addEventListener('click', function () {
-      try {
-        var open = document.querySelector('.panel.on');
-        if (open && open.id && open.id.indexOf('panel-') === 0) {
-          sessionStorage.setItem('rlfc_return_panel', open.id.slice(6));
-        }
-      } catch (e) {}
-      location.reload();
-    });
-    document.body.appendChild(bar);
-  }
-  function check() {
-    fetch('/admin.html', { method: 'HEAD', cache: 'no-store' }).then(function (res) {
-      var tag = stamp(res);
-      if (!tag) return;
-      if (baseTag === null) { baseTag = tag; return; }
-      if (tag !== baseTag) showReloadBar();
-    }).catch(function () {});
-  }
-  check();
-  setInterval(check, 90000);
-  window.addEventListener('focus', check);
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
-})();
-var _adminPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); _adminPrompt = e; });
-window.addEventListener('appinstalled', function(){ var b=document.getElementById('admin-install'); if(b) b.style.display='none'; });
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-  document.addEventListener('DOMContentLoaded', function(){ var b=document.getElementById('admin-install'); if(b) b.style.display='none'; });
+// ── INSTALL AND UPDATE: js/hq-pwa.js ──
+// The old version polled admin.html with HEAD and compared content-length /
+// etag. Every Save rebuilds the site and re-stamps the etag, so "A new version
+// of Lane HQ is ready" appeared after every save. The only update signal now
+// is a genuinely new service worker, and nothing reloads by itself.
+//
+// What counts as unsaved work. The update bar asks this before reloading.
+// A gate count in Match Day Ops that has not reached the server, or any field
+// a person has typed into on the open screen since its last confirmed save.
+var _hqDirty = {};
+document.addEventListener('input', function (e) {
+  if (!e.isTrusted || !e.target || !e.target.closest) return;
+  var p = e.target.closest('.panel');
+  if (p && p.id && !e.target.hasAttribute('data-hq-q')) _hqDirty[p.id] = true;
+}, true);
+function hqClearDirty() {
+  var open = document.querySelector('.panel.on');
+  if (open && open.id) delete _hqDirty[open.id];
 }
-function adminInstall() {
-  if (_adminPrompt) { _adminPrompt.prompt(); _adminPrompt.userChoice.finally(function(){ _adminPrompt=null; }); return; }
-  var iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  alert(iOS
-    ? 'Add Lane HQ to your home screen:\n\n1. Tap the Share button (square with an arrow)\n2. Tap "Add to Home Screen"\n3. Tap Add — open it like an app any time.'
-    : 'Install Lane HQ:\n\nOpen your browser menu (⋮) and choose "Install app" or "Add to Home screen".');
-}
+window.hqUnsavedWork = function () {
+  try { if (window.MDOps && MDOps.isBusy && MDOps.isBusy()) return { dirty: true, where: 'Attendance and takings (a gate count is not saved yet)' }; } catch (e) {}
+  var ids = Object.keys(_hqDirty);
+  if (!ids.length) return { dirty: false };
+  var name = ids[0].replace(/^panel-/, '');
+  var label = (window.HQModel && HQModel.labelOf(name)) || (window.PortalTools && PortalTools.byId(name) && PortalTools.byId(name).name) || name;
+  return { dirty: true, where: label };
+};
+try { HQPwa.init(); } catch (e) {}
 
 var pinVal = '';
 var isLive = false;
@@ -3838,10 +3820,10 @@ function enterApp() {
   loadAll();
   initDash();
   addTileInfos();
-  try { if (window.PortalHome) PortalHome.init(); } catch (e) {}
-  // The fixture card sits above the front door. Independently wrapped so a
-  // failure resolving it can never stop the dashboard rendering.
-  try { if (window.PrepareMatch) PrepareMatch.init(); } catch (e) {}
+  try { if (window.PortalRecent) PortalRecent.watch(); } catch (e) {}
+  // The Command Centre, navigation and notifications. Independently wrapped
+  // so a failure there can never stop the panels working.
+  try { if (window.HQShell) HQShell.init(); } catch (e) {}
   try { if (window.PortalSafety) PortalSafety.init(); } catch (e) {}
   restoreReturnPanel();
 }
@@ -4580,17 +4562,18 @@ function openPanel(name) {
   // just to read the notice explaining it is retired was pure friction, so the
   // panel opens; the figures themselves stay behind the existing gate.
   document.getElementById('dash-home').style.display = 'none';
-  var _ph = document.getElementById('portal-home');
-  if (_ph) _ph.style.display = 'none';
+  var _ph = document.getElementById('hq-home');
+  if (_ph) _ph.hidden = true;
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
   var p = document.getElementById('panel-' + name);
   if (p) p.classList.add('on');
   paintCrumb(name, p);
+  try { if (window.HQShell) HQShell.onNavigate(name); } catch (e) {}
   window.scrollTo(0, 0);
   // Push a history entry so the phone's back gesture (and the browser back
   // button) returns to the dashboard instead of leaving the admin entirely.
   try { if (!(history.state && history.state.panel === name)) history.pushState({ panel: name }, '', '#' + name); } catch (e) {}
-  if (name === 'preparematch') { try { PrepareMatch.init(); } catch (e) {} }
+  if (name === 'preparematch') { try { HQShell.renderMatch(); } catch (e) {} }
   if (name === 'brandlibrary') { try { BrandLibrary.init(); } catch (e) {} }
   if (name === 'squad')     renderSquad();
   if (name === 'committee') { renderCommittee(); loadOfficials(); }
@@ -4631,7 +4614,7 @@ function openPanel(name) {
 function paintCrumb(name, panel) {
   if (!panel || !window.PortalTools) return;
   var tool = PortalTools.byId(name);
-  var area = PortalTools.areaOf(name);
+  var area = (window.HQModel && HQModel.sectionOf(name)) || PortalTools.areaOf(name);
   var hdr = panel.querySelector('.phdr');
   if (!hdr) return;
   var old = panel.querySelector('.ph-crumb');
@@ -4639,7 +4622,7 @@ function paintCrumb(name, panel) {
   var el = document.createElement('nav');
   el.className = 'ph-crumb';
   el.setAttribute('aria-label', 'You are here');
-  el.innerHTML = '<button onclick="back()">Home</button>' +
+  el.innerHTML = '<button onclick="back()">Command centre</button>' +
     (area ? '<span class="ph-crumb__sep">&rsaquo;</span><span>' + area.name + '</span>' : '') +
     '<span class="ph-crumb__sep">&rsaquo;</span>' +
     '<span class="ph-crumb__here">' + ((tool && tool.name) || name) + '</span>';
@@ -4649,14 +4632,12 @@ function paintCrumb(name, panel) {
 // Show the dashboard without touching history (used by popstate + lock).
 function showDash() {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
-  var ph = document.getElementById('portal-home');
-  if (ph) ph.style.display = 'block';
-  // The classic list only reappears if the user asked for it.
+  // The classic tile list is retired from navigation: every tool is in the
+  // HQ navigation (js/hq-model.js SECTIONS). Its markup stays, hidden.
   var dh = document.getElementById('dash-home');
-  if (dh) dh.style.display = (window.PortalHome && PortalHome._state.showAll) ? 'block' : 'none';
+  if (dh) dh.style.display = 'none';
   initDash();
-  try { if (window.PortalHome) PortalHome.refresh(); } catch (e) {}
-  try { if (window.PrepareMatch) PrepareMatch.paint(); } catch (e) {}
+  try { if (window.HQShell) { HQShell.onNavigate('home'); HQShell.refresh(); } } catch (e) {}
 }
 // The in-app "← Back" button: pop the history entry so the device back button
 // stays in sync; fall back to just showing the dashboard.
@@ -4744,187 +4725,13 @@ function loadDashFanCount() {
 }
 
 // ── NOTIFICATION CENTRE ──
-// Derives staff to-dos from the data state + the twice-a-week (Sat/Tue) rhythm.
-function toggleNotifs() { document.getElementById('notif-panel').classList.toggle('on'); }
-async function buildNotifs() {
-  var md = await new Promise(function(res){ fetchJSON('matchday', res); });
-  var pr = await new Promise(function(res){ fetchJSON('programme', res); });
-  var todos = [], info = [];
-  var now = new Date(), todayStr = now.toISOString().slice(0,10);
-  var opp = md && md.opponent, mdDate = (md && md.date) ? String(md.date).slice(0,10) : '';
-  if (!opp || opp === 'TBC' || !mdDate) {
-    todos.push({ i:'<i class="ico ico-calendar"></i>', t:'Set your next fixture — opponent, date & home/away.', a:'matchday' });
-  } else {
-    var days = Math.ceil((new Date(mdDate + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000);
-    if (mdDate < todayStr && md.isLive) {
-      todos.push({ i:'<i class="ico ico-dot-off"></i>', t:'Last match finished — turn the scoreboard OFF and post the result.', a:'matchday' });
-    } else if (mdDate === todayStr && !md.isLive) {
-      todos.push({ i:'<i class="ico ico-football"></i>', t:'It\'s MATCH DAY vs ' + opp + ' — activate the live scoreboard at kick-off.', a:'matchday' });
-    } else if (days >= 0 && days <= 4) {
-      todos.push({ i:'<i class="ico ico-hourglass"></i>', t:(days===0?'Match today vs '+opp:days+' day'+(days>1?'s':'')+' to '+opp+' — get match day ready.'), a:'matchday' });
-    }
-    if (pr && (pr.opponent || '') !== opp) {
-      todos.push({ i:'<i class="ico ico-newspaper"></i>', t:'Programme still set for ' + (pr.opponent || 'no one') + ' — update it for ' + opp + '.', a:'programme' });
-    }
-    if (mdDate < todayStr) {
-      todos.push({ i:'<i class="ico ico-clipboard-list"></i>', t:'Post the Match Report & Man of the Match from the last game.', a:'matchreport' });
-    }
-  }
-
-  // ── Work the club can SEE is outstanding, from its own data ────────────────
-  // Each of these was previously invisible: you only found out when a supporter
-  // told you. None of them guesses — every one is a fact already in the JSON.
-  var fxd = await new Promise(function (res) { fetchJSON('fixtures', res); });
-  var fixtures = (fxd && fxd.fixtures) || [];
-
-  // 1. Games that have been played with no score entered. The public page is
-  //    honest about it ("Result to follow") — which is exactly why it's
-  //    embarrassing to leave sitting there.
-  var noResult = fixtures.filter(function (f) {
-    return f.date && f.date < todayStr && (f.us == null || f.them == null);
-  });
-  if (noResult.length) {
-    var oldest = noResult.sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
-    var daysOld = Math.floor((new Date(todayStr) - new Date(oldest.date)) / 86400000);
-    todos.push({ i:'<i class="ico ico-clipboard-list"></i>',
-      t: noResult.length + ' fixture' + (noResult.length > 1 ? 's have' : ' has') + ' no result — ' +
-         (oldest.opponent || 'a game') + ' has been waiting ' + daysOld + ' day' + (daysOld === 1 ? '' : 's') +
-         '. The site says "Result to follow".', a:'fixtures' });
-  }
-
-  // 2. Match previews still telling supporters about a game that's been played.
-  var nwd = await new Promise(function (res) { fetchJSON('news', res); });
-  var arts = (nwd && nwd.articles) || [];
-  var stale = arts.filter(function (a) {
-    if (!/this saturday|this weekend|on saturday/i.test(String(a.excerpt || '') + String(a.body || ''))) return false;
-    var when = String(a.date || '').slice(0, 10);
-    return when && when < todayStr && (new Date(todayStr) - new Date(when)) > 2 * 86400000;
-  });
-  if (stale.length) {
-    todos.push({ i:'<i class="ico ico-newspaper"></i>',
-      t: stale.length + ' news article' + (stale.length > 1 ? 's' : '') + ' still say' + (stale.length > 1 ? '' : 's') +
-         ' "this Saturday" about a game that has been played. Archive or update ' +
-         (stale.length > 1 ? 'them' : 'it') + '.', a:'news' });
-  }
-
-  // 3. Squad information the club can fix in one sitting — and which every
-  //    graphic, profile and programme depends on.
-  var pld = await new Promise(function (res) { fetchJSON('players', res); });
-  var players = (pld && pld.players) || [];
-  if (players.length) {
-    var noNum = players.filter(function (p) { return !Number(p.number); }).length;
-    var noPhoto = players.filter(function (p) { return !p.photo; }).length;
-    if (noNum === players.length) {
-      todos.push({ i:'<i class="ico ico-user"></i>', t:'No squad numbers set — every player shows blank on cards and the programme.', a:'players' });
-    }
-    if (noPhoto) {
-      todos.push({ i:'<i class="ico ico-camera"></i>', t: noPhoto + ' player' + (noPhoto > 1 ? 's have' : ' has') + ' no photograph — they fall back to an illustration.', a:'players' });
-    }
-  }
-
-  // 4. A deadline the club has published and can miss.
-  var cfg = await new Promise(function (res) { fetchJSON('config', res); });
-  var eb = cfg && cfg.seasonTicket && cfg.seasonTicket.earlyBird;
-  if (eb && eb.deadline) {
-    var left = Math.ceil((new Date(eb.deadline + 'T23:59:59') - now) / 86400000);
-    if (left >= 0 && left <= 7) {
-      todos.push({ i:'<i class="ico ico-ticket"></i>',
-        t:'Season ticket early bird ends in ' + (left === 0 ? 'less than a day' : left + ' day' + (left === 1 ? '' : 's')) + ' — last push?', a:'news' });
-    }
-  }
-
-  info.push({ i:'<i class="ico ico-calendar-days"></i>', t:'Twice-a-week season: keep BOTH Saturday and Tuesday games set up.' });
-  info.push({ i:'<i class="ico ico-heart"></i>', t:'Enquiries from the website — trials, volunteers, sponsors — arrive in the Enquiries panel.' });
-  return { todos: todos, info: info };
-}
-// ── WHAT'S NEW (feature announcements; seen/dismissed kept per device) ──
-var WHATS_NEW = [
-  { id:'nf-fixtures-2606', i:'<i class="ico ico-calendar"></i>', t:'NEW: Fixtures — one season schedule', d:'Add every game once in the new Fixtures tab (opponent, date, kick-off, venue, score). It powers the Fixtures page, the home countdown, the calendar feed AND Post Studio — all from one place. (Match Day → Fixtures)' },
-  { id:'nf-calendar-2606', i:'<i class="ico ico-calendar-days"></i>', t:'NEW: Add-to-Calendar feed is live', d:'Fans can tap "Subscribe to fixtures" on the Fixtures page and the whole season lands in their phone calendar — and auto-updates every time you edit a fixture. Nothing to maintain.' },
-  { id:'nf-psfixture-2606', i:'<i class="ico ico-zap"></i>', t:'NEW: Post Studio fills itself from a fixture', d:'On Match Day / Kick Off / Half-Time / Full-Time, pick "Load from fixture" and the graphic builds itself — opponent crest, home/away swap, date, time, venue & score. Plus a new Pre-Season card.' },
-  { id:'nf-seo-2606', i:'<i class="ico ico-search"></i>', t:'NEW: Google & AI can now read your fixtures', d:'Every fixture is published as structured data, so Google and AI assistants (ChatGPT, Google AI) can answer "Rayners Lane next match" and "league position". The more you keep Fixtures updated, the better the club shows up online.' },
-  { id:'nf-livescore', i:'<i class="ico ico-dot-off"></i>', t:'Live Scoreboard', d:'Tap the score live during games — fans see it in ~20s. (Match Day tab)' },
-  { id:'nf-spotlight', i:'<i class="ico ico-star"></i>', t:'Man of the Match & New Signing', d:'Feature your star or announce a signing on the home page.' },
-  { id:'nf-fanzone',   i:'<i class="ico ico-heart"></i>', t:'Fan Zone & Lane Membership Cards', d:'Fans get a card, Lane number & loyalty hearts. New Fan Zone page.' },
-  { id:'nf-hearts',    i:'<i class="ico ico-camera"></i>', t:'Award Hearts + QR Scanner', d:'Scan members\' cards at the gate to award yellow hearts. (Fan Club tab)' },
-  { id:'nf-fanclub',   i:'<i class="ico ico-award"></i>', t:'Patrons Wall & Fan of the Month', d:'Champion your most loyal fans on the public wall.' },
-  { id:'nf-staff',     i:'<i class="ico ico-user"></i>', t:'Private Staff Profiles', d:'Emergency & medical details, stored privately for the club only.' },
-  { id:'nf-notif',     i:'<i class="ico ico-bell"></i>', t:'Notification Centre', d:'This bell — your match-day to-dos and new features.' },
-  { id:'nf-guides',    i:'<i class="ico ico-library"></i>', t:'Site Guide & The Lane Lowdown', d:'Every section explained + club facts and talking points.' },
-  { id:'nf-swot',      i:'<i class="ico ico-chart-column"></i>', t:'SWOT & Risk', d:'A boardroom view of where the club stands.' },
-  { id:'nf-install',   i:'<i class="ico ico-smartphone"></i>', t:'Install as an App', d:'Add the admin (and the public site) to your home screen.' },
-  { id:'nf-roles',     i:'<i class="ico ico-users"></i>', t:'Club Roles & Staff editor', d:'Change any role, title or name (board, management, coaches, medical) → updates the About page.' },
-  { id:'nf-perks',     i:'<i class="ico ico-ticket"></i>', t:'Member Perks & Vouchers', d:'Add vouchers, promos & members-only news — shown to signed-in fans in the Fan Zone. (Member Perks tab)' },
-  { id:'nf-fansignups',i:'<i class="ico ico-heart"></i>', t:'Fan sign-ups in the portal', d:'See everyone who joined the Family List — name, email, birthday — in the Fan Club tab + a count on the dashboard.' },
-  { id:'nf-splogo',    i:'<i class="ico ico-image"></i>', t:'Upload sponsor logos', d:'Add a sponsor logo straight from your phone (JPG/PNG) — no filenames. (Sponsors tab)' },
-  { id:'nf-officials', i:'<i class="ico ico-scale"></i>', t:'Editable policy names', d:'Change the Welfare Officer, Chairman or Secretary once → every mention on the Policies page updates. (Club Roles tab)' },
-  { id:'nf-playbook',  i:'<i class="ico ico-banknote"></i>', t:'The Lane Business Playbook', d:'How to grow the club\'s income — real examples from clubs like us, honest revenue ideas, grants & every role\'s part. Pinned at the top: Start Here.' },
-  { id:'nf-winsboard', i:'<i class="ico ico-trophy"></i>', t:'The Wins Board is live', d:'Landed something for The Lane — a board, lottery members, a sponsor\'s yes? Put your name on the Wins Board (top of the Business Playbook). Watch it grow.' },
-  { id:'nf-meetings',  i:'<i class="ico ico-square-pen"></i>', t:'Committee Meetings tab', d:'The club\'s shared minute book — write up who attended, what was discussed, decisions & next steps. Opens with the live numbers. (Boardroom)' },
-];
-function newsSeen()      { try { return JSON.parse(localStorage.getItem('rlfc_news_seen') || '[]'); } catch (e) { return []; } }
-function newsDismissed() { try { return JSON.parse(localStorage.getItem('rlfc_news_dismissed') || '[]'); } catch (e) { return []; } }
-function activeNews()    { var d = newsDismissed(); return WHATS_NEW.filter(function (n) { return d.indexOf(n.id) === -1; }); }
-function unseenNews()    { var s = newsSeen(), d = newsDismissed(); return WHATS_NEW.filter(function (n) { return d.indexOf(n.id) === -1 && s.indexOf(n.id) === -1; }); }
-function toggleNewsSeen(id) {
-  var s = newsSeen(), i = s.indexOf(id);
-  if (i === -1) s.push(id); else s.splice(i, 1);
-  localStorage.setItem('rlfc_news_seen', JSON.stringify(s));
-  refreshNotifs();
-}
-function dismissNews(id) {
-  var d = newsDismissed(); if (d.indexOf(id) === -1) d.push(id);
-  localStorage.setItem('rlfc_news_dismissed', JSON.stringify(d));
-  refreshNotifs();
-}
-function clearAllNews() {
-  localStorage.setItem('rlfc_news_dismissed', JSON.stringify(WHATS_NEW.map(function (n) { return n.id; })));
-  refreshNotifs();
-}
-
-async function refreshNotifs() {
-  var data = await buildNotifs();
-  var badge = document.getElementById('bell-badge');
-  // THE BADGE COUNTS WORK, NOT ANNOUNCEMENTS.
-  // It used to be todos + unseen release notes. There are 22 release notes, so
-  // it read "24" permanently and the two things that actually needed doing —
-  // "it's MATCH DAY, activate the scoreboard", "the programme is still set for
-  // last week's opponent" — were buried under a changelog. A red badge that is
-  // mostly marketing teaches people to ignore red badges, including the one
-  // that matters at 2:45 on a Saturday. The release notes are still there,
-  // still readable, still dismissible — they just don't cry wolf.
-  var count = data.todos.length;
-  if (badge) {
-    if (count) { badge.style.display = 'flex'; badge.textContent = count; }
-    else { badge.style.display = 'none'; }
-  }
-  var list = document.getElementById('notif-list');
-  if (!list) return;
-  var seen = newsSeen();
-  // To-dos
-  var html = data.todos.map(function(n){
-    return '<button class="notif__item" onclick="toggleNotifs();openPanel(\''+n.a+'\')"><span class="notif__ic">'+n.i+'</span><span class="notif__txt">'+n.t+'</span></button>';
-  }).join('');
-  if (!data.todos.length) html += '<div class="notif__empty">No jobs to do right now. <i class="ico ico-heart"></i></div>';
-  // What's New
-  var news = activeNews();
-  if (news.length) {
-    html += '<div class="notif__sub"><i class="ico ico-sparkles"></i> What\'s New <button class="notif__clear" onclick="clearAllNews()">Clear all</button></div>';
-    html += news.map(function(n){
-      var isSeen = seen.indexOf(n.id) > -1;
-      return '<div class="notif__item news' + (isSeen ? ' seen' : '') + '">' +
-        '<button class="notif__chk' + (isSeen ? ' on' : '') + '" title="Mark as seen" onclick="toggleNewsSeen(\''+n.id+'\')">' + (isSeen ? '<i class="ico ico-check"></i>' : '') + '</button>' +
-        '<span class="notif__txt"><strong>'+n.i+' '+n.t+'</strong><br><span style="color:var(--gr);font-size:12.5px">'+n.d+'</span></span>' +
-        '<button class="notif__x" title="Delete" onclick="dismissNews(\''+n.id+'\')">&times;</button>' +
-      '</div>';
-    }).join('');
-  }
-  // Standing info
-  html += data.info.map(function(n){
-    return '<div class="notif__item info"><span class="notif__ic">'+n.i+'</span><span class="notif__txt">'+n.t+'</span></div>';
-  }).join('');
-  list.innerHTML = html;
-}
+// One system: js/hq-shell.js derives notifications from the same grouped,
+// de-duplicated priorities as the Command Centre (js/hq-model.js), from the
+// football registry and the club office — not from data/fixtures.json. A
+// notification is resolved when the records change, never by being read.
+// The old list (fixtures.json to-dos plus 22 release notes) is gone.
+function toggleNotifs() { try { HQShell.toggleNotifications(); } catch (e) {} }
+function refreshNotifs() { try { if (window.HQShell) HQShell.refreshNotifications(); } catch (e) {} }
 
 // ── LOAD DATA ──
 function loadAll() {
@@ -11299,6 +11106,7 @@ function escH(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').repl
  *   portalSaid('failed')     → what to do next
  */
 function portalSaid(kind, detail) {
+  if (kind !== 'failed') { try { hqClearDirty(); } catch (e) {} }
   var t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   var map = {
     draft:     { txt: detail || ('Draft saved at ' + t + '.'),                  sticky: false, err: false },
@@ -11323,6 +11131,7 @@ function portalSaid(kind, detail) {
 }
 
 function toast(msg, err) {
+  if (!err) { try { hqClearDirty(); } catch (e) {} }
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast on' + (err ? ' err' : '');

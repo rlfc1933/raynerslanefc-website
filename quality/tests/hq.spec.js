@@ -183,3 +183,249 @@ test('Permissions — no committee password, no data; unsigned writes refused', 
   const w = await page.evaluate(() => fetch('/.netlify/functions/club-os', { method: 'POST', body: JSON.stringify({ pin: '1933', action: 'create', kind: 'task', title: 'x' }) }).then((x) => x.json()));
   expect(w.error).toMatch(/who you are/);
 });
+
+// ════════════════════════════════════════════════════════════════════════
+// LANE HQ — the redesigned shell, proved by the directive's scenarios
+// (product design intervention §18 A, B, E, G). The REAL club-os and
+// football-data functions over the in-memory database; the football registry
+// is seeded relative to today in Europe/London (support/hq-harness.js), with
+// the real shape of the week of 9 October 2026: postponed and superseded rows,
+// results in the registry, historic home matches with no takings record.
+// ════════════════════════════════════════════════════════════════════════
+const HQ = require('./support/hq-harness');
+
+test.describe('Lane HQ scenarios', () => {
+  let hq;
+  test.afterEach(() => { if (hq) hq.restore(); hq = null; });
+
+  test('Lane HQ A — the chairman has five minutes: what needs doing, money, supporters, next match', async ({ page }, info) => {
+    hq = await HQ.setupHq(page, { programme: { opponent: 'North Leigh', date: '2026-10-10', managerNotes: 'x' } });
+    const t0 = Date.now();
+    await HQ.signIn(page, open);
+    const home = page.locator('#hq-home');
+    expect(Date.now() - t0).toBeLessThan(15000);
+
+    // The three questions are answered on the first screen (desktop) / in the first sections (phone).
+    for (const h of ['Needs doing', 'Money in', 'Supporters']) await expect(home.getByRole('heading', { name: h })).toBeVisible();
+    if (info.project.name === 'desktop-1440') {
+      for (const h of ['Needs doing', 'Money in', 'Supporters']) await expect(home.getByRole('heading', { name: h })).toBeInViewport();
+    }
+    // No generic greeting, no misleading reassurance, no tool inventory.
+    const text = await home.innerText();
+    for (const banned of [/Good (morning|afternoon|evening)/, /Everything is available to you/, /cannot break the website/i, /All club tools/, /Quick actions/, /classic tile/i]) {
+      expect(text).not.toMatch(banned);
+    }
+    // The next match is the registry's — tomorrow, not "today", and never the stale North Leigh fixture.
+    const strip = page.locator('.hq-match');
+    await expect(strip).toContainText('Holyport v Rayners Lane');
+    await expect(strip).toContainText(/Tomorrow, /);
+    expect(await page.locator('body').innerText()).not.toMatch(/Today at the club/i);
+    await expect(strip).toContainText('Next home match: Thatcham Town');
+
+    // Priorities: grouped by fixture and cause; registry results are public results.
+    const rows = page.locator('.hq-pri__row');
+    await expect(rows.filter({ hasText: /result not recorded|No result recorded/i })).toHaveCount(0);
+    const rec = rows.filter({ hasText: '3 fixtures need reconciliation' });
+    await expect(rec).toHaveCount(1);
+    await expect(page.locator('.hq-sev--critical')).toHaveCount(0);
+    await rec.locator('.hq-pri__btn').click();
+    const items = rec.locator('.hq-pri__item');
+    await expect(items).toHaveCount(3);
+    await expect(rec).toContainText('Private attendance and takings records');
+    await expect(items.filter({ hasText: 'Ardley United' })).toContainText('waiting for approval');
+    await expect(items.filter({ hasText: 'Hilltop' })).toContainText('No attendance and takings record yet');
+    // The postponed Hilltop and Wokingham rows are not "missing takings".
+    await expect(items.filter({ hasText: 'Wokingham' })).toHaveCount(0);
+
+    // Money: from the club office, not invented.
+    const money = page.locator('section[aria-labelledby="hq-s-money"]');
+    await expect(money.locator('.hq-row', { hasText: 'New sponsorship enquiries' })).toContainText('1');
+    await expect(money.locator('.hq-row', { hasText: 'Owed on issued invoices' })).toContainText('£200');
+    await expect(rows.filter({ hasText: '1 sponsorship enquiry waiting more than 48 hours' })).toHaveCount(1);
+    // The programme being edited is for another fixture — said plainly, once.
+    await expect(page.locator('section[aria-labelledby="hq-s-prog"] .hq-flag')).toContainText('North Leigh');
+
+    // One notification system: the bell counts the same groups, unread first.
+    const groups = await rows.count();
+    await page.locator('#bell-btn').click();
+    await expect(page.locator('#notif-panel')).toBeVisible();
+    await expect(page.locator('#notif-panel .hq-note:not(.is-resolved)')).toHaveCount(groups);
+    const badge = Number(await page.locator('#bell-badge').innerText());
+    await page.locator('#notif-panel .hq-note').first().getByRole('button', { name: 'Mark as read' }).click();
+    await expect(page.locator('#bell-badge')).toHaveText(String(badge - 1));
+    await expect(page.locator('#notif-panel .hq-note:not(.is-resolved)')).toHaveCount(groups); // read ≠ resolved
+    await page.keyboard.press('Escape');
+
+    // A group opens the real destination.
+    await page.locator('.hq-pri__row', { hasText: 'approvals waiting' }).locator('.hq-pri__btn').click();
+    await page.locator('.hq-pri__row', { hasText: 'approvals waiting' }).getByRole('button', { name: /^Go to/ }).click();
+    await expect(page.locator('#panel-commsdesk')).toBeVisible();
+    await expect(page.locator('#hq-home')).toBeHidden();
+  });
+
+  test('Lane HQ B — an administrator works a fixture record, the fixture moves, nothing contradicts it', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop-1440', 'one run is enough for a data journey');
+    hq = await HQ.setupHq(page, { mdops: null });
+    await HQ.signIn(page, open);
+    await page.locator('.hq-match').getByRole('button', { name: 'Matchday preparation' }).click();
+    const mp = page.locator('#hq-match');
+    await expect(mp).toContainText('Holyport v Rayners Lane');
+    await mp.getByRole('button', { name: 'Create the checklist' }).click();
+    await expect(mp.locator('tbody tr')).toHaveCount(5);
+    const holyId = hq.F.holyport.internal_fixture_id;
+    const tasks = () => hq.db.hq_items.filter((i) => i.kind === 'task' && i.data && i.data.fixture === holyId);
+    expect(tasks()).toHaveLength(5);
+    const oldDay = HQ.londonDay(1);
+    expect(tasks().every((t) => t.data.fixture_date === oldDay && t.created_by === 'Pete Singh')).toBe(true);
+
+    // Assign and complete a job.
+    page.__answers = ['Jenny'];
+    await mp.locator('tbody tr').first().getByRole('button', { name: 'Assign' }).click();
+    await expect(mp.locator('tbody tr').first()).toContainText('Jenny');
+    await mp.locator('tbody tr').first().getByRole('button', { name: 'Mark done' }).click();
+    await expect(mp.locator('tbody tr').first()).toContainText('Done');
+    await expect(mp).toContainText('1 of 5 done');
+    expect(tasks().filter((t) => t.stage === 'done')).toHaveLength(1);
+    expect(hq.db.hq_audit.some((a) => a.action === 'move' && a.actor === 'Pete Singh')).toBe(true);
+
+    // The league rearranges the fixture: the registry moves it a week.
+    hq.F.holyport.scheduled_kickoff_at = HQ.london(HQ.londonDay(8), '15:00');
+    await page.locator('#hq-nav').getByRole('link', { name: 'Command centre' }).click();
+    await page.locator('[data-hq-refresh]').click();
+    const moved = page.locator('.hq-pri__row', { hasText: 'Holyport (away) has moved to' });
+    await expect(moved).toHaveCount(1);
+    await expect(moved).toContainText('Urgent');
+    await moved.locator('.hq-pri__btn').click();
+    await moved.getByRole('button', { name: /^Go to/ }).click();
+    await expect(mp.locator('.hq-flag--act')).toContainText('This fixture has moved');
+    await mp.getByRole('button', { name: /Move them to the new date/ }).click();
+    await expect(mp.locator('.hq-flag--act')).toHaveCount(0);
+    const newDay = HQ.londonDay(8);
+    expect(tasks().filter((t) => t.stage !== 'done').every((t) => t.data.fixture_date === newDay)).toBe(true);
+    expect(tasks().filter((t) => !/^After the match/.test(t.title) && t.stage !== 'done').every((t) => t.due_date === newDay)).toBe(true);
+
+    // No contradictory dates remain: the old date appears nowhere for Holyport.
+    const oldLabel = await page.evaluate((d) => HQTime.shortDate(d), oldDay);
+    expect(await mp.innerText()).not.toContain(oldLabel);
+    await page.locator('#hq-nav').getByRole('link', { name: 'Command centre' }).click();
+    await expect(page.locator('.hq-match')).toContainText(await page.evaluate((d) => HQTime.shortDate(d), newDay));
+    expect(await page.locator('#hq-home').innerText()).not.toContain(oldLabel);
+    await expect(page.locator('.hq-pri__row', { hasText: 'has moved' })).toHaveCount(0);
+  });
+
+  test('Lane HQ E — on a phone: simple navigation, adapted tables, clear saves, no sideways scroll', async ({ page }, info) => {
+    test.skip(info.project.name !== 'phone', 'phone only');
+    hq = await HQ.setupHq(page, { mdops: null });
+    await HQ.signIn(page, open);
+    const noSideways = () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    expect(await noSideways()).toBe(true);
+    await expect(page.locator('#hq-nav')).toBeHidden();               // no desktop sidebar on a phone
+    const bar = page.locator('#hq-tabbar');
+    await expect(bar).toBeVisible();
+    for (const b of await bar.getByRole('button').all()) expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);
+
+    // Menu → search → a destination, in three taps.
+    await bar.getByRole('button', { name: 'Menu' }).click();
+    const sheet = page.locator('#hq-sheet');
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole('searchbox', { name: 'Find a tool' }).fill('spons');
+    await sheet.getByRole('link', { name: 'Sponsorship', exact: true }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('#panel-commercial')).toBeVisible();
+    expect(await noSideways()).toBe(true);
+
+    // Matchday from the tab bar; the job table stacks into readable rows.
+    await bar.getByRole('button', { name: 'Matchday' }).click();
+    const mp = page.locator('#hq-match');
+    await mp.getByRole('button', { name: 'Create the checklist' }).click();
+    await expect(mp.locator('tbody tr')).toHaveCount(5);
+    expect(await noSideways()).toBe(true);
+    const done = mp.locator('tbody tr').first().getByRole('button', { name: 'Mark done' });
+    expect((await done.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    await done.click();
+    await expect(mp.locator('tbody tr').first()).toContainText('Done');     // the save shows where it happened
+    expect(await noSideways()).toBe(true);
+
+    // Back to the overview from the tab bar.
+    await bar.getByRole('button', { name: 'Overview' }).click();
+    await expect(page.locator('#hq-home')).toBeVisible();
+    await expect(page.locator('.hq-match')).toContainText('1 of 5 jobs done');
+  });
+});
+
+// Scenario G needs a real service worker, which the shared config blocks, and
+// a sw.js whose bytes change mid-test — so it serves the site itself.
+test('Lane HQ G — a new version arrives while someone is editing: no forced reload, update when safe', async ({ browser }, info) => {
+  test.skip(info.project.name !== 'desktop-1440', 'one browser is enough for the lifecycle');
+  const http = require('http'), fs = require('fs'), path = require('path');
+  const ROOT = path.resolve(__dirname, '..', '..');
+  let build = 1;
+  const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2', '.mjs': 'text/javascript', '.svg': 'image/svg+xml' };
+  const server = http.createServer((req, res) => {
+    let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    if (p.startsWith('/.netlify/')) { res.writeHead(503, { 'Content-Type': 'application/json' }); return res.end('{"ok":false}'); }
+    if (p === '/') p = '/index.html';
+    const abs = path.join(ROOT, p);
+    if (!abs.startsWith(ROOT) || !fs.existsSync(abs) || fs.statSync(abs).isDirectory()) { res.writeHead(404); return res.end(); }
+    let body = fs.readFileSync(abs);
+    if (p === '/sw.js') body = Buffer.from(String(body).replace(/var VERSION = '[^']*'/, `var VERSION = 'test-build-${build}'`));
+    res.writeHead(200, { 'Content-Type': TYPES[path.extname(abs)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+    res.end(body);
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const base = 'http://127.0.0.1:' + server.address().port;
+  const ctx = await browser.newContext({ serviceWorkers: 'allow', viewport: { width: 1280, height: 800 }, timezoneId: 'Europe/London' });
+  const page = await ctx.newPage();
+  try {
+    await ctx.route((u) => !u.href.startsWith(base), (r) => r.abort());
+    await ctx.route('**/.netlify/functions/admin-pin', (r) => r.fulfill({ json: { ok: true } }));
+    await page.addInitScript(() => { try { localStorage.setItem('rlfc_consent_v2', '{"analytics":false,"essential":true,"version":2}'); localStorage.setItem('rlfc_actor', 'Test'); } catch (e) {} });
+    await page.goto(base + '/admin.html');
+    await page.waitForFunction(() => navigator.serviceWorker.controller, null, { timeout: 15000 });
+    for (const d of '1933') await page.locator('.pin-btn', { hasText: new RegExp(`^${d}$`) }).click();
+    const temp = page.getByRole('button', { name: 'Continue with temporary committee access' });
+    if (await temp.isVisible({ timeout: 3000 }).catch(() => false)) await temp.click();
+    await page.locator('#app').waitFor({ state: 'visible' });
+    // A first install is not an "update".
+    await expect(page.locator('#hq-update.on')).toHaveCount(0);
+
+    // Start editing something.
+    await page.evaluate(() => openPanel('news'));
+    const field = page.locator('#panel-news input[type=text]:visible, #panel-news textarea:visible').first();
+    await field.click();
+    await field.pressSequentially('Matchday notes in progress');
+    await page.evaluate(() => { window.__stillHere = true; });
+
+    // A new version ships. Ask twice: one bar, not two.
+    build = 2;
+    await page.evaluate(() => HQPwa.checkNow());
+    await page.evaluate(() => HQPwa.checkNow());
+    const bar = page.locator('#hq-update.on');
+    await expect(bar).toContainText('An update to Lane HQ is ready', { timeout: 15000 });
+    await expect(bar).toContainText('test-build-2');
+    await expect(page.locator('#hq-update')).toHaveCount(1);
+    // Nothing reloaded by itself, and the typing is still there.
+    expect(await page.evaluate(() => window.__stillHere)).toBe(true);
+
+    // "Reload now" with unsaved work → it refuses, and says why.
+    await bar.getByRole('button', { name: 'Reload now' }).click();
+    await expect(bar).toContainText('You have unsaved changes in News');
+    expect(await page.evaluate(() => window.__stillHere)).toBe(true);
+    await expect(field).toHaveValue(/Matchday notes in progress/);
+    await bar.getByRole('button', { name: 'Keep editing' }).click();
+
+    // They save (a confirmed save clears the marker) and update at a safe point.
+    await page.evaluate(() => toast('Saved'));
+    await Promise.all([page.waitForEvent('load'), bar.getByRole('button', { name: 'Reload now' }).click()]);
+    await page.waitForFunction(() => window.HQPwa && navigator.serviceWorker.controller);
+    expect(await page.evaluate(() => window.__stillHere)).toBeUndefined();   // it really reloaded
+    const v = await page.evaluate(() => new Promise((res) => { const ch = new MessageChannel(); ch.port1.onmessage = (e) => res(e.data.version); navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [ch.port2]); }));
+    expect(v).toBe('test-build-2');
+    await page.waitForTimeout(800);
+    await expect(page.locator('#hq-update.on')).toHaveCount(0);           // cleared after the update
+    expect(await page.evaluate(() => sessionStorage.getItem('hq_update_later'))).toBeNull();
+  } finally {
+    await ctx.close();
+    server.close();
+  }
+});
