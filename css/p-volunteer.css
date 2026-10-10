@@ -12,3 +12,27 @@
 .vo-apply .kf__label small{color:#F5F3ED}
 .vo-apply .kf select option{background:#1A5C32}
 .vo-apply .kf input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #1A5C32 inset}
+
+/* How it works + the facts under each opportunity (what / when / where /
+   commitment / who / checks) as a hairline definition list — no boxes. */
+.vo-how__grid{display:grid;gap:28px}
+@media (min-width:900px){.vo-how__grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:56px;align-items:start}}
+.vo-steps{counter-reset:vo}
+.vo-steps > li{font-family:var(--font-body);font-size:17px;line-height:1.55;color:rgba(245,243,237,.86)}
+.vo-steps b{color:var(--white)}
+.vo-facts{margin:6px 0 0;display:grid;gap:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14))}
+@media (min-width:900px){.vo-facts{grid-column:2}}
+.vo-facts > div{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.vo-facts dt{font-family:var(--font-body);font-weight:800;font-size:14px;color:#AAAAAA}
+.vo-facts dd{margin:0;font-family:var(--font-body);font-size:15px;line-height:1.5;color:var(--white)}
+.vo-pick{justify-self:start}
+@media (min-width:900px){.vo-list > li{grid-template-areas:none}.vo-list__name{grid-area:auto;grid-column:1;grid-row:1 / span 2}.vo-list__d{grid-area:auto;grid-column:2}.vo-pick{grid-column:2}}
+.vo-safe{font-family:var(--font-body);font-size:16px;line-height:1.6;color:rgba(245,243,237,.86);max-width:70ch;margin:32px 0 0;padding-top:20px;border-top:2px solid var(--yellow)}
+.vo-safe b{color:var(--white)}
+.vo-safe a,.vo-apply .kf-aside a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-underline-offset:3px}
+.vo-apply .kf-aside p{color:#F5F3ED}
+.vo-apply .kf__fine{color:#F5F3ED}
+.vo-list a.vo-pick{background:none;color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:5px}
+.vo-list a.vo-pick:hover{color:var(--yellow)}
+.vo-steps > li{max-width:64ch}
+.vo-safe{max-width:62ch}

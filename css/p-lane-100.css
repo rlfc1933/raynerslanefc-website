@@ -1,0 +1,55 @@
+/* ════════════════════════════════════════════════════════════════════════
+   THE LANE 100 — Kit Launch. A photograph title card, the live count as one
+   enormous tabular number on the yellow field, "is / is not" as two ruled
+   lists, the sign-up on the green field, the wall as a numbered ruled list.
+   No cards, no pills, no glow. The bar only fills to the REAL count.
+   ════════════════════════════════════════════════════════════════════════ */
+.l100-ph .kl-ph__media img{object-position:50% 60%}
+
+/* The count */
+.l100-count-grid{display:grid;gap:24px;align-items:end}
+@media (min-width:900px){.l100-count-grid{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:56px}}
+.l100c{border-top:2px solid #080808;padding-top:12px;min-height:140px}
+.l100c__n{margin:0;font-family:var(--font-display);font-weight:400;line-height:.8;color:#080808;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.l100c__now{font-size:clamp(7rem,22vw,16rem)}
+.l100c__of{font-size:clamp(2.6rem,7vw,5rem)}
+.l100c__bar{height:10px;background:rgba(8,8,8,.18);margin:18px 0 16px;overflow:hidden}
+.l100c__bar i{display:block;height:100%;background:#080808;transform-origin:left center}
+@media (prefers-reduced-motion: no-preference){html:not(.a11y-reduce-motion) .l100c__bar i{transition:transform var(--dur-slow) var(--ease-out)}}
+.l100c__msg{font-family:var(--font-body);font-weight:700;font-size:clamp(1.05rem,1.5vw,1.3rem);line-height:1.45;color:#080808;margin:0;max-width:40ch}
+.l100c[data-state="zero"] .l100c__now{color:#080808}
+
+/* Is / is not */
+.l100-what__grid{display:grid;gap:40px}
+@media (min-width:900px){.l100-what__grid{grid-template-columns:1fr 1fr;gap:56px}}
+.l100-what__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,3.4vw,3rem);line-height:.9;text-transform:uppercase;color:var(--yellow);margin:0 0 16px}
+.l100-what__list li{font-family:var(--font-body);font-size:17px;line-height:1.55;color:var(--white)}
+.l100-what__list a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-underline-offset:4px;background:none}
+.l100-what__list--not li{color:#AAAAAA}
+.l100-what__grid > div:last-child .l100-what__h{color:var(--white)}
+
+/* Join — green field */
+.l100-join{background:var(--green,#1A5C32)}
+.l100-join .kf input{border-bottom-color:rgba(245,243,237,.6)}
+.l100-join .kf input::placeholder{color:#AAAAAA}
+.l100-join .kf__label small,.l100-join .kf__fine{color:#F5F3ED}
+.l100-join .kf input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #1A5C32 inset}
+.l100-join .kf-aside p{font-family:var(--font-body);font-size:17px;line-height:1.55;color:#F5F3ED;max-width:34ch}
+.l100f__err{font-family:var(--font-body);font-weight:700;font-size:15px;line-height:1.55;color:#080808;background:var(--yellow);padding:12px 14px;border-radius:var(--r-xs);margin:0}
+.l100f__err a{color:#080808}
+.l100f__done{outline:none;border-top:2px solid var(--yellow);padding-top:18px}
+.l100f__you{font-family:var(--font-body);font-weight:800;font-size:18px;color:var(--white);margin:0}
+.l100f__no{font-family:var(--font-display);font-weight:400;font-size:clamp(6rem,18vw,12rem);line-height:.82;color:var(--yellow);margin:10px 0 16px;font-variant-numeric:tabular-nums}
+.l100f__p{font-family:var(--font-body);font-size:16px;line-height:1.6;color:#F5F3ED;margin:0 0 10px;max-width:52ch}
+.l100f__p a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:3px}
+
+/* The wall */
+.l100w{list-style:none;margin:0;padding:0;border-top:1px solid var(--ed-line,rgba(245,243,237,.14));display:grid}
+@media (min-width:700px){.l100w{grid-template-columns:1fr 1fr;column-gap:40px}}
+@media (min-width:1100px){.l100w{grid-template-columns:repeat(3,1fr)}}
+.l100w > li{display:grid;grid-template-columns:3.2ch minmax(0,1fr) auto;align-items:baseline;gap:14px;padding:14px 0;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.l100w__no{font-family:var(--font-display);font-size:2rem;line-height:1;color:var(--yellow);font-variant-numeric:tabular-nums}
+.l100w__name{font-family:var(--font-body);font-weight:800;font-size:17px;color:var(--white)}
+.l100w__town{font-family:var(--font-body);font-size:14px;color:#AAAAAA}
+.l100w > li.l100w__empty{display:block;grid-column:1/-1;font-family:var(--font-body);font-size:17px;line-height:1.55;color:#AAAAAA}
+.l100-join .kf__fine{color:#F5F3ED}

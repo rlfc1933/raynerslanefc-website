@@ -3,7 +3,9 @@
    · Next match, league position, results and fixtures: the football registry
      (js/football-data.js → /.netlify/functions/football-data). One source,
      the same one Club Now and the fixtures page use.
+   · Next HOME match: the same registry list through js/next-home.js.
    · Prices: data/config.json. Squad: data/squad.json.
+   · The Lane 100 count: /.netlify/functions/lane-100 via js/lane-100.js.
    Every block has an honest empty/failed state: if a source is down the
    page says so; it never fills a gap with a guess.
    ════════════════════════════════════════════════════════════════════════ */
@@ -31,11 +33,11 @@
     body.innerHTML =
       (crest ? '<img class="kl-bug__crest" src="' + esc(crest) + '" alt="" width="44" height="44" loading="lazy">' : '') +
       '<span class="kl-bug__vs">' + esc(m.opponent) + '<small>' + (m.isHome ? 'HOME' : 'AWAY') + '</small></span>' +
-      '<span class="kl-bug__when">' + esc(fmt(m.kickoffAt, { weekday: 'short', day: 'numeric', month: 'short' })) + ' &middot; ' + esc(fmt(m.kickoffAt, { hour: '2-digit', minute: '2-digit' })) +
+      '<span class="kl-bug__when">' + esc(fmt(m.kickoffAt, { weekday: 'short', day: 'numeric', month: 'short' })) + ' &middot; ' + (m.kickoffTimeConfirmed === false ? 'Time TBC' : esc(fmt(m.kickoffAt, { hour: '2-digit', minute: '2-digit' }))) +
         '<span>' + esc(where) + ' &middot; ' + esc(m.competition || '') + '</span></span>' +
       (live ? '<span class="kl-bug__live">Live now</span>' : '<span class="kl-bug__count" id="kl-count" aria-label="Time to kick-off"></span>');
-    el.setAttribute('aria-label', (live ? 'Live: ' : 'Next match: ') + m.opponent + (m.isHome ? ' at home, ' : ' away, ') + fmt(m.kickoffAt, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '. Open match centre.');
-    if (!live) tick(Date.parse(m.kickoffAt));
+    el.setAttribute('aria-label', (live ? 'Live: ' : 'Next match: ') + m.opponent + (m.isHome ? ' at home, ' : ' away, ') + fmt(m.kickoffAt, m.kickoffTimeConfirmed === false ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '. Open match centre.');
+    if (!live && m.kickoffTimeConfirmed !== false) tick(Date.parse(m.kickoffAt));
   }
   function tick(t) {
     var c = $('kl-count'); if (!c || !isFinite(t)) return;
@@ -77,7 +79,7 @@
         '<span class="kl-run__tbc">Result not yet<br>confirmed</span>';
       return item(f, score);
     }).concat(ahead.map(function (f, i) {
-      return item(f, '<span class="kl-run__ko">' + esc(fmt(f.kickoffAt, { hour: '2-digit', minute: '2-digit' })) + '</span>', i === 0);
+      return item(f, f.kickoffTimeConfirmed === false ? '<span class="kl-run__tbc">Kick-off time<br>to be confirmed</span>' : '<span class="kl-run__ko">' + esc(fmt(f.kickoffAt, { hour: '2-digit', minute: '2-digit' })) + '</span>', i === 0);
     })).join('');
     el.innerHTML = html;
     var nx = el.querySelector('.is-next');
@@ -92,6 +94,9 @@
       tail + '</li>';
   }
 
+  // ── ② the next HOME match (js/next-home.js — same rule as matchday.html) ─
+  function nextHome(fx) { if (window.LaneNextHome) LaneNextHome.render($('kl-nexthome'), fx); }
+
   // ── ④ prices ─────────────────────────────────────────────────────────────
   function prices(cfg) {
     var el = $('kl-prices'); if (!el) return;
@@ -100,7 +105,7 @@
     el.innerHTML = p.map(function (x) {
       return '<div class="kl-gate__price"><dt>' + esc(x.label) + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</dt><dd>' + esc(x.price) + '</dd></div>';
     }).join('');
-    if (a.sub) { var s = $('kl-gate-sub'); if (s) s.textContent = a.sub + '. Tithe Farm, 151 Rayners Lane, HA2 0XH — Rayners Lane station is a short walk.'; }
+    if (a.sub) { var s = $('kl-gate-sub'); if (s) s.textContent = a.sub + '. Tithe Farm, 151 Rayners Lane, HA2 0XH. Rayners Lane station is a short walk.'; }
   }
 
   // ── ⑥ squad ──────────────────────────────────────────────────────────────
@@ -118,7 +123,8 @@
     }).join('');
   }
 
-  // ── hero video: only where it costs nothing to the visitor ───────────────
+  // ── hero video: only where it costs nothing to the visitor. The hero is now
+  //    a still of Tithe Farm (no <video> element), so this is a no-op. ─────
   function video() {
     var v = document.querySelector('.kl-hero__video'); if (!v) return;
     var reduce = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || document.documentElement.classList.contains('a11y-reduce-motion');
@@ -137,8 +143,9 @@
     if (F) {
       F.summary().then(bug);
       F.table().then(table);
-      Promise.all([F.fixtures(), F.results()]).then(function (r) { run(r[0], r[1]); });
-    } else { bug(null); run(null, null); }
+      Promise.all([F.fixtures(), F.results()]).then(function (r) { run(r[0], r[1]); nextHome(r[0]); });
+    } else { bug(null); run(null, null); nextHome(null); }
+    if (window.Lane100 && $('kl-l100-count')) Lane100.load().then(function (d) { Lane100.counter($('kl-l100-count'), d); });
     getJSON('data/config.json').then(prices);
     getJSON('data/squad.json').then(squad);
   });

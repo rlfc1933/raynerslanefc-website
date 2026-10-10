@@ -28,6 +28,8 @@ var PAGES = [
   ['/gallery.html', 'weekly', '0.6'],
   ['/fan-zone.html', 'monthly', '0.6'],
   ['/volunteer.html', 'monthly', '0.6'],
+  ['/matchday.html', 'weekly', '0.8'],
+  ['/lane-100.html', 'weekly', '0.7'],
   ['/investment.html', 'monthly', '0.6'],
   ['/acerbis.html', 'monthly', '0.6'],
   ['/programme.html', 'weekly', '0.5'],

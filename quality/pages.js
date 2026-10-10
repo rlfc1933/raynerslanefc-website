@@ -20,6 +20,8 @@ const PUBLIC_PAGES = [
   { path: '/shop.html',           name: 'shop',           tier: 2 },
   { path: '/trials.html',         name: 'trials',         tier: 2 },
   { path: '/volunteer.html',      name: 'volunteer',      tier: 2 },
+  { path: '/matchday.html',       name: 'matchday',       tier: 2 },
+  { path: '/lane-100.html',       name: 'lane-100',       tier: 2 },
   { path: '/investment.html',     name: 'investment',     tier: 2 },
   { path: '/innovation.html',     name: 'innovation',     tier: 2 },
   { path: '/acerbis.html',        name: 'acerbis',        tier: 2 },

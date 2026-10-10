@@ -17,11 +17,12 @@ const UNIQUE = {
   hq_attendance: [['fixture_id']],
   studio_revisions: [['composition_id', 'rev']],
   studio_sponsor_logos: [['sponsor_key', 'version']],
+  lane100_members: [['email_key'], ['supporter_no']],
 };
 
 function makeDb(seed = {}) {
   const t = { hq_orgs: [], hq_items: [], hq_audit: [], hq_suppression: [], hq_redemptions: [], submissions: [], attendance: [],
-    hq_import_batches: [], hq_fixture_slots: [], hq_attendance: [], hq_finance_lines: [], ...seed };
+    hq_import_batches: [], hq_fixture_slots: [], hq_attendance: [], hq_finance_lines: [], lane100_members: [], ...seed };
   return t;
 }
 
@@ -77,6 +78,15 @@ function handle(db, method, urlStr, body, prefer = '') {
       if (table === 'hq_items') { r.paid_pence = r.paid_pence || 0; r.data = r.data || {}; r.in_kind = !!r.in_kind; }
       if (table === 'hq_audit') r.at = now;
       if (table === 'hq_redemptions') r.redeemed_at = now;
+      if (table === 'lane100_members') {
+        // mirrors the lane100_assign_no trigger: duplicate email refused,
+        // number = max + 1 (no gaps), never more than 100
+        r.email_key = String(r.email || '').trim().toLowerCase();
+        r.status = r.status || 'active';
+        if (rows.some((x) => x.email_key === r.email_key)) return { status: 409, json: { code: '23505', message: 'lane100_duplicate' } };
+        r.supporter_no = rows.reduce((m, x) => Math.max(m, x.supporter_no || 0), 0) + 1;
+        if (r.supporter_no > 100) return { status: 400, json: { code: 'P0001', message: 'lane100_full' } };
+      }
       for (const cols of UNIQUE[table] || []) {
         if (cols.some((c) => r[c] == null)) continue;
         if (rows.some((x) => cols.every((c) => x[c] === r[c]))) {

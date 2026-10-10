@@ -14,7 +14,7 @@
   <meta property="og:locale" content="en_GB">
   <meta property="og:url" content="https://raynerslanefc.co.uk/">
   <meta property="og:title" content="Rayners Lane FC — Harrow's Club Since 1933">
-  <meta property="og:description" content="Yellow. The Lane. Harrow since 1933. Back and louder than ever.">
+  <meta property="og:description" content="Harrow's football club since 1933. The Lane is your club too.">
   <meta property="og:image" content="https://raynerslanefc.co.uk/img/og-card.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -22,7 +22,7 @@
   <meta property="og:image:alt" content="Rayners Lane FC crest">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Rayners Lane FC — Harrow's Club Since 1933">
-  <meta name="twitter:description" content="Yellow. The Lane. Harrow since 1933. Back and louder than ever.">
+  <meta name="twitter:description" content="Harrow's football club since 1933. The Lane is your club too.">
   <meta name="twitter:image" content="https://raynerslanefc.co.uk/img/og-card.jpg">
   <meta name="theme-color" content="#FFD100">
   <link rel="icon" type="image/png" href="img/badge.png">
@@ -33,13 +33,13 @@
   <!-- Self-hosted type: Bebas Neue (display) + Manrope (everything else). No Google Fonts request. -->
   <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/bebas-neue-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <!-- The hero still is the first thing in the LCP region, so it is fetched
-       alongside the stylesheet instead of after it. imagesrcset mirrors the
-       <img> exactly so the preload and the element resolve to the SAME file —
-       get that wrong and the page downloads two. -->
-  <link rel="preload" as="image" href="video/hero-poster-1440.jpg"
-        imagesrcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
-        imagesizes="100vw" fetchpriority="high">
+  <!-- The hero is GENUINE club photography (Tithe Farm from the air), fetched
+       alongside the stylesheet because it is the LCP. imagesrcset/imagesizes
+       mirror the <img> exactly so the preload and the element resolve to the
+       SAME file. (The earlier generated video/poster is no longer used.) -->
+  <link rel="preload" as="image" href="img/ground/tithe-farm-aerial-clubhouse-1600.webp" type="image/webp"
+        imagesrcset="img/ground/tithe-farm-aerial-clubhouse-800.webp 800w, img/ground/tithe-farm-aerial-clubhouse-1600.webp 1600w"
+        imagesizes="(max-aspect-ratio: 16/9) 178svh, 100vw" fetchpriority="high">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/fan-zone.css?v=1">
@@ -99,7 +99,7 @@
       {
         "@type": "Question",
         "name": "How do I sponsor Rayners Lane FC?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Email info@raynerslanefc.co.uk. The club offers shirt, matchball and board sponsorship, and works with local Harrow businesses. Details are on the club\u2019s sponsorship pages." }
+        "acceptedAnswer": { "@type": "Answer", "text": "Email info@raynerslanefc.co.uk. The club offers match-ball, matchday, shirt, player and programme sponsorship, and works with local Harrow businesses. Details are on the club\u2019s sponsorship page." }
       },
       {
         "@type": "Question",
@@ -160,11 +160,12 @@
 <!-- ① TITLE CARD — the club's name, the next match, one action -->
 <section class="kl-hero" aria-labelledby="kl-hero-title">
   <div class="kl-hero__media" aria-hidden="true">
-    <img src="video/hero-poster-1440.jpg"
-         srcset="video/hero-poster-960.jpg 960w, video/hero-poster-1440.jpg 1440w, video/hero-poster-1920.jpg 1920w"
-         sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">
-    <video class="kl-hero__video" muted loop playsinline preload="none" poster="video/hero-poster-1440.jpg"
-           data-src="video/hero.mp4" data-src-mobile="video/hero-mobile.mp4"></video>
+    <picture>
+      <source type="image/webp" srcset="img/ground/tithe-farm-aerial-clubhouse-800.webp 800w, img/ground/tithe-farm-aerial-clubhouse-1600.webp 1600w" sizes="(max-aspect-ratio: 16/9) 178svh, 100vw">
+      <img src="img/ground/tithe-farm-aerial-clubhouse-1600.jpg" data-no-opt
+           srcset="img/ground/tithe-farm-aerial-clubhouse-800.jpg 800w, img/ground/tithe-farm-aerial-clubhouse-1600.jpg 1600w"
+           sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1600" height="898" alt="" fetchpriority="high" decoding="async">
+    </picture>
   </div>
   <div class="kl-hero__shade" aria-hidden="true"></div>
   <div class="kl-hero__inner">
@@ -177,10 +178,10 @@
       <span class="kl-line"><span>Lane<em>.</em></span></span>
     </h1>
     <div class="kl-hero__foot">
-      <p class="kl-hero__line">Community built. Harrow proud. Yellow first, always &mdash; The Lane backs itself, and has since 1933.</p>
+      <p class="kl-hero__line">Harrow&rsquo;s football club since 1933. Community built, yellow first. <strong>The Lane is your club too.</strong></p>
       <div class="kl-hero__acts">
         <a class="kl-btn kl-btn--solid" href="fixtures.html">Fixtures &amp; results</a>
-        <a class="kl-btn kl-btn--line" href="fan-zone.html">Join The Lane &mdash; free</a>
+        <a class="kl-btn kl-btn--line" href="matchday.html">Your first visit</a>
       </div>
     </div>
   </div>
@@ -206,7 +207,29 @@
   </div>
 </section>
 
-<!-- ② MATCH CENTRE — the live-aware block (js/club-now.js): live score on a
+<!-- ② NEXT HOME MATCH — drenched yellow poster. The next match (the lower
+     third above) may be away; this is the next one at Tithe Farm, worked out
+     by js/next-home.js from the registry — the same rule "Your first visit"
+     uses, so a postponement reads the same on both. Prices: data/config.json. -->
+<section class="kl-gate" aria-labelledby="kl-gate-h">
+  <div class="kl-wrap kl-gate__grid">
+    <div>
+      <h2 class="kl-gate__h" id="kl-gate-h">Next at<br>Tithe Farm</h2>
+      <div class="nh nh--ink" id="kl-nexthome" aria-live="polite"><p class="nh__none">Loading the next home match&hellip;</p></div>
+      <div class="kl-gate__acts">
+        <a class="kl-btn kl-btn--ink" href="matchday.html">Your first visit</a>
+        <a class="kl-btn kl-btn--inkline" href="https://www.google.com/maps/dir/?api=1&amp;destination=Tithe+Farm+Social+Club+HA2+0XH" target="_blank" rel="noopener">Directions</a>
+      </div>
+    </div>
+    <div>
+      <dl class="kl-gate__prices" id="kl-prices" aria-label="Matchday admission prices"></dl>
+      <p class="kl-gate__p" id="kl-gate-sub">Pay on the gate. Tithe Farm, 151 Rayners Lane, HA2 0XH. Rayners Lane station is a short walk.</p>
+      <p class="kl-gate__p kl-gate__p--small">No ticket, no app, no account. Bringing friends? <a href="matchday.html">Here&rsquo;s everything they need.</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ③ MATCH CENTRE — the live-aware block (js/club-now.js): live score on a
      matchday, full time for 24 hours after, otherwise the countdown. -->
 <section class="kl-centre" aria-labelledby="kl-centre-h">
   <div class="kl-wrap kl-centre__grid">
@@ -231,7 +254,7 @@
   </div>
 </section>
 
-<!-- ③ THE RUN — results and the fixtures ahead, as one strip in time order -->
+<!-- ④ THE RUN — results and the fixtures ahead, as one strip in time order -->
 <section class="kl-run" aria-labelledby="kl-run-h">
   <div class="kl-wrap kl-run__head">
     <h2 class="kl-h2" id="kl-run-h">The run</h2>
@@ -240,18 +263,67 @@
   <ol class="kl-run__rail" id="kl-run" tabindex="0" aria-label="Recent results and upcoming fixtures, scroll sideways"></ol>
 </section>
 
-<!-- ④ MATCHDAY — drenched yellow poster: what it costs and how to get in -->
-<section class="kl-gate" aria-labelledby="kl-gate-h">
-  <div class="kl-wrap kl-gate__grid">
-    <div>
-      <h2 class="kl-gate__h" id="kl-gate-h">Pay on<br>the gate.</h2>
-      <p class="kl-gate__p" id="kl-gate-sub">Cash or card at Tithe Farm, 151 Rayners Lane, HA2 0XH. Rayners Lane station is a short walk.</p>
-      <div class="kl-gate__acts">
-        <a class="kl-btn kl-btn--ink" href="season-tickets.html">2026/27 season tickets</a>
-        <a class="kl-btn kl-btn--inkline" href="https://www.google.com/maps/dir/?api=1&amp;destination=Tithe+Farm+Social+Club+HA2+0XH" target="_blank" rel="noopener">Directions</a>
+<!-- JOIN THE LANE — the free Lane Card, drenched green -->
+<section class="kl-card" aria-labelledby="kl-card-h">
+  <div class="kl-wrap kl-card__grid">
+    <div class="kl-card__visual" aria-hidden="true">
+      <div class="kl-lanecard" id="kl-lanecard">
+        <img src="img/badge-512.png" width="56" height="56" alt="">
+        <span class="kl-lanecard__name">The Lane Card</span>
+        <span class="kl-lanecard__no">No. 1933</span>
+        <span class="kl-lanecard__hearts"><i></i><i></i><i></i><i></i><i></i><i class="off"></i></span>
       </div>
     </div>
-    <dl class="kl-gate__prices" id="kl-prices" aria-label="Matchday admission prices"></dl>
+    <div>
+      <h2 class="kl-h2" id="kl-card-h">Join<br>The Lane.</h2>
+      <p class="kl-card__p">The Lane is your club too. Your free Lane Card is entirely optional: you never need it to get in. Scan in at the gate, collect a yellow heart every home game, and the rewards come to you: your sixth home game is on us, then a drink on the house, then matchday VIP.</p>
+      <div class="kl-hero__acts">
+        <a class="kl-btn kl-btn--solid" href="fan-zone.html?join=1">Get your free card</a>
+        <a class="kl-btn kl-btn--line" href="fan-zone.html">How it works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BACK THE LANE — sponsorship and help in kind, stated plainly -->
+<section class="kl-back" aria-labelledby="kl-back-h">
+  <div class="kl-wrap kl-back__grid">
+    <h2 class="kl-h2" id="kl-back-h">Back<br>The Lane.</h2>
+    <div>
+      <p class="kl-back__p">Local businesses keep non-league football going. Sponsor a match ball or a matchday, put your name on the shirt or in the programme, or help in kind with printing, photography or transport. Tell us what suits you and the club will come back to you personally.</p>
+      <div class="kl-hero__acts">
+        <a class="kl-btn kl-btn--solid" href="investment.html">Ways to back The Lane</a>
+        <a class="kl-btn kl-btn--line" href="investment.html#in-kind">Offer help in kind</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE LANE 100 — founding supporters. The number is the REAL count from
+     the club database (js/home.js → /.netlify/functions/lane-100); at zero it
+     says so. Recognition only: not ownership, not investment. -->
+<section class="kl-l100" aria-labelledby="kl-l100-h">
+  <div class="kl-wrap kl-l100__grid">
+    <div>
+      <h2 class="kl-h2" id="kl-l100-h">The Lane<br><em>100</em></h2>
+      <p class="kl-l100__p">The first hundred supporters to put their name to the club&rsquo;s next chapter. Free, your own supporter number, and a place on the founding wall if you want one.</p>
+      <a class="kl-btn kl-btn--solid" href="lane-100.html">Join The Lane 100</a>
+    </div>
+    <div class="l100c l100c--home" id="kl-l100-count" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- SINCE 1933 — the club's voice and its verified history -->
+<section class="kl-voice" aria-label="From the chairman">
+  <div class="kl-wrap">
+    <blockquote class="kl-voice__q">&ldquo;Yellow kit. Harrow heart. <em>This is The Lane.</em>&rdquo;</blockquote>
+    <p class="kl-voice__who">Pete Singh, Club Chairman &middot; <a href="about.html#chairman">More from the chairman</a></p>
+    <ul class="kl-since" aria-label="The Lane since 1933">
+      <li><b>1933</b><span>Founded in Harrow</span></li>
+      <li><b>1982</b><span>Hellenic League Division One champions</span></li>
+      <li><b>1992&ndash;93</b><span>FA Cup second qualifying round</span></li>
+    </ul>
+    <p class="kl-voice__who"><a href="history.html">The Lane since 1933</a> &middot; Got old photos or programmes? <a href="contact.html">Send them to the club</a>.</p>
   </div>
 </section>
 
@@ -282,46 +354,12 @@
   <ol class="kl-squad__rail" id="kl-squad" tabindex="0" aria-label="First-team squad, scroll sideways"></ol>
 </section>
 
-<!-- ⑦ THE LANE CARD — the free membership, drenched green -->
-<section class="kl-card" aria-labelledby="kl-card-h">
-  <div class="kl-wrap kl-card__grid">
-    <div class="kl-card__visual" aria-hidden="true">
-      <div class="kl-lanecard" id="kl-lanecard">
-        <img src="img/badge-512.png" width="56" height="56" alt="">
-        <span class="kl-lanecard__name">The Lane Card</span>
-        <span class="kl-lanecard__no">No. 1933</span>
-        <span class="kl-lanecard__hearts"><i></i><i></i><i></i><i></i><i></i><i class="off"></i></span>
-      </div>
-    </div>
-    <div>
-      <h2 class="kl-h2" id="kl-card-h">Your free<br>Lane Card.</h2>
-      <p class="kl-card__p">Scan in at the gate, collect a yellow heart every home game, and the rewards come to you: your sixth home game is on us, then a drink on the house, then matchday VIP.</p>
-      <div class="kl-hero__acts">
-        <a class="kl-btn kl-btn--solid" href="fan-zone.html?join=1">Get your card</a>
-        <a class="kl-btn kl-btn--line" href="fan-zone.html">How it works</a>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ⑧ THE CHAIRMAN — the club's voice, set like a poster -->
-<section class="kl-voice" aria-label="From the chairman">
-  <div class="kl-wrap">
-    <blockquote class="kl-voice__q">&ldquo;Yellow kit. Harrow heart. <em>This is The Lane.</em>&rdquo;</blockquote>
-    <p class="kl-voice__who">Pete Singh, Club Chairman &middot; <a href="about.html#chairman">More from the chairman</a></p>
-  </div>
-</section>
 
-<!-- ⑨ BACK THE LANE — sponsorship, stated plainly -->
-<section class="kl-back" aria-labelledby="kl-back-h">
-  <div class="kl-wrap kl-back__grid">
-    <h2 class="kl-h2" id="kl-back-h">Put your business in front of Harrow.</h2>
-    <div>
-      <p class="kl-back__p">Match-ball and matchday sponsorship, the programme, the shirt, or something bespoke. Tell us what you're after and the club will come back to you personally with a proposal built around your business.</p>
-      <a class="kl-btn kl-btn--solid" href="investment.html#apply">Partner with The Lane</a>
-    </div>
-  </div>
-</section>
+
+
+
+
 
 
 <!-- ══════════ SPOTLIGHT — MOTM & NEW SIGNING ══════════ -->
@@ -443,11 +481,24 @@
   </div>
 </section>
 
-<!-- ⑩ TITHE FARM — home, from above -->
+<!-- YOUR CLUB TOO — small, real ways in. No committee required. -->
+<section class="kl-sec kl-join" aria-labelledby="kl-join-h">
+  <div class="kl-wrap">
+    <div class="kl-run__head"><h2 class="kl-h2" id="kl-join-h">Your club too</h2></div>
+    <ul class="kl-rows kl-join__rows">
+      <li><a href="matchday.html"><b>Bring a friend</b><span>Next home match, prices and how to get here, for anyone you bring.</span></a></li>
+      <li><a href="volunteer.html"><b>Help on one matchday</b><span>Small, specific jobs. The club agrees every role with you first.</span></a></li>
+      <li><a href="lane-100.html"><b>The Lane 100</b><span>Be one of the founding hundred supporters.</span></a></li>
+      <li><a href="investment.html#apply"><b>Introduce a local business</b><span>Know someone who would back The Lane? Point them our way.</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- TITHE FARM — home, from above -->
 <section class="kl-ground" aria-labelledby="kl-ground-h">
   <img class="kl-ground__img" src="img/ground/tithe-farm-aerial-wide-1600.jpg"
        srcset="img/ground/tithe-farm-aerial-wide-800.jpg 800w, img/ground/tithe-farm-aerial-wide-1600.jpg 1600w"
-       sizes="100vw" width="1600" height="898" loading="lazy" decoding="async"
+       sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1600" height="898" loading="lazy" decoding="async"
        alt="Tithe Farm from the air: the pitch, the clubhouse and the houses of Rayners Lane around it">
   <div class="kl-ground__shade" aria-hidden="true"></div>
   <div class="kl-wrap kl-ground__in">
@@ -526,7 +577,7 @@
       </div>
       <div class="faq-item">
         <h3>How do I sponsor Rayners Lane FC?</h3>
-        <p>Email <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>. The club offers shirt, matchball and board sponsorship and works with local Harrow businesses. Sponsoring a Step 5 club puts your name in front of a real community every Saturday.</p>
+        <p>Email <a href="mailto:info@raynerslanefc.co.uk">info@raynerslanefc.co.uk</a>. The club offers match-ball, matchday, shirt, player and programme sponsorship and works with local Harrow businesses, including help in kind. Sponsoring a Step 5 club puts your name in front of a real community every Saturday.</p>
       </div>
       <div class="faq-item">
         <h3>When is the next Rayners Lane game?</h3>
@@ -566,6 +617,8 @@
     })();
   </script>
 <script src="js/football-data.js"></script>
+<script src="js/next-home.js"></script>
+<script src="js/lane-100.js" defer></script>
 <script src="js/home.js" defer></script>
 <script src="js/match-time.js"></script>
 <script src="js/main.js"></script>

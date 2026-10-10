@@ -1,0 +1,58 @@
+/* ════════════════════════════════════════════════════════════════════════
+   YOUR FIRST VISIT — Kit Launch. A drenched yellow title card (the matchday
+   poster), the next home match set big on black, the gate on yellow, the
+   friends calculator and travel as ruled rows, the Lane Card on green.
+   Hairlines and type only.
+   ════════════════════════════════════════════════════════════════════════ */
+.fv-muted{color:var(--ed-text-2,#AAAAAA)}
+.fv-muted a,.fv-rows a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;text-underline-offset:3px;background:none}
+.fv-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+
+/* Next home match block (markup from js/next-home.js) */
+.fv-next__grid,.fv-gate__grid,.fv-friends__grid,.fv-card__grid,.fv-share__grid{display:grid;gap:28px}
+@media (min-width:900px){.fv-next__grid,.fv-gate__grid,.fv-friends__grid,.fv-card__grid,.fv-share__grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:56px;align-items:start}}
+.nh{border-top:2px solid var(--white);padding-top:16px}
+.nh__when{margin:0;display:flex;flex-wrap:wrap;gap:4px 18px;font-family:var(--font-body);font-weight:800;font-size:clamp(1.05rem,1.5vw,1.3rem);color:var(--white)}
+.nh__ko{color:var(--yellow)}
+.nh__opp{margin:10px 0 8px;font-family:var(--font-display);font-weight:400;font-size:clamp(3.4rem,9vw,7.5rem);line-height:.84;text-transform:uppercase;color:var(--white)}
+.nh__where{margin:0;font-family:var(--font-body);font-size:15px;line-height:1.5;color:#AAAAAA}
+.nh__none{margin:0;font-family:var(--font-body);font-size:17px;line-height:1.55;color:var(--white);max-width:48ch}
+.nh__off{margin:0 0 18px;font-family:var(--font-body);font-size:16px;line-height:1.5;color:#080808;background:var(--yellow);padding:12px 14px;border-radius:var(--r-xs);max-width:60ch}
+.nh__off b{font-weight:800}
+.nh a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+
+/* Gate prices on yellow */
+.fv-gate__p{font-family:var(--font-body);font-weight:600;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.5;color:#080808;max-width:42ch;margin:18px 0 0}
+.fv-gate__p a{color:#080808;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.fv-prices{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:2px solid #080808}
+.fv-price{padding:16px 0 20px;border-bottom:2px solid #080808;min-width:0}
+.fv-price:nth-child(odd){border-right:2px solid #080808;padding-right:14px}
+.fv-price:nth-child(even){padding-left:18px}
+.fv-price dt{font-family:var(--font-body);font-weight:800;font-size:15px;line-height:1.3;color:#080808}
+.fv-price dt small{display:block;font-weight:600;font-size:13px;color:#111111}
+.fv-price dd{margin:0;font-family:var(--font-display);font-size:clamp(3.4rem,8vw,6rem);line-height:.85;color:#080808;font-variant-numeric:tabular-nums}
+
+/* Friends calculator */
+.fv-calc{border-top:2px solid var(--white)}
+.fv-calc__row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--ed-line,rgba(245,243,237,.14))}
+.fv-calc__row label{font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--white)}
+.fv-calc__row label span{display:block;font-weight:600;font-size:14px;color:#AAAAAA}
+.fv-step{display:flex;align-items:center;gap:4px}
+.fv-step button{width:44px;height:44px;border:1px solid rgba(245,243,237,.4);background:transparent;color:var(--white);font-family:var(--font-body);font-weight:800;font-size:20px;border-radius:var(--r-sm);cursor:pointer}
+.fv-step button:hover{border-color:var(--yellow);color:var(--yellow)}
+.fv-step button:focus-visible,.fv-step input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.fv-step input{width:3.2ch;min-height:44px;text-align:center;background:transparent;border:0;color:var(--white);font-family:var(--font-display);font-size:2rem;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield}
+.fv-step input::-webkit-outer-spin-button,.fv-step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.fv-calc__total{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin:16px 0 0;font-family:var(--font-body);font-weight:700;font-size:16px;color:#AAAAAA}
+.fv-calc__total b{font-family:var(--font-display);font-weight:400;font-size:clamp(3.4rem,8vw,5.5rem);line-height:.85;color:var(--yellow);font-variant-numeric:tabular-nums}
+.fv-calc__total small{flex-basis:100%;font-size:14px;font-weight:600}
+
+/* Travel rows */
+.fv-rows > li{display:grid;gap:6px 32px}
+@media (min-width:800px){.fv-rows > li{grid-template-columns:minmax(0,.6fr) minmax(0,1.4fr);align-items:baseline}}
+.fv-rows h3{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3vw,2.6rem);line-height:.95;text-transform:uppercase;color:var(--white);margin:0}
+.fv-rows p{font-family:var(--font-body);font-size:17px;line-height:1.55;color:rgba(245,243,237,.88);margin:0;max-width:60ch}
+.fv-rows strong{color:var(--white)}
+
+.fv-card .kl-p{color:#F5F3ED}
+.fv-card .kl-btn--line{border-color:rgba(255,255,255,.7)}

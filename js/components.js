@@ -312,9 +312,9 @@ function buildNav(currentPage) {
   // Full mobile menu sheet — grouped links to EVERY page. Both the top ☰ and the
   // bottom "More" open this same sheet, so no page is unreachable on a phone.
   const menuGroups = [
-    { h:'Matchday',     items:[['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
+    { h:'Matchday',     items:[['Your First Visit','matchday.html'],['Fixtures & Results','fixtures.html'],['Match Programme','programme.html'],['The Squad','squad.html'],['Gallery','gallery.html']] },
     { h:'The Club',     items:[['About The Club','about.html'],['Our History','history.html'],['Technology & The Lane','innovation.html'],['News','news.html'],['Contact','contact.html']] },
-    { h:'Get Involved', items:[['Membership','membership.html'],['Season Tickets','season-tickets.html'],['Fan Zone','fan-zone.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
+    { h:'Get Involved', items:[['Membership','membership.html'],['Season Tickets','season-tickets.html'],['Fan Zone','fan-zone.html'],['The Lane 100','lane-100.html'],['Volunteer','volunteer.html'],['Player Trials','trials.html']] },
     { h:'Commercial',   items:[['Sponsorship','investment.html'],['Club Shop','shop.html']] },
   ];
   const mLink = function (label, href) {
@@ -598,6 +598,7 @@ function buildFooter() {
             <h4>Match Day</h4>
             <ul>
               <li><a href="fixtures.html">All Fixtures</a></li>
+              <li><a href="matchday.html">Your First Visit</a></li>
               <li><a href="match-centre.html">Match Centre</a></li>
               <li><a href="fixtures.html#fx-results">Results</a></li>
               <li><a href="fixtures.html#calendar">Sync to Phone</a></li>
@@ -613,6 +614,7 @@ function buildFooter() {
               <li><a href="acerbis.html">Kit Partner: Acerbis</a></li>
               <li><a href="shop.html">Club Shop</a></li>
               <li><a href="https://www.easyfundraising.org.uk/causes/raynerslanefc" target="_blank">Easy Fundraising</a></li>
+              <li><a href="lane-100.html">The Lane 100</a></li>
               <li><a href="volunteer.html">Volunteer</a></li>
               <li><a href="trials.html">Player Trials</a></li>
               <li><a href="contact.html">Contact Us</a></li>

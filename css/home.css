@@ -198,3 +198,52 @@ body .notify-bar{background:transparent;border:0;border-top:1px solid var(--ed-l
 @media (min-width:900px){body .notify-bar{grid-template-columns:auto 1fr auto}}
 body .notify-bar__title{font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);text-transform:uppercase;margin:0}
 body .notify-bar__sub{margin:0}
+
+/* ── ② NEXT HOME MATCH on the yellow poster (markup: js/next-home.js) ──── */
+.kl-gate__h{font-size:clamp(3.4rem,8vw,7.5rem)}
+.nh--ink{border-top:2px solid #080808;padding-top:14px;margin:24px 0 26px}
+.nh--ink .nh__when{margin:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-family:var(--font-body);font-weight:800;font-size:clamp(1.05rem,1.4vw,1.25rem);color:#080808}
+.nh--ink .nh__opp{margin:8px 0 6px;font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,7vw,6rem);line-height:.84;text-transform:uppercase;color:#080808}
+.nh--ink .nh__where{margin:0;font-family:var(--font-body);font-weight:600;font-size:14px;line-height:1.5;color:#111111}
+.nh--ink .nh__none{margin:0;font-family:var(--font-body);font-weight:600;font-size:16px;line-height:1.55;color:#080808;max-width:44ch}
+.nh--ink .nh__off{margin:0 0 16px;font-family:var(--font-body);font-size:15px;line-height:1.5;color:var(--yellow);background:#080808;padding:12px 14px;border-radius:var(--r-xs);max-width:52ch}
+.nh--ink .nh__off a{color:var(--yellow)}
+.nh--ink a{color:#080808;text-decoration:underline;text-underline-offset:3px}
+.kl-gate__grid{align-items:start}
+.kl-gate__p--small{font-weight:500;margin-top:0}
+.kl-gate__p a{color:#080808;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.kl-gate__prices + .kl-gate__p{margin-top:22px}
+
+/* THE LANE 100 teaser — the real count, big */
+.kl-l100{background:#080808;padding:clamp(64px,9vw,120px) 0;border-top:1px solid var(--ed-line)}
+.kl-l100__grid{display:grid;gap:36px;align-items:end}
+@media (min-width:900px){.kl-l100__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.kl-l100 .kl-h2 em{font-style:normal;color:var(--yellow)}
+.kl-l100__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:var(--ed-text-2);max-width:44ch;margin:20px 0 26px}
+.l100c--home{border-top:2px solid var(--white);padding-top:12px;min-height:120px}
+.l100c--home .l100c__n{margin:0;font-family:var(--font-display);line-height:.8;color:var(--yellow);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.l100c--home .l100c__now{font-size:clamp(6rem,16vw,12rem)}
+.l100c--home .l100c__of{font-size:clamp(2.2rem,5vw,4rem);color:var(--white)}
+.l100c--home .l100c__bar{height:8px;background:rgba(245,243,237,.14);margin:16px 0 14px;overflow:hidden}
+.l100c--home .l100c__bar i{display:block;height:100%;background:var(--yellow);transform-origin:left center}
+.l100c--home .l100c__msg{font-family:var(--font-body);font-weight:700;font-size:16px;line-height:1.5;color:var(--white);margin:0}
+
+/* SINCE 1933 — verified milestones under the chairman's line */
+.kl-since{list-style:none;margin:44px 0 6px;padding:0;display:grid;border-top:1px solid var(--ed-line)}
+@media (min-width:800px){.kl-since{grid-template-columns:repeat(3,1fr)}}
+.kl-since li{display:grid;gap:6px;padding:18px 18px 18px 0;border-bottom:1px solid var(--ed-line)}
+@media (min-width:800px){.kl-since li{border-bottom:0;border-right:1px solid var(--ed-line);padding:20px 20px 4px}.kl-since li:first-child{padding-left:0}.kl-since li:last-child{border-right:0}}
+.kl-since b{font-family:var(--font-display);font-weight:400;font-size:clamp(3rem,6vw,4.8rem);line-height:.85;color:var(--yellow);font-variant-numeric:tabular-nums}
+.kl-since span{font-family:var(--font-body);font-weight:700;font-size:15px;color:var(--white)}
+
+/* YOUR CLUB TOO — ruled ways in */
+.kl-join{background:#080808}
+.kl-join__rows a{display:grid;gap:4px 32px;padding:4px 0;min-height:44px}
+@media (min-width:800px){.kl-join__rows a{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:baseline}}
+.kl-join__rows b{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,3.6vw,3.2rem);line-height:.9;text-transform:uppercase;color:var(--white)}
+.kl-join__rows span{font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--ed-text-2)}
+.kl-join__rows a:hover b{color:var(--yellow)}
+.kl-hero__line strong{font-weight:800;color:var(--yellow)}
+.kl-join__rows a{background:none}
+.kl-join__rows a:hover b,.kl-join__rows a:focus-visible b{color:var(--yellow);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+.kl-hero__media img{object-position:50% 55%}
