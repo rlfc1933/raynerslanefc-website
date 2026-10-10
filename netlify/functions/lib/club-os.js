@@ -38,11 +38,24 @@ const FLOW = {
   comms:       { draft: ['review', 'withdrawn'], review: ['approved', 'draft', 'withdrawn'], approved: ['scheduled', 'published', 'draft', 'withdrawn'],
                  scheduled: ['published', 'approved', 'withdrawn'], published: ['withdrawn'], withdrawn: ['draft'] },
   analysis:    { open: ['reviewed'], reviewed: ['shared', 'open'], shared: ['reviewed'] },
+  // Rebirth workspaces (lib/rebirth/*): volunteering, private proposals, research.
+  volunteer_role:  require('./rebirth/volunteers').ROLE_FLOW,
+  volunteer_offer: require('./rebirth/volunteers').OFFER_FLOW,
+  // A proposal is decided, never launched, by the software.
+  proposal:    { draft: ['review', 'parked'], review: ['approved', 'declined', 'draft', 'parked'], approved: ['parked'],
+                 declined: ['draft'], parked: ['draft'] },
+  research:    { open: ['reviewed', 'archived'], reviewed: ['open', 'archived'], archived: ['open'] },
 };
 const FIRST = { task: 'open', enquiry: 'new', opportunity: 'research', fulfilment: 'todo', invoice: 'draft',
-  outreach: 'draft', grant: 'discovered', compliance: 'not_started', comms: 'draft', analysis: 'open' };
+  outreach: 'draft', grant: 'discovered', compliance: 'not_started', comms: 'draft', analysis: 'open',
+  volunteer_role: 'draft', volunteer_offer: 'new', proposal: 'draft', research: 'open' };
 const CLOSED = new Set(['done', 'cancelled', 'closed', 'won', 'lost', 'not_interested', 'not_applicable', 'paid', 'void',
-  'replied', 'withdrawn', 'ineligible', 'awarded', 'declined', 'complete', 'published', 'shared']);
+  'replied', 'withdrawn', 'ineligible', 'awarded', 'declined', 'complete', 'published', 'shared',
+  'filled', 'recognised', 'parked', 'archived']);
+// Stages that close a record only for some kinds ("approved" closes a proposal,
+// "closed" closes a volunteer role but "approved" keeps an invoice open).
+const CLOSED_FOR = { proposal: new Set(['approved', 'declined', 'parked']), volunteer_role: new Set(['closed', 'filled']) };
+function isClosed(kind, stage) { return CLOSED_FOR[kind] ? CLOSED_FOR[kind].has(stage) : CLOSED.has(stage); }
 const KINDS = Object.keys(FLOW);
 
 // Moves that need something more than a click. Returned as a human sentence.
@@ -55,6 +68,9 @@ function guardTransition(item, to, ctx = {}) {
   const needsOwner = { opportunity: ['contacted', 'meeting', 'proposal', 'negotiation', 'won'], enquiry: ['assigned', 'answered'],
     grant: ['preparing', 'awaiting_approval', 'submitted'], compliance: ['in_progress', 'complete'], comms: ['review'] };
   if ((needsOwner[item.kind] || []).includes(to) && !(ctx.owner || item.owner)) return 'Give it an owner first — someone has to be responsible.';
+  if (item.kind === 'opportunity' && to === 'won') {
+    const why = require('./rebirth/sponsor-journey').wonGuard(item, ctx.slot || null); if (why) return why;
+  }
   if (item.kind === 'opportunity' && to === 'won' && !(ctx.value_pence || item.value_pence) && !item.in_kind)
     return 'Record the agreed value (or mark it in-kind) before marking it won.';
   if (item.kind === 'invoice' && to === 'approved' && !(item.value_pence > 0)) return 'An invoice needs an amount before it can be approved.';
@@ -70,6 +86,14 @@ function guardTransition(item, to, ctx = {}) {
   if (item.kind === 'comms' && to === 'approved' && d.drafted_by && ctx.actor && norm(d.drafted_by) === norm(ctx.actor) && !ctx.allowSelfApprove)
     return 'Someone other than the writer should approve it.';
   if (item.kind === 'comms' && to === 'scheduled' && !(ctx.publish_at || d.publish_at)) return 'Pick a publish date and time.';
+  if (item.kind === 'volunteer_role') return require('./rebirth/volunteers').roleGuard(item, to, ctx);
+  if (item.kind === 'volunteer_offer') return require('./rebirth/volunteers').offerGuard(item, to, ctx, ctx.role || null);
+  if (item.kind === 'proposal' && ['approved', 'declined'].includes(to)) {
+    if (!ctx.actor) return 'The decision must be recorded against a named person.';
+    if (d.drafted_by && norm(d.drafted_by) === norm(ctx.actor) && !ctx.allowSelfApprove) return 'Someone other than the person who drafted it should decide it.';
+    if (!ctx.reason) return 'Record the decision and any conditions (what was agreed, prices, rights).';
+  }
+  if (item.kind === 'research' && to === 'reviewed' && !(d.source_url || ctx.reference)) return 'A research note needs its source before it is marked reviewed.';
   return null;
 }
 
@@ -86,6 +110,9 @@ function sendPermission(org, suppressed = new Set()) {
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, why: 'No valid business email address recorded.' };
   const domain = '@' + email.split('@')[1];
   if (suppressed.has(email) || suppressed.has(domain)) return { ok: false, why: 'This address is on the suppression list (they asked not to be contacted).' };
+  // An address that arrived in an imported research list must be re-checked
+  // (source, accuracy, relevance) by a person before it can be used at all.
+  if (org.import_batch_id && !org.email_checked_at) return { ok: false, why: 'Imported address not re-checked yet — confirm its source and accuracy, then record the date checked.' };
   switch (org.permission) {
     case 'opted_out': case 'do_not_contact': return { ok: false, why: 'Marked do-not-contact.' };
     case 'research_only': return { ok: false, why: 'Research only — no lawful basis recorded yet.' };
@@ -144,16 +171,19 @@ const INVENTORY = [
   { key: 'match', name: 'Match sponsor (per home game)', capacity: null, per: 'fixture' },
   { key: 'matchball', name: 'Matchball sponsor (per home game)', capacity: null, per: 'fixture' },
   { key: 'player', name: 'Player sponsor (per player)', capacity: null, per: 'player' },
-  { key: 'board', name: 'Pitch-side board', capacity: null },
+  // Tithe Farm is shared and not owned by the club: these rights are not the club's to sell.
+  { key: 'board', name: 'Pitch-side board (not offered — ground not owned)', capacity: 0, unavailable: true },
   { key: 'programme', name: 'Programme advert', capacity: null },
   { key: 'website', name: 'Website partner placement', capacity: null },
-  { key: 'hospitality', name: 'Matchday hospitality', capacity: null, per: 'fixture' },
+  { key: 'hospitality', name: 'Matchday hospitality (not offered — ground not owned)', capacity: 0, unavailable: true },
   { key: 'community', name: 'Community project sponsor', capacity: null },
   { key: 'bespoke', name: 'Bespoke partnership', capacity: null },
 ];
 // Would selling this package double-sell an exclusive right this season?
 function inventoryClash(pkgKey, season, existingWon = []) {
-  const pkg = INVENTORY.find((p) => p.key === pkgKey); if (!pkg || !pkg.exclusive) return null;
+  const pkg = INVENTORY.find((p) => p.key === pkgKey);
+  if (pkg && pkg.unavailable) return `${pkg.name}: the club cannot sell this.`;
+  if (!pkg || !pkg.exclusive) return null;
   const taken = existingWon.find((o) => (o.data || {}).package === pkgKey && (o.data || {}).season === season);
   return taken ? `${pkg.name} for ${season} is already sold (${taken.title}).` : null;
 }
@@ -211,7 +241,7 @@ function label(s) { return String(s || '').replace(/_/g, ' '); }
 function poundsToPence(v) { if (v === '' || v == null) return null; const n = Number(String(v).replace(/[£,\s]/g, '')); return isFinite(n) && n >= 0 ? Math.round(n * 100) : NaN; }
 
 module.exports = {
-  FLOW, FIRST, CLOSED, KINDS, guardTransition, sendPermission, CORPORATE, SCORE_WEIGHTS, scoreProspect,
+  FLOW, FIRST, CLOSED, CLOSED_FOR, isClosed, KINDS, guardTransition, sendPermission, CORPORATE, SCORE_WEIGHTS, scoreProspect,
   milesFromGround, proximityFactor, FULFILMENT_STEPS, INVENTORY, inventoryClash, rewardStatus, attention,
   applyPayment, nameKey, hostOf, findDuplicate, label, poundsToPence,
 };

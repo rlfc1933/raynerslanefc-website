@@ -11,10 +11,15 @@ const UNIQUE = {
   hq_items: [['idempotency_key']],
   hq_redemptions: [['lane_no', 'reward_key', 'season']],
   hq_suppression: [['value']],
+  // Back the Lane / Run the Lane (20261009140000_rebirth_hq.sql)
+  hq_import_batches: [['content_hash']],
+  hq_fixture_slots: [['fixture_id', 'slot'], ['opportunity_id']],
+  hq_attendance: [['fixture_id']],
 };
 
 function makeDb(seed = {}) {
-  const t = { hq_orgs: [], hq_items: [], hq_audit: [], hq_suppression: [], hq_redemptions: [], submissions: [], attendance: [], ...seed };
+  const t = { hq_orgs: [], hq_items: [], hq_audit: [], hq_suppression: [], hq_redemptions: [], submissions: [], attendance: [],
+    hq_import_batches: [], hq_fixture_slots: [], hq_attendance: [], hq_finance_lines: [], ...seed };
   return t;
 }
 
@@ -31,7 +36,7 @@ function get(row, col) {
   return row[col];
 }
 function match(row, [col, expr]) {
-  const i = expr.indexOf('.'); const op = expr.slice(0, i), val = decodeURIComponent(expr.slice(i + 1));
+  const i = expr.indexOf('.'); const op = expr.slice(0, i), val = (() => { try { return decodeURIComponent(expr.slice(i + 1)); } catch (e) { return expr.slice(i + 1); } })();
   const v = get(row, col);
   switch (op) {
     case 'eq': return String(v) === val;
@@ -104,7 +109,7 @@ function install(db, host = 'fake-supabase.local') {
     const body = opts.body ? JSON.parse(opts.body) : undefined;
     const prefer = (opts.headers && (opts.headers.Prefer || opts.headers.prefer)) || '';
     const r = handle(db, (opts.method || 'GET').toUpperCase(), s, body, prefer);
-    return new Response(r.json == null ? '' : JSON.stringify(r.json), { status: r.status, headers: { 'Content-Type': 'application/json' } });
+    return new Response(r.json == null ? null : JSON.stringify(r.json), { status: r.status, headers: { 'Content-Type': 'application/json' } });
   };
   return () => { global.fetch = real; };
 }
