@@ -285,3 +285,11 @@ button.hq-row:hover { background: var(--hq-s1); }
 #app .hq-top .hlp-btn { width: 44px; height: 44px; min-width: 44px; border-radius: var(--r-sm); border-color: var(--hq-line); color: var(--hq-text); font: 800 15px var(--font-body); }
 #app .hq-top .hlp-btn:hover { background: var(--hq-s3); border-color: var(--hq-line); color: var(--hq-text); }
 @media (max-width: 420px) { #app .hq-top .hlp-btn { display: none; } }
+/* The fixture strip: one line on wide screens; identity above, progress and
+   the action below on tablets, so the facts are never squeezed into a column. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .hq-match { grid-template-columns: minmax(0, 1fr) auto; }
+  .hq-match__id { grid-column: 1 / -1; }
+}
+@media (min-width: 1024px) { #app .hq-frame #panel-preparematch { max-width: 1240px; } }
+.hq-table td[data-label="Owner"], .hq-table td[data-label="Due"] { white-space: nowrap; }

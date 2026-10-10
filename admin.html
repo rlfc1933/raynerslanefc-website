@@ -881,19 +881,17 @@
   <nav class="hq-nav" id="hq-nav" aria-label="Lane HQ"></nav>
   <div class="dash">
 
-    <!-- ═══ PORTAL HOME (Release 1) ═══════════════════════════════════════
-         Answers "what needs doing" before showing the tool inventory. The
-         classic 31-tile list below is preserved untouched and is revealed by
-         "View all club tools", so nothing became unreachable. -->
-    <!-- The fixture, above the tool inventory. Empty until PrepareMatch
-         resolves one, so a failure here shows nothing rather than a broken
-         card. -->
+    <!-- ═══ THE COMMAND CENTRE (js/hq-shell.js) ═══════════════════════════
+         What needs doing, money in, supporters, the next match from the
+         football registry, programmes, my work and recent activity. Every
+         tool is reached through the one HQ navigation (js/hq-model.js). -->
     <div id="pm-next" hidden></div>
-    <!-- THE COMMAND CENTRE (js/hq-shell.js). -->
     <main id="hq-home" aria-label="Command centre"></main>
 
-    <!-- DASHBOARD — the classic full tool list. Hidden by default; shown by
-         PortalHome.toggleAll(). Every tile, panel id and hash still works. -->
+    <!-- RETIRED: the classic tile list and its fixtures.json "Next Match"
+         editor. Kept in the page (hidden, unreachable from navigation) so no
+         panel id or initialiser that reads it breaks; every tool it linked to
+         is in the HQ navigation. -->
     <div id="dash-home" style="display:none">
       <div class="hq-hero">
         <div class="hq-eyebrow">Rayners Lane FC &middot; Staff HQ</div>
