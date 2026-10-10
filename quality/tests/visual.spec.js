@@ -28,6 +28,15 @@ for (const pg of PUBLIC_PAGES.filter((p) => p.tier === 1)) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.clock.setFixedTime(new Date('2026-08-15T12:00:00+01:00'));   // a fixed Saturday in season
     await open(page, pg.path, { freeze: true });
+    // Photo-led pages: pull every lazy image in and wait until each has
+    // decoded, so the golden compares the design rather than load timing.
+    await page.evaluate(async () => {
+      document.querySelectorAll('img[loading="lazy"]').forEach((i) => { i.loading = 'eager'; });
+      for (let y = 0; y < document.body.scrollHeight; y += innerHeight) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 60)); }
+      scrollTo(0, 0);
+      await Promise.all([...document.images].map((i) => (i.complete ? (i.decode ? i.decode().catch(() => {}) : 0) : new Promise((r) => { i.onload = i.onerror = r; setTimeout(r, 5000); }))));
+    });
+    await page.waitForTimeout(300);
     await expect(page).toHaveScreenshot(`${pg.name}.png`, {
       fullPage: true,
       mask: VOLATILE.map((s) => page.locator(s)),

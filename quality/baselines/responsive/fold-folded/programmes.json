@@ -4,8 +4,6 @@
  "text-under-12px:button.bnav__item > span.bnav__label",
  "text-under-12px:div > div",
  "text-under-12px:div > p",
- "text-under-12px:div.container > span.label",
- "text-under-12px:div.footer__col > h4",
  "text-under-12px:div.nav__title > span.nav__title-sub",
  "text-under-12px:p > a",
  "text-under-12px:p.affils > span.affils__lbl",

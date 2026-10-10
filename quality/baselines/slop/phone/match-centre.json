@@ -1,7 +1,6 @@
 [
  "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
  "impeccable:gradient-text:body",
- "impeccable:hero-eyebrow-chip:span.label",
  "impeccable:skipped-heading:body",
  "impeccable:undersized-ui-text:#a11y-text-label",
  "impeccable:undersized-ui-text:a.bnav__item > span.bnav__label",

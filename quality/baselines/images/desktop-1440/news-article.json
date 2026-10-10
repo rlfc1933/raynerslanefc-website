@@ -1,19 +1,11 @@
 [
  "heavy:images",
- "no-dimensions:a > img",
  "no-dimensions:a.nav__brand > img.nav__badge",
- "no-dimensions:a.ptr-affcard > img",
- "no-dimensions:a.ptr-card > img",
- "no-dimensions:div#hero-shirts > img",
  "no-dimensions:div.cn__team > img.cn__crest",
  "no-dimensions:div.nav__crest > img",
  "no-dimensions:div.news-card__img > img",
- "no-dimensions:div.ptr-card > img",
- "no-dimensions:span.ptr-chip > img",
  "oversized:a.nav__brand > img.nav__badge",
- "oversized:a.ptr-card > img",
  "oversized:div.cn__team > img.cn__crest",
  "oversized:div.nav__crest > img",
- "oversized:div.ptr-card > img",
  "under-resolved:div.news-card__img > img"
 ]

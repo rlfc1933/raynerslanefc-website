@@ -4,11 +4,8 @@
  "no-dimensions:article.fxc > img.fxc__ghost",
  "no-dimensions:div > img",
  "no-dimensions:div.fxc__team > img.fxc__crest",
- "no-dimensions:div.fxc__top > img.fxc__comp",
  "no-dimensions:div.fxh > img.fxc__ghost.fxh__ghost",
- "no-dimensions:div.fxh__comp > img.fxc__comp",
  "no-dimensions:div.nav__crest > img",
  "under-resolved:article.fxc > img.fxc__ghost",
- "under-resolved:div.fxc__team > img.fxc__crest",
  "under-resolved:div.fxh > img.fxc__ghost.fxh__ghost"
 ]

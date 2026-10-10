@@ -1,4 +1,5 @@
 [
+ "eager-offscreen:div.nav__crest > img",
  "heavy:images",
  "no-dimensions:a.nav__brand > img.nav__badge",
  "no-dimensions:div > img",

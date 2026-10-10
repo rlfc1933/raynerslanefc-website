@@ -1,8 +1,6 @@
 [
- "impeccable:bounce-easing:body",
  "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
  "impeccable:gradient-text:body",
- "impeccable:gradient-text:div.e404__num > span",
  "impeccable:skipped-heading:body",
  "impeccable:undersized-ui-text:#a11y-text-label",
  "impeccable:undersized-ui-text:a.bnav__item > span.bnav__label",

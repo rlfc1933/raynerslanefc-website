@@ -1,13 +1,6 @@
 [
- "impeccable:bounce-easing:body",
- "impeccable:dark-glow:body",
- "impeccable:dark-glow:div.lane-ring",
  "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
- "impeccable:gpt-thin-border-wide-shadow:div.lane-ring",
  "impeccable:gradient-text:body",
- "impeccable:gradient-text:div.e404__num > span",
- "impeccable:layout-transition:body",
- "impeccable:layout-transition:div.lane-ring",
  "impeccable:line-length:p.footer__legal",
  "impeccable:skipped-heading:body",
  "impeccable:undersized-ui-text:#a11y-text-label",

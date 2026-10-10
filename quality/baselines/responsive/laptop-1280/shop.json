@@ -1,19 +1,10 @@
 [
  "text-under-12px:a > span",
  "text-under-12px:div > div",
- "text-under-12px:div > div.label",
  "text-under-12px:div > p",
  "text-under-12px:div > span",
- "text-under-12px:div > span.label",
- "text-under-12px:div.container > span",
- "text-under-12px:div.container > span.label",
- "text-under-12px:div.footer__col > h4",
  "text-under-12px:div.nav__title > span.nav__title-sub",
- "text-under-12px:div.product-colours > span.colour-label",
- "text-under-12px:div.product-img > span.product-tag",
- "text-under-12px:div.product-img > span.product-tag.green",
  "text-under-12px:p > a",
  "text-under-12px:p.affils > span.affils__lbl",
- "text-under-12px:p.footer__legal > a",
- "text-under-12px:tr > th"
+ "text-under-12px:p.footer__legal > a"
 ]

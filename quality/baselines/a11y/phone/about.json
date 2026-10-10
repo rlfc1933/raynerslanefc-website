@@ -1,9 +1,3 @@
 [
- "serious:link-in-text-block:a[href=\"fan-zone.html?join=1\"]",
- "serious:target-size:.affil-item[href$=\"www.thefa.com\"][target=\"_blank\"]:nth-child(3)",
- "serious:target-size:.affil-item[href$=\"www.thefa.com\"][target=\"_blank\"]:nth-child(4)",
- "serious:target-size:.affil-item[target=\"_blank\"]:nth-child(6)",
- "serious:target-size:.affil-item[target=\"_blank\"]:nth-child(7)",
- "serious:target-size:.bnav__item[href=\"index.html\"]",
- "serious:target-size:a[href$=\"www.kickitout.org\"]"
+ "serious:target-size:.bnav__item[href=\"index.html\"]"
 ]

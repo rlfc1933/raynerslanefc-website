@@ -2,5 +2,7 @@
  "heavy:images",
  "no-dimensions:a.nav__brand > img.nav__badge",
  "no-dimensions:div > img",
- "no-dimensions:div.nav__crest > img"
+ "no-dimensions:div.nav__crest > img",
+ "under-resolved:div.acb-ph__shot > img",
+ "under-resolved:li.acb-shot > img"
 ]

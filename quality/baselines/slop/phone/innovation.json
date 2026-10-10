@@ -1,9 +1,6 @@
 [
  "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
  "impeccable:gradient-text:body",
- "impeccable:low-contrast:p.ess-standfirst",
- "impeccable:radial-spotlight-glow:section.ess-hero",
- "impeccable:side-tab:div.ess-pull",
  "impeccable:skipped-heading:body",
  "impeccable:tight-leading:div.ess-pull > p",
  "impeccable:undersized-ui-text:#a11y-text-label",
