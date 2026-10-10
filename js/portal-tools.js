@@ -88,7 +88,7 @@
       ask: 'Are you managing internal club records?',
       likely: 'Most often: write up a meeting, or read enquiries sent through the website.',
       ids: ['command', 'clubtasks', 'funding', 'compliance', 'meetings', 'committee', 'staff', 'records', 'supporters', 'clubstats',
-            'swot', 'playbook', 'analytics', 'users', 'scorecard', 'attendance', 'volunteers', 'finance', 'future'] },
+            'swot', 'playbook', 'analytics', 'users', 'scorecard', 'attendance', 'volunteers', 'finance', 'future', 'lane100'] },
 
     { key: 'help', name: 'Help',
       ask: 'Do you want to look something up?',
@@ -228,6 +228,9 @@
       roles: ['Chairman', 'V Chairman', 'Club Secretary', 'Club Management'] },
     { id: 'attendance', name: 'Verified Attendance', effect: 'internal',
       desc: 'One verified home crowd per fixture: one person counts, another confirms. Lane Card check-ins shown as a subset.',
+      roles: ['Chairman', 'V Chairman', 'Club Secretary', 'Committee', 'Club Management'] },
+    { id: 'lane100', name: 'The Lane 100', effect: 'internal',
+      desc: 'Founding supporters who signed up on the website, in joining order. Read-only.',
       roles: ['Chairman', 'V Chairman', 'Club Secretary', 'Committee', 'Club Management'] },
     { id: 'volunteers', name: 'Volunteers', effect: 'internal',
       desc: 'Volunteer roles (what, when, where, who coordinates, checks needed), offers from the website, assignments and hours.',

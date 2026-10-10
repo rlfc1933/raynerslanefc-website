@@ -90,5 +90,12 @@
   "gameDay": {
     "enabled": true,
     "_note": "KILL SWITCH. Set enabled:false to turn game-day homepage theming off everywhere, immediately, without a deploy — data/config.json is fetched at runtime. The homepage falls back to the normal Rayners Lane theme. js/game-day.js checks this BEFORE doing any other work, and any error anywhere in that file also tears the theme down, because a cosmetic feature must never be able to break the club front page on a matchday."
+  },
+  "sponsorship": {
+    "_note": "Entry-level packages the club already offers (chairman-confirmed). Larger tiers are proposals in HQ, not public prices.",
+    "entryPoints": {
+      "matchball": "£50",
+      "matchday": "£100"
+    }
   }
 }

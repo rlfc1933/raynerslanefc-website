@@ -589,6 +589,21 @@
     });
   }
 
+  // ── The Lane 100 (read-only list of real sign-ups) ─────────────────────
+  function lane100() {
+    var el = host('lane100'); if (!el) return;
+    el.innerHTML = '<p class="cos-blurb">Founding supporters who have signed up on the website, numbered by the database in the order they joined. Participation and recognition only — no payments, no promises.</p><div class="cos-body" aria-live="polite"><div class="cos-loading">Loading…</div></div>';
+    var out = el.querySelector('.cos-body');
+    call('lane100', {}).then(function (r) {
+      if (!r.ok) return r.notSetUp ? notSetUp(out, r) : (out.innerHTML = '<p class="cos-err">' + h(r.error) + '</p>');
+      if (!r.members.length) { out.innerHTML = '<div class="cos-empty">Nobody has joined yet. The public page says “be one of the first” until someone does.</div>'; return; }
+      out.innerHTML = '<p><b>' + r.members.length + '</b> of 100 joined.</p><table class="cos-table"><thead><tr><th scope="col">No.</th><th scope="col">Name</th><th scope="col">Town</th><th scope="col">On the wall</th><th scope="col">Club updates</th><th scope="col">Joined</th></tr></thead><tbody>' +
+        r.members.map(function (m) {
+          return '<tr><td>' + m.no + '</td><td>' + h(m.name) + (m.status !== 'active' ? ' <small>(' + h(m.status) + ')</small>' : '') + '</td><td>' + h(m.town || '—') + '</td><td>' + (m.wall ? 'Yes' : 'No') + '</td><td>' + (m.updates ? h(m.email || 'Yes') : 'No') + '</td><td>' + new Date(m.joined).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Europe/London' }) + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    });
+  }
+
   // ── rewards redemption ─────────────────────────────────────────────────
   function rewards() {
     var el = document.querySelector('[data-cos="rewards"]'); if (!el) return;
@@ -1002,8 +1017,9 @@
     { id: 'attendance', title: 'Attendance', group: 'Grow the Lane', summary: 'Verified home attendance and Lane Card check-ins.' },
     { id: 'volunteers', title: 'Volunteers', group: 'Grow the Lane', summary: 'Roles, offers of help, assignment.' },
     { id: 'rewards', title: 'Reward redemption', group: 'Grow the Lane' },
+    { id: 'lane100', title: 'The Lane 100', group: 'Grow the Lane' },
   ];
-  var CUSTOM = { command: commandCentre, rewards: rewards, priorities: priorities, scorecard: scorecard, prospects: prospects, bookings: bookings, attendance: attendance, finance: finance };
+  var CUSTOM = { command: commandCentre, rewards: rewards, lane100: lane100, priorities: priorities, scorecard: scorecard, prospects: prospects, bookings: bookings, attendance: attendance, finance: finance };
   function open(name) {
     if (CUSTOM[name]) return CUSTOM[name]();
     if (AREAS[name]) return mount(name);

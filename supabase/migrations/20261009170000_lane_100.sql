@@ -51,8 +51,7 @@ begin
   return new;
 end $$;
 
-drop trigger if exists lane100_assign_no on public.lane100_members;
-create trigger lane100_assign_no before insert on public.lane100_members
+create or replace trigger lane100_assign_no before insert on public.lane100_members
   for each row execute function public.lane100_assign_no();
 
 -- Numbers are permanent once given.
@@ -64,8 +63,7 @@ begin
   end if;
   return new;
 end $$;
-drop trigger if exists lane100_freeze_no on public.lane100_members;
-create trigger lane100_freeze_no before update on public.lane100_members
+create or replace trigger lane100_freeze_no before update on public.lane100_members
   for each row execute function public.lane100_freeze_no();
 
 alter table public.lane100_members enable row level security;

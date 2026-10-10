@@ -48,6 +48,7 @@
     { key: 'community', name: 'Club and community', items: [
       { id: 'supporters', label: 'Members and supporters' },
       { id: 'volunteers', label: 'Volunteers' },
+      { id: 'lane100', label: 'The Lane 100' },
       { id: 'records', label: 'Website enquiries' },
       { id: 'fanclub', label: 'Fan club' },
       { id: 'perks', label: 'Supporter offers' },

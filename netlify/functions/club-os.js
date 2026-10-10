@@ -315,6 +315,17 @@ A.companiesHouse = async (b) => {
     address: c.address_snippet, created: c.date_of_creation })) };
 };
 
+// ── The Lane 100: who has joined (read-only) ──────────────────────────────
+// Sign-ups are numbered by the database (lane100_members). HQ only reads them:
+// names, numbers and opt-ins; emails shown to the committee for follow-up only
+// where the member opted in to club updates.
+A.lane100 = async () => {
+  const rows = await sb('GET', 'lane100_members?select=supporter_no,name,email,town,show_on_wall,updates_opt_in,status,created_at&order=supporter_no.asc&limit=100');
+  return { ok: true, members: (rows || []).map((m) => ({
+    no: m.supporter_no, name: m.name, town: m.town || null, wall: !!m.show_on_wall,
+    updates: !!m.updates_opt_in, email: m.updates_opt_in ? m.email : null, status: m.status, joined: m.created_at })) };
+};
+
 // ── Loyalty redemption ─────────────────────────────────────────────────────
 function seasonOf(d = new Date()) { const y = d.getUTCMonth() >= 6 ? d.getUTCFullYear() : d.getUTCFullYear() - 1; return { label: `${y}/${String(y + 1).slice(2)}`, from: `${y}-07-01`, to: `${y + 1}-06-30` }; }
 async function verifiedHomeVisits(lane, season) {
