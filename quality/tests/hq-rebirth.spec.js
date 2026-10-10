@@ -197,3 +197,13 @@ test('Volunteers + scorecard — offer collected, assigned to an approved role; 
   await expect(s.getByText(/page views are never reported as attendance/i)).toBeVisible();
   await shot(page, 'scorecard', info);
 });
+
+test('Matchday checklist — built from the registry’s next HOME fixture, each task carries fixture_id and London date', async ({ page }) => {
+  await signIn(page);
+  await openPanel(page, 'clubtasks');
+  await page.locator('[data-cos="clubtasks"]').getByRole('button', { name: 'Create checklist for next home match' }).click();
+  await expect.poll(() => db.hq_items.filter((i) => i.kind === 'task').length).toBe(12);
+  const tasks = db.hq_items.filter((i) => i.kind === 'task');
+  expect(tasks.every((t) => t.data.fixture_id === 'fwp-900' && t.data.fixture_date === ymd(10))).toBe(true);   // not the away game, not fixtures.json
+  expect(tasks.every((t) => /Thatcham Town/.test(t.title))).toBe(true);
+});

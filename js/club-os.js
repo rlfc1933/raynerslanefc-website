@@ -538,7 +538,7 @@
       if (!confirm('Create the ' + MATCHDAY_TASKS.length + '-item checklist for ' + opp + ' (' + day(dt) + ')? Running it twice creates nothing new.')) return;
       var jobs = MATCHDAY_TASKS.map(function (title, i) {
         var due = i >= 10 ? new Date(Date.parse(dt + 'T12:00:00Z') + 2 * 864e5).toISOString().slice(0, 10) : dt;
-        return write('create', { kind: 'task', title: title + ' — v ' + opp, due_date: due, idempotency_key: 'matchday:' + fid + ':' + i, source: 'fixture:' + fid, data: { area: 'Matchday', fixture: fid } });
+        return write('create', { kind: 'task', title: title + ' — v ' + opp, due_date: due, idempotency_key: 'matchday:' + fid + ':' + i, source: 'fixture:' + fid, data: { area: 'Matchday', fixture: fid, fixture_id: fid, fixture_date: dt } });
       });
       Promise.all(jobs).then(function (rs) {
         var bad = rs.filter(function (r) { return !r.ok; }); var made = rs.filter(function (r) { return r.ok && !r.duplicate; }).length;
