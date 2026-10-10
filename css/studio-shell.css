@@ -50,3 +50,18 @@
   text-transform:uppercase; color:var(--muted,#6d6d6d);
 }
 @media (max-width:600px){ .pss__cats{ grid-template-columns:1fr; } }
+
+/* The way into Asset Studio — one row above the front door, not a card wall. */
+.studio-entry{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:12px 14px; margin:0 0 16px; border:1px solid var(--border,#242424); border-radius:var(--r-md,10px); background:#141414;
+}
+.studio-entry__t{ display:flex; flex-direction:column; gap:3px; min-width:min(100%,260px); flex:1; }
+.studio-entry__t strong{ font-family:var(--font-b,Manrope),sans-serif; font-size:15px; font-weight:800; color:#F5F3ED; }
+.studio-entry__t span{ font-family:var(--font-b,Manrope),sans-serif; font-size:13px; color:#AAAAAA; line-height:1.4; }
+.studio-entry__go{
+  min-height:44px; padding:0 16px; border-radius:var(--r-sm,6px); cursor:pointer;
+  background:#FFD100; border:1px solid #FFD100; color:#080808;
+  font-family:var(--font-b,Manrope),sans-serif; font-weight:800; font-size:14px;
+}
+.studio-entry__go:focus-visible{ outline:2px solid #F5F3ED; outline-offset:2px; }

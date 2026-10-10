@@ -11,6 +11,8 @@ const UNIQUE = {
   hq_items: [['idempotency_key']],
   hq_redemptions: [['lane_no', 'reward_key', 'season']],
   hq_suppression: [['value']],
+  studio_revisions: [['composition_id', 'rev']],
+  studio_sponsor_logos: [['sponsor_key', 'version']],
 };
 
 function makeDb(seed = {}) {
@@ -35,6 +37,7 @@ function match(row, [col, expr]) {
   const v = get(row, col);
   switch (op) {
     case 'eq': return String(v) === val;
+    case 'neq': return String(v) !== val;
     case 'is': return val === 'null' ? v == null : String(v) === val;
     case 'in': return val.replace(/^\(|\)$/g, '').split(',').includes(String(v));
     case 'gte': return v != null && String(v) >= val;
@@ -84,6 +87,9 @@ function handle(db, method, urlStr, body, prefer = '') {
   if (method === 'PATCH') {
     if (table === 'hq_audit') return { status: 400, json: { message: 'hq_audit is append-only' } };
     const hit = rows.filter(sel);
+    // Mirrors the studio_revision_guard / append-only triggers in 20261009150000_asset_studio.sql.
+    if (table === 'studio_revisions' && hit.some((r) => body.doc !== undefined && JSON.stringify(body.doc) !== JSON.stringify(r.doc))) return { status: 400, json: { message: 'a revision\'s document is fixed once saved' } };
+    if (table === 'studio_exports' || table === 'studio_publications') return { status: 400, json: { message: table + ' is append-only' } };
     for (const r of hit) Object.assign(r, body, { updated_at: new Date().toISOString() });
     return { status: 200, json: /return=minimal/.test(prefer) ? null : JSON.parse(JSON.stringify(hit)) };
   }
