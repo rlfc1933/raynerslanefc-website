@@ -466,7 +466,7 @@ test('EVERY COLUMN THE SYNC WRITES EXISTS AND ACCEPTS THE VALUE', () => {
     // The publishing system's columns (teams_status, last_error, …). The sync
     // writes them only after detecting the migration, but they must exist in it.
     + fs.readFileSync(path.join(ROOT,
-    'supabase/migrations/20261009150000_programme_publishing_system.sql'), 'utf8');
+    'supabase/migrations/20261009160000_programme_publishing_system.sql'), 'utf8');
 
   // Every patch.<column> the sync assigns must exist in the schema.
   const cols = [...new Set((sync.match(/patch\.([a-z_]+)\s*=/g) || [])

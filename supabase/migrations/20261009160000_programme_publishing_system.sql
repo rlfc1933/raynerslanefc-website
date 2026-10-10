@@ -227,11 +227,9 @@ alter table public.programme_source_snapshots     enable row level security;
 alter table public.programme_source_discrepancies enable row level security;
 alter table public.programme_provider_requests    enable row level security;
 
-drop trigger if exists programme_sections_touch on public.programme_sections;
-create trigger programme_sections_touch before update on public.programme_sections
+create or replace trigger programme_sections_touch before update on public.programme_sections
   for each row execute function public.programme_touch();
-drop trigger if exists programme_sponsor_placements_touch on public.programme_sponsor_placements;
-create trigger programme_sponsor_placements_touch before update on public.programme_sponsor_placements
+create or replace trigger programme_sponsor_placements_touch before update on public.programme_sponsor_placements
   for each row execute function public.programme_touch();
 
 comment on column public.programme_editions.edition_kind is
