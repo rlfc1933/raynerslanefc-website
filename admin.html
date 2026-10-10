@@ -4561,6 +4561,11 @@ function toggleAllTools() {
 })();
 
 function openPanel(name) {
+  // Asset Studio is a full-screen workspace layer, not a panel.
+  if (name === 'assetstudio') {
+    if (window.StudioApp && typeof window.StudioApp.open === 'function') { window.StudioApp.open(); return; }
+    toast('Asset Studio could not load — refresh and try again', true); return;
+  }
   // Staff Access opens for anyone who may VIEW staff — the Chairman, and the
   // Vice Chairman so he can disable a compromised login without waiting for
   // permission from an account that might itself be the problem. What each of

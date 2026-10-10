@@ -77,7 +77,7 @@
     { key: 'media', name: 'Photos and Media',
       ask: 'Are you adding photographs?',
       likely: 'Most often: upload match-day photographs to the public Gallery.',
-      ids: ['gallery'] },
+      ids: ['gallery', 'assetstudio'] },
 
     { key: 'sponsors', name: 'Sponsors',
       ask: 'Are you working on sponsorship?',
@@ -132,8 +132,11 @@
       desc: 'Write the post-match report. It appears on the News page.',
       roles: ['Marketing/Media', 'Committee'] },
 
+    { id: 'assetstudio', name: 'Asset Studio', effect: 'download',
+      desc: 'Templates for matchday, sponsor, club and programme artwork from verified fixture data; approve, then export real PNG/JPEG/PDF/ZIP files.',
+      roles: ['Marketing/Media', 'Committee', 'Chairman', 'V Chairman'] },
     { id: 'poststudio', name: 'Post Studio', effect: 'download',
-      desc: 'Make match-day graphics for social media.',
+      desc: 'Make match-day graphics live during a match: goal, half-time and card posts.',
       roles: ['Marketing/Media', 'Committee'] },
 
     // Opponent colours are a property of the artwork, so this belongs beside

@@ -70,7 +70,8 @@
       { id: 'funding', label: 'Grants and funding' },
       { id: 'playbook', label: 'Income plan' } ] },
     { key: 'media', name: 'Media', items: [
-      { id: 'poststudio', label: 'Asset Studio' },
+      { id: 'assetstudio', label: 'Asset Studio' },
+      { id: 'poststudio', label: 'Live match cards' },
       { id: 'gallery', label: 'Media library' },
       { id: 'brandlibrary', label: 'Club colours' },
       { id: 'social', label: 'Social plan' },
