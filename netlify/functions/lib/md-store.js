@@ -106,12 +106,23 @@ async function fetchFixtures(force) {
   let file = [];
   try { file = await fetchClubFile(); } catch (e) { if (!reg.length) throw e; }
   // The same match can carry a different id in each source (the club file
-  // named cup ties by hand) — so a file entry on the same London day against
-  // the same opponent is the registry's fixture, not a second one.
-  const known = new Set(reg.map((f) => f.id));
-  const sameMatch = new Set(reg.map((f) => f.date + '|' + String(f.opponent || '').trim().toLowerCase()));
-  const list = reg.length ? reg.concat(file.filter((f) => f && !known.has(f.id) &&
-    !sameMatch.has(f.date + '|' + String(f.opponent || '').trim().toLowerCase()))) : file;
+  // named cup ties by hand: "favase-1q-new-bradwell-20260815" is the
+  // registry's fwp-571413). Matchday records were made against the club id,
+  // so where both describe one match (same London day, same opponent) the
+  // registry's facts are used under the CLUB's id — existing takings records
+  // keep resolving — and the registry id is carried alongside.
+  const key = (f) => f.date + '|' + String(f.opponent || '').trim().toLowerCase();
+  const fileByMatch = {};
+  file.forEach((f) => { if (f && f.date) fileByMatch[key(f)] = f; });
+  const regIds = new Set(reg.map((f) => f.id));
+  const usedFile = new Set();
+  const merged = reg.map((r) => {
+    const c = fileByMatch[key(r)];
+    if (c && c.id !== r.id && !regIds.has(c.id)) { usedFile.add(c.id); return Object.assign({}, r, { id: c.id, registryId: r.id }); }
+    if (c) usedFile.add(c.id);
+    return r;
+  });
+  const list = reg.length ? merged.concat(file.filter((f) => f && !usedFile.has(f.id) && !regIds.has(f.id))) : file;
   _fixtureCache = list;
   _fixtureCacheAt = now;
   return list;
