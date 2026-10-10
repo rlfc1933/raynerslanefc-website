@@ -60,9 +60,33 @@
     return key;
   }
 
+  /**
+   * THE WAY INTO ASSET STUDIO. An addition above the front door, never a
+   * replacement: the live-match templates (Goal, Half-Time, cards) stay exactly
+   * where match-day operators already find them — see the 15 Aug incident
+   * below. Asset Studio is where planned, approved, multi-format work is made.
+   */
+  function entry(host) {
+    var el = document.getElementById('studio-entry');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'studio-entry';
+      el.className = 'studio-entry';
+      host.parentNode.insertBefore(el, host);
+    }
+    el.innerHTML =
+      '<div class="studio-entry__t"><strong>Asset Studio</strong>' +
+      '<span>Fixture, sponsor, club and programme graphics in every format — checked, approved and exported as real PNG, JPEG, A4 PDF or ZIP files.</span></div>' +
+      '<button type="button" class="studio-entry__go" onclick="StudioShell.openStudio()">Open Asset Studio</button>';
+  }
+  function openStudio(tpl) {
+    if (global.StudioApp && typeof global.StudioApp.open === 'function') global.StudioApp.open(tpl ? { template: tpl } : undefined);
+  }
+
   function render() {
     var host = document.getElementById('ps-shell');
     if (!host) return;
+    try { entry(host); } catch (e) {}
 
     if (S.all) {
       host.innerHTML = '<div class="pss"><button class="pss__back" onclick="StudioShell.home()">' +
@@ -164,6 +188,6 @@
 
   global.StudioShell = {
     init: init, render: render, pick: pick, home: home, showAll: showAll,
-    choose: choose, CATS: CATS, _state: S
+    choose: choose, openStudio: openStudio, CATS: CATS, _state: S
   };
 }(typeof window !== 'undefined' ? window : globalThis));

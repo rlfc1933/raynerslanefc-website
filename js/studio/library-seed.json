@@ -1,0 +1,1310 @@
+{
+ "_generated": "js/studio/tools/build-library.js — do not edit by hand; re-run the tool.",
+ "assets": [
+  {
+   "id": "repo:img/crests/abingdon-united.png",
+   "src": "img/crests/abingdon-united.png",
+   "w": 316,
+   "h": 316,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Abingdon United crest",
+   "category": "crest",
+   "rights_holder": "Abingdon United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Abingdon United"
+   }
+  },
+  {
+   "id": "repo:img/crests/amersham-town.png",
+   "src": "img/crests/amersham-town.png",
+   "w": 284,
+   "h": 343,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Amersham Town crest",
+   "category": "crest",
+   "rights_holder": "Amersham Town",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Amersham Town"
+   }
+  },
+  {
+   "id": "repo:img/crests/ardley-united.png",
+   "src": "img/crests/ardley-united.png",
+   "w": 256,
+   "h": 256,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Ardley United crest",
+   "category": "crest",
+   "rights_holder": "Ardley United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Ardley United"
+   }
+  },
+  {
+   "id": "repo:img/crests/bedfont.png",
+   "src": "img/crests/bedfont.png",
+   "w": 282,
+   "h": 352,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Bedfont crest",
+   "category": "crest",
+   "rights_holder": "Bedfont",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Bedfont"
+   }
+  },
+  {
+   "id": "repo:img/crests/broadfields-united.png",
+   "src": "img/crests/broadfields-united.png",
+   "w": 316,
+   "h": 316,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Broadfields United crest",
+   "category": "crest",
+   "rights_holder": "Broadfields United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Broadfields United"
+   }
+  },
+  {
+   "id": "repo:img/crests/burnham.png",
+   "src": "img/crests/burnham.png",
+   "w": 223,
+   "h": 320,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Burnham crest",
+   "category": "crest",
+   "rights_holder": "Burnham",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Burnham"
+   }
+  },
+  {
+   "id": "repo:img/crests/easington-sports.png",
+   "src": "img/crests/easington-sports.png",
+   "w": 225,
+   "h": 225,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Easington Sports crest",
+   "category": "crest",
+   "rights_holder": "Easington Sports",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Easington Sports"
+   }
+  },
+  {
+   "id": "repo:img/crests/harefield-united.png",
+   "src": "img/crests/harefield-united.png",
+   "w": 316,
+   "h": 316,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Harefield United crest",
+   "category": "crest",
+   "rights_holder": "Harefield United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Harefield United"
+   }
+  },
+  {
+   "id": "repo:img/crests/hayes-and-yeading-united.png",
+   "src": "img/crests/hayes-and-yeading-united.png",
+   "w": 238,
+   "h": 256,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Hayes & Yeading United crest",
+   "category": "crest",
+   "rights_holder": "Hayes & Yeading United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Hayes & Yeading United"
+   }
+  },
+  {
+   "id": "repo:img/crests/hilltop.png",
+   "src": "img/crests/hilltop.png",
+   "w": 269,
+   "h": 370,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Hilltop crest",
+   "category": "crest",
+   "rights_holder": "Hilltop",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Hilltop"
+   }
+  },
+  {
+   "id": "repo:img/crests/holyport.png",
+   "src": "img/crests/holyport.png",
+   "w": 187,
+   "h": 182,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Holyport crest",
+   "category": "crest",
+   "rights_holder": "Holyport",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Holyport"
+   }
+  },
+  {
+   "id": "repo:img/crests/kidlington.png",
+   "src": "img/crests/kidlington.png",
+   "w": 313,
+   "h": 311,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Kidlington crest",
+   "category": "crest",
+   "rights_holder": "Kidlington",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Kidlington"
+   }
+  },
+  {
+   "id": "repo:img/crests/london-lions.png",
+   "src": "img/crests/london-lions.png",
+   "w": 317,
+   "h": 315,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "London Lions crest",
+   "category": "crest",
+   "rights_holder": "London Lions",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "London Lions"
+   }
+  },
+  {
+   "id": "repo:img/crests/metropolitan-police.png",
+   "src": "img/crests/metropolitan-police.png",
+   "w": 300,
+   "h": 300,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Metropolitan Police FC crest",
+   "category": "crest",
+   "rights_holder": "Metropolitan Police FC",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Metropolitan Police FC"
+   }
+  },
+  {
+   "id": "repo:img/crests/new-bradwell-st-peter.png",
+   "src": "img/crests/new-bradwell-st-peter.png",
+   "w": 200,
+   "h": 200,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "New Bradwell St Peter crest",
+   "category": "crest",
+   "rights_holder": "New Bradwell St Peter",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "New Bradwell St Peter"
+   }
+  },
+  {
+   "id": "repo:img/crests/north-greenford-united.png",
+   "src": "img/crests/north-greenford-united.png",
+   "w": 300,
+   "h": 300,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "North Greenford United crest",
+   "category": "crest",
+   "rights_holder": "North Greenford United",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "North Greenford United"
+   }
+  },
+  {
+   "id": "repo:img/crests/north-leigh.png",
+   "src": "img/crests/north-leigh.png",
+   "w": 316,
+   "h": 316,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "North Leigh crest",
+   "category": "crest",
+   "rights_holder": "North Leigh",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "North Leigh"
+   }
+  },
+  {
+   "id": "repo:img/crests/northwood.png",
+   "src": "img/crests/northwood.png",
+   "w": 181,
+   "h": 216,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Northwood crest",
+   "category": "crest",
+   "rights_holder": "Northwood",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Northwood"
+   }
+  },
+  {
+   "id": "repo:img/crests/penn-and-tylers-green.png",
+   "src": "img/crests/penn-and-tylers-green.png",
+   "w": 234,
+   "h": 252,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Penn & Tylers Green crest",
+   "category": "crest",
+   "rights_holder": "Penn & Tylers Green",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Penn & Tylers Green"
+   }
+  },
+  {
+   "id": "repo:img/crests/reading-city.png",
+   "src": "img/crests/reading-city.png",
+   "w": 304,
+   "h": 303,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Reading City crest",
+   "category": "crest",
+   "rights_holder": "Reading City",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Reading City"
+   }
+  },
+  {
+   "id": "repo:img/crests/thatcham-town.png",
+   "src": "img/crests/thatcham-town.png",
+   "w": 200,
+   "h": 200,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Thatcham Town crest",
+   "category": "crest",
+   "rights_holder": "Thatcham Town",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Thatcham Town"
+   }
+  },
+  {
+   "id": "repo:img/crests/wallingford-and-crowmarsh.png",
+   "src": "img/crests/wallingford-and-crowmarsh.png",
+   "w": 291,
+   "h": 320,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Wallingford & Crowmarsh crest",
+   "category": "crest",
+   "rights_holder": "Wallingford & Crowmarsh",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Wallingford & Crowmarsh"
+   }
+  },
+  {
+   "id": "repo:img/crests/wokingham-town.png",
+   "src": "img/crests/wokingham-town.png",
+   "w": 316,
+   "h": 316,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Wokingham Town crest",
+   "category": "crest",
+   "rights_holder": "Wokingham Town",
+   "licence": "Fixture identification only (editorial)",
+   "approval": "approved",
+   "usage": "Identifies the opponent on fixture and result graphics. Never altered.",
+   "related": {
+    "opponent": "Wokingham Town"
+   }
+  },
+  {
+   "id": "repo:img/ground/tithe-farm-goalmouth-1600.jpg",
+   "src": "img/ground/tithe-farm-goalmouth-1600.jpg",
+   "w": 1600,
+   "h": 1200,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Goalmouth at Tithe Farm",
+   "category": "ground",
+   "rights_holder": "Rayners Lane FC (club photography)",
+   "licence": "Club use",
+   "approval": "approved",
+   "usage": "Published on the website. The ground is shared — never imply the club owns it."
+  },
+  {
+   "id": "repo:img/ground/tithe-farm-aerial-clubhouse-1600.jpg",
+   "src": "img/ground/tithe-farm-aerial-clubhouse-1600.jpg",
+   "w": 1600,
+   "h": 898,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "The pitch and clubhouse from above",
+   "category": "ground",
+   "rights_holder": "Rayners Lane FC (club photography)",
+   "licence": "Club use",
+   "approval": "approved",
+   "usage": "Published on the website. The ground is shared — never imply the club owns it."
+  },
+  {
+   "id": "repo:img/ground/tithe-farm-aerial-wide-1600.jpg",
+   "src": "img/ground/tithe-farm-aerial-wide-1600.jpg",
+   "w": 1600,
+   "h": 898,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Tithe Farm from above",
+   "category": "ground",
+   "rights_holder": "Rayners Lane FC (club photography)",
+   "licence": "Club use",
+   "approval": "approved",
+   "usage": "Published on the website. The ground is shared — never imply the club owns it."
+  },
+  {
+   "id": "repo:img/badge.png",
+   "src": "img/badge.png",
+   "w": 1254,
+   "h": 1254,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Club crest (master)",
+   "category": "identity",
+   "rights_holder": "Rayners Lane Football Club Limited",
+   "licence": "Club-owned mark",
+   "approval": "approved",
+   "usage": "Every template. Never recoloured, cropped or stretched."
+  },
+  {
+   "id": "repo:video/hero-poster-1920.jpg",
+   "src": "video/hero-poster-1920.jpg",
+   "w": 1920,
+   "h": 1080,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Promotional film still (station)",
+   "category": "matchday",
+   "rights_holder": "Rayners Lane FC",
+   "licence": "Club use",
+   "approval": "needs_review",
+   "usage": "Not cleared: the station sign in this frame reads \"Rayers Lane\". Confirm the source before any use."
+  },
+  {
+   "id": "repo:img/players/alfie-campbell.jpg",
+   "src": "img/players/alfie-campbell.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Alfie Campbell",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-alfie-campbell"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/ati-diamond.jpg",
+   "src": "img/players/ati-diamond.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Ati Diamond",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-ati-diamond"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/casey-yousuff-phillips.jpg",
+   "src": "img/players/casey-yousuff-phillips.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Casey Yousuff-Phillips",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-casey-yousuff-phillips"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/charlie-austin.jpg",
+   "src": "img/players/charlie-austin.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Charlie Austin",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-charlie-austin"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/christon-john-ahye.jpg",
+   "src": "img/players/christon-john-ahye.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Christon John-Ahye",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-christon-john-ahye"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/jalen-johnson.jpg",
+   "src": "img/players/jalen-johnson.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Jalen Johnson",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-jalen-johnson"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/jaycob-campbell.jpg",
+   "src": "img/players/jaycob-campbell.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Jaycob Campbell",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-jaycob-campbell"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/jenyo-balogun.jpg",
+   "src": "img/players/jenyo-balogun.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Jenyo Balogun",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-jenyo-balogun"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/jevan-el-kaffash.jpg",
+   "src": "img/players/jevan-el-kaffash.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Jevan El-Kaffash",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-jevan-el-kaffash"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/keiran-barnard-white.jpg",
+   "src": "img/players/keiran-barnard-white.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Keiran Barnard-White",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-keiran-barnard-white"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/le-kai-chevannes.jpg",
+   "src": "img/players/le-kai-chevannes.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Le'Kai Chevannes",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-le'kai-chevannes"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/leon-iluobe.jpg",
+   "src": "img/players/leon-iluobe.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Leon Iluobe",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-leon-iluobe"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/mateo-dos-reis.jpg",
+   "src": "img/players/mateo-dos-reis.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Mateo Dos Reis",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-mateo-dos-reis"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/matthew-forkin.jpg",
+   "src": "img/players/matthew-forkin.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Matthew Forkin",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-matthew-forkin"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/micah-haley.jpg",
+   "src": "img/players/micah-haley.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Micah Haley",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-micah-haley"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/michael-adefolami.jpg",
+   "src": "img/players/michael-adefolami.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Michael Adefolami",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-michael-adefolami"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/ruben-santangelo.jpg",
+   "src": "img/players/ruben-santangelo.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Ruben Santangelo",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-ruben-santangelo"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/players/temi-animashaun.jpg",
+   "src": "img/players/temi-animashaun.jpg",
+   "w": 800,
+   "h": 1071,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Temi Animashaun",
+   "category": "player",
+   "rights_holder": "Rayners Lane FC (club squad photography)",
+   "licence": "Club use — photographer not recorded in the repository",
+   "approval": "approved",
+   "usage": "Published on the squad page.",
+   "related": {
+    "player": "player-temi-animashaun"
+   },
+   "subject": {
+    "x": 0.18,
+    "y": 0.04,
+    "w": 0.64,
+    "h": 0.5,
+    "basis": "squad portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/acerbis.png",
+   "src": "img/sponsors/band/acerbis.png",
+   "w": 903,
+   "h": 553,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Acerbis logo",
+   "category": "sponsor",
+   "rights_holder": "Acerbis",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "acerbis"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/ahiq.png",
+   "src": "img/sponsors/band/ahiq.png",
+   "w": 1200,
+   "h": 360,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "AHiQ logo",
+   "category": "sponsor",
+   "rights_holder": "AHiQ",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "ahiq"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/ashwood.png",
+   "src": "img/sponsors/band/ashwood.png",
+   "w": 874,
+   "h": 160,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Ashwood Builders Merchants logo",
+   "category": "sponsor",
+   "rights_holder": "Ashwood Builders Merchants",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "ashwood"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/hdl.png",
+   "src": "img/sponsors/band/hdl.png",
+   "w": 410,
+   "h": 249,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "Hanlon Dry Lining logo",
+   "category": "sponsor",
+   "rights_holder": "Hanlon Dry Lining",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "hdl"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/mccaffertys.png",
+   "src": "img/sponsors/band/mccaffertys.png",
+   "w": 494,
+   "h": 114,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "McCafferty's logo",
+   "category": "sponsor",
+   "rights_holder": "McCafferty's",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "mccafferty"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/mjm-sports.png",
+   "src": "img/sponsors/mjm-sports.png",
+   "w": 2083,
+   "h": 440,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "MJM Sports logo",
+   "category": "sponsor",
+   "rights_holder": "MJM Sports",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements.",
+   "related": {
+    "sponsor": "mjm-sports"
+   }
+  },
+  {
+   "id": "repo:img/sponsors/band/king.png",
+   "src": "img/sponsors/band/king.png",
+   "w": 591,
+   "h": 222,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "The King, Denham logo",
+   "category": "sponsor",
+   "rights_holder": "The King, Denham",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements and the partner rail.",
+   "related": {
+    "sponsor": "king"
+   }
+  },
+  {
+   "id": "repo:img/partners/younique-logo.png",
+   "src": "img/partners/younique-logo.png",
+   "w": 640,
+   "h": 359,
+   "format": "png",
+   "source": "repository",
+   "version": 1,
+   "title": "You-Nique Training logo",
+   "category": "sponsor",
+   "rights_holder": "You-Nique Training",
+   "licence": "Sponsor agreement — club use while the partnership is current",
+   "approval": "approved",
+   "usage": "Sponsor acknowledgements.",
+   "related": {
+    "sponsor": "you-nique-training"
+   }
+  },
+  {
+   "id": "repo:img/committee/nigel-hanlon.jpg",
+   "src": "img/committee/nigel-hanlon.jpg",
+   "w": 600,
+   "h": 900,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Nigel Hanlon, Vice Chairman",
+   "category": "team",
+   "rights_holder": "Rayners Lane FC",
+   "licence": "Club use — named official",
+   "approval": "approved",
+   "usage": "Club statements and committee announcements only.",
+   "subject": {
+    "x": 0.15,
+    "y": 0.04,
+    "w": 0.7,
+    "h": 0.5,
+    "basis": "portrait framing"
+   }
+  },
+  {
+   "id": "repo:img/committee/pete-singh.jpg",
+   "src": "img/committee/pete-singh.jpg",
+   "w": 600,
+   "h": 900,
+   "format": "jpeg",
+   "source": "repository",
+   "version": 1,
+   "title": "Pete Singh, Chairman",
+   "category": "team",
+   "rights_holder": "Rayners Lane FC",
+   "licence": "Club use — named official",
+   "approval": "approved",
+   "usage": "Club statements and committee announcements only.",
+   "subject": {
+    "x": 0.15,
+    "y": 0.04,
+    "w": 0.7,
+    "h": 0.5,
+    "basis": "portrait framing"
+   }
+  }
+ ],
+ "sponsors": [
+  {
+   "key": "acerbis",
+   "name": "Acerbis",
+   "role": "Kit Supplier"
+  },
+  {
+   "key": "hdl",
+   "name": "Hanlon Dry Lining",
+   "role": "Home Kit Sponsor"
+  },
+  {
+   "key": "mccafferty",
+   "name": "McCafferty's",
+   "role": "Away Kit Sponsor"
+  },
+  {
+   "key": "ashwood",
+   "name": "Ashwood Builders Merchants",
+   "role": "Club Sponsor"
+  },
+  {
+   "key": "king",
+   "name": "The King, Denham",
+   "role": "Club Sponsor"
+  },
+  {
+   "key": "ahiq",
+   "name": "AHiQ",
+   "role": "Club Sponsor"
+  },
+  {
+   "key": "higginson-stairs",
+   "name": "Higginson Stairs",
+   "role": "Programme"
+  },
+  {
+   "key": "you-nique-training",
+   "name": "You-Nique Training",
+   "role": "Inclusive Fitness — All Abilities"
+  },
+  {
+   "key": "mjm-sports",
+   "name": "MJM Sports",
+   "role": "Partner"
+  }
+ ],
+ "sponsorLogos": {
+  "acerbis": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/acerbis.png",
+    "white": "img/sponsors/band/acerbis-white.png",
+    "ground": "dark",
+    "w": 903,
+    "h": 553,
+    "ar": 1.6329,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "hdl": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/hdl.png",
+    "white": "img/sponsors/band/hdl-white.png",
+    "ground": "dark",
+    "w": 410,
+    "h": 249,
+    "ar": 1.6466,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "mccafferty": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/mccaffertys.png",
+    "white": "img/sponsors/band/mccaffertys-white.png",
+    "ground": "dark",
+    "w": 494,
+    "h": 114,
+    "ar": 4.3333,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "ashwood": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/ashwood.png",
+    "white": "img/sponsors/band/ashwood-white.png",
+    "ground": "light",
+    "w": 874,
+    "h": 160,
+    "ar": 5.4625,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "king": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/king.png",
+    "white": "img/sponsors/band/king-white.png",
+    "ground": "light",
+    "w": 591,
+    "h": 222,
+    "ar": 2.6622,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "ahiq": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/band/ahiq.png",
+    "white": "img/sponsors/band/ahiq-white.png",
+    "ground": "dark",
+    "w": 1200,
+    "h": 360,
+    "ar": 3.3333,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": "2026-08-09T18:00:00.000Z",
+    "note": "Pre-trimmed band artwork used by the sponsor rail."
+   }
+  ],
+  "higginson-stairs": [],
+  "you-nique-training": [
+   {
+    "version": 1,
+    "colour": "img/partners/younique-logo.png",
+    "white": null,
+    "ground": "dark",
+    "w": 640,
+    "h": 359,
+    "ar": 1.7827,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": null,
+    "note": "Logo as listed in data/sponsors.json. Untrimmed; always placed on a light plate."
+   }
+  ],
+  "mjm-sports": [
+   {
+    "version": 1,
+    "colour": "img/sponsors/mjm-sports.png",
+    "white": null,
+    "ground": "light",
+    "w": 2083,
+    "h": 440,
+    "ar": 4.7341,
+    "source": "repository",
+    "approval": "approved",
+    "current": true,
+    "approved_at": null,
+    "note": "Logo as listed in data/sponsors.json. Untrimmed; always placed on a light plate."
+   }
+  ]
+ }
+}
