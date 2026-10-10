@@ -175,6 +175,7 @@ A.move = async (b, actor) => {
   const item = await getItem(b.id); if (!item) return fail('Not found.');
   const ctx = { actor, owner: b.owner, value_pence: b.value != null ? OS.poundsToPence(b.value) : null, reason: str(b.reason, 500),
     reference: str(b.reference, 200), evidence: str(b.evidence, 500), eligibility_note: str(b.eligibility_note, 2000), publish_at: str(b.publish_at, 40) };
+  Object.assign(ctx, await H.journey.ctxFor(item), await H.volunteer.ctxFor(item, b));
   const why = OS.guardTransition(item, b.to, ctx); if (why) return fail(why);
   const patch = { stage: b.to };
   if (b.owner) patch.owner = str(b.owner, 120);
@@ -188,8 +189,10 @@ A.move = async (b, actor) => {
   if (['approved'].includes(b.to)) { data.approved_by = actor; data.approved_at = new Date().toISOString(); }
   if (b.to === 'sent') { data.sent_by = actor; data.sent_at = new Date().toISOString(); data.channel = str(b.channel, 40) || 'club mailbox'; }
   if (b.to === 'issued' && !data.invoice_no) data.invoice_no = await nextInvoiceNo();
+  H.volunteer.patch(item, ctx, b, patch, data);
   patch.data = data;
-  patch.closed_at = OS.CLOSED.has(b.to) ? new Date().toISOString() : null;
+  patch.closed_at = OS.isClosed(item.kind, b.to) ? new Date().toISOString() : null;
+  if (patch.closed_at) patch.next_action = null;   // a finished record has no next action
 
   // Outreach can only be marked sent if sending was permitted at that moment.
   if (item.kind === 'outreach' && b.to === 'sent') {
@@ -217,16 +220,19 @@ async function sideEffects(after, before, actor) {
   const made = [];
   const mk = async (row) => { const r = await A.create(row, actor); if (r.ok && !r.duplicate) made.push(r.item.title); return r; };
   if (after.kind === 'opportunity' && after.stage === 'won') {
-    for (let i = 0; i < OS.FULFILMENT_STEPS.length; i++) {
-      await mk({ kind: 'fulfilment', title: OS.FULFILMENT_STEPS[i], parent_id: after.id, org_id: after.org_id, owner: after.owner,
+    // A per-fixture package gets the checklist for what it actually promises.
+    const steps = H.journey.fulfilmentFor(after) || OS.FULFILMENT_STEPS;
+    for (let i = 0; i < steps.length; i++) {
+      await mk({ kind: 'fulfilment', title: steps[i], parent_id: after.id, org_id: after.org_id, owner: after.owner,
         idempotency_key: `opp:${after.id}:ful:${i}`, source: 'opportunity-won' });
     }
     if (!after.in_kind && after.value_pence > 0) {
+      const ad = after.data || {};
       await mk({ kind: 'invoice', title: `Invoice — ${after.title}`, parent_id: after.id, org_id: after.org_id, owner: after.owner,
         value: after.value_pence / 100, idempotency_key: `opp:${after.id}:invoice:1`, source: 'opportunity-won',
-        data: { terms_days: 30, vat: 'not set — confirm VAT status before issuing' } });
+        data: { terms_days: 30, vat: 'not set — confirm VAT status before issuing', package: ad.package || null, fixture: ad.fixture_label || null } });
     }
-    const renew = (after.data || {}).renewal_date;
+    const renew = H.journey.renewalDue(after);
     await mk({ kind: 'task', title: `Renewal conversation — ${after.title}`, parent_id: after.id, org_id: after.org_id, owner: after.owner,
       due_date: renew && DATE.test(renew) ? renew : null, idempotency_key: `opp:${after.id}:renewal`, source: 'opportunity-won' });
     if (after.org_id) await sb('PATCH', 'hq_orgs?id=eq.' + q(after.org_id), { relationship: 'sponsor' });
@@ -235,6 +241,8 @@ async function sideEffects(after, before, actor) {
     await mk({ kind: 'task', title: `Reply to: ${after.title}`, parent_id: after.id, org_id: after.org_id, owner: after.owner,
       due_date: new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10), idempotency_key: `enq:${after.id}:reply`, source: 'enquiry' });
   }
+  await H.journey.afterMove(after, before, actor, mk);
+  await H.volunteer.afterMove(after, actor, mk);
   if (after.kind === 'grant' && after.stage === 'awarded') {
     await mk({ kind: 'task', title: `Grant reporting obligations — ${after.title}`, parent_id: after.id, owner: after.owner,
       idempotency_key: `grant:${after.id}:reporting`, source: 'grant-awarded' });
@@ -408,7 +416,17 @@ A.history = async (b) => ({ ok: true, audit: await sb('GET', 'hq_audit?select=*&
 
 function pick(o, keys) { const r = {}; for (const k of keys) r[k] = o ? o[k] : undefined; return r; }
 
-const WRITES = new Set(['create', 'update', 'move', 'pay', 'saveOrg', 'suppress', 'redeem', 'seed']);
+// Back the Lane / Run the Lane actions (lib/rebirth/actions.js) share this
+// API, its storage helpers, its audit log and its password check.
+const H = { sb, q, audit, str, fail, getItem, getOrg, UUID, DATE, OS, suppressionSet };
+require('./lib/rebirth/actions').install(A, H);
+exports.intakeVolunteer = (sub) => (SB_KEY ? H.intakeVolunteer(sub, 'website') : Promise.resolve({ ok: false, error: 'no-supabase' }));
+
+const WRITES = new Set(['create', 'update', 'move', 'pay', 'saveOrg', 'suppress', 'redeem', 'seed',
+  'importStage', 'checkEmail', 'draftOutreach', 'approvePackage', 'book', 'release', 'convertEnquiry', 'renew',
+  'recordAttendance', 'verifyAttendance', 'collectVolunteerOffers', 'seedRebirth']);
+// Finance actions sign with the verified staff identity instead of the typed name.
+const FINANCE = new Set(['finance', 'saveFinanceLine', 'archiveFinanceLine']);
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
@@ -417,14 +435,14 @@ exports.handler = async function (event) {
   if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   const fn = A[b.action]; if (!fn) return resp(200, fail('Unknown action.'));
   const actor = str(b.actor, 80);
-  if (WRITES.has(b.action) && !actor) return resp(200, fail('Tell us who you are (top of Staff HQ) — every change is signed.'));
+  if (WRITES.has(b.action) && !FINANCE.has(b.action) && !actor) return resp(200, fail('Tell us who you are (top of Staff HQ) — every change is signed.'));
   if (!SB_KEY) return resp(200, fail('The club database is not connected (SUPABASE_SERVICE_KEY not set).', { notSetUp: true }));
-  try { return resp(200, await fn(b, actor)); }
+  try { return resp(200, await fn(b, actor, event)); }
   catch (e) {
-    if (e.notSetUp) return resp(200, fail('Club OS is not set up yet: run supabase/migrations/20261009120000_club_os.sql once in Supabase → SQL Editor.', { notSetUp: true }));
+    if (e.notSetUp) return resp(200, fail('Club OS is not set up yet: run supabase/migrations/20261009120000_club_os.sql and 20261009140000_rebirth_hq.sql once in Supabase → SQL Editor.', { notSetUp: true }));
     if (e.message && !e.status) return resp(200, fail(e.message));       // validation messages from clean*()
     console.error('[club-os]', b.action, e.status, e.message);
     return resp(200, fail('The database refused that change. Nothing was saved. (' + (e.code || e.status) + ')'));
   }
 };
-exports._test = { A, cleanItemFields, cleanOrgFields, seasonOf, LADDER };
+exports._test = { A, H, cleanItemFields, cleanOrgFields, seasonOf, LADDER };
