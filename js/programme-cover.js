@@ -67,9 +67,21 @@
     var comp = e.competition || '';
     var sponsor = e.matchSponsor ? '<div class="pc__sponsor">Match sponsor · ' + esc(e.matchSponsor) + '</div>' : '';
 
+    /* Controlled variation, not a new design per match: yellow stock for the
+       league, bottle-green for a cup tie, black for an Archive Edition — so a
+       shelf of covers reads at a glance, and a reconstructed edition can never
+       be mistaken for one handed out on the day. */
+    var archive = !!e.archive || e.editionKind === 'retrospective';
+    var cup = !archive && (e.cup || /cup|vase|trophy|shield/i.test(comp));
+    var variant = archive ? ' pc--archive' : (cup ? ' pc--cup' : '');
+    var top = archive ? 'Archive Edition' : 'Matchday Programme';
+    var num = e.editionNumber ? ' · No. ' + esc(e.editionNumber) : '';
+    // A time the registry has not confirmed is never printed on a cover.
+    var showTime = e.kickoffAt && e.kickoffTimeConfirmed !== false;
+
     return '<div class="pc-wrap">' +
-      '<' + tag + ' class="pc"' + href + ' aria-label="' + esc(label) + '">' +
-        '<div class="pc__top">Matchday Programme' + (e.season ? '<br>' + esc(e.season) : '') + '</div>' +
+      '<' + tag + ' class="pc' + variant + '"' + href + ' aria-label="' + esc(label) + '">' +
+        '<div class="pc__top">' + top + num + (e.season ? '<br>' + esc(e.season) : '') + '</div>' +
         '<div class="pc__crests">' +
           crest(e.homeCrest, e.homeTeam) +
           '<span class="pc__v" aria-hidden="true">V</span>' +
@@ -82,7 +94,7 @@
         '<div class="pc__foot">' +
           (comp ? esc(comp) + '<br>' : '') +
           esc(clubDate(e.kickoffAt)) +
-          (e.kickoffAt ? '<br>Kick-off ' + esc(clubTime(e.kickoffAt)) : '') +
+          (showTime ? '<br>Kick-off ' + esc(clubTime(e.kickoffAt)) : '') +
         '</div>' + sponsor +
       '</' + tag + '></div>';
   }

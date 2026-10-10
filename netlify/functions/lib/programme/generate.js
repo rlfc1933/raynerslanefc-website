@@ -156,7 +156,8 @@ function build(ctx) {
     homeCrest: ctx.homeCrest || null, awayCrest: ctx.awayCrest || null,
     competition: ctx.competition || null,
     dateLong: clubDateLong(ctx.kickoffAt),
-    kickoff: clubTime(ctx.kickoffAt),
+    // A kick-off time the registry has not confirmed is never printed.
+    kickoff: ctx.kickoffTimeConfirmed === false ? null : clubTime(ctx.kickoffAt),
     venue: ctx.venue || null,
     season: ctx.season || null,
     matchSponsor: ctx.matchSponsor || null,
@@ -171,16 +172,18 @@ function build(ctx) {
     recent: ctx.recentResults || [],
     today: {
       homeTeam: ctx.homeTeam, awayTeam: ctx.awayTeam,
-      competition: ctx.competition, kickoff: clubTime(ctx.kickoffAt),
+      competition: ctx.competition, kickoff: ctx.kickoffTimeConfirmed === false ? null : clubTime(ctx.kickoffAt),
     },
     upcoming: ctx.upcomingFixtures || [],
   };
   sections.join = {
     headline: 'JOIN THE LANE',
     lead: 'Put your business at the heart of The Lane.',
+    // Tithe Farm is shared and is not the club's to sell: no pitch-side,
+    // ground-naming or venue rights are ever offered here.
     body: 'Rayners Lane FC has played in Harrow since 1933. Partnering with the ' +
-      'club puts your name in front of a local community every matchday — on ' +
-      'the pitch side, in this programme and across the club’s website.',
+      'club puts your name in front of a local community every matchday — in ' +
+      'this programme and across the club’s website.',
     // Real routes only. No invented packages, no prices the club has not agreed.
     options: ctx.sponsorshipOptions || [],
     contact: ctx.sponsorshipContact || null,

@@ -8,6 +8,23 @@
 
 const S = require('./lib/football/store');
 const FAN = require('./lib/fan/members');
+const READ = require('./lib/football/read');
+const REC = require('./lib/programme/reconcile');
+
+const SEASON = process.env.FWP_SEASON || '2026-2027';
+
+/* Columns added by 20261009150000. Selected only when the migration has been
+   applied — asking PostgREST for a column that does not exist fails the whole
+   request, and the archive must never go blank because a migration is pending. */
+const V2_EDITION_COLS = ',edition_kind,teams_status,fixture_postponed_at,edition_number';
+async function editionRows(query, cols) {
+  try {
+    return await S.rest('programme_editions?' + query + '&select=' + cols + V2_EDITION_COLS);
+  } catch (e) {
+    if (!/42703|does not exist|column/i.test(String(e && e.message))) throw e;
+    return await S.rest('programme_editions?' + query + '&select=' + cols);
+  }
+}
 
 /**
  * @param {number} code
@@ -56,6 +73,25 @@ function resp(code, obj, seconds, personal) {
 const PUBLIC_STATE_LIST = ['published_matchday', 'published_late',
   'full_time_current', 'archived', 'published_recovery'];
 const PUBLIC_STATES = '(' + PUBLIC_STATE_LIST.join(',') + ')';
+
+/** The public season ledger, or null if the registry cannot be read. */
+async function seasonLedger() {
+  try {
+    const [fixtures, editions] = await Promise.all([
+      READ.results(SEASON).then(async (played) => {
+        const all = await READ.season(SEASON);
+        const byId = {}; played.forEach((p) => { byId[p.id] = p; });
+        return all.map((f) => byId[f.id] || f);
+      }),
+      editionRows('season=eq.' + encodeURIComponent(SEASON),
+        'internal_fixture_id,external_fixture_id,state,published_at,current_version,publication_source_detail'),
+    ]);
+    return REC.publicLedger(REC.reconcile(fixtures, editions || [], Date.now()));
+  } catch (e) {
+    console.error('programme-data: ledger unavailable: ' + (e && e.message));
+    return null;
+  }
+}
 
 exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
@@ -120,6 +156,8 @@ exports.handler = async function (event) {
             season: ed.season, kickoffAt: ed.scheduled_kickoff_at, venue: ed.venue,
             publishedAt: ed.published_at,
             afterFullTime: !!ed.published_after_full_time,
+            editionKind: ed.edition_kind || (ed.publication_source_detail === 'retrospective' ? 'retrospective' : 'matchday'),
+            postponedAt: ed.fixture_postponed_at || null,
           },
           // Cover only — the shelf, not the contents.
           cover: (v.payload && v.payload.sections && v.payload.sections.cover) || null,
@@ -147,6 +185,14 @@ exports.handler = async function (event) {
           // final whistle must not read as though supporters had it at kick-off.
           afterFullTime: !!ed.published_after_full_time,
           publicationSource: ed.publication_source_detail || 'automatic',
+          // The two-stage model and the archive marker, said by the edition.
+          editionKind: ed.edition_kind || (ed.publication_source_detail === 'retrospective' ? 'retrospective' : 'matchday'),
+          teamsStatus: ed.teams_status || null,
+          postponedAt: ed.fixture_postponed_at || null,
+          editionNumber: ed.edition_number || null,
+          versionStage: v.stage || null,
+          versionPublishedAt: v.published_at || null,
+          revisionReason: v.revision_reason || null,
         },
         programme: v.payload,
         lineups: v.lineup_snapshot,
@@ -159,10 +205,9 @@ exports.handler = async function (event) {
     }
 
     // The library: every published edition, newest first.
-    const rows = await S.rest('programme_editions?state=in.' + PUBLIC_STATES +
-      '&select=internal_fixture_id,slug,season,scheduled_kickoff_at,venue,state,published_at,' +
-      'published_after_full_time,publication_source_detail,home_team_id,away_team_id,competition_id' +
-      '&order=scheduled_kickoff_at.desc') || [];
+    const rows = await editionRows('state=in.' + PUBLIC_STATES + '&order=scheduled_kickoff_at.desc',
+      'internal_fixture_id,slug,season,scheduled_kickoff_at,venue,state,published_at,' +
+      'published_after_full_time,publication_source_detail,home_team_id,away_team_id,competition_id') || [];
     const [teams, comps] = await Promise.all([
       S.rest('football_teams?select=id,canonical_name,crest_asset_path'),
       S.rest('football_competitions?select=id,canonical_name'),
@@ -199,8 +244,17 @@ exports.handler = async function (event) {
           // So a card can say what it is without the page guessing from state.
           afterFullTime: !!r.published_after_full_time,
           publicationSource: r.publication_source_detail || 'automatic',
+          editionKind: r.edition_kind || (r.publication_source_detail === 'retrospective' ? 'retrospective' : 'matchday'),
+          teamsStatus: r.teams_status || null,
+          postponedAt: r.fixture_postponed_at || null,
         };
       }),
+      // The season's home fixtures and what exists for each — published,
+      // postponed, archive edition in preparation, not yet published. Built by
+      // the same reconciliation HQ uses, so the archive can never quietly omit
+      // a fixture (a cup tie included) just because it has no edition.
+      ledger: await seasonLedger(),
+      ledgerAsOf: new Date().toISOString(),
     }, 120);
   } catch (e) {
     return resp(200, { ok: false, error: String(e && e.message || e) });

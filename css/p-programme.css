@@ -113,3 +113,41 @@ body .pr-gate__score,body .pr-gate__mc{font-size:14px;color:#AAAAAA}
 body .pr .pl-empty{background:none;border:0;border-radius:0;padding:clamp(24px,5vw,56px) 0;text-align:left}
 body .pr .pl-empty__h{font-family:var(--font-display);font-weight:400;font-size:clamp(2.8rem,6.5vw,6rem);line-height:.88;text-transform:uppercase;letter-spacing:0;color:var(--white);margin:0 0 18px;max-width:16ch}
 body .pr .pl-empty__p{font-family:var(--font-body);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.6;color:rgba(245,243,237,.78);max-width:56ch;margin:0 0 26px}
+
+/* ── the publishing system: markers, two-stage teams, partners ─────── */
+/* The archive marker is the edition's first sentence, said once. */
+body .pr-marker{margin:0 0 28px;padding:14px 0 0;border-top:3px solid #8F8F8F;font-family:var(--font-body);font-weight:800;font-size:15px;line-height:1.5;color:var(--white)}
+body .pr-record{list-style:none;margin:0 0 16px;padding:0;border-top:1px solid #242424}
+body .pr-record li{padding:14px 0;border-bottom:1px solid #242424;font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--white)}
+body .pr-byline{font-weight:800;color:var(--white)}
+body .pr-article + .pr-article{margin-top:40px;padding-top:32px;border-top:1px solid #242424}
+body .pr-article__h{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3vw,2.4rem);line-height:.95;text-transform:uppercase;margin:0 0 16px}
+body .pr-fig{margin:0 0 20px}
+body .pr-fig img{display:block;width:100%;height:auto;border-radius:var(--r-xs)}
+body .pr-fig figcaption{margin-top:8px;font-size:13px;color:#AAAAAA}
+body .pr-ads{display:grid;gap:0 32px;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));border-top:1px solid #242424}
+body .pr-ad{display:block;padding:18px 0;border-bottom:1px solid #242424;color:var(--white);text-decoration:none}
+body .pr-ad__k{font-family:var(--font-body);font-weight:800;font-size:13px;color:var(--yellow)}
+body .pr-ad__n{font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);line-height:1;text-transform:uppercase;margin-top:6px}
+body .pr-ad__art{display:block;max-width:100%;height:auto;margin-top:10px;object-fit:contain}
+body .pr-ad__c{margin:8px 0 0;font-size:15px;color:rgba(245,243,237,.86)}
+body a.pr-ad:hover .pr-ad__n{color:var(--yellow)}
+body .pr-xi{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))}
+body .pr-xi__h{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+body .pr-xi__row{display:flex;gap:12px;align-items:baseline}
+body .pr-xi__side .pr-xi__wait{margin:8px 0 0}
+body .pr-cta{display:flex;flex-wrap:wrap;gap:12px}
+
+/* ── COVER VARIANTS ─────────────────────────────────────────────────── */
+/* One cover system, three stocks: yellow for the league, bottle green for a
+   cup tie, black for an Archive Edition (reconstructed afterwards). */
+body .pc--cup{background:#1A5C32;color:var(--white)}
+body .pc--cup::before{background:var(--yellow)}
+body .pc--cup .pc__top,body .pc--cup .pc__v,body .pc--cup .pc__teams{color:var(--white)}
+body .pc--cup .pc__teams .pc__opp{color:var(--yellow)}
+body .pc--cup .pc__foot{color:var(--white)}
+body .pc--archive{background:#141414;color:var(--white);box-shadow:inset 0 0 0 2px #242424}
+body .pc--archive::before{background:#8F8F8F}
+body .pc--archive .pc__top,body .pc--archive .pc__v,body .pc--archive .pc__teams,body .pc--archive .pc__foot{color:var(--white)}
+body .pc--archive .pc__teams .pc__opp{color:#AAAAAA}
+body .pc--cup .pc__crest--ini,body .pc--archive .pc__crest--ini{border-color:var(--white);color:var(--white);background:rgba(245,243,237,.08)}

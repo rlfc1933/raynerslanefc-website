@@ -462,7 +462,11 @@ test('EVERY COLUMN THE SYNC WRITES EXISTS AND ACCEPTS THE VALUE', () => {
   const schema = fs.readFileSync(path.join(ROOT,
     'supabase/migrations/20260802060000_programme_editions.sql'), 'utf8')
     + fs.readFileSync(path.join(ROOT,
-    'supabase/migrations/20260803120000_programme_recovery.sql'), 'utf8');
+    'supabase/migrations/20260803120000_programme_recovery.sql'), 'utf8')
+    // The publishing system's columns (teams_status, last_error, …). The sync
+    // writes them only after detecting the migration, but they must exist in it.
+    + fs.readFileSync(path.join(ROOT,
+    'supabase/migrations/20261009150000_programme_publishing_system.sql'), 'utf8');
 
   // Every patch.<column> the sync assigns must exist in the schema.
   const cols = [...new Set((sync.match(/patch\.([a-z_]+)\s*=/g) || [])
@@ -522,15 +526,18 @@ test('A PARTIAL PUBLICATION IS REPAIRED, NOT COLLIDED WITH', () => {
     'a version the edition never acknowledged must be REUSED, not duplicated');
   assert.match(s, /return \{ version: highest, repairing: true \}/);
 
-  // Both publication paths must go through it.
-  const uses = (s.match(/await nextVersion\(/g) || []).length;
-  assert.strictEqual(uses, 2, 'both the publish and the enrich path must use it');
+  // EVERY version write goes through one helper, which uses nextVersion and a
+  // conflict-tolerant insert — first publication, the team-sheet revision,
+  // full-time enrichment and the retrospective Archive Edition alike.
+  assert.match(s, /async function writeVersion\(edition, row, opts\)/);
+  assert.strictEqual((s.match(/await nextVersion\(/g) || []).length, 1, 'nextVersion is called from writeVersion only');
+  assert.ok((s.match(/await writeVersion\(/g) || []).length >= 4, 'every publishing path uses writeVersion');
   assert.ok(!/const version = \(edition\.current_version \|\| 0\) \+ 1/.test(s),
     'the old derivation is still present somewhere');
 
-  // And the insert itself must tolerate a repeat.
+  // And the insert itself must tolerate a repeat — and there is only one.
   const inserts = (s.match(/programme_versions\?on_conflict=edition_id,version/g) || []).length;
-  assert.strictEqual(inserts, 2, 'both inserts must be conflict-tolerant');
+  assert.strictEqual(inserts, 1, 'one conflict-tolerant insert site');
   assert.match(s, /resolution=merge-duplicates,return=minimal/);
 });
 
