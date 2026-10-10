@@ -1,0 +1,11 @@
+[
+ "impeccable:gpt-thin-border-wide-shadow:#a11y-panel",
+ "impeccable:gradient-text:body",
+ "impeccable:line-length:p.footer__legal",
+ "impeccable:skipped-heading:body",
+ "impeccable:undersized-ui-text:#a11y-text-label",
+ "impeccable:undersized-ui-text:div.a11y-group > span.a11y-group__label",
+ "impeccable:undersized-ui-text:div.footer__brand > a > span",
+ "impeccable:undersized-ui-text:span.nav__title-sub",
+ "impeccable:wide-tracking:p.affils"
+]

@@ -240,3 +240,4 @@ body .fz-card .btn{background:transparent;color:var(--white);border:2px solid rg
 .fz-give__grid{display:grid;gap:24px}
 @media (min-width:900px){.fz-give__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:end}}
 .fz-give__p{font-family:var(--font-body);font-weight:600;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:#080808;margin:0 0 22px;max-width:48ch}
+.fz-give__p a{color:#080808;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}

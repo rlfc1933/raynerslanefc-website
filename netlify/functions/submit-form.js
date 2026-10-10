@@ -15,7 +15,7 @@
 const URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rewkixywfgsyqinfbggv.supabase.co';
 const KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const TYPES = ['trial', 'volunteer', 'sponsor', 'contact', 'membership', 'other'];
+const TYPES = ['trial', 'volunteer', 'sponsor', 'contact', 'membership', 'lane100', 'other'];
 const MAX_FIELD = 4000;      // any single free-text field
 const MAX_PAYLOAD = 24000;   // total serialised extra fields
 
@@ -67,6 +67,11 @@ exports.handler = async function (event) {
   if (!email && !phone) return resp(200, { ok: false, error: 'contact-required' });
   if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return resp(200, { ok: false, error: 'email-invalid' });
 
+  // THE LANE 100 — its own table (lane100_members), where the DATABASE assigns
+  // the supporter number at the moment of a real sign-up. Nothing here invents
+  // or predicts a number: the visitor is told the number the row came back with.
+  if (type === 'lane100') return lane100(b, name, email, event);
+
   const isMinor = !!b.is_minor;
   const guardianName = clean(b.guardian_name || b.guardian, 200);
   const guardianEmail = clean(b.guardian_email, 200).toLowerCase();
@@ -116,8 +121,59 @@ exports.handler = async function (event) {
         await require('./club-os').intakeEnquiry({ id: saved.id, name: name, email: email, phone: phone, message: payload.message || payload.msg || '', fields: payload });
       } catch (e) { console.error('[submit-form] club-os intake failed', e && e.message); }
     }
+    // A volunteer offer becomes something the club can approve in Staff HQ.
+    // Best-effort, exactly like the sponsor intake: the submission is already
+    // saved, so a Club OS failure never fails the visitor's offer.
+    if (type === 'volunteer') {
+      try {
+        const CO = require('./club-os');
+        if (typeof CO.intakeVolunteer === 'function') {
+          const saved = (await r.json())[0] || {};
+          await CO.intakeVolunteer({ id: saved.id, name: name, email: email, phone: phone,
+            role: payload.role || payload.opportunity || '', opportunity: payload.opportunity || payload.role || '',
+            availability: payload.availability || '', message: payload.message || '', fields: payload });
+        }
+      } catch (e) { console.error('[submit-form] club-os volunteer intake failed', e && e.message); }
+    }
     return resp(200, { ok: true });
   } catch (e) {
     return resp(200, { ok: false, error: 'save-failed' });
   }
 };
+
+// ── THE LANE 100 ─────────────────────────────────────────────────────────
+// Participation & recognition only: no payment, no ownership. Email is
+// required (it is how the club recognises a duplicate), consent is required,
+// the public wall and club updates are separate opt-ins. Errors are mapped to
+// plain outcomes and never leak database detail.
+async function lane100(b, name, email, event) {
+  if (!email) return resp(200, { ok: false, error: 'email-required' });
+  if (!b.consent) return resp(200, { ok: false, error: 'consent-required' });
+  if (!URL || !KEY) return resp(200, { ok: false, error: 'no-supabase' });
+  const yes = (v) => v === true || v === 'on' || v === 'yes' || v === 'true' || v === '1';
+  const row = {
+    name: name, email: email,
+    town: clean(b.town, 80) || null,
+    show_on_wall: yes(b.show_on_wall),
+    updates_opt_in: yes(b.updates_opt_in),
+    consent: true,
+    source_page: clean(b.source_page, 200) || null,
+  };
+  try {
+    const headers = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' };
+    const r = await fetch(URL + '/rest/v1/lane100_members', { method: 'POST', headers: headers, body: JSON.stringify(row), signal: AbortSignal.timeout(9000) });
+    if (!r.ok) {
+      let code = ''; let msg = '';
+      try { const e = await r.json(); code = String(e.code || ''); msg = String(e.message || ''); } catch (e) {}
+      if (code === '23505' || r.status === 409) return resp(200, { ok: false, error: 'already-joined' });
+      if (/lane100_full/.test(msg)) return resp(200, { ok: false, error: 'full' });
+      return resp(200, { ok: false, error: 'save-failed' });
+    }
+    const saved = (await r.json())[0] || {};
+    const no = Number(saved.supporter_no);
+    if (!(no >= 1)) return resp(200, { ok: false, error: 'save-failed' });   // never claim a number the database did not give
+    return resp(200, { ok: true, number: no });
+  } catch (e) {
+    return resp(200, { ok: false, error: 'save-failed' });
+  }
+}

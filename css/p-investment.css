@@ -83,3 +83,18 @@ a.inv-partner__name:hover{color:var(--yellow)}
 .spon-form input:focus-visible,.spon-form select:focus-visible,.spon-form textarea:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .spon-go{width:100%;margin-top:22px;cursor:pointer}
 .spon-note{font-family:var(--font-body);font-size:14px;color:rgba(245,243,237,.88);margin:12px 0 0;max-width:60ch}
+
+/* ── Back The Lane: entry points, help in kind, business club, honesty ── */
+.inv-in{border-top:0}
+.inv-in .kl-sec__head{flex-wrap:wrap}
+.inv-note{font-family:var(--font-body);font-size:15px;line-height:1.55;color:var(--ed-text-2);max-width:62ch;margin:20px 0 0}
+.inv-muted{color:var(--ed-text-2)}
+.inv-kind__grid,.inv-bc__grid{display:grid;gap:28px}
+@media (min-width:1000px){.inv-kind__grid,.inv-bc__grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:56px;align-items:start}}
+.inv-kind__list > li{display:grid;gap:4px 24px}
+@media (min-width:700px){.inv-kind__list > li{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:baseline}}
+.inv-kind__list b{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,2.8vw,2.4rem);line-height:.95;text-transform:uppercase;color:var(--white)}
+.inv-kind__list span{font-family:var(--font-body);font-size:16px;line-height:1.5;color:var(--ed-text-2)}
+.inv-bc__p{font-family:var(--font-body);font-weight:600;font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.55;color:#080808;max-width:50ch;margin:0 0 24px}
+.inv-stat[hidden]{display:none}
+.inv-kind .kl-p,.inv-not .kl-p{margin-top:20px}
