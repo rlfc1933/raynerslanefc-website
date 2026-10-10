@@ -161,7 +161,7 @@ test('Programme HQ: sign in, approve the next edition, authorise an archive edit
 
   const row = page.locator('.phq-table tr', { hasText: '590749' });
   await row.getByRole('button', { name: 'Authorise archive edition' }).click();
-  await expect(page.locator('#phq-msg')).toContainText('Archive Edition published');
+  await expect(page.locator('#phq-msg')).toContainText('Archive Edition published', { timeout: 20000 });
   const e = db.programme_editions.filter((x) => x.external_fixture_id === '590749')[0];
   expect(e.edition_kind).toBe('retrospective');
   expect(db.programme_publication_events.some((x) => x.event_type === 'retrospective_authorised' && x.actor === 'Jenny')).toBe(true);

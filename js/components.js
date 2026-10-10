@@ -262,7 +262,7 @@ const TICKER_ITEMS = [
   "Follow us @RaynersLaneFC · Home shirt sponsor: Hanlon Dry Lining",
 ];
 
-const CREST_IMG = `<img src="img/badge.png" alt="Rayners Lane FC" style="width:100%;height:100%;object-fit:contain;border-radius:50%">`;
+const CREST_IMG = `<img src="img/badge-512.png" alt="Rayners Lane FC" width="64" height="64" style="width:100%;height:100%;object-fit:contain;border-radius:50%">`;
 
 function buildNav(currentPage) {
   const links = [
@@ -360,7 +360,7 @@ function buildNav(currentPage) {
   return `<nav class="nav" role="navigation">
     <div class="nav__i">
       <a href="index.html" class="nav__brand">
-        <img src="img/badge.png" alt="Rayners Lane FC" class="nav__badge">
+        <img src="img/badge-512.png" alt="Rayners Lane FC" class="nav__badge" width="64" height="64">
         <div class="nav__title">
           <span class="nav__title-main">Rayners Lane</span>
           <span class="nav__title-sub">FC &middot; Est. 1933 &middot; Harrow</span>
@@ -497,7 +497,7 @@ function buildTwitterSection() {
           </div>
 
           <div style="background:var(--black);border:1px solid var(--border);padding:32px;text-align:center">
-            <img src="img/badge.png" alt="Rayners Lane FC" style="width:100px;height:100px;object-fit:contain;margin:0 auto 20px;display:block">
+            <img src="img/badge-512.png" alt="Rayners Lane FC" width="100" height="100" loading="lazy" style="width:100px;height:100px;object-fit:contain;margin:0 auto 20px;display:block">
             <div style="font-family:var(--font-d);font-size:32px;letter-spacing:.04em;color:var(--white);margin-bottom:8px">Rayners Lane FC</div>
             <div style="font-family:var(--font-c);font-size:12px;color:var(--grey);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px">Est. 1933 &middot; Harrow &middot; The Lane</div>
             <div style="display:flex;justify-content:center;gap:16px">
