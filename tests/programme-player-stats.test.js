@@ -239,7 +239,12 @@ test('the Full-Time ingestion is untouched and remains the source of truth', () 
       if (/footballwebpages/.test(fs.readFileSync(f, 'utf8'))) hits.push(path.relative(dir, f));
     });
   }(dir));
-  assert.deepStrictEqual(hits.sort(), ['import-fixtures.js', 'lib/fwp-adapter.js', 'lib/fwp-client.js'],
+  // lib/programme/fwp-api.js is the OFFICIAL v2 API adapter the programme
+  // directive requires: key-gated (FWP_API_KEY), rate-budgeted, and inert
+  // until the club holds a key. It is the only addition, and it is allowed by
+  // name so that a second one still fails here.
+  assert.deepStrictEqual(hits.sort(), ['import-fixtures.js', 'lib/fwp-adapter.js', 'lib/fwp-client.js',
+    'lib/programme/fwp-api.js'],
     'no new file may talk to Full-Time');
 });
 

@@ -42,7 +42,7 @@
 <link rel="stylesheet" href="css/edition.css">
 <link rel="stylesheet" href="css/kl.css">
 <script src="js/lane-motion.js" defer></script>
-<link rel="stylesheet" href="css/p-programmes.css">
+<link rel="stylesheet" href="css/p-programmes.css?v=2">
 </head>
 <body>
 <div id="nav-placeholder"></div>
@@ -59,9 +59,26 @@
   </section>
 
   <div class="pl">
+    <!-- Programme HQ (committee only) mounts here when the page is opened
+         with ?hq=1. Nothing is rendered for supporters. -->
+    <div id="programme-hq" hidden></div>
+
     <div id="programme-library">
-      <div class="pl-empty"><div class="pl-empty__h">Loading the collection…</div></div>
+      <div class="pl-notice" role="status"><p>Fetching the latest editions…</p>
+        <noscript><p>The covers need JavaScript. Every home fixture of the season and its programme is listed below.</p></noscript>
+      </div>
     </div>
+
+    <!-- THE SEASON LEDGER. Baked as static HTML from verified records (see
+         netlify/functions/lib/programme/bake-ledger.js), so the archive is never
+         a blank loading state for a reader without JavaScript. The browser
+         replaces it with the live ledger when the programme service answers.
+         ⛔ Regenerate with the bake script; do not hand-edit between the markers. -->
+    <section class="pg-led" id="programme-ledger" aria-labelledby="pg-led-h" data-source="baked">
+<!-- programme-ledger:start -->
+<h2 class="pg-led__h" id="pg-led-h">2026/27 home fixtures</h2><p class="pg-led__lede">Every home match of the season in every competition, cup ties included, and the programme for each. <span class="pg-led__asof">As recorded on 9 October 2026.</span></p><ol class="pg-led__list"><li class="pg-led__row pg-led__row--published" data-kind="published" data-comp="league" data-opp="Wallingford &amp; Crowmarsh"><time class="pg-led__d" datetime="2026-08-01">Sat 1 Aug</time><span class="pg-led__o">Rayners Lane v Wallingford &amp; Crowmarsh</span><span class="pg-led__c">League</span><span class="pg-led__res">3–3</span><a class="pg-led__st" href="programme.html?id=fwp-578225">Programme published</a></li><li class="pg-led__row pg-led__row--postponed" data-kind="postponed" data-comp="league" data-opp="Hilltop"><time class="pg-led__d" datetime="2026-08-11">Tue 11 Aug</time><span class="pg-led__o">Rayners Lane v Hilltop</span><span class="pg-led__c">League</span><span class="pg-led__st">Postponed · rearranged</span></li><li class="pg-led__row pg-led__row--published" data-kind="published" data-comp="cup" data-opp="New Bradwell St Peter"><time class="pg-led__d" datetime="2026-08-15">Sat 15 Aug</time><span class="pg-led__o">Rayners Lane v New Bradwell St Peter</span><span class="pg-led__c">FA Vase First Qualifying Round</span><span class="pg-led__res">1–2</span><a class="pg-led__st" href="programme.html?id=favase-1q-new-bradwell-20260815">Programme published</a></li><li class="pg-led__row pg-led__row--published" data-kind="published" data-comp="league" data-opp="Ardley United"><time class="pg-led__d" datetime="2026-08-29">Sat 29 Aug</time><span class="pg-led__o">Rayners Lane v Ardley United</span><span class="pg-led__c">League</span><span class="pg-led__res">0–1</span><a class="pg-led__st" href="programme.html?id=fwp-578278">Programme published</a></li><li class="pg-led__row pg-led__row--missing" data-kind="missing" data-comp="league" data-opp="Hilltop"><time class="pg-led__d" datetime="2026-09-08">Tue 8 Sept</time><span class="pg-led__o">Rayners Lane v Hilltop</span><span class="pg-led__c">League</span><span class="pg-led__res">0–1</span><span class="pg-led__st">Archive edition in preparation</span></li><li class="pg-led__row pg-led__row--postponed" data-kind="postponed" data-comp="league" data-opp="Wokingham Town"><time class="pg-led__d" datetime="2026-09-19">Sat 19 Sept</time><span class="pg-led__o">Rayners Lane v Wokingham Town</span><span class="pg-led__c">League</span><span class="pg-led__st">Postponed</span></li><li class="pg-led__row pg-led__row--upcoming" data-kind="upcoming" data-comp="league" data-opp="Thatcham Town"><time class="pg-led__d" datetime="2026-10-31">Sat 31 Oct · 3pm</time><span class="pg-led__o">Rayners Lane v Thatcham Town</span><span class="pg-led__c">League</span><span class="pg-led__st">Not yet published</span></li><li class="pg-led__row pg-led__row--upcoming" data-kind="upcoming" data-comp="league" data-opp="Abingdon United"><time class="pg-led__d" datetime="2026-11-07">Sat 7 Nov · 3pm</time><span class="pg-led__o">Rayners Lane v Abingdon United</span><span class="pg-led__c">League</span><span class="pg-led__st">Not yet published</span></li><li class="pg-led__row pg-led__row--upcoming" data-kind="upcoming" data-comp="league" data-opp="Broadfields United"><time class="pg-led__d" datetime="2026-11-28">Sat 28 Nov · 3pm</time><span class="pg-led__o">Rayners Lane v Broadfields United</span><span class="pg-led__c">League</span><span class="pg-led__st">Not yet published</span></li><li class="pg-led__row pg-led__row--upcoming" data-kind="upcoming" data-comp="league" data-opp="Amersham Town"><time class="pg-led__d" datetime="2026-12-01">Tue 1 Dec · 7:45pm</time><span class="pg-led__o">Rayners Lane v Amersham Town</span><span class="pg-led__c">League</span><span class="pg-led__st">Not yet published</span></li></ol><dl class="pg-led__key"><div><dt class="pg-led__row--published"><span class="pg-led__dot" aria-hidden="true"></span>Published</dt><dd>Free to read for Fan Zone members.</dd></div><div><dt class="pg-led__row--missing"><span class="pg-led__dot" aria-hidden="true"></span>In preparation</dt><dd>No programme was published on the day. An archive edition is being prepared.</dd></div><div><dt class="pg-led__row--postponed"><span class="pg-led__dot" aria-hidden="true"></span>Postponed</dt><dd>Postponed or rearranged. No completed-match programme exists.</dd></div><div><dt class="pg-led__row--upcoming"><span class="pg-led__dot" aria-hidden="true"></span>Not yet published</dt><dd>Each edition appears on matchday.</dd></div></dl>
+<!-- programme-ledger:end -->
+    </section>
   </div>
 </main>
 
@@ -70,8 +87,10 @@
 <script src="js/components.js"></script>
 <script src="js/fan-boot.js?v=1"></script>
 <script src="js/crest.js?v=8"></script>
-<script src="js/programme-cover.js?v=8"></script>
-<script src="js/programme-library.js?v=8"></script>
+<script src="js/programme-cover.js?v=9"></script>
+<script src="js/programme-ledger.js?v=1"></script>
+<script src="js/programme-library.js?v=9"></script>
+<script src="js/programme-hq.js?v=1" defer></script>
 <script>
   try { initComponents('programmes.html'); } catch(e){}
 </script>

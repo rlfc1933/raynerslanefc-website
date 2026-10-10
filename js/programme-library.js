@@ -3,22 +3,34 @@
 
    The club's growing collection of free digital matchday programmes.
 
-   Cover-led, because a shelf of covers is how anyone actually browses a
-   collection. The feeling is borrowed from a record shelf or a bookcase; the
-   interface, type and colour are entirely Rayners Lane. No prices, no locks,
-   no carts — every edition is free.
+   Two parts:
+     1. the SHELF — covers of every published edition, the latest one large;
+     2. the LEDGER — every home fixture of the season, in every competition,
+        with what exists for it: published, archive edition, postponed, or not
+        yet published. The ledger ships baked into programmes.html, so a reader
+        without JavaScript (or whose request fails) still sees the season.
 
-   Accessibility is not decorative here: each card carries a real text label
-   independent of its artwork, so nothing on this page is available only inside
-   an image.
+   WHAT WAS WRONG (October 2026). The page showed "Loading the collection…"
+   until two things had BOTH finished: the crest library and the Fan Zone
+   session. If the session bootstrap stalled, the page never asked for the
+   programmes at all. And when the request did fail, the page said "The
+   collection starts soon" — an empty-collection message for an error, which
+   hid the fault and told supporters something untrue. Now the session gets a
+   short grace period, a failure says it is a failure and offers a retry, and
+   the baked season ledger stays visible throughout.
+
+   Cover-led, because a shelf of covers is how anyone browses a collection.
+   No prices, no locks, no carts — every edition is free to members.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
 
   var root = document.getElementById('programme-library');
+  var ledgerRoot = document.getElementById('programme-ledger');
   if (!root) return;
 
   var ALL = [];
+  var LEDGER = null;
   var filters = { season: null, competition: null };
 
   function esc(s) {
@@ -26,6 +38,7 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function dateLong(iso) { return RLFCCover.clubDate(iso); }
+  function isArchive(e) { return e.editionKind === 'retrospective'; }
 
   function card(e) {
     var url = 'programme.html?id=' + encodeURIComponent(e.fixtureId);
@@ -33,19 +46,30 @@
       ? '<span class="pl-card__score">' + e.homeScore + '–' + e.awayScore + '</span>' : '';
     var member = isMember();
     var label = e.homeTeam + ' versus ' + e.awayTeam + ', ' + dateLong(e.kickoffAt) +
+      (isArchive(e) ? ', archive edition' : '') +
       (member ? '. Read the matchday programme.' : '. Unlock free in Fan Zone.');
+    var note = isArchive(e) ? '<span class="pl-card__note">Archive edition, reconstructed from verified match records</span>'
+      : (e.postponedAt ? '<span class="pl-card__note">Match postponed after this edition was published</span>' : '');
     // The card always shows the cover, the fixture, the date and the score.
     // What changes is the promise it makes about opening it.
     return '<article>' +
       '<a class="pl-card' + (member ? '' : ' pl-card--locked') + '" href="' + esc(url) +
         '" aria-label="' + esc(label) + '">' +
-        '<div class="pl-card__cover">' + RLFCCover.render(e, { as: 'div' }) + '</div>' +
+        '<div class="pl-card__cover">' + RLFCCover.render(coverOf(e), { as: 'div' }) + '</div>' +
         '<div class="pl-card__t">' + esc(e.homeTeam) + ' v ' + esc(e.awayTeam) + '</div>' +
         '<div class="pl-card__m">' + esc(dateLong(e.kickoffAt)) +
           (e.competition ? ' · ' + esc(e.competition) : '') + '</div>' +
-        score +
+        score + note +
         '<span class="pl-card__cta">' + (member ? 'Read programme' : 'Unlock free in Fan Zone') + '</span>' +
       '</a></article>';
+  }
+
+  function coverOf(e) {
+    return { homeTeam: e.homeTeam, awayTeam: e.awayTeam, homeCrest: e.homeCrest, awayCrest: e.awayCrest,
+      competition: e.competition, kickoffAt: e.kickoffAt, season: e.season, editionKind: e.editionKind,
+      // Archive editions carry no kick-off time on the cover: the time is
+      // part of the matchday promise, not the record.
+      kickoffTimeConfirmed: isArchive(e) ? false : e.kickoffTimeConfirmed };
   }
 
   /* Is this fixture TODAY, at the ground? Decided from the kick-off instant in
@@ -74,11 +98,13 @@
   function featured(e) {
     var live = isToday(e.kickoffAt);
     var afterFullTime = !!e.afterFullTime;
+    var label = live ? 'Today at The Lane'
+      : isArchive(e) ? 'Archive edition'
+      : (afterFullTime ? 'Inaugural digital edition' : 'Latest edition');
     return '<section class="pl-featured" aria-labelledby="pl-feat-h">' +
-      '<div>' + RLFCCover.render(e, { as: 'div' }) + '</div>' +
+      '<div>' + RLFCCover.render(coverOf(e), { as: 'div' }) + '</div>' +
       '<div class="pl-featured__meta">' +
-        '<span class="label">' + (live ? 'Today at The Lane'
-          : (afterFullTime ? 'Inaugural digital edition' : 'Latest edition')) + '</span>' +
+        '<span class="label">' + label + '</span>' +
         '<h2 class="pl-featured__title" id="pl-feat-h">' + esc(e.homeTeam) + ' v ' + esc(e.awayTeam) + '</h2>' +
         '<p class="pl-featured__sub">' + esc(dateLong(e.kickoffAt)) +
           (e.competition ? ' · ' + esc(e.competition) : '') +
@@ -125,12 +151,12 @@
   function paint() {
     var list = visible();
     if (!ALL.length) {
-      // Honest, and deliberately not padded with fake editions.
+      // Honest, and deliberately not padded with fake editions. This is the
+      // answer to a SUCCESSFUL request that found nothing — never to an error.
       root.innerHTML = '<div class="pl-empty">' +
         '<div class="pl-empty__h">The collection starts soon</div>' +
         '<p class="pl-empty__p">Rayners Lane publishes a free digital programme for every home fixture. ' +
-        'Each edition appears here on matchday, once both official team sheets are confirmed, ' +
-        'and stays in the collection permanently.</p>' +
+        'Each edition appears here on matchday and stays in the collection permanently.</p>' +
         '<a class="btn btn-primary" href="fixtures.html">See the fixtures</a></div>';
       return;
     }
@@ -146,7 +172,7 @@
     var seasons = Object.keys(bySeason).sort().reverse();
 
     root.innerHTML =
-      featured(current) +
+      (current ? featured(current) : '') +
       filterBar() +
       (rest.length
         ? seasons.map(function (s) {
@@ -166,6 +192,88 @@
     });
   }
 
+  /* A failure is a failure. Not "the collection starts soon". */
+  function failed() {
+    root.innerHTML = '<div class="pl-notice" role="status">' +
+      '<p><strong>The programme covers could not be loaded just now.</strong> ' +
+      'The season record below lists every home fixture and its programme.</p>' +
+      '<button class="btn" type="button" id="pl-retry">Try again</button></div>';
+    var b = document.getElementById('pl-retry');
+    if (b) b.addEventListener('click', function () { root.innerHTML = loadingHtml(); load(); });
+  }
+  function loadingHtml() {
+    return '<div class="pl-notice" role="status"><p>Fetching the latest editions…</p></div>';
+  }
+
+  /* ── the season ledger: filters for the archive index ──────────────────── */
+  var lf = { comp: '', opp: '', kind: '', month: '' };
+  function ledgerFilters(rows) {
+    var opps = [], months = [];
+    rows.forEach(function (r) {
+      if (r.opponent && opps.indexOf(r.opponent) === -1) opps.push(r.opponent);
+      var m = String(r.date || '').slice(0, 7);
+      if (m && months.indexOf(m) === -1) months.push(m);
+    });
+    opps.sort();
+    function sel(id, label, opts) {
+      return '<label class="pg-led__f"><span>' + label + '</span><select id="' + id + '">' +
+        opts.map(function (o) { return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>'; }).join('') +
+        '</select></label>';
+    }
+    var monthName = function (m) {
+      return new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+        .format(new Date(m + '-01T00:00:00Z'));
+    };
+    return '<form class="pg-led__filters" aria-label="Filter the season record" onsubmit="return false">' +
+      sel('pg-f-comp', 'Competition', [['', 'All'], ['league', 'League'], ['cup', 'Cup']]) +
+      sel('pg-f-opp', 'Opponent', [['', 'All']].concat(opps.map(function (o) { return [o, o]; }))) +
+      sel('pg-f-month', 'Month', [['', 'All']].concat(months.map(function (m) { return [m, monthName(m)]; }))) +
+      sel('pg-f-kind', 'Programme', [['', 'All'], ['published', 'Published'], ['retrospective', 'Archive edition'],
+        ['missing', 'In preparation'], ['postponed', 'Postponed'], ['upcoming', 'Not yet published']]) +
+      '</form><p class="pg-led__count" aria-live="polite"></p>';
+  }
+  function applyLedgerFilters() {
+    if (!ledgerRoot) return;
+    var shown = 0, total = 0;
+    ledgerRoot.querySelectorAll('.pg-led__row').forEach(function (li) {
+      total++;
+      var date = (li.querySelector('time') || {}).getAttribute ? li.querySelector('time').getAttribute('datetime') : '';
+      var ok = (!lf.comp || li.getAttribute('data-comp') === lf.comp) &&
+        (!lf.opp || li.getAttribute('data-opp') === lf.opp) &&
+        (!lf.kind || li.getAttribute('data-kind') === lf.kind) &&
+        (!lf.month || String(date).slice(0, 7) === lf.month);
+      li.hidden = !ok;
+      if (ok) shown++;
+    });
+    var c = ledgerRoot.querySelector('.pg-led__count');
+    if (c) c.textContent = shown === total ? '' : 'Showing ' + shown + ' of ' + total + ' home fixtures.';
+  }
+  function wireLedger(rows) {
+    if (!ledgerRoot) return;
+    var list = ledgerRoot.querySelector('.pg-led__list');
+    if (!list || !rows || rows.length < 4) return;
+    list.insertAdjacentHTML('beforebegin', ledgerFilters(rows));
+    [['pg-f-comp', 'comp'], ['pg-f-opp', 'opp'], ['pg-f-kind', 'kind'], ['pg-f-month', 'month']].forEach(function (p) {
+      var el = document.getElementById(p[0]);
+      if (el) el.addEventListener('change', function () { lf[p[1]] = el.value; applyLedgerFilters(); });
+    });
+  }
+  /** Rows as the baked HTML carries them, so filters work without the API. */
+  function bakedRows() {
+    if (!ledgerRoot) return [];
+    return [].map.call(ledgerRoot.querySelectorAll('.pg-led__row'), function (li) {
+      var t = li.querySelector('time');
+      return { opponent: li.getAttribute('data-opp'), date: t ? t.getAttribute('datetime') : '' };
+    });
+  }
+  function paintLedger() {
+    if (!ledgerRoot || !LEDGER || !window.RLFCLedger) return;
+    ledgerRoot.innerHTML = window.RLFCLedger.render(LEDGER, { season: '2026/27', asOf: new Date().toISOString(), live: true });
+    ledgerRoot.setAttribute('data-source', 'live');
+    wireLedger(LEDGER);
+    applyLedgerFilters();
+  }
+
   // The library's cards are LIVE registry data, not archived editions, so the
   // crest library may answer for them. (The reader is different and must stay
   // snapshot-only — an archived programme that reached for a current asset
@@ -174,12 +282,13 @@
     ? window.LaneCrest.load().catch(function () {})
     : Promise.resolve();
 
-  // Wait for the session too: a member who lands on the library should never
-  // be told to unlock something they already have.
-  // `ready` rather than `refresh()`: the bootstrap loads the Supabase library
-  // and config itself, so the client may not exist yet when this runs. Calling
-  // refresh() too early is exactly how this page used to report every member
-  // as a stranger — it resolved instantly, with no client and no token.
+  // Wait for the session too — but not for ever. A member who lands on the
+  // library should never be told to unlock something they already have; a
+  // session bootstrap that stalls must not keep the whole collection hidden.
+  // The shelf repaints when the session answers (onChange below).
+  function grace(p, ms) {
+    return Promise.race([p, new Promise(function (r) { setTimeout(r, ms); })]);
+  }
   var sessionReady = (window.LaneFan && window.LaneFan.ready)
     ? window.LaneFan.ready.catch(function () {}) : Promise.resolve();
 
@@ -187,17 +296,30 @@
   if (window.LaneFan && window.LaneFan.onChange) {
     var seen = null;
     window.LaneFan.onChange(function (s) {
-      if (seen !== null && s.entitled !== seen) paint();
+      if (seen !== null && s.entitled !== seen && ALL.length) paint();
       seen = s.entitled;
     });
   }
 
-  Promise.all([crestsReady, sessionReady])
-    .then(function () { return fetch('/.netlify/functions/programme-data'); })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) {
-      ALL = (d && d.ok && d.editions) ? d.editions : [];
-      paint();
-    })
-    .catch(function () { ALL = []; paint(); });
+  function load() {
+    // Anonymous on purpose: the listing is public, only the contents are gated.
+    // A request that hangs is treated as a failure after ten seconds.
+    return grace(Promise.all([crestsReady, sessionReady]), 2500)
+      .then(function () {
+        return Promise.race([fetch('/.netlify/functions/programme-data'),
+          new Promise(function (r) { setTimeout(function () { r(null); }, 10000); })]);
+      })
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || d.ok !== true || !Array.isArray(d.editions)) { failed(); return; }
+        ALL = d.editions;
+        LEDGER = Array.isArray(d.ledger) ? d.ledger : null;
+        paint();
+        paintLedger();
+      })
+      .catch(function () { failed(); });
+  }
+
+  wireLedger(bakedRows());
+  load();
 })();

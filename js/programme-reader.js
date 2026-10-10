@@ -30,8 +30,64 @@
     staff: 'Committee & Football Staff', sponsors: 'Our Partners',
     standings: 'League Table', fixtures: 'Results & Fixtures',
     join: 'Join The Lane', history: 'History of The Lane', squads: 'Today’s Squads',
-    result: 'Full Time',
+    result: 'Full Time', record: 'The Match Record', preview: 'Match Preview',
+    chairNotes: 'From the Chair', articles: 'Features', placements: 'Match Partners',
   };
+  var TEAMS_PLACEHOLDER = 'Confirmed teams will appear here when available.';
+  var RETRO_MARKER = 'Archive Edition — Reconstructed from verified match records';
+
+  function clubStamp(iso) {
+    var ms = Date.parse(iso);
+    if (!isFinite(ms)) return '';
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric',
+      month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(ms));
+  }
+  function paras(text) {
+    return String(text || '').split(/\n{2,}/).map(function (t) { return t.trim(); }).filter(Boolean)
+      .map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+  }
+
+  /* Written by a named person and approved. Generated copy never appears here. */
+  function chairNotes(c) {
+    if (!c || !c.body || !c.approvedBy) return '';
+    return '<div class="pr-body">' + paras(c.body) + (c.byline ? '<p class="pr-byline">' + esc(c.byline) + '</p>' : '') + '</div>';
+  }
+  function previewSection(pv) {
+    if (!pv || !pv.body) return '';
+    return '<div class="pr-body">' + paras(pv.body) + '</div>';
+  }
+  function articles(list) {
+    if (!list || !list.length) return '';
+    return list.map(function (a) {
+      return '<article class="pr-article"><h3 class="pr-article__h">' + esc(a.title || '') + '</h3>' +
+        (a.image ? '<figure class="pr-fig"><img src="' + esc(a.image) + '" alt="' + esc(a.caption || '') + '" loading="lazy">' +
+          (a.caption || a.credit ? '<figcaption>' + esc(a.caption || '') + (a.credit ? ' · ' + esc(a.credit) : '') + '</figcaption>' : '') +
+          '</figure>' : '') +
+        '<div class="pr-body">' + paras(a.body) + (a.byline ? '<p class="pr-byline">' + esc(a.byline) + '</p>' : '') + '</div></article>';
+    }).join('');
+  }
+  /* Only approved commercial placements reach a version, so whatever is here
+     was agreed. Nothing is inferred and nothing is substituted. */
+  function placements(list) {
+    if (!list || !list.length) return '';
+    var NAMES = { title_sponsor: 'Programme partner', match_sponsor: 'Match sponsor', match_ball: 'Match-ball sponsor',
+      full_page: 'Partner', half_page: 'Partner', quarter_page: 'Partner', directory: 'Local business directory' };
+    return '<div class="pr-ads">' + list.map(function (p) {
+      var art = p.artwork ? '<img class="pr-ad__art" src="' + esc(p.artwork) + '" alt="' + esc(p.sponsor) + '" loading="lazy">' : '';
+      var inner = '<div class="pr-ad__k">' + esc(NAMES[p.kind] || 'Partner') + '</div>' + art +
+        '<div class="pr-ad__n">' + esc(p.sponsor) + '</div>' + (p.copy ? '<p class="pr-ad__c">' + esc(p.copy) + '</p>' : '');
+      var cls = 'pr-ad pr-ad--' + esc(p.kind);
+      return p.website ? '<a class="' + cls + '" href="' + esc(p.website) + '" rel="noopener sponsored" target="_blank">' + inner + '</a>'
+        : '<div class="' + cls + '">' + inner + '</div>';
+    }).join('') + '</div>';
+  }
+  function record(r) {
+    if (!r) return '';
+    return '<p class="pr-marker">' + esc(r.marker || RETRO_MARKER) + '</p>' +
+      '<div class="pr-body"><p>' + esc(r.note || '') + '</p></div>' +
+      '<ul class="pr-record">' + (r.lines || []).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>' +
+      ((r.sources || []).length ? '<p class="pr-freshness">Source: ' + r.sources.map(function (x) { return esc(x.label + (x.ref ? ' (' + x.ref + ')' : '')); }).join('; ') + '</p>' : '');
+  }
 
   function sec(key, n, inner) {
     if (!inner) return '';
@@ -149,26 +205,38 @@
       (h.body ? '<p>' + esc(h.body) + '</p>' : '') + '</div>';
   }
 
+  /* Team sheets, side by side. A side appears ONLY once its own sheet is
+     confirmed; the other keeps an honest placeholder. Never a prediction. */
   function squads(s, cover) {
     if (!s) return '';
-    if (!s.confirmed) {
-      return '<p class="pr-xi__wait">' + esc(s.note || 'Official squads will appear here once both teams are submitted.') + '</p>';
+    function row(p) {
+      return '<li class="pr-xi__row"><span class="pr-xi__no">' + esc(p.number || '') + '</span>' +
+        '<span>' + esc(p.name) + (p.isCaptain ? ' (C)' : '') + '</span></li>';
     }
-    function side(x, crestSrc) {
-      function row(p) {
-        return '<li class="pr-xi__row"><span class="pr-xi__no">' + esc(p.number || '') + '</span>' +
-          '<span>' + esc(p.name) + (p.isCaptain ? ' (C)' : '') + '</span></li>';
-      }
-      return '<div class="pr-xi__side"><div class="pr-xi__h">' +
-        (crestSrc ? '<img class="pr-xi__crest" src="' + esc(crestSrc) + '" alt="">' : '') +
-        '<span class="pr-xi__name">' + esc(x.team) + '</span></div>' +
-        '<ul>' + (x.starters || []).map(row).join('') + '</ul>' +
+    function side(x, crestSrc, fallbackName) {
+      x = x || {};
+      var head = '<div class="pr-xi__h">' +
+        (crestSrc ? '<img class="pr-xi__crest" src="' + esc(crestSrc) + '" alt="" width="40" height="40">' : '') +
+        '<span class="pr-xi__name">' + esc(x.team || fallbackName || '') + '</span></div>';
+      var confirmed = x.confirmed !== false && (x.starters || []).length;
+      if (!confirmed) return '<div class="pr-xi__side">' + head + '<p class="pr-xi__wait">' + esc(x.note || TEAMS_PLACEHOLDER) + '</p></div>';
+      return '<div class="pr-xi__side">' + head +
+        '<ul aria-label="' + esc((x.team || '') + ' starting eleven') + '">' + (x.starters || []).map(row).join('') + '</ul>' +
         ((x.substitutes || []).length
           ? '<div class="pr-xi__lbl">Substitutes</div><ul>' + x.substitutes.map(row).join('') + '</ul>' : '') +
         '</div>';
     }
-    return '<div class="pr-xi">' + side(s.home, cover && cover.homeCrest) + side(s.away, cover && cover.awayCrest) + '</div>' +
-      (s.referee ? '<p class="pr-freshness">Referee: ' + esc(s.referee) + '</p>' : '');
+    if (!s.confirmed && s.status !== 'partial') {
+      // Nothing confirmed for either side (or an archive edition with no sheet).
+      return '<p class="pr-xi__wait">' + esc(s.note || TEAMS_PLACEHOLDER) + '</p>';
+    }
+    var stamp = s.sourceUpdatedAt ? clubStamp(s.sourceUpdatedAt) : '';
+    var corr = (s.corrections || []).length ? '<p class="pr-freshness">Corrected by the club: ' +
+      s.corrections.map(function (c) { return esc(c.from + ' to ' + c.to); }).join('; ') + '.</p>' : '';
+    return '<div class="pr-xi">' + side(s.home, cover && cover.homeCrest, cover && cover.homeTeam) +
+      side(s.away, cover && cover.awayCrest, cover && cover.awayTeam) + '</div>' +
+      (s.source && stamp ? '<p class="pr-freshness">Team sheet updated from ' + esc(s.source) + ' at ' + esc(stamp) + '.</p>' : '') +
+      corr + (s.referee ? '<p class="pr-freshness">Referee: ' + esc(s.referee) + '</p>' : '');
   }
 
   function result(fm, fixtureId) {
@@ -297,20 +365,32 @@
       n++; present.push(key); html += sec(key, n, inner);
     }
 
+    var archive = ed.editionKind === 'retrospective' || !!cover.archiveMarker;
     var coverEdition = {
       homeTeam: cover.homeTeam, awayTeam: cover.awayTeam,
       homeCrest: cover.homeCrest, awayCrest: cover.awayCrest,
       competition: cover.competition, kickoffAt: ed.kickoffAt,
       season: cover.season, matchSponsor: cover.matchSponsor,
+      editionKind: archive ? 'retrospective' : 'matchday', editionNumber: ed.editionNumber,
+      // The edition stored kickoff:null when the time was never confirmed.
+      kickoffTimeConfirmed: archive || cover.kickoff === null ? false : undefined,
     };
 
+    // An archive edition was not on sale that day: its team sheet is the
+    // record's, not "today's".
+    HEADINGS.squads = archive ? 'Team Sheets' : 'Today’s Squads';
+    add('record', record(s.record));
+    add('chairNotes', chairNotes(s.chairNotes));
     add('welcome', welcome(s.welcome));
+    add('preview', previewSection(s.preview));
     add('opposition', opposition(s.opposition));
     add('staff', staff(s.staff));
+    add('placements', placements(s.placements));
     add('sponsors', sponsors(s.sponsors));
     add('standings', standings(s.standings));
     add('fixtures', fixtures(s.fixtures));
     add('join', join(s.join));
+    add('articles', articles(s.articles));
     add('history', history(s.history));
     add('squads', squads(s.squads, cover));
     add('result', result(d.finalMatch, ed.fixtureId));
@@ -319,18 +399,44 @@
       (preview ? '<div class="pr-preview">Private design preview — not a published matchday edition</div>' : '') +
       // Honesty, stated once, near the top, in the club's voice. Not an
       // apology and not an explanation of the machinery.
-      (ed.afterFullTime
-        ? '<div class="pr-note">This edition was published after full time as Rayners Lane introduced its ' +
-          'new matchday programme platform.</div>'
+      (archive
+        ? '<p class="pr-marker pr-marker--top">' + esc(RETRO_MARKER) + '</p>'
+        : (ed.afterFullTime
+          ? '<div class="pr-note">This edition was published after full time as Rayners Lane introduced its ' +
+            'new matchday programme platform.</div>'
+          : '')) +
+      (ed.postponedAt
+        ? '<div class="pr-note" role="note">This match was postponed after the programme was published. ' +
+          'The edition is kept as it was issued; it is not a record of a match played on this date.</div>'
         : '') +
       '<div class="pr-cover">' + RLFCCover.render(coverEdition, { as: 'div' }) + '</div>' +
       toc(present) + html +
       '<div class="pr-cta">' +
         (ed.fixtureId ? '<a class="btn btn-primary" href="match-centre.html?id=' + encodeURIComponent(ed.fixtureId) + '">Match Centre</a>' : '') +
+        // The PDF is this edition through its A4 print stylesheet
+        // (css/p-programme-print.css): the browser's own "Save as PDF".
+        '<button class="btn" type="button" id="pr-print">Print or save as PDF</button>' +
         '<a class="btn" href="programmes.html">All programmes</a></div>' +
-      '<p class="pr-credit">Rayners Lane FC · free digital matchday programme' +
-        (ed.publishedAt ? ' · published ' + esc(String(ed.publishedAt).slice(0, 10)) : '') + '</p>' +
+      '<p class="pr-credit">Rayners Lane FC · ' + (archive ? 'archive edition' : 'free digital matchday programme') +
+        (ed.publishedAt ? ' · first published ' + esc(String(ed.publishedAt).slice(0, 10)) : '') +
+        (ed.version ? ' · version ' + esc(ed.version) : '') +
+        (ed.versionPublishedAt && ed.version > 1 ? ' (updated ' + esc(clubStamp(ed.versionPublishedAt)) + ')' : '') +
+        '</p>' +
       legalFooter(d.legal);
+
+    var pb = document.getElementById('pr-print');
+    if (pb) pb.addEventListener('click', function () { window.print(); });
+    document.documentElement.setAttribute('data-edition', (ed.fixtureId || '') + '@v' + (ed.version || ''));
+    // A saved PDF takes the document title as its metadata title, so while
+    // printing the title names the fixture, the edition and the revision.
+    var screenTitle = null;
+    window.addEventListener('beforeprint', function () {
+      screenTitle = document.title;
+      document.title = (cover.homeTeam || '') + ' v ' + (cover.awayTeam || '') + ' · ' +
+        (archive ? 'Archive Edition' : 'Matchday Programme') + ' · ' + (cover.season || ed.season || '') +
+        ' · ' + (ed.fixtureId || '') + ' · version ' + (ed.version || 1) + ' · Rayners Lane FC';
+    });
+    window.addEventListener('afterprint', function () { if (screenTitle) document.title = screenTitle; });
 
     if (cover.homeTeam && cover.awayTeam) {
       document.title = cover.homeTeam + ' v ' + cover.awayTeam + ' | Matchday Programme | Rayners Lane FC';
@@ -413,7 +519,8 @@
         } catch (e2) {}
       }
     })
-    .catch(function () {
+    .catch(function (err) {
+      if (window.console) console.error('[programme-reader]', err && err.message);
       unavailable('Programme temporarily unavailable', 'Please try again shortly.');
     });
 })();

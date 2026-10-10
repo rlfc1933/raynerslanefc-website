@@ -1,0 +1,97 @@
+/* ════════════════════════════════════════════════════════════════════════
+   PROGRAMME — the A4 PRINT EDITION
+   Loaded with media="print" by programme.html. It turns the mobile reader into
+   a printed matchday programme: UK A4, consistent margins, the cover on its
+   own page, sections that never split a team sheet or a table, a running foot
+   with the page number, ink on white paper. "Print or save as PDF" in the
+   reader IS the PDF workflow; tests render a real PDF through it and look at
+   every page (quality/tests/programme.spec.js).
+
+   Separate from the interactive layout on purpose: nothing here may change how
+   the edition looks on a screen.
+   ════════════════════════════════════════════════════════════════════════ */
+
+@page {
+  size: A4;
+  margin: 16mm 15mm 18mm;
+  @bottom-left { content: "Rayners Lane FC · raynerslanefc.co.uk"; font: 600 8pt "Manrope", sans-serif; color: #555555; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 600 8pt "Manrope", sans-serif; color: #555555; }
+}
+/* The cover is a full page: no running foot on it. */
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+html, body { background: #FFFFFF !important; color: #111111 !important; }
+* { box-shadow: none !important; text-shadow: none !important; animation: none !important; transition: none !important; }
+
+/* The site chrome is not part of the publication. */
+body > *:not(main), #pwa-banner, #nav-placeholder, #footer-placeholder, nav, header.kl-ph, .pr-toc, .pr-cta, .pr-preview, .pr-joined,
+.skip-link, #cookie-banner, .cookie-banner, .a11y-fab, [class*="a11y-"], .lane-install, .pr-gate__cta,
+.pl-empty .btn, iframe { display: none !important; }
+
+body .pr { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+main { padding: 0 !important; margin: 0 !important; }
+
+/* ── the cover page ─────────────────────────────────────────────────── */
+body .pr-cover {
+  page: cover; break-after: page;
+  width: 210mm; height: 297mm; max-width: none !important; margin: 0 !important;
+  display: flex; align-items: center; justify-content: center; background: #FFFFFF;
+}
+body .pr-cover .pc-wrap { width: 168mm; }
+body .pr-cover .pc { box-shadow: none !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* The cover always prints first; notices that sit above it on screen follow it. */
+#programme-reader { display: flex !important; flex-direction: column !important; }
+#programme-reader > * { width: 100%; }
+body .pr-cover { order: -1; }
+
+/* Archive and postponement notices print, plainly. */
+body .pr-marker, body .pr-note {
+  color: #111111 !important; border-top: 2pt solid #111111 !important; padding-top: 3mm !important;
+  font: 700 10pt "Manrope", sans-serif !important; margin: 0 0 6mm !important;
+}
+
+/* ── sections ───────────────────────────────────────────────────────── */
+body .pr-sec { border-top: 1.5pt solid #111111 !important; padding: 6mm 0 4mm !important; break-inside: auto; }
+body .pr-sec__h {
+  font-family: "Bebas Neue", sans-serif !important; font-size: 26pt !important; line-height: .9 !important;
+  color: #111111 !important; margin: 0 0 4mm !important; break-after: avoid;
+}
+body .pr-body, body .pr-body p, body .pr-lead, body .pr-xi__wait, body .pr-freshness, body .pr-credit, body .pr-legal,
+body .pr-fix, body .pr-person__n, body .pr-record li {
+  color: #111111 !important; font-family: "Manrope", sans-serif !important;
+}
+body .pr-body { font-size: 10.5pt !important; line-height: 1.55 !important; max-width: none !important; orphans: 3; widows: 3; }
+body .pr-lead { font-size: 12.5pt !important; }
+body .pr-freshness, body .pr-credit, body .pr-legal, body .pr-legal p { font-size: 8.5pt !important; color: #555555 !important; }
+body .pr-fact__l, body .pr-person__r, body .pr-tier__h, body .pr-xi__lbl { color: #555555 !important; font-size: 8.5pt !important; }
+body .pr-fact__v, body .pr-xi__name, body .pr-sponsor, body .pr-fix__s, body .pr-ad__n { color: #111111 !important; }
+body .pr-sponsor { font-size: 15pt !important; }
+body a { color: #111111 !important; text-decoration: none !important; }
+
+/* Never split these across a page. */
+body .pr-xi, body .pr-xi__side, body .pr-table-wrap, body .pr-facts, body .pr-ad, body .pr-record, body figure, body .pr-tier {
+  break-inside: avoid;
+}
+/* Keep the team sheets together: they start a fresh page. */
+body #pr-squads { break-before: page; }
+
+/* Team sheets: two columns on A4, ruled. */
+body .pr-xi { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 0 10mm !important; }
+body .pr-xi__side { border-top: 2pt solid #111111 !important; padding-top: 3mm !important; }
+body .pr-xi__row { border-bottom: .5pt solid #E2E2E2 !important; padding: 1.6mm 0 !important; font-size: 10pt !important; color: #111111 !important; }
+body .pr-xi__no { color: #111111 !important; font-size: 13pt !important; min-width: 9mm !important; }
+
+/* The table: ink only, our row in a light tint that survives a mono printer. */
+body .pr-table { width: 100% !important; font-size: 9pt !important; border-collapse: collapse; }
+body .pr-table th { color: #111111 !important; border-bottom: 1.2pt solid #111111 !important; }
+body .pr-table td { color: #111111 !important; border-bottom: .5pt solid #E2E2E2 !important; padding: 1.2mm 1.5mm !important; }
+body .pr-table tr.is-us td { background: #E2E2E2 !important; font-weight: 800; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body .pr-table tr.is-opp td { font-weight: 700; }
+body .pr-fix { border-bottom: .5pt solid #E2E2E2 !important; padding: 2mm 0 !important; font-size: 10pt !important; min-height: 0 !important; }
+body .pr-fix--today { background: #E2E2E2 !important; color: #111111 !important; }
+
+/* Sponsor artwork: never stretched. */
+body .pr-ad__art { max-width: 100%; height: auto !important; object-fit: contain; }
+body img { max-width: 100% !important; height: auto; }
+body .pr-legal { break-inside: avoid; border-top: .5pt solid #111111 !important; padding-top: 3mm !important; }
