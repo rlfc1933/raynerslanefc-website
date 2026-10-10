@@ -1070,7 +1070,7 @@ function initComponents(currentPage) {
     banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;box-sizing:border-box;max-width:100%;background:#111;border-top:2px solid var(--yellow);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10000;flex-wrap:wrap;';
     banner.innerHTML = '<div style="font-family:var(--font-c);font-size:12px;color:var(--lgrey);letter-spacing:.04em;flex:1 1 220px;min-width:0">' +
       '<span style="color:var(--yellow);font-weight:700"><i class="ico ico-cookie"></i> Cookies</span> — We use cookies to improve your experience and track site visits via Google Analytics. ' +
-      '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Learn more</a>' +
+      '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Our cookie policy</a>' +
       '</div>' +
       '<div style="display:flex;gap:8px;flex:0 0 auto;flex-wrap:wrap">' +
       '<button onclick="acceptCookies()" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent">Accept</button>' +
