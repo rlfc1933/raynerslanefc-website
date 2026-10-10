@@ -11,7 +11,10 @@ truth and this file is the bug.
 | `css/style.css` `:root` | colour palette, `--nav-h` |
 | `brand/tokens.css` / `tokens.json` | semantic colours (results, cards, print), spacing scale — for graphics & print |
 | `css/a11y.css` | the accessibility panel: text size, contrast, reduce-motion switch |
-| `css/edition.css` | the 2026/27 "Floodlit" edition layer, loaded last on every public page — browser surfaces, hero title card, broadcast panels, partner board, news front, page headers |
+| `css/edition.css` | the 2026/27 "Floodlit" edition layer — browser surfaces, broadcast panels, partner board, shared nav/footer overrides |
+| `css/kl.css` | **Kit Launch** page vocabulary, loaded after edition.css on every public page: `.kl-ph` page title card, `.kl-sec`, `.kl-rows` ruled lists, `.kl-btn`, `.kl-h2`, `.kl-line`, page-to-page View Transitions |
+| `css/home.css`, `css/p-<page>.css` | one stylesheet per page, composed only from the vocabulary above |
+| `js/lane-motion.js` | every scroll-driven moment (GSAP + ScrollTrigger), with the motion thesis in its header |
 
 ## 1 · Character
 
@@ -22,6 +25,13 @@ yellow, a bottle-green heritage note, big condensed numbers, hairline
 structure, real photography. The voice is dry and specific ("A DIVISION UP.
 SO WHAT."). Premium here means **certain, consistent and fast** — not glossy.
 Gen Z energy comes from tempo and type, never from glow or gradient text.
+
+**Kit Launch** (the 2026/27 page system, built on Floodlit): every page opens
+with a title card — real Lane photography full-bleed, or a drenched yellow or
+green field — with the page name set as large as the screen allows and one
+plain sentence. Colour by the *field* (yellow owns the matchday poster, green
+owns membership, black carries photography), structure by hairlines and type.
+No boxed card grids, no pills, no kicker labels, no glow.
 
 Signature moves: the hero is a title card (the headline arrives once, line by
 line); Club Now is a broadcast panel; sponsors sit on a hairline board like a
