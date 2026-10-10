@@ -557,8 +557,8 @@
     .snote{background:rgba(255,209,0,.06);border:1px solid rgba(255,209,0,.15);border-left:3px solid var(--y);padding:13px 15px;border-radius:0 4px 4px 0;margin-bottom:13px}
     .snote p{font-family:var(--fb);font-size:14px;color:var(--gr);line-height:1.7}
     /* TOAST */
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--su);color:white;font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:.08em;padding:12px 22px;border-radius:4px;transition:transform .3s;z-index:9999;white-space:nowrap;pointer-events:none}
-    .toast.on{transform:translateX(-50%) translateY(0)}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--su);color:white;font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:.08em;padding:12px 22px;border-radius:4px;transition:transform .3s;z-index:9999;white-space:nowrap;pointer-events:none;visibility:hidden;transition:transform .3s,visibility 0s .3s}
+    .toast.on{transform:translateX(-50%) translateY(0);visibility:visible;transition:transform .3s}
     .toast.err{background:var(--re)}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
