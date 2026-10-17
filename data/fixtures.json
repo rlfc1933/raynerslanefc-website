@@ -283,10 +283,10 @@
       "isHome": false,
       "venue": "Scours Lane (The Rivermoor)",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
-      "scorers": "",
+      "status": "played",
+      "us": 1,
+      "them": 1,
+      "scorers": "Jalen Johnson 18'",
       "shareHeadline": "DOWN TO THE RIVERMOOR",
       "shareHeadlineAuto": "DOWN TO THE RIVERMOOR",
       "season": "2026-27",
@@ -725,5 +725,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-08-31T12:39:06.674Z"
+  "updatedAt": "2026-10-17T15:57:02.113Z"
 }
