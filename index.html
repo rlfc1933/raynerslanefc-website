@@ -193,6 +193,39 @@
   </a>
 </section>
 
+<!-- ══════════ IN LOVING MEMORY — Grant Nivett ══════════
+     Permanent: after the memorial match (31 Oct 2026) this can be reduced to a
+     smaller feature; the full story lives in data/news.json. -->
+<section class="memorial" aria-labelledby="memorial-name">
+  <div class="container memorial__inner">
+    <figure class="memorial__photo">
+      <img src="img/news/grant-nivett.jpg" width="412" height="387" loading="lazy" decoding="async"
+           alt="Grant Nivett, smiling, wearing glasses and a green and gold Rayners Lane scarf">
+    </figure>
+    <div class="memorial__text">
+      <p class="memorial__kicker">In Loving Memory</p>
+      <h2 class="memorial__name" id="memorial-name">Grant Nivett</h2>
+      <p class="memorial__years">1938 &ndash; 2026</p>
+      <p class="memorial__motto">Forever part of the Lane</p>
+      <p class="memorial__match">Our home match against <strong>Thatcham Town</strong> on <strong>Saturday 31 October</strong> (3pm, Tithe Farm) is dedicated to Sir Grant, with a minute&rsquo;s applause at kick-off. Come early, share your memories and raise a glass in his honour.</p>
+      <a class="btn btn-outline" href="news-article.html?id=grant-nivett-forever-part-of-the-lane">Read Grant&rsquo;s story</a>
+    </div>
+  </div>
+</section>
+<style>
+.memorial{padding:56px 0;background:#0b3d1f;border-top:2px solid var(--yellow);border-bottom:2px solid var(--yellow)}
+.memorial__inner{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:48px;align-items:center}
+.memorial__photo{margin:0;border:1px solid rgba(255,209,0,.55);padding:8px;background:#072a15}
+.memorial__photo img{display:block;width:100%;height:auto;filter:saturate(.92)}
+.memorial__kicker{font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--yellow);margin:0 0 10px}
+.memorial__name{font-family:var(--font-d);font-size:clamp(48px,7vw,96px);line-height:.9;letter-spacing:.01em;color:#fff;margin:0}
+.memorial__years{font-family:var(--font-d);font-size:clamp(22px,2.6vw,32px);letter-spacing:.08em;color:var(--yellow);margin:8px 0 18px}
+.memorial__motto{font-family:var(--font-c);font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#fff;margin:0 0 18px;padding-top:16px;border-top:1px solid rgba(255,209,0,.4);max-width:520px}
+.memorial__match{font-family:var(--font-b);font-size:16px;line-height:1.6;color:#e8efe9;max-width:560px;margin:0 0 22px}
+.memorial .btn-outline{border-color:var(--yellow)}
+@media (max-width:720px){.memorial{padding:40px 0}.memorial__inner{grid-template-columns:1fr;gap:24px}.memorial__photo{max-width:260px}}
+</style>
+
 <!-- Member welcome (shown only to a recognised Fan Zone member — css switches it) -->
 <section class="kl-wrap" aria-label="Your Fan Zone">
   <div class="fan-strip">

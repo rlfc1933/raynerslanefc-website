@@ -41,7 +41,10 @@ test('the article is in the club newsroom, not bolted onto a page', () => {
 });
 
 test('it is the newest story, so it leads', () => {
-  const newest = ARTICLES.slice().sort((a, b) =>
+  // Newest as of its own publication date: later stories (e.g. the Grant
+  // Nivett memorial, 2026-10-18) are allowed to come after it.
+  const self = ARTICLES.find((a) => a.id === ID);
+  const newest = ARTICLES.filter((a) => String(a.date || '') <= String(self.date)).sort((a, b) =>
     String(b.date || '').localeCompare(String(a.date || '')))[0];
   assert.strictEqual(newest.id, ID);
 });

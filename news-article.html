@@ -114,12 +114,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const img = document.getElementById('art-img');
       const fig = document.getElementById('art-fig');
       img.onerror = () => { fig.hidden = true; };
-      img.src = art.image; img.alt = art.title || 'Article image'; img.style.display='block';
+      img.src = art.image; img.alt = art.imageAlt || art.title || 'Article image'; img.style.display='block';
       fig.hidden = false;
     }
     document.getElementById('art-body').innerHTML = (art.body||'')
       .split('\n').filter(l=>l.trim())
-      .map(l=>`<p>${l}</p>`).join('');
+      .map(l=>/^## /.test(l) ? `<h2 style="font-family:var(--font-d);font-size:clamp(28px,4vw,40px);letter-spacing:.02em;line-height:1;color:var(--yellow);margin:40px 0 14px">${l.slice(3)}</h2>` : `<p>${l}</p>`).join('');
 
     // Only show Share once we actually have an article to share.
     const sb = document.getElementById('art-share');
