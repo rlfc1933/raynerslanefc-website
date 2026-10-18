@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const acts = document.querySelector('.ar-ph .kl-ph__acts');
       document.querySelector('.ar-end').before(acts);
       document.getElementById('art-share').classList.replace('kl-btn--solid', 'kl-btn--line');
+      document.querySelector('.ar-end .kl-more').textContent = 'Back to News';
     }
     if (art.lifespan) { const y = document.getElementById('art-years'); y.textContent = art.lifespan; y.hidden = false; }
     if (art.closing || art.imageCredit) {
