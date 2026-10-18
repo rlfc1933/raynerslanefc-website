@@ -30,3 +30,42 @@
 .ar-body p:first-child{font-size:clamp(1.25rem,1.9vw,1.6rem);line-height:1.5;font-weight:600;color:var(--white);margin-bottom:1.3em}
 .ar-body a{color:var(--white);text-decoration:underline;text-decoration-color:var(--yellow);text-underline-offset:4px;text-decoration-thickness:2px}
 .ar-end{max-width:65ch;margin:clamp(40px,6vw,72px) auto 0;padding-top:24px;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+
+/* Section headings inside a story ("## " lines in news.json). */
+.ar-h2{font-family:var(--font-display);font-weight:400;font-size:clamp(1.75rem,3vw,2.25rem);line-height:1;letter-spacing:.02em;color:var(--yellow);margin:2.2em 0 .6em}
+.ar-years{margin:0;font-family:var(--font-display);font-size:clamp(1.5rem,2.4vw,2rem);letter-spacing:.08em;color:var(--yellow)}
+.ar-close{max-width:65ch;margin:clamp(40px,6vw,64px) auto 0;padding-top:24px;border-top:1px solid var(--ed-line-2,rgba(245,243,237,.16))}
+.ar-close p{font-family:var(--font-body);font-size:1.0625rem;line-height:1.7;color:var(--white);margin:0}
+.ar-close a{color:var(--yellow);font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.ar-close .ar-credit{margin-top:12px;font-size:.875rem;color:#AAAAAA}
+
+/* ── MEMORIAL VARIANT (.ar--memorial) ─────────────────────────────────
+   A tribute, not a headline: one centred 1000px container, the portrait
+   at its natural proportions beside the title, a 700px reading column,
+   and sharing moved quietly to the end. */
+.ar--memorial .ar-ph{min-height:0;align-items:start}
+.ar--memorial .ar-ph .kl-ph__inner{max-width:1000px;margin-inline:auto;padding:clamp(32px,4vw,56px) 0 clamp(32px,4vw,48px);
+  grid-template-columns:minmax(0,1fr) minmax(0,340px);grid-template-areas:"back fig" "meta fig" "title fig" "years fig" ". fig";
+  column-gap:56px;row-gap:14px;align-items:start}
+.ar--memorial .ar-back{grid-area:back;min-height:44px}
+.ar--memorial .ar-meta{grid-area:meta;font-size:13px;font-weight:600;color:#AAAAAA}
+.ar--memorial .ar-meta b{color:var(--yellow);font-weight:700}
+.ar--memorial .ar-meta time{color:#AAAAAA}
+.ar--memorial .ar-title{grid-area:title;font-size:clamp(2.25rem,4.4vw,4rem);line-height:.95;max-width:none;margin-top:6px}
+.ar--memorial .ar-years{grid-area:years}
+.ar--memorial .ar-fig{grid-area:fig;align-self:center;background:none;margin:0;width:100%;max-width:340px;justify-self:end;border:1px solid rgba(245,243,237,.3)}
+.ar--memorial .ar-fig img{width:100%;height:auto;max-height:none;object-fit:contain;aspect-ratio:auto}
+.ar--memorial .ar-wrap{max-width:1000px;margin-inline:auto;padding-top:clamp(40px,5vw,64px)}
+.ar--memorial .ar-body,.ar--memorial .ar-close,.ar--memorial .ar-end,.ar--memorial .kl-ph__acts{max-width:700px;margin-inline:auto}
+.ar--memorial .ar-body p{font-size:1.125rem;line-height:1.72;margin:0 0 1.25em}
+.ar--memorial .ar-body p:first-child{font-size:1.3rem;line-height:1.6;font-weight:600}
+.ar--memorial .ar-h2{font-size:clamp(1.75rem,2.6vw,2.125rem);margin:36px 0 12px}
+.ar--memorial .kl-ph__acts{margin-top:32px}
+.ar--memorial #art-share{min-height:44px;padding:10px 18px;font-size:13px}
+@media (max-width:767px){
+  .ar--memorial .ar-ph .kl-ph__inner{grid-template-columns:1fr;grid-template-areas:"back" "meta" "title" "years" "fig";row-gap:10px;padding-top:32px}
+  .ar--memorial .ar-title{font-size:clamp(2.25rem,10vw,2.625rem)}
+  .ar--memorial .ar-fig{justify-self:center;max-width:320px;margin-top:14px}
+  .ar--memorial .ar-body p{font-size:1.0625rem}
+  .ar--memorial .ar-body p:first-child{font-size:1.1875rem}
+}

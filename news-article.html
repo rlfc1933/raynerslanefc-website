@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="css/edition.css">
 <link rel="stylesheet" href="css/kl.css">
 <script src="js/lane-motion.js" defer></script>
-<link rel="stylesheet" href="css/p-news-article.css">
+<link rel="stylesheet" href="css/p-news-article.css?v=2">
 </head>
 <body>
 <div id="nav-placeholder"></div>
@@ -46,6 +46,7 @@
            the phone's share sheet — WhatsApp, Messages, Instagram. No login,
            nothing to design. Every share carries the card and the link back. -->
       <div class="kl-ph__acts"><button id="art-share" type="button" class="kl-btn kl-btn--solid" style="display:none">Share this story</button></div>
+      <p class="ar-years" id="art-years" hidden></p>
     </div>
   </header>
 
@@ -57,6 +58,8 @@
 
   <div class="kl-wrap ar-wrap">
     <div class="ar-body" id="art-body"></div>
+    <!-- Optional close: a request for memories/photographs and a credit. -->
+    <aside class="ar-close" id="art-close" hidden><p id="art-closing"></p><p class="ar-credit" id="art-credit"></p></aside>
     <p class="ar-end"><a class="kl-more" href="news.html">All news</a></p>
   </div>
 </article>
@@ -114,12 +117,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       const img = document.getElementById('art-img');
       const fig = document.getElementById('art-fig');
       img.onerror = () => { fig.hidden = true; };
-      img.src = art.image; img.alt = art.title || 'Article image'; img.style.display='block';
+      img.src = art.image; img.alt = art.imageAlt || art.title || 'Article image'; img.style.display='block';
       fig.hidden = false;
     }
     document.getElementById('art-body').innerHTML = (art.body||'')
       .split('\n').filter(l=>l.trim())
-      .map(l=>`<p>${l}</p>`).join('');
+      .map(l=>/^## /.test(l) ? `<h2 class="ar-h2">${l.slice(3)}</h2>` : `<p>${l}</p>`).join('');
+
+    // Memorial variant: portrait beside the title, lifespan, quiet sharing at
+    // the end. Ordinary articles never set these fields.
+    if (art.variant === 'memorial') {
+      document.querySelector('.ar').classList.add('ar--memorial');
+      const fig = document.getElementById('art-fig');
+      document.querySelector('.ar-ph .kl-ph__inner').appendChild(fig);
+      const acts = document.querySelector('.ar-ph .kl-ph__acts');
+      document.querySelector('.ar-end').before(acts);
+      document.getElementById('art-share').classList.replace('kl-btn--solid', 'kl-btn--line');
+      document.querySelector('.ar-end .kl-more').textContent = 'Back to News';
+    }
+    if (art.lifespan) { const y = document.getElementById('art-years'); y.textContent = art.lifespan; y.hidden = false; }
+    if (art.closing || art.imageCredit) {
+      document.getElementById('art-closing').innerHTML = art.closing || '';
+      document.getElementById('art-credit').textContent = art.imageCredit || '';
+      document.getElementById('art-close').hidden = false;
+    }
 
     // Only show Share once we actually have an article to share.
     const sb = document.getElementById('art-share');

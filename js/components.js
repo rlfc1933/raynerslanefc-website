@@ -1098,8 +1098,8 @@ function initComponents(currentPage) {
       '<a href="policies.html" style="color:var(--yellow);text-decoration:underline">Our cookie policy</a>' +
       '</div>' +
       '<div style="display:flex;gap:8px;flex:0 0 auto;flex-wrap:wrap">' +
-      '<button onclick="acceptCookies()" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent">Accept</button>' +
-      '<button onclick="declineCookies()" style="background:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">Decline</button>' +
+      '<button onclick="acceptCookies()" style="background:var(--yellow);color:var(--black);font-family:var(--font-c);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;min-height:44px;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent">Accept</button>' +
+      '<button onclick="declineCookies()" style="background:none;color:var(--grey);font-family:var(--font-c);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;min-height:44px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">Decline</button>' +
       '</div>';
     document.body.appendChild(banner);
     // The accessibility launcher is fixed bottom-left at z-index 90000 and sat

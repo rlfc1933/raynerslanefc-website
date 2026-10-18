@@ -15,8 +15,8 @@
 // with CACHE whenever shipped HTML/JS/CSS changes; nothing else triggers an
 // update prompt (the old prompt compared admin.html's etag, which changes on
 // every data save, so it appeared after every save).
-var VERSION = '2026.10.09-hq1';
-var CACHE = 'rlfc-v17'; // bump on deploy → old caches purged, new assets picked up cleanly
+var VERSION = '2026.10.18-memorial';
+var CACHE = 'rlfc-v18'; // bump on deploy → old caches purged, new assets picked up cleanly
 var CORE = ['/', '/index.html', '/css/style.css', '/css/icons.css', '/js/components.js', '/js/main.js', '/img/badge.png'];
 
 self.addEventListener('install', function (e) {

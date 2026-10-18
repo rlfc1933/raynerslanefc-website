@@ -1,6 +1,22 @@
 {
   "articles": [
     {
+      "id": "grant-nivett-forever-part-of-the-lane",
+      "title": "Grant Nivett: Forever Part of the Lane",
+      "category": "In Memory",
+      "date": "2026-10-18",
+      "author": "Rayners Lane FC",
+      "image": "img/news/grant-nivett.jpg",
+      "imageAlt": "Grant Nivett, smiling, wearing glasses and a green and gold Rayners Lane scarf",
+      "excerpt": "Rayners Lane FC remembers Grant Nivett (1938–2026), affectionately known as Sir Grant. Our home match against Thatcham Town on 31 October will be dedicated to his memory.",
+      "shareHeadline": "FOREVER PART OF THE LANE",
+      "body": "Rayners Lane Football Club is saddened by the death of Grant Nivett, known around Tithe Farm with real affection as Sir Grant. He died in September 2026, aged in his late eighties, and the club extends its deepest sympathy to his family and to everyone who knew him.\n\nClubs like ours are not built by a single generation. They are held together by people who keep turning up, season after season, long after their own part on the pitch has ended. Grant was one of those people, and Tithe Farm will feel his absence.\n\n## His place at the Lane\n\nGrant was a much-loved figure in the Rayners Lane family, and the club is dedicating a home fixture to his memory. We would rather tell his story accurately than tell it quickly, so the detail of his years with the club is still being gathered. If you played alongside Grant, served with him, or shared a matchday with him, we would be grateful to hear from you so that his part in the club's history can be recorded properly and in full.\n\n## The man behind the football\n\nHis family have remembered him as a wonderful father and grandfather and, in their words, “the perfect gentleman”. In his final days he was cared for by Rennie Grove Peace Hospice Care, and the family have asked that anyone wishing to mark his life consider a donation to the hospice through his memorial page at <a href=\"https://grantnivett.muchloved.com/\" rel=\"noopener\">grantnivett.muchloved.com</a>.\n\nHis funeral took place at Breakspear Crematorium in Ruislip on Wednesday 23 September 2026, followed by a celebration of his life at West Herts Golf Club.\n\n## A club that remembers\n\nNon-league football runs on goodwill. Behind every first-team fixture are people who mark lines, take money on the gate, keep the books, referee the youngsters and put the kettle on. Most of them are never thanked in public. The club wants to make sure that names like Grant's are not lost.\n\n## The memorial fixture\n\nOur home match against Thatcham Town on Saturday 31 October 2026 (3pm kick-off at Tithe Farm Sports & Social Club) will be dedicated to Grant's memory. There will be a minute's applause before kick-off.\n\nSupporters are invited to arrive early, share their memories of Grant and raise a glass in his honour in the clubhouse. His family and friends will be made very welcome.\n\n## Forever part of the Lane\n\nThis page will stay on the club's website as a permanent record. As photographs and memories come in, we will add them here, with the family's agreement, so that the full story of Grant's time at Rayners Lane is kept where it belongs.\n\nRest well, Sir Grant. You will always be part of the Lane.",
+      "variant": "memorial",
+      "lifespan": "1938–2026",
+      "closing": "Memories and photographs can be sent to <a href=\"mailto:info@raynerslanefc.co.uk\">info@raynerslanefc.co.uk</a>.",
+      "imageCredit": "Photograph courtesy of the club's memorial poster."
+    },
+    {
       "id": "article-hilltop-postponed-fa-vase-2026",
       "title": "Hilltop Fixture Postponed — FA Vase Up Next at Tithe Farm",
       "category": "Match",
@@ -147,5 +163,5 @@
       "featured": false
     }
   ],
-  "updatedAt": "2026-08-09T17:15:00.000Z"
+  "updatedAt": "2026-10-18T15:00:00.000Z"
 }
