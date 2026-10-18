@@ -46,6 +46,7 @@
            the phone's share sheet — WhatsApp, Messages, Instagram. No login,
            nothing to design. Every share carries the card and the link back. -->
       <div class="kl-ph__acts"><button id="art-share" type="button" class="kl-btn kl-btn--solid" style="display:none">Share this story</button></div>
+      <p class="ar-years" id="art-years" hidden></p>
     </div>
   </header>
 
@@ -57,6 +58,8 @@
 
   <div class="kl-wrap ar-wrap">
     <div class="ar-body" id="art-body"></div>
+    <!-- Optional close: a request for memories/photographs and a credit. -->
+    <aside class="ar-close" id="art-close" hidden><p id="art-closing"></p><p class="ar-credit" id="art-credit"></p></aside>
     <p class="ar-end"><a class="kl-more" href="news.html">All news</a></p>
   </div>
 </article>
@@ -119,7 +122,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     document.getElementById('art-body').innerHTML = (art.body||'')
       .split('\n').filter(l=>l.trim())
-      .map(l=>/^## /.test(l) ? `<h2 style="font-family:var(--font-d);font-size:clamp(28px,4vw,40px);letter-spacing:.02em;line-height:1;color:var(--yellow);margin:40px 0 14px">${l.slice(3)}</h2>` : `<p>${l}</p>`).join('');
+      .map(l=>/^## /.test(l) ? `<h2 class="ar-h2">${l.slice(3)}</h2>` : `<p>${l}</p>`).join('');
+
+    // Memorial variant: portrait beside the title, lifespan, quiet sharing at
+    // the end. Ordinary articles never set these fields.
+    if (art.variant === 'memorial') {
+      document.querySelector('.ar').classList.add('ar--memorial');
+      const fig = document.getElementById('art-fig');
+      document.querySelector('.ar-ph .kl-ph__inner').appendChild(fig);
+      const acts = document.querySelector('.ar-ph .kl-ph__acts');
+      document.querySelector('.ar-end').before(acts);
+      document.getElementById('art-share').classList.replace('kl-btn--solid', 'kl-btn--line');
+    }
+    if (art.lifespan) { const y = document.getElementById('art-years'); y.textContent = art.lifespan; y.hidden = false; }
+    if (art.closing || art.imageCredit) {
+      document.getElementById('art-closing').innerHTML = art.closing || '';
+      document.getElementById('art-credit').textContent = art.imageCredit || '';
+      document.getElementById('art-close').hidden = false;
+    }
 
     // Only show Share once we actually have an article to share.
     const sb = document.getElementById('art-share');
