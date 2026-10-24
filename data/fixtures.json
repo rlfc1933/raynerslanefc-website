@@ -319,9 +319,9 @@
       "isHome": false,
       "venue": "Elm Road (French School Meadow)",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
+      "status": "played",
+      "us": 0,
+      "them": 1,
       "scorers": "",
       "shareHeadline": "DOWN TO FRENCH SCHOOL MEADOW",
       "shareHeadlineAuto": "DOWN TO FRENCH SCHOOL MEADOW",
@@ -725,5 +725,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-10-17T15:59:04.423Z"
+  "updatedAt": "2026-10-24T15:52:05.650Z"
 }
