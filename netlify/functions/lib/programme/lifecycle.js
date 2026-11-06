@@ -199,7 +199,9 @@ function decideStage(input) {
       return { action: 'hold', state: 'ready_for_review', stage: null,
         reasons: ['editorial content changed after approval — needs a fresh look'] };
     }
-    if (approved && input.contentValid && RULES.isMatchday(fx, now)) {
+    // Matchday morning as before — or from the time a person chose when approving.
+    var fromChosen = ed.publish_not_before && isFinite(Date.parse(ed.publish_not_before)) && now >= Date.parse(ed.publish_not_before);
+    if (approved && input.contentValid && (RULES.isMatchday(fx, now) || fromChosen)) {
       var koMs = Date.parse(fx.scheduled_kickoff_at);
       return { action: 'publish', state: isFinite(koMs) && now >= koMs ? RULES.STATES.PUBLISHED_LATE
         : RULES.STATES.PUBLISHED_MATCHDAY, stage: ts.status === 'partial' ? 'teams_partial' : 'editorial',
@@ -210,6 +212,15 @@ function decideStage(input) {
         stage: null, reasons: ['awaiting editorial approval'].concat(base.reasons || []) };
     }
     return { action: 'hold', state: base.state, stage: null, reasons: base.reasons };
+  }
+
+  // ── already published: an APPROVED editorial correction is a new version ─
+  // Only when a publisher approved a correction after publication AND the
+  // approved words actually differ from what was published. The previous
+  // versions stay exactly as they were.
+  if (ed.correction_approved_at && input.editorialHash && input.editorialHash !== ed.published_editorial_hash) {
+    return { action: 'revise', state: ed.state, stage: 'correction',
+      reasons: ['editorial correction approved by ' + (ed.correction_approved_by || 'a publisher')] };
   }
 
   // ── already published: revise ONLY the team sheet when it improves ─────

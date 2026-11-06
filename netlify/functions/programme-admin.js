@@ -130,8 +130,12 @@ exports.handler = async function (ev) {
   const action = String(b.action || 'status');
   // Who did this comes from the signed session, never from the request body.
   // Preparing copy is EDIT; anything that changes what the public sees is PUBLISH.
-  const PUBLISHING = ['run', 'approve_editorial', 'authorise_retrospective', 'unpublish', 'restore', 'rollback', 'add_placement'];
-  const g = await GATE.gate(ev, PUBLISHING.indexOf(action) > -1 ? GATE.CAP.PUBLISH : GATE.CAP.EDIT);
+  const PUBLISHING = ['run', 'approve_editorial', 'approve_correction', 'authorise_retrospective', 'unpublish', 'restore', 'rollback', 'add_placement'];
+  // Saving a section WITH approval, or correcting a name on a published
+  // edition, changes what the public sees — those are publishing too.
+  const publishes = PUBLISHING.indexOf(action) > -1 || action === 'correct_player' ||
+    (action === 'save_section' && (b.approve === true || b.approve === 'true' || !!b.approve));
+  const g = await GATE.gate(ev, publishes ? GATE.CAP.PUBLISH : GATE.CAP.EDIT);
   if (!g.ok) return g.response;
   const who = g.who;
   if (!S.configured()) return resp(200, { ok: false, error: 'database not configured' });
@@ -168,10 +172,28 @@ exports.handler = async function (ev) {
       if (ed.published_at) return resp(200, { ok: false, error: 'Already published — use corrections or rollback instead.' });
       if (!ed.mandatory_content_valid) return resp(200, { ok: false, error: 'The edition is missing mandatory sections; fix those first.' });
       const at = new Date().toISOString();
-      await patchEdition(ed.id, { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
-        state: ed.state === 'ready_for_review' ? 'approved' : ed.state });
-      await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at });
-      return resp(200, { ok: true, message: 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
+      // Optional: publish from a chosen time (or now) instead of waiting for
+      // matchday morning. Never earlier than the moment of approval.
+      const from = b.publishAt ? Date.parse(b.publishAt) : NaN;
+      const patch = { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
+        state: ed.state === 'ready_for_review' ? 'approved' : ed.state };
+      if (isFinite(from)) patch.publish_not_before = new Date(Math.max(from, Date.parse(at))).toISOString();
+      await patchEdition(ed.id, patch);
+      await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at,
+        reason: isFinite(from) ? 'publish from ' + patch.publish_not_before : null });
+      return resp(200, { ok: true, publishNotBefore: patch.publish_not_before || null, message: isFinite(from)
+        ? 'Approved. It publishes from the time you chose; confirmed teams are added when they are released.'
+        : 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
+    }
+
+    if (action === 'approve_correction') {
+      // After publication, approved words go out as a labelled correction (a new
+      // version), never by quietly editing what supporters already have.
+      if (!ed.published_at) return resp(200, { ok: false, error: 'Not published yet — approve the edition instead.' });
+      const at = new Date().toISOString();
+      await patchEdition(ed.id, { correction_approved_at: at, correction_approved_by: who });
+      await event(ed, 'correction_approved', { actor: who, reason: clean(b.reason, 300) || null, key: 'correction-approve:' + ed.id + ':' + at });
+      return resp(200, { ok: true, message: 'Correction approved. The website gets a new version with the change noted.' });
     }
 
     if (action === 'save_section') {

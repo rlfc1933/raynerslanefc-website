@@ -60,6 +60,11 @@ test('HQ refuses the shared password, an unsigned request, and a role without pu
     assert.strictEqual(JSON.stringify(ed(db, 'fwp-578384')), before, 'a refused request changes nothing');
     const draft = await call(F.admin, { action: 'save_section', fixtureId: 'fwp-578384', key: 'managerNotes', body: 'Notes.' }, { role: 'Programme Editor' });
     assert.notStrictEqual(draft.status, 403, 'editing is within the role');
+    // …but approving copy, or correcting a published name, is publishing.
+    const selfApprove = await call(F.admin, { action: 'save_section', fixtureId: 'fwp-578384', sectionKey: 'welcome', body: 'Hi.', approve: true }, { role: 'Programme Editor' });
+    assert.strictEqual(selfApprove.status, 403);
+    const fix = await call(F.admin, { action: 'correct_player', fixtureId: 'fwp-578384', side: 'home', from: 'A', to: 'B' }, { role: 'Programme Editor' });
+    assert.strictEqual(fix.status, 403);
     // A forged session is no session.
     const forged = await call(F.admin, { action: 'status' }, { token: token('x', 'Chairman') + 'tampered' });
     assert.strictEqual(forged.status, 401);

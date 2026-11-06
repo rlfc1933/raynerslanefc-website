@@ -584,6 +584,7 @@ exports.handler = async function (event) {
           const w = await writeVersion(edition, versionRow, { v2, stage: stage.stage, reason: decision.reasons.join('; ') });
           patch.current_version = w.version;
           patch.published_at = new Date().toISOString();
+          if (v2 && edition.hasOwnProperty('published_editorial_hash')) patch.published_editorial_hash = editorialHash;
           patch.state = stage.recovery
             ? RULES.STATES.PUBLISHED_RECOVERY
             : (stage.late ? RULES.STATES.PUBLISHED_LATE : RULES.STATES.PUBLISHED_MATCHDAY);
@@ -603,6 +604,16 @@ exports.handler = async function (event) {
           if (finalMatch) patch.fulltime_enriched_at = nowIso;
           await logEvent(v2, edition, 'published', { from: edition.state, to: patch.state, version: w.version,
             reason: stage.stage + ': ' + decision.reasons.join('; '), key: 'publish:' + edition.id });
+        } else if (stage.action === 'revise' && stage.stage === 'correction' && edition.published_at && v2) {
+          // An approved editorial correction: a new immutable version with the
+          // reason on it. Earlier versions — and any PDF made from them — stay.
+          const w = await writeVersion(edition, versionRow, { v2, stage: 'correction', reason: stage.reasons.join('; ') });
+          patch.current_version = w.version;
+          patch.state = edition.state;
+          patch.published_editorial_hash = editorialHash;
+          patch.correction_approved_at = null;
+          await logEvent(v2, edition, 'corrected', { version: w.version, reason: stage.reasons.join('; '),
+            key: 'correction:' + edition.id + ':' + editorialHash });
         } else if (stage.action === 'revise' && edition.published_at && v2) {
           // Stage B: ONLY the team sheet changed. A new immutable version, the
           // editorial untouched, no supporter notification.

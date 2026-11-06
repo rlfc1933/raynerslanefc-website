@@ -272,8 +272,10 @@ test('the only remaining Blobs use is the unrelated sponsor radar', () => {
       if (/getStore\(/.test(code)) hits.push(path.relative(dir, p));
     });
   }(dir));
-  assert.deepStrictEqual(hits.sort(), ['lib/radar.js'],
-    'staff auth must not depend on Blobs; the radar cache legitimately may');
+  // The radar cache and Programme Studio's drafts legitimately use Blobs; staff
+  // AUTH never may (checked above, file by file).
+  assert.deepStrictEqual(hits.sort(), ['lib/programme/studio-store.js', 'lib/radar.js'],
+    'staff auth must not depend on Blobs; the radar cache and Studio drafts legitimately may');
 });
 
 // ── 6 · SYSTEM MAINTAINER ───────────────────────────────────────────────────
