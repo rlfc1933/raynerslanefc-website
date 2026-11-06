@@ -243,9 +243,13 @@ test('the Full-Time ingestion is untouched and remains the source of truth', () 
   // directive requires: key-gated (FWP_API_KEY), rate-budgeted, and inert
   // until the club holds a key. It is the only addition, and it is allowed by
   // name so that a second one still fails here.
+  // lib/squad/sources.js NAMES the Football Web Pages club page as the source
+  // a squad-review question came from; it never requests it (asserted below).
   assert.deepStrictEqual(hits.sort(), ['import-fixtures.js', 'lib/fwp-adapter.js', 'lib/fwp-client.js',
-    'lib/programme/fwp-api.js'],
+    'lib/programme/fwp-api.js', 'lib/squad/sources.js'],
     'no new file may talk to Full-Time');
+  assert.ok(!/fetch\(/.test(read('netlify/functions/lib/squad/sources.js')),
+    'the squad source reader cites the page as evidence and makes no network call');
 });
 
 test('the programme never calls Full-Time itself', () => {
