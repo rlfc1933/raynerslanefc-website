@@ -31,7 +31,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const RP = require('./lib/football/read-players');
 const S = require('./lib/football/store');
 
@@ -165,7 +165,8 @@ exports.handler = async function (event) {
 
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
+  const g = await GATE.gate(event, GATE.CAP.EDIT);
+  if (!g.ok) return g.response;
 
   const mode = String(b.mode || '').trim();
   const season = b.season || SEASON;

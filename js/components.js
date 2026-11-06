@@ -8,6 +8,7 @@
   if (window.__laneData) return; window.__laneData = true;
   var CDN = 'https://cdn.jsdelivr.net/gh/rlfc1933/raynerslanefc-website@main/';
   var _fetch = window.fetch.bind(window);
+  var PREVIEW = /--raynerslanefc\.netlify\.app$/i.test(location.hostname) && !/^main--/i.test(location.hostname);
   function ts(o) { return (o && o.updatedAt) ? (Date.parse(o.updatedAt) || 0) : 0; }
   function grab(u) { return _fetch(u, { cache: 'no-store' }).then(function (r) { return (r && r.ok) ? r.json() : null; }).catch(function () { return null; }); }
   window.fetch = function (url, opts) {
@@ -20,9 +21,15 @@
         // — the freshest available copy always wins. Falls back to the plain
         // deployed fetch if both reads fail.
         var q = m[2] || ('?t=' + Date.now());
-        return Promise.all([ grab(CDN + m[1] + q), grab(url) ]).then(function (r) {
-          var cdn = r[0], dep = r[1];
+        // On a Deploy Preview only, the preview's squad sandbox (squad-data) is
+        // a third candidate for the two squad files, so a change confirmed in
+        // Staff HQ shows on that preview without touching the live site.
+        var sandbox = (PREVIEW && /^data\/(players|squad)\.json$/i.test(m[1]))
+          ? grab('/.netlify/functions/squad-data?file=' + m[1].replace(/^data\/|\.json$/gi, '')) : Promise.resolve(null);
+        return Promise.all([ grab(CDN + m[1] + q), grab(url), sandbox ]).then(function (r) {
+          var cdn = r[0], dep = r[1], box = r[2];
           var pick = (cdn && dep) ? (ts(dep) > ts(cdn) ? dep : cdn) : (cdn || dep);
+          if (box && (!pick || ts(box) > ts(pick))) pick = box;
           if (!pick) return _fetch(url, opts);
           return new Response(JSON.stringify(pick), { status: 200, headers: { 'Content-Type': 'application/json' } });
         });

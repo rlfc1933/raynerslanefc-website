@@ -97,6 +97,16 @@ exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   if (!S.configured()) return resp(200, { ok: false, error: 'not configured' });
   try {
+    // Deploy previews only: Programme Studio publications made on THIS preview
+    // (production's database is shared, so a preview never writes to it).
+    // Returns null on the club's real hosts — this block never runs there.
+    const SANDBOX = await require('./lib/programme/studio-publish').sandboxOverlay(event);
+    const sandboxFor = (id) => (SANDBOX || []).filter((r) => r.fixtureId === id)[0] || null;
+    if (q.id && sandboxFor(q.id)) {
+      const out = await require('./lib/programme/studio-publish').sandboxResponse(event, sandboxFor(q.id), FAN);
+      return resp(200, out, 0, true);
+    }
+
     if (q.id || q.slug) {
       const filter = q.id
         ? 'internal_fixture_id=eq.' + encodeURIComponent(q.id)
@@ -224,9 +234,14 @@ exports.handler = async function (event) {
     }
     const SC = {}; states.forEach((s) => { SC[s.fixture_id] = s; });
 
+    const sandboxCards = (SANDBOX || []).map((r) => ({ fixtureId: r.fixtureId, slug: r.fixtureId, season: r.fixture.season,
+      kickoffAt: r.fixture.date + 'T' + (r.fixture.kickoff || '15:00') + ':00', venue: r.fixture.venue, state: 'published_matchday',
+      homeTeam: 'Rayners Lane', awayTeam: r.fixture.opponent, awayCrest: r.fixture.oppCrest || null, competition: r.fixture.competition,
+      isCurrent: true, publishedAt: r.at, publicationSource: 'manual', editionKind: 'matchday', sandbox: true }));
+    const sandboxIds = sandboxCards.map((c) => c.fixtureId);
     return resp(200, {
       ok: true,
-      editions: rows.map((r) => {
+      editions: sandboxCards.concat(rows.filter((r) => sandboxIds.indexOf(r.internal_fixture_id) < 0).map((r) => {
         const st = SC[r.internal_fixture_id];
         return {
           fixtureId: r.internal_fixture_id, slug: r.slug, season: r.season,
@@ -248,14 +263,14 @@ exports.handler = async function (event) {
           teamsStatus: r.teams_status || null,
           postponedAt: r.fixture_postponed_at || null,
         };
-      }),
+      })),
       // The season's home fixtures and what exists for each — published,
       // postponed, archive edition in preparation, not yet published. Built by
       // the same reconciliation HQ uses, so the archive can never quietly omit
       // a fixture (a cup tie included) just because it has no edition.
       ledger: await seasonLedger(),
       ledgerAsOf: new Date().toISOString(),
-    }, 120);
+    }, SANDBOX ? 0 : 120);   // a preview's answer is never cached anywhere
   } catch (e) {
     return resp(200, { ok: false, error: String(e && e.message || e) });
   }

@@ -8,7 +8,7 @@
 // editorial they may add if they want to.
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const S = require('./lib/football/store');
 const READ = require('./lib/football/read');
 const RULES = require('./lib/programme/publish-rules');
@@ -343,8 +343,16 @@ exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
   try { body = JSON.parse((event && event.body) || '{}'); } catch (e) { /* GET */ }
-  if ((q.apply === '1' || body.apply === true) && !adminOk(body.pin || q.pin)) {
-    return resp(401, { ok: false, error: 'Applying requires sign-in' });
+  // Every run can publish, so every run is authorised:
+  //   · Netlify's scheduler (its body carries next_run; the platform refuses
+  //     direct web requests to a scheduled function),
+  //   · an in-process call from a function that already checked the caller
+  //     (event._internal — a web request cannot set it), or
+  //   · a publisher's personal session, or the server-only internal key.
+  const scheduled = typeof body.next_run === 'string';
+  if (!(event && event._internal === true) && !scheduled && !GATE.internalKey(body.pin || q.pin)) {
+    const g = await GATE.gate(event, GATE.CAP.PUBLISH);
+    if (!g.ok) return g.response;
   }
   if (!S.configured()) return resp(200, { ok: false, error: 'supabase not configured' });
 
@@ -523,6 +531,7 @@ exports.handler = async function (event) {
           homeLineup: lineups.home, awayLineup: lineups.away, teams: ts,
           isFinal: !!(state && state.is_final), contentValid: built.validation.ok,
           editorialHash, result,
+          editorialUpdatedAt: editorial.sections.reduce((m, s) => (s.edition_id != null && s.updated_at && (!m || s.updated_at > m) ? s.updated_at : m), null),
         });
         // The engine's decision, with publication decided by the stage model.
         const decision = Object.assign({}, base, { state: stage.state || base.state,
@@ -579,6 +588,7 @@ exports.handler = async function (event) {
           const w = await writeVersion(edition, versionRow, { v2, stage: stage.stage, reason: decision.reasons.join('; ') });
           patch.current_version = w.version;
           patch.published_at = new Date().toISOString();
+          if (v2 && edition.hasOwnProperty('published_editorial_hash')) patch.published_editorial_hash = editorialHash;
           patch.state = stage.recovery
             ? RULES.STATES.PUBLISHED_RECOVERY
             : (stage.late ? RULES.STATES.PUBLISHED_LATE : RULES.STATES.PUBLISHED_MATCHDAY);
@@ -598,6 +608,16 @@ exports.handler = async function (event) {
           if (finalMatch) patch.fulltime_enriched_at = nowIso;
           await logEvent(v2, edition, 'published', { from: edition.state, to: patch.state, version: w.version,
             reason: stage.stage + ': ' + decision.reasons.join('; '), key: 'publish:' + edition.id });
+        } else if (stage.action === 'revise' && stage.stage === 'correction' && edition.published_at && v2) {
+          // An approved editorial correction: a new immutable version with the
+          // reason on it. Earlier versions — and any PDF made from them — stay.
+          const w = await writeVersion(edition, versionRow, { v2, stage: 'correction', reason: stage.reasons.join('; ') });
+          patch.current_version = w.version;
+          patch.state = edition.state;
+          patch.published_editorial_hash = editorialHash;
+          patch.correction_approved_at = null;
+          await logEvent(v2, edition, 'corrected', { version: w.version, reason: stage.reasons.join('; '),
+            key: 'correction:' + edition.id + ':' + editorialHash });
         } else if (stage.action === 'revise' && edition.published_at && v2) {
           // Stage B: ONLY the team sheet changed. A new immutable version, the
           // editorial untouched, no supporter notification.

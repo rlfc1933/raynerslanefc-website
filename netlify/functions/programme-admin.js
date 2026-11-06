@@ -1,7 +1,8 @@
 // PROGRAMME HQ — the committee's controls for the matchday programme.
 //
-// One POST endpoint, committee-password gated (lib/pin, the same gate as every
-// other HQ write), used by the Programme HQ panel (js/programme-hq.js).
+// One POST endpoint, used by the Programme HQ panel (js/programme-hq.js) and
+// Programme Studio. Gated by a PERSONAL staff session (lib/programme/gate.js):
+// editing needs can_edit_programme, publishing needs can_publish_programme.
 //
 // Every decision is made by a NAMED person and recorded as a publication
 // event. Nothing is deleted: unpublishing is a state with a reason, a rollback
@@ -12,7 +13,7 @@
 // Never called by the scheduler, and it never calls a data provider.
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const S = require('./lib/football/store');
 const READ = require('./lib/football/read');
 const REC = require('./lib/programme/reconcile');
@@ -69,14 +70,14 @@ async function insertVersion(edition, row) {
 }
 
 /** The whole picture for HQ: reconciliation, the next home fixture, sources. */
-async function status() {
+async function status(now) {
   const [all, played, editions] = await Promise.all([
     READ.season(SEASON), READ.results(SEASON),
     S.rest('programme_editions?season=eq.' + encodeURIComponent(SEASON) + '&select=*&order=scheduled_kickoff_at.asc'),
   ]);
   const byId = {}; played.forEach((p) => { byId[p.id] = p; });
   const fixtures = all.map((f) => byId[f.id] || f);
-  const rec = REC.reconcile(fixtures, editions || [], Date.now());
+  const rec = REC.reconcile(fixtures, editions || [], now);
 
   let next = null;
   if (rec.summary.nextHome) {
@@ -126,20 +127,26 @@ exports.handler = async function (ev) {
   if (ev.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
   let b = {};
   try { b = JSON.parse(ev.body || '{}'); } catch (e) { return resp(400, { ok: false, error: 'bad JSON' }); }
-  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Not signed in' });
+  const action = String(b.action || 'status');
+  // Who did this comes from the signed session, never from the request body.
+  // Preparing copy is EDIT; anything that changes what the public sees is PUBLISH.
+  const PUBLISHING = ['run', 'approve_editorial', 'approve_correction', 'authorise_retrospective', 'unpublish', 'restore', 'rollback', 'add_placement'];
+  // Saving a section WITH approval, or correcting a name on a published
+  // edition, changes what the public sees — those are publishing too.
+  const publishes = PUBLISHING.indexOf(action) > -1 || action === 'correct_player' ||
+    (action === 'save_section' && (b.approve === true || b.approve === 'true' || !!b.approve));
+  const g = await GATE.gate(ev, publishes ? GATE.CAP.PUBLISH : GATE.CAP.EDIT);
+  if (!g.ok) return g.response;
+  const who = g.who;
   if (!S.configured()) return resp(200, { ok: false, error: 'database not configured' });
 
-  const action = String(b.action || 'status');
-  const who = clean(b.by, 80);
-  const needsName = action !== 'status' && action !== 'history' && action !== 'run';
-  if (needsName && !who) return resp(400, { ok: false, error: 'Add your name so the club has a record of who did this.' });
-
   try {
-    if (action === 'status') return resp(200, await status());
+    // ev._now is a test-only clock; a browser cannot set it.
+    if (action === 'status') return resp(200, await status(ev._now || Date.now()));
 
     if (action === 'run') {
       const sync = require('./programme-sync');
-      const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} });
+      const out = await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} });
       return resp(200, Object.assign({ triggered: true }, JSON.parse(out.body || '{}')));
     }
 
@@ -165,10 +172,30 @@ exports.handler = async function (ev) {
       if (ed.published_at) return resp(200, { ok: false, error: 'Already published — use corrections or rollback instead.' });
       if (!ed.mandatory_content_valid) return resp(200, { ok: false, error: 'The edition is missing mandatory sections; fix those first.' });
       const at = new Date().toISOString();
-      await patchEdition(ed.id, { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
-        state: ed.state === 'ready_for_review' ? 'approved' : ed.state });
-      await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at });
-      return resp(200, { ok: true, message: 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
+      // Optional: publish from a chosen time (or now) instead of waiting for
+      // matchday morning. Never earlier than the moment of approval.
+      const from = b.publishAt ? Date.parse(b.publishAt) : NaN;
+      const patch = { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
+        state: ed.state === 'ready_for_review' ? 'approved' : ed.state };
+      // Always set: a plain approval clears any earlier chosen time, so an old
+      // "publish now" never carries over to a later approval.
+      patch.publish_not_before = isFinite(from) ? new Date(Math.max(from, Date.parse(at))).toISOString() : null;
+      await patchEdition(ed.id, patch);
+      await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at,
+        reason: isFinite(from) ? 'publish from ' + patch.publish_not_before : null });
+      return resp(200, { ok: true, publishNotBefore: patch.publish_not_before || null, message: isFinite(from)
+        ? 'Approved. It publishes from the time you chose; confirmed teams are added when they are released.'
+        : 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
+    }
+
+    if (action === 'approve_correction') {
+      // After publication, approved words go out as a labelled correction (a new
+      // version), never by quietly editing what supporters already have.
+      if (!ed.published_at) return resp(200, { ok: false, error: 'Not published yet — approve the edition instead.' });
+      const at = new Date().toISOString();
+      await patchEdition(ed.id, { correction_approved_at: at, correction_approved_by: who });
+      await event(ed, 'correction_approved', { actor: who, reason: clean(b.reason, 300) || null, key: 'correction-approve:' + ed.id + ':' + at });
+      return resp(200, { ok: true, message: 'Correction approved. The website gets a new version with the change noted.' });
     }
 
     if (action === 'save_section') {
@@ -183,7 +210,7 @@ exports.handler = async function (ev) {
       const row = { edition_id: editionId, section_key: key, title: clean(b.title, 140) || null,
         body: clean(b.body, 8000) || null, byline: clean(b.byline, 80) || null,
         data: b.data && typeof b.data === 'object' ? b.data : null,
-        source: b.evergreen ? 'evergreen' : 'manual', updated_by: who,
+        source: b.evergreen ? 'evergreen' : 'manual', updated_by: who, updated_at: new Date().toISOString(),
         approved_by: b.approve ? who : null, approved_at: b.approve ? new Date().toISOString() : null,
         preapproved: !!(b.evergreen && b.approve && key !== 'chairNotes') };
       const existing = await S.findOne('programme_sections', (editionId == null ? 'edition_id=is.null' : 'edition_id=eq.' + editionId) +
@@ -209,7 +236,7 @@ exports.handler = async function (ev) {
         retrospective_note: clean(b.reason, 500) || null });
       await event(ed, 'retrospective_authorised', { actor: who, reason: clean(b.reason, 500), key: 'retro-auth:' + ed.id });
       const sync = require('./programme-sync');
-      const out = JSON.parse((await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} })).body || '{}');
+      const out = JSON.parse((await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} })).body || '{}');
       const after = await editionFor(b.fixtureId);
       return resp(200, { ok: !!(after && after.published_at), state: after && after.state, run: out.ok,
         message: after && after.published_at ? 'Archive Edition published — labelled as reconstructed, dated today.'

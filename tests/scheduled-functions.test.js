@@ -60,7 +60,7 @@ test('NO browser code calls a scheduled function', () => {
 test('a companion is PIN-gated and its scheduled twin is not reachable by one', () => {
   scheduled().forEach((name) => {
     const now = R('netlify/functions/' + name + '-now.js');
-    assert.match(now, /adminOk\(/, name + '-now must be signed in: a person presses it');
+    assert.match(now, /adminOk\(|GATE\.gate\(/, name + '-now must be signed in: a person presses it');
     assert.match(now, /httpMethod !== 'POST'/, name + '-now should be POST only');
   });
 });

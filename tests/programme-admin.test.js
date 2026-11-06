@@ -4,6 +4,8 @@
 process.env.SUPABASE_URL = 'https://fake-supabase.local';
 process.env.SUPABASE_SERVICE_KEY = 'test-service-key';
 process.env.SITE_ORIGIN = 'https://site.local';
+process.env.NODE_ENV = 'test';
+process.env.MD_TOKEN_SECRET = 'test-secret-for-tests-only-long-enough';
 
 const test = require('node:test');
 const assert = require('node:assert');
@@ -18,8 +20,17 @@ function load() {
     data: require('../netlify/functions/programme-data'),
   };
 }
-async function call(fn, body) {
-  const r = await fn.handler({ httpMethod: 'POST', body: JSON.stringify(Object.assign({ pin: '1933' }, body)) });
+// A signed PERSONAL session — the only thing programme-admin now accepts. The
+// person named in `by` becomes the session's username, so the audit trail the
+// tests check still names them; the body's `by` itself is no longer read.
+const AUTH = require('../netlify/functions/lib/md-auth');
+function token(username, role, auth) {
+  return AUTH.issue({ username, role: role || 'Chairman', isChairman: (role || 'Chairman') === 'Chairman', auth: auth || 'custom' });
+}
+async function call(fn, body, opts) {
+  const o = opts || {};
+  const t = o.token || token((body && body.by) || 'p.singh', o.role, o.auth);
+  const r = await fn.handler({ httpMethod: 'POST', headers: { authorization: 'Bearer ' + t }, body: JSON.stringify(body), _now: o.now });
   return Object.assign({ status: r.statusCode }, JSON.parse(r.body));
 }
 async function setup() {
@@ -27,26 +38,43 @@ async function setup() {
   FAKE.seedRegistry(db, SEASON.corrected());
   const restore = FAKE.install(db);
   const F = load();
-  await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+  await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
   return { db, restore, F };
 }
 const ed = (db, ext) => db.programme_editions.filter((e) => e.external_fixture_id === ext)[0];
 
-test('HQ refuses without the committee password, and every decision needs a name', async () => {
-  const { restore, F } = await setup();
+test('HQ refuses the shared password, an unsigned request, and a role without publishing rights', async () => {
+  const { db, restore, F } = await setup();
   try {
-    const r = await F.admin.handler({ httpMethod: 'POST', body: JSON.stringify({ action: 'status' }) });
+    // No session at all — including the old committee password in the body.
+    const r = await F.admin.handler({ httpMethod: 'POST', body: JSON.stringify({ pin: '1933', action: 'status' }) });
     assert.strictEqual(r.statusCode, 401);
-    const n = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' });
-    assert.strictEqual(n.status, 400);
-    assert.match(n.error, /your name/);
+    // A session minted from the SHARED password carries a role the caller typed.
+    const shared = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' }, { auth: 'shared' });
+    assert.strictEqual(shared.status, 403);
+    assert.match(shared.error, /personal password/);
+    // A Programme Editor prepares pages but cannot publish them.
+    const before = JSON.stringify(ed(db, 'fwp-578384'));
+    const editor = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' }, { role: 'Programme Editor' });
+    assert.strictEqual(editor.status, 403);
+    assert.strictEqual(JSON.stringify(ed(db, 'fwp-578384')), before, 'a refused request changes nothing');
+    const draft = await call(F.admin, { action: 'save_section', fixtureId: 'fwp-578384', key: 'managerNotes', body: 'Notes.' }, { role: 'Programme Editor' });
+    assert.notStrictEqual(draft.status, 403, 'editing is within the role');
+    // …but approving copy, or correcting a published name, is publishing.
+    const selfApprove = await call(F.admin, { action: 'save_section', fixtureId: 'fwp-578384', sectionKey: 'welcome', body: 'Hi.', approve: true }, { role: 'Programme Editor' });
+    assert.strictEqual(selfApprove.status, 403);
+    const fix = await call(F.admin, { action: 'correct_player', fixtureId: 'fwp-578384', side: 'home', from: 'A', to: 'B' }, { role: 'Programme Editor' });
+    assert.strictEqual(fix.status, 403);
+    // A forged session is no session.
+    const forged = await call(F.admin, { action: 'status' }, { token: token('x', 'Chairman') + 'tampered' });
+    assert.strictEqual(forged.status, 401);
   } finally { restore(); }
 });
 
 test('status gives the reconciliation table and the next home fixture with what is missing', async () => {
   const { restore, F } = await setup();
   try {
-    const s = await call(F.admin, { action: 'status' });
+    const s = await call(F.admin, { action: 'status' }, { now: Date.parse('2026-10-30T12:00:00Z') });
     assert.strictEqual(s.ok, true);
     assert.strictEqual(s.reconciliation.summary.eligiblePlayedHome, 4);
     // On an empty database every played home match now HAS a record, waiting
@@ -65,7 +93,7 @@ test('approve → matchday publish → the archive lists it; unpublish keeps it;
   try {
     const a = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
     assert.strictEqual(a.ok, true, a.error);
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     assert.strictEqual(ed(db, '578384').state, 'published_matchday');
 
     let list = JSON.parse((await F.data.handler({ queryStringParameters: {} })).body);
@@ -77,7 +105,7 @@ test('approve → matchday publish → the archive lists it; unpublish keeps it;
     assert.ok(!list.editions.some((e) => e.fixtureId === 'fwp-578384'), 'no longer public');
     assert.strictEqual(db.programme_versions.filter((v) => v.edition_id === ed(db, '578384').id).length, 1, 'nothing deleted');
     // the timer does not undo a person's decision
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T10:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T10:00:00Z') });
     assert.strictEqual(ed(db, '578384').state, 'withheld');
 
     const r = await call(F.admin, { action: 'restore', fixtureId: 'fwp-578384', by: 'Pete' });
@@ -107,7 +135,7 @@ test('rollback and name correction are new versions; history is kept', async () 
   const { db, restore, F } = await setup();
   try {
     await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     const e = ed(db, '578384');
     const fx = db.football_fixtures.filter((f) => f.external_fixture_id === '578384')[0];
     [fx.home_team_id, fx.away_team_id].forEach((team, s) => {
@@ -116,7 +144,7 @@ test('rollback and name correction are new versions; history is kept', async () 
       for (let i = 1; i <= 14; i++) db.football_lineup_players.push({ lineup_id: id, provider_player_name: (s ? 'Away ' : 'Home ') + i,
         shirt_number: String(i), lineup_role: i <= 11 ? 'starter' : 'substitute', sort_order: i });
     });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T14:10:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T14:10:00Z') });
     assert.strictEqual(e.current_version, 2);
 
     const c = await call(F.admin, { action: 'correct_player', fixtureId: 'fwp-578384', by: 'Jenny', side: 'home',
@@ -126,7 +154,7 @@ test('rollback and name correction are new versions; history is kept', async () 
     // a later provider refresh keeps the correction
     db.football_lineup_players.filter((p) => p.provider_player_name === 'Away 12')[0].lineup_role = 'starter';
     db.football_lineup_players.filter((p) => p.provider_player_name === 'Away 11')[0].lineup_role = 'substitute';
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T17:30:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T17:30:00Z') });
 
     const rb = await call(F.admin, { action: 'rollback', fixtureId: 'fwp-578384', by: 'Pete', toVersion: 1, reason: 'test' });
     assert.strictEqual(rb.ok, true, rb.error);
@@ -145,7 +173,7 @@ test('a sponsor saved without an agreed deal is a proposal and never renders', a
       sponsorName: 'Prospect Bakery', approve: true /* but confirmAgreed missing */ });
     assert.strictEqual(db.programme_sponsor_placements[0].approval_status, 'proposed');
     await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     const v = db.programme_versions.filter((x) => x.edition_id === ed(db, '578384').id)[0];
     assert.ok(!JSON.stringify(v.payload).includes('Prospect Bakery'));
   } finally { restore(); }

@@ -9,7 +9,7 @@
 // deploy to find. Same shape, same fix, written at the same time this time.
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const sync = require('./programme-sync');
 const S = require('./lib/football/store');
 
@@ -32,7 +32,8 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) { /* handled */ }
-  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Not signed in' });
+  const g = await GATE.gate(event, GATE.CAP.PUBLISH);
+  if (!g.ok) return g.response;
 
   /* ── authorising a retrospective edition ───────────────────────────────────
      A match played outside the recovery window gets no programme by itself —
@@ -42,7 +43,7 @@ exports.handler = async function (event) {
      the real one: this authorises publishing now, not pretending it was then. */
   if (b.action === 'authorise_retrospective') {
     if (!b.fixtureId) return resp(400, { ok: false, error: 'which fixture?' });
-    const who = String(b.by || '').trim();
+    const who = g.who;
     if (!who) return resp(400, { ok: false, error: 'who is authorising this? Send "by".' });
 
     const ed = await S.findOne('programme_editions',
@@ -62,7 +63,8 @@ exports.handler = async function (event) {
     // Then run the engine, which will now find the authorisation and publish.
   }
 
-  const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} });
+  // Trusted in-process call: the publisher's session was checked above.
+  const out = await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} });
   let parsed = {};
   try { parsed = JSON.parse(out.body || '{}'); } catch (e) { /* pass through */ }
   return resp(200, Object.assign({ triggered: true }, parsed));

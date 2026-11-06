@@ -155,9 +155,9 @@ test('changing the squad needs the capability; looking at it does not', () => {
     assert.ok(fn.indexOf("action === '" + a + "'") > gateAt, a + ' must be behind the gate'));
 });
 
-test('the Programme Editor can maintain the roster and nothing else', () => {
-  assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['Programme Editor'], [AUTHZ.CAP.MANAGE_ROSTER]);
-  [AUTHZ.CAP.MANAGE_USERS, AUTHZ.CAP.ASSIGN_ADMIN, AUTHZ.CAP.CONFIRM_IDENTITY, AUTHZ.CAP.VIEW_STAFF]
+test('the Programme Editor can maintain the roster and edit the programme, and nothing else', () => {
+  assert.deepStrictEqual(AUTHZ.DEFAULT_CAPS['Programme Editor'], [AUTHZ.CAP.MANAGE_ROSTER, AUTHZ.CAP.EDIT_PROGRAMME]);
+  [AUTHZ.CAP.MANAGE_USERS, AUTHZ.CAP.ASSIGN_ADMIN, AUTHZ.CAP.CONFIRM_IDENTITY, AUTHZ.CAP.VIEW_STAFF, AUTHZ.CAP.PUBLISH_PROGRAMME]
     .forEach((c) => assert.ok(!AUTHZ.DEFAULT_CAPS['Programme Editor'].includes(c)));
 });
 
@@ -172,7 +172,7 @@ test('the drawing mirror agrees with the server', () => {
   const caps = pt.slice(pt.indexOf('var STAFF_CAPS = {'), pt.indexOf('/** Does this role hold'));
   Object.keys(AUTHZ.DEFAULT_CAPS).forEach((role) =>
     assert.ok(caps.includes("'" + role + "'"), 'no mirror for ' + role));
-  assert.match(caps, /'Programme Editor': \['can_manage_first_team_roster'\]/);
+  assert.match(caps, /'Programme Editor': \['can_manage_first_team_roster', 'can_edit_programme'\]/);
 });
 
 test('every roster change is written to the audit', () => {

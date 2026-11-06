@@ -55,7 +55,10 @@ exports.handler = async function (event) {
 
   let b = {};
   try { b = JSON.parse(event.body || '{}'); } catch (e) {}
-  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
+  // A PERSONAL password is its own proof: `personal: true` skips the shared
+  // committee door and never falls back to the shared default below.
+  const personalOnly = b.personal === true;
+  if (!personalOnly && !adminOk(b.pin)) return resp(401, { ok: false, error: 'Unauthorized' });
   const cfgErr = AUTH.configError();
   if (cfgErr) return resp(503, { ok: false, error: cfgErr, misconfigured: true });
 
@@ -93,6 +96,7 @@ exports.handler = async function (event) {
   }
 
   // 2 · shared committee default
+  if (!auth && personalOnly) return resp(200, { ok: false, error: 'no-personal-password' });
   if (!auth) {
     // Constant-time compare so the shared password cannot be probed a
     // character at a time.

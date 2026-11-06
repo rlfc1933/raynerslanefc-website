@@ -547,17 +547,20 @@
     // system, including when the permission system is what is broken.
     'System Maintainer': ['can_view_staff', 'can_manage_users', 'can_disable_account',
                           'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles',
-                          'can_confirm_player_identity', 'can_manage_first_team_roster'],
+                          'can_confirm_player_identity', 'can_manage_first_team_roster',
+                          'can_edit_programme', 'can_publish_programme'],
     'Chairman':   ['can_view_staff', 'can_manage_users', 'can_disable_account',
                    'can_reset_credentials', 'can_assign_roles', 'can_assign_admin_roles',
-                   'can_confirm_player_identity', 'can_manage_first_team_roster'],
+                   'can_confirm_player_identity', 'can_manage_first_team_roster',
+                   'can_edit_programme', 'can_publish_programme'],
     'V Chairman': ['can_view_staff', 'can_disable_account'],
     // Holds no administrative power: he is the person who knows which of two
     // same-named players actually played, and who is in his squad.
     'Team Manager': ['can_confirm_player_identity', 'can_manage_first_team_roster'],
-    // The roster and nothing else — a Thursday signing has to reach Saturday's
-    // programme without waiting for anybody technical.
-    'Programme Editor': ['can_manage_first_team_roster'],
+    // The roster and the programme's pages — a Thursday signing has to reach
+    // Saturday's programme without waiting for anybody technical. Publishing
+    // to the public stays with the Chairman unless la_permissions grants it.
+    'Programme Editor': ['can_manage_first_team_roster', 'can_edit_programme'],
   };
 
   /** Does this role hold this capability BY DEFAULT? Drawing only. */
