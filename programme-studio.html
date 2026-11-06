@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Programme Studio | Rayners Lane FC</title>
+  <link rel="icon" type="image/png" href="img/badge.png">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/programme-studio.css?v=1">
+</head>
+<body>
+<!-- PROGRAMME STUDIO — one place for the committee to build the matchday
+     booklet: choose the match, edit the pages, check, download the PDF.
+     Reads the site's own data (fixtures, squad, admission). Drafts are
+     autosaved in this browser; "Save draft file" / "Open draft file" move
+     a draft between computers. Nothing here publishes to the website. -->
+<header class="ps-top">
+  <a class="ps-brand" href="admin.html"><img src="img/badge.png" alt="" width="36" height="36"> Programme Studio</a>
+  <div class="ps-status" id="ps-status" role="status" aria-live="polite">Not started</div>
+</header>
+
+<main id="ps-app">
+  <!-- STEP 1: choose the match -->
+  <section class="ps-step" id="step-start">
+    <h1>Matchday Programme</h1>
+    <p class="ps-lead">Build the printed programme for a home match. Choose the match, edit the pages, check the booklet, then download the PDF for the printer. Downloading never publishes anything on the website.</p>
+    <div class="ps-card">
+      <h2>Prepare a home programme</h2>
+      <label class="ps-label" for="fx-pick">Home match</label>
+      <select id="fx-pick" class="ps-input"></select>
+      <p class="ps-hint" id="fx-hint"></p>
+      <button class="ps-btn ps-btn--main" id="btn-new" type="button">Start this programme</button>
+    </div>
+    <div class="ps-card" id="drafts-card" hidden>
+      <h2>Continue a draft</h2>
+      <ul id="drafts" class="ps-drafts"></ul>
+    </div>
+    <div class="ps-card">
+      <h2>Open a draft from another computer</h2>
+      <p class="ps-hint">If a colleague saved a draft file and sent it to you, open it here.</p>
+      <label class="ps-btn ps-btn--plain" for="open-file">Open draft file…</label>
+      <input type="file" id="open-file" accept=".json,application/json" hidden>
+    </div>
+  </section>
+
+  <!-- STEP 2: edit pages -->
+  <section class="ps-step" id="step-edit" hidden>
+    <div class="ps-bar">
+      <button class="ps-btn ps-btn--plain" id="btn-back" type="button">← All programmes</button>
+      <h2 id="ed-title"></h2>
+      <div class="ps-bar__acts">
+        <button class="ps-btn ps-btn--plain" id="btn-save" type="button">Save now</button>
+        <button class="ps-btn ps-btn--plain" id="btn-export-draft" type="button">Save draft file</button>
+        <button class="ps-btn ps-btn--main" id="btn-check" type="button">Check booklet</button>
+      </div>
+    </div>
+    <div class="ps-edit">
+      <nav class="ps-thumbs" id="thumbs" aria-label="Pages"></nav>
+      <div class="ps-form" id="form"></div>
+      <div class="ps-preview"><div class="ps-preview__label" id="pv-label"></div><div class="ps-preview__frame" id="preview"></div></div>
+    </div>
+  </section>
+
+  <!-- STEP 3/4: check booklet and download -->
+  <section class="ps-step" id="step-check" hidden>
+    <div class="ps-bar">
+      <button class="ps-btn ps-btn--plain" id="btn-back-edit" type="button">← Back to editing</button>
+      <h2>Check the booklet</h2>
+      <div class="ps-bar__acts"><button class="ps-btn ps-btn--main" id="btn-pdf" type="button">Download PDF for printer</button></div>
+    </div>
+    <div class="ps-card" id="checks"></div>
+    <p class="ps-hint" id="pdf-note">The PDF is A5 portrait (148 × 210 mm) with a provisional 3 mm bleed on every side, in reading order — front cover first, back cover last. It is a <strong>proof</strong> in RGB colour: confirm size, bleed and colour requirements with the printer before the first run.</p>
+    <div class="ps-spreads" id="spreads"></div>
+  </section>
+</main>
+
+<!-- Off-screen stage the PDF is rendered from: the same page HTML as the preview. -->
+<div id="ps-stage" aria-hidden="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
+<script src="js/programme-studio.js?v=1"></script>
+</body>
+</html>
