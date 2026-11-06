@@ -390,7 +390,7 @@
     if (imagesOnly) { [].forEach.call(document.querySelectorAll('#form img[data-ref]'), function (im) { var u = img(im.dataset.ref); if (u) im.src = u; }); return; }
     var h = '<h2>' + esc(p.label || t.name) + ' <small>(' + t.name + ')</small></h2>';
     h += '<div class="ps-row"><button class="ps-btn ps-btn--plain" data-act="up" type="button">Move up</button><button class="ps-btn ps-btn--plain" data-act="down" type="button">Move down</button><button class="ps-btn ps-btn--plain" data-act="dup" type="button">Duplicate</button><button class="ps-btn ps-btn--plain" data-act="hide" type="button">' + (p.hidden ? 'Show page' : 'Hide page') + '</button><button class="ps-btn ps-btn--danger" data-act="del" type="button">Remove page</button></div>';
-    if (p.role === 'chair') h += '<p class="ps-hint">These are the Chairman\'s own words. They appear on the website only with his name in "Written by", and only once approved.</p>';
+    if (p.role === 'chair') h += '<p class="ps-hint">These are the Chairman\'s own words. They appear on the website only with the Chairman\'s name in "Written by", and only once approved.</p>';
     if (!t.fields.length) h += '<p class="ps-hint">This page fills itself from the club\'s fixtures, squad and prices. Nothing to type.</p>';
     t.fields.forEach(function (f) {
       var k = f[0], lab = f[1], kind = f[2], id = 'f-' + k;
