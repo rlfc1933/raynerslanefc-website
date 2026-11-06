@@ -11,6 +11,9 @@
   var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
   // Paragraphs from plain text: blank line = new paragraph. No HTML accepted.
   var paras = function (t) { return String(t || '').split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join(''); };
+  // Pictures come from drafts, which can be opened from a file — so they are
+  // untrusted. Only an embedded image or a same-site path ever reaches the page.
+  var img = function (src) { src = String(src || ''); return (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(src) || /^\/?img\/[\w\/.-]+$/.test(src)) ? src : ''; };
   var gap = function (label) { return '<span class="pg-gap">' + esc(label) + ' — to be written</span>'; };
   var ukDate = function (d) { var x = new Date(d + 'T12:00:00Z'); return isNaN(x) ? (d || '') : x.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London' }); };
 
@@ -24,20 +27,20 @@
     cover: { name: 'Front cover', fields: [['headline', 'Cover headline', 'line'], ['sponsor', 'Presented by (sponsor name, optional)', 'line'], ['photo', 'Cover photograph', 'image']],
       render: function (p, e) { var f = e.fixture; return '<div class="pg pg--cover"' + bg(p.photo) + '><div class="pg-cover__top">Official Matchday Programme' + (p.sponsor ? '<small>presented by ' + esc(p.sponsor) + '</small>' : '') + '</div>' +
         '<div class="pg-cover__h">' + (p.headline ? esc(p.headline) : 'Matchday') + '</div>' +
-        '<div class="pg-cover__vs"><img src="img/badge-512.png" alt=""><b>v</b>' + (f.oppCrest ? '<img src="' + esc(f.oppCrest) + '" alt="">' : '') + '</div>' +
+        '<div class="pg-cover__vs"><img src="img/badge-512.png" alt=""><b>v</b>' + (img(f.oppCrest) ? '<img src="' + img(f.oppCrest) + '" alt="">' : '') + '</div>' +
         '<div class="pg-cover__match"><strong>Rayners Lane FC v ' + esc(f.opponent) + '</strong><span>' + esc(ukDate(f.date)) + ' · ' + esc(f.kickoff || '') + '</span><span>' + esc(f.competition || '') + '</span><span>Tithe Farm, 151 Rayners Lane, Harrow HA2 0XH</span></div></div>'; } },
     contents: { name: 'Contents and match details', fields: [],
       render: function (p, e) { var f = e.fixture, rows = e.pages.map(function (q, i) { return q.hidden || i === 0 || q.type === 'contents' || q.type === 'back' ? '' : '<li><span>' + esc(q.label || T[q.type].name) + '</span><b>' + (visNo(e, i)) + '</b></li>'; }).join('');
         return '<div class="pg"><h2 class="pg-h">In this issue</h2><ul class="pg-toc">' + rows + '</ul><div class="pg-box"><h3>Today\'s match</h3><p><strong>Rayners Lane FC v ' + esc(f.opponent) + '</strong><br>' + esc(ukDate(f.date)) + ', kick-off ' + esc(f.kickoff || 'TBC') + '<br>' + esc(f.competition || '') + '<br>' + esc(f.venue || '') + '</p></div></div>'; } },
     notes: { name: 'Notes', fields: [['label', 'Page name (e.g. Chairman\'s notes)', 'line'], ['author', 'Written by (name and role)', 'line'], ['body', 'Text', 'text'], ['photo', 'Photograph (optional)', 'image']],
-      render: function (p) { return '<div class="pg"><h2 class="pg-h">' + esc(p.label || 'Notes') + '</h2>' + (p.photo ? '<img class="pg-portrait" src="' + p.photo + '" alt="">' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap(p.label || 'Notes')) + '</div>' + (p.author ? '<p class="pg-by">' + esc(p.author) + '</p>' : '') + '</div>'; } },
+      render: function (p) { return '<div class="pg"><h2 class="pg-h">' + esc(p.label || 'Notes') + '</h2>' + (p.photo ? '<img class="pg-portrait" src="' + img(p.photo) + '" alt="">' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap(p.label || 'Notes')) + '</div>' + (p.author ? '<p class="pg-by">' + esc(p.author) + '</p>' : '') + '</div>'; } },
     article: { name: 'Article', fields: [['label', 'Page name (for contents)', 'line'], ['headline', 'Headline', 'line'], ['body', 'Text', 'text'], ['photo', 'Photograph (optional)', 'image'], ['caption', 'Photo caption', 'line']],
-      render: function (p) { return '<div class="pg"><div class="pg-kick">' + esc(p.label || '') + '</div><h2 class="pg-h">' + (p.headline ? esc(p.headline) : gap('Headline')) + '</h2>' + (p.photo ? '<figure class="pg-fig"><img src="' + p.photo + '" alt=""><figcaption>' + esc(p.caption || '') + '</figcaption></figure>' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap('Article')) + '</div></div>'; } },
+      render: function (p) { return '<div class="pg"><div class="pg-kick">' + esc(p.label || '') + '</div><h2 class="pg-h">' + (p.headline ? esc(p.headline) : gap('Headline')) + '</h2>' + (p.photo ? '<figure class="pg-fig"><img src="' + img(p.photo) + '" alt=""><figcaption>' + esc(p.caption || '') + '</figcaption></figure>' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap('Article')) + '</div></div>'; } },
     opposition: { name: 'The opposition', fields: [['body', 'About today\'s visitors', 'text'], ['source', 'Where the facts came from', 'line']],
-      render: function (p, e) { var f = e.fixture; return '<div class="pg"><div class="pg-kick">Today\'s visitors</div><h2 class="pg-h">' + esc(f.opponent) + '</h2>' + (f.oppCrest ? '<img class="pg-crest" src="' + esc(f.oppCrest) + '" alt="">' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap('Opposition profile')) + '</div>' + (p.source ? '<p class="pg-src">Source: ' + esc(p.source) + '</p>' : '') + '</div>'; } },
+      render: function (p, e) { var f = e.fixture; return '<div class="pg"><div class="pg-kick">Today\'s visitors</div><h2 class="pg-h">' + esc(f.opponent) + '</h2>' + (img(f.oppCrest) ? '<img class="pg-crest" src="' + img(f.oppCrest) + '" alt="">' : '') + '<div class="pg-body">' + (p.body ? paras(p.body) : gap('Opposition profile')) + '</div>' + (p.source ? '<p class="pg-src">Source: ' + esc(p.source) + '</p>' : '') + '</div>'; } },
     squad: { name: 'Squad portraits', fields: [['part', 'Which players (1 = first half, 2 = second half)', 'line']],
       render: function (p, e) { var s = e.squad, h = Math.ceil(s.length / 2), list = p.part === '2' ? s.slice(h) : s.slice(0, h);
-        return '<div class="pg pg--green"><h2 class="pg-h">The Squad' + (p.part === '2' ? ' (continued)' : '') + '</h2><div class="pg-squad">' + list.map(function (x) { return '<div><span class="pg-face"' + (x.photo ? ' style="background-image:url(\'' + esc(x.photo) + '\')"' : '') + '></span><b>' + esc(x.name) + '</b><small>' + esc(x.pos || '') + '</small></div>'; }).join('') + '</div><p class="pg-note">Club squad — subject to selection. Not today\'s team sheet.</p></div>'; } },
+        return '<div class="pg pg--green"><h2 class="pg-h">The Squad' + (p.part === '2' ? ' (continued)' : '') + '</h2><div class="pg-squad">' + list.map(function (x) { return '<div><span class="pg-face"' + (img(x.photo) ? ' style="background-image:url(\'' + img(x.photo) + '\')"' : '') + '></span><b>' + esc(x.name) + '</b><small>' + esc(x.pos || '') + '</small></div>'; }).join('') + '</div><p class="pg-note">Club squad — subject to selection. Not today\'s team sheet.</p></div>'; } },
     teams: { name: 'Squads for today', fields: [['away', 'Visitors\' squad (one name per line, if supplied)', 'text']],
       render: function (p, e) { var away = String(p.away || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
         return '<div class="pg"><h2 class="pg-h">Squads</h2><p class="pg-note">Squads subject to selection. The official team sheet is announced at the ground.</p><div class="pg-cols"><div><h3>Rayners Lane FC</h3><ol>' + e.squad.map(function (x) { return '<li>' + esc(x.name) + '</li>'; }).join('') + '</ol></div><div><h3>' + esc(e.fixture.opponent) + '</h3>' + (away.length ? '<ol>' + away.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' : gap('Visitors\' squad')) + '</div></div></div>'; } },
@@ -51,11 +54,11 @@
       render: function (p) { var a = DATA.admission;
         return '<div class="pg"><h2 class="pg-h">At the Lane</h2>' + (a ? '<div class="pg-box"><h3>' + esc(a.heading || 'Admission') + '</h3><table class="pg-tab"><tbody>' + a.prices.map(function (x) { return '<tr><td>' + esc(x.label) + (x.note ? ' <small>(' + esc(x.note) + ')</small>' : '') + '</td><td><b>' + esc(x.price) + '</b></td></tr>'; }).join('') + '</tbody></table></div>' : '') + '<div class="pg-body">' + paras(p.body) + '<p>Tithe Farm Sports &amp; Social Club, 151 Rayners Lane, Harrow HA2 0XH.<br>raynerslanefc.co.uk</p></div></div>'; } },
     advert: { name: 'Advert', fields: [['label', 'Advertiser name', 'line'], ['photo', 'Advert artwork (image)', 'image'], ['size', 'Size: full, half or quarter', 'line']],
-      render: function (p) { return '<div class="pg pg--ad">' + (p.photo ? '<img class="pg-ad pg-ad--' + esc(p.size || 'full') + '" src="' + p.photo + '" alt="">' : '<div class="pg-adgap">Advert space<br><small>' + esc(p.label || 'No artwork uploaded yet') + '</small></div>') + '</div>'; } },
+      render: function (p) { return '<div class="pg pg--ad">' + (p.photo ? '<img class="pg-ad pg-ad--' + esc(p.size || 'full') + '" src="' + img(p.photo) + '" alt="">' : '<div class="pg-adgap">Advert space<br><small>' + esc(p.label || 'No artwork uploaded yet') + '</small></div>') + '</div>'; } },
     back: { name: 'Back cover', fields: [['body', 'Back cover message', 'text'], ['photo', 'Back cover image (optional)', 'image']],
       render: function (p) { return '<div class="pg pg--cover"' + bg(p.photo) + '><img class="pg-back__badge" src="img/badge-512.png" alt=""><div class="pg-body pg-back__body">' + paras(p.body) + '</div><div class="pg-back__foot">Rayners Lane FC · Est. 1933 · raynerslanefc.co.uk</div></div>'; } }
   };
-  function bg(src) { return src ? ' style="background-image:linear-gradient(rgba(6,40,20,.35),rgba(6,40,20,.85)),url(\'' + src + '\')"' : ''; }
+  function bg(src) { src = img(src); return src ? ' style="background-image:linear-gradient(rgba(6,40,20,.35),rgba(6,40,20,.85)),url(\'' + src + '\')"' : ''; }
   function visNo(e, i) { var n = 0; for (var k = 0; k <= i; k++) if (!e.pages[k].hidden) n++; return n; }
 
   // Suggested 24-page running order. A template, not copy: every text field starts empty.
@@ -115,7 +118,7 @@
       var k = f[0], lab = f[1], kind = f[2], id = 'f-' + k;
       h += '<label class="ps-label" for="' + id + '">' + esc(lab) + '</label>';
       if (kind === 'text') h += '<textarea id="' + id + '" class="ps-input ps-text" data-k="' + k + '" rows="10">' + esc(p[k] || '') + '</textarea><p class="ps-hint">Leave a blank line between paragraphs.</p>';
-      else if (kind === 'image') h += (p[k] ? '<img class="ps-thumbimg" src="' + p[k] + '" alt=""><button class="ps-btn ps-btn--plain" data-clear="' + k + '" type="button">Remove image</button>' : '') + '<input id="' + id + '" type="file" accept="image/jpeg,image/png,image/webp" data-img="' + k + '" class="ps-input"><p class="ps-hint" id="w-' + k + '"></p>';
+      else if (kind === 'image') h += (p[k] ? '<img class="ps-thumbimg" src="' + img(p[k]) + '" alt=""><button class="ps-btn ps-btn--plain" data-clear="' + k + '" type="button">Remove image</button>' : '') + '<input id="' + id + '" type="file" accept="image/jpeg,image/png,image/webp" data-img="' + k + '" class="ps-input"><p class="ps-hint" id="w-' + k + '"></p>';
       else h += '<input id="' + id + '" class="ps-input" data-k="' + k + '" value="' + esc(p[k] || '') + '">';
     });
     $('form').innerHTML = h;
@@ -220,7 +223,7 @@
   document.addEventListener('input', function (e) { var k = e.target.dataset && e.target.dataset.k; if (k && ed) { ed.pages[cur][k] = e.target.value; if (k === 'label') renderThumbs(); touch(); } });
   document.addEventListener('change', function (e) {
     if (e.target.dataset && e.target.dataset.img && e.target.files[0]) readImage(e.target.files[0], e.target.dataset.img);
-    if (e.target.id === 'open-file' && e.target.files[0]) { var r = new FileReader(); r.onload = function () { try { var d = JSON.parse(r.result); if (!d.fixture || !d.pages) throw 0; open(d); save(); } catch (x) { alert('That file is not a Programme Studio draft.'); } }; r.readAsText(e.target.files[0]); }
+    if (e.target.id === 'open-file' && e.target.files[0]) { var r = new FileReader(); r.onload = function () { try { var d = JSON.parse(r.result); if (!d.fixture || !Array.isArray(d.pages) || !d.pages.every(function (q) { return q && T.hasOwnProperty(q.type); })) throw 0; open(d); save(); } catch (x) { alert('That file is not a Programme Studio draft.'); } }; r.readAsText(e.target.files[0]); }
   });
 
   /* ── BOOT: the site's own data files ──────────────────────────────────── */
