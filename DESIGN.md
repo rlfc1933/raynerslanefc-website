@@ -136,3 +136,7 @@ Desktop 1440/1280, tablet portrait 768 / landscape 1180, phone 412 / 375,
 foldable cover 344 and inner 884, touch and keyboard. No sideways scroll at any
 width. Touch targets ≥ 44px (hard floor 24px, WCAG 2.2 2.5.8). Every
 interaction works by keyboard with a visible focus ring.
+
+## Campaign imagery, November 2026
+
+The homepage uses generated abstract yellow/green textile artwork as a decorative brand material, explicitly requested for this campaign. It is not club documentary photography or a representation of the kit. Ground photographs remain authentic. This narrowly extends section 6 for decorative material only; it does not permit fabricated players or match scenes. The campaign pairs layered typography and a tilted ground photograph with restrained scroll-linked movement. System and site reduced-motion preferences restore the static composition.
