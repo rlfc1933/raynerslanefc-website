@@ -4,6 +4,8 @@
 process.env.SUPABASE_URL = 'https://fake-supabase.local';
 process.env.SUPABASE_SERVICE_KEY = 'test-service-key';
 process.env.SITE_ORIGIN = 'https://site.local';
+process.env.NODE_ENV = 'test';
+process.env.MD_TOKEN_SECRET = 'test-secret-for-tests-only-long-enough';
 
 const test = require('node:test');
 const assert = require('node:assert');
@@ -18,8 +20,17 @@ function load() {
     data: require('../netlify/functions/programme-data'),
   };
 }
-async function call(fn, body) {
-  const r = await fn.handler({ httpMethod: 'POST', body: JSON.stringify(Object.assign({ pin: '1933' }, body)) });
+// A signed PERSONAL session — the only thing programme-admin now accepts. The
+// person named in `by` becomes the session's username, so the audit trail the
+// tests check still names them; the body's `by` itself is no longer read.
+const AUTH = require('../netlify/functions/lib/md-auth');
+function token(username, role, auth) {
+  return AUTH.issue({ username, role: role || 'Chairman', isChairman: (role || 'Chairman') === 'Chairman', auth: auth || 'custom' });
+}
+async function call(fn, body, opts) {
+  const o = opts || {};
+  const t = o.token || token((body && body.by) || 'p.singh', o.role, o.auth);
+  const r = await fn.handler({ httpMethod: 'POST', headers: { authorization: 'Bearer ' + t }, body: JSON.stringify(body), _now: o.now });
   return Object.assign({ status: r.statusCode }, JSON.parse(r.body));
 }
 async function setup() {
@@ -32,21 +43,33 @@ async function setup() {
 }
 const ed = (db, ext) => db.programme_editions.filter((e) => e.external_fixture_id === ext)[0];
 
-test('HQ refuses without the committee password, and every decision needs a name', async () => {
-  const { restore, F } = await setup();
+test('HQ refuses the shared password, an unsigned request, and a role without publishing rights', async () => {
+  const { db, restore, F } = await setup();
   try {
-    const r = await F.admin.handler({ httpMethod: 'POST', body: JSON.stringify({ action: 'status' }) });
+    // No session at all — including the old committee password in the body.
+    const r = await F.admin.handler({ httpMethod: 'POST', body: JSON.stringify({ pin: '1933', action: 'status' }) });
     assert.strictEqual(r.statusCode, 401);
-    const n = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' });
-    assert.strictEqual(n.status, 400);
-    assert.match(n.error, /your name/);
+    // A session minted from the SHARED password carries a role the caller typed.
+    const shared = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' }, { auth: 'shared' });
+    assert.strictEqual(shared.status, 403);
+    assert.match(shared.error, /personal password/);
+    // A Programme Editor prepares pages but cannot publish them.
+    const before = JSON.stringify(ed(db, 'fwp-578384'));
+    const editor = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384' }, { role: 'Programme Editor' });
+    assert.strictEqual(editor.status, 403);
+    assert.strictEqual(JSON.stringify(ed(db, 'fwp-578384')), before, 'a refused request changes nothing');
+    const draft = await call(F.admin, { action: 'save_section', fixtureId: 'fwp-578384', key: 'managerNotes', body: 'Notes.' }, { role: 'Programme Editor' });
+    assert.notStrictEqual(draft.status, 403, 'editing is within the role');
+    // A forged session is no session.
+    const forged = await call(F.admin, { action: 'status' }, { token: token('x', 'Chairman') + 'tampered' });
+    assert.strictEqual(forged.status, 401);
   } finally { restore(); }
 });
 
 test('status gives the reconciliation table and the next home fixture with what is missing', async () => {
   const { restore, F } = await setup();
   try {
-    const s = await call(F.admin, { action: 'status' });
+    const s = await call(F.admin, { action: 'status' }, { now: Date.parse('2026-10-30T12:00:00Z') });
     assert.strictEqual(s.ok, true);
     assert.strictEqual(s.reconciliation.summary.eligiblePlayedHome, 4);
     // On an empty database every played home match now HAS a record, waiting

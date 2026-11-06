@@ -331,8 +331,9 @@ test('the assistant reads the canonical service, not the provider', () => {
   assert.ok(!/footballwebpages/.test(ai));
 });
 
-test('the assistant is gated like every other staff tool', () => {
-  assert.match(ai, /if \(!adminOk\(b\.pin\)\) return resp\(401/);
+test('the assistant needs a personal staff session with programme editing rights', () => {
+  assert.match(ai, /GATE\.gate\(event, GATE\.CAP\.EDIT\)/);
+  assert.ok(!/adminOk/.test(ai), 'the shared committee password no longer opens it');
 });
 
 test('AI copy is frozen with the edition once published', () => {

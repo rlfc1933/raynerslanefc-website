@@ -40,9 +40,17 @@ function selector() {
 const S = selector();
 
 /** What the page would show for an edition on this date. */
+// The fixture list AS IT STOOD on the edition's date: anything after it had no
+// result yet. Without this the real list decays — once 19 Aug is played, an
+// edition dated 15 Aug would be judged against a result it could not know.
+function asAt(fixtures, editionDate) {
+  return fixtures.map((f) => (String(f.date) > editionDate
+    ? Object.assign({}, f, { us: null, them: null, status: /^played$/i.test(f.status || '') ? 'scheduled' : f.status })
+    : f));
+}
 function pick(fixtures, editionDate, doc) {
   const d = doc || {};
-  const up = S.upcomingAfter(fixtures, editionDate);
+  const up = S.upcomingAfter(asAt(fixtures, editionDate), editionDate);
   return {
     nextMatch: d.published ? (d.nextFixture || null) : (up[0] || null),
     nextHome: d.published ? (d.nextHomeFixture || null) : (up.filter(S.fxIsHome)[0] || null),

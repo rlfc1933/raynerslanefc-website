@@ -8,7 +8,7 @@
 // editorial they may add if they want to.
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const S = require('./lib/football/store');
 const READ = require('./lib/football/read');
 const RULES = require('./lib/programme/publish-rules');
@@ -343,8 +343,13 @@ exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
   try { body = JSON.parse((event && event.body) || '{}'); } catch (e) { /* GET */ }
-  if ((q.apply === '1' || body.apply === true) && !adminOk(body.pin || q.pin)) {
-    return resp(401, { ok: false, error: 'Applying requires sign-in' });
+  // Applying over HTTP needs a personal session with publishing rights, or the
+  // server-only internal key. The scheduled run never applies through here.
+  if (q.apply === '1' || body.apply === true) {
+    if (!GATE.internalKey(body.pin || q.pin)) {
+      const g = await GATE.gate(event, GATE.CAP.PUBLISH);
+      if (!g.ok) return g.response;
+    }
   }
   if (!S.configured()) return resp(200, { ok: false, error: 'supabase not configured' });
 

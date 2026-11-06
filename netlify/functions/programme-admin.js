@@ -1,7 +1,8 @@
 // PROGRAMME HQ — the committee's controls for the matchday programme.
 //
-// One POST endpoint, committee-password gated (lib/pin, the same gate as every
-// other HQ write), used by the Programme HQ panel (js/programme-hq.js).
+// One POST endpoint, used by the Programme HQ panel (js/programme-hq.js) and
+// Programme Studio. Gated by a PERSONAL staff session (lib/programme/gate.js):
+// editing needs can_edit_programme, publishing needs can_publish_programme.
 //
 // Every decision is made by a NAMED person and recorded as a publication
 // event. Nothing is deleted: unpublishing is a state with a reason, a rollback
@@ -12,7 +13,7 @@
 // Never called by the scheduler, and it never calls a data provider.
 'use strict';
 
-const adminOk = require('./lib/pin');
+const GATE = require('./lib/programme/gate');
 const S = require('./lib/football/store');
 const READ = require('./lib/football/read');
 const REC = require('./lib/programme/reconcile');
@@ -69,14 +70,14 @@ async function insertVersion(edition, row) {
 }
 
 /** The whole picture for HQ: reconciliation, the next home fixture, sources. */
-async function status() {
+async function status(now) {
   const [all, played, editions] = await Promise.all([
     READ.season(SEASON), READ.results(SEASON),
     S.rest('programme_editions?season=eq.' + encodeURIComponent(SEASON) + '&select=*&order=scheduled_kickoff_at.asc'),
   ]);
   const byId = {}; played.forEach((p) => { byId[p.id] = p; });
   const fixtures = all.map((f) => byId[f.id] || f);
-  const rec = REC.reconcile(fixtures, editions || [], Date.now());
+  const rec = REC.reconcile(fixtures, editions || [], now);
 
   let next = null;
   if (rec.summary.nextHome) {
@@ -126,16 +127,18 @@ exports.handler = async function (ev) {
   if (ev.httpMethod !== 'POST') return resp(405, { ok: false, error: 'POST only' });
   let b = {};
   try { b = JSON.parse(ev.body || '{}'); } catch (e) { return resp(400, { ok: false, error: 'bad JSON' }); }
-  if (!adminOk(b.pin)) return resp(401, { ok: false, error: 'Not signed in' });
+  const action = String(b.action || 'status');
+  // Who did this comes from the signed session, never from the request body.
+  // Preparing copy is EDIT; anything that changes what the public sees is PUBLISH.
+  const PUBLISHING = ['run', 'approve_editorial', 'authorise_retrospective', 'unpublish', 'restore', 'rollback', 'add_placement'];
+  const g = await GATE.gate(ev, PUBLISHING.indexOf(action) > -1 ? GATE.CAP.PUBLISH : GATE.CAP.EDIT);
+  if (!g.ok) return g.response;
+  const who = g.who;
   if (!S.configured()) return resp(200, { ok: false, error: 'database not configured' });
 
-  const action = String(b.action || 'status');
-  const who = clean(b.by, 80);
-  const needsName = action !== 'status' && action !== 'history' && action !== 'run';
-  if (needsName && !who) return resp(400, { ok: false, error: 'Add your name so the club has a record of who did this.' });
-
   try {
-    if (action === 'status') return resp(200, await status());
+    // ev._now is a test-only clock; a browser cannot set it.
+    if (action === 'status') return resp(200, await status(ev._now || Date.now()));
 
     if (action === 'run') {
       const sync = require('./programme-sync');
