@@ -53,6 +53,8 @@ function clean(input) {
     ids[id] = 1;
     const q = { id, type: p.type, hidden: !!p.hidden };
     if (ROLES.indexOf(p.role) > -1) q.role = p.role;
+    // Every page may carry the name it is listed under in the contents.
+    if (typeof p.label === 'string' && p.label.trim()) q.label = str(p.label, LIMIT.label);
     TYPES[p.type].forEach((k) => {
       if (p[k] == null || p[k] === '') return;
       if (IMAGE_FIELDS.indexOf(k) > -1) { if (isImageRef(String(p[k]))) q[k] = String(p[k]); if (/^\d{1,5}×\d{1,5}$/.test(String(p[k + 'Px'] || ''))) q[k + 'Px'] = p[k + 'Px']; return; }

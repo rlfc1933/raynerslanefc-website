@@ -7,24 +7,44 @@
   <title>Programme Studio | Rayners Lane FC</title>
   <link rel="icon" type="image/png" href="img/badge.png">
   <link rel="stylesheet" href="css/fonts.css">
-  <link rel="stylesheet" href="css/programme-studio.css?v=1">
+  <link rel="stylesheet" href="css/programme-studio.css?v=3">
 </head>
 <body>
-<!-- PROGRAMME STUDIO — one place for the committee to build the matchday
-     booklet: choose the match, edit the pages, check, download the PDF.
-     Reads the site's own data (fixtures, squad, admission). Drafts are
-     autosaved in this browser; "Save draft file" / "Open draft file" move
-     a draft between computers. Nothing here publishes to the website. -->
+<!-- PROGRAMME STUDIO — the committee's one place for the matchday programme:
+     choose the match → edit pages → check the booklet → download for the
+     printer → publish online when ready. Drafts are saved on the club's server
+     (netlify/functions/programme-studio.js); signing in needs your own staff
+     password. Printing and publishing are separate: a PDF never publishes. -->
+<a class="ps-skip" href="#ps-app">Skip to the programme</a>
 <header class="ps-top">
   <a class="ps-brand" href="admin.html"><img src="img/badge.png" alt="" width="36" height="36"> Programme Studio</a>
-  <div class="ps-status" id="ps-status" role="status" aria-live="polite">Not started</div>
+  <div class="ps-top__right">
+    <div class="ps-status" id="ps-status" role="status" aria-live="polite">Not signed in</div>
+    <span class="ps-who" id="ps-who" hidden></span>
+    <button class="ps-btn ps-btn--plain ps-btn--sm" id="btn-signout" type="button" hidden>Sign out</button>
+  </div>
 </header>
 
-<main id="ps-app">
+<main id="ps-app" tabindex="-1">
+  <h1 class="ps-pagetitle" id="ps-h1">Matchday Programme</h1>
+  <!-- SIGN IN -->
+  <section class="ps-step" id="step-signin" hidden>
+    <p class="ps-lead">Sign in with your own staff name and password. The shared committee password cannot open the programme — every change is recorded against the person who made it.</p>
+    <form class="ps-card" id="signin-form">
+      <h2>Sign in</h2>
+      <label class="ps-label" for="si-user">Your staff name</label>
+      <input class="ps-input" id="si-user" name="username" autocomplete="username" required>
+      <label class="ps-label" for="si-pass">Your password</label>
+      <input class="ps-input" id="si-pass" name="password" type="password" autocomplete="current-password" required>
+      <p class="ps-error" id="si-error" role="alert" hidden></p>
+      <button class="ps-btn ps-btn--main" type="submit">Sign in</button>
+      <p class="ps-hint">No personal password yet? Ask the Chairman to set one up for you in Staff HQ.</p>
+    </form>
+  </section>
+
   <!-- STEP 1: choose the match -->
-  <section class="ps-step" id="step-start">
-    <h1>Matchday Programme</h1>
-    <p class="ps-lead">Build the printed programme for a home match. Choose the match, edit the pages, check the booklet, then download the PDF for the printer. Downloading never publishes anything on the website.</p>
+  <section class="ps-step" id="step-start" hidden>
+    <p class="ps-lead">Choose the match, edit the pages, check the booklet, download the PDF for the printer — and, when it is approved, publish it on the website. Downloading never publishes anything.</p>
     <div class="ps-card">
       <h2>Prepare a home programme</h2>
       <label class="ps-label" for="fx-pick">Home match</label>
@@ -32,29 +52,33 @@
       <p class="ps-hint" id="fx-hint"></p>
       <button class="ps-btn ps-btn--main" id="btn-new" type="button">Start this programme</button>
     </div>
-    <div class="ps-card" id="drafts-card" hidden>
-      <h2>Continue a draft</h2>
-      <ul id="drafts" class="ps-drafts"></ul>
+    <div class="ps-card" id="drafts-card">
+      <h2>Continue a programme</h2>
+      <ul id="drafts" class="ps-drafts"><li class="ps-hint">Loading…</li></ul>
     </div>
     <div class="ps-card">
-      <h2>Open a draft from another computer</h2>
-      <p class="ps-hint">If a colleague saved a draft file and sent it to you, open it here.</p>
-      <label class="ps-btn ps-btn--plain" for="open-file">Open draft file…</label>
-      <input type="file" id="open-file" accept=".json,application/json" hidden>
+      <h2>Previous programmes</h2>
+      <p class="ps-hint">Published programmes are on the website, with every version kept.</p>
+      <a class="ps-btn ps-btn--plain" href="programmes.html">Open the programme collection</a>
     </div>
+    <div class="ps-card" id="profile-card"></div>
   </section>
 
   <!-- STEP 2: edit pages -->
   <section class="ps-step" id="step-edit" hidden>
     <div class="ps-bar">
       <button class="ps-btn ps-btn--plain" id="btn-back" type="button">← All programmes</button>
-      <h2 id="ed-title"></h2>
+      <h2 id="ed-title" class="ps-bar__title"></h2>
       <div class="ps-bar__acts">
+        <button class="ps-btn ps-btn--plain" id="btn-undo" type="button" aria-keyshortcuts="Control+Z Meta+Z">Undo</button>
+        <button class="ps-btn ps-btn--plain" id="btn-redo" type="button" aria-keyshortcuts="Control+Y Meta+Shift+Z">Redo</button>
         <button class="ps-btn ps-btn--plain" id="btn-save" type="button">Save now</button>
-        <button class="ps-btn ps-btn--plain" id="btn-export-draft" type="button">Save draft file</button>
+        <button class="ps-btn ps-btn--plain" id="btn-history" type="button">Versions</button>
         <button class="ps-btn ps-btn--main" id="btn-check" type="button">Check booklet</button>
       </div>
     </div>
+    <div class="ps-flow" id="flow" aria-label="Where this programme is up to"></div>
+    <div class="ps-notice" id="notice" role="region" aria-live="polite" hidden></div>
     <div class="ps-edit">
       <nav class="ps-thumbs" id="thumbs" aria-label="Pages"></nav>
       <div class="ps-form" id="form"></div>
@@ -62,24 +86,34 @@
     </div>
   </section>
 
-  <!-- STEP 3/4: check booklet and download -->
+  <!-- STEP 3–5: check, download, publish -->
   <section class="ps-step" id="step-check" hidden>
     <div class="ps-bar">
       <button class="ps-btn ps-btn--plain" id="btn-back-edit" type="button">← Back to editing</button>
-      <h2>Check the booklet</h2>
-      <div class="ps-bar__acts"><button class="ps-btn ps-btn--main" id="btn-pdf" type="button">Download PDF for printer</button></div>
+      <h2 class="ps-bar__title">Check the booklet</h2>
     </div>
-    <div class="ps-card" id="checks"></div>
-    <p class="ps-hint" id="pdf-note">The PDF is A5 portrait (148 × 210 mm) with a provisional 3 mm bleed on every side, in reading order — front cover first, back cover last. It is a <strong>proof</strong> in RGB colour: confirm size, bleed and colour requirements with the printer before the first run.</p>
+    <div class="ps-grid2">
+      <div class="ps-card" id="checks"></div>
+      <div>
+        <div class="ps-card" id="download-card"></div>
+        <div class="ps-card" id="publish-card"></div>
+      </div>
+    </div>
     <div class="ps-spreads" id="spreads"></div>
   </section>
 </main>
 
-<!-- Off-screen stage the PDF is rendered from: the same page HTML as the preview. -->
+<!-- Dialogs: one at a time, focus moves into them, Escape closes. -->
+<div class="ps-dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-h" hidden>
+  <div class="ps-dialog__box"><h2 id="dialog-h"></h2><div id="dialog-body"></div></div>
+</div>
+
+<!-- Off-screen stage the PDF is drawn from: the same page HTML as the preview. -->
 <div id="ps-stage" aria-hidden="true"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
-<script src="js/programme-studio.js?v=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+<script src="js/programme-studio-pdf.js?v=2"></script>
+<script src="js/programme-studio.js?v=3"></script>
 </body>
 </html>
