@@ -94,7 +94,10 @@ exports.handler = async function (event) {
       const cur = await STORE.readDraft(store, b.fixtureId);
       const wasApproved = cur && cur.draft.status === 'approved';
       if (c.doc.status === 'approved' && !wasApproved) c.doc.status = 'review';
-      if (wasApproved && JSON.stringify(cur.draft.doc.pages) !== JSON.stringify(c.doc.pages)) c.doc.status = 'review';
+      // ANY change to an approved programme — pages, squad, match details,
+      // deadline — sends it back for review; only an identical save keeps it.
+      const sameAs = (a, b) => JSON.stringify(Object.assign({}, a, { status: null })) === JSON.stringify(Object.assign({}, b, { status: null }));
+      if (wasApproved && !sameAs(cur.draft.doc, c.doc)) c.doc.status = 'review';
       const r = await STORE.saveDraft(store, b.fixtureId, c.doc, parseInt(b.baseRevision, 10) || 0, who, String(b.note || '').slice(0, 200));
       if (!r.ok) return resp(409, { ok: false, conflict: true, current: r.current,
         error: 'Someone else saved this programme while you were editing.' });

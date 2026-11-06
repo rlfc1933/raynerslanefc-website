@@ -38,7 +38,7 @@ function seeded(opts) {
 }
 
 async function run(sync, nowMs) {
-  const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {}, _now: nowMs });
+  const out = await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {}, _now: nowMs });
   return JSON.parse(out.body);
 }
 const ed = (db, ext) => db.programme_editions.filter((e) => e.external_fixture_id === ext)[0];

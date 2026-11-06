@@ -146,7 +146,7 @@ exports.handler = async function (ev) {
 
     if (action === 'run') {
       const sync = require('./programme-sync');
-      const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} });
+      const out = await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} });
       return resp(200, Object.assign({ triggered: true }, JSON.parse(out.body || '{}')));
     }
 
@@ -236,7 +236,7 @@ exports.handler = async function (ev) {
         retrospective_note: clean(b.reason, 500) || null });
       await event(ed, 'retrospective_authorised', { actor: who, reason: clean(b.reason, 500), key: 'retro-auth:' + ed.id });
       const sync = require('./programme-sync');
-      const out = JSON.parse((await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} })).body || '{}');
+      const out = JSON.parse((await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} })).body || '{}');
       const after = await editionFor(b.fixtureId);
       return resp(200, { ok: !!(after && after.published_at), state: after && after.state, run: out.ok,
         message: after && after.published_at ? 'Archive Edition published — labelled as reconstructed, dated today.'

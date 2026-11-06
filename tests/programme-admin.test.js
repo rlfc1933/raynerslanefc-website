@@ -38,7 +38,7 @@ async function setup() {
   FAKE.seedRegistry(db, SEASON.corrected());
   const restore = FAKE.install(db);
   const F = load();
-  await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+  await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
   return { db, restore, F };
 }
 const ed = (db, ext) => db.programme_editions.filter((e) => e.external_fixture_id === ext)[0];
@@ -93,7 +93,7 @@ test('approve → matchday publish → the archive lists it; unpublish keeps it;
   try {
     const a = await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
     assert.strictEqual(a.ok, true, a.error);
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     assert.strictEqual(ed(db, '578384').state, 'published_matchday');
 
     let list = JSON.parse((await F.data.handler({ queryStringParameters: {} })).body);
@@ -105,7 +105,7 @@ test('approve → matchday publish → the archive lists it; unpublish keeps it;
     assert.ok(!list.editions.some((e) => e.fixtureId === 'fwp-578384'), 'no longer public');
     assert.strictEqual(db.programme_versions.filter((v) => v.edition_id === ed(db, '578384').id).length, 1, 'nothing deleted');
     // the timer does not undo a person's decision
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T10:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T10:00:00Z') });
     assert.strictEqual(ed(db, '578384').state, 'withheld');
 
     const r = await call(F.admin, { action: 'restore', fixtureId: 'fwp-578384', by: 'Pete' });
@@ -135,7 +135,7 @@ test('rollback and name correction are new versions; history is kept', async () 
   const { db, restore, F } = await setup();
   try {
     await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     const e = ed(db, '578384');
     const fx = db.football_fixtures.filter((f) => f.external_fixture_id === '578384')[0];
     [fx.home_team_id, fx.away_team_id].forEach((team, s) => {
@@ -144,7 +144,7 @@ test('rollback and name correction are new versions; history is kept', async () 
       for (let i = 1; i <= 14; i++) db.football_lineup_players.push({ lineup_id: id, provider_player_name: (s ? 'Away ' : 'Home ') + i,
         shirt_number: String(i), lineup_role: i <= 11 ? 'starter' : 'substitute', sort_order: i });
     });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T14:10:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T14:10:00Z') });
     assert.strictEqual(e.current_version, 2);
 
     const c = await call(F.admin, { action: 'correct_player', fixtureId: 'fwp-578384', by: 'Jenny', side: 'home',
@@ -154,7 +154,7 @@ test('rollback and name correction are new versions; history is kept', async () 
     // a later provider refresh keeps the correction
     db.football_lineup_players.filter((p) => p.provider_player_name === 'Away 12')[0].lineup_role = 'starter';
     db.football_lineup_players.filter((p) => p.provider_player_name === 'Away 11')[0].lineup_role = 'substitute';
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T17:30:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T17:30:00Z') });
 
     const rb = await call(F.admin, { action: 'rollback', fixtureId: 'fwp-578384', by: 'Pete', toVersion: 1, reason: 'test' });
     assert.strictEqual(rb.ok, true, rb.error);
@@ -173,7 +173,7 @@ test('a sponsor saved without an agreed deal is a proposal and never renders', a
       sponsorName: 'Prospect Bakery', approve: true /* but confirmAgreed missing */ });
     assert.strictEqual(db.programme_sponsor_placements[0].approval_status, 'proposed');
     await call(F.admin, { action: 'approve_editorial', fixtureId: 'fwp-578384', by: 'Jenny' });
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: Date.parse('2026-10-31T09:00:00Z') });
     const v = db.programme_versions.filter((x) => x.edition_id === ed(db, '578384').id)[0];
     assert.ok(!JSON.stringify(v.payload).includes('Prospect Bakery'));
   } finally { restore(); }

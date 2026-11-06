@@ -343,13 +343,16 @@ exports.handler = async function (event) {
   const q = (event && event.queryStringParameters) || {};
   let body = {};
   try { body = JSON.parse((event && event.body) || '{}'); } catch (e) { /* GET */ }
-  // Applying over HTTP needs a personal session with publishing rights, or the
-  // server-only internal key. The scheduled run never applies through here.
-  if (q.apply === '1' || body.apply === true) {
-    if (!GATE.internalKey(body.pin || q.pin)) {
-      const g = await GATE.gate(event, GATE.CAP.PUBLISH);
-      if (!g.ok) return g.response;
-    }
+  // Every run can publish, so every run is authorised:
+  //   · Netlify's scheduler (its body carries next_run; the platform refuses
+  //     direct web requests to a scheduled function),
+  //   · an in-process call from a function that already checked the caller
+  //     (event._internal — a web request cannot set it), or
+  //   · a publisher's personal session, or the server-only internal key.
+  const scheduled = typeof body.next_run === 'string';
+  if (!(event && event._internal === true) && !scheduled && !GATE.internalKey(body.pin || q.pin)) {
+    const g = await GATE.gate(event, GATE.CAP.PUBLISH);
+    if (!g.ok) return g.response;
   }
   if (!S.configured()) return resp(200, { ok: false, error: 'supabase not configured' });
 

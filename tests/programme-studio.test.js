@@ -201,7 +201,7 @@ test('PREVIEW: publishing writes only to the preview\'s own store and shows in t
   const restore = FAKE.install(db);
   try {
     const F = load();
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
     const before = JSON.stringify([db.programme_editions, db.programme_versions, db.programme_sections]);
     await approved(F);
     const p = await call(F, { action: 'publish', fixtureId: 'fwp-578384', baseRevision: 2, when: 'now' });
@@ -224,7 +224,7 @@ test('PRODUCTION: publishing goes through the edition model and is only "Publish
   const restore = FAKE.install(db);
   try {
     const F = load();
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
     const o = { host: PROD, user: 'test.chair' };
     const d0 = draft(); d0.fixture = Object.assign({}, d0.fixture, { id: 'fwp-578395', date: '2026-11-07' });
     await call(F, { action: 'save', fixtureId: 'fwp-578395', baseRevision: 0, doc: d0 }, o);
@@ -297,7 +297,7 @@ test('a plain approval clears an earlier "publish from" time; a chosen time neve
   try {
     const F = load();
     const admin = require('../netlify/functions/programme-admin');
-    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+    await F.sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
     const t = tok('test.chair');
     const call2 = async (b, now) => JSON.parse((await admin.handler({ httpMethod: 'POST', headers: { host: PROD, authorization: 'Bearer ' + t },
       body: JSON.stringify(b), _now: now })).body);
@@ -324,4 +324,28 @@ test('a section changed after a correction was approved waits for a fresh approv
     now: Date.parse('2026-11-07T10:10:00Z'), teams: { status: 'pending' }, contentValid: true, homeLineup: [], awayLineup: [] });
   assert.strictEqual(d.action, 'hold');
   assert.match(d.reasons[0], /after the correction was approved/);
+});
+
+test('the engine cannot be run by a web request without a publisher, whatever it sends', async () => {
+  const db = FAKE.makeDb(); FAKE.seedRegistry(db, SEASON.corrected());
+  const restore = FAKE.install(db);
+  try {
+    const F = load();
+    for (const body of ['{}', '{"apply":false}', '{"pin":"1933"}']) {
+      const r = await F.sync.handler({ httpMethod: 'POST', headers: { host: PROD }, body, queryStringParameters: {} });
+      assert.strictEqual(r.statusCode, 401, body);
+    }
+    const editor = await F.sync.handler({ httpMethod: 'POST', headers: { host: PROD, authorization: 'Bearer ' + tok('e', 'Programme Editor') }, body: '{}', queryStringParameters: {} });
+    assert.strictEqual(editor.statusCode, 403);
+    assert.strictEqual(db.programme_editions.length, 0, 'nothing was created by the refused calls');
+  } finally { restore(); }
+});
+
+test('changing anything on an approved programme sends it back for review', async () => {
+  const F = load();
+  await call(F, { action: 'save', fixtureId: 'fwp-578384', baseRevision: 0, doc: draft() });
+  await call(F, { action: 'approve', fixtureId: 'fwp-578384', baseRevision: 1 });
+  const d = draft({ status: 'approved', squad: [{ id: 'test-player', name: 'Test Player', pos: 'Forward' }] });
+  const s = await call(F, { action: 'save', fixtureId: 'fwp-578384', baseRevision: 2, doc: d }, { role: 'Programme Editor' });
+  assert.strictEqual(s.draftStatus, 'review', 'a squad change alone is still a change');
 });

@@ -63,7 +63,8 @@ exports.handler = async function (event) {
     // Then run the engine, which will now find the authorisation and publish.
   }
 
-  const out = await sync.handler({ httpMethod: 'POST', body: '{}', queryStringParameters: {} });
+  // Trusted in-process call: the publisher's session was checked above.
+  const out = await sync.handler({ _internal: true, httpMethod: 'POST', body: '{}', queryStringParameters: {} });
   let parsed = {};
   try { parsed = JSON.parse(out.body || '{}'); } catch (e) { /* pass through */ }
   return resp(200, Object.assign({ triggered: true }, parsed));
