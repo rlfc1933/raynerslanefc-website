@@ -47,6 +47,12 @@ function similar(a, b) {
   const sa = pa[pa.length - 1], sb = pb[pb.length - 1], fa = pa[0], fb = pb[0];
   if (sa === sb && (fa === fb || (fa.length === 1 && fb[0] === fa) || (fb.length === 1 && fa[0] === fb) ||
       fa.startsWith(fb) || fb.startsWith(fa))) return true;
+  // Same first name and one name carries an extra surname (Mateo Dos Reis ↔
+  // Mateo Dos Reis Guerra): every part of the shorter, in order, at the start.
+  const short = pa.length <= pb.length ? pa : pb, long = pa.length <= pb.length ? pb : pa;
+  if (short.length >= 2 && short.length < long.length && short.every((t, i) => long[i] === t)) return true;
+  // Shortened first name and a surname one letter out (Josh Andrew ↔ Joshua Andrews).
+  if ((fa.startsWith(fb) || fb.startsWith(fa)) && Math.min(fa.length, fb.length) >= 3 && sa.length > 3 && distance(sa, sb) <= 1) return true;
   return A.length > 6 && distance(A, B) <= 2;
 }
 
