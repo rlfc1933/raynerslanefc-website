@@ -87,8 +87,12 @@ test('no session, a shared-password session and a role without roster rights are
     assert.strictEqual(vc.status, 403);
     assert.strictEqual((await call(F.photo, { playerId: 'pv-1' }, { auth: 'shared' })).status, 403);
     assert.strictEqual((await call(F.photo, { playerId: 'pv-1' }, { token: null })).status, 401);
-    // Reading the card only needs a signed session.
-    assert.strictEqual((await call(F.review, { action: 'status' }, { role: 'V Chairman' })).ok, true);
+    // Reading is not open to any token either: personal session + roster or programme rights.
+    assert.strictEqual((await call(F.review, { action: 'status' }, { role: 'V Chairman' })).status, 403);
+    assert.strictEqual((await call(F.review, { action: 'status' }, { auth: 'shared' })).status, 403);
+    assert.strictEqual((await call(F.review, { action: 'queue' }, { auth: 'shared' })).status, 403);
+    assert.strictEqual((await call(F.review, { action: 'status' }, { role: 'Programme Editor' })).ok, true, 'programme editors see the card');
+    assert.strictEqual((await call(F.review, { action: 'queue' }, { role: 'V Chairman' })).status, 403, 'no roster rights, no queue');
   } finally { done(); }
 });
 
@@ -300,4 +304,58 @@ test('names: variants are questions, different people are not merged', () => {
   const roster = [{ id: 1, name: 'Josh Adams', status: 'active' }];
   const p = RL.proposalsFromSource(roster, [{ sourceKey: 'fwp:1', name: 'Josh Adams', evidence: {} }], {});
   assert.strictEqual(p[0].kind, 'confirm_link', 'even an identical name is a question, not a merge');
+});
+
+/* ── security review: data exposure and path safety ───────────────────── */
+test('the queue exposes names and evidence only — no age, consent records or who typed a note', async () => {
+  const F = setup();
+  try {
+    await call(F.review, { action: 'import', names: 'Test Imported Person', sourceUrl: 'https://example.test/list', note: 'TEST note' });
+    const q = await call(F.review, { action: 'queue' });
+    q.players.forEach((p) => {
+      assert.deepStrictEqual(Object.keys(p).sort(), ['hasPhoto', 'id', 'name', 'photo', 'position', 'status']);
+    });
+    const kid = q.players.find((p) => p.name === 'Test Junior Keeper');
+    assert.ok(kid && !('age' in kid) && !('photoConsent' in kid));
+    q.proposals.forEach((p) => p.evidence.forEach((e) => {
+      assert.ok(!('enteredBy' in e), 'who entered evidence is not exposed');
+      assert.deepStrictEqual(Object.keys(e).sort(), ['checkedAt', 'note', 'season', 'source', 'url']);
+    }));
+    const st = await call(F.review, { action: 'status' });
+    assert.ok(!('proposals' in st) && !('players' in st), 'the card carries counts, not records');
+  } finally { done(); }
+});
+
+test('photo paths come only from the server-side player record, never from what the browser sends', async () => {
+  const P = require('../netlify/functions/squad-photo')._internal;
+  ['../../etc/passwd', 'a/b', 'a\\b', '%2e%2e%2fsecret', '..%2F..%2F', '   ', '//', 'Ünïcødé Näme', 'O\'Brien-Smith Jr.'].forEach((name) => {
+    const s = P.safeSlug({ id: 'x1', name });
+    assert.match(s, P.SAFE_SLUG, name + ' → ' + s);
+    assert.ok(!/[./\\%]/.test(s), 'no separators or encodings survive: ' + s);
+    assert.match('img/players/' + s + '-0123456789.jpg', P.SAFE_PATH);
+  });
+  assert.strictEqual(P.safeSlug({ id: 'x1', name: 'Test Alfa One' }), 'test-alfa-one');
+  assert.ok(!P.SAFE_PATH.test('img/players/../../x-0123456789.jpg'));
+  assert.ok(!P.SAFE_PATH.test('img/players/a/b-0123456789.jpg'));
+
+  // Through the handler: a hostile player id is refused before any lookup, and a
+  // player whose STORED name is hostile still gets a safe storage key.
+  const keys = [];
+  const mem = memoryBlobs();
+  ST.setBackend((name) => { const st = mem(name); const set = st.set.bind(st); st.set = (k, b, o) => { keys.push(name + ' :: ' + k); return set(k, b, o); }; return st; });
+  realFetch = global.fetch;
+  global.fetch = async () => ({ ok: true, json: async () => ({ players: [{ id: '../../etc/passwd', name: '../../etc/passwd', position: 'Defender', photo: '' }] }) });
+  try {
+    const photo = require('../netlify/functions/squad-photo');
+    for (const bad of ['../pv-1', 'pv-1/../../x', 'pv%2F1', '', 'a'.repeat(65)]) {
+      const r = await call(photo, { playerId: bad, web: durl(jpeg(400, 500)), consentConfirmed: true });
+      assert.strictEqual(r.status, 400, 'refused: ' + bad);
+    }
+    const ok = await call(photo, { playerId: 'pv-1', web: durl(jpeg(400, 500)), original: durl(jpeg(2000, 2500)), consentConfirmed: true });
+    assert.strictEqual(ok.ok, true, ok.error);
+    const orig = keys.filter((k) => /photo-originals/.test(k));
+    assert.strictEqual(orig.length, 1);
+    assert.match(orig[0], / :: etc-passwd\/[a-f0-9]{10}\.jpg$/, 'hostile name reduced to a safe key: ' + orig[0]);
+    keys.forEach((k) => assert.ok(!/\.\.|\\\\/.test(k.split(' :: ')[1]), 'no traversal in ' + k));
+  } finally { done(); }
 });

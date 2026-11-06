@@ -59,6 +59,14 @@ async function nextHome(scope, deps) {
   } catch (e) { return null; }
 }
 
+/** A proposal as the review screen sees it — no personal data beyond names. */
+function publicProposal(p) {
+  return { id: p.id, kind: p.kind, name: p.name, question: p.question, status: p.status,
+    candidates: (p.candidates || []).map((c) => ({ id: c.id, name: c.name, status: c.status })),
+    evidence: (p.evidence || []).map((e) => ({ source: e.source || null, url: e.url || null, season: e.season || null,
+      checkedAt: e.checkedAt || null, note: e.note || null })) };
+}
+
 function publicExpect(kind, data) {
   const n = RL.norm(data.name);
   if (kind === 'present') return (ps) => ps.some((p) => RL.norm(p.name) === n);
@@ -80,9 +88,15 @@ exports.handler = async function (event) {
 
   const sess = AZ.sessionFrom(event);
   if (!sess) return resp(401, { ok: false, error: 'Please sign in with your own staff password.' });
-  const READS = ['status', 'queue'];
+  // EVERY action needs a PERSONAL session: a shared-password token carries a
+  // role the caller typed. The card ('status') is for people who look after the
+  // squad or the programme; the queue and every change are roster work only.
   let who = sess;
-  if (READS.indexOf(action) < 0) {
+  if (action === 'status') {
+    if (!sess.elevated) return resp(403, { ok: false, error: 'This needs your own personal password, not the shared committee one.' });
+    const allowed = (await AZ.can(sess, AZ.CAP.MANAGE_ROSTER)) || (await AZ.can(sess, AZ.CAP.EDIT_PROGRAMME));
+    if (!allowed) return resp(403, { ok: false, error: 'Your account does not look after the squad.' });
+  } else {
     const g = await AZ.requireCap(event, AZ.CAP.MANAGE_ROSTER, { elevated: true });
     if (!g.ok) return g.response;
     who = g.session;
@@ -103,7 +117,7 @@ exports.handler = async function (event) {
       const until = (doc.remind || {})[sess.username];
       const out = {
         ok: true, preview: !scope.production,
-        lastConfirmed: (doc.reviews || [])[0] || null,
+        lastConfirmed: (doc.reviews || [])[0] ? { by: doc.reviews[0].by, at: doc.reviews[0].at } : null,
         pendingCount: pending.length,
         missingHeadshots: current.filter((p) => !p.photo_url).map((p) => ({ id: p.id, name: p.name })),
         currentCount: current.length,
@@ -111,8 +125,12 @@ exports.handler = async function (event) {
         remindUntil: until || null, sources: doc.sources || {}, nextHome: nh,
       };
       if (action === 'queue') {
-        out.proposals = pending;
-        out.players = players.map((p) => ({ id: p.id, name: p.name, position: p.position || '', status: p.status, photo: p.photo_url || '', age: p.age || null, photoConsent: p.photo_consent }));
+        // Only what the review screen needs: no age, contact details or consent
+        // records; evidence keeps its source, season, date and link — the free-
+        // text note is shown only to roster managers, who are the readers here.
+        out.proposals = pending.map(publicProposal);
+        out.players = players.map((p) => ({ id: p.id, name: p.name, position: p.position || '', status: p.status,
+          photo: p.photo_url || '', hasPhoto: !!p.photo_url }));
       }
       return resp(200, out);
     }
@@ -193,7 +211,7 @@ exports.handler = async function (event) {
       const prop = (doc.proposals || []).find((p) => p.id === b.proposalId);
       if (!prop) return resp(404, { ok: false, error: 'That item is no longer in the list.' });
       if (prop.status !== 'pending') {
-        return resp(200, { ok: true, already: true, message: 'Already dealt with by ' + (prop.resolvedBy || 'someone') + ' — nothing changed.', proposal: prop });
+        return resp(200, { ok: true, already: true, message: 'Already dealt with by ' + (prop.resolvedBy || 'someone') + ' — nothing changed.', proposal: publicProposal(prop) });
       }
       const ops = await rosterOps(event);
       const players = await ops.list();
@@ -259,7 +277,8 @@ exports.handler = async function (event) {
     return resp(400, { ok: false, error: 'Unknown action.' });
   } catch (e) {
     if (e && e.code === 'busy') return resp(409, { ok: false, error: 'Someone else saved at the same moment. Nothing was lost — please try again.' });
-    console.error('[squad-review]', (e && e.message) || e);
+    // Error class only: database errors can quote row contents.
+    console.error('[squad-review] failed:', action, (e && (e.code || e.name)) || 'error');
     return resp(200, { ok: false, error: 'The squad could not be updated just now. Nothing has changed — please try again.' });
   }
 };

@@ -23,6 +23,22 @@ const PUB = require('./lib/squad/publish');
 const REPO = 'rlfc1933/raynerslanefc-website';
 const LIMITS = { webMax: 900 * 1024, originalMax: 4 * 1024 * 1024, minSide: 300 };
 
+// Storage keys and the GitHub path are built ONLY from this: a slug derived on
+// the server from the player's stored record, reduced to a-z, 0-9 and single
+// hyphens. Names are free text (imports, typing), so "../", "/", "\\", "%2F"
+// and the like are removed here — never trusted, never passed through.
+const SAFE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SAFE_PATH = /^img\/players\/[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{10}\.jpg$/;
+function safeSlug(player) {
+  let raw = String(player.slug || player.name || '');
+  try { raw = decodeURIComponent(raw); } catch (e) { /* keep as typed */ }
+  const s = raw.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/^player-/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+  if (SAFE_SLUG.test(s)) return s;
+  // Nothing usable in the name: an opaque, still server-derived key.
+  return 'player-' + crypto.createHash('sha256').update(String(player.id)).digest('hex').slice(0, 12);
+}
+
 function resp(code, obj) {
   return { statusCode: code, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' }, body: JSON.stringify(obj) };
 }
@@ -61,6 +77,8 @@ exports.handler = async function (event) {
   const deps = event._deps || {};
 
   try {
+    // A player id is a database id or a preview id — nothing else is looked up.
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(String(b.playerId || ''))) return resp(400, { ok: false, error: 'Choose a player from the list.' });
     const R = await ST.roster(event);
     const players = await R.list();
     const p = players.find((x) => String(x.id) === String(b.playerId));
@@ -81,7 +99,7 @@ exports.handler = async function (event) {
     if (orig && orig.error) return resp(400, { ok: false, error: orig.error });
 
     const hash = crypto.createHash('sha256').update(web.buf).digest('hex').slice(0, 10);
-    const slug = (p.slug || ST.slug(p.name)).replace(/^player-/, '');
+    const slug = safeSlug(p);
     const scope = require('./lib/deploy-scope').scopeOf(event);
     const by = g.session.username, at = new Date().toISOString();
     const meta = { playerId: String(p.id), player: p.name, by, at, consent: p.photo_consent === true ? 'player-flag' : 'confirmed-by-staff',
@@ -95,6 +113,7 @@ exports.handler = async function (event) {
     if (scope.production) {
       if (!process.env.GITHUB_TOKEN) return resp(200, { ok: false, retry: true, error: 'The website photo store is not configured. Nothing has changed.' });
       photoUrl = '/img/players/' + slug + '-' + hash + '.jpg';
+      if (!SAFE_PATH.test(photoUrl.slice(1))) return resp(400, { ok: false, error: 'That photo could not be filed safely. Nothing has changed.' });
       const ok = await (deps.commitImage || commitImage)(photoUrl.slice(1), web.buf, 'Player photo: ' + p.name + ' (' + by + ')');
       if (!ok) return resp(200, { ok: false, retry: true, error: 'The photo could not be saved to the website. The player’s existing photo is unchanged — please try again.' });
       await R.patch(p.id, { photo_url: photoUrl });
@@ -114,9 +133,9 @@ exports.handler = async function (event) {
     return resp(200, { ok: true, photo: photoUrl, original: !!orig, website });
   } catch (e) {
     if (e && e.code === 'busy') return resp(409, { ok: false, error: 'Someone else saved at the same moment. Please try again.' });
-    console.error('[squad-photo]', (e && e.message) || e);
+    console.error('[squad-photo] failed:', (e && (e.code || e.name)) || 'error');
     return resp(200, { ok: false, retry: true, error: 'The photo could not be saved just now. The player’s existing photo is unchanged.' });
   }
 };
 
-exports._internal = { decode, LIMITS };
+exports._internal = { decode, LIMITS, safeSlug, SAFE_SLUG, SAFE_PATH };
