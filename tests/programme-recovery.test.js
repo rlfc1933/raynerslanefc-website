@@ -469,7 +469,7 @@ test('EVERY COLUMN THE SYNC WRITES EXISTS AND ACCEPTS THE VALUE', () => {
     'supabase/migrations/20261009160000_programme_publishing_system.sql'), 'utf8')
     // Programme Studio: publish-from time and approved corrections.
     + fs.readFileSync(path.join(ROOT,
-    'supabase/migrations/20261106120000_programme_studio_publishing.sql'), 'utf8');
+    'supabase/migrations/20261106130000_programme_studio_publishing.sql'), 'utf8');
 
   // Every patch.<column> the sync assigns must exist in the schema.
   const cols = [...new Set((sync.match(/patch\.([a-z_]+)\s*=/g) || [])
