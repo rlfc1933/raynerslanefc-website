@@ -279,3 +279,49 @@ test('the browser and the server agree on every page type and its fields', () =>
     assert.deepStrictEqual(keys, DOC.TYPES[t], t + ' fields differ');
   });
 });
+
+// ── 6 · SECURITY REVIEW REGRESSIONS ─────────────────────────────────────────
+test('a forged X-Forwarded-Host never turns the live site into a preview', () => {
+  const SCOPE = require('../netlify/functions/lib/deploy-scope');
+  const STORE = require('../netlify/functions/lib/programme/studio-store');
+  const ev = { headers: { host: PROD, 'x-forwarded-host': PREVIEW } };
+  assert.strictEqual(SCOPE.scopeOf(ev).production, true);
+  assert.strictEqual(STORE.storeName(ev), 'programme-studio');
+  assert.strictEqual(SCOPE.scopeOf({ headers: { host: 'something-unexpected.example' } }).production, false,
+    'an unknown host is a sandbox, never live');
+});
+
+test('a plain approval clears an earlier "publish from" time; a chosen time never publishes after kick-off', async () => {
+  const db = FAKE.makeDb(); FAKE.seedRegistry(db, SEASON.corrected());
+  const restore = FAKE.install(db);
+  try {
+    const F = load();
+    const admin = require('../netlify/functions/programme-admin');
+    await F.sync.handler({ httpMethod: 'POST', body: '{}', _now: SEASON.NOW });
+    const t = tok('test.chair');
+    const call2 = async (b, now) => JSON.parse((await admin.handler({ httpMethod: 'POST', headers: { host: PROD, authorization: 'Bearer ' + t },
+      body: JSON.stringify(b), _now: now })).body);
+    const ed = () => db.programme_editions.filter((e) => e.internal_fixture_id === 'fwp-578415')[0];
+    await call2({ action: 'approve_editorial', fixtureId: 'fwp-578415', publishAt: new Date().toISOString() });
+    assert.ok(ed().publish_not_before);
+    await call2({ action: 'approve_editorial', fixtureId: 'fwp-578415' });
+    assert.strictEqual(ed().publish_not_before, null, 'the old time does not carry over');
+    // Chosen time in the past AND kick-off already gone: the engine must not publish it as a chosen-time edition.
+    const LC = require('../netlify/functions/lib/programme/lifecycle');
+    const decision = LC.decideStage({ fixture: { scheduled_kickoff_at: '2026-11-01T15:00:00Z', status: 'scheduled' },
+      edition: { editorial_approved_at: '2026-10-01T00:00:00Z', publish_not_before: '2026-10-01T00:00:00Z' },
+      now: Date.parse('2026-11-06T12:00:00Z'), teams: { status: 'pending' }, contentValid: true, homeLineup: [], awayLineup: [] });
+    assert.notStrictEqual(decision.action, 'publish');
+  } finally { restore(); }
+});
+
+test('a section changed after a correction was approved waits for a fresh approval', () => {
+  const LC = require('../netlify/functions/lib/programme/lifecycle');
+  const d = LC.decideStage({ fixture: { scheduled_kickoff_at: '2026-11-07T15:00:00Z', status: 'scheduled' },
+    edition: { published_at: '2026-11-07T09:00:00Z', state: 'published_matchday', correction_approved_at: '2026-11-07T10:00:00Z',
+      published_editorial_hash: 'old' },
+    editorialHash: 'new', editorialUpdatedAt: '2026-11-07T10:05:00Z',
+    now: Date.parse('2026-11-07T10:10:00Z'), teams: { status: 'pending' }, contentValid: true, homeLineup: [], awayLineup: [] });
+  assert.strictEqual(d.action, 'hold');
+  assert.match(d.reasons[0], /after the correction was approved/);
+});

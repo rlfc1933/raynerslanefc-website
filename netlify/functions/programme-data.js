@@ -270,7 +270,7 @@ exports.handler = async function (event) {
       // a fixture (a cup tie included) just because it has no edition.
       ledger: await seasonLedger(),
       ledgerAsOf: new Date().toISOString(),
-    }, 120);
+    }, SANDBOX ? 0 : 120);   // a preview's answer is never cached anywhere
   } catch (e) {
     return resp(200, { ok: false, error: String(e && e.message || e) });
   }

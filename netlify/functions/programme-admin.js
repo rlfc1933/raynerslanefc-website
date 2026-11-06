@@ -177,7 +177,9 @@ exports.handler = async function (ev) {
       const from = b.publishAt ? Date.parse(b.publishAt) : NaN;
       const patch = { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
         state: ed.state === 'ready_for_review' ? 'approved' : ed.state };
-      if (isFinite(from)) patch.publish_not_before = new Date(Math.max(from, Date.parse(at))).toISOString();
+      // Always set: a plain approval clears any earlier chosen time, so an old
+      // "publish now" never carries over to a later approval.
+      patch.publish_not_before = isFinite(from) ? new Date(Math.max(from, Date.parse(at))).toISOString() : null;
       await patchEdition(ed.id, patch);
       await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at,
         reason: isFinite(from) ? 'publish from ' + patch.publish_not_before : null });
@@ -208,7 +210,7 @@ exports.handler = async function (ev) {
       const row = { edition_id: editionId, section_key: key, title: clean(b.title, 140) || null,
         body: clean(b.body, 8000) || null, byline: clean(b.byline, 80) || null,
         data: b.data && typeof b.data === 'object' ? b.data : null,
-        source: b.evergreen ? 'evergreen' : 'manual', updated_by: who,
+        source: b.evergreen ? 'evergreen' : 'manual', updated_by: who, updated_at: new Date().toISOString(),
         approved_by: b.approve ? who : null, approved_at: b.approve ? new Date().toISOString() : null,
         preapproved: !!(b.evergreen && b.approve && key !== 'chairNotes') };
       const existing = await S.findOne('programme_sections', (editionId == null ? 'edition_id=is.null' : 'edition_id=eq.' + editionId) +

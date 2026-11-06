@@ -528,6 +528,7 @@ exports.handler = async function (event) {
           homeLineup: lineups.home, awayLineup: lineups.away, teams: ts,
           isFinal: !!(state && state.is_final), contentValid: built.validation.ok,
           editorialHash, result,
+          editorialUpdatedAt: editorial.sections.reduce((m, s) => (s.edition_id != null && s.updated_at && (!m || s.updated_at > m) ? s.updated_at : m), null),
         });
         // The engine's decision, with publication decided by the stage model.
         const decision = Object.assign({}, base, { state: stage.state || base.state,

@@ -200,7 +200,12 @@ function decideStage(input) {
         reasons: ['editorial content changed after approval — needs a fresh look'] };
     }
     // Matchday morning as before — or from the time a person chose when approving.
-    var fromChosen = ed.publish_not_before && isFinite(Date.parse(ed.publish_not_before)) && now >= Date.parse(ed.publish_not_before);
+    // Fails closed: only BEFORE kick-off (afterwards the matchday/recovery rules
+    // decide), never for a withheld edition, never on a stale or unparseable time.
+    var chosenMs = ed.publish_not_before ? Date.parse(ed.publish_not_before) : NaN;
+    var koChosen = Date.parse(fx.scheduled_kickoff_at);
+    var fromChosen = isFinite(chosenMs) && now >= chosenMs && isFinite(koChosen) && now < koChosen &&
+      base.state !== RULES.STATES.WITHHELD && !base.recovery;
     if (approved && input.contentValid && (RULES.isMatchday(fx, now) || fromChosen)) {
       var koMs = Date.parse(fx.scheduled_kickoff_at);
       return { action: 'publish', state: isFinite(koMs) && now >= koMs ? RULES.STATES.PUBLISHED_LATE
@@ -218,7 +223,15 @@ function decideStage(input) {
   // Only when a publisher approved a correction after publication AND the
   // approved words actually differ from what was published. The previous
   // versions stay exactly as they were.
-  if (ed.correction_approved_at && input.editorialHash && input.editorialHash !== ed.published_editorial_hash) {
+  // Bound to the words approved: a section changed AFTER the approval waits for
+  // a fresh one rather than riding along on it.
+  var corrMs = ed.correction_approved_at ? Date.parse(ed.correction_approved_at) : NaN;
+  var editedMs = input.editorialUpdatedAt ? Date.parse(input.editorialUpdatedAt) : NaN;
+  if (isFinite(corrMs) && isFinite(editedMs) && editedMs > corrMs) {
+    return { action: 'hold', state: ed.state, stage: null,
+      reasons: ['editorial changed after the correction was approved — needs a fresh approval'] };
+  }
+  if (isFinite(corrMs) && input.editorialHash && input.editorialHash !== ed.published_editorial_hash) {
     return { action: 'revise', state: ed.state, stage: 'correction',
       reasons: ['editorial correction approved by ' + (ed.correction_approved_by || 'a publisher')] };
   }

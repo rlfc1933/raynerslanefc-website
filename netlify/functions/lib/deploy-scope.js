@@ -16,9 +16,17 @@
 const PRODUCTION_HOSTS = ['raynerslanefc.co.uk', 'www.raynerslanefc.co.uk',
   'raynerslanefc.netlify.app', 'main--raynerslanefc.netlify.app'];
 
+const SANDBOX_KEY = /^(deploy-preview-\d+|[a-z0-9-]{1,40})--raynerslanefc\.netlify\.app$/;
+
+/**
+ * The Host header ONLY. X-Forwarded-Host is set by whoever sends the request,
+ * so it is never read: a request to the live site claiming a preview host in
+ * it must not reach preview behaviour. Host itself is what Netlify routed on,
+ * so the production deploy only ever sees production hosts.
+ */
 function hostOf(event) {
   const h = (event && event.headers) || {};
-  return String(h['x-forwarded-host'] || h.host || h.Host || '').toLowerCase().split(':')[0];
+  return String(h.host || h.Host || '').toLowerCase().split(':')[0];
 }
 
 /**
@@ -27,10 +35,15 @@ function hostOf(event) {
  */
 function scopeOf(event) {
   const host = hostOf(event);
-  const production = PRODUCTION_HOSTS.indexOf(host) > -1;
-  const m = host.match(/^(deploy-preview-\d+|[a-z0-9-]+?)--raynerslanefc\.netlify\.app$/);
-  const key = production ? 'production' : (m ? m[1] : (host.replace(/[^a-z0-9-]/g, '-') || 'local'));
-  return { production, host, key };
+  // Live: one of the club's real hosts, or Netlify's own production context.
+  // Everything else — a preview, a branch deploy, a host nobody expected — is a
+  // sandbox, so preview code can never write to the live database by accident.
+  if (PRODUCTION_HOSTS.indexOf(host) > -1 || process.env.CONTEXT === 'production') {
+    return { production: true, host, key: 'production' };
+  }
+  const m = SANDBOX_KEY.exec(host);
+  const key = m ? m[1] : (host.replace(/[^a-z0-9-]/g, '-').slice(0, 40) || 'local');
+  return { production: false, host, key };
 }
 
 module.exports = { scopeOf, hostOf, PRODUCTION_HOSTS };

@@ -20,7 +20,20 @@ function resp(code, obj, extra) {
     body: JSON.stringify(obj) };
 }
 
-const PUBLISHING = ['approve', 'publish'];
+const PUBLISHING = ['approve', 'publish', 'set_profile'];
+
+// The club's printer requirements, set once. Until a person confirms them with
+// the printer, every PDF is labelled a proof.
+const PROFILE_DEFAULT = { printer: '', trim: 'A5', bleedMm: 3, safeMm: 8, colour: 'unknown', standard: 'none',
+  cropMarks: false, confirmed: false, confirmedBy: null, confirmedAt: null };
+function cleanProfile(p) {
+  const x = p || {};
+  return { printer: String(x.printer || '').slice(0, 80), trim: x.trim === 'A4' ? 'A4' : 'A5',
+    bleedMm: Math.min(5, Math.max(0, parseFloat(x.bleedMm) || 0)), safeMm: Math.min(20, Math.max(3, parseFloat(x.safeMm) || 8)),
+    colour: ['rgb', 'cmyk', 'unknown'].indexOf(x.colour) > -1 ? x.colour : 'unknown',
+    standard: ['none', 'pdfx1a', 'pdfx4'].indexOf(x.standard) > -1 ? x.standard : 'none', cropMarks: !!x.cropMarks,
+    confirmed: !!x.confirmed };
+}
 
 exports.handler = async function (event) {
   // Pictures are fetched by the Studio with its session header and shown from a
@@ -54,6 +67,19 @@ exports.handler = async function (event) {
     }
 
     if (action === 'list') return resp(200, { ok: true, drafts: await STORE.listDrafts(store) });
+
+    if (action === 'get_profile') {
+      const p = await store.get('settings/printer-profile', { type: 'json' });
+      return resp(200, { ok: true, profile: Object.assign({}, PROFILE_DEFAULT, p || {}) });
+    }
+    if (action === 'set_profile') {
+      const p = cleanProfile(b.profile);
+      p.confirmedBy = p.confirmed ? who : null;
+      p.confirmedAt = p.confirmed ? new Date().toISOString() : null;
+      p.updatedBy = who; p.updatedAt = new Date().toISOString();
+      await store.setJSON('settings/printer-profile', p);
+      return resp(200, { ok: true, profile: p });
+    }
 
     if (action === 'get') {
       const r = await STORE.readDraft(store, b.fixtureId);

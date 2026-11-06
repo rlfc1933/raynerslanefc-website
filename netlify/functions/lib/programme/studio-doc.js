@@ -63,7 +63,13 @@ function clean(input) {
   }
   const status = STATUSES.indexOf(d.status) > -1 ? d.status : 'draft';
   const printDeadline = /^\d{4}-\d{2}-\d{2}$/.test(String(d.printDeadline || '')) ? d.printDeadline : '';
-  return { ok: true, doc: { fixture, pages, status, printDeadline, squadAsOf: str(d.squadAsOf, 30), template: 'a5-24-v1' } };
+  // The squad as it stood when this programme was prepared. Pages render from
+  // THIS, so a later signing or departure never rewrites an exported booklet;
+  // the Studio offers "Squad updates available" instead.
+  const squad = (Array.isArray(d.squad) ? d.squad : []).slice(0, 80).map((x) => ({
+    id: str(x && x.id, 80), name: str(x && x.name, 80), pos: str(x && x.pos, 40), no: /^\d{1,2}$/.test(String(x && x.no)) ? +x.no : null,
+    photo: isImageRef(String((x && x.photo) || '')) ? String(x.photo) : '' })).filter((x) => x.name);
+  return { ok: true, doc: { fixture, pages, status, printDeadline, squad, squadAsOf: str(d.squadAsOf, 30), template: 'a5-24-v1' } };
 }
 
 module.exports = { TYPES, ROLES, STATUSES, clean, isImageRef };

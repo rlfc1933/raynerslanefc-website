@@ -12,27 +12,21 @@
 //   assets/<sha256>                 pictures, by content hash, served only to staff
 //
 // WHICH STORE: deploy previews share the production DATABASE, so their Studio
-// data must not share production's store. The request's host decides: the
-// club's real hosts use 'programme-studio'; any other deploy uses a store named
-// after that deploy's host. Netlify routes by host, so a preview cannot reach
-// production's function and production never sees a preview host.
+// data must not share production's store. lib/deploy-scope.js decides — from
+// the Host header Netlify routed on (never X-Forwarded-Host), failing closed
+// to production for anything that is not this site's preview address.
 // ════════════════════════════════════════════════════════════════════════════
 'use strict';
 
 const crypto = require('crypto');
 
-const PRODUCTION_HOSTS = ['raynerslanefc.co.uk', 'www.raynerslanefc.co.uk', 'raynerslanefc.netlify.app', 'main--raynerslanefc.netlify.app'];
-
-function hostOf(event) {
-  const h = (event && event.headers) || {};
-  return String(h['x-forwarded-host'] || h.host || '').toLowerCase().split(':')[0];
-}
-function isProduction(event) { return PRODUCTION_HOSTS.indexOf(hostOf(event)) > -1; }
+// One answer to "is this the live site?", shared with the squad tools.
+const SCOPE = require('../deploy-scope');
+function hostOf(event) { return SCOPE.hostOf(event); }
+function isProduction(event) { return SCOPE.scopeOf(event).production; }
 function storeName(event) {
-  if (isProduction(event)) return 'programme-studio';
-  // e.g. deploy-preview-34--raynerslanefc.netlify.app → programme-studio--deploy-preview-34
-  const label = hostOf(event).split('--')[0].replace(/[^a-z0-9-]/g, '').slice(0, 40) || 'local';
-  return 'programme-studio--' + label;
+  const sc = SCOPE.scopeOf(event);
+  return sc.production ? 'programme-studio' : 'programme-studio--' + sc.key.replace(/[^a-z0-9-]/g, '').slice(0, 40);
 }
 
 // Tests swap the backend for an in-memory one with the same semantics.
