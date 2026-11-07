@@ -2,8 +2,9 @@
    LANE MOTION — the site's scroll-driven storytelling (GSAP + ScrollTrigger).
    DESIGN.md §5 and impeccable/animate: motion explains; it never decorates
    and never hides information. Everything here:
-     · is skipped entirely under prefers-reduced-motion or the a11y panel's
-       reduce-motion switch (GSAP is not even downloaded);
+     · is skipped under prefers-reduced-motion or the a11y panel's
+       reduce-motion switch (GSAP is not even downloaded), and is reverted
+       to the static page if either is switched on after load;
      · starts from content that is already visible — if this file fails,
        nothing is missing;
      · loads GSAP after first paint, only on a page that has something for it.
@@ -27,50 +28,69 @@
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
-  var reduce = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
-    document.documentElement.classList.contains('a11y-reduce-motion');
-  if (reduce) return;
+  var mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  function reduced() {
+    return !!(mq && mq.matches) || document.documentElement.classList.contains('a11y-reduce-motion');
+  }
   var hasTimeline = !!document.getElementById('tl-list');
   var hasBoard = !!document.querySelector('.ptr-grid');
   var hasHero = !!document.querySelector('.kl-hero');
-  var hasPh = !!document.querySelector('.kl-ph .kl-ph__media');
+  var hasPh = !!document.querySelector('.kl-ph .kl-ph__media, .kl-ph .lane-weave');
   var hasRun = !!document.getElementById('kl-run');
   var hasVoice = !!document.querySelector('.kl-voice__q');
   var hasCard = !!document.getElementById('kl-lanecard');
   var hasCount = !!document.querySelector('[data-kl-count]');
-  if (!hasTimeline && !hasBoard && !hasHero && !hasPh && !hasRun && !hasVoice && !hasCard && !hasCount) return;
+  var hasGate = !!document.querySelector('.lane-gate__photo');
+  if (!hasTimeline && !hasBoard && !hasHero && !hasPh && !hasRun && !hasVoice && !hasCard && !hasCount && !hasGate) return;
 
   function load(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
-  function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
 
   // After first paint: GSAP must never compete with the page or match info.
   function afterPaint(fn) {
     if (document.readyState === 'complete') return setTimeout(fn, 0);
     window.addEventListener('load', function () { setTimeout(fn, 0); }, { once: true });
   }
-  afterPaint(function () {
-    load('js/vendor/gsap-3.15.0.min.js')
+
+  // Every tween lives in ONE gsap.context, so switching motion off — by the
+  // system setting or the site's accessibility panel, at any time — reverts
+  // every element to its static, CSS-defined state (not a frozen mid-scroll
+  // frame), and switching it back on rebuilds from that state.
+  var gsapP = null, ctx = null, restore = [];
+  function engine() {
+    if (!gsapP) gsapP = load('js/vendor/gsap-3.15.0.min.js')
       .then(function () { return load('js/vendor/ScrollTrigger-3.15.0.min.js'); })
       .then(function () {
-        var gsap = window.gsap; if (!gsap || !window.ScrollTrigger) return;
-        gsap.registerPlugin(window.ScrollTrigger);
-        // The a11y panel can switch motion off after load — honour it live.
-        new MutationObserver(function () {
-          if (document.documentElement.classList.contains('a11y-reduce-motion')) {
-            window.ScrollTrigger.getAll().forEach(function (t) { t.kill(true); }); gsap.globalTimeline.progress(1);
-          }
-        }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        if (!window.gsap || !window.ScrollTrigger) throw new Error('no gsap');
+        window.gsap.registerPlugin(window.ScrollTrigger);
+        return window.gsap;
+      });
+    return gsapP;
+  }
+  function start() {
+    if (ctx || reduced()) return;
+    engine().then(function (gsap) {
+      if (ctx || reduced()) return;
+      ctx = gsap.context(function () {
         if (hasTimeline) timeline(gsap);
         if (hasBoard) board(gsap);
         if (hasHero) hero(gsap);
         if (hasPh) pageTitle(gsap);
+        if (hasGate) gate(gsap);
         if (hasRun) runRail(gsap);
         if (hasVoice) voice(gsap);
         if (hasCard) laneCard(gsap);
         if (hasCount) tally(gsap);
-      })
-      .catch(function () { /* no motion is a fine outcome */ });
-  });
+      });
+    }).catch(function () { /* no motion is a fine outcome */ });
+  }
+  function stop() {
+    if (ctx) { ctx.revert(); ctx = null; }
+    restore.splice(0).forEach(function (f) { f(); });
+  }
+  function sync() { if (reduced()) stop(); else start(); }
+  if (mq) { if (mq.addEventListener) mq.addEventListener('change', sync); else if (mq.addListener) mq.addListener(sync); }
+  new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  afterPaint(sync);
 
   function timeline(gsap) {
     var list = document.getElementById('tl-list');
@@ -94,21 +114,43 @@
     }
   }
 
+  // FABRIC — the title card is three real layers: the woven sash, the
+  // photograph of Tithe Farm, and the club's name. Leaving it, they part
+  // gently: the photograph pushes in, the sash slides along its own line
+  // and the name lifts away. Small distances, scrubbed, nothing pinned.
+  // Each tween owns a different element (the <img> inside each layer), so
+  // nothing here competes with the CSS entrance on the name's lines.
   function hero(gsap) {
     var sec = document.querySelector('.kl-hero');
-    var media = sec.querySelector('.kl-hero__media'), word = sec.querySelector('.kl-hero__word');
+    var media = sec.querySelector('.kl-hero__media');
+    var photo = sec.querySelector('.lane-hero__photo img'), weave = sec.querySelector('.lane-hero__weave img');
+    var word = sec.querySelector('.kl-hero__word');
     var tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom top', scrub: 0.4 } });
     if (media) tl.fromTo(media, { scale: 1 }, { scale: 1.12, ease: 'none' }, 0);
-    if (word) tl.fromTo(word, { yPercent: 0 }, { yPercent: -18, ease: 'none' }, 0);
+    if (photo) tl.fromTo(photo, { scale: 1.02, yPercent: 0 }, { scale: 1.1, yPercent: 4, ease: 'none' }, 0);
+    if (weave) tl.fromTo(weave, { xPercent: 0, yPercent: 0 }, { xPercent: -3, yPercent: 6, ease: 'none' }, 0);
+    if (word) tl.fromTo(word, { yPercent: 0 }, { yPercent: -14, ease: 'none' }, 0);
+  }
+
+  // GROUND — the photograph above "Next at Tithe Farm" drifts a few percent
+  // inside its frame while the heading over its edge stays put: depth from
+  // two layers, not a moving page.
+  function gate(gsap) {
+    gsap.utils.toArray('.lane-gate__photo img').forEach(function (img) {
+      gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none',
+        scrollTrigger: { trigger: img.parentNode, start: 'top bottom', end: 'bottom top', scrub: 0.5 } });
+    });
   }
 
   // CARRY — every inside page's photograph pushes in as you leave its title.
   function pageTitle(gsap) {
     gsap.utils.toArray('.kl-ph').forEach(function (sec) {
-      var media = sec.querySelector('.kl-ph__media'); if (!media) return;
+      var media = sec.querySelector('.kl-ph__media'), weave = sec.querySelector('.lane-weave img');
+      if (!media && !weave) return;
       var title = sec.querySelector('.kl-ph__title');
       var tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom top', scrub: 0.4 } });
-      tl.fromTo(media, { scale: 1 }, { scale: 1.1, ease: 'none' }, 0);
+      if (media) tl.fromTo(media, { scale: 1 }, { scale: 1.1, ease: 'none' }, 0);
+      if (weave) tl.fromTo(weave, { xPercent: 0 }, { xPercent: -4, ease: 'none' }, 0);
       if (title) tl.fromTo(title, { yPercent: 0 }, { yPercent: -14, ease: 'none' }, 0);
     });
   }
@@ -146,8 +188,8 @@
   // only their opacity is scrubbed, from legible-dim to full.
   function voice(gsap) {
     var q = document.querySelector('.kl-voice__q');
-    var words = [];
-    (function wrap(node) {
+    var words = gsap.utils.toArray(q.querySelectorAll('.kl-w'));
+    if (!words.length) (function wrap(node) {
       Array.prototype.slice.call(node.childNodes).forEach(function (n) {
         if (n.nodeType === 3) {
           var frag = document.createDocumentFragment();
@@ -183,6 +225,7 @@
           onUpdate: function () { el.textContent = final.replace(String(end), o.v.toFixed(dec)); },
           onComplete: function () { el.textContent = final; } });
       } });
+      restore.push(function () { el.textContent = final; });
     });
   }
 

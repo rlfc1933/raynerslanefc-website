@@ -124,6 +124,7 @@
 <link rel="stylesheet" href="css/edition.css">
 <link rel="stylesheet" href="css/kl.css">
 <link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/lane-campaign.css?v=3">
 <script src="js/lane-motion.js" defer></script>
 </head>
 <body>
@@ -158,16 +159,23 @@
      ══════════════════════════════════════════════════════════════════════ -->
 
 <!-- ① TITLE CARD — the club's name, the next match, one action -->
-<section class="kl-hero" aria-labelledby="kl-hero-title">
-  <div class="kl-hero__media" aria-hidden="true">
+<!-- "The fabric of The Lane": three layers, each with one job. The woven sash
+     (abstract campaign artwork, not kit or crowd) carries the colours; the
+     photograph is the real Tithe Farm; the name sits across both. -->
+<section class="kl-hero lane-hero" aria-labelledby="kl-hero-title">
+  <div class="lane-hero__weave" aria-hidden="true">
+    <img src="img/campaign/lane-fabric-768.webp" srcset="img/campaign/lane-fabric-768.webp 768w, img/campaign/lane-fabric-1536.webp 1536w"
+         sizes="(min-width:900px) 66vw, 100vw" width="1536" height="1024" alt="" decoding="async">
+  </div>
+  <figure class="lane-hero__photo">
     <picture>
-      <source type="image/webp" srcset="img/ground/tithe-farm-aerial-clubhouse-800.webp 800w, img/ground/tithe-farm-aerial-clubhouse-1600.webp 1600w" sizes="(max-aspect-ratio: 16/9) 178svh, 100vw">
+      <source type="image/webp" srcset="img/ground/tithe-farm-aerial-clubhouse-800.webp 800w, img/ground/tithe-farm-aerial-clubhouse-1600.webp 1600w" sizes="(min-width:900px) 60vw, 100vw">
       <img src="img/ground/tithe-farm-aerial-clubhouse-1600.jpg" data-no-opt
            srcset="img/ground/tithe-farm-aerial-clubhouse-800.jpg 800w, img/ground/tithe-farm-aerial-clubhouse-1600.jpg 1600w"
-           sizes="(max-aspect-ratio: 16/9) 178svh, 100vw" width="1600" height="898" alt="" fetchpriority="high" decoding="async">
+           sizes="(min-width:900px) 60vw, 100vw" width="1600" height="898" alt="Tithe Farm from the air: the pitch, the clubhouse and the houses of Rayners Lane around it" fetchpriority="high" decoding="async">
     </picture>
-  </div>
-  <div class="kl-hero__shade" aria-hidden="true"></div>
+    <figcaption>Tithe Farm, HA2</figcaption>
+  </figure>
   <div class="kl-hero__inner">
     <div class="kl-hero__top">
       <img class="kl-hero__crest" src="img/badge-512.png" width="64" height="64" alt="">
@@ -207,7 +215,7 @@
       <h2 class="memorial__name" id="memorial-name">Grant Nivett</h2>
       <p class="memorial__years">1938 &ndash; 2026</p>
       <p class="memorial__motto">Forever part of the Lane</p>
-      <p class="memorial__match">Our home match against <strong>Thatcham Town</strong> on <strong>Saturday 31 October</strong> (3pm, Tithe Farm) is dedicated to Sir Grant, with a minute&rsquo;s applause at kick-off. Come early, share your memories and raise a glass in his honour.</p>
+      <p class="memorial__match">The club dedicated our home match against <strong>Thatcham Town</strong> on <strong>Saturday 31 October</strong> at Tithe Farm to Sir Grant.</p>
       <a class="btn btn-outline" href="news-article.html?id=grant-nivett-forever-part-of-the-lane">Read Grant&rsquo;s story</a>
     </div>
   </div>
@@ -244,10 +252,17 @@
      third above) may be away; this is the next one at Tithe Farm, worked out
      by js/next-home.js from the registry — the same rule "Your first visit"
      uses, so a postponement reads the same on both. Prices: data/config.json. -->
-<section class="kl-gate" aria-labelledby="kl-gate-h">
+<section class="kl-gate lane-gate" aria-labelledby="kl-gate-h">
+  <figure class="lane-gate__photo">
+    <picture>
+      <source type="image/webp" srcset="img/ground/tithe-farm-goalmouth-800.webp 800w, img/ground/tithe-farm-goalmouth-1600.webp 1600w" sizes="100vw">
+      <img src="img/ground/tithe-farm-goalmouth-1600.jpg" srcset="img/ground/tithe-farm-goalmouth-800.jpg 800w, img/ground/tithe-farm-goalmouth-1600.jpg 1600w"
+           sizes="100vw" width="1600" height="1200" loading="lazy" decoding="async" alt="The pitch at Tithe Farm seen through the goal net, with the clubhouse beyond">
+    </picture>
+  </figure>
   <div class="kl-wrap kl-gate__grid">
     <div>
-      <h2 class="kl-gate__h" id="kl-gate-h">Next at<br>Tithe Farm</h2>
+      <h2 class="kl-gate__h" id="kl-gate-h"><span class="lane-on-photo">Next at</span><br>Tithe Farm</h2>
       <div class="nh nh--ink" id="kl-nexthome" aria-live="polite"><p class="nh__none">Loading the next home match&hellip;</p></div>
       <div class="kl-gate__acts">
         <a class="kl-btn kl-btn--ink" href="matchday.html">Your first visit</a>
