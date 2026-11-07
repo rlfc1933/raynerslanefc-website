@@ -1,7 +1,7 @@
 {
-  "opponent": "Hilltop",
-  "date": "2026-08-11",
-  "kickoff": "19:45",
+  "opponent": "Abingdon United",
+  "date": "2026-11-07",
+  "kickoff": "15:00",
   "competition": "Combined Counties Prem N",
   "venue": "Tithe Farm Sports & Social Club",
   "pitch": "",
@@ -27,7 +27,7 @@
   "equality": "Football is for everyone. Rayners Lane FC opposes discrimination of every kind and welcomes players, supporters and volunteers of all backgrounds, abilities, ages, faiths, genders, sexualities and ethnicities.",
   "affiliation": "Rayners Lane FC is affiliated to Middlesex County FA and plays in the Combined Counties Football League, Premier Division North — Step 5 of the National League System. An FA Charter Standard Community Club, est. 1933.",
   "matchSponsor": "Test For Committee",
-  "ballSponsor": "",
+  "ballSponsor": "British Premium Meats",
   "matchdaySponsor": "",
   "matchSponsorLogo": "",
   "ballSponsorLogo": "",
@@ -48,12 +48,12 @@
   "womens": "",
   "supporters": "",
   "groundInfo": "",
-  "oppCrest": "img/crests/hilltop.png",
+  "oppCrest": "img/crests/abingdon-united.png",
   "coverTheme": "black-yellow",
   "customPages": [],
-  "updatedAt": "2026-08-07T19:57:16.950Z",
-  "fixtureId": "fwp-578241",
+  "updatedAt": "2026-11-07T10:26:51.054Z",
+  "fixtureId": "fwp-578395",
   "published": false,
   "isHome": true,
-  "id": "2026-08-11-hilltop"
+  "id": "2026-11-07-abingdon-united"
 }
