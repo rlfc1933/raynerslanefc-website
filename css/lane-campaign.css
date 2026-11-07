@@ -97,3 +97,7 @@
 /* Motion off: lane-motion.js reverts its tweens; this covers anything left. */
 @media (prefers-reduced-motion:reduce){.tl-progress{display:none}}
 html.a11y-reduce-motion .tl-progress{display:none}
+@media (max-width:699px){
+  .lane-gate__photo::after{height:56px}
+  .lane-gate .kl-gate__h{line-height:.92;margin-top:calc(-1.06em - clamp(8px,2vw,24px))}
+}
