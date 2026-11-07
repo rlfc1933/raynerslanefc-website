@@ -137,6 +137,14 @@ foldable cover 344 and inner 884, touch and keyboard. No sideways scroll at any
 width. Touch targets ≥ 44px (hard floor 24px, WCAG 2.2 2.5.8). Every
 interaction works by keyboard with a visible focus ring.
 
-## Campaign imagery, November 2026
+## Campaign imagery, November 2026 — "The fabric of The Lane"
 
-The homepage uses generated abstract yellow/green textile artwork as a decorative brand material, explicitly requested for this campaign. It is not club documentary photography or a representation of the kit. Ground photographs remain authentic. This narrowly extends section 6 for decorative material only; it does not permit fabricated players or match scenes. The campaign pairs layered typography and a tilted ground photograph with restrained scroll-linked movement. System and site reduced-motion preferences restore the static composition.
+Generated abstract yellow/green woven-fabric artwork (`img/campaign/lane-fabric-*.webp`) is permitted as decorative brand material only: never kit, players, crowds, sponsors or ground features. People, the ground and match scenes stay real photography.
+
+One device, used consistently: a **sash** of the cloth cut on the same diagonal as the photograph beside it.
+- Home title card: bottle-green canvas, real aerial of Tithe Farm on the diagonal, the sash along the cut, the club name in warm white crossing it.
+- Next at Tithe Farm: the real goalmouth photograph, "Next at" on the photo, "Tithe Farm" on the yellow — prices stay on plain yellow.
+- Lane Card: the card laid on the cloth. Matchday / membership title cards: a narrow selvedge of cloth (matchday adds the wide aerial).
+Colour roles: bottle green #0e3320 canvas; club yellow identity and action; near-black weight and ink on yellow; warm white #f5f1e6 reading text.
+Rejected from the first draft: the tilted framed photograph, the free-floating "1933" stamp and the "This is our patch" section (duplicated "Next at Tithe Farm").
+Motion lives only in `js/lane-motion.js` (one gsap.context, one tween per element), small scrubbed distances, no pinning; reverted live when either reduced-motion setting turns on.

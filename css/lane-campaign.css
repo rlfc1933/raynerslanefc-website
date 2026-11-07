@@ -1,50 +1,99 @@
-/* The fabric of The Lane: abstract campaign artwork + genuine ground photography.
-   Reference: supplied layered sports/editorial compositions. Colour roles:
-   bottle-green canvas, yellow identity/action, warm white reading text. */
-.lane-campaign{background:#102d1c;min-height:850px}
-.lane-campaign__fabric{position:absolute;inset:0;z-index:-3;overflow:hidden}
-.lane-campaign__fabric img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:.85}
-.lane-campaign__ground{position:absolute;right:0;top:12%;width:53%;height:65%;margin:0;z-index:-1;transform:rotate(-5deg);border:8px solid var(--white);background:var(--white)}
-.lane-campaign__ground img{width:100%;height:100%;object-fit:cover;display:block}
-.lane-campaign__ground figcaption{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:var(--white);color:var(--black);font:800 13px var(--font-body);text-transform:uppercase;letter-spacing:.06em}
-.lane-campaign__stamp{position:absolute;right:4%;bottom:16%;font:400 clamp(80px,13vw,200px)/.8 var(--font-display);color:var(--yellow);z-index:0;pointer-events:none}
-.lane-campaign .kl-hero__inner{position:relative;z-index:1;min-height:750px;pointer-events:none}
-.lane-campaign .kl-hero__inner a{pointer-events:auto}
-.lane-campaign .kl-hero__top{max-width:380px}
-.lane-campaign .kl-hero__word{font-size:clamp(120px,18vw,280px);margin:54px 0 32px;text-shadow:0 2px 1px rgba(0,0,0,.1)}
-.lane-campaign .kl-hero__word em{color:var(--yellow)}
-.lane-campaign .kl-hero__foot{display:flex;align-items:flex-start;flex-direction:column;gap:20px;padding-bottom:24px}
-.lane-campaign .kl-hero__line{max-width:37ch;background:#102d1c;padding:12px 16px;margin:0}
-.lane-campaign .kl-hero__acts{background:#102d1c;padding:8px}
-.lane-campaign .kl-bug{z-index:2}
-.lane-ground{position:relative;display:grid;grid-template-columns:1.2fr 1fr;min-height:640px;background:var(--black);overflow:hidden}
-.lane-ground__image{overflow:hidden;min-height:640px}
-.lane-ground__image img{display:block;width:100%;height:100%;object-fit:cover}
-.lane-ground__copy{position:relative;padding:80px 12% 64px 10%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
-.lane-ground h2{font:400 clamp(72px,8vw,128px)/.85 var(--font-display);text-transform:uppercase;margin:0 0 28px;color:var(--white)}
-.lane-ground h2 span{color:var(--yellow)}
-.lane-ground p{font:500 17px/1.65 var(--font-body);color:var(--white);max-width:34ch;margin:0 0 28px}
-.lane-ground__location{margin-top:48px;font:700 12px/1.5 var(--font-body);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.kl-card__visual{background:url('../img/campaign/lane-fabric.webp') center/cover;min-height:360px;display:grid;place-items:center;overflow:hidden}
-@media(min-width:1100px){.lane-ground h2{margin-left:-100px;position:relative;text-shadow:0 2px 10px #080808}}
-@media(max-width:899px){
- .lane-campaign{min-height:0}.lane-campaign .kl-hero__inner{min-height:800px}
- .lane-campaign__ground{top:26%;width:68%;height:37%}
- .lane-campaign .kl-hero__word{font-size:clamp(120px,25vw,210px);margin:80px 0 130px}
- .lane-campaign__stamp{bottom:25%;font-size:110px}
- .lane-ground{grid-template-columns:1fr}.lane-ground__image{min-height:0;height:420px}.lane-ground__copy{padding:48px 24px}
- .lane-ground h2{margin-top:-105px;position:relative;text-shadow:0 2px 10px #080808}
+/* ════════════════════════════════════════════════════════════════════════
+   THE FABRIC OF THE LANE — campaign layer over the Kit Launch system.
+   Colour roles (DESIGN.md "Campaign imagery"):
+     bottle green  the ground everything sits on (canvas, never small text)
+     club yellow   identity and action: the sash, the full stop, buttons
+     near-black    weight: the next-match bar, ink on yellow
+     warm white    reading text
+   One idea, used three ways: a woven sash cut on the same diagonal as the
+   photograph beside it. Home: sash + ground + name. Matchday and
+   membership: a narrow selvedge of the same cloth, a different crop.
+   Static by default; js/lane-motion.js may add small scrubbed movement.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--lane-bottle:#0e3320;--lane-ink:#0a0a0a;--lane-warm:#f5f1e6;--lane-cut:14%}
+
+/* ── HOME TITLE CARD ─────────────────────────────────────────────────── */
+.lane-hero{background:var(--lane-bottle);color:var(--lane-warm)}
+.lane-hero__weave,.lane-hero__photo{position:absolute;margin:0;overflow:hidden}
+.lane-hero__weave img,.lane-hero__photo img{display:block;width:100%;height:100%;object-fit:cover}
+.lane-hero__weave{z-index:-3}
+.lane-hero__photo{z-index:-2}
+.lane-hero__photo::after{content:"";position:absolute;inset:0;pointer-events:none}
+.lane-hero__photo figcaption{position:absolute;z-index:1;font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--lane-warm);background:var(--lane-ink);padding:7px 9px}
+.lane-hero .kl-hero__meta,.lane-hero .kl-hero__line{color:var(--lane-warm)}
+.lane-hero .kl-hero__word{color:var(--lane-warm);text-shadow:0 2px 24px rgba(5,20,12,.35)}
+.lane-hero .kl-hero__inner{position:relative;z-index:1}
+
+/* Desktop: name on the green at left, Tithe Farm at right, the sash
+   running down the cut between them. The name crosses onto the photo. */
+@media (min-width:900px){
+  .lane-hero__photo{top:0;bottom:0;right:0;width:58%;clip-path:polygon(var(--lane-cut) 0,100% 0,100% 100%,0 100%)}
+  .lane-hero__photo img{object-position:62% 50%}
+  .lane-hero__photo::after{background:linear-gradient(90deg,rgba(14,51,32,.72) 0%,rgba(14,51,32,.18) 38%,rgba(10,10,10,0) 60%),linear-gradient(0deg,rgba(10,10,10,.55) 0%,rgba(10,10,10,0) 30%)}
+  .lane-hero__photo figcaption{right:24px;top:24px}
+  /* The sash: same cut, offset left, so a band of cloth shows along it. */
+  .lane-hero__weave{top:0;bottom:0;right:0;width:calc(58% + 9vw);clip-path:polygon(var(--lane-cut) 0,100% 0,100% 100%,0 100%)}
+  .lane-hero__weave img{object-position:58% 50%}
+  .lane-hero .kl-hero__top,.lane-hero .kl-hero__foot{max-width:min(46%,620px)}
+  .lane-hero .kl-hero__foot{grid-template-columns:1fr}
+  .lane-hero .kl-hero__word{font-size:min(15.5vw,30svh);line-height:.8;margin:auto 0 0}
 }
-@media(max-width:540px){
- .lane-campaign .kl-hero__inner{min-height:760px;padding-top:24px;gap:20px}
- .lane-campaign .kl-hero__word{font-size:31vw;margin:30px 0 230px}
- .lane-campaign__ground{top:29%;right:-4%;width:88%;height:29%;border-width:5px}
- .lane-campaign__ground figcaption{padding:10px;font-size:12px}
- .lane-campaign__stamp{bottom:32%;right:5%;font-size:76px}
- .lane-campaign .kl-hero__line{font-size:15px;padding:8px}.lane-campaign .kl-hero__acts{padding:0}
- .lane-campaign .kl-hero__top{max-width:300px}.lane-campaign .kl-hero__meta{font-size:12px}
- .lane-ground__image{height:320px}.lane-ground h2{font-size:80px}
+
+/* Tablet and phone: Tithe Farm first, cut on the diagonal at its foot, the
+   sash below the cut, the name crossing the sash onto the green. */
+@media (max-width:899px){
+  .lane-hero{--lane-photo:min(52svh,calc(64vw + 120px))}
+  .lane-hero__photo{left:0;right:0;top:0;height:var(--lane-photo);clip-path:polygon(0 0,100% 0,100% 78%,0 100%)}
+  .lane-hero__photo img{object-position:58% 50%}
+  .lane-hero__photo::after{background:linear-gradient(180deg,rgba(10,10,10,.6) 0%,rgba(10,10,10,0) 34%,rgba(14,51,32,0) 60%,rgba(14,51,32,.45) 100%)}
+  .lane-hero__photo figcaption{right:16px;bottom:calc(22% + 14px)}
+  .lane-hero__weave{left:0;right:0;top:0;height:calc(var(--lane-photo) + 44px);clip-path:polygon(0 0,100% 0,100% calc(78% - 6px),0 100%)}
+  .lane-hero__weave img{object-position:70% 55%}
+  .lane-hero .kl-hero__word{margin:calc(var(--lane-photo) - 230px) 0 0;line-height:.8}
 }
-@media(prefers-reduced-motion:reduce){.lane-campaign__ground{transform:rotate(-5deg)!important}.lane-campaign__fabric img,.lane-ground__image img{transform:none!important}}
-html.a11y-reduce-motion .lane-campaign__ground{transform:rotate(-5deg)!important}
-html.a11y-reduce-motion .lane-campaign__fabric img,html.a11y-reduce-motion .lane-ground__image img{transform:none!important}
+@media (max-width:699px){
+  .lane-hero .kl-hero__word{font-size:min(31vw,20svh);margin-top:calc(var(--lane-photo) - 190px)}
+  .lane-hero__photo figcaption{display:none}
+}
+
+/* ── NEXT AT TITHE FARM — the ground through the home net ─────────────── */
+.lane-gate{padding-top:0}
+.lane-gate::before{display:none}
+.lane-gate__photo{position:relative;margin:0;height:clamp(240px,34vw,460px);overflow:hidden;background:var(--lane-bottle)}
+.lane-gate__photo img{display:block;width:100%;height:112%;margin-top:-6%;object-fit:cover;object-position:50% 58%}
+.lane-gate__photo::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(14,51,32,0) 40%,rgba(14,51,32,.82) 100%)}
+.lane-gate__photo::after{content:"";position:absolute;z-index:2;left:0;right:0;bottom:-1px;height:clamp(36px,6vw,84px);background:var(--yellow);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.lane-gate .kl-gate__grid{position:relative;z-index:3;padding-top:clamp(8px,2vw,24px)}
+/* "Next at" sits on the photograph in warm white; "Tithe Farm" lands on the yellow. */
+.lane-gate .kl-gate__h{margin-top:calc(-.82em - clamp(8px,2vw,24px));position:relative}
+.lane-gate .kl-gate__h .lane-on-photo{color:var(--lane-warm)}
+
+/* ── THE LANE CARD, laid on the cloth ─────────────────────────────────── */
+.kl-card__visual{position:relative;min-height:clamp(300px,34vw,420px);display:grid;place-items:center;overflow:hidden;
+  background:var(--lane-bottle) url('../img/campaign/lane-fabric-768.webp') 18% 30%/cover no-repeat}
+@media (min-width:900px){.kl-card__visual{background-image:url('../img/campaign/lane-fabric-1536.webp')}}
+.kl-card__visual::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,51,32,.15),rgba(14,51,32,.45))}
+.kl-card__visual .kl-lanecard{position:relative;box-shadow:0 30px 60px -24px rgba(0,0,0,.75)}
+
+/* ── INSIDE PAGES: a selvedge of the same cloth on the title card ─────── */
+.lane-weave{--cut:140px;position:absolute;top:0;bottom:0;right:0;width:clamp(150px,30vw,460px);z-index:-1;overflow:hidden;
+  clip-path:polygon(var(--cut) 0,100% 0,100% 100%,0 100%);pointer-events:none}
+.lane-weave img{display:block;width:100%;height:100%;object-fit:cover}
+.lane-weave--photo{--cut:200px;width:clamp(220px,46vw,760px)}
+/* Matchday: the photograph sits on the cloth, cut parallel, so a band of
+   the sash shows along its edge — the homepage idea in miniature. */
+.lane-weave__pic{position:absolute;top:0;bottom:0;right:0;left:clamp(36px,4.5vw,72px);clip-path:polygon(var(--cut) 0,100% 0,100% 100%,0 100%)}
+.lane-weave__pic img{object-position:50% 60%}
+.kl-ph .kl-ph__inner{position:relative}
+@media (min-width:700px){.kl-ph--weave .kl-ph__inner > *{max-width:min(58%,60ch)}.kl-ph--weave .kl-ph__inner > .kl-ph__title{max-width:none}}
+@media (max-width:699px){
+  .lane-weave,.lane-weave--photo{--cut:0px;top:auto;left:0;right:0;width:auto;height:72px;clip-path:polygon(0 40%,100% 0,100% 100%,0 100%)}
+  .lane-weave--photo{height:170px;clip-path:polygon(0 26%,100% 0,100% 100%,0 100%)}
+  .lane-weave__pic{left:0;top:18px;clip-path:polygon(0 26%,100% 0,100% 100%,0 100%)}
+  .kl-ph--weave .kl-ph__inner{padding-bottom:104px}
+  .kl-ph--weave.kl-ph--photo .kl-ph__inner{padding-bottom:194px}
+}
+
+/* Motion off: lane-motion.js reverts its tweens; this covers anything left. */
+@media (prefers-reduced-motion:reduce){.tl-progress{display:none}}
+html.a11y-reduce-motion .tl-progress{display:none}

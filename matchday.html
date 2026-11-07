@@ -42,6 +42,7 @@
   <!-- lane-schema:end -->
 <link rel="stylesheet" href="css/edition.css">
 <link rel="stylesheet" href="css/kl.css">
+<link rel="stylesheet" href="css/lane-campaign.css?v=2">
 <script src="js/lane-motion.js" defer></script>
 <link rel="stylesheet" href="css/p-matchday.css">
 </head>
@@ -54,7 +55,14 @@
      data/config.json, travel and facilities only as already published on the
      club's own pages. Where the club hasn't confirmed something, the page says
      "ask us" instead of guessing. No account or phone is ever required. -->
-<section class="kl-ph kl-ph--yellow kl-ph--short fv-ph" aria-labelledby="ph-title">
+<section class="kl-ph kl-ph--yellow kl-ph--short fv-ph kl-ph--weave kl-ph--photo" aria-labelledby="ph-title">
+  <div class="lane-weave lane-weave--photo" aria-hidden="true">
+    <img src="img/campaign/lane-fabric-768.webp" width="768" height="512" alt="" decoding="async" style="object-position:40% 60%">
+    <picture class="lane-weave__pic">
+      <source type="image/webp" srcset="img/ground/tithe-farm-aerial-wide-800.webp 800w, img/ground/tithe-farm-aerial-wide-1600.webp 1600w" sizes="(min-width:700px) 46vw, 100vw">
+      <img src="img/ground/tithe-farm-aerial-wide-800.jpg" width="800" height="450" alt="" decoding="async">
+    </picture>
+  </div>
   <div class="kl-wrap kl-ph__inner">
     <p class="kl-ph__meta">Matchday at Tithe Farm</p>
     <h1 class="kl-ph__title" id="ph-title"><span class="kl-line"><span>Your first</span></span><span class="kl-line"><span>visit.</span></span></h1>
