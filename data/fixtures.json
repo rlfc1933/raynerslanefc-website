@@ -373,9 +373,9 @@
       "isHome": false,
       "venue": "Yarnton Road",
       "competition": "Combined Counties Prem N",
-      "status": "scheduled",
-      "us": null,
-      "them": null,
+      "status": "played",
+      "us": 0,
+      "them": 4,
       "scorers": "",
       "shareHeadline": "INTO OXFORDSHIRE",
       "shareHeadlineAuto": "INTO OXFORDSHIRE",
@@ -725,5 +725,5 @@
       "competitionId": "ccl-prem-north"
     }
   ],
-  "updatedAt": "2026-11-07T18:47:06.850Z"
+  "updatedAt": "2026-11-14T16:48:03.966Z"
 }
