@@ -30,12 +30,8 @@ function resp(code, obj) {
   };
 }
 
-function slugFor(f) {
-  const s = (x) => String(x || '').toLowerCase().replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  const d = f.scheduled_kickoff_at ? String(f.scheduled_kickoff_at).slice(0, 10) : '';
-  return [d, s(f._homeName), 'v', s(f._awayName)].filter(Boolean).join('-');
-}
+const ED = require('./lib/programme/editions');
+const slugFor = ED.slugFor;
 
 /**
  * A club data file.
@@ -66,7 +62,8 @@ async function loadJson(name) {
 }
 
 /** Everything the generator needs, gathered from what the club already holds. */
-async function buildContext(fx, teams, comps) {
+async function buildContext(fx, teams, comps, opts) {
+  const readOnly = !!(opts && opts.readOnly);
   const home = teams[fx.home_team_id] || {};
   const away = teams[fx.away_team_id] || {};
 
@@ -83,6 +80,7 @@ async function buildContext(fx, teams, comps) {
     const lib = await CRESTS.library();
     for (const t of [home, away]) {
       if (!t || !t.id) continue;
+      if (readOnly) continue;   // preflight/publish checks never write
       if (CRESTS.patchFor(t.crest_asset_path, t.canonical_name).keep) continue;
       const file = CRESTS.forName(lib, t.canonical_name);
       if (!file) continue;
@@ -232,10 +230,7 @@ const LEGACY_STATE = { postponed: 'withheld', cancelled: 'withheld', ready_for_r
   awaiting_fixture_confirmation: 'draft_hidden' };
 function storableState(state, v2) { return v2 ? state : (LEGACY_STATE[state] || state); }
 
-/** The fixture id every surface uses — the read layer's own rule. */
-function keyFor(fx) {
-  return fx.internal_fixture_id || ('fwp-' + fx.external_fixture_id);
-}
+const keyFor = ED.keyFor;
 
 /** An audited transition. Idempotent: a retried job writes the same key. */
 async function logEvent(v2, edition, type, extra) {
@@ -375,8 +370,7 @@ exports.handler = async function (event) {
        are now created for the whole season; only the expensive regeneration is
        limited to fixtures that can still change. Home status is the official
        designation (home_team_id), never the venue. */
-    const eligible = (fixtures || []).filter((f) =>
-      String(f.home_team_id) === String(ourTeamId) && f.programme_eligible);
+    const eligible = (fixtures || []).filter((f) => ED.isEligible(f, ourTeamId));
 
     const clubLegal = await loadClubLegal();
 
@@ -388,21 +382,9 @@ exports.handler = async function (event) {
       const ko = Date.parse(fx.scheduled_kickoff_at);
 
       try {
-        let edition = await S.findOne('programme_editions', 'fixture_id=eq.' + fx.id);
-        if (!edition) {
-          edition = await S.upsert('programme_editions', {
-            fixture_id: fx.id,
-            internal_fixture_id: key,
-            external_fixture_id: fx.external_fixture_id,
-            season: fx.season,
-            home_team_id: fx.home_team_id, away_team_id: fx.away_team_id,
-            competition_id: fx.competition_id,
-            scheduled_kickoff_at: fx.scheduled_kickoff_at,
-            venue: fx.venue, slug: slugFor(fx),
-            state: RULES.STATES.DRAFT_HIDDEN,
-          }, 'fixture_id');
-          await logEvent(v2, edition, 'record_created', { to: RULES.STATES.DRAFT_HIDDEN, key: 'created:' + fx.id });
-        }
+        // The ONE resolve-or-create path, shared with HQ's publish action.
+        const { edition } = await ED.ensureEdition(fx, {
+          logEvent: (ed, type, extra) => logEvent(v2, ed, type, extra) });
         if (!edition) { outcomes.push({ fixture: key, outcome: 'could not create edition' }); continue; }
 
         // An edition written with a null id could never be opened by URL.
@@ -661,4 +643,4 @@ exports.handler = async function (event) {
   }
 };
 
-exports._internal = { slugFor, keyFor, writeVersion, hasPublishingSchema, publishRetrospective, lineupsFor, loadClubLegal };
+exports._internal = { buildContext, storableState, slugFor, keyFor, writeVersion, hasPublishingSchema, publishRetrospective, lineupsFor, loadClubLegal };

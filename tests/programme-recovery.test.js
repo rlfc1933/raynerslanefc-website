@@ -548,7 +548,10 @@ test('a repeated run creates no second edition and no second version', () => {
   const fs = require('fs');
   const path = require('path');
   const s = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/programme-sync.js'), 'utf8');
-  assert.match(s, /findOne\('programme_editions', 'fixture_id=eq\.' \+ fx\.id\)/,
+  // The lookup-then-upsert lives in the shared ensureEdition (lib/programme/editions.js).
+  const ed = fs.readFileSync(path.join(__dirname, '..', 'netlify/functions/lib/programme/editions.js'), 'utf8');
+  assert.match(s, /ED\.ensureEdition\(fx/, 'the sync must create editions through ensureEdition');
+  assert.match(ed, /findOne\('programme_editions', 'fixture_id=eq\.' \+ fx\.id/,
     'an edition must be looked up before one is created');
   assert.match(s, /if \(decision\.canPublish && !edition\.published_at\)/,
     'an already-published edition must never be republished');
