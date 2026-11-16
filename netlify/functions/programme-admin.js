@@ -168,7 +168,7 @@ exports.handler = async function (ev) {
       await patchEdition(ed.id, { editorial_approved_by: who, editorial_approved_at: at, editorial_approved_hash: null,
         state: ed.state === 'ready_for_review' ? 'approved' : ed.state });
       await event(ed, 'editorial_approved', { actor: who, from: ed.state, to: 'approved', key: 'approve:' + ed.id + ':' + at });
-      return resp(200, { ok: true, message: 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
+      return resp(200, { ok: true, editionId: ed.id, published: false, message: 'Approved. It publishes on matchday morning; confirmed teams are added when they are released.' });
     }
 
     if (action === 'save_section') {

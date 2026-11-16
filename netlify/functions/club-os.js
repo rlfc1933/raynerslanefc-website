@@ -434,7 +434,7 @@ require('./lib/rebirth/actions').install(A, H);
 exports.intakeVolunteer = (sub) => (SB_KEY ? H.intakeVolunteer(sub, 'website') : Promise.resolve({ ok: false, error: 'no-supabase' }));
 
 const WRITES = new Set(['create', 'update', 'move', 'pay', 'saveOrg', 'suppress', 'redeem', 'seed',
-  'importStage', 'checkEmail', 'draftOutreach', 'approvePackage', 'book', 'release', 'convertEnquiry', 'renew',
+  'importStage', 'checkEmail', 'draftOutreach', 'approvePackage', 'book', 'release', 'convertEnquiry', 'renew', 'submitArtwork', 'approveArtwork', 'recordFulfilment',
   'recordAttendance', 'verifyAttendance', 'collectVolunteerOffers', 'seedRebirth']);
 // Finance actions sign with the verified staff identity instead of the typed name.
 const FINANCE = new Set(['finance', 'saveFinanceLine', 'archiveFinanceLine']);

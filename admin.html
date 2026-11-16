@@ -1561,13 +1561,14 @@
 
       <div class="div"></div>
       <div class="slbl">Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing prints</span></div>
-      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Start typing and <strong style="color:var(--w)">pick one of your club sponsors</strong> — their <strong style="color:var(--w)">logo</strong> then prints automatically on the cover and in “Today’s Sponsors”. (New sponsor? Add them in the <strong>Sponsors</strong> tab first with their logo, then pick them here.)</p></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Only <strong style="color:var(--w)">confirmed bookings for this match</strong> are offered — their <strong style="color:var(--w)">approved artwork</strong> then prints on the cover and in “Today’s Sponsors”. (New sponsor? In Club OS: deal → Approve package → Book a home fixture → artwork approved → won.)</p></div>
       <div class="field"><label class="fl">This match is sponsored by <span style="color:var(--gr);font-weight:400">— printed across the top of the cover</span></label><input type="text" id="pr-matchsponsor" list="pr-sponsors-dl" placeholder="e.g. Hanlon Dry Lining"></div>
       <div class="row2">
         <div class="field"><label class="fl">Match ball sponsor</label><input type="text" id="pr-ballsponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
         <div class="field"><label class="fl">Matchday sponsor</label><input type="text" id="pr-matchdaysponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
       </div>
       <datalist id="pr-sponsors-dl"></datalist>
+      <div id="pr-fx-sponsors" class="pr-muted"></div>
 
       <button type="button" class="save" onclick="prStep(3)">Next: add stories &rarr;</button>
       </section>
@@ -3817,6 +3818,12 @@ function sponsorLogoFor(name) {
   var s = sponsors.filter(function (x) { return (x.name || '').trim().toLowerCase() === String(name).trim().toLowerCase(); })[0];
   return (s && s.logo) ? s.logo : '';
 }
+// The approved artwork of a confirmed booking wins; otherwise the club sponsor
+// logo (the programme checks flag any sponsor that is not a confirmed booking).
+function prSponsorArt(id) {
+  var name = (document.getElementById(id) || {}).value || '';
+  return (window.PRE && PRE.artFor && PRE.artFor(id, name)) || sponsorLogoFor(name);
+}
 function populateSponsorDatalist() {
   var dl = document.getElementById('pr-sponsors-dl');
   if (dl) dl.innerHTML = sponsors.map(function (s) { return '<option value="' + escH(s.name || '') + '">'; }).join('');
@@ -5202,7 +5209,7 @@ function sendPushAlert() {
 }
 
 // ── PROGRAMME ──
-// FA Step 5 standard club statements — pre-written, editable per programme.
+// Club statements (club policy, not league rules) — pre-written, editable per programme.
 var PR_DEFAULTS = {
   admission: 'General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card',
   rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
@@ -5524,7 +5531,7 @@ function prBuildDoc() {
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
-    matchSponsorLogo: sponsorLogoFor(gv('pr-matchsponsor')), ballSponsorLogo: sponsorLogoFor(gv('pr-ballsponsor')), matchdaySponsorLogo: sponsorLogoFor(gv('pr-matchdaysponsor')),
+    matchSponsorLogo: prSponsorArt('pr-matchsponsor'), ballSponsorLogo: prSponsorArt('pr-ballsponsor'), matchdaySponsorLogo: prSponsorArt('pr-matchdaysponsor'),
     storylines: gv('pr-storylines'), keyPlayers: gv('pr-keyplayers'),
     oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
