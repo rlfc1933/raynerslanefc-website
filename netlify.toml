@@ -39,6 +39,21 @@
   status = 404
   force = true
 
+# Unpublished drafts are working copies, not public data. They are read only
+# through the signed-in save-data function (read mode); the static files are
+# never served.
+[[redirects]]
+  from = "/data/news-drafts.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/data/programme-draft.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/tests/*"
   to = "/404.html"

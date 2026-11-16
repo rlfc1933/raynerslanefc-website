@@ -786,6 +786,15 @@
      which could be a different match. Now it loads the club-saved draft and
      checks it is the same fixture (fx) and version (rev) the link was made
      for; if not, it says exactly what it is showing instead. */
+  /* The club-saved draft is not a public file. It is read through the
+     committee's sign-in on this device (the HQ tab that opened this page
+     shares it); without a sign-in there is nothing to show. */
+  function clubDraft(){
+    var pin=''; try{ pin=sessionStorage.getItem('rlfc_admin_pin')||''; }catch(e){}
+    if(!pin) return Promise.resolve(null);
+    return fetch('/.netlify/functions/save-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:pin,read:true,path:'data/programme-draft.json'})})
+      .then(function(r){return r.ok?r.json():null;}).then(function(j){ return (j&&j.ok&&j.data)||null; }).catch(function(){ return null; });
+  }
   function qp(k){ var m=location.search.match(new RegExp('[?&]'+k+'=([^&]*)')); return m?decodeURIComponent(m[1]):''; }
   function pxNote(kind, html){ var b=document.getElementById('px-banner'); if(b) b.innerHTML='<div class="px-banner px-banner--'+kind+'">'+html+'</div>'; }
   function loadProgrammeDoc(){
@@ -795,8 +804,8 @@
       if (local && (!wantFx || local.fixtureId === wantFx)) { pxNote('warn','Draft from this device'+(local.revision?' (based on version '+esc(local.revision)+')':'')+'. Not published.'); return Promise.resolve(local); }
       // Before the first save under the new editor there is no draft file yet;
       // the working draft is still the old single file.
-      return getJSON('programme-draft').then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
-        if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be found on this device or on the club’s site. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
+      return clubDraft().then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
+        if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be opened here. Sign in to Lane HQ on this device and open it from Programmes. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
         if (wantFx && d.fixtureId !== wantFx) {
           pxNote('err','This link was for a different match. The club’s saved draft is now for <b>'+esc(d.opponent||'another match')+'</b> ('+esc(d.date||'')+'), so that is what is shown. Do not print this for the original match.');
         } else if (wantRev && String(d.revision||0) !== wantRev) {

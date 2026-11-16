@@ -6147,8 +6147,8 @@ function renderNews() {
   document.getElementById('nw-list').innerHTML = articles.length
     ? articles.map(function(a) {
         return '<div class="li"><div class="li-main"><div class="li-name">' + escH(a.title) + '</div><div class="li-sub">' + escH(a.category) + ' &middot; ' + escH(a.date||'') + '</div></div>' +
-          '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="nwEdit(\'' + esc(a.id) + '\',\'published\')">Edit</button>' +
-          '<button class="li-del" onclick="deleteArticle(\'' + esc(a.id) + '\')">Delete</button></div>';
+          '<button type="button" class="li-del" style="background:var(--c2);color:var(--w)" data-nw-edit="' + escH(a.id) + '" data-nw-kind="published">Edit</button>' +
+          '<button type="button" class="li-del" data-nw-del="' + escH(a.id) + '">Delete</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No articles yet</div>';
   nwRenderDrafts();
@@ -6161,6 +6161,14 @@ function renderNews() {
    Publish says "published" only after the save is confirmed; Edit reopens a
    published story and republishing updates it in place (same id). */
 var nwEditingId = null, nwEditingImage = null, nwBusy = false, nwDrafts = [];
+// Ids travel in escaped data attributes, never pasted into inline handlers:
+// an id containing a quote cannot become script.
+document.addEventListener('click', function (e) {
+  var b = e.target && e.target.closest && e.target.closest('[data-nw-edit],[data-nw-del]');
+  if (!b) return;
+  if (b.hasAttribute('data-nw-del')) deleteArticle(b.getAttribute('data-nw-del'));
+  else nwEdit(b.getAttribute('data-nw-edit'), b.getAttribute('data-nw-kind'));
+});
 function nwForm() {
   return { id: nwEditingId || ('draft-' + Date.now()), title: gv('nw-title'), category: gv('nw-cat'), date: gv('nw-date'),
     author: gv('nw-author'), excerpt: gv('nw-exc'), body: gv('nw-body'), shareHeadline: gv('nw-hook') || undefined,
@@ -6175,7 +6183,7 @@ function nwRenderDrafts() {
   var el = document.getElementById('nw-drafts'); if (!el) return;
   el.innerHTML = nwDrafts.length ? nwDrafts.map(function (d) {
     return '<div class="li"><div class="li-main"><div class="li-name">' + escH(d.title || '(untitled)') + '</div><div class="li-sub">Draft &middot; saved ' + escH(String(d.savedAt || '').slice(0, 16).replace('T', ' ')) + (d.savedBy ? ' by ' + escH(d.savedBy) : '') + '</div></div>' +
-      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="nwEdit(\'' + esc(d.id) + '\',\'draft\')">Open</button></div>';
+      '<button type="button" class="li-del" style="background:var(--c2);color:var(--w)" data-nw-edit="' + escH(d.id) + '" data-nw-kind="draft">Open</button></div>';
   }).join('') : '<p class="pr-muted">No drafts.</p>';
 }
 function nwSaveDraft() {
@@ -6186,7 +6194,7 @@ function nwSaveDraft() {
     body: JSON.stringify({ pin: PIN, merge: true, domain: 'news-drafts', key: 'drafts', idField: 'id', upserts: [d] }) })
     .then(function (r) { return r.json().then(function (j) { return { ok: r.ok && j.ok !== false, j: j }; }); })
     .then(function (r) {
-      if (!r.ok) { showDep(el, 'err', 'Draft not saved: ' + ((r.j && r.j.error) || 'error') + '. It is still in the form.'); return; }
+      if (!r.ok) { showDep(el, 'err', 'Draft not saved: ' + escH((r.j && r.j.error) || 'error') + '. It is still in the form.'); return; }
       nwDrafts = r.j.merged || nwDrafts; nwRenderDrafts();
       showDep(el, 'ok', 'Draft saved. Not on the website.');
     }).catch(function (e) { showDep(el, 'err', 'Draft not saved: no connection. It is still in the form.'); });
@@ -9182,7 +9190,7 @@ function mtActionsToTasks(mt) {
   })).then(function (rs) {
     var ok = rs.filter(function (r) { return r && r.ok; }).length, bad = rs.length - ok;
     var msg = ok + ' action' + (ok === 1 ? '' : 's') + ' added to Tasks with an owner.';
-    if (bad) msg += ' ' + bad + ' could not be added (' + ((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error || 'error') + ') — add them in Tasks.';
+    if (bad) msg += ' ' + bad + ' could not be added (' + escH(((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error) || 'error') + ') — add them in Tasks.';
     if (loose.length) msg += ' ' + loose.length + ' line' + (loose.length === 1 ? ' has' : 's have') + ' no name (“Name — action”), so no task was made.';
     if (el) showDep(el, bad ? 'err' : (loose.length ? 'warn' : 'ok'), msg);
   });

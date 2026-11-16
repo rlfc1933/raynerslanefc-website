@@ -85,9 +85,7 @@
       }
       // Could not reach the club copy. Use the site copy and say so.
       PRE.readFailed = true;
-      return fetch(DRAFT + '?t=' + Date.now()).then(function (x) { return x.ok ? x.json() : null; })
-        .catch(function () { return null; })
-        .then(function (d) { return d || fetch('data/programme.json?t=' + Date.now()).then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; }); });
+      return fetch('data/programme.json?t=' + Date.now()).then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; });
     });
   };
   PRE.afterLoad = function (d) {

@@ -70,3 +70,12 @@ test('news says "published" only after the save is confirmed', () => {
   assert.match(admin, /function nwPreview\(\)/);
   assert.match(admin, /function nwEdit\(id, kind\)/);
 });
+
+test('drafts are not public files, and news ids never reach inline script', () => {
+  const toml = read('netlify.toml');
+  assert.match(toml, /from = "\/data\/news-drafts\.json"[\s\S]{0,60}status = 404[\s\S]{0,20}force = true/);
+  assert.match(toml, /from = "\/data\/programme-draft\.json"[\s\S]{0,60}status = 404[\s\S]{0,20}force = true/);
+  assert.ok(!/onclick="nwEdit\(|onclick="deleteArticle\(\\'' \+ esc\(a\.id\)/.test(admin));
+  assert.match(admin, /data-nw-edit="' \+ escH\(a\.id\)/);
+  assert.ok(!/getJSON\('programme-draft'\)/.test(read('programme-print.html')), 'the print page reads the draft through the sign-in');
+});
