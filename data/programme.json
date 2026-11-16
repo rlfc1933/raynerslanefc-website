@@ -1,6 +1,6 @@
 {
-  "opponent": "Abingdon United",
-  "date": "2026-11-07",
+  "opponent": "Broadfields United",
+  "date": "2026-11-28",
   "kickoff": "15:00",
   "competition": "Combined Counties Prem N",
   "venue": "Tithe Farm Sports & Social Club",
@@ -48,12 +48,12 @@
   "womens": "",
   "supporters": "",
   "groundInfo": "",
-  "oppCrest": "img/crests/abingdon-united.png",
-  "coverTheme": "black-yellow",
+  "oppCrest": "img/crests/broadfields-united.png",
+  "coverTheme": "yellow-green",
   "customPages": [],
-  "updatedAt": "2026-11-07T10:26:51.054Z",
-  "fixtureId": "fwp-578395",
+  "updatedAt": "2026-11-16T16:32:28.934Z",
+  "fixtureId": "fwp-578415",
   "published": false,
   "isHome": true,
-  "id": "2026-11-07-abingdon-united"
+  "id": "2026-11-28-broadfields-united"
 }
