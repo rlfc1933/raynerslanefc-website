@@ -236,7 +236,9 @@
       cos('history', { limit: 12 }),
       mdopsRows(), members(), submissions(),
       // The programme editor saves drafts to programme-draft.json; before its first save the old file is the draft.
-      dataFile('programme-draft').then(function (d) { return d || dataFile('programme'); })
+      fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: global.PIN || '', read: true, path: 'data/programme-draft.json' }) })
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.ok && j.data) || null; }).catch(function () { return null; })
+        .then(function (d) { return d || dataFile('programme'); })
     ];
     S.loading = Promise.all(jobs).then(function (r) {
       var lists = {}, listErr = null;
