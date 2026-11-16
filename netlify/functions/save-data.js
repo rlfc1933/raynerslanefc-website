@@ -44,15 +44,32 @@ const PRIVATE = { 'data/programme-draft.json': 'programme-draft', 'data/news-dra
 // Read-only private paths: staff may read them, nothing may write them.
 const READ_ONLY = { 'data/programme-legacy-recovery.json': true };
 // The legacy draft that used to sit in public data/programme.json (and the
-// unpublished items of data/programmes.json). Bundled with the function, never
-// served (netlify.toml 404s /netlify/*). Seeds the private store once so the
-// Broadfields work is not lost when the public file was deleted.
-const LEGACY = require('./lib/legacy-programme-draft.json');
+// unpublished items of data/programmes.json). It is NOT copied into the current
+// tree (the repository is public): on the first signed-in read it is fetched
+// from git history at the last commit that had it, and copied into the private
+// store, so the Broadfields work is recoverable by staff without republishing it.
+const LEGACY_REF = '86b2143acc7b82928c848a85f673ac50bb936794';
+let ghForSeed = null;
+async function fetchLegacy() {
+  if (!ghForSeed) return null;
+  async function at(p) {
+    const r = await fetch(API + p + '?ref=' + LEGACY_REF, { headers: ghForSeed });
+    if (!r.ok) return null;
+    const j = await r.json();
+    try { return JSON.parse(Buffer.from(String(j.content || '').replace(/\n/g, ''), 'base64').toString('utf8')); } catch (e) { return null; }
+  }
+  const programme = await at('data/programme.json');
+  if (!programme) return null;
+  const arch = await at('data/programmes.json');
+  return { programme: programme, archiveDrafts: ((arch && arch.items) || []).filter(function (i) { return i && i.published !== true; }), fromCommit: LEGACY_REF };
+}
 async function seedLegacy(st) {
-  if ((await st.get('programme-legacy-recovery', { type: 'json' })) == null) await st.setJSON('programme-legacy-recovery', LEGACY);
   if ((await st.get('programme-legacy-seeded', { type: 'json' })) != null) return;
+  const legacy = await fetchLegacy();
+  if (!legacy) return;                                   // try again on a later read
+  if ((await st.get('programme-legacy-recovery', { type: 'json' })) == null) await st.setJSON('programme-legacy-recovery', legacy);
   if ((await st.get('programme-draft', { type: 'json' })) == null) {
-    await st.setJSON('programme-draft', Object.assign({}, LEGACY.programme, { revision: 0, recoveredFrom: 'data/programme.json' }));
+    await st.setJSON('programme-draft', Object.assign({}, legacy.programme, { revision: 0, recoveredFrom: 'data/programme.json@' + LEGACY_REF.slice(0, 7) }));
   }
   await st.setJSON('programme-legacy-seeded', { at: new Date().toISOString() });
 }
@@ -280,7 +297,7 @@ exports.handler = async function (event) {
 
   if (!adminOk(payload.pin)) return resp(401, { error: 'Unauthorized' });
 
-  const ghHeaders = {
+  const ghHeaders = ghForSeed = {
     'Authorization': 'token ' + token,
     'Accept': 'application/vnd.github.v3+json',
     'User-Agent': 'RLFC-Admin',

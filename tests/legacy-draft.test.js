@@ -20,16 +20,24 @@ const PIN = process.env.ADMIN_PIN;
 
 const ghCalls = [];
 const realFetch = global.fetch;
-global.fetch = async (url, opt) => {
+global.fetch = async (url, opt) => { opt = opt || {};
   url = String(url);
-  if (/api\.github\.com|purge\.jsdelivr/.test(url)) { ghCalls.push(url); return { ok: false, status: 404, json: async () => ({}) }; }
+  if (/api\.github\.com|purge\.jsdelivr/.test(url)) {
+    ghCalls.push((opt.method || 'GET') + ' ' + url);
+    const m = url.match(/contents\/([^?]+)\?ref=86b2143/);
+    if ((!opt.method || opt.method === 'GET') && m && HISTORY[m[1]]) return { ok: true, status: 200, json: async () => ({ content: Buffer.from(JSON.stringify(HISTORY[m[1]])).toString('base64') }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  }
   return realFetch(url, opt);
 };
 const save = require(path.join(ROOT, 'netlify/functions/save-data.js'));
 let blobs = {};
 save._setDraftStore({ get: async (k) => (k in blobs ? JSON.parse(blobs[k]) : null), setJSON: async (k, v) => { blobs[k] = JSON.stringify(v); } });
 const call = async (b) => { const r = await save.handler({ httpMethod: 'POST', body: JSON.stringify(b) }); return { status: r.statusCode, j: JSON.parse(r.body) }; };
-const LEGACY = require(path.join(ROOT, 'netlify/functions/lib/legacy-programme-draft.json'));
+// Synthetic stand-in for the old file. The real content is read from git
+// history in production and must never be copied into the public tree.
+const LEGACY = { programme: { opponent: 'Synthetic Opponent FC', date: '2026-11-28' } };
+const HISTORY = { 'data/programme.json': LEGACY.programme, 'data/programmes.json': { items: [{ id: 'd1', published: false }, { id: 'p1', published: true }] } };
 const PRIVATE_PATHS = ['data/programme-draft.json', 'data/news-drafts.json', 'data/programme-legacy-recovery.json'];
 
 // ── unauthenticated reads ─────────────────────────────────────────────────
@@ -54,7 +62,7 @@ test('first signed-in read of the draft seeds it from the legacy copy, once', as
   assert.strictEqual(r.j.data.opponent, LEGACY.programme.opponent);
   assert.strictEqual(r.j.data.revision, 0);
   assert.ok(blobs['programme-legacy-recovery'], 'the recovery copy is stored privately');
-  assert.deepStrictEqual(ghCalls, [], 'never read from or written to the public repository');
+  assert.ok(ghCalls.length && ghCalls.every((c) => /^GET .*\?ref=86b2143/.test(c)), 'only reads git history; never writes to the repository');
   // A later save replaces it; the seed never comes back over staff work.
   await call({ pin: PIN, path: 'data/programme-draft.json', content: Buffer.from(JSON.stringify({ revision: 1, opponent: 'Hilltop' })).toString('base64'), expectRevision: 0 });
   const again = await call({ pin: PIN, read: true, path: 'data/programme-draft.json' });
@@ -93,7 +101,7 @@ test('netlify.toml forces a 404 for every private data path and the functions di
     const re = new RegExp('\\[\\[redirects\\]\\]\\s*from = "' + p.replace(/[.*/]/g, '\\$&') + '"\\s*to = "/404.html"\\s*status = 404\\s*force = true');
     assert.match(toml, re, p + ' must be a forced 404');
   }
-  assert.match(toml, /\[functions\."save-data"\]\s*included_files = \["netlify\/functions\/lib\/legacy-programme-draft\.json"\]/);
+  assert.ok(!fs.existsSync(path.join(ROOT, 'netlify/functions/lib/legacy-programme-draft.json')), 'no copy of the draft in the public tree');
 });
 
 function walk(dir, out) {
