@@ -1615,8 +1615,8 @@
       <button type="button" class="save sec" id="pr-save-btn" onclick="saveProgramme()">&#10003; Save to the club</button>
       <div class="snote" style="margin-top:10px"><p>Saving stores this draft on the club&rsquo;s system so it can be finished on another device. It does <strong style="color:var(--w)">not</strong> put the programme on the website.</p></div>
       <div class="slbl"><i class="ico ico-printer"></i> PDF and printing</div>
-      <div class="snote"><p>Opens the finished pages with a <strong style="color:var(--w)">Download PDF</strong> button. This PDF is for reading, sharing and home or office printing; a commercial printer will give you their own requirements (size, bleed, colour).</p></div>
-      <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDF</button>
+      <div class="snote"><p>Opens the finished pages with two downloads: <strong style="color:var(--w)">Reading PDF</strong> (the pages as designed) and <strong style="color:var(--w)">Booklet PDF</strong> (padded to a multiple of four with club pages before the back cover, still in reading order — your printer or print dialogue does the booklet imposition, 2-up, saddle stitch). A4 page images with selectable text, RGB, no bleed: for reading, sharing and home or office printing, not press-ready.</p></div>
+      <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDFs</button>
       <div class="slbl" style="margin-top:14px">Publish</div>
       <button type="button" class="save" id="pr-publish-btn" style="background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to website</button>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans can see it, and its match details, player figures and league table stay exactly as they are today.</p></div>
@@ -5432,35 +5432,36 @@ function prInitials(name) {
   var ini = w.slice(0, 3).map(function (x) { return (x[0] || '').toUpperCase(); }).join('');
   return 'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="58" fill="%230d0d0d" stroke="%23ffffff" stroke-width="3"/><text x="60" y="72" text-anchor="middle" font-family="Arial Black" font-size="' + (ini.length > 2 ? '30' : '38') + '" font-weight="900" fill="white">' + ini + '</text></svg>');
 }
+/* THE PREVIEW IS THE PRINT COVER.
+   It used to be a second, hand-drawn cover in inline styles that drifted from
+   the real one. Now the form is handed over exactly as the print page reads
+   it ('rlfc_programme_draft') and programme-print.html?embed=cover renders
+   page 1 in an iframe, scaled to the aside. Debounced: one re-render ~600ms
+   after typing stops, not one per keystroke. */
+var prPreviewTimer = null;
 function prRenderPreview() {
+  clearTimeout(prPreviewTimer);
+  prPreviewTimer = setTimeout(prRenderPreviewNow, 600);
+}
+function prRenderPreviewNow() {
   var box = document.getElementById('pr-preview'); if (!box) return;
-  var t = COVER_THEMES[prCoverTheme] || COVER_THEMES['black-yellow'];
-  var opp = gv('pr-opp') || 'TBC';
-  var ocFile = prCurrentOppCrest();
-  var oppImg = ocFile || prInitials(opp);
-  var comp = gv('pr-comp') || 'Combined Counties Premier Division North';
-  var venue = gv('pr-venue') || 'Tithe Farm';
-  var date = (typeof fxFmtDate === 'function' && gv('pr-date')) ? fxFmtDate(gv('pr-date')) : (gv('pr-date') || 'TBC');
-  var ms = gv('pr-matchsponsor');
-  function meta(l, v) { return '<div style="text-align:center;min-width:0"><div style="font-family:var(--fc);font-size:6px;font-weight:700;letter-spacing:.1em;color:' + t.accent + '">' + l + '</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:11px;color:' + t.ink + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px">' + esc(v) + '</div></div>'; }
-  box.innerHTML =
-    '<div style="width:100%;height:100%;display:flex;flex-direction:column;background:' + t.bg + ';color:' + t.ink + '">' +
-      (ms ? '<div style="background:' + t.accent + ';color:' + t.accentInk + ';text-align:center;font-family:var(--fc);font-weight:700;font-size:7.5px;letter-spacing:.03em;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">SPONSORED BY ' + esc(ms).toUpperCase() + '</div>' : '') +
-      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 12px 10px;position:relative;overflow:hidden">' +
-        '<div style="position:absolute;right:-26px;bottom:-26px;width:160px;height:160px;background:url(img/badge.png) center/contain no-repeat;opacity:.06"></div>' +
-        '<img src="img/badge.png" style="width:40px;height:40px;object-fit:contain">' +
-        '<div style="font-family:var(--fc);font-weight:700;font-size:6.5px;letter-spacing:.26em;color:' + t.accent + ';margin-top:6px">OFFICIAL MATCHDAY PROGRAMME</div>' +
-        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:23px;letter-spacing:1px;line-height:.95;margin-top:1px;color:' + t.ink + '">RAYNERS LANE FC</div>' +
-        '<div style="font-family:var(--fc);font-size:6.5px;letter-spacing:.08em;color:' + t.soft + ';margin-top:1px">' + esc(comp) + '</div>' +
-        '<div style="display:flex;align-items:center;gap:9px;margin:auto 0;position:relative;z-index:1">' +
-          '<div style="text-align:center"><img src="img/badge.png" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + '">RAYNERS LANE</div></div>' +
-          '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:25px;color:' + t.accent + '">VS</div>' +
-          '<div style="text-align:center"><img src="' + esc(oppImg) + '" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + ';max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(opp).toUpperCase() + '</div></div>' +
-        '</div>' +
-        '<div style="display:flex;gap:10px;margin-top:auto;position:relative;z-index:1">' + meta('DATE', date) + meta('K.O.', prTo12(gv('pr-ko'))) + meta('VENUE', venue) + '</div>' +
-      '</div>' +
-      '<div style="background:' + t.accent + ';color:' + t.accentInk + ';display:flex;justify-content:space-between;padding:5px 10px;font-family:var(--fc);font-weight:700;font-size:7px;letter-spacing:.06em"><span>THE LANE · EST. 1933</span><span>RAYNERSLANEFC.CO.UK</span></div>' +
-    '</div>';
+  try {
+    var doc = prBuildDoc();
+    localStorage.setItem('rlfc_programme_draft', JSON.stringify({ savedAt: new Date().toISOString(), doc: doc }));
+  } catch (e) { /* storage full or blocked: the iframe says there is no preview */ }
+  var fr = box.querySelector('iframe.pr-preview-frame');
+  if (!fr) {
+    box.innerHTML = '';
+    fr = document.createElement('iframe');
+    fr.className = 'pr-preview-frame';
+    fr.title = 'Programme cover preview';
+    fr.setAttribute('tabindex', '-1');
+    fr.style.cssText = 'width:100%;height:100%;border:0;display:block;background:#0d0d0d';
+    fr.src = 'programme-print.html?embed=cover';
+    box.appendChild(fr);
+  } else {
+    try { fr.contentWindow.location.reload(); } catch (e) { fr.src = 'programme-print.html?embed=cover&t=' + Date.now(); }
+  }
 }
 
 // ── CUSTOM PAGES — editor adds/removes branded pages with their own artwork ──
