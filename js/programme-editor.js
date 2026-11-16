@@ -728,7 +728,7 @@
     list.sort(function (a, b) { return order[a.level] - order[b.level]; });
     if (!list.length) { el.innerHTML = '<p class="pr-check-ok">No problems found. Open the pages and check them by eye before printing.</p><p class="pr-muted">' + DISCLAIMER + '</p>'; return; }
     var name = { must: 'Must fix', warn: 'Check', info: 'Optional' };
-    var CAT = PRE.CHECK_CATEGORIES;
+    var CAT = PRE.CHECK_CATEGORIES || {};
     el.innerHTML = '<ul>' + list.map(function (i, n) {
       return '<li class="pr-ck pr-ck--' + i.level + '"><span class="pr-ck__lvl">' + name[i.level] + '</span><span class="pr-ck__kind">' + h(CAT[i.cat] || i.kind) + '</span>' +
         '<span class="pr-ck__t">' + h(i.text) + '</span>' + (i.el ? '<button type="button" class="pr-link" data-go="' + h(i.el) + '">Go to it</button>' : '') + '</li>';
