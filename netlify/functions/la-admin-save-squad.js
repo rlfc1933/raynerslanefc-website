@@ -26,6 +26,7 @@ exports.handler = async function (event) {
   const byName = {};
   existing.forEach(function (p) { byName[norm(p.name)] = p; });
 
+  function stat(v) { if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null; }
   let added = 0, updated = 0;
   for (const p of players) {
     if (!p || !p.name) continue;
@@ -34,7 +35,8 @@ exports.handler = async function (event) {
       age: (p.age === '' || p.age == null) ? null : Number(p.age),
       squad_no: (p.number && Number(p.number) > 0) ? Number(p.number) : null,
       nationality: p.nationality || null, nickname: p.nickname || null, bio: p.bio || null,
-      apps: Number(p.apps) || 0, goals: Number(p.goals) || 0, assists: Number(p.assists) || 0,
+      // Blank is "not known", stored as null — never a zero nobody counted.
+      apps: stat(p.apps), goals: stat(p.goals), assists: stat(p.assists),
       photo_url: p.photo || null,
     };
     const ex = byName[norm(p.name)];

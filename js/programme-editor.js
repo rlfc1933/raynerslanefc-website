@@ -100,8 +100,24 @@
     offerDeviceCopy(d);
     renderCarry(); renderOppSource(); loadRegistries();
     bindDeviceAutosave();
+    offerHqFixture(d);
     prStep(1);
   };
+  /* Arriving from Matchday preparation with a different fixture selected:
+     ask, never switch silently (switching lists carried-over writing). */
+  function offerHqFixture(d) {
+    var want = ''; try { want = sessionStorage.getItem('rlfc_hq_fixture') || ''; } catch (e) {}
+    if (!want || want === (d.fixtureId || '')) return;
+    var f = (global._prFixtures || []).filter(function (x) { return String(x.id) === want; })[0];
+    if (!f) { setTimeout(function () { if ((global._prFixtures || []).length) offerHqFixture(d); }, 800); return; }
+    if (f.isHome === false) return;
+    var el = document.createElement('div'); el.className = 'pr-carry'; el.id = 'pr-hq-fx';
+    el.innerHTML = 'You came from Matchday preparation for <b>' + h(f.opponent) + '</b>' + (d.opponent ? '; this draft is for <b>' + h(d.opponent) + '</b>' : '') + '.' +
+      '<div class="pr-carry__acts"><button type="button" class="save sec" id="pr-hq-yes">Work on ' + h(f.opponent) + '</button><button type="button" class="save sec" id="pr-hq-no">Keep this draft</button></div>';
+    var host = $('pr-save-state'); host.parentNode.insertBefore(el, host.nextSibling);
+    $('pr-hq-yes').onclick = function () { var sel = $('pr-fixture'); if (sel) sel.value = want; global.prProgFromFixture(want); el.remove(); };
+    $('pr-hq-no').onclick = function () { try { sessionStorage.removeItem('rlfc_hq_fixture'); } catch (e) {} el.remove(); };
+  }
 
   /* ── device copy: protects work from a dropped connection ──────────── */
   function writeDevice() {

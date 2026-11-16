@@ -115,11 +115,25 @@
         '<button type="button" class="hq-nav__head" aria-expanded="' + expanded + '" data-hq-sec="' + sec.key + '">' +
         '<i class="ico ' + SECTION_ICON[sec.key] + '" aria-hidden="true"></i><span>' + h(sec.name) + '</span>' +
         '<span class="hq-nav__chev" aria-hidden="true"></span></button>' +
-        '<ul class="hq-nav__list"' + (expanded ? '' : ' hidden') + '>' + items.map(function (it) {
-          var here = S.where === it.id;
-          return '<li><a href="#' + (it.id === 'home' ? '' : h(it.id)) + '" class="hq-nav__item' + (here ? ' is-here' : '') + '"' +
-            (here ? ' aria-current="page"' : '') + ' data-hq-go="' + h(it.id) + '">' + h(it.label) + '</a></li>';
-        }).join('') + '</ul></div>';
+        '<ul class="hq-nav__list"' + (expanded ? '' : ' hidden') + '>' + (function () {
+          // Occasional tools sit behind "More" so each section leads with the
+          // everyday jobs. Nothing is removed: search, the current page and the
+          // toggle all reveal them.
+          S.navMore = S.navMore || {};
+          var showAll = !!q || !!S.navMore[sec.key];
+          var hiddenN = 0;
+          var lis = items.map(function (it) {
+            var here = S.where === it.id;
+            if (it.more && !showAll && !here) { hiddenN++; return ''; }
+            return '<li><a href="#' + (it.id === 'home' ? '' : h(it.id)) + '" class="hq-nav__item' + (here ? ' is-here' : '') + '"' +
+              (here ? ' aria-current="page"' : '') + (it.hint ? ' title="' + h(it.hint) + '"' : '') + ' data-hq-go="' + h(it.id) + '">' + h(it.label) +
+              (it.hint ? '<span class="hq-nav__hint">' + h(it.hint) + '</span>' : '') + '</a></li>';
+          }).join('');
+          var anyMore = items.some(function (it) { return it.more; });
+          if (anyMore && !q) lis += '<li><button type="button" class="hq-nav__more" data-hq-more="' + sec.key + '" aria-expanded="' + showAll + '">' +
+            (showAll ? 'Fewer' : 'More (' + hiddenN + ')') + '</button></li>';
+          return lis;
+        })() + '</ul></div>';
     });
     if (!any) out += '<p class="hq-nav__none">No tool matches “' + h(S.query) + '”.</p>';
     return out;
@@ -220,7 +234,9 @@
       // Tasks include finished ones: a matchday checklist shows what is done, not only what is left.
       Promise.all(KINDS.map(function (k) { return cos('list', k === 'task' ? { kind: k } : { kind: k, open: true }); })),
       cos('history', { limit: 12 }),
-      mdopsRows(), members(), submissions(), dataFile('programme')
+      mdopsRows(), members(), submissions(),
+      // The programme editor saves drafts to programme-draft.json; before its first save the old file is the draft.
+      dataFile('programme-draft').then(function (d) { return d || dataFile('programme'); })
     ];
     S.loading = Promise.all(jobs).then(function (r) {
       var lists = {}, listErr = null;
@@ -416,16 +432,32 @@
       out.push(row('Unread website enquiries', '—', 'records', 'Could not be read'));
     }
     var att = lastAttendance();
-    out.push(row('Last home attendance', att ? String(att.n) : '—', 'mdops', att ? att.label : 'Recorded in Attendance and takings'));
+    out.push(row('Last home attendance', att ? String(att.n) : (d.md && d.md.rows ? 'Not recorded' : 'Unavailable'), 'mdops',
+      att ? att.label : (d.md && d.md.rows ? 'No completed count for a past home match yet' : 'Attendance records could not be loaded')));
     var nh = d.fixtures ? M.nextHome(d.fixtures, now()) : null;
     if (nh) out.push(row('Promote the next home match', '', 'poststudio', nh.opponent + ', ' + T.kickoffLabel(nh, now()) + ' — make the matchday graphic'));
     return '<ul class="hq-rows" role="list">' + out.join('') + '</ul>';
   }
+  /* LAST HOME ATTENDANCE — a match that has happened, with a count somebody
+     finished. It used to take any record with a calculated figure, sorted by
+     date, so a PREPARED record for 3 April (Bedfont) showed as "last home
+     attendance: 0". Now: the fixture date has passed, the record is completed
+     or locked (the same rule the attendance reports use), and the official
+     figure wins over the gate count. No such record → null, which the row
+     shows as "not recorded", never as zero. */
   function lastAttendance() {
     var d = S.data; if (!d.md || !d.md.rows) return null;
-    var done = d.md.rows.filter(function (r) { return r.record && (r.record.attendance_calculated != null); })
-      .sort(function (a, b) { return String(b.fixture.date).localeCompare(String(a.fixture.date)); })[0];
-    return done ? { n: done.record.attendance_calculated, label: done.fixture.opponent + ', ' + T.shortDate(done.fixture.date) } : null;
+    var today = T.londonDate(now());
+    var done = d.md.rows.filter(function (r) {
+      var rec = r.record, f = r.fixture || {};
+      if (!rec || ['completed', 'locked'].indexOf(rec.status) < 0) return false;
+      if (String(f.date || '').slice(0, 10) > today) return false;
+      var n = rec.attendance_official != null ? rec.attendance_official : rec.attendance_calculated;
+      return n != null && n !== '';
+    }).sort(function (a, b) { return String(b.fixture.date).localeCompare(String(a.fixture.date)); })[0];
+    if (!done) return null;
+    var rec = done.record, n = rec.attendance_official != null ? rec.attendance_official : rec.attendance_calculated;
+    return { n: n, label: done.fixture.opponent + ', ' + T.shortDate(done.fixture.date) + (rec.attendance_official != null ? ' · official' : ' · gate count') };
   }
 
   function programmeFor(fx) {
@@ -533,6 +565,9 @@
     var f = selectedFixture();
     if (!f) { el.innerHTML = '<p class="hq-empty">There is no upcoming fixture in the registry.</p>'; return; }
     var home = f.isHome !== false;
+    // The fixture chosen here travels with the person into Programme (and any
+    // other panel that reads it), so they do not pick the match twice.
+    try { sessionStorage.setItem('rlfc_hq_fixture', String(f.id)); } catch (e) {}
     var tasks = M.tasksForFixture(d.items.task, f.id).sort(function (a, b) { return String(a.idempotency_key || a.title).localeCompare(String(b.idempotency_key || b.title), undefined, { numeric: true }); });
     var moved = M.movedTasks(d.items.task, f);
     var done = tasks.filter(function (t) { return M.CLOSED[t.stage]; }).length;
@@ -741,6 +776,7 @@
       var k = x.getAttribute('data-hq-sec'); var open = x.getAttribute('aria-expanded') !== 'true';
       S.navOpen[k] = open; paintNav(); return;
     }
+    if ((x = closest(t, '[data-hq-more]'))) { S.navMore = S.navMore || {}; var mk = x.getAttribute('data-hq-more'); S.navMore[mk] = !S.navMore[mk]; paintNav(); return; }
     if ((x = closest(t, '[data-hq-note-read]'))) { var key = x.getAttribute('data-hq-note-read'); var n = (S.notes.list.filter(function (q) { return q.key === key; })[0]); markRead(key, !(n && n.read)); return; }
     if ((x = closest(t, '[data-hq-note-open]'))) { markRead(x.getAttribute('data-hq-note-open'), true); toggleNotes(false); }
     if ((x = closest(t, '[data-hq-go]'))) {
@@ -811,6 +847,9 @@
   global.HQShell = {
     init: init, onNavigate: onNavigate, refresh: function () { return load().then(function () { renderHome(); paintBell(); }); },
     refreshNotifications: function () { if (S.data) { compute(); paintBell(); } },
-    toggleNotifications: toggleNotes, openMenu: openSheet, renderMatch: renderMatch, _state: S
+    toggleNotifications: toggleNotes, openMenu: openSheet, renderMatch: renderMatch, _state: S,
+    // Signed writes and identity, shared so other panels (meetings, programme)
+    // carry the same name into ownership and history.
+    write: write, askName: askName, actor: actor
   };
 }(window));

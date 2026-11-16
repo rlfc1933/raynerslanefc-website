@@ -1672,8 +1672,8 @@
       </div>
       <div class="field"><label class="fl">Position</label><select id="sq-pos"><option value="">Select...</option><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option></select></div>
       <div class="row2">
-        <div class="field"><label class="fl">Apps</label><input type="number" id="sq-apps" value="0" min="0"></div>
-        <div class="field"><label class="fl">Goals</label><input type="number" id="sq-goals" value="0" min="0"></div>
+        <div class="field"><label class="fl">Apps</label><input type="number" id="sq-apps" min="0" placeholder="Not known"></div>
+        <div class="field"><label class="fl">Goals</label><input type="number" id="sq-goals" min="0" placeholder="Not known"></div>
       </div>
       <button class="save sec" onclick="addPlayer()">+ Add Player</button>
       <div class="div"></div>
@@ -1732,7 +1732,16 @@
         <div class="so-hook-note" id="nw-hook-note">Write the article first, then press &#10024; for a suggestion. Blank is fine &mdash; the card falls back to the title.</div>
       </div>
       <div class="field"><label class="fl">Full Article</label><textarea id="nw-body" rows="8" placeholder="Write the full article here..."></textarea></div>
-      <button class="save" onclick="publishArticle()">&#10003; Publish Article</button>
+      <div class="snote" id="nw-editing" hidden></div>
+      <div class="row2">
+        <button class="save sec" type="button" onclick="nwSaveDraft()">Save draft</button>
+        <button class="save sec" type="button" onclick="nwPreview()">Preview</button>
+      </div>
+      <div class="nw-pv" id="nw-preview" hidden></div>
+      <button class="save" style="margin-top:10px" onclick="publishArticle()">&#10003; Publish to website</button>
+      <div class="div"></div>
+      <div class="slbl">Drafts</div>
+      <div id="nw-drafts"><p class="pr-muted">Loading…</p></div>
       <div class="div"></div>
       <div class="slbl" id="nw-cnt">Published Articles</div>
       <div id="nw-list"></div>
@@ -1879,10 +1888,10 @@
       <div class="field"><label class="fl">Nickname (optional)</label><input type="text" id="pl-nick" placeholder="The Wall, Rocket etc."></div>
       <div class="field"><label class="fl">Player Bio</label><textarea id="pl-bio" rows="4" placeholder="A brief description of the player, where they came from, strengths..."></textarea></div>
       <div class="row2">
-        <div class="field"><label class="fl">Apps</label><input type="number" id="pl-apps" value="0" min="0"></div>
-        <div class="field"><label class="fl">Goals</label><input type="number" id="pl-goals" value="0" min="0"></div>
+        <div class="field"><label class="fl">Apps</label><input type="number" id="pl-apps" min="0" placeholder="Not known"></div>
+        <div class="field"><label class="fl">Goals</label><input type="number" id="pl-goals" min="0" placeholder="Not known"></div>
       </div>
-      <div class="field"><label class="fl">Assists</label><input type="number" id="pl-assists" value="0" min="0"></div>
+      <div class="field"><label class="fl">Assists</label><input type="number" id="pl-assists" min="0" placeholder="Not known"></div>
       <div class="field">
         <label class="fl">Player Photo (optional)</label>
         <div class="iup-wrap" id="pl-iw"><input type="file" accept="image/*" onchange="prevImg('pl',this)"><div class="iup-icon"><i class="ico ico-camera"></i></div><div class="iup-lbl">Tap to upload player photo</div><div class="iup-sub">Head shot or action photo — JPG, PNG</div></div>
@@ -2840,7 +2849,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="snote" style="border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)"><p>The club's <strong style="color:var(--w)">minute book</strong>. Fill in the form, press <strong style="color:var(--w)">Save</strong>, and it's kept in the club's shared records — every staff member can open this tab and read it back under <strong style="color:var(--w)">"Saved meetings"</strong> at the bottom. Nothing is lost and nothing is on the public website. <em>Tip: keep anything truly sensitive (personal, financial or disciplinary detail) out of here and handled in person.</em></p></div>
 
       <div class="slbl"><i class="ico ico-chart-column"></i> Where we stand right now <button onclick="loadMeetingSnapshot()" style="background:none;border:none;color:var(--y);font-family:var(--fc);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;float:right">Refresh <i class="ico ico-rotate-cw"></i></button></div>
-      <p style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.5;margin:0 2px 10px">These aren't typed in here — they fill in <strong style="color:#fff">automatically</strong> from across the admin (the Wins Board, Fan sign-ups, Match Day Analytics). They read zero right now because it's pre-season with no data yet. <strong style="color:var(--y)">Tap any number</strong> to jump to where it's updated.</p>
+      <p style="font-family:var(--fb);font-size:12px;color:var(--gr);line-height:1.5;margin:0 2px 10px">These aren't typed in here — they fill in <strong style="color:#fff">automatically</strong> from across the admin (the Wins Board, Fan sign-ups, Match Day Analytics). A number is what has actually been recorded; a dash means that figure could not be loaded, which is not the same as zero. <strong style="color:var(--y)">Tap any number</strong> to jump to where it's updated.</p>
       <div class="mt-snap" id="mt-snap"><div style="font-family:var(--fc);font-size:13px;color:var(--gr);padding:6px 0">Loading…</div></div>
 
       <div class="div"></div>
@@ -2852,7 +2861,7 @@ Rayners Lane v [OPPONENT] — 3pm kick-off. Pay on the gate, bar open, all welco
       <div class="field"><label class="fl">Who attended</label><input type="text" id="mt-att" placeholder="Pete, Nigel, Jenny, Gary…"></div>
       <div class="field"><label class="fl">Subjects covered</label><textarea id="mt-subj" rows="3" placeholder="One per line — e.g.&#10;Pre-season sponsorship push&#10;100 Club launch&#10;Matchday roles for game one"></textarea></div>
       <div class="field"><label class="fl">Decisions / outcomes</label><textarea id="mt-out" rows="3" placeholder="What did we agree? e.g.&#10;Agreed to print 15 advertising boards&#10;Quiz night booked for 12 July"></textarea></div>
-      <div class="field"><label class="fl">Next steps — who does what</label><textarea id="mt-next" rows="3" placeholder="e.g.&#10;Nigel — approach 5 firms for boards by next meeting&#10;Jenny — start Football Foundation grant"></textarea></div>
+      <div class="field"><label class="fl">Next steps — who does what</label><textarea id="mt-next" rows="3" placeholder="One per line: Name — what they will do&#10;e.g. Nigel — approach 5 firms for boards&#10;Jenny — start Football Foundation grant 2026-12-01"></textarea><p class="pr-muted" style="margin:6px 2px 0">Each line written as <b>Name — action</b> becomes a task for that person in Tasks, linked to this meeting. Add a date as 2026-12-01 to set a deadline.</p></div>
       <button class="save sec" onclick="addMeeting()">+ Save this meeting</button>
       <p style="font-family:var(--fc);font-size:11px;color:var(--gr);margin:8px 2px 0"><i class="ico ico-circle-check"></i> Saves to the club's shared records (live in ~30s) and appears under "Saved meetings" below — every staff member can read it.</p>
       <div class="dep" id="dep-meetings"></div>
@@ -4617,7 +4626,7 @@ function openPanel(name) {
   if (name === 'squad')     renderSquad();
   if (name === 'committee') { renderCommittee(); loadOfficials(); }
   if (name === 'sponsors')  renderSponsors();
-  if (name === 'news')      renderNews();
+  if (name === 'news')      { renderNews(); nwLoadDrafts(); }
   if (name === 'matchday')  initMD();
   if (name === 'fixtures')  fxInit();
   if (name === 'mdops')     MDOps.init();
@@ -5886,7 +5895,7 @@ function prNewProgramme() {
 function _playerId(name) { return 'player-' + String(name || '').toLowerCase().replace(/\s+/g, '-'); }
 function _gridFromProfiles() {
   return playerProfiles.map(function (p) {
-    return { id: p.id, no: p.number || 0, name: p.name, pos: p.position, role: p.role || '', age: p.age || 0, apps: p.apps || 0, goals: p.goals || 0, photo: p.photo || '' };
+    return { id: p.id, no: p.number || 0, name: p.name, pos: p.position, role: p.role || '', age: p.age || 0, apps: p.apps == null ? null : p.apps, goals: p.goals == null ? null : p.goals, photo: p.photo || '' };
   });
 }
 function _refreshSquadViews() {
@@ -5931,8 +5940,10 @@ function addPlayer() {
   var no = parseInt(gv('sq-no')) || 0;
   var name = gv('sq-name');
   var pos  = gv('sq-pos');
-  var apps = parseInt(gv('sq-apps')) || 0;
-  var goals= parseInt(gv('sq-goals')) || 0;
+  // Blank means not known — never a made-up zero. Official figures come from
+  // the Full-Time match data once a name is matched in the review queue.
+  var apps = numOrNull(gv('sq-apps'));
+  var goals= numOrNull(gv('sq-goals'));
   if (!name) { toast('Enter a name', true); return; }
   if (!pos)  { toast('Select a position', true); return; }
   var id = _playerId(name);
@@ -6043,8 +6054,8 @@ function commitArticle(art, depId, after) {
     list.unshift(art);
     articles = list;
     renderNews();
-    pushToGitHub('news', { articles: articles, updatedAt: new Date().toISOString() }, depId || 'dep-news');
-    if (after) after();
+    Promise.resolve(pushToGitHub('news', { articles: articles, updatedAt: new Date().toISOString() }, depId || 'dep-news'))
+      .then(function (r) { if (r && r.ok) { if (after) after(); } else portalSaid('failed', 'Not published: ' + ((r && r.error) || 'the save did not complete') + '. Your article is still in the form.'); });
   });
 }
 
@@ -6086,8 +6097,9 @@ function publishArticle() {
   if (!title || !body) { toast('Enter title and article body', true); return; }
   var cat   = gv('nw-cat');
   var imgs  = {Signing:'img/news/news-signing.svg',Trials:'img/news/news-trials.svg',League:'img/news/news-league.svg',Commercial:'img/news/news-commercial.svg','Match Report':'img/news/news-matchday.svg'};
+  if (nwBusy) return; nwBusy = true; setTimeout(function () { nwBusy = false; }, 4000);
   var art   = {
-    id: 'article-' + Date.now(),
+    id: nwEditingId ? nwEditingId.replace(/^draft-/, 'article-') : ('article-' + Date.now()),
     title: title, category: cat,
     date: gv('nw-date'), author: gv('nw-author'),
     image: imgStore['nw'] ? imgStore['nw'].dataUrl : (imgs[cat] || 'img/news/news-default.svg'),
@@ -6103,13 +6115,15 @@ function publishArticle() {
       if (path) art.image = path;
       commitArticle(art, 'dep-news', function() {
         setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc',''); setVal('nw-hook','');
-        rmImg('nw');
+        rmImg('nw'); nwAfterPublish(art);
         portalSaid('published', 'News story published to the website.');
       });
     });
   } else {
+    if (nwEditingImage && !imgStore['nw']) art.image = nwEditingImage;
     commitArticle(art, 'dep-news', function() {
-      setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc','');
+      setVal('nw-title',''); setVal('nw-body',''); setVal('nw-exc',''); setVal('nw-hook','');
+      nwAfterPublish(art);
       portalSaid('published', 'News story published to the website.');
     });
   }
@@ -6132,9 +6146,87 @@ function renderNews() {
   document.getElementById('nw-cnt').textContent = 'Published (' + articles.length + ')';
   document.getElementById('nw-list').innerHTML = articles.length
     ? articles.map(function(a) {
-        return '<div class="li"><div class="li-main"><div class="li-name">' + a.title + '</div><div class="li-sub">' + a.category + ' &middot; ' + (a.date||'') + '</div></div><button class="li-del" onclick="deleteArticle(\'' + esc(a.id) + '\')">Delete</button></div>';
+        return '<div class="li"><div class="li-main"><div class="li-name">' + escH(a.title) + '</div><div class="li-sub">' + escH(a.category) + ' &middot; ' + escH(a.date||'') + '</div></div>' +
+          '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="nwEdit(\'' + esc(a.id) + '\',\'published\')">Edit</button>' +
+          '<button class="li-del" onclick="deleteArticle(\'' + esc(a.id) + '\')">Delete</button></div>';
       }).join('')
     : '<div style="padding:14px;text-align:center;font-family:var(--fc);font-size:13px;color:var(--gr)">No articles yet</div>';
+  nwRenderDrafts();
+}
+
+/* NEWS: SAVE DRAFT → PREVIEW → PUBLISH, and edit afterwards.
+   Publish used to be the only button, and a published story could only be
+   deleted. Drafts are kept in data/news-drafts.json (not listed anywhere on
+   the public site); Preview shows the story as a reader will see it;
+   Publish says "published" only after the save is confirmed; Edit reopens a
+   published story and republishing updates it in place (same id). */
+var nwEditingId = null, nwEditingImage = null, nwBusy = false, nwDrafts = [];
+function nwForm() {
+  return { id: nwEditingId || ('draft-' + Date.now()), title: gv('nw-title'), category: gv('nw-cat'), date: gv('nw-date'),
+    author: gv('nw-author'), excerpt: gv('nw-exc'), body: gv('nw-body'), shareHeadline: gv('nw-hook') || undefined,
+    image: nwEditingImage || undefined, savedAt: new Date().toISOString(), savedBy: (window.HQShell && HQShell.actor && HQShell.actor()) || '' };
+}
+function nwLoadDrafts() {
+  fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: PIN, read: true, path: 'data/news-drafts.json' }) })
+    .then(function (r) { return r.json(); }).then(function (j) { nwDrafts = (j && j.ok && j.data && j.data.drafts) || []; nwRenderDrafts(); })
+    .catch(function () { var el = document.getElementById('nw-drafts'); if (el) el.innerHTML = '<p class="pr-muted">Drafts could not be loaded.</p>'; });
+}
+function nwRenderDrafts() {
+  var el = document.getElementById('nw-drafts'); if (!el) return;
+  el.innerHTML = nwDrafts.length ? nwDrafts.map(function (d) {
+    return '<div class="li"><div class="li-main"><div class="li-name">' + escH(d.title || '(untitled)') + '</div><div class="li-sub">Draft &middot; saved ' + escH(String(d.savedAt || '').slice(0, 16).replace('T', ' ')) + (d.savedBy ? ' by ' + escH(d.savedBy) : '') + '</div></div>' +
+      '<button class="li-del" style="background:var(--c2);color:var(--w)" onclick="nwEdit(\'' + esc(d.id) + '\',\'draft\')">Open</button></div>';
+  }).join('') : '<p class="pr-muted">No drafts.</p>';
+}
+function nwSaveDraft() {
+  var d = nwForm(); if (!d.title && !d.body) { toast('Write something first', true); return; }
+  if (!nwEditingId) nwEditingId = d.id;
+  var el = document.getElementById('dep-news'); showDep(el, 'loading', 'Saving draft…');
+  fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, merge: true, domain: 'news-drafts', key: 'drafts', idField: 'id', upserts: [d] }) })
+    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok && j.ok !== false, j: j }; }); })
+    .then(function (r) {
+      if (!r.ok) { showDep(el, 'err', 'Draft not saved: ' + ((r.j && r.j.error) || 'error') + '. It is still in the form.'); return; }
+      nwDrafts = r.j.merged || nwDrafts; nwRenderDrafts();
+      showDep(el, 'ok', 'Draft saved. Not on the website.');
+    }).catch(function (e) { showDep(el, 'err', 'Draft not saved: no connection. It is still in the form.'); });
+}
+function nwPreview() {
+  var d = nwForm(), box = document.getElementById('nw-preview');
+  var img = imgStore['nw'] ? imgStore['nw'].dataUrl : d.image;
+  box.hidden = false;
+  box.innerHTML = '<div class="nw-pv__k">Preview — not published</div>' + (img ? '<img src="' + escH(img) + '" alt="">' : '') +
+    '<div class="nw-pv__cat">' + escH(d.category) + (d.date ? ' &middot; ' + escH(d.date) : '') + '</div><h3>' + escH(d.title || '(no headline)') + '</h3>' +
+    (d.excerpt ? '<p class="nw-pv__exc">' + escH(d.excerpt) + '</p>' : '') +
+    String(d.body || '').split(/\n{2,}|\n/).filter(Boolean).map(function (p) { return '<p>' + escH(p) + '</p>'; }).join('') +
+    (d.author ? '<p class="nw-pv__by">' + escH(d.author) + '</p>' : '');
+  box.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+function nwEdit(id, kind) {
+  var a = (kind === 'draft' ? nwDrafts : articles).filter(function (x) { return x.id === id; })[0]; if (!a) return;
+  nwEditingId = id;
+  nwEditingImage = a.image || null;
+  setVal('nw-title', a.title || ''); setVal('nw-cat', a.category || 'News'); setVal('nw-date', a.date || '');
+  setVal('nw-author', a.author || ''); setVal('nw-exc', a.excerpt || ''); setVal('nw-body', a.body || ''); setVal('nw-hook', a.shareHeadline || '');
+  var st = document.getElementById('nw-editing');
+  st.hidden = false; st.innerHTML = (kind === 'published' ? 'Editing a <b>published</b> story. Publishing again updates it on the website.' : 'Editing a draft.') +
+    ' <button type="button" class="pr-link" onclick="nwNew()">Start a new story instead</button>';
+  document.getElementById('nw-title').scrollIntoView({ block: 'center' });
+}
+function nwNew() {
+  nwEditingId = null; nwEditingImage = null;
+  ['nw-title', 'nw-body', 'nw-exc', 'nw-hook'].forEach(function (i) { setVal(i, ''); });
+  var st = document.getElementById('nw-editing'); st.hidden = true;
+  var pv = document.getElementById('nw-preview'); pv.hidden = true;
+}
+function nwAfterPublish(art) {
+  // A published story's draft is finished with.
+  var draftId = 'draft-' + String(art.id).replace(/^article-/, '');
+  var gone = nwDrafts.filter(function (d) { return d.id === draftId || d.id === art.id; }).map(function (d) { return d.id; });
+  if (gone.length) fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: PIN, merge: true, domain: 'news-drafts', key: 'drafts', idField: 'id', upserts: [], deletedIds: gone }) })
+    .then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { nwDrafts = j.merged || []; nwRenderDrafts(); } }).catch(function () {});
+  nwNew();
 }
 
 // ── COMMITTEE ──
@@ -9062,6 +9154,38 @@ function addMeeting() {
   renderMeetings();
   setVal('mt-title', ''); setVal('mt-att', ''); setVal('mt-subj', ''); setVal('mt-out', ''); setVal('mt-next', ''); setVal('mt-date', '');
   commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting saved to the club records <i class="ico ico-check"></i> — see it under "Saved meetings"');
+  mtActionsToTasks(meetings[0]);
+}
+/* AGREED ACTIONS BECOME TASKS. "Next steps — who does what" used to be text
+   that someone had to retype into Tasks. Each line written as
+   "Name — what they will do" becomes a task owned by that person, linked back
+   to the meeting. The key is per meeting and line, so saving again (or a
+   dropped connection and retry) never creates a duplicate. Lines without a
+   name are listed, not guessed. */
+function mtParseActions(text) {
+  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, i) {
+    var m = l.match(/^([^—–:-]{2,40}?)\s*[—–:-]\s+(.+)$/);
+    var iso = l.match(/\b(20\d\d-\d\d-\d\d)\b/);
+    return m ? { i: i, owner: m[1].trim(), title: m[2].trim(), due: iso ? iso[1] : null } : { i: i, title: l, owner: null };
+  });
+}
+function mtActionsToTasks(mt) {
+  var el = document.getElementById('dep-meetings');
+  var acts = mtParseActions(mt && mt.nextSteps);
+  if (!acts.length) return;
+  if (!window.HQShell || !HQShell.write) { if (el) showDep(el, 'warn', 'Meeting saved. Actions were not turned into tasks: Tasks is not available on this page.'); return; }
+  var named = acts.filter(function (a) { return a.owner; }), loose = acts.filter(function (a) { return !a.owner; });
+  Promise.all(named.map(function (a) {
+    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner, due_date: a.due || undefined,
+      idempotency_key: 'meeting:' + mt.id + ':' + a.i, source: 'meeting:' + mt.id,
+      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date } });
+  })).then(function (rs) {
+    var ok = rs.filter(function (r) { return r && r.ok; }).length, bad = rs.length - ok;
+    var msg = ok + ' action' + (ok === 1 ? '' : 's') + ' added to Tasks with an owner.';
+    if (bad) msg += ' ' + bad + ' could not be added (' + ((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error || 'error') + ') — add them in Tasks.';
+    if (loose.length) msg += ' ' + loose.length + ' line' + (loose.length === 1 ? ' has' : 's have') + ' no name (“Name — action”), so no task was made.';
+    if (el) showDep(el, bad ? 'err' : (loose.length ? 'warn' : 'ok'), msg);
+  });
 }
 function deleteMeeting(id) {
   if (!PortalSafety.confirmTyped('DELETE', 'Delete this meeting record',
@@ -9073,21 +9197,24 @@ function deleteMeeting(id) {
 }
 async function loadMeetingSnapshot() {
   var el = document.getElementById('mt-snap'); if (!el) return;
-  function jget(name) { return new Promise(function (r) { fetchJSON(name, function (d) { r(d || {}); }); }); }
+  // null = could not be read (shown as a dash), {} with nothing in = genuinely none (0).
+  function jget(name) { return new Promise(function (r) { fetchJSON(name, function (d) { r(d || null); }); }); }
   var w = await jget('committee-wins'), att = await jget('attendance');
-  var winsArr = w.wins || [];
-  var brought = winsArr.reduce(function (a, x) { return a + (parseFloat(x.amt) || 0); }, 0);
-  // match income is chairman-private now — only counted if unlocked this session
-  var income = (analyticsUnlocked ? analytics : []).reduce(function (a, m) { return a + matchTotal(m); }, 0);
-  var hearts = 0; (att.matches || []).forEach(function (m) { hearts += (m.lanes || []).length; });
+  var winsArr = w ? (w.wins || []) : null;
+  var brought = winsArr ? winsArr.reduce(function (a, x) { return a + (parseFloat(x.amt) || 0); }, 0) : null;
+  // Match income is chairman-private: until it is unlocked this session it is
+  // "locked", not £0.
+  var income = analyticsUnlocked ? (analytics || []).reduce(function (a, m) { return a + matchTotal(m); }, 0) : null;
+  var hearts = null; if (att) { hearts = 0; (att.matches || []).forEach(function (m) { hearts += (m.lanes || []).length; }); }
   var fans = '—';
   try { var fres = await loadMembers(); if (fres.configured) fans = fres.members.length; } catch (e) {}
+  function money(v) { return v == null ? '—' : '£' + Math.round(v).toLocaleString('en-GB'); }
   var cards = [
-    { n: winsArr.length, l: 'Wins logged', src: 'Wins Board', go: 'playbook' },
-    { n: '£' + Math.round(brought).toLocaleString('en-GB'), l: 'Brought in', src: 'Wins Board', go: 'playbook' },
+    { n: winsArr ? winsArr.length : '—', l: 'Wins logged', src: 'Wins Board', go: 'playbook' },
+    { n: money(brought), l: 'Brought in', src: 'Wins Board', go: 'playbook' },
     { n: fans, l: 'Fans signed up', src: 'Fan Club', go: 'fanclub' },
-    { n: '£' + Math.round(income).toLocaleString('en-GB'), l: 'Matchday income', src: 'Match Day Analytics', go: 'clubstats' },
-    { n: hearts, l: 'Hearts awarded', src: 'Fan Club', go: 'fanclub' },
+    { n: income == null ? 'Locked' : money(income), l: 'Matchday income', src: 'Match Day Analytics', go: 'clubstats' },
+    { n: hearts == null ? '—' : hearts, l: 'Hearts awarded', src: 'Fan Club', go: 'fanclub' },
   ];
   el.innerHTML = cards.map(function (c) { return '<button class="s" onclick="openPanel(\'' + c.go + '\')"><b>' + c.n + '</b><span>' + c.l + '</span><small>from ' + c.src + ' &rsaquo;</small></button>'; }).join('');
 }
@@ -10161,9 +10288,9 @@ function addPlayerProfile() {
     role:gv('pl-role'), age:parseInt(gv('pl-age'))||0,
     nationality:gv('pl-nat'), nickname:gv('pl-nick'),
     bio:gv('pl-bio'),
-    apps:parseInt(gv('pl-apps'))||0,
-    goals:parseInt(gv('pl-goals'))||0,
-    assists:parseInt(gv('pl-assists'))||0,
+    apps:numOrNull(gv('pl-apps')),
+    goals:numOrNull(gv('pl-goals')),
+    assists:numOrNull(gv('pl-assists')),
     photo: imgStore['pl'] ? imgStore['pl'].dataUrl : (prev.photo || ''),
   });
   _refreshSquadViews();
@@ -10173,7 +10300,7 @@ function addPlayerProfile() {
 }
 function plClearForm() {
   ['pl-name','pl-no','pl-bio','pl-nick','pl-nat','pl-role','pl-age','pl-id'].forEach(function(f){ setVal(f, ''); });
-  setVal('pl-pos', ''); setVal('pl-apps', '0'); setVal('pl-goals', '0'); setVal('pl-assists', '0');
+  setVal('pl-pos', ''); setVal('pl-apps', ''); setVal('pl-goals', ''); setVal('pl-assists', '');
   if (imgStore['pl']) rmImg('pl');
 }
 // Load an existing profile back into the form to edit it.
@@ -10182,7 +10309,7 @@ function plEdit(id) {
   setVal('pl-id', p.id); setVal('pl-name', p.name); setVal('pl-no', p.number || '');
   setVal('pl-pos', p.position || ''); setVal('pl-role', p.role || ''); setVal('pl-age', p.age || '');
   setVal('pl-nat', p.nationality || ''); setVal('pl-nick', p.nickname || ''); setVal('pl-bio', p.bio || '');
-  setVal('pl-apps', p.apps || 0); setVal('pl-goals', p.goals || 0); setVal('pl-assists', p.assists || 0);
+  setVal('pl-apps', p.apps == null ? '' : p.apps); setVal('pl-goals', p.goals == null ? '' : p.goals); setVal('pl-assists', p.assists == null ? '' : p.assists);
   var panel = document.getElementById('panel-squad'); if (panel) panel.scrollIntoView({ block: 'start' });
   toast('Editing ' + p.name + ' — change details then “Add / Update Player”');
 }
@@ -11047,7 +11174,8 @@ function pushToGitHub(name, data, depId) {
 
   showDep(el, 'loading', 'Saving to site...');
 
-  fetch('/.netlify/functions/save-data', {
+  // Returns the outcome so a caller can wait for it before saying "published".
+  return fetch('/.netlify/functions/save-data', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pin: PIN, path: 'data/' + name + '.json', content: content })
@@ -11060,13 +11188,16 @@ function pushToGitHub(name, data, depId) {
       showDep(el, 'ok', 'Saved to site — live in ~30 seconds');
       // Nudge a deploy in case the GitHub→Netlify auto-build is ever delayed.
       try { fetch(BUILD_HOOK, { method: 'POST' }); } catch (e) {}
+      return { ok: true };
     } else {
       var msg = (res.j && res.j.error) || 'Save failed';
       showDep(el, 'err', msg);
+      return { ok: false, error: msg };
     }
   })
   .catch(function(err) {
     showDep(el, 'err', 'Network error: ' + err.message);
+    return { ok: false, error: 'Network error: ' + err.message };
   });
 }
 
@@ -11079,6 +11210,7 @@ function showDep(el, type, msg) {
 }
 
 // ── HELPERS ──
+function numOrNull(v) { v = String(v == null ? '' : v).trim(); if (v === '') return null; var n = parseInt(v, 10); return isFinite(n) && n >= 0 ? n : null; }
 function gv(id) { var el=document.getElementById(id); return el ? el.value.trim() : ''; }
 function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 // HTML-escape for TEXT content (esc above is for JS-string/onclick contexts only).
