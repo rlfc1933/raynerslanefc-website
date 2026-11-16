@@ -28,6 +28,8 @@
   <script src="js/hq-time.js"></script>
   <script src="js/hq-model.js"></script>
   <script src="js/hq-shell.js"></script>
+  <script src="js/match-officials.js?v=1" defer></script>
+  <script src="js/opp-results.js?v=1" defer></script>
   <script src="js/programme-editor.js?v=1" defer></script>
   <link rel="stylesheet" href="css/programme-editor.css?v=1">
   <script src="js/hq-pwa.js"></script>
@@ -1541,6 +1543,14 @@
         <div class="field"><label class="fl" for="pr-off-source">Confirmed by / source</label><input type="text" id="pr-off-source" placeholder="e.g. League appointments email"></div>
       </div>
       <div class="field"><label class="fl" for="pr-off-checked">Last checked</label><input type="date" id="pr-off-checked"></div>
+      <div id="pr-off-use" class="pr-off-use"></div>
+      <details class="pr-offimp" id="pr-offimp"><summary>Import appointments (paste from the league or referees&rsquo; secretary)</summary>
+        <div class="snote"><p>Paste the appointments message. Each fixture line needs the date and the opponent, e.g. <em>Sat 28 Nov Rayners Lane v Broadfields United — Referee: A Name; AR1: B Name; AR2: C Name; 4th: D Name</em>. Only names and roles are kept: phone numbers, emails and addresses are removed, and any line about assessment or marking is refused.</p></div>
+        <div class="field"><label class="fl" for="pr-offimp-label">Source</label><input type="text" id="pr-offimp-label" placeholder="e.g. League appointments email"></div>
+        <div class="field"><label class="fl" for="pr-offimp-text">Appointments text</label><textarea id="pr-offimp-text" rows="6"></textarea></div>
+        <button type="button" class="save sec" onclick="prParseAppointments()">Preview</button>
+        <div id="pr-offimp-preview" class="pr-offimp-preview"></div>
+      </details>
 
       <div class="div"></div>
       <div class="slbl">Playing colours <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— as confirmed for this match</span></div>
@@ -1598,6 +1608,8 @@
 
       <div class="field"><label class="fl">Opposition summary (scouting)</label><textarea id="pr-oppsum" rows="3" placeholder="Their form, where they sit, danger men..."></textarea></div>
       <div class="field"><label class="fl">Head to Head / History</label><textarea id="pr-h2h" rows="3" placeholder="Any history between the clubs..."></textarea></div>
+      <div class="slbl">Recent results <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— completed matches only; prints with its source and cut-off date</span></div>
+      <div id="pr-oppres" class="pr-oppres"></div>
 
 
       <div class="div"></div>
@@ -5233,7 +5245,7 @@ function applyProgrammeData(d) {
   setVal('pr-clubinfo', d.clubInfo || ''); setVal('pr-captainname', d.captainName || ''); setVal('pr-potm', d.potm || ''); setVal('pr-captainnotes', d.captainNotes || '');
   setVal('pr-off-status', d.officialsStatus || 'awaiting'); setVal('pr-off-source', d.officialsSource || ''); setVal('pr-off-checked', d.officialsCheckedAt || '');
   setVal('pr-homekit', d.homeKit || ''); setVal('pr-awaykit', d.awayKit || ''); var _ko = document.getElementById('pr-kit-ok'); if (_ko) _ko.checked = !!d.awayKitConfirmed;
-  if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; }
+  if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; PRE.oppRecent = d.oppRecentResults || null; }
   setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
   // Opponent crest: an uploaded image (cup/friendly) vs one picked from the list.
   var oc = document.getElementById('pr-oppcrest');
@@ -5535,6 +5547,8 @@ function prBuildDoc() {
     officialsStatus: gv('pr-off-status') || 'awaiting', officialsSource: gv('pr-off-source'), officialsCheckedAt: gv('pr-off-checked'),
     homeKit: gv('pr-homekit'), awayKit: gv('pr-awaykit'), awayKitConfirmed: !!(document.getElementById('pr-kit-ok') || {}).checked,
     carryReview: (window.PRE && PRE.carry) || null, oppProfileSource: (window.PRE && PRE.oppSource) || null,
+    // Chosen by the editor (js/programme-editor.js), never by a background refresh.
+    oppRecentResults: (window.PRE && PRE.oppRecent) || null,
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
@@ -5873,6 +5887,9 @@ async function prFreezeEdition(base) {
     doc.nextHomeFixture = up.filter(function (f) { return f.isHome !== false; })[0] || null;
   } catch (e) { /* no snapshot is honest; a later season's fixture is not */ }
 
+  // OPPOSITION RESULTS are already a copy (doc.oppRecentResults, chosen in
+  // the editor with their cut-off date). They are kept exactly as chosen:
+  // never re-fetched here, so the edition prints what the editor approved.
   doc.published = true;
   doc.publishedAt = new Date().toISOString();
   doc.snapshotOf = doc.fixtureId || doc.id;

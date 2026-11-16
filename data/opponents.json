@@ -24,11 +24,19 @@
       ],
       "sources": [
         "https://www.broadfieldsunitedfc.co.uk/a/club-history-64122.html",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Broadfields_United_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Checked against the club's own history page",
-      "reviewNote": "History summary written from the club's own history page (read 16 Nov 2026). Wikipedia's account of the early years differs (it mentions the Southern Olympian League); the club page is preferred."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: History summary written from the club's own history page (read 16 Nov 2026). Wikipedia's account of the early years differs (it mentions the Southern Olympian League); the club page is preferred.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Harefield United",
@@ -50,11 +58,20 @@
         "Won Spartan South Midlands Division One unbeaten in 2018-19 and joined the Combined Counties Premier North in 2022."
       ],
       "sources": [
+        "https://www.harefieldunited.com/a/club-history-27796.html",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Harefield_United_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None. 'Oldest in Middlesex' is Wikipedia's claim and has not been independently checked. Season of the Parthenon League title is my inference from 'debut season' after joining in 1964. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None. 'Oldest in Middlesex' is Wikipedia's claim and has not been independently checked. Season of the Parthenon League title is my inference from 'debut season' after joining in 1964.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Northwood",
@@ -76,11 +93,20 @@
         "Won the Middlesex Senior Cup in 2006-07, beating Hayes on penalties."
       ],
       "sources": [
+        "https://northwoodfc.com/clubinfo.html",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Northwood_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "opponents.json honours says 'Hellenic Premier champs 1991-92' - WRONG according to Wikipedia: the 1991-92 title was the Spartan League Premier Division. Northwood's Hellenic title was Division One (about 1978-79). Founded year 1926 is given as 'believed', with an earlier 1899 club in the area. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "16 Nov 2026 check: Ground currently sponsor-named Skyline Roofing Stadium; underlying name matches stored value. 2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: opponents.json honours says 'Hellenic Premier champs 1991-92' - WRONG according to Wikipedia: the 1991-92 title was the Spartan League Premier Division. Northwood's Hellenic title was Division One (about 1978-79). Founded year 1926 is given as 'believed', with an earlier 1899 club in the area.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "North Greenford United",
@@ -102,11 +128,20 @@
         "Relegated from the Southern League in 2016; reached the FA Vase quarter-finals in 2023-24."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/North_Greenford_United_F.C."
+        "https://en.wikipedia.org/wiki/North_Greenford_United_F.C.",
+        "https://southern-football-league.co.uk/team/NorthGreenfordUnited/2985//p",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Ground left null: the Wikipedia text read did not name the ground, so 'Berkeley Fields' in opponents.json is unverified. Nickname 'The Blues' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Ground left null: the Wikipedia text read did not name the ground, so 'Berkeley Fields' in opponents.json is unverified. Nickname 'The Blues' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Hilltop",
@@ -128,11 +163,20 @@
         "Reached the FA Vase fifth round in 2023-24."
       ],
       "sources": [
+        "https://hilltopfc.co.uk/club-statement-hilltop-fc-confirm-new-ground-share-agreement-from-the-202526-season",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Hilltop_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "opponents.json says 'Middlesex County League Div One champions 2019' and town 'Kingsbury NW9'; Wikipedia lists the title as Division One West 2018-19 and gives the club's base as Stonebridge. How Hilltop reached the Premier Division North from Division One is not stated in the article read. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: opponents.json says 'Middlesex County League Div One champions 2019' and town 'Kingsbury NW9'; Wikipedia lists the title as Division One West 2018-19 and gives the club's base as Stonebridge. How Hilltop reached the Premier Division North from Division One is not stated in the article read.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Bedfont",
@@ -154,11 +198,19 @@
         "Won the 2025-26 Division One play-off final against Brook House to reach the Premier Division North."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Bedfont_F.C."
+        "https://en.wikipedia.org/wiki/Bedfont_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "opponents.json honours mentions only the 2015-16 runners-up finish; Wikipedia shows they were also Division One runners-up and play-off winners in 2025-26. Nickname 'The Yellows' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: opponents.json honours mentions only the 2015-16 runners-up finish; Wikipedia shows they were also Division One runners-up and play-off winners in 2025-26. Nickname 'The Yellows' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Amersham Town",
@@ -180,11 +232,20 @@
         "Won Combined Counties League Division One in 2023-24 with 111 points."
       ],
       "sources": [
+        "https://amershamtownfc.com/history",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Amersham_Town_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None on founded year or ground. Nickname 'The Magpies' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None on founded year or ground. Nickname 'The Magpies' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Burnham",
@@ -206,11 +267,20 @@
         "Southern League Division One Central champions in 2012-13, reaching the Southern Premier Division for the first time."
       ],
       "sources": [
+        "https://burnhamfc1878.co.uk/?p=44",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Burnham_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "opponents.json honours says 'Hellenic Premier & League Cup 1975-76'; the Wikipedia text read confirms only the 1975-76 Premier Division title, not a League Cup that season. Treat the League Cup claim as unverified. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: opponents.json honours says 'Hellenic Premier & League Cup 1975-76'; the Wikipedia text read confirms only the 1975-76 Premier Division title, not a League Cup that season. Treat the League Cup claim as unverified.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Holyport",
@@ -232,11 +302,20 @@
         "Promoted to the Combined Counties Premier North in 2021; lost 4-0 to Rayners Lane in the 2023-24 play-off semi-final."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Holyport_F.C."
+        "https://www.holyportfc.co.uk/",
+        "https://en.wikipedia.org/wiki/Holyport_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None. Nickname 'The Villagers' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "16 Nov 2026 check: Official homepage calls the ground 'Summerleaze Park'; Wikipedia and the league page say 'Summerleaze Village'. Minor naming difference. 2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None. Nickname 'The Villagers' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Kidlington",
@@ -258,11 +337,20 @@
         "Won the Oxfordshire Senior Cup for the first time in 2025-26, beating Oxford City 4-0."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Kidlington_F.C."
+        "https://www.kidlingtonfootballclub.com/",
+        "https://en.wikipedia.org/wiki/Kidlington_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None. Nickname 'The Greens' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/Kidlington_F.C.); no official league directory page was reachable. Earlier note: None. Nickname 'The Greens' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/Kidlington_F.C."
+      }
     },
     {
       "key": "Ardley United",
@@ -284,11 +372,20 @@
         "Moved to the Spartan South Midlands League in 2021 and to the Combined Counties Premier North in 2023."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Ardley_United_F.C."
+        "https://www.ardleyunitedfc.co.uk/",
+        "https://en.wikipedia.org/wiki/Ardley_United_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Existing ground 'Ardley Playing Fields'; Wikipedia says 'the Playing Fields' on Oxford Road - consistent. Nickname not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "16 Nov 2026 check: Stored 'Ardley Playing Fields' vs sources 'The Playing Fields, Oxford Road' (same place, naming only). 2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Existing ground 'Ardley Playing Fields'; Wikipedia says 'the Playing Fields' on Oxford Road - consistent. Nickname not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Easington Sports",
@@ -310,11 +407,20 @@
         "Moved to the United Counties League in 2021 and to the Combined Counties Premier North at the end of 2025-26."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Easington_Sports_F.C."
+        "http://www.pitchero.com/clubs/easingtonsports/",
+        "https://en.wikipedia.org/wiki/Easington_Sports_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None. Wikipedia states the transfer to the Combined Counties Premier North came after 2025-26, so this is their first season in the division. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None. Wikipedia states the transfer to the Combined Counties Premier North came after 2025-26, so this is their first season in the division.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "North Leigh",
@@ -336,11 +442,20 @@
         "Relegated to the Combined Counties Premier North after finishing bottom of Division One Central in 2024-25."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/North_Leigh_F.C."
+        "http://www.pitchero.com/clubs/northleighfc/",
+        "https://en.wikipedia.org/wiki/North_Leigh_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None on founded year or ground. Nickname 'The Millers' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None on founded year or ground. Nickname 'The Millers' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Reading City",
@@ -362,11 +477,20 @@
         "Moved to the Combined Counties Premier North in 2021; reached the FA Vase fourth round in 2025-26."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Reading_City_F.C."
+        "http://www.pitchero.com/clubs/readingcityfc",
+        "https://en.wikipedia.org/wiki/Reading_City_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Internal Wikipedia conflict: the history text dates the Reading Senior Cup win to 2005-06, but the honours list gives 2006-07. Omitted from facts until checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Internal Wikipedia conflict: the history text dates the Reading Senior Cup win to 2005-06, but the honours list gives 2006-07. Omitted from facts until checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Thatcham Town",
@@ -388,11 +512,20 @@
         "Won the FA Vase at Wembley in 2017-18, and the Hellenic Premier Division in the same season."
       ],
       "sources": [
+        "https://www.pitchero.com/clubs/thatchamtown/a/history-7280.html",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Thatcham_Town_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "The Wikipedia history is out of date (it stops around 2021-22 in the Isthmian League), but the lead says they are now in the Combined Counties Premier North; the summary does not say how they got there. Nickname 'The Kingfishers' is supported by the article ('the Kingfishers'). Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: The Wikipedia history is out of date (it stops around 2021-22 in the Isthmian League), but the lead says they are now in the Combined Counties Premier North; the summary does not say how they got there. Nickname 'The Kingfishers' is supported by the article ('the Kingfishers').",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Wallingford & Crowmarsh",
@@ -415,11 +548,20 @@
         "Won the 2021-22 Combined Counties Division One play-offs (beating Rayners Lane in the semi-final) and became Wallingford & Crowmarsh after a 2022 link-up with Crowmarsh Youth FC."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Wallingford_%26_Crowmarsh_F.C."
+        "https://www.wandcfc.co.uk/",
+        "https://en.wikipedia.org/wiki/Wallingford_%26_Crowmarsh_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Wikipedia's honours list Combined Counties League champions 1998-99 as well as 2001-02, but the history text mentions only 2001-02, so 1998-99 needs a second source (opponents.json repeats both). Founding: 1995 for the merged club; the original Wallingford Town dates from 1922. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Conflicting sources — confirm with the club secretary before printing",
+      "reviewNote": "16 Nov 2026 check: Wikipedia infobox gives 1922 (Wallingford Town predecessor), while the article body says 1995 merger. Club should decide which year to display. 2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Wikipedia's honours list Combined Counties League champions 1998-99 as well as 2001-02, but the history text mentions only 2001-02, so 1998-99 needs a second source (opponents.json repeats both). Founding: 1995 for the merged club; the original Wallingford Town dates from 1922.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "needs-secretary-check",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Wokingham Town",
@@ -441,11 +583,20 @@
         "Merged with Emmbrook Sports in 2004 as Wokingham & Emmbrook and went back to the name Wokingham Town in 2024."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/Wokingham_Town_F.C."
+        "https://www.wokinghamtownfc.club/",
+        "https://en.wikipedia.org/wiki/Wokingham_Town_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Founding year is 1875 in opponents.json, but Wikipedia notes reports of meetings in October 1874. Nickname 'The Satsumas' is confirmed by Wikipedia. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Founding year is 1875 in opponents.json, but Wikipedia notes reports of meetings in October 1874. Nickname 'The Satsumas' is confirmed by Wikipedia.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "Abingdon United",
@@ -467,11 +618,20 @@
         "Won the 2024-25 Hellenic Division One play-off final against Wantage Town to move up to the Combined Counties Premier North."
       ],
       "sources": [
+        "https://www.abingdonunitedfc.com/a/abingdon-united-club-history-26977.html",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Abingdon_United_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "None found against opponents.json. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: None found against opponents.json.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     },
     {
       "key": "London Lions",
@@ -485,7 +645,7 @@
       "wikipedia": "https://en.wikipedia.org/wiki/London_Lions_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
       "note": "Founded by Maccabi London; see their Wikipedia article. Deliberately not used in matchday copy — a club's religious or ethnic identity is theirs to lead on, not ours.",
-      "historySummary": "London Lions began in 1995 as MALEX, a Saturday team set up by Maccabi Association London, and took the Lions name in 1999. They won titles in the Hertfordshire Senior County League and the Spartan South Midlands League, moving between the two more than once. A Combined Counties Division One title in 2021-22 was followed by a return to the Spartan South Midlands League. They play at Rowley Lane in Arkley.",
+      "historySummary": "London Lions began in 1995 as MALEX, a Saturday team set up by Maccabi Association London, and took the Lions name in 1999. They won titles in the Hertfordshire Senior County League and the Spartan South Midlands League, moving between the two more than once. A Combined Counties Division One title in 2021-22 was followed by a return to the Spartan South Midlands League. They play at Rowley Lane in Arkley and, after promotion through the 2024-25 play-offs, now compete in the Southern League Division One Central.",
       "historyFacts": [
         "Founded as MALEX in 1995 by Maccabi Association London; renamed London Lions in 1999, later Maccabi London Lions.",
         "Hertfordshire Senior County League Premier Division champions in 2009-10 and 2016-17.",
@@ -494,12 +654,21 @@
         "Promoted to Southern League Division One Central through the 2024-25 Spartan South Midlands play-offs."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/London_Lions_F.C.",
-        "https://en.wikipedia.org/wiki/Maccabi_London_Lions_F.C."
+        "https://www.mlfc.co.uk/",
+        "https://en.wikipedia.org/wiki/Maccabi_London_Lions_F.C.",
+        "https://en.wikipedia.org/wiki/London_Lions_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "MAJOR: the Wikipedia title redirects to Maccabi London Lions F.C., which it says now plays in Southern League Division One Central after the 2024-25 play-offs. opponents.json also records that promotion. That conflicts with them being a 2026-27 Combined Counties Premier North opponent. Check the fixture list and the league's club list before printing anything; the summary avoids saying which league they are in now. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Checked against secondary sources only (club site did not confirm founded/ground)",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/Maccabi_London_Lions_F.C.); no official league directory page was reachable. Earlier note: MAJOR: the Wikipedia title redirects to Maccabi London Lions F.C., which it says now plays in Southern League Division One Central after the 2024-25 play-offs. opponents.json also records that promotion. That conflicts with them being a 2026-27 Combined Counties Premier North opponent. Check the fixture list and the league's club list before printing anything; the summary avoids saying which league they are in now.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-secondary",
+      "league": {
+        "name": "Southern League Division One Central",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/Maccabi_London_Lions_F.C."
+      },
+      "fixtureContext": "Met in the FA Cup Extra Preliminary Round (fixture facup-ep-london-lions-20260808, competitionId fa-cup). Not a league opponent: they play in the Southern League, which is consistent."
     },
     {
       "key": "New Bradwell St Peter",
@@ -521,11 +690,20 @@
         "The original club resigned in 2017; in 2018 Loughton Manor adopted the New Bradwell St Peter name and moved to the Recreation Ground."
       ],
       "sources": [
-        "https://en.wikipedia.org/wiki/New_Bradwell_St_Peter_F.C."
+        "https://en.wikipedia.org/wiki/New_Bradwell_St_Peter_F.C.",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Spartan_South_Midlands_Football_League"
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "MAJOR: Wikipedia says they are in Spartan South Midlands League Division One, which conflicts with a 2026-27 Combined Counties Premier North place; confirm with the league. Lineage: the original club resigned in 2017 and the name was taken on by Loughton Manor in 2018, so 'founded 1895' (opponents.json) describes the historic club, not the present organisation. Wikipedia says 'by 1895', not exactly 1895. Nickname 'The Saints' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Conflicting sources — confirm with the club secretary before printing",
+      "reviewNote": "16 Nov 2026 check: Some sources cite 1902. Because of the 2018 refounding, 1895 is the lineage of the name, not of the current entity. Division is Step 6 Division One, not the Premier Division. 2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Spartan_South_Midlands_Football_League); no official league directory page was reachable. Earlier note: MAJOR: Wikipedia says they are in Spartan South Midlands League Division One, which conflicts with a 2026-27 Combined Counties Premier North place; confirm with the league. Lineage: the original club resigned in 2017 and the name was taken on by Loughton Manor in 2018, so 'founded 1895' (opponents.json) describes the historic club, not the present organisation. Wikipedia says 'by 1895', not exactly 1895. Nickname 'The Saints' not checked. Do NOT link newbradwellstpeter.co.uk: the domain now hosts unrelated gambling content.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "needs-secretary-check",
+      "league": {
+        "name": "Spartan South Midlands League Division One",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Spartan_South_Midlands_Football_League"
+      },
+      "fixtureContext": "Met in the FA Vase First Qualifying Round (fixture favase-1q-new-bradwell-20260815, competitionId fa-vase). Not a league opponent: they play in the Spartan South Midlands League Division One, which is consistent."
     },
     {
       "key": "Penn & Tylers Green",
@@ -547,13 +725,24 @@
         "Combined Counties League Division One champions in 2025-26; record crowd of 1,237 against Wycombe Wanderers in October 2025."
       ],
       "sources": [
+        "https://ptgfc.co.uk/",
+        "https://ptgfc.co.uk/club-history/",
+        "https://ptgfc.co.uk/club-information",
+        "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League",
         "https://en.wikipedia.org/wiki/Penn_%26_Tylers_Green_F.C."
       ],
       "reviewedOn": "2026-11-16",
-      "verification": "Wikipedia only — confirm with the club before relying on it",
-      "reviewNote": "Wikipedia's honours list Hellenic Division One East titles in 2015-16 and 2016-17, which sits oddly with no promotion being mentioned; treat these as needing a second source. Nickname 'Penn' not checked. Only Wikipedia was read; no club official site was checked in this pass."
+      "verification": "Founded and ground checked against the club’s own site",
+      "reviewNote": "2026-27 league placement is from a secondary source (https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League); no official league directory page was reachable. Earlier note: Wikipedia's honours list Hellenic Division One East titles in 2015-16 and 2016-17, which sits oddly with no promotion being mentioned; treat these as needing a second source. Nickname 'Penn' not checked.",
+      "checkedOn": "2026-11-16",
+      "reviewStatus": "verified-official",
+      "league": {
+        "name": "Combined Counties League Premier Division North",
+        "season": "2026-27",
+        "source": "https://en.wikipedia.org/wiki/2026%E2%80%9327_Combined_Counties_Football_League"
+      }
     }
   ],
-  "updatedAt": "2026-07-15",
+  "updatedAt": "2026-11-16",
   "_profilesNote": "historySummary is original club-history copy for the programme opposition page; editors adjust it per edition without changing this master profile. Current manager, squad and results are deliberately NOT stored here."
 }

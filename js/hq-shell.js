@@ -238,6 +238,10 @@
       // The programme draft is private: signed-in read only, never a public file.
       fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: global.PIN || '', read: true, path: 'data/programme-draft.json' }) })
         .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.ok && j.data) || null; }).catch(function () { return null; })
+        ,
+      // Confirmed match-official appointments (private store, names + roles only).
+      fetch('/.netlify/functions/save-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: global.PIN || '', read: true, path: 'data/fixture-officials.json' }) })
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return j && j.ok ? ((j.data && j.data.items) || []) : null; }).catch(function () { return null; })
     ];
     S.loading = Promise.all(jobs).then(function (r) {
       var lists = {}, listErr = null;
@@ -249,7 +253,7 @@
         summary: r[2] && r[2].ok ? r[2] : null, summaryErr: r[2] && !r[2].ok ? r[2].error : null,
         items: lists, listErr: listErr,
         history: r[4] && r[4].ok ? r[4].audit || [] : null,
-        md: r[5], members: r[6], subs: r[7], programme: r[8]
+        md: r[5], members: r[6], subs: r[7], programme: r[8], officials: r[9]
       };
       compute();
       S.loading = false;
@@ -627,9 +631,17 @@
     links.push(linkRow('Live scoreboard', 'On the day', 'matchday'));
     links.push(linkRow('Result and report', 'After full time', 'matchreport'));
 
+    // Confirmed officials for this fixture: what was saved, with its source.
+    var MO = global.MatchOfficials, offRec = MO && d.officials ? MO.recordFor(d.officials, { id: f.id, date: T.londonDate(Date.parse(f.kickoffAt)), opponent: f.opponent }) : null;
+    var offBlock = '<section aria-labelledby="hq-mp-off"><h3 class="hq-sec__h" id="hq-mp-off">Match officials</h3>' +
+      (d.officials == null ? '<p class="hq-muted">Appointments could not be read.</p>'
+        : offRec ? '<p>' + MO.ROLE_KEYS.filter(function (k) { return offRec.officials[k]; }).map(function (k) { return h(MO.ROLE_LABEL[k]) + ': <b>' + h(offRec.officials[k]) + '</b>'; }).join(' · ') + '</p>' +
+          '<p class="hq-muted">Confirmed · ' + h(offRec.sourceLabel) + ' · checked ' + h(String(offRec.checkedAt).slice(0, 10)) + ' by ' + h(offRec.enteredBy) + '</p>'
+        : '<p class="hq-muted">No confirmed appointments saved for this fixture.</p>') +
+      (canSee('programme') ? '<ul class="hq-rows" role="list">' + row('Import appointments', '', 'programme', 'Paste the appointments message in Programme, stage 2') + '</ul>' : '') + '</section>';
     el.innerHTML = head + warn +
       '<div class="hq-mp__cols"><section aria-labelledby="hq-mp-jobs"><h3 class="hq-sec__h" id="hq-mp-jobs">Matchday jobs</h3>' + list + '</section>' +
-      '<section aria-labelledby="hq-mp-rel"><h3 class="hq-sec__h" id="hq-mp-rel">Related work</h3><ul class="hq-rows" role="list">' + links.filter(Boolean).join('') + '</ul></section></div>' +
+      '<section aria-labelledby="hq-mp-rel"><h3 class="hq-sec__h" id="hq-mp-rel">Related work</h3><ul class="hq-rows" role="list">' + links.filter(Boolean).join('') + '</ul></section>' + offBlock + '</div>' +
       '<p class="hq-err" role="alert" data-hq-err></p>';
   }
   function linkRow(label, note, panel) { return canSee(panel) ? row(label, '', panel, note) : ''; }
