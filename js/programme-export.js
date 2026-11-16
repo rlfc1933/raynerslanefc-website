@@ -191,6 +191,7 @@
   /* Called by programme-print.html once render() has finished. */
   function ready(doc) {
     fit();
+    if (window.__pxBlocked) { say(window.__pxBlocked + ' — export is switched off.', 'err'); return; }
     window.addEventListener('resize', fit);
     say('Checking every page has finished loading…');
     whenReady().then(function () {

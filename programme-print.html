@@ -22,7 +22,7 @@
 <script src="js/brand-palette.js"></script>
 <link rel="stylesheet" href="brand/tokens.css">
 <link rel="stylesheet" href="css/programme-export.css?v=1">
-<script src="js/programme-export.js?v=2" defer></script>
+<script src="js/programme-export.js?v=3" defer></script>
 <style>
   /* Brand values derive from the single source of truth (brand/tokens.css) */
   :root{ --y:var(--yellow); --g:var(--green); --gd:#0e3d20; --ink:var(--print-ink); --soft:var(--print-soft); --line:var(--print-line); --fd:var(--font-d); --fc:var(--font-c); --fb:var(--font-b); --fm:'Roboto Mono',monospace; }
@@ -793,8 +793,10 @@
     if (/[?&]draft=1/.test(location.search)) {
       var local = draftSnapshot();
       if (local && (!wantFx || local.fixtureId === wantFx)) { pxNote('warn','Draft from this device'+(local.revision?' (based on version '+esc(local.revision)+')':'')+'. Not published.'); return Promise.resolve(local); }
-      return getJSON('programme-draft').then(function(d){
-        if (!d) { pxNote('err','The draft this link points to could not be found on this device or on the club’s site. Nothing below is that draft.'); return {}; }
+      // Before the first save under the new editor there is no draft file yet;
+      // the working draft is still the old single file.
+      return getJSON('programme-draft').then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
+        if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be found on this device or on the club’s site. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
         if (wantFx && d.fixtureId !== wantFx) {
           pxNote('err','This link was for a different match. The club’s saved draft is now for <b>'+esc(d.opponent||'another match')+'</b> ('+esc(d.date||'')+'), so that is what is shown. Do not print this for the original match.');
         } else if (wantRev && String(d.revision||0) !== wantRev) {
@@ -808,7 +810,7 @@
     var id = paramId();
     if (!id) return getJSON('programme').then(function(d){ if (d && !d.published) pxNote('warn','This is an unpublished draft, not a published programme.'); return d; });
     return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0];
-      if (!hit) { pxNote('err','There is no archived edition called “'+esc(id)+'”. Nothing is shown in its place.'); return {}; }
+      if (!hit) { window.__pxBlocked = 'No such edition'; pxNote('err','There is no archived edition called “'+esc(id)+'”. Nothing is shown in its place.'); return {}; }
       return hit; });
   }
 
