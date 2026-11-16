@@ -188,7 +188,7 @@ test('programme next-match logic skips it', () => {
 
 test('the publish freeze uses the same validity rule', () => {
   const admin = read('admin.html');
-  const pub = admin.match(/async function publishProgramme\(\)[\s\S]*?\n\}/)[0];
+  const pub = admin.match(/async function prFreezeEdition\(base\)[\s\S]*?\n\}/)[0];
   assert.match(pub, /postpon\|cancel\|abandon\|void\|off/);
 });
 

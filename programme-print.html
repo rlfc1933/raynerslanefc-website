@@ -21,6 +21,8 @@
 <script src="js/competition-brand.js?v=1"></script>
 <script src="js/brand-palette.js"></script>
 <link rel="stylesheet" href="brand/tokens.css">
+<link rel="stylesheet" href="css/programme-export.css?v=1">
+<script src="js/programme-export.js?v=3" defer></script>
 <style>
   /* Brand values derive from the single source of truth (brand/tokens.css) */
   :root{ --y:var(--yellow); --g:var(--green); --gd:#0e3d20; --ink:var(--print-ink); --soft:var(--print-soft); --line:var(--print-line); --fd:var(--font-d); --fc:var(--font-c); --fb:var(--font-b); --fm:'Roboto Mono',monospace; }
@@ -129,6 +131,11 @@
   .form-strip{ display:flex; gap:6px; }
   .fchip{ width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-family:var(--fc); font-weight:700; color:#fff; font-size:14px; }
 
+  .page--opp .opp-head{display:flex;align-items:center;gap:18px;margin:4px 0 16px}
+  .page--opp .opp-head img{width:110px;height:110px;object-fit:contain}
+  .page--opp .opp-name{font-family:var(--fd);font-size:46px;line-height:.92;color:var(--ink);letter-spacing:.3px}
+  .page--opp .opp-facts{margin-bottom:6px}
+  .page--opp .opp-src{font-size:10.5px;margin-top:10px}
   /* team sheets */
   .ts-team{ font-family:var(--fd); font-size:23px; letter-spacing:.5px; color:#fff; background:var(--g); padding:6px 13px; }
   .ts-team.away{ background:#0d0d0d; }
@@ -607,13 +614,17 @@
 </head>
 <body>
 
-<div class="bar">
+<div class="bar px-bar">
   <h1>Programme — Print Edition</h1>
-  <button onclick="window.print()"><i class="ico ico-printer"></i> Print / Save as PDF</button>
-  <span class="hint">Click the button → choose <b>Save as PDF</b> (or your printer) → paper <b>A4</b>, “Background graphics” ON. Then send the PDF to your printer.</span>
+  <button class="px-btn px-btn--main" id="px-pdf" type="button" disabled>Download PDF</button>
+  <button class="px-btn" id="px-print" type="button" disabled><i class="ico ico-printer"></i> Print</button>
   <span class="sp"></span>
   <a href="programme.html" style="color:#aaa;font-family:var(--fc);font-size:13px">← Digital version</a>
+  <p class="px-status" id="px-status" role="status" aria-live="polite">Building your programme…</p>
+  <div class="px-result" id="px-result" hidden></div>
+  <p class="px-note">This PDF is for reading, sharing and printing at home or the office (A4, colour, no bleed). It is not a press-ready file: a commercial printer will tell you their size, bleed and colour requirements.</p>
 </div>
+<div id="px-banner"></div>
 
 <div class="pages" id="pages">
   <div class="page" style="display:flex;align-items:center;justify-content:center;color:#888;font-family:var(--fc)">Building your programme…</div>
@@ -768,12 +779,39 @@
       return o.doc || null;
     } catch (e) { return null; }
   }
+  /* WHICH EDITION, ON ANY DEVICE.
+     ?draft=1 first uses the copy handed over on this device. Opened on a
+     different device (or after 30 minutes) there is no hand-over, and this
+     page used to fall back silently to whatever data/programme.json held —
+     which could be a different match. Now it loads the club-saved draft and
+     checks it is the same fixture (fx) and version (rev) the link was made
+     for; if not, it says exactly what it is showing instead. */
+  function qp(k){ var m=location.search.match(new RegExp('[?&]'+k+'=([^&]*)')); return m?decodeURIComponent(m[1]):''; }
+  function pxNote(kind, html){ var b=document.getElementById('px-banner'); if(b) b.innerHTML='<div class="px-banner px-banner--'+kind+'">'+html+'</div>'; }
   function loadProgrammeDoc(){
-    var draft = draftSnapshot();
-    if (draft) return Promise.resolve(draft);
+    var wantFx = qp('fx'), wantRev = qp('rev');
+    if (/[?&]draft=1/.test(location.search)) {
+      var local = draftSnapshot();
+      if (local && (!wantFx || local.fixtureId === wantFx)) { pxNote('warn','Draft from this device'+(local.revision?' (based on version '+esc(local.revision)+')':'')+'. Not published.'); return Promise.resolve(local); }
+      // Before the first save under the new editor there is no draft file yet;
+      // the working draft is still the old single file.
+      return getJSON('programme-draft').then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
+        if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be found on this device or on the club’s site. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
+        if (wantFx && d.fixtureId !== wantFx) {
+          pxNote('err','This link was for a different match. The club’s saved draft is now for <b>'+esc(d.opponent||'another match')+'</b> ('+esc(d.date||'')+'), so that is what is shown. Do not print this for the original match.');
+        } else if (wantRev && String(d.revision||0) !== wantRev) {
+          pxNote('warn','Showing the club’s saved draft, version '+esc(d.revision||0)+' (saved '+esc(d.savedAt?new Date(d.savedAt).toLocaleString('en-GB'):'')+(d.savedBy?' by '+esc(d.savedBy):'')+'). The link was made from version '+esc(wantRev)+'; unsaved changes on the other device are not included.');
+        } else {
+          pxNote('warn','Draft, version '+esc(d.revision||0)+'. Not published.');
+        }
+        return d;
+      });
+    }
     var id = paramId();
-    if (!id) return getJSON('programme');
-    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; return items.filter(function(it){return it.id===id;})[0] || getJSON('programme'); });
+    if (!id) return getJSON('programme').then(function(d){ if (d && !d.published) pxNote('warn','This is an unpublished draft, not a published programme.'); return d; });
+    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0];
+      if (!hit) { window.__pxBlocked = 'No such edition'; pxNote('err','There is no archived edition called “'+esc(id)+'”. Nothing is shown in its place.'); return {}; }
+      return hit; });
   }
 
   /* ── THE ARCHIVE RULE ─────────────────────────────────────────────────
@@ -856,7 +894,7 @@
       if (ps && !d.published) d.playerStats = ps;
       else if (ps && !d.playerStats) d.playerStats = ps;
       render(d, crests, sponsors, fixtures, table, club);
-      afterRender();
+      afterRender(d);
     });
   }).catch(function(err){
     /* WHY THIS EXISTS.
@@ -878,11 +916,13 @@
     console.error('[programme-print]', err);
   });
 
-  function afterRender(){
-    if (/[?&](print|auto)=1/.test(location.search)) {
-      window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 900); });
-      setTimeout(function(){ window.print(); }, 1400);
-    }
+  /* No automatic print dialog. ?print=1 (old links) just brings the PDF
+     button into view; programme-export.js enables it once every page, font
+     and picture has actually finished loading. */
+  function afterRender(d){
+    if (window.ProgrammeExport) window.ProgrammeExport.ready(d);
+    else window.addEventListener('load', function(){ if (window.ProgrammeExport) window.ProgrammeExport.ready(d); }, { once:true });
+    if (/[?&](print|auto)=1/.test(location.search)) { var b=document.getElementById('px-pdf'); if (b) b.scrollIntoView({block:'center'}); }
   }
 
   function render(d, crests, sponsors, fixtures, table, club) {
@@ -1046,23 +1086,25 @@
         foot()+'</div>');
     }
 
-    /* 3 — TODAY'S VISITORS */
-    if (lines(d.oppSummary).length || lines(d.headToHead).length) {
-      P.push('<div class="page page--edit">'+ banner('Today’s Visitors', opp)+
-        '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px"><img src="'+esc(oppCrest)+'" style="width:88px;height:88px;object-fit:contain">'+
-          '<div><div class="eyebrow">Rayners Lane FC vs</div><div style="font-family:var(--fd);font-size:34px;letter-spacing:.5px;color:var(--ink);line-height:.95">'+esc(opp)+'</div><div class="muted body">'+esc(comp)+'</div></div></div>'+
-        (lines(d.oppSummary).length?'<div class="body">'+notes(d.oppSummary)+'</div>':'')+
+    /* THE OPPOSITION — one dedicated page for a home edition.
+       It used to be two thin pages ("Today's Visitors" and "Scouting Report")
+       that each printed a sentence or two on a white sheet. Facts first, then
+       the club's story, then this season's people, then the meetings. The
+       history comes from the club's reviewed profile, edited per edition;
+       current names and results are kept apart from the historical facts. */
+    var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Home ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
+    var hasOpp = oppFacts.length || lines(d.oppSummary).length || lines(d.oppOnesToWatch).length || lines(d.headToHead).length;
+    if (hasOpp) {
+      var srcLine = d.oppProfileSource && (d.oppProfileSource.reviewedOn || d.oppProfileSource.source)
+        ? '<p class="muted opp-src">Club history from '+esc(d.oppProfileSource.source||'the club profile')+(d.oppProfileSource.reviewedOn?', checked '+esc(d.oppProfileSource.reviewedOn):'')+'.</p>' : '';
+      P.push('<div class="page page--edit page--opp">'+ banner(d.isHome===false?'Our Hosts':'Today’s Visitors', opp)+
+        '<div class="opp-head"><img src="'+esc(oppCrest)+'" alt="">'+
+          '<div><div class="eyebrow">'+(d.isHome===false?'Rayners Lane at':'Welcome to Tithe Farm')+'</div><div class="opp-name">'+esc(opp)+'</div><div class="muted body">'+esc(comp)+'</div></div></div>'+
+        (oppFacts.length?'<div class="grid2 opp-facts" style="grid-template-columns:repeat('+Math.min(oppFacts.length,3)+',1fr)">'+oppFacts.map(function(f){return '<div class="card g"><div class="k">'+f[0]+'</div><div class="t">'+esc(f[1])+'</div></div>';}).join('')+'</div>':'')+
+        (lines(d.oppSummary).length?'<div class="divider"><span class="lbl">The Club</span></div><div class="body">'+notes(d.oppSummary)+'</div>':'')+
+        (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">This Season</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
         (lines(d.headToHead).length?'<div class="divider"><span class="lbl">Head to Head</span></div><div class="body">'+notes(d.headToHead)+'</div>':'')+
-        foot()+'</div>');
-    }
-
-    /* OPPOSITION FOCUS (scouting) */
-    var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
-    if (oppFacts.length || lines(d.oppOnesToWatch).length) {
-      P.push('<div class="page page--edit">'+ banner('Scouting Report', opp)+
-        (oppFacts.length?'<div class="grid2" style="grid-template-columns:repeat('+Math.min(oppFacts.length,3)+',1fr);margin-bottom:14px">'+oppFacts.map(function(f){return '<div class="card g"><div class="k">'+f[0]+'</div><div class="t">'+esc(f[1])+'</div></div>';}).join('')+'</div>':'')+
-        (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">Ones to Watch</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
-        foot()+'</div>');
+        srcLine+ foot()+'</div>');
     }
     /* MATCH PREVIEW (storylines + key players) */
     if (lines(d.storylines).length || lines(d.keyPlayers).length) {
@@ -1117,6 +1159,10 @@
       }
       var ourKit = (d.isHome===false) ? (cfgKit && cfgKit.away) : (cfgKit && cfgKit.home);
       var oppKit = d.oppKit || null;
+      function kitText(label, t, ok){
+        return '<div class="kit-row"><span class="kit-l">'+esc(label)+'</span><span class="kit-i">'+esc(t)+'</span>'+
+          (ok ? '' : '<span class="kit-tbc">to be confirmed</span>')+'</div>';
+      }
 
       /* The officials, on the page the rule expects them on rather than buried
          in matchday information. Entered once by the Secretary against the
@@ -1133,11 +1179,13 @@
           '<div><div class="ts-team away">'+esc(opp)+'</div>'+(tsList(d.awayLineup)||'<div class="ts-list"><div class="ts-row muted">Confirmed at kick-off.</div></div>')+'</div>'+
         '</div>'+
         '<div class="divider"><span class="lbl">Playing Colours</span></div>'+
-        '<div class="kit-block">'+ kitStrip('Rayners Lane', ourKit) + kitStrip(opp, oppKit) +'</div>'+
+        '<div class="kit-block">'+ ((d.homeKit||'').trim() ? kitText('Rayners Lane', d.homeKit, true) : kitStrip('Rayners Lane', ourKit)) +
+          ((d.awayKit||'').trim() ? kitText(opp, d.awayKit, !!d.awayKitConfirmed) : kitStrip(opp, oppKit)) +'</div>'+
         '<div class="divider"><span class="lbl">Match Officials</span></div>'+
         (offRows.length
           ? '<div class="off-block">'+offRows.map(function(r){
-              return '<span class="off-i"><b>'+esc(r[0])+'</b> '+esc(r[1])+'</span>'; }).join('')+'</div>'
+              return '<span class="off-i"><b>'+esc(r[0])+'</b> '+esc(r[1])+'</span>'; }).join('')+
+              (d.officialsStatus==='confirmed' ? '' : '<span class="off-tbc">Appointments awaiting confirmation</span>')+'</div>'
           : '<div class="off-block"><span class="off-tbc">Appointments to be confirmed</span></div>')+
         foot()+'</div>');
     }
@@ -1477,16 +1525,9 @@
        an otherwise blank sheet. A full yellow field, the line set at poster
        scale, one QR built into the composition. Minimal because it is meant to
        be, not because the pagination gave up. */
-    P.push('<div class="page page--flood page--flood-y">'+
-      '<div class="fl">'+
-        '<div class="fl-kick">Join us</div>'+
-        '<div class="fl-big">JOIN THE<br>YELLOW ARMY</div>'+
-        '<div class="fl-sub">Free Lane membership. Your own card, yellow hearts every game, '+
-          'and rewards all season long.</div>'+
-        '<div class="fl-qr">'+qr(SITE+'/fan-zone.html')+'</div>'+
-        '<div class="fl-foot"><span>raynerslanefc.co.uk/fan-zone</span>'+
-          '<span>Sponsor The Lane &middot; info@raynerslanefc.co.uk</span></div>'+
-      '</div></div>');
+    /* The "Join the Yellow Army" flood page was removed: the back cover
+       carries the same membership call with the same QR code. One promotion,
+       not two. */
 
     /* 12 — REPORT IT (FA) */
     /* A CAMPAIGN, NOT A SETTINGS SCREEN.

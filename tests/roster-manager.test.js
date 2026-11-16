@@ -193,7 +193,7 @@ test('the decider comes from the signed session, not the browser', () => {
 test('the roster opens with the Programme', () => {
   assert.match(admin, /if \(name === 'programme'\) \{ initProgramme\(\); prStatsStatus\(\); prRosterLoad\(\); \}/);
   assert.match(admin, /id="pr-roster"/);
-  assert.match(admin, /First Team Roster/);
+  assert.match(admin, /Our squad/);
 });
 
 test('a player with no photograph gets a graphic, not a blank box', () => {

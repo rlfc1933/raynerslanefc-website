@@ -28,6 +28,8 @@
   <script src="js/hq-time.js"></script>
   <script src="js/hq-model.js"></script>
   <script src="js/hq-shell.js"></script>
+  <script src="js/programme-editor.js?v=1" defer></script>
+  <link rel="stylesheet" href="css/programme-editor.css?v=1">
   <script src="js/hq-pwa.js"></script>
   <!-- Release 2: the fixture, and everything it needs, in one workspace.
        Navigation and status only — every action opens an EXISTING panel via
@@ -1485,38 +1487,25 @@
       <div class="phdr"><button class="pback" onclick="back()">&#8592; Back</button><div class="pttl"><i class="ico ico-newspaper"></i> Programme</div></div>
       <div class="pr-layout">
       <div class="pr-form">
-      <div class="snote"><p>The official match-day programme — built to the <strong style="color:var(--w)">Step 5 standard</strong>. Tip: pick the game under &ldquo;Load from fixture&rdquo; and the match details fill themselves. The club statements are pre-written; fill the rest before kick-off.</p></div>
-
-      <div class="slbl"><i class="ico ico-palette"></i> Cover colour scheme <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— pick the front-page look</span></div>
-      <div id="pr-themes" class="pr-themes"></div>
-
-      <!-- WHICH MATCH THIS PROGRAMME IS FOR. Shown before anything else,
-           because it is the first thing the operator needs to know and the
-           thing the old panel got wrong. -->
+      <!-- FOUR STAGES. Same fields, same ids, same data as before — arranged in
+           the order a committee member actually works: the match first, then
+           the facts that must be right, then the writing, then the checks.
+           Permanent club information and layout options live in "More
+           options" so they are maintained once, not re-read every week. -->
       <div id="pr-fixture-head" class="pr-fx"></div>
+      <div class="pr-save-state" id="pr-save-state" role="status" aria-live="polite"></div>
+      <nav class="pr-steps" aria-label="Programme stages">
+        <button type="button" class="pr-step" data-step="1" onclick="prStep(1)"><b>1</b> Choose match</button>
+        <button type="button" class="pr-step" data-step="2" onclick="prStep(2)"><b>2</b> Confirm essentials</button>
+        <button type="button" class="pr-step" data-step="3" onclick="prStep(3)"><b>3</b> Add stories</button>
+        <button type="button" class="pr-step" data-step="4" onclick="prStep(4)"><b>4</b> Review &amp; publish</button>
+      </nav>
 
-      <!-- WHY THE PLAYER CARDS SHOW DASHES.
-           The club had verified Full-Time figures — 2 apps, 1 goal, 179 minutes
-           for Keiran Barnard-White — and the programme printed an em dash for
-           every player, because not one Full-Time name had been confirmed as
-           one of our players yet. That is the system working correctly: it will
-           not guess which Keiran scored. But it explained itself nowhere, so it
-           looked broken. This says it, in the one place the editor is standing,
-           and offers the way to fix it. -->
-      <div id="pr-stats-status" class="pr-stats-status" hidden></div>
-
-      <!-- FIRST TEAM ROSTER. The squad that prints in the programme, editable
-           by the person producing the programme. A signing on Thursday has to
-           be in Saturday's edition, and waiting for a developer is how the old
-           programme ended up capped at fifteen players. -->
-      <div class="slbl"><i class="ico ico-users"></i> First Team Roster
-        <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— who prints in the squad pages</span></div>
-      <div id="pr-roster" class="pr-roster"></div>
-
-      <div class="slbl"><i class="ico ico-zap"></i> Choose another match <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fills in opponent, date, time &amp; venue. Your writing is kept.</span></div>
-      <div class="field"><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
-
-      <div class="slbl">Match &amp; Fixture Details</div>
+      <section class="pr-stage" data-stage="1" aria-label="Choose match">
+      <div class="slbl">Which home match is this programme for? <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fills opponent, crest, date, time and venue from the fixture list</span></div>
+      <div class="field"><label class="fl" for="pr-fixture">Match</label><select id="pr-fixture" onchange="prProgFromFixture(this.value)"><option value="">&mdash; pick a fixture &mdash;</option></select></div>
+      <div id="pr-carry" class="pr-carry" hidden></div>
+      <details class="pr-more"><summary>Match details (filled from the fixture — change only to correct them)</summary>
       <div class="field"><label class="fl">Opposition</label><input type="text" id="pr-opp" placeholder="Harefield United"></div>
       <div class="field"><label class="fl">Opposition crest <span style="color:var(--gr);font-weight:400">— shown on the cover (VS)</span></label><select id="pr-oppcrest" onchange="prClearOppCrestUpload()"><option value="">— pick a crest —</option></select></div>
       <div class="field"><label class="fl">…or upload a crest <span style="color:var(--gr);font-weight:400">— for pre-season, friendlies &amp; cup ties not on the list</span></label>
@@ -1530,12 +1519,48 @@
       <div class="field"><label class="fl">Competition</label><input type="text" id="pr-comp" value="Combined Counties Premier Division North"></div>
       <div class="row2">
         <div class="field"><label class="fl">Venue</label><input type="text" id="pr-venue" value="Tithe Farm Sports &amp; Social Club"></div>
-        <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
       </div>
-      <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
+
+      </details>
+      <button type="button" class="save" onclick="prStep(2)">Next: confirm essentials &rarr;</button>
+      </section>
+
+      <section class="pr-stage" data-stage="2" aria-label="Confirm essentials" hidden>
+      <div id="pr-stats-status" class="pr-stats-status" hidden></div>
+      <div class="slbl">Match officials <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— only names you have been told are appointed</span></div>
+      <div class="snote"><p>Pick a name or type a new one. A name is not proof of appointment: mark it <strong style="color:var(--w)">Confirmed</strong> only when the league or the referees&rsquo; secretary has told the club. The 4th official only prints when one is assigned.</p></div>
+      <div class="field"><label class="fl" for="pr-ref">Referee</label><input type="text" id="pr-ref" list="pr-officials-dl" autocomplete="off" placeholder="Search or type a name"></div>
+      <div class="row2">
+        <div class="field"><label class="fl" for="pr-ar1">Assistant referee 1</label><input type="text" id="pr-ar1" list="pr-officials-dl" autocomplete="off" placeholder="Search or type a name"></div>
+        <div class="field"><label class="fl" for="pr-ar2">Assistant referee 2</label><input type="text" id="pr-ar2" list="pr-officials-dl" autocomplete="off" placeholder="Search or type a name"></div>
+      </div>
+      <div class="field"><label class="fl" for="pr-4th">4th official (only if assigned)</label><input type="text" id="pr-4th" list="pr-officials-dl" autocomplete="off" placeholder="Leave blank if none"></div>
+      <datalist id="pr-officials-dl"></datalist>
+      <div class="row2">
+        <div class="field"><label class="fl" for="pr-off-status">Appointments</label><select id="pr-off-status"><option value="awaiting">Awaiting confirmation</option><option value="confirmed">Confirmed</option></select></div>
+        <div class="field"><label class="fl" for="pr-off-source">Confirmed by / source</label><input type="text" id="pr-off-source" placeholder="e.g. League appointments email"></div>
+      </div>
+      <div class="field"><label class="fl" for="pr-off-checked">Last checked</label><input type="date" id="pr-off-checked"></div>
 
       <div class="div"></div>
-      <div class="slbl">Front Page &amp; Match Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing shows</span></div>
+      <div class="slbl">Playing colours <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— as confirmed for this match</span></div>
+      <div class="row2">
+        <div class="field"><label class="fl" for="pr-homekit">Rayners Lane wear</label><input type="text" id="pr-homekit" placeholder="e.g. Yellow and green shirts, green shorts"></div>
+        <div class="field"><label class="fl" for="pr-awaykit">Visitors wear</label><input type="text" id="pr-awaykit" placeholder="Ask the visiting secretary"></div>
+      </div>
+      <label class="pr-check"><input type="checkbox" id="pr-kit-ok"> The visitors&rsquo; colours have been confirmed with their club</label>
+
+      <div class="div"></div>
+      <div class="slbl"><i class="ico ico-users"></i> Our squad <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— who prints on the squad pages</span></div>
+      <div id="pr-roster" class="pr-roster"></div>
+      <div class="field"><label class="fl">Rayners Lane — Starting XI</label><textarea id="pr-xi" rows="6" placeholder="1. Keeper&#10;2. Right back&#10;..."></textarea></div>
+      <div class="field"><label class="fl">Rayners Lane — Substitutes</label><textarea id="pr-subs" rows="3" placeholder="Subs..."></textarea></div>
+      <div class="field"><label class="fl">Manager &amp; coaching staff</label><input type="text" id="pr-staff" placeholder="Manager: Gary Pitt · Assistant: …"></div>
+      <div class="field"><label class="fl">Opposition line-up (if known)</label><textarea id="pr-away" rows="4" placeholder="Away XI / subs — optional"></textarea></div>
+
+
+      <div class="div"></div>
+      <div class="slbl">Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing prints</span></div>
       <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Start typing and <strong style="color:var(--w)">pick one of your club sponsors</strong> — their <strong style="color:var(--w)">logo</strong> then prints automatically on the cover and in “Today’s Sponsors”. (New sponsor? Add them in the <strong>Sponsors</strong> tab first with their logo, then pick them here.)</p></div>
       <div class="field"><label class="fl">This match is sponsored by <span style="color:var(--gr);font-weight:400">— printed across the top of the cover</span></label><input type="text" id="pr-matchsponsor" list="pr-sponsors-dl" placeholder="e.g. Hanlon Dry Lining"></div>
       <div class="row2">
@@ -1544,47 +1569,26 @@
       </div>
       <datalist id="pr-sponsors-dl"></datalist>
 
-      <div class="div"></div>
-      <div class="slbl">Match Officials</div>
-      <div class="field"><label class="fl">Referee</label><input type="text" id="pr-ref" placeholder="Referee name"></div>
-      <div class="row2">
-        <div class="field"><label class="fl">Assistant 1</label><input type="text" id="pr-ar1" placeholder="Linesman"></div>
-        <div class="field"><label class="fl">Assistant 2</label><input type="text" id="pr-ar2" placeholder="Linesman"></div>
-      </div>
-      <div class="field"><label class="fl">4th Official (if assigned)</label><input type="text" id="pr-4th" placeholder="Optional"></div>
+      <button type="button" class="save" onclick="prStep(3)">Next: add stories &rarr;</button>
+      </section>
 
-      <div class="div"></div>
-      <div class="slbl">Team Sheets <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— one name per line</span></div>
-      <div class="field"><label class="fl">Rayners Lane — Starting XI</label><textarea id="pr-xi" rows="6" placeholder="1. Keeper&#10;2. Right back&#10;..."></textarea></div>
-      <div class="field"><label class="fl">Rayners Lane — Substitutes</label><textarea id="pr-subs" rows="3" placeholder="Subs..."></textarea></div>
-      <div class="field"><label class="fl">Manager &amp; coaching staff</label><input type="text" id="pr-staff" placeholder="Manager: Gary Pitt · Assistant: …"></div>
-      <div class="field"><label class="fl">Opposition line-up (if known)</label><textarea id="pr-away" rows="4" placeholder="Away XI / subs — optional"></textarea></div>
-
-      <div class="div"></div>
-      <div class="slbl">Notes &amp; Preview</div>
+      <section class="pr-stage" data-stage="3" aria-label="Add stories" hidden>
+      <div class="slbl">This week&rsquo;s writing <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— each page only prints if you write something</span></div>
       <div class="field"><label class="fl">Manager's Notes</label><textarea id="pr-mgr" rows="5" placeholder="Pre-match notes from the manager..."></textarea></div>
       <div class="field"><label class="fl">Welcome to Our Guests</label><textarea id="pr-wel" rows="4" placeholder="Welcome message for the opposition..."></textarea></div>
       <div class="field"><label class="fl">What We're Looking Forward To</label><textarea id="pr-lf" rows="4" placeholder="Match preview..."></textarea></div>
-      <div class="field"><label class="fl">Opposition summary (scouting)</label><textarea id="pr-oppsum" rows="3" placeholder="Their form, where they sit, danger men..."></textarea></div>
-      <div class="field"><label class="fl">Head to Head / History</label><textarea id="pr-h2h" rows="3" placeholder="Any history between the clubs..."></textarea></div>
-
-      <div class="div"></div>
-      <div class="slbl">Matchday Info</div>
-      <div class="field"><label class="fl">Admission</label><input type="text" id="pr-admission" value="General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card"></div>
-      <div class="field"><label class="fl">Ground rules</label><input type="text" id="pr-rules" value="No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers"></div>
-      <div class="field"><label class="fl">First aid / emergency</label><input type="text" id="pr-firstaid" value="First aid is available at the clubhouse — ask any committee member."></div>
-
-      <div class="div"></div>
-      <div class="slbl">Club Statements <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— FA standard, pre-written (edit if needed)</span></div>
-      <div class="field"><label class="fl">Respect / Fair Play</label><textarea id="pr-respect" rows="2"></textarea></div>
-      <div class="field"><label class="fl">Safeguarding</label><textarea id="pr-safe" rows="2"></textarea></div>
-      <div class="field"><label class="fl">Equality &amp; Inclusion</label><textarea id="pr-equality" rows="2"></textarea></div>
-      <div class="field"><label class="fl">Affiliation</label><textarea id="pr-affil" rows="2"></textarea></div>
-
-      <div class="div"></div>
-      <div class="slbl">Match Preview &amp; Opposition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— blank pages are skipped</span></div>
       <div class="field"><label class="fl">Match preview / storylines</label><textarea id="pr-storylines" rows="4" placeholder="The narrative of today's game — what's at stake, recent form, the talking points."></textarea></div>
       <div class="field"><label class="fl">Our key players to watch</label><textarea id="pr-keyplayers" rows="3" placeholder="One per line — the Lane men to keep an eye on."></textarea></div>
+      <div class="row2">
+        <div class="field"><label class="fl">Captain's name</label><input type="text" id="pr-captainname" placeholder="e.g. Smith"></div>
+        <div class="field"><label class="fl">Player of the Month</label><input type="text" id="pr-potm" placeholder="Optional"></div>
+      </div>
+      <div class="field"><label class="fl">Captain's notes</label><textarea id="pr-captainnotes" rows="3" placeholder="A word from the skipper."></textarea></div>
+
+      <div class="div"></div>
+      <div class="slbl">The opposition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— prints as its own page in home editions</span></div>
+      <div class="pr-opp-src" id="pr-opp-src"></div>
+      <button type="button" class="save sec" id="pr-opp-fill" onclick="prFillOpposition()">Fill empty boxes from the club profile</button>
       <div class="row2">
         <div class="field"><label class="fl">Opposition founded</label><input type="text" id="pr-oppfounded" placeholder="e.g. 1890"></div>
         <div class="field"><label class="fl">Opposition ground</label><input type="text" id="pr-oppground" placeholder="Their home ground"></div>
@@ -1592,14 +1596,55 @@
       <div class="field"><label class="fl">Opposition manager</label><input type="text" id="pr-oppmanager" placeholder="Their manager"></div>
       <div class="field"><label class="fl">Opposition ones to watch</label><textarea id="pr-opponestowatch" rows="3" placeholder="Their danger men."></textarea></div>
 
+      <div class="field"><label class="fl">Opposition summary (scouting)</label><textarea id="pr-oppsum" rows="3" placeholder="Their form, where they sit, danger men..."></textarea></div>
+      <div class="field"><label class="fl">Head to Head / History</label><textarea id="pr-h2h" rows="3" placeholder="Any history between the clubs..."></textarea></div>
+
+
       <div class="div"></div>
-      <div class="slbl">Feature Pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— optional; each only prints if you write something</span></div>
-      <div class="field"><label class="fl">Club information / about the club</label><textarea id="pr-clubinfo" rows="3" placeholder="Leave blank for the default club intro, or write your own."></textarea></div>
-      <div class="row2">
-        <div class="field"><label class="fl">Captain's name</label><input type="text" id="pr-captainname" placeholder="e.g. Smith"></div>
-        <div class="field"><label class="fl">Player of the Month</label><input type="text" id="pr-potm" placeholder="Optional"></div>
+      <div class="slbl"><i class="ico ico-plus"></i> Extra pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— adverts, features, artwork</span></div>
+      <div class="snote"><p>Add as many extra pages as you like — a sponsor advert, a player feature, a poster, a chart, a photo collage. Upload it as an <strong style="color:var(--w)">image</strong> (PNG/JPG — export anything, even a PDF page, as an image) and it drops onto a ready-branded RLFC page. Drag-free reorder with the arrows; remove any time.</p></div>
+      <div id="pr-pages-list"></div>
+      <button class="save sec" onclick="prAddPage()">+ Add a page</button>
+
+      <button type="button" class="save" onclick="prStep(4)">Next: review &amp; publish &rarr;</button>
+      </section>
+
+      <section class="pr-stage" data-stage="4" aria-label="Review and publish" hidden>
+      <div class="slbl">Before it goes anywhere <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— fix &ldquo;Must fix&rdquo; items first</span></div>
+      <div id="pr-checks" class="pr-checks" aria-live="polite"></div>
+      <button type="button" class="save sec" id="pr-save-btn" onclick="saveProgramme()">&#10003; Save to the club</button>
+      <div class="snote" style="margin-top:10px"><p>Saving stores this draft on the club&rsquo;s system so it can be finished on another device. It does <strong style="color:var(--w)">not</strong> put the programme on the website.</p></div>
+      <div class="slbl"><i class="ico ico-printer"></i> PDF and printing</div>
+      <div class="snote"><p>Opens the finished pages with a <strong style="color:var(--w)">Download PDF</strong> button. This PDF is for reading, sharing and home or office printing; a commercial printer will give you their own requirements (size, bleed, colour).</p></div>
+      <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDF</button>
+      <div class="slbl" style="margin-top:14px">Publish</div>
+      <button type="button" class="save" id="pr-publish-btn" style="background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to website</button>
+      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans can see it, and its match details, player figures and league table stay exactly as they are today.</p></div>
+      <div class="dep" id="dep-programme"></div>
+      <div class="row2" style="margin-top:8px">
+        <button type="button" class="save sec" onclick="prNewProgramme()">+ Start a new one</button>
+        <button type="button" class="save sec" onclick="window.open('programmes.html','_blank')"><i class="ico ico-library"></i> View archive</button>
       </div>
-      <div class="field"><label class="fl">Captain's notes</label><textarea id="pr-captainnotes" rows="3" placeholder="A word from the skipper."></textarea></div>
+      </section>
+
+      <details class="pr-more pr-advanced"><summary>More options: cover colours, ground details, club statements, feature pages</summary>
+      <div class="slbl"><i class="ico ico-palette"></i> Cover colour scheme</div>
+      <div id="pr-themes" class="pr-themes"></div>
+        <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
+      <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
+<div class="slbl">Matchday information</div>
+      <div class="field"><label class="fl">Admission</label><input type="text" id="pr-admission" value="General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card"></div>
+      <div class="field"><label class="fl">Ground rules</label><input type="text" id="pr-rules" value="No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers"></div>
+      <div class="field"><label class="fl">First aid / emergency</label><input type="text" id="pr-firstaid" value="First aid is available at the clubhouse — ask any committee member."></div>
+
+<div class="slbl">Club statements <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— maintained once; reused every edition</span></div>
+      <div class="field"><label class="fl">Respect / Fair Play</label><textarea id="pr-respect" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Safeguarding</label><textarea id="pr-safe" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Equality &amp; Inclusion</label><textarea id="pr-equality" rows="2"></textarea></div>
+      <div class="field"><label class="fl">Affiliation</label><textarea id="pr-affil" rows="2"></textarea></div>
+
+<div class="slbl">Occasional feature pages</div>
+      <div class="field"><label class="fl">Club information / about the club</label><textarea id="pr-clubinfo" rows="3" placeholder="Leave blank for the default club intro, or write your own."></textarea></div>
       <div class="field"><label class="fl">Heritage / club history feature</label><textarea id="pr-clubhistory" rows="3" placeholder="A history feature — legends, historic matches."></textarea></div>
       <div class="field"><label class="fl">In the community</label><textarea id="pr-community" rows="2" placeholder="School visits, charity, volunteers."></textarea></div>
       <div class="field"><label class="fl">Academy / youth</label><textarea id="pr-academy" rows="2" placeholder="Youth pathway, development squads."></textarea></div>
@@ -1607,28 +1652,7 @@
       <div class="field"><label class="fl">Supporters</label><textarea id="pr-supporters" rows="2" placeholder="Travel, supporters' club, fan shout-outs."></textarea></div>
       <div class="field"><label class="fl">Ground information note (extra)</label><textarea id="pr-groundinfo" rows="2" placeholder="Anything extra for the Ground Info page."></textarea></div>
 
-      <div class="div"></div>
-      <div class="slbl"><i class="ico ico-plus"></i> Your Own Pages <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— add a page, drop in any artwork</span></div>
-      <div class="snote"><p>Add as many extra pages as you like — a sponsor advert, a player feature, a poster, a chart, a photo collage. Upload it as an <strong style="color:var(--w)">image</strong> (PNG/JPG — export anything, even a PDF page, as an image) and it drops onto a ready-branded RLFC page. Drag-free reorder with the arrows; remove any time.</p></div>
-      <div id="pr-pages-list"></div>
-      <button class="save sec" onclick="prAddPage()">+ Add a page</button>
-
-      <button class="save sec" style="margin-top:14px" onclick="saveProgramme()">&#10003; Save Draft</button>
-      <div class="snote" style="margin-top:10px"><p>Saving keeps your work and updates the print edition. It does <strong style="color:var(--w)">not</strong> put the programme on the website.</p></div>
-      <button class="save" style="margin-top:10px;background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to Website</button>
-      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans will be able to see it, and the match details, player figures and league table are saved exactly as they are today. Opening it again next year will still show this match as it was.</p></div>
-      <div class="dep" id="dep-programme"></div>
-      <div class="row2" style="margin-top:8px">
-        <button class="save sec" onclick="prNewProgramme()">+ Start a new one</button>
-        <button class="save sec" onclick="window.open('programmes.html','_blank')"><i class="ico ico-library"></i> View archive</button>
-      </div>
-      <div style="font-family:var(--fb);font-size:11px;color:var(--gr);line-height:1.5;margin-top:8px">Every Publish is kept in the <b style="color:var(--w)">archive library</b> on the site — fans can browse and read any past programme, and you can re-print any of them.</div>
-
-      <div class="div"></div>
-      <div class="slbl"><i class="ico ico-printer"></i>&#65039; Print Edition <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— a printer-ready A4 PDF</span></div>
-      <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Print this programme now. This does not put it on the website.</strong> Your work is saved first, then a full A4 programme opens with your print box. Choose <strong style="color:var(--w)">Save as PDF</strong>, set paper to <strong style="color:var(--w)">A4</strong>, and email that PDF to your printer. The programme stays a draft until you press Publish.</p></div>
-      <button class="save sec" onclick="prPrintEdition()">&#128438; Print / Save PDF</button>
-      <a href="#" onclick="prPreviewEdition();return false" style="display:block;text-align:center;font-family:var(--fc);font-size:12px;color:var(--gr);margin-top:8px;text-decoration:underline">Just look at it first (no print box)</a>
+      </details>
       </div><!-- /pr-form -->
       <aside class="pr-side">
         <div class="pr-side-lbl">Live cover preview</div>
@@ -4776,10 +4800,7 @@ function loadAll() {
     isLive = d.isLive || false;
     isHome = d.isHome !== false;
   });
-  fetchJSON('programme', function (d) {
-    applyProgrammeData(d);
-    prSeedFromNextFixture();     // O3 — runs AFTER the saved programme, never against it
-  });
+  // The programme panel loads its own draft (initProgramme → PRE.loadDraft).
 }
 function fetchJSON(name, cb) {
   fetch('data/' + name + '.json?t=' + Date.now())
@@ -5199,6 +5220,9 @@ function applyProgrammeData(d) {
   setVal('pr-storylines', d.storylines || ''); setVal('pr-keyplayers', d.keyPlayers || '');
   setVal('pr-oppfounded', d.oppFounded || ''); setVal('pr-oppground', d.oppGround || ''); setVal('pr-oppmanager', d.oppManager || ''); setVal('pr-opponestowatch', d.oppOnesToWatch || '');
   setVal('pr-clubinfo', d.clubInfo || ''); setVal('pr-captainname', d.captainName || ''); setVal('pr-potm', d.potm || ''); setVal('pr-captainnotes', d.captainNotes || '');
+  setVal('pr-off-status', d.officialsStatus || 'awaiting'); setVal('pr-off-source', d.officialsSource || ''); setVal('pr-off-checked', d.officialsCheckedAt || '');
+  setVal('pr-homekit', d.homeKit || ''); setVal('pr-awaykit', d.awayKit || ''); var _ko = document.getElementById('pr-kit-ok'); if (_ko) _ko.checked = !!d.awayKitConfirmed;
+  if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; }
   setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
   // Opponent crest: an uploaded image (cup/friendly) vs one picked from the list.
   var oc = document.getElementById('pr-oppcrest');
@@ -5232,11 +5256,13 @@ function initProgramme() {
       sel.innerHTML = '<option value="">— pick a fixture —</option>' + list.map(function (f) {
         return '<option value="' + esc(f.id) + '">' + esc((typeof fxFmtDate === 'function' ? fxFmtDate(f.date) : f.date) + ' ' + (f.isHome === false ? '@ ' : 'vs ') + (f.opponent || 'TBC')) + '</option>';
       }).join('');
+      if (window.PRE && PRE.fixtureOptions) PRE.fixtureOptions();
     }
     _prReady.fixtures = true; prMaybeSeed();
   });
-  fetchJSON('programme', function (d) {
+  (window.PRE ? PRE.loadDraft() : new Promise(function (ok) { fetchJSON('programme', ok); })).then(function (d) {
     applyProgrammeData(d);
+    if (window.PRE) PRE.afterLoad(d);
     // The fixture this programme belongs to, remembered across reloads.
     window._prSavedFixtureId = (d && d.fixtureId) || '';
     _prReady.programme = true; prMaybeSeed();
@@ -5495,6 +5521,9 @@ function prBuildDoc() {
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
     clubHistory: gv('pr-clubhistory'), community: gv('pr-community'), academy: gv('pr-academy'), womens: gv('pr-womens'), supporters: gv('pr-supporters'), groundInfo: gv('pr-groundinfo'),
     oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme,
+    officialsStatus: gv('pr-off-status') || 'awaiting', officialsSource: gv('pr-off-source'), officialsCheckedAt: gv('pr-off-checked'),
+    homeKit: gv('pr-homekit'), awayKit: gv('pr-awaykit'), awayKitConfirmed: !!(document.getElementById('pr-kit-ok') || {}).checked,
+    carryReview: (window.PRE && PRE.carry) || null, oppProfileSource: (window.PRE && PRE.oppSource) || null,
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
@@ -5512,50 +5541,6 @@ function prBuildDoc() {
   // Stable id so re-publishing the same match updates its archive entry.
   data.id = (data.date || 'undated') + '-' + (data.opponent || 'tbc').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   return data;
-}
-
-function saveProgramme() {
-  var tok = localStorage.getItem('rlfc_gh_token') || (window.RLFC_TOKEN||'');
-  var data = prBuildDoc();
-  pushToGitHub('programme', data, 'dep-programme');           // latest (for the live digital programme)
-  // …and add/update it in the archive library.
-  fetchJSON('programmes', function (arch) {
-    var items = (arch && arch.items) || [];
-    items = items.filter(function (it) { return it.id !== data.id; });
-    items.unshift(data);
-    items.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
-    setTimeout(function () { pushToGitHub('programmes', { items: items, updatedAt: new Date().toISOString() }, 'dep-programme'); }, 1500);
-  });
-  toast('Programme saved. Nothing has been published to the website yet.');
-}
-/**
- * PRINTING IS NOT PUBLISHING.
- *
- * The panel used to say "Press Publish first". That was a workaround for the
- * real defect — the print page could only see saved data — and it taught the
- * committee that the only way to get a PDF was to put the programme on the
- * public website. Russell was printing Tuesday's programme by publishing it.
- *
- * Now the draft is handed straight to the print page, so what prints is
- * exactly what is on screen, and nothing becomes public.
- */
-function prHandOverDraft() {
-  var doc = prBuildDoc();
-  try {
-    localStorage.setItem('rlfc_programme_draft',
-      JSON.stringify({ savedAt: new Date().toISOString(), doc: doc }));
-  } catch (e) { /* private browsing — the saved file is still the fallback */ }
-  return doc;
-}
-function prPrintEdition() {
-  prHandOverDraft();
-  saveProgramme();                       // keep the stored copy in step
-  window.open('programme-print.html?draft=1&print=1', '_blank');
-  toast('PDF opened. Nothing has been published to the website.');
-}
-function prPreviewEdition() {
-  prHandOverDraft();
-  window.open('programme-print.html?draft=1', '_blank');
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5832,15 +5817,15 @@ async function prRefreshFootball() {
  * player on 25 appearances because that is what he has NOW — quietly rewriting
  * a document supporters already hold in their hands.
  */
-async function publishProgramme() {
-  if (!confirm('Publish this programme to the website?\n\nFans will be able to see it. ' +
-    'The match details, player figures and league table are frozen exactly as they are today — ' +
-    'this edition will always show this match as it was.')) return;
-
-  var el = document.getElementById('dep-programme');
-  if (el) showDep(el, 'loading', 'Freezing this edition…');
-
-  var doc = prBuildDoc();
+/**
+ * FREEZE AN EDITION. Everything the edition DISPLAYS is captured into the
+ * document at publication — player figures, league table rows and what the
+ * next fixture was — so reopening it later shows the match as it was.
+ * Moved verbatim out of the old publishProgramme(); js/programme-editor.js
+ * calls it when it writes the published archive copy.
+ */
+async function prFreezeEdition(base) {
+  var doc = base || prBuildDoc();
   // Everything the edition DISPLAYS is captured, not referenced. A reference
   // would follow the season; a copy stays put.
   try {
@@ -5880,16 +5865,7 @@ async function publishProgramme() {
   doc.published = true;
   doc.publishedAt = new Date().toISOString();
   doc.snapshotOf = doc.fixtureId || doc.id;
-
-  pushToGitHub('programme', doc, 'dep-programme');
-  fetchJSON('programmes', function (arch) {
-    var items = (arch && arch.items) || [];
-    items = items.filter(function (it) { return it.id !== doc.id; });
-    items.unshift(doc);
-    items.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
-    setTimeout(function () { pushToGitHub('programmes', { items: items, updatedAt: new Date().toISOString() }, 'dep-programme'); }, 1500);
-  });
-  toast('Programme published. Fans can now view it on the website.');
+  return doc;
 }
 
 function prNewProgramme() {

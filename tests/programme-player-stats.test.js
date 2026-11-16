@@ -175,7 +175,7 @@ test('a draft reads today’s figures; a published edition never does', () => {
 });
 
 test('publishing freezes the figures, the table and the moment', () => {
-  const fn = admin.match(/async function publishProgramme\(\) \{[\s\S]*?\n\}/)[0];
+  const fn = admin.match(/async function prFreezeEdition\(base\) \{[\s\S]*?\n\}/)[0];
   assert.match(fn, /doc\.playerStats = ps/, 'player figures are copied in');
   assert.match(fn, /doc\.leagueTable = tb/, 'so is the table');
   assert.match(fn, /doc\.published = true/);
@@ -257,7 +257,7 @@ test('the programme never calls Full-Time itself', () => {
 test('the fixture repair just deployed is not regressed', () => {
   assert.match(admin, /function prBuildDoc\(\)/);
   assert.match(admin, /data\.fixtureId = gv\('pr-fixture'\)/);
-  assert.match(admin, /function prHandOverDraft\(\)/);
+  assert.match(read('js/programme-editor.js'), /localStorage\.setItem\('rlfc_programme_draft'/, 'the draft hand-over to the print page');
   assert.ok(!/Press Publish first/.test(strip(admin)));
   assert.match(print, /aspect-ratio:4\/5/, 'the headshot fix must survive');
   assert.match(print, /league-mark/, 'Cherry Red placement must survive');
@@ -270,8 +270,8 @@ test('match sponsors stay tied to their own edition', () => {
   });
   // They are part of the document, so publishing freezes them with everything
   // else and the next fixture starts clean.
-  const pub = admin.match(/async function publishProgramme\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(pub, /var doc = prBuildDoc\(\)/);
+  const pub = admin.match(/async function prFreezeEdition\(base\) \{[\s\S]*?\n\}/)[0];
+  assert.match(pub, /var doc = base \|\| prBuildDoc\(\)/);
 });
 
 // ── 7 · AI WRITES THE STORY, NEVER THE STATISTICS ───────────────────────────
@@ -338,8 +338,8 @@ test('the assistant is gated like every other staff tool', () => {
 test('AI copy is frozen with the edition once published', () => {
   // Approved copy lives in the programme document, which publishProgramme()
   // freezes wholesale — so an archived spotlight is never regenerated.
-  const pub = admin.match(/async function publishProgramme\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(pub, /var doc = prBuildDoc\(\)/,
+  const pub = admin.match(/async function prFreezeEdition\(base\) \{[\s\S]*?\n\}/)[0];
+  assert.match(pub, /var doc = base \|\| prBuildDoc\(\)/,
     'the editorial fields are part of the document that gets frozen');
   assert.ok(!/programme-ai/.test(pub), 'publishing must never regenerate copy');
 });

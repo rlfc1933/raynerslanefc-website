@@ -28,7 +28,12 @@ const path = require('node:path');
 const ROOT = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const print = read('programme-print.html');
-const REAL = JSON.parse(read('data/fixtures.json')).fixtures || [];
+// The club's real fixture list AS IT STOOD when these cases were written
+// (commit b997ae8). The live file keeps changing as results come in — Burnham
+// on 19 Aug has since been played — and a test that reads it asserts last
+// month's calendar against this month's data. The selection rules are what is
+// under test, so they run against a fixed, real snapshot.
+const REAL = JSON.parse(read('tests/fixtures/fixtures-2026-08-snapshot.json')).fixtures || [];
 
 /** The renderer's own selection logic, lifted out and run for real. */
 function selector() {
@@ -175,7 +180,7 @@ test('one connector convention throughout', () => {
 
 test('publishing records what the next fixture was', () => {
   const admin = read('admin.html');
-  const pub = admin.match(/async function publishProgramme\(\)[\s\S]*?\n\}/)[0];
+  const pub = admin.match(/async function prFreezeEdition\(base\)[\s\S]*?\n\}/)[0];
   assert.match(pub, /doc\.nextFixture = up\[0\] \|\| null;/);
   assert.match(pub, /doc\.nextHomeFixture = up\.filter\(function \(f\) \{ return f\.isHome !== false; \}\)\[0\] \|\| null;/);
   assert.match(pub, /postpon\|cancel\|abandon\|void\|off/, 'the freeze uses the same validity rule');
