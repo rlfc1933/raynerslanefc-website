@@ -633,7 +633,7 @@
 <script>
 (function () {
   var SITE = 'https://raynerslanefc.co.uk';
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function lines(t){ return String(t||'').split('\n').map(function(l){return l.trim();}).filter(Boolean); }
   /* EDITORS WRITE MARKDOWN WHETHER OR NOT WE SUPPORT IT.
      The Hilltop preview opened with "**OLD PATHS. NEW CHAPTER.**" and that is
@@ -802,9 +802,8 @@
     if (/[?&]draft=1/.test(location.search)) {
       var local = draftSnapshot();
       if (local && (!wantFx || local.fixtureId === wantFx)) { pxNote('warn','Draft from this device'+(local.revision?' (based on version '+esc(local.revision)+')':'')+'. Not published.'); return Promise.resolve(local); }
-      // Before the first save under the new editor there is no draft file yet;
-      // the working draft is still the old single file.
-      return clubDraft().then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
+      // Only the signed-in club copy. There is no public draft file to fall back to.
+      return clubDraft().then(function(d){
         if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be opened here. Sign in to Lane HQ on this device and open it from Programmes. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
         if (wantFx && d.fixtureId !== wantFx) {
           pxNote('err','This link was for a different match. The club’s saved draft is now for <b>'+esc(d.opponent||'another match')+'</b> ('+esc(d.date||'')+'), so that is what is shown. Do not print this for the original match.');
@@ -817,8 +816,10 @@
       });
     }
     var id = paramId();
-    if (!id) return getJSON('programme').then(function(d){ if (d && !d.published) pxNote('warn','This is an unpublished draft, not a published programme.'); return d; });
-    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0];
+    // No edition named: never render a draft. Point at the published archive.
+    if (!id) { window.__pxBlocked = 'No edition chosen'; pxNote('err','No programme edition was chosen, so nothing is shown. Published programmes are in the <a href="programmes.html">programme archive</a>.'); return Promise.resolve({}); }
+    // The print archive lists PUBLISHED editions only; an unpublished item is never printed from a public link.
+    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0]; if (hit && hit.published!==true) hit=null;
       if (!hit) { window.__pxBlocked = 'No such edition'; pxNote('err','There is no archived edition called “'+esc(id)+'”. Nothing is shown in its place.'); return {}; }
       return hit; });
   }

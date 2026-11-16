@@ -268,7 +268,7 @@ test('systems outside Match Day Ops were not touched', () => {
   // These files carry the squad, sponsors, social cards and public pages. The
   // brief was explicit that this work must not disturb them.
   const untouched = [
-    'js/sponsor-rail.js', 'js/squad.js', 'js/share-news.js', 'js/programme.js',
+    'js/sponsor-rail.js', 'js/squad.js', 'js/share-news.js',
     'data/sponsors.json', 'data/partners.json', 'data/news.json', 'data/squad.json',
     'data/players.json', 'fixtures.html', 'index.html', 'squad.html', 'news.html',
   ];

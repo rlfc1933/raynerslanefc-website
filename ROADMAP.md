@@ -161,7 +161,7 @@ portal reports success on edits that may never reach the public site:
 - `js/squad.js` reads a **published Google Sheet**; the portal edits
   `squad.json`. Same 24 people, two sources. They agree today. Nothing keeps
   them agreeing.
-- `js/programme.js` reads two more Sheets while `data/programme.json` exists.
+- (removed) `js/programme.js` and public `data/programme.json` were deleted; the draft is private (save-data / Blobs).
 - `js/main.js` and `js/club-now.js` **both** implement a live scoreboard and a
   countdown, both loaded on the homepage, each polling every 12 seconds.
 - A static `sitemap.xml` is committed and permanently shadowed by the dynamic

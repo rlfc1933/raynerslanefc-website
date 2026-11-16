@@ -40,7 +40,22 @@ const DOMAIN_OK = /^[\w-]+$/;
 // Blobs 8.2 has no conditional write, so the revision check is read-then-write
 // in one invocation: a far smaller window than the old client-side check, but
 // not an atomic compare-and-swap.
-const PRIVATE = { 'data/programme-draft.json': 'programme-draft', 'data/news-drafts.json': 'news-drafts' };
+const PRIVATE = { 'data/programme-draft.json': 'programme-draft', 'data/news-drafts.json': 'news-drafts', 'data/programme-legacy-recovery.json': 'programme-legacy-recovery' };
+// Read-only private paths: staff may read them, nothing may write them.
+const READ_ONLY = { 'data/programme-legacy-recovery.json': true };
+// The legacy draft that used to sit in public data/programme.json (and the
+// unpublished items of data/programmes.json). Bundled with the function, never
+// served (netlify.toml 404s /netlify/*). Seeds the private store once so the
+// Broadfields work is not lost when the public file was deleted.
+const LEGACY = require('./lib/legacy-programme-draft.json');
+async function seedLegacy(st) {
+  if ((await st.get('programme-legacy-recovery', { type: 'json' })) == null) await st.setJSON('programme-legacy-recovery', LEGACY);
+  if ((await st.get('programme-legacy-seeded', { type: 'json' })) != null) return;
+  if ((await st.get('programme-draft', { type: 'json' })) == null) {
+    await st.setJSON('programme-draft', Object.assign({}, LEGACY.programme, { revision: 0, recoveredFrom: 'data/programme.json' }));
+  }
+  await st.setJSON('programme-legacy-seeded', { at: new Date().toISOString() });
+}
 let draftStore = null, lastEvent = null;
 async function drafts() {
   if (draftStore) return draftStore;
@@ -48,7 +63,7 @@ async function drafts() {
   if (b.connectLambda && lastEvent) { try { b.connectLambda(lastEvent); } catch (e) { /* newer runtime injects context */ } }
   return b.getStore({ name: 'rlfc-private-drafts', consistency: 'strong' });
 }
-async function privRead(path) { const st = await drafts(); const d = await st.get(PRIVATE[path], { type: 'json' }); return d == null ? null : d; }
+async function privRead(path) { const st = await drafts(); if (path === 'data/programme-draft.json' || path === 'data/programme-legacy-recovery.json') await seedLegacy(st); const d = await st.get(PRIVATE[path], { type: 'json' }); return d == null ? null : d; }
 async function privWrite(path, obj) { const st = await drafts(); await st.setJSON(PRIVATE[path], obj); }
 
 function resp(code, obj) {
@@ -101,6 +116,7 @@ async function handleMerge(payload, ghHeaders) {
   const upserts    = Array.isArray(payload.upserts) ? payload.upserts : [];
   const deletedIds = Array.isArray(payload.deletedIds) ? payload.deletedIds : [];
   const extra      = (payload.extra && typeof payload.extra === 'object') ? payload.extra : null;
+  if (READ_ONLY[path]) return resp(403, { error: 'Read-only: ' + path + ' is a recovery copy and cannot be changed.' });
   if (PRIVATE[path]) {
     const obj = (await privRead(path)) || {};
     const merged = mergeArray(Array.isArray(obj[key]) ? obj[key] : [], upserts, deletedIds, idField);
@@ -200,6 +216,7 @@ async function handleRaw(payload, ghHeaders) {
   if (!path || typeof content !== 'string' || !PATH_OK.test(path)) {
     return resp(400, { error: 'Invalid path or content' });
   }
+  if (READ_ONLY[path]) return resp(403, { error: 'Read-only: ' + path + ' is a recovery copy and cannot be changed.' });
   if (PRIVATE[path]) {
     let next; try { next = JSON.parse(Buffer.from(content, 'base64').toString('utf8')); } catch (e) { return resp(400, { error: 'Draft must be JSON' }); }
     const cur = await privRead(path);

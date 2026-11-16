@@ -79,14 +79,16 @@
   PRE.loadDraft = function () {
     return save({ read: true, path: DRAFT }).then(function (r) {
       if (r.ok && r.j.exists) return r.j.data;
-      if (r.ok && !r.j.exists) {
-        // First run: the old single-file draft becomes version 0 of the new one.
-        return save({ read: true, path: 'data/programme.json' }).then(function (r2) { var d = (r2.ok && r2.j.data) || {}; d.revision = 0; return d; });
-      }
-      // Could not reach the club copy. Use the site copy and say so.
+      // No club draft yet (the server seeds the recovered legacy draft on first read).
+      if (r.ok && !r.j.exists) return { revision: 0 };
+      // Could not reach the club copy. Say so and start empty: drafts are never read from a public file.
       PRE.readFailed = true;
-      return fetch('data/programme.json?t=' + Date.now()).then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; });
+      return {};
     });
+  };
+  /* Read-only: the signed-in club draft or null. No side effects, no public fallback. */
+  PRE.readDraft = function () {
+    return save({ read: true, path: DRAFT }).then(function (r) { return (r.ok && r.j.exists && r.j.data) || null; }).catch(function () { return null; });
   };
   PRE.afterLoad = function (d) {
     d = d || {};
@@ -94,7 +96,7 @@
     PRE.lastFixtureId = d.fixtureId || '';
     PRE.carry = d.carryReview || null;
     showClubState();
-    if (PRE.readFailed) status('warn', 'Could not reach the club’s saved copy, so this may not be the latest version. Saving will be refused if someone has saved a newer one.');
+    if (PRE.readFailed) status('warn', 'Could not reach the club’s saved copy, so the form is empty. Check you are signed in and reload before typing; saving will be refused if someone has saved a newer one.');
     offerDeviceCopy(d);
     renderCarry(); renderOppSource(); loadRegistries();
     bindDeviceAutosave();

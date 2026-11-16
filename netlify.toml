@@ -55,6 +55,18 @@
   force = true
 
 [[redirects]]
+  from = "/data/programme.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/data/programme-legacy-recovery.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
   from = "/tests/*"
   to = "/404.html"
   status = 404
@@ -88,6 +100,9 @@
 # Guarantee the Sponsor Radar baked business snapshots are bundled with the
 # radar-discover function (it require()s them, but this makes it bulletproof).
 # These ship INSIDE the function bundle — not publicly served.
+[functions."save-data"]
+  included_files = ["netlify/functions/lib/legacy-programme-draft.json"]
+
 [functions."radar-discover"]
   included_files = ["netlify/functions/radar-data/**"]
 

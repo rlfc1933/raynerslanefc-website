@@ -5269,7 +5269,7 @@ function initProgramme() {
     }
     _prReady.fixtures = true; prMaybeSeed();
   });
-  (window.PRE ? PRE.loadDraft() : new Promise(function (ok) { fetchJSON('programme', ok); })).then(function (d) {
+  (window.PRE ? PRE.loadDraft() : Promise.resolve({})).then(function (d) {
     applyProgrammeData(d);
     if (window.PRE) PRE.afterLoad(d);
     // The fixture this programme belongs to, remembered across reloads.
@@ -5286,7 +5286,7 @@ function initProgramme() {
 // O3: the programme is almost always for the NEXT game, so open on it rather
 // than on "— pick a fixture —" and five empty fields.
 //
-// Runs only AFTER fetchJSON('programme') has applied the saved data — an earlier
+// Runs only AFTER the programme draft (PRE.loadDraft) has applied the saved data — an earlier
 // version raced it, and whichever fetch finished last won. Guards on the SAVED
 // state, not on whatever happens to be in the inputs at the time.
 //
