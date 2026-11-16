@@ -169,7 +169,7 @@ test('programme editor: carry-over list, checks and opponent source escape HTML'
   for (const x of PAYLOADS) {
     const el = fakeEl();
     const PRE = { carry: { from: x, to: x, items: [{ label: x, el: x, field: x }] }, checks: () => [{ level: 'must', kind: x, text: x, el: x }] };
-    const f = new Function('$', 'PRE', 'val', 'profileFor', lineSrc(s, 'h') + fnSrc(s, 'renderCarry') + fnSrc(s, 'renderChecks') + fnSrc(s, 'renderOppSource') +
+    const f = new Function('$', 'PRE', 'val', 'profileFor', lineSrc(s, 'h') + "var DISCLAIMER = 'This checklist does not certify legal or league compliance.';\n" + fnSrc(s, 'renderCarry') + fnSrc(s, 'renderChecks') + fnSrc(s, 'renderOppSource') +
       'renderCarry(); var a = $().innerHTML; renderChecks(); var b = $().innerHTML; renderOppSource(); return [a, b, $().innerHTML];');
     const out = f(() => el, PRE, () => x, () => ({ key: x, founded: x, ground: x, verification: x, reviewedOn: x, reviewNote: x }));
     out.forEach(clean);
