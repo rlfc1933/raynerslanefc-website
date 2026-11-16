@@ -136,6 +136,8 @@
   .page--opp .opp-name{font-family:var(--fd);font-size:46px;line-height:.92;color:var(--ink);letter-spacing:.3px}
   .page--opp .opp-facts{margin-bottom:6px}
   .page--opp .opp-src{font-size:10.5px;margin-top:10px}
+  .page--opp .opp-res{width:100%;border-collapse:collapse;font-size:12px}
+  .page--opp .opp-res td{padding:3px 6px 3px 0;border-bottom:1px solid rgba(0,0,0,.08)}
   /* team sheets */
   .ts-team{ font-family:var(--fd); font-size:23px; letter-spacing:.5px; color:#fff; background:var(--g); padding:6px 13px; }
   .ts-team.away{ background:#0d0d0d; }
@@ -1102,7 +1104,13 @@
        history comes from the club's reviewed profile, edited per edition;
        current names and results are kept apart from the historical facts. */
     var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Home ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
-    var hasOpp = oppFacts.length || lines(d.oppSummary).length || lines(d.oppOnesToWatch).length || lines(d.headToHead).length;
+    /* Recent results: exactly the set the editor chose (doc.oppRecentResults),
+       completed matches only, always with the cut-off date and source. */
+    var oppRes = (d.oppRecentResults && d.oppRecentResults.items || []).filter(function(r){ return r && r.date && typeof r.homeScore==='number' && typeof r.awayScore==='number'; });
+    var oppResHtml = oppRes.length ? '<div class="divider"><span class="lbl">Recent Results</span></div><table class="opp-res"><tbody>'+oppRes.map(function(r){
+        return '<tr><td>'+esc(shortDate(r.date)||r.date)+'</td><td>'+esc(r.home)+' '+r.homeScore+'–'+r.awayScore+' '+esc(r.away)+'</td><td class="muted">'+esc(r.competition||'')+'</td></tr>'; }).join('')+
+      '</tbody></table><p class="muted opp-src">Results to '+esc(shortDate(d.oppRecentResults.cutoff)||d.oppRecentResults.cutoff||'—')+' · '+esc(d.oppRecentResults.source||'source not recorded')+'</p>' : '';
+    var hasOpp = oppFacts.length || lines(d.oppSummary).length || lines(d.oppOnesToWatch).length || lines(d.headToHead).length || oppRes.length;
     if (hasOpp) {
       var srcLine = d.oppProfileSource && (d.oppProfileSource.reviewedOn || d.oppProfileSource.source)
         ? '<p class="muted opp-src">Club history from '+esc(d.oppProfileSource.source||'the club profile')+(d.oppProfileSource.reviewedOn?', checked '+esc(d.oppProfileSource.reviewedOn):'')+'.</p>' : '';
@@ -1113,7 +1121,7 @@
         (lines(d.oppSummary).length?'<div class="divider"><span class="lbl">The Club</span></div><div class="body">'+notes(d.oppSummary)+'</div>':'')+
         (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">This Season</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
         (lines(d.headToHead).length?'<div class="divider"><span class="lbl">Head to Head</span></div><div class="body">'+notes(d.headToHead)+'</div>':'')+
-        srcLine+ foot()+'</div>');
+        oppResHtml+ srcLine+ foot()+'</div>');
     }
     /* MATCH PREVIEW (storylines + key players) */
     if (lines(d.storylines).length || lines(d.keyPlayers).length) {

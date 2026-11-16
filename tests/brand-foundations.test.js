@@ -54,7 +54,8 @@ test('visual metadata is kept out of the factual opponent file', () => {
   // never leak into it, or a guessed colour acquires the authority of a checked
   // founding date.
   const ops = read('data/opponents.json');
-  assert.ok(!/primary|secondary|#[0-9A-Fa-f]{6}/.test(ops),
+  // Keys, not words: reviewStatus 'verified-secondary' is a source grade, not a colour.
+  assert.ok(!/"(primary|secondary)"\s*:|#[0-9A-Fa-f]{6}/.test(ops),
     'colour data must live in club-brands.json, not opponents.json');
 });
 

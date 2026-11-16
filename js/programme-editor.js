@@ -96,7 +96,9 @@
     showClubState();
     if (PRE.readFailed) status('warn', 'Could not reach the club’s saved copy, so this may not be the latest version. Saving will be refused if someone has saved a newer one.');
     offerDeviceCopy(d);
+    PRE.oppRecent = d.oppRecentResults || null;
     renderCarry(); renderOppSource(); loadRegistries();
+    loadOfficials(); PRE.refreshOppResults(false);
     bindDeviceAutosave();
     offerHqFixture(d);
     prStep(1);
@@ -303,6 +305,9 @@
       origFromFixture(id, quiet);
       PRE.lastFixtureId = id;
       renderCarry(); renderOppSource();
+      // A different opponent's results must not ride along into this edition.
+      if (f && oldOpp && f.opponent !== oldOpp) PRE.oppRecent = null;
+      renderOfficialsUse(); PRE.refreshOppResults(false);
     };
   }
   function renderCarry() {
@@ -378,6 +383,165 @@
     if (filled.length) { PRE.deviceOnly = true; showClubState(); }
     status(filled.length ? 'warn' : 'idle', filled.length ? 'Filled ' + filled.join(', ') + ' from the club profile. Not saved yet.' : 'Nothing filled: those boxes already have writing in them, which is kept.');
   };
+
+  /* ── OPPOSITION RECENT RESULTS (stage 3) ──────────────────────────────
+     Two separate things, deliberately:
+       PRE.oppLive   what the server last told us (refreshes in the background)
+       PRE.oppRecent what the editor CHOSE for this edition (doc.oppRecentResults)
+     A refresh only ever replaces PRE.oppLive. Nothing here writes oppSummary
+     or any other staff-written field; the chosen set changes only when the
+     editor presses "Use selected results". A published edition keeps the set
+     it was published with (prFreezeEdition copies the document as-is). */
+  PRE.oppLive = null; PRE.oppRecent = null;
+  var RES_STATE = { available: 'Up to date', stale: 'Stale — older than 3 days, refresh before printing', unavailable: 'Unavailable' };
+  function oppClub() { return val('pr-opp'); }
+  PRE.refreshOppResults = function (force) {
+    var club = oppClub(); var el = $('pr-oppres'); if (!el) return Promise.resolve(null);
+    if (!club) { PRE.oppLive = null; renderOppResults(); return Promise.resolve(null); }
+    if (force) el.setAttribute('aria-busy', 'true');
+    return post('/.netlify/functions/opponent-results', { pin: global.PIN || '', club: club, refresh: !!force, n: 6, cutoff: val('pr-date') || null })
+      .then(function (r) {
+        el.removeAttribute('aria-busy');
+        if (oppClub() !== club) return null;                    // the fixture changed while we waited
+        PRE.oppLive = r.ok ? r.j : { ok: false, state: 'unavailable', error: (r.j && r.j.error) || ('error ' + r.status), items: [], manual: [] };
+        renderOppResults(); return PRE.oppLive;
+      });
+  };
+  function resRow(r, club, i, checked) {
+    var L = global.OppResults.line(r, club);
+    return '<tr><td><input type="checkbox" data-res-pick="' + i + '"' + (checked ? ' checked' : '') + ' aria-label="Use this result"></td>' +
+      '<td>' + h(r.date) + '</td><td>' + h(r.competition || '—') + '</td><td><b>' + h(L.res) + '</b> ' + h(L.score) + ' v ' + h(L.opp) + ' (' + L.venue + ')</td>' +
+      '<td>' + (r.enteredBy ? 'Entered by ' + h(r.enteredBy) + ': ' + h(r.sourceText || '') : (r.sourceUrl ? '<a href="' + h(r.sourceUrl) + '" target="_blank" rel="noopener">Provider page</a>' : '—')) + '</td></tr>';
+  }
+  function renderOppResults() {
+    var el = $('pr-oppres'); if (!el || !global.OppResults) return;
+    var club = oppClub(), live = PRE.oppLive, chosen = PRE.oppRecent;
+    if (!club) { el.innerHTML = '<p class="pr-muted">Choose the match first.</p>'; return; }
+    var items = (live && live.items) || [];
+    var st = live ? (live.state || 'unavailable') : 'unavailable';
+    var auto = live && live.automation;
+    var chosenKeys = ((chosen && chosen.items) || []).map(global.OppResults.matchKey);
+    var html = '<div class="pr-oppres__state pr-oppres__state--' + h(st) + '"><b>' + h(RES_STATE[st] || st) + '</b>' +
+      (live && live.fetchedAt ? ' · refreshed ' + h(dayTime(live.fetchedAt)) : '') + (live && live.source ? ' · ' + h(live.source) : '') + '</div>';
+    if (auto && !auto.enabled) html += '<p class="pr-muted">' + h(auto.reason) + '</p>';
+    if (live && live.refreshError) html += '<p class="pr-muted">Refresh failed: ' + h(live.refreshError) + '. Showing the last saved results, labelled by their age.</p>';
+    if (live && live.ok === false) html += '<p class="pr-muted">Could not read results: ' + h(live.error) + '.</p>';
+    if (items.length) {
+      html += '<table class="pr-table"><thead><tr><th>Use</th><th>Date</th><th>Competition</th><th>Result</th><th>Source</th></tr></thead><tbody>' +
+        items.map(function (r, i) { return resRow(r, club, i, chosenKeys.indexOf(global.OppResults.matchKey(r)) >= 0); }).join('') + '</tbody></table>' +
+        '<button type="button" class="save sec" id="pr-oppres-use">Use selected results in this edition</button>';
+    } else html += '<p class="pr-muted">No completed results on record for ' + h(club) + '. Nothing will print until results are added.</p>';
+    html += chosen && chosen.items && chosen.items.length
+      ? '<p class="pr-muted">This edition prints ' + chosen.items.length + ' result' + (chosen.items.length === 1 ? '' : 's') + ' to ' + h(chosen.cutoff || '—') + '.</p>'
+      : '<p class="pr-muted">No results chosen for this edition yet.</p>';
+    html += '<button type="button" class="save sec" id="pr-oppres-refresh">Refresh</button>' +
+      '<details class="pr-oppres__add"><summary>Add / correct a result</summary>' +
+      '<div class="row2"><div class="field"><label class="fl" for="pr-res-date">Date</label><input type="date" id="pr-res-date"></div>' +
+      '<div class="field"><label class="fl" for="pr-res-comp">Competition</label><input type="text" id="pr-res-comp" placeholder="e.g. CCL Premier North"></div></div>' +
+      '<div class="row2"><div class="field"><label class="fl" for="pr-res-home">Home team</label><input type="text" id="pr-res-home"></div>' +
+      '<div class="field"><label class="fl" for="pr-res-hs">Home score</label><input type="number" min="0" max="99" id="pr-res-hs"></div></div>' +
+      '<div class="row2"><div class="field"><label class="fl" for="pr-res-away">Away team</label><input type="text" id="pr-res-away"></div>' +
+      '<div class="field"><label class="fl" for="pr-res-as">Away score</label><input type="number" min="0" max="99" id="pr-res-as"></div></div>' +
+      '<div class="field"><label class="fl" for="pr-res-src">Where this result comes from</label><input type="text" id="pr-res-src" placeholder="e.g. FA Full-Time results page, read 16 Nov"></div>' +
+      '<div class="field"><label class="fl" for="pr-res-url">Source link (optional)</label><input type="url" id="pr-res-url"></div>' +
+      '<p class="pr-muted">A result with the same date and teams as one above replaces it as a correction. Only completed matches with a final score.</p>' +
+      '<button type="button" class="save sec" id="pr-res-save">Save result</button> <span id="pr-res-msg" role="status"></span></details>';
+    el.innerHTML = html;
+    var use = $('pr-oppres-use'); if (use) use.onclick = function () {
+      var picked = []; el.querySelectorAll('[data-res-pick]').forEach(function (c) { if (c.checked) picked.push(items[+c.getAttribute('data-res-pick')]); });
+      var cutoff = picked.map(function (r) { return r.date; }).sort().pop() || null;
+      PRE.oppRecent = global.OppResults.attach({}, picked, { source: live.source || null, fetchedAt: live.fetchedAt || null, cutoff: cutoff }).oppRecentResults;
+      PRE.deviceOnly = true; showClubState(); renderOppResults();
+      status('warn', 'Chose ' + picked.length + ' result' + (picked.length === 1 ? '' : 's') + ' for the opposition page. Not saved yet.');
+    };
+    $('pr-oppres-refresh').onclick = function () { PRE.refreshOppResults(true); };
+    $('pr-res-home').value = $('pr-res-home').value || club;
+    $('pr-res-save').onclick = saveManualResult;
+  }
+  function saveManualResult() {
+    var msg = $('pr-res-msg'); var who = me(); if (!who) { msg.textContent = 'Add your name first.'; return; }
+    var rec = { club: oppClub(), date: val('pr-res-date'), competition: val('pr-res-comp'), home: val('pr-res-home'), away: val('pr-res-away'),
+      homeScore: val('pr-res-hs') === '' ? NaN : Number(val('pr-res-hs')), awayScore: val('pr-res-as') === '' ? NaN : Number(val('pr-res-as')),
+      sourceText: val('pr-res-src'), sourceUrl: val('pr-res-url'), enteredBy: who, enteredAt: new Date().toISOString() };
+    var clean = global.OppResults.toManual(rec);
+    if (!clean) { msg.textContent = 'Not saved: date, both teams, both scores and where the result comes from are all required.'; return; }
+    msg.textContent = 'Saving…';
+    save({ merge: true, domain: 'opponent-results', key: 'items', idField: 'id', upserts: [clean] }).then(function (r) {
+      if (!r.ok) { msg.textContent = 'Not saved: ' + ((r.j && r.j.error) || ('error ' + r.status)); return; }
+      return PRE.refreshOppResults(false).then(function () { var m = $('pr-res-msg'); if (m) m.textContent = 'Saved to the club.'; });
+    });
+  }
+
+  /* ── MATCH OFFICIALS: confirmed appointments (stage 2) ────────────────
+     Appointments pasted by the secretary are parsed in the browser for a
+     preview, then saved record by record; the server rebuilds each record
+     from names and roles only. Using them in a programme never overwrites a
+     name already typed without asking first. */
+  var OFF_FILE = 'data/fixture-officials.json';
+  PRE.officials = null;
+  function loadOfficials() {
+    return save({ read: true, path: OFF_FILE }).then(function (r) {
+      PRE.officials = r.ok ? ((r.j.data && r.j.data.items) || []) : null; renderOfficialsUse(); return PRE.officials;
+    });
+  }
+  function fixtureNow() { var id = val('pr-fixture'); return (global._prFixtures || []).filter(function (f) { return String(f.id) === id; })[0] || null; }
+  function renderOfficialsUse() {
+    var el = $('pr-off-use'); if (!el || !global.MatchOfficials) return;
+    var f = fixtureNow(), rec = f && PRE.officials ? global.MatchOfficials.recordFor(PRE.officials, f) : null;
+    if (PRE.officials == null) { el.innerHTML = '<p class="pr-muted">Confirmed appointments could not be read.</p>'; return; }
+    if (!rec) { el.innerHTML = '<p class="pr-muted">No confirmed appointments saved for this fixture yet.</p>'; return; }
+    el.innerHTML = '<p class="pr-muted">Confirmed appointments: ' + global.MatchOfficials.ROLE_KEYS.filter(function (k) { return rec.officials[k]; }).map(function (k) { return h(global.MatchOfficials.ROLE_LABEL[k]) + ' ' + h(rec.officials[k]); }).join(' · ') +
+      ' — ' + h(rec.sourceLabel) + ', checked ' + h(String(rec.checkedAt).slice(0, 10)) + ' by ' + h(rec.enteredBy) + '.</p>' +
+      '<button type="button" class="save sec" id="pr-off-apply">Use confirmed appointments for this fixture</button>';
+    $('pr-off-apply').onclick = function () { global.prUseAppointments(rec); };
+  }
+  global.prUseAppointments = function (rec) {
+    var map = { referee: 'pr-ref', assistant1: 'pr-ar1', assistant2: 'pr-ar2', fourthOfficial: 'pr-4th' };
+    var cur = {}; Object.keys(map).forEach(function (k) { cur[k] = val(map[k]); });
+    var diff = global.MatchOfficials.diffAgainst(cur, rec.officials);
+    if (diff.length && !global.confirm('These boxes already hold different names:\n\n' + diff.map(function (d) { return d.label + ': “' + d.have + '” → “' + d.want + '”'; }).join('\n') + '\n\nReplace them with the confirmed appointments?')) {
+      status('idle', 'Nothing changed: the names already typed are kept.'); return false;
+    }
+    Object.keys(map).forEach(function (k) { var e = $(map[k]); if (e && rec.officials[k]) e.value = rec.officials[k]; });
+    var s1 = $('pr-off-status'); if (s1) s1.value = 'confirmed';
+    var s2 = $('pr-off-source'); if (s2) s2.value = rec.sourceLabel;
+    var s3 = $('pr-off-checked'); if (s3) s3.value = String(rec.checkedAt).slice(0, 10);
+    PRE.deviceOnly = true; showClubState();
+    status('warn', 'Officials filled from the confirmed appointments. Not saved yet.');
+    return true;
+  };
+  global.prParseAppointments = function () {
+    var out = $('pr-offimp-preview'); if (!out || !global.MatchOfficials) return;
+    var p = global.MatchOfficials.parse(val('pr-offimp-text'), global._prFixtures || []);
+    PRE.offParsed = p;
+    var rows = p.matches.map(function (m, i) {
+      return '<tr><td><input type="checkbox" data-off-pick="' + i + '"' + (m.conflicts.length ? '' : ' checked') + ' aria-label="Save this fixture"></td><td>' + h(m.date) + '</td><td>' + h(m.opponent) + (m.isHome ? ' (H)' : ' (A)') + '</td>' +
+        global.MatchOfficials.ROLE_KEYS.map(function (k) { return '<td>' + h(m.officials[k] || '—') + '</td>'; }).join('') +
+        '<td>' + (m.conflicts.length ? 'Conflict: ' + h(m.conflicts.join('; ')) : '') + '</td></tr>';
+    }).join('');
+    out.innerHTML = (p.matches.length ? '<table class="pr-table"><thead><tr><th>Save</th><th>Date</th><th>Fixture</th><th>Referee</th><th>AR1</th><th>AR2</th><th>4th</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="pr-muted">No fixture recognised. Each fixture line needs a date and the opponent’s name.</p>') +
+      (p.unmatched.length ? '<p class="pr-muted"><b>Not matched (' + p.unmatched.length + '):</b></p><ul>' + p.unmatched.map(function (u) { return '<li>Line ' + u.lineNo + ': ' + h(u.text) + ' — ' + h(u.reason) + '</li>'; }).join('') + '</ul>' : '') +
+      (p.refused.length ? '<p class="pr-muted"><b>Refused (' + p.refused.length + '):</b> line ' + p.refused.map(function (r) { return r.lineNo; }).join(', ') + ' mention assessment or marking and are never stored.</p>' : '') +
+      (p.stripped ? '<p class="pr-muted">' + p.stripped + ' phone number(s), email(s) or address(es) removed. Only names and roles are kept.</p>' : '') +
+      (p.matches.length ? '<button type="button" class="save" id="pr-offimp-save">Confirm and save the ticked fixtures</button> <span id="pr-offimp-msg" role="status"></span>' : '');
+    var b = $('pr-offimp-save'); if (b) b.onclick = saveAppointments;
+  };
+  function saveAppointments() {
+    var msg = $('pr-offimp-msg'); var who = me(); if (!who) { msg.textContent = 'Add your name first.'; return; }
+    var label = val('pr-offimp-label'); if (!label) { msg.textContent = 'Say where the appointments came from (e.g. League appointments email).'; return; }
+    var picks = []; document.querySelectorAll('#pr-offimp-preview [data-off-pick]').forEach(function (c) { if (c.checked) picks.push(PRE.offParsed.matches[+c.getAttribute('data-off-pick')]); });
+    var now = new Date().toISOString();
+    var recs = picks.map(function (m) { return global.MatchOfficials.toRecord(m, { sourceLabel: label, enteredBy: who, checkedAt: now }); }).filter(Boolean);
+    if (!recs.length) { msg.textContent = 'Nothing ticked to save.'; return; }
+    msg.textContent = 'Saving…';
+    save({ merge: true, domain: 'fixture-officials', key: 'items', idField: 'fixtureId', upserts: recs }).then(function (r) {
+      if (!r.ok) { msg.textContent = 'Not saved: ' + ((r.j && r.j.error) || ('error ' + r.status)); return; }
+      PRE.officials = r.j.merged || PRE.officials;            // the server's post-write copy
+      renderOfficialsUse();
+      msg.textContent = 'Saved ' + recs.length + ' fixture' + (recs.length === 1 ? '' : 's') + ' to the club.';
+    });
+  }
+  PRE.loadOfficials = loadOfficials; PRE.renderOppResults = renderOppResults; PRE.renderOfficialsUse = renderOfficialsUse;
 
   /* ── CHECKS ─────────────────────────────────────────────────────────── */
   var PLACEHOLDER = /\b(test(ing)?|lorem|ipsum|placeholder|xxx+|tbc|tba|asdf|dummy|sample)\b/i;

@@ -40,7 +40,21 @@ const DOMAIN_OK = /^[\w-]+$/;
 // Blobs 8.2 has no conditional write, so the revision check is read-then-write
 // in one invocation: a far smaller window than the old client-side check, but
 // not an atomic compare-and-swap.
-const PRIVATE = { 'data/programme-draft.json': 'programme-draft', 'data/news-drafts.json': 'news-drafts' };
+const PRIVATE = {
+  'data/programme-draft.json': 'programme-draft', 'data/news-drafts.json': 'news-drafts',
+  // Match-official appointments (names + roles only) and opposition results
+  // typed in by staff. Private because appointments change before matchday
+  // and each record names the staff member who entered it; the programme
+  // prints the officials' names once the edition is produced.
+  'data/fixture-officials.json': 'fixture-officials', 'data/opponent-results.json': 'opponent-results',
+};
+// These two are written ONLY through merge, and every upsert is rebuilt from
+// its declared fields by the shared parser rules: no phone numbers, emails,
+// addresses or assessment text can be stored, whatever the browser sent.
+const SANITISE = {
+  'data/fixture-officials.json': { key: 'items', idField: 'fixtureId', clean: (r) => require('../../js/match-officials').toRecord(r, r) },
+  'data/opponent-results.json': { key: 'items', idField: 'id', clean: (r) => require('../../js/opp-results').toManual(r) },
+};
 let draftStore = null, lastEvent = null;
 async function drafts() {
   if (draftStore) return draftStore;
@@ -102,8 +116,16 @@ async function handleMerge(payload, ghHeaders) {
   const deletedIds = Array.isArray(payload.deletedIds) ? payload.deletedIds : [];
   const extra      = (payload.extra && typeof payload.extra === 'object') ? payload.extra : null;
   if (PRIVATE[path]) {
+    let ups = upserts;
+    const rule = SANITISE[path];
+    if (rule) {
+      if (key !== rule.key || idField !== rule.idField) return resp(400, { error: path + ' is saved with key "' + rule.key + '" and idField "' + rule.idField + '"' });
+      ups = upserts.map(rule.clean);
+      const bad = ups.findIndex((u) => !u);
+      if (bad >= 0) return resp(400, { error: 'Record ' + (bad + 1) + ' is missing a required field (names/roles or scores, source, and who entered it). Nothing was saved.' });
+    }
     const obj = (await privRead(path)) || {};
-    const merged = mergeArray(Array.isArray(obj[key]) ? obj[key] : [], upserts, deletedIds, idField);
+    const merged = mergeArray(Array.isArray(obj[key]) ? obj[key] : [], ups, deletedIds, idField);
     obj[key] = merged; obj.updatedAt = new Date().toISOString();
     await privWrite(path, obj);
     return resp(200, { ok: true, merged: merged, count: merged.length, skipped: [], private: true });
@@ -200,6 +222,7 @@ async function handleRaw(payload, ghHeaders) {
   if (!path || typeof content !== 'string' || !PATH_OK.test(path)) {
     return resp(400, { error: 'Invalid path or content' });
   }
+  if (SANITISE[path]) return resp(400, { error: path + ' is saved record by record (merge), not as a whole file.' });
   if (PRIVATE[path]) {
     let next; try { next = JSON.parse(Buffer.from(content, 'base64').toString('utf8')); } catch (e) { return resp(400, { error: 'Draft must be JSON' }); }
     const cur = await privRead(path);
@@ -249,6 +272,8 @@ async function handleRaw(payload, ghHeaders) {
 }
 
 exports._setDraftStore = function (st) { draftStore = st; };
+// The same private store, for opponent-results.js (its provider cache).
+exports._privateStore = function (event) { if (event) lastEvent = event; return drafts(); };
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   if (event.httpMethod !== 'POST')    return resp(405, { error: 'POST only' });
