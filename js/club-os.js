@@ -210,7 +210,10 @@
         (k.seed && !(r.items || []).length ? '<button class="cos-btn" data-seedr>Load starting records</button>' : '') +
         '<label class="cos-toggle"><input type="checkbox" data-closed ' + (showClosed ? 'checked' : '') + '> Show finished (' + closedN + ')</label>' +
         '<button class="cos-btn cos-btn--ghost" data-export>Export CSV</button></div>';
-      if (!items.length) html += '<div class="cos-empty"><strong>Nothing open.</strong><p>' + (k.fields ? 'Add the first one with “+ New”.' : 'Qualified prospects appear here.') + '</p></div>';
+      // An empty compliance register means nobody has recorded the club's
+      // obligations yet — not that there are none. Say so, and say who fixes it.
+      if (!items.length && k.kind === 'compliance') html += '<div class="cos-empty cos-empty--warn"><strong>Not set up: no obligations recorded.</strong><p>This is not proof the club is compliant. The Secretary should record each obligation (league, FA, insurance, safeguarding, ground) with its source document, owner and due date — or load the verified starting records from the Command Centre.</p></div>';
+      else if (!items.length) html += '<div class="cos-empty"><strong>Nothing open.</strong><p>' + (k.fields ? 'Add the first one with “+ New”.' : 'Qualified prospects appear here.') + '</p></div>';
       else html += '<ul class="cos-list">' + items.map(function (i) {
         var closed = isClosed(i);
         var meta = [i.owner ? h(i.owner) : '<span class="cos-warn">No owner</span>'];

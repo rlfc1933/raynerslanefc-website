@@ -43,3 +43,12 @@
 @media (max-width:1000px){
   #panel-programme .pr-side{position:static;order:1;border-bottom:0;border-top:1px solid var(--br);padding-top:14px}
 }
+/* News preview: the story as a reader sees it, inside HQ. */
+.nw-pv{margin:12px 0;padding:16px;border:1.5px dashed var(--y);border-radius:var(--r-md);background:var(--c);color:var(--w);font:400 15px/1.6 var(--fb)}
+.nw-pv img{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:var(--r-md);margin:8px 0}
+.nw-pv h3{font:400 30px/1 var(--fd,var(--fc));text-transform:uppercase;margin:6px 0 10px}
+.nw-pv__k{font:700 11px/1 var(--fc);letter-spacing:.14em;text-transform:uppercase;color:var(--y)}
+.nw-pv__cat{font:600 12px/1.2 var(--fc);color:var(--gr);text-transform:uppercase;letter-spacing:.08em}
+.nw-pv__exc{font-weight:600}
+.nw-pv__by{color:var(--gr);font-size:13px}
+.cos-empty--warn{border-color:var(--y)!important}
