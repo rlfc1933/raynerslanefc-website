@@ -100,7 +100,9 @@ test('the cover uses only approved club photography', () => {
   if (unapproved) assert.notStrictEqual(E.coverPhoto({ coverAsset: unapproved.id }, lib).src, unapproved.src);
   const crest = lib.find((a) => a.category === 'crest');
   assert.notStrictEqual(E.coverPhoto({ coverAsset: crest.id }, lib).src, crest.src, 'a crest is not a photograph');
-  assert.strictEqual(E.coverPhoto({ coverPhoto: 'img/x.jpg' }, lib).src, 'img/x.jpg');
+  assert.strictEqual(E.coverPhoto({ coverPhoto: 'img/x.jpg' }, lib).src, 'img/ground/tithe-farm-goalmouth-1600.jpg', 'an unlisted path is not used');
+  assert.strictEqual(E.coverPhoto({ coverPhoto: 'javascript:alert(1)' }, lib).src, 'img/ground/tithe-farm-goalmouth-1600.jpg');
+  assert.strictEqual(E.coverPhoto({ coverPhoto: player.src }, lib).src, player.src, 'an approved photo by path is used');
 });
 test('the cover carries the recurring masthead and issue identity', () => {
   assert.match(print, /<span class="pc__title">The Lane<\/span>/);

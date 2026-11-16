@@ -1090,6 +1090,8 @@
       try {
         if (window.BrandPalette && BrandPalette.glowable) oppC = BrandPalette.glowable(cPal.primary, '#0a0a0a');
       } catch (e) { oppC = cPal.primary; }
+      // Only a plain hex colour may reach a style attribute.
+      if (!/^#[0-9a-f]{3,8}$/i.test(String(oppC || ''))) oppC = '';
     }
     var season = d.season || '2026-27';
     var compMk = (cIdent && cIdent.logo)

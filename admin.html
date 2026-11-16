@@ -1645,6 +1645,9 @@
       <details class="pr-more pr-advanced"><summary>More options: cover colours, ground details, club statements, feature pages</summary>
       <div class="slbl"><i class="ico ico-palette"></i> Cover colour scheme</div>
       <div id="pr-themes" class="pr-themes"></div>
+      <div class="field"><label class="fl" for="pr-coverasset">Cover photograph <span style="color:var(--gr);font-weight:400">— approved club photos from Asset Studio only</span></label>
+        <select id="pr-coverasset"><option value="">Club default (Tithe Farm goalmouth)</option></select>
+        <img id="pr-coverasset-thumb" alt="" style="display:none;margin-top:8px;max-width:220px;border-radius:var(--r-md)"></div>
         <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
       <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
 <div class="slbl">Matchday information</div>
@@ -5253,6 +5256,7 @@ function applyProgrammeData(d) {
   setVal('pr-off-status', d.officialsStatus || 'awaiting'); setVal('pr-off-source', d.officialsSource || ''); setVal('pr-off-checked', d.officialsCheckedAt || '');
   setVal('pr-homekit', d.homeKit || ''); setVal('pr-awaykit', d.awayKit || ''); var _ko = document.getElementById('pr-kit-ok'); if (_ko) _ko.checked = !!d.awayKitConfirmed;
   if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; PRE.oppRecent = d.oppRecentResults || null; }
+  prLoadCoverAssets(d.coverAsset || '');
   setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
   // Opponent crest: an uploaded image (cup/friendly) vs one picked from the list.
   var oc = document.getElementById('pr-oppcrest');
@@ -5262,6 +5266,23 @@ function applyProgrammeData(d) {
   prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
   prCustomPages = Array.isArray(d.customPages) ? d.customPages.map(function (p) { return { title: p.title || '', caption: p.caption || '', image: p.image || '' }; }) : [];
   prRenderThemes(); prRenderPreview(); prRenderPages();
+}
+/* COVER PHOTO: the same approved library Asset Studio uses
+   (js/studio/library-seed.json) — photographs only, never crests or generated
+   artwork. The print page applies the same rule (ProgrammeEdition.coverPhoto). */
+function prLoadCoverAssets(current) {
+  var sel = document.getElementById('pr-coverasset'); if (!sel) return;
+  fetch('js/studio/library-seed.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    var photos = ((j && j.assets) || []).filter(function (a) { return a.approval === 'approved' && ['ground', 'player', 'matchday', 'team', 'action'].indexOf(a.category) > -1 && a.src; });
+    sel.innerHTML = '<option value="">Club default (Tithe Farm goalmouth)</option>' + photos.map(function (a) {
+      return '<option value="' + escH(a.id) + '" data-src="' + escH(a.src) + '">' + escH(a.title || a.src) + (a.rights_holder ? ' — ' + escH(a.rights_holder) : '') + '</option>';
+    }).join('');
+    sel.value = current || '';
+    var th = document.getElementById('pr-coverasset-thumb');
+    function show() { var o = sel.options[sel.selectedIndex]; var src = o && o.getAttribute('data-src'); th.style.display = src ? 'block' : 'none'; if (src) th.src = src; }
+    if (!sel._bound) { sel._bound = 1; sel.addEventListener('change', function () { show(); if (typeof prRenderPreview === 'function') prRenderPreview(); }); }
+    show();
+  }).catch(function () {});
 }
 function prFillCrests() {
   var sel = document.getElementById('pr-oppcrest'); if (!sel) return;
@@ -5551,7 +5572,7 @@ function prBuildDoc() {
     oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
     clubHistory: gv('pr-clubhistory'), community: gv('pr-community'), academy: gv('pr-academy'), womens: gv('pr-womens'), supporters: gv('pr-supporters'), groundInfo: gv('pr-groundinfo'),
-    oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme,
+    oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme, coverAsset: gv('pr-coverasset') || undefined,
     officialsStatus: gv('pr-off-status') || 'awaiting', officialsSource: gv('pr-off-source'), officialsCheckedAt: gv('pr-off-checked'),
     homeKit: gv('pr-homekit'), awayKit: gv('pr-awaykit'), awayKitConfirmed: !!(document.getElementById('pr-kit-ok') || {}).checked,
     carryReview: (window.PRE && PRE.carry) || null, oppProfileSource: (window.PRE && PRE.oppSource) || null,

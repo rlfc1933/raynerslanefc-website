@@ -92,9 +92,12 @@
       return a && a.approval === 'approved' && PHOTO_CATS.indexOf(a.category) > -1 && a.src;
     });
     function byId(id) { return list.filter(function (a) { return a.id === id; })[0] || null; }
+    // A path typed into a draft is used ONLY if it is an approved photograph in
+    // the library. Anything else (another site, a script URL, an unapproved
+    // image) falls through to the club default.
     if (doc.coverPhoto && typeof doc.coverPhoto === 'string') {
       var hit = list.filter(function (a) { return a.src === doc.coverPhoto; })[0];
-      return { src: doc.coverPhoto, credit: hit ? hit.rights_holder : '', id: hit ? hit.id : '' };
+      if (hit) return { src: hit.src, credit: hit.rights_holder || '', id: hit.id };
     }
     var a = (doc.coverAsset && byId(doc.coverAsset)) || byId(DEFAULT_COVER);
     if (a) return { src: a.src, credit: a.rights_holder || '', id: a.id };
