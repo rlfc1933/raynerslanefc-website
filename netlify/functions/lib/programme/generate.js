@@ -145,6 +145,22 @@ function squadsSection(ctx) {
 }
 
 /**
+ * The mandatory sections absent from a built edition. One rule, used by build()
+ * and by HQ's publish check after editorial sections are applied on top.
+ */
+function missingMandatory(sections) {
+  var sec = sections || {};
+  return SECTIONS.filter(function (s) {
+    if (!s.mandatory) return false;
+    var v = sec[s.key];
+    if (!v) return true;
+    if (s.key === 'staff' && !(v.groups && v.groups.length)) return true;
+    if (s.key === 'sponsors' && !(v.tiers && v.tiers.length)) return true;
+    return false;
+  }).map(function (s) { return s.key; });
+}
+
+/**
  * Build the whole edition.
  * @returns {{sections:Object, order:string[], validation:{ok:boolean, missing:string[]}}}
  */
@@ -195,15 +211,7 @@ function build(ctx) {
   if (ctx.chairNotes)    sections.chairNotes = { body: ctx.chairNotes, byline: ctx.chairName || null };
   if (ctx.managerNotes)  sections.managerNotes = { body: ctx.managerNotes, byline: ctx.managerName || null };
 
-  var missing = SECTIONS.filter(function (s) {
-    if (!s.mandatory) return false;
-    var v = sections[s.key];
-    if (!v) return true;
-    if (s.key === 'staff' && !v.groups.length) return true;
-    if (s.key === 'sponsors' && !v.tiers.length) return true;
-    if (s.key === 'history' && !v) return true;
-    return false;
-  }).map(function (s) { return s.key; });
+  var missing = missingMandatory(sections);
 
   return {
     sections: sections,
@@ -213,4 +221,4 @@ function build(ctx) {
   };
 }
 
-module.exports = { SECTIONS, build, welcomeCopy, oppositionSection, standingsSection, squadsSection, ordinal };
+module.exports = { SECTIONS, build, missingMandatory, welcomeCopy, oppositionSection, standingsSection, squadsSection, ordinal };

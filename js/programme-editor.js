@@ -214,34 +214,28 @@
     var doc0 = global.prBuildDoc();
     if (!doc0.fixtureId) { status('err', '<b>Not published.</b> Choose the match in stage 1 first.'); return; }
     if (!global.confirm('Publish the programme for Rayners Lane v ' + (doc0.opponent || '') + '?\n\n' +
-      'Your writing is approved for this edition. The club’s programme system publishes it on matchday morning and adds confirmed teams when they are released. Changes after that go out as corrections.')) return;
+      'Your writing is approved for this edition. The club’s programme system publishes it on matchday morning and adds confirmed teams when they are released. Once it is published, this writing can no longer be changed from here.')) return;
     var who = me(); if (!who) return;
     PRE.publishing = true;
     var btn = $('pr-publish-btn'); if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
     status('busy', 'Saving your latest changes first…');
+    var chk = $('pr-preflight-btn'); if (chk) chk.disabled = true;
     global.saveProgramme().then(function (saved) {
       if (!saved) throw new Error('Your changes could not be saved, so nothing was published.');
       var doc = global.prBuildDoc();
-      var jobs = SECTION_MAP.filter(function (m) { return String(doc[m[0]] || '').trim(); });
-      var chain = Promise.resolve(), done = [];
-      jobs.forEach(function (m, i) {
-        chain = chain.then(function () {
-          status('busy', 'Sending ' + m[2] + ' (' + (i + 1) + ' of ' + jobs.length + ')…');
-          var byline = m[0] === 'captainNotes' ? (doc.captainName || null) : null;
-          return post('/.netlify/functions/programme-admin', { pin: global.PIN || '', by: who, action: 'save_section',
-            fixtureId: doc.fixtureId, sectionKey: m[1], title: m[2], body: doc[m[0]], byline: byline, approve: true });
-        }).then(function (r) {
-          if (!r.ok) throw new Error(m[2] + ' was not accepted: ' + ((r.j && r.j.error) || ('error ' + r.status)));
-          done.push(m[2]);
-        });
-      });
-      return chain.then(function () {
-        status('busy', 'Approving the edition…');
-        return post('/.netlify/functions/programme-admin', { pin: global.PIN || '', by: who, action: 'approve_editorial', fixtureId: doc.fixtureId });
-      }).then(function (r) {
-        if (!r.ok) throw new Error('The writing was saved (' + done.join(', ') + ') but the edition was not approved: ' + ((r.j && r.j.error) || ('error ' + r.status)));
+      status('busy', 'Sending the programme to the club’s edition system…');
+      // ONE request: the server checks everything first and approves all of it,
+      // or none of it. A retry with the same writing returns the same result.
+      return post('/.netlify/functions/programme-admin', { pin: global.PIN || '', by: who, action: 'publish_editorial',
+        fixtureId: doc.fixtureId, sections: editorialSections(doc), clientRevision: PRE.rev }).then(function (r) {
+        if (!r.ok) {
+          if (r.j && r.j.checks) renderPreflight(r.j);
+          throw new Error((r.j && r.j.error) || ('error ' + r.status));
+        }
         return archiveCopy(doc, who).then(function (arch) {
-          status('ok', '<b>Approved for publication.</b> ' + h((r.j && r.j.message) || '') +
+          var ed = r.j.edition || {};
+          status('ok', '<b>Approved for publication' + (ed.editorial_approved_by ? ' by ' + h(ed.editorial_approved_by) : '') + '.</b> ' +
+            h(r.j.message || '') + (r.j.sections ? ' ' + r.j.sections.length + ' section(s) on the club’s record.' : '') +
             (arch ? '' : ' (The print-edition archive copy could not be updated; the published edition is unaffected.)'));
         });
       });
@@ -249,6 +243,46 @@
       status('err', '<b>Not published.</b> ' + h(e.message || e));
     }).then(function () {
       PRE.publishing = false; if (btn) { btn.disabled = false; btn.innerHTML = '&#127760; Publish to website'; }
+      var c2 = $('pr-preflight-btn'); if (c2 && !PRE.checking) c2.disabled = false;
+    });
+  };
+  /** The writing this draft sends: non-empty stories only, keyed for the edition. */
+  function editorialSections(doc) {
+    return SECTION_MAP.filter(function (m) { return String(doc[m[0]] || '').trim(); }).map(function (m) {
+      return { key: m[1], title: m[2], body: doc[m[0]], byline: m[0] === 'captainNotes' ? (doc.captainName || null) : null };
+    });
+  }
+
+  /* ── CHECK READINESS: the same checks the publish runs, nothing written ── */
+  function renderPreflight(j) {
+    var el = $('pr-preflight'); if (!el) return;
+    var list = (j && j.checks) || [];
+    el.hidden = false;
+    el.innerHTML = '<p><b>' + (j && j.ready ? 'Ready to publish.' : 'Not ready yet — see the items marked ✗.') + '</b></p>' +
+      '<ul>' + list.map(function (c) {
+        var mark = c.info ? 'ℹ' : (c.ok ? '✓' : '✗');
+        var label = c.info ? 'For information' : (c.ok ? 'OK' : 'Needs fixing');
+        return '<li data-ok="' + (c.ok ? '1' : '0') + '"><span title="' + label + '" aria-label="' + label + '">' + mark + '</span> ' + h(c.detail) + '</li>';
+      }).join('') + '</ul>';
+  }
+  global.prCheckReadiness = function () {
+    if (PRE.checking || PRE.publishing) return;
+    var doc = global.prBuildDoc();
+    if (!doc.fixtureId) { status('err', 'Choose the match in stage 1 first.'); return; }
+    PRE.checking = true;
+    var btn = $('pr-preflight-btn'), pub = $('pr-publish-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+    if (pub) pub.disabled = true;
+    post('/.netlify/functions/programme-admin', { pin: global.PIN || '', action: 'preflight', fixtureId: doc.fixtureId,
+      sections: editorialSections(doc), clientRevision: PRE.rev }).then(function (r) {
+      if (r.j && r.j.checks) renderPreflight(r.j);
+      else status('err', '<b>Could not check readiness.</b> ' + h((r.j && r.j.error) || ('Error ' + r.status)));
+    }).catch(function (e) {
+      status('err', '<b>Could not check readiness.</b> ' + h(e.message || e));
+    }).then(function () {
+      PRE.checking = false;
+      if (btn) { btn.disabled = false; btn.textContent = 'Check readiness'; }
+      if (pub && !PRE.publishing) pub.disabled = false;
     });
   };
   /* The print archive keeps the frozen document so the PDF can be remade

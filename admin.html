@@ -1618,6 +1618,8 @@
       <div class="snote"><p>Opens the finished pages with a <strong style="color:var(--w)">Download PDF</strong> button. This PDF is for reading, sharing and home or office printing; a commercial printer will give you their own requirements (size, bleed, colour).</p></div>
       <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDF</button>
       <div class="slbl" style="margin-top:14px">Publish</div>
+      <button type="button" class="save sec" id="pr-preflight-btn" onclick="prCheckReadiness()">Check readiness</button>
+      <div id="pr-preflight" class="pr-checks" aria-live="polite" hidden></div>
       <button type="button" class="save" id="pr-publish-btn" style="background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to website</button>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans can see it, and its match details, player figures and league table stay exactly as they are today.</p></div>
       <div class="dep" id="dep-programme"></div>
