@@ -208,3 +208,8 @@ test('print page: esc covers attributes; kit, officials and banners escape', () 
     assert.doesNotMatch(c, /\+\s*(?!esc\()[A-Za-z_$][\w$.]*\s*(\+|\|\|)/, 'unescaped banner value: ' + c);
   }
 });
+
+test('a blocked print page draws no programme pages at all', () => {
+  const s = read('programme-print.html');
+  assert.match(s, /else if \(window\.__pxBlocked\) P = \[\];/);
+});

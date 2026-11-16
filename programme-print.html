@@ -1870,6 +1870,8 @@
     if (extraHost && !EMBED) extraHost.innerHTML = ['credits','notes','fixtures','autographs'].map(function(k){ return X[k]||''; }).join('');
 
     if (EMBED && window.__pxBlocked) P = ['<div class="page px-embed-empty"><p>Choose the match and the cover appears here.</p></div>'];
+    // No edition: never draw an empty "TBC" programme that could be printed.
+    else if (window.__pxBlocked) P = [];
     document.getElementById('pages').innerHTML = EMBED ? P[0] : P.join('');
     // Auto-fit safety net: a page is a fixed A4 sheet (297mm). If a long
     // manager's note / welcome / scouting write-up makes a page taller than one
