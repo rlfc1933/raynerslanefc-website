@@ -394,7 +394,7 @@ test('a published edition draws the table it was published with', () => {
 });
 
 test('the freeze stores rows the print page can actually read', () => {
-  const pub = admin.match(/async function publishProgramme\(\)[\s\S]*?\n\}/)[0];
+  const pub = admin.match(/async function prFreezeEdition\(base\)[\s\S]*?\n\}/)[0];
   assert.match(pub, /if \(tb && tb\.table && tb\.table\.length\) doc\.leagueTable = tb\.table;/);
   assert.ok(!/doc\.leagueTable = tb;/.test(pub),
     'storing the envelope made the print page fall through to today’s table');
@@ -444,6 +444,7 @@ test('nothing already deployed is regressed', () => {
   assert.match(read('programme-print.html'), /league-mark/, 'Cherry Red placement');
   assert.match(read('programme-print.html'), /function loadSeasonStats\(doc\)\{/, 'archive rule');
   assert.match(admin, /function prBuildDoc\(\)/, 'programme fixture repair');
-  assert.match(admin, /async function publishProgramme\(\)/, 'publish freeze');
+  assert.match(admin, /async function prFreezeEdition\(base\)/, 'publish freeze');
+  assert.match(read('js/programme-editor.js'), /global\.publishProgramme = function/, 'publish');
   assert.ok(!/Press Publish first/.test(strip(admin)));
 });

@@ -97,7 +97,29 @@ async function handleMerge(payload, ghHeaders) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) obj = {};
 
     const liveArr = Array.isArray(obj[key]) ? obj[key] : [];
-    const merged  = mergeArray(liveArr, upserts, deletedIds, idField);
+    // GUARDS (programme archive). A stale client must not overwrite a record
+    // someone else has changed since it was loaded, and a DRAFT save must never
+    // replace a PUBLISHED edition — that is how editing a draft used to
+    // unpublish the programme supporters had already been given.
+    const byId = {}; liveArr.forEach(function (it) { if (it && it[idField] != null) byId[it[idField]] = it; });
+    const expect = (payload.expectRevisions && typeof payload.expectRevisions === 'object') ? payload.expectRevisions : null;
+    if (expect) {
+      for (const id of Object.keys(expect)) {
+        const cur = byId[id]; const have = cur ? (cur.revision || 0) : 0;
+        if (have !== (Number(expect[id]) || 0)) {
+          return resp(409, { error: 'stale', id: id, current: cur ? { revision: have, savedAt: cur.savedAt || cur.updatedAt || null, savedBy: cur.savedBy || null, published: !!cur.published } : null });
+        }
+      }
+    }
+    let effUpserts = upserts; const skipped = [];
+    if (payload.protectPublished === true) {
+      effUpserts = upserts.filter(function (it) {
+        const cur = it && byId[it[idField]];
+        if (cur && cur.published === true && it.published !== true) { skipped.push(it[idField]); return false; }
+        return true;
+      });
+    }
+    const merged  = mergeArray(liveArr, effUpserts, deletedIds, idField);
     obj[key] = merged;                                    // preserves every other top-level key in the file
     if (extra) Object.keys(extra).forEach(function (k) { obj[k] = extra[k]; });
     obj.updatedAt = new Date().toISOString();
@@ -115,7 +137,7 @@ async function handleMerge(payload, ghHeaders) {
     if (put.ok) {
       const result = await put.json();
       const purged = await purgeCDN(path);
-      return resp(200, { ok: true, merged: merged, count: merged.length, commit: result.commit && result.commit.sha, purged: purged });
+      return resp(200, { ok: true, merged: merged, count: merged.length, skipped: skipped, commit: result.commit && result.commit.sha, purged: purged });
     }
     // 409 = sha conflict (concurrent commit); 422 GitHub sometimes returns for a
     // stale sha too. Either way: loop, re-read the newer sha, re-merge, re-try.
@@ -127,6 +149,22 @@ async function handleMerge(payload, ghHeaders) {
   return resp(409, { error: 'Too many people saving at once — your changes were NOT lost, please press Save again.' });
 }
 
+// ── READ: the authoritative current copy of one data file ──
+// The site's own copy of data/*.json lags a save by a rebuild (30–90 s), so an
+// editor that reloads from it can start from an older version than the one it
+// just saved — and then overwrite it. Reading from GitHub closes that gap.
+async function handleRead(payload, ghHeaders) {
+  const path = payload.path;
+  if (!path || !/^data\/[\w-]+\.json$/.test(path)) return resp(400, { error: 'Invalid path' });
+  const cur = await fetch(API + path + '?ref=' + BRANCH, { headers: ghHeaders });
+  if (cur.status === 404) return resp(200, { ok: true, exists: false, data: null });
+  if (!cur.ok) return resp(cur.status, { error: 'Could not read ' + path });
+  const j = await cur.json();
+  let data = null;
+  try { data = JSON.parse(Buffer.from(String(j.content || '').replace(/\n/g, ''), 'base64').toString('utf8')); } catch (e) { return resp(502, { error: 'Unreadable JSON in ' + path }); }
+  return resp(200, { ok: true, exists: true, data: data, sha: j.sha });
+}
+
 // ── MODE 2: raw whole-file write (images, programme) ──
 async function handleRaw(payload, ghHeaders) {
   const path = payload.path, content = payload.content;
@@ -135,7 +173,24 @@ async function handleRaw(payload, ghHeaders) {
   }
   let sha;
   const cur = await fetch(API + path + '?ref=' + BRANCH, { headers: ghHeaders });
-  if (cur.ok) { const j = await cur.json(); sha = j.sha; }
+  if (cur.ok) {
+    const j = await cur.json(); sha = j.sha;
+    // Optional optimistic lock for whole-file JSON documents (the programme
+    // draft): refuse if the file's `revision` is not the one this client
+    // started from, and say who saved the newer one.
+    if (payload.expectRevision != null) {
+      let doc = {};
+      try { doc = JSON.parse(Buffer.from(String(j.content || '').replace(/\n/g, ''), 'base64').toString('utf8')) || {}; } catch (e) { doc = {}; }
+      const have = Number(doc.revision) || 0;
+      if (have !== (Number(payload.expectRevision) || 0)) {
+        return resp(409, { error: 'stale', current: { revision: have, savedAt: doc.savedAt || doc.updatedAt || null, savedBy: doc.savedBy || null, opponent: doc.opponent || null, fixtureId: doc.fixtureId || null } });
+      }
+    }
+  } else if (cur.status !== 404) {
+    return resp(cur.status, { error: 'Could not read current ' + path + ' from GitHub — nothing was changed.' });
+  } else if (payload.expectRevision != null && Number(payload.expectRevision) !== 0) {
+    return resp(409, { error: 'stale', current: null });
+  }
 
   const body = { message: 'Admin: update ' + path, content: content, branch: BRANCH };
   if (sha) body.sha = sha;
@@ -172,6 +227,7 @@ exports.handler = async function (event) {
   };
 
   try {
+    if (payload.read === true) return await handleRead(payload, ghHeaders);
     return payload.merge === true
       ? await handleMerge(payload, ghHeaders)
       : await handleRaw(payload, ghHeaders);

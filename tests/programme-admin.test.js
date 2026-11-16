@@ -45,6 +45,10 @@ test('HQ refuses without the committee password, and every decision needs a name
 
 test('status gives the reconciliation table and the next home fixture with what is missing', async () => {
   const { restore, F } = await setup();
+  // status() works out "the next home fixture" from the clock. Pin the clock to
+  // the week these expectations describe (before the 31 Oct home match), or the
+  // test fails every time the season moves on.
+  const realNow = Date.now; Date.now = () => Date.parse('2026-10-20T12:00:00Z');
   try {
     const s = await call(F.admin, { action: 'status' });
     assert.strictEqual(s.ok, true);
@@ -57,7 +61,7 @@ test('status gives the reconciliation table and the next home fixture with what 
     assert.strictEqual(s.next.fixture.fixtureId, 'fwp-578384');
     assert.ok(s.next.missing.includes('editorial approval'));
     assert.match(s.sources.fwpApi, /not connected/);
-  } finally { restore(); }
+  } finally { Date.now = realNow; restore(); }
 });
 
 test('approve → matchday publish → the archive lists it; unpublish keeps it; restore brings it back', async () => {

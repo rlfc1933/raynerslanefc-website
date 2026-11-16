@@ -1,0 +1,45 @@
+/* Programme editor: stage navigation, save status, checks. Uses HQ tokens
+   (--y yellow, --su success, --re error, --gr grey, --w white, --c/--c2 card,
+   --br border) so it sits inside the existing HQ design. */
+.pr-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:12px 0 16px}
+.pr-step{min-height:52px;border:1.5px solid var(--br);background:var(--c);color:var(--w);border-radius:var(--r-md);font:600 13px/1.2 var(--fc);
+  display:flex;align-items:center;gap:8px;padding:6px 10px;text-align:left;cursor:pointer}
+.pr-step b{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:var(--r-circle);background:var(--c2);color:var(--y);font-size:13px}
+.pr-step.is-on{border-color:var(--y);box-shadow:inset 0 0 0 1px var(--y)}
+.pr-step.is-on b{background:var(--y);color:#0a0a0a}
+.pr-step:focus-visible,.pr-link:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+@media (max-width:560px){.pr-steps{grid-template-columns:1fr 1fr}}
+.pr-stage[hidden]{display:none}
+.pr-stage .save{min-height:52px}
+.pr-save-state{margin:10px 0 0;padding:10px 12px;border-radius:var(--r-md);font:500 14px/1.45 var(--fb);border:1px solid var(--br);color:var(--w);background:var(--c)}
+.pr-save-state--ok{border-color:rgba(34,197,94,.5)}
+.pr-save-state--warn{border-color:var(--y);background:rgba(255,209,0,.08)}
+.pr-save-state--err{border-color:var(--re);background:rgba(239,68,68,.1)}
+.pr-save-state--busy{border-style:dashed}
+.pr-save-state:empty{display:none}
+.pr-link{background:none;border:0;color:var(--y);font:700 14px/1.2 var(--fb);text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px}
+.pr-carry{margin:12px 0;padding:12px 14px;border:1.5px solid var(--y);border-radius:var(--r-md);background:rgba(255,209,0,.07);color:var(--w);font:500 14px/1.5 var(--fb)}
+.pr-carry ul{margin:8px 0 0;padding:0;list-style:none}
+.pr-carry li{display:flex;flex-wrap:wrap;align-items:center;gap:4px;border-top:1px solid var(--br);padding:2px 0}
+.pr-carry li span{flex:1;min-width:10em}
+.pr-carry__acts{display:flex;gap:8px;margin-top:8px}
+.pr-more{margin:12px 0;border:1px solid var(--br);border-radius:var(--r-md);padding:0 12px;background:var(--c)}
+.pr-more>summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font:600 14px/1.3 var(--fc);color:var(--w)}
+.pr-more[open]{padding-bottom:12px}
+.pr-check{display:flex;gap:10px;align-items:center;min-height:44px;font:500 14px/1.4 var(--fb);color:var(--w)}
+.pr-check input{width:22px;height:22px}
+.pr-muted{color:var(--gr);font:500 13px/1.5 var(--fb);margin:6px 0}
+.pr-checks ul{list-style:none;margin:0 0 8px;padding:0}
+.pr-ck{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--br);font:500 14px/1.45 var(--fb);color:var(--w)}
+.pr-ck__lvl{font:700 11px/1 var(--fc);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:var(--r-pill)}
+.pr-ck--must .pr-ck__lvl{background:var(--re);color:#fff}
+.pr-ck--warn .pr-ck__lvl{background:var(--y);color:#0a0a0a}
+.pr-ck--info .pr-ck__lvl{background:var(--c2);color:var(--w)}
+.pr-ck__kind{font:600 12px/1 var(--fc);color:var(--gr)}
+@media (max-width:560px){.pr-ck{grid-template-columns:auto 1fr}.pr-ck__t{grid-column:1/-1}}
+.pr-check-ok{color:var(--su);font:600 14px/1.5 var(--fb)}
+/* Phones: the cover preview was a sticky block that covered half the form.
+   It now sits after the form, in the page flow, at a readable size. */
+@media (max-width:1000px){
+  #panel-programme .pr-side{position:static;order:1;border-bottom:0;border-top:1px solid var(--br);padding-top:14px}
+}

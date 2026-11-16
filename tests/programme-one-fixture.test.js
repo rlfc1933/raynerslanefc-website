@@ -40,14 +40,15 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/^\s*\/\/.*$/gm
 
 const admin = read('admin.html');
 const print = read('programme-print.html');
+const editor = read('js/programme-editor.js');
 
 // ── 1 · ONE SNAPSHOT, BUILT ONCE ────────────────────────────────────────────
 
 test('the programme is built in exactly one place', () => {
   assert.match(admin, /function prBuildDoc\(\)/,
     'preview, save and print must not each assemble their own idea of the programme');
-  const save = admin.match(/function saveProgramme\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(save, /var data = prBuildDoc\(\)/, 'save must use the shared builder');
+  const save = editor.match(/global\.saveProgramme = function \(\) \{[\s\S]*?\n  \};/)[0];
+  assert.match(save, /var doc = global\.prBuildDoc\(\)/, 'save must use the shared builder');
 });
 
 test('the selected fixture is carried with the programme', () => {
@@ -69,13 +70,11 @@ test('every field the print edition falls back on is actually saved', () => {
 // ── 2 · PRINT AND PREVIEW SEE THE SAME THING ────────────────────────────────
 
 test('print is handed the draft the operator is looking at', () => {
-  assert.match(admin, /function prHandOverDraft\(\)/);
-  const h = admin.match(/function prHandOverDraft\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(h, /prBuildDoc\(\)/, 'the hand-off must be the same snapshot');
-  assert.match(h, /rlfc_programme_draft/);
-  const p = admin.match(/function prPrintEdition\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(p, /prHandOverDraft\(\)/);
+  const p = editor.match(/global\.prPrintEdition = function \(\) \{[\s\S]*?\n  \};/)[0];
+  assert.match(p, /global\.prBuildDoc\(\)/, 'the hand-off must be the same snapshot');
+  assert.match(p, /rlfc_programme_draft/);
   assert.match(p, /draft=1/, 'the print page must be told to use the draft');
+  assert.match(p, /fx=/, 'and which fixture, so another device cannot silently show a different match');
 });
 
 test('the print page prefers the handed-over draft over the saved file', () => {
@@ -111,21 +110,23 @@ test('the panel no longer tells anybody to publish before printing', () => {
   // our own prose would make this test pass or fail on the wrong thing.
   assert.ok(!/Press Publish first/.test(strip(admin)),
     'this instruction is what made Russell publish a programme in order to print it');
-  assert.match(admin, /Print this programme now\. This does not put it on the website\./);
+  assert.match(admin, /It does <strong style="color:var\(--w\)">not<\/strong> put the programme on the website\./);
 });
 
 test('printing says plainly that nothing was published', () => {
-  const p = admin.match(/function prPrintEdition\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(p, /Nothing has been published to the website/);
-  // And it must not call the publish path.
-  assert.ok(!/publishProgramme|prPublish/.test(p));
+  const p = editor.match(/global\.prPrintEdition = function \(\) \{[\s\S]*?\n  \};/)[0];
+  assert.match(admin, /Open pages &amp; download PDF/);
+  // It must not call the publish path, nor save on the way.
+  assert.ok(!/publishProgramme|prPublish|saveProgramme/.test(p));
 });
 
 test('saving says what happened, in the club’s words', () => {
-  const s = admin.match(/function saveProgramme\(\) \{[\s\S]*?\n\}/)[0];
-  assert.match(s, /Programme saved\. Nothing has been published/);
-  assert.ok(!/Programme published — saved to the archive/.test(s),
-    'saving is not publishing and must not say it is');
+  const s = editor.match(/global\.saveProgramme = function \(\) \{[\s\S]*?\n  \};/)[0];
+  // Success is only reported inside the confirmed-write branch…
+  assert.ok(s.indexOf('if (r.ok)') > -1 && s.indexOf('showClubState()') > s.indexOf('if (r.ok)'),
+    'success may only be shown after the server confirms the write');
+  assert.match(editor, /Not published\./, 'the saved state says it is not published');
+  assert.match(s, /Your changes are kept on this device only/, 'a failure says where the work is');
 });
 
 // ── 4 · THE FIXTURE IS THE OPERATOR’S CHOICE ────────────────────────────────
@@ -283,7 +284,7 @@ test('fixture, player and squad truth is not edited to suit the programme', () =
   // The programme must adapt to the fixture data, never the other way round.
   const b = admin.match(/function prBuildDoc\(\) \{[\s\S]*?\n\}/)[0];
   assert.ok(!/pushToGitHub\('fixtures'|pushToGitHub\('players'|pushToGitHub\('squad'/.test(b));
-  const p = admin.match(/function prPrintEdition\(\) \{[\s\S]*?\n\}/)[0];
+  const p = editor.match(/global\.prPrintEdition = function \(\) \{[\s\S]*?\n  \};/)[0];
   assert.ok(!/pushToGitHub\('fixtures'/.test(p));
 });
 

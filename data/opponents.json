@@ -12,7 +12,23 @@
       "travel": "On the doorstep",
       "wikipedia": "https://en.wikipedia.org/wiki/Broadfields_United_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
-      "groundshare": true
+      "groundshare": true,
+      "historySummary": "Broadfields United were founded in 1993 and joined the Middlesex County League in 1995-96, winning Division One at the first attempt to move up to its Premier Division. Promotion to the Spartan South Midlands League followed in 2014-15, and the club reached Step 5 after the 2018-19 season. Since 2020 they have shared Tithe Farm with Rayners Lane, and in 2022-23 they moved into the Combined Counties League Premier Division North.",
+      "historyFacts": [
+        "Founded 1993",
+        "Joined Middlesex County League 1995-96; Division One champions 1996-97",
+        "Promoted to Spartan South Midlands League 2014-15",
+        "Reached Step 5 after 2018-19",
+        "Groundshare with Rayners Lane at Tithe Farm since 2020",
+        "Combined Counties League Premier Division North from 2022-23"
+      ],
+      "sources": [
+        "https://www.broadfieldsunitedfc.co.uk/a/club-history-64122.html",
+        "https://en.wikipedia.org/wiki/Broadfields_United_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Checked against the club's own history page",
+      "reviewNote": "History summary written from the club's own history page (read 16 Nov 2026). Wikipedia's account of the early years differs (it mentions the Southern Olympian League); the club page is preferred."
     },
     {
       "key": "Harefield United",
@@ -24,7 +40,21 @@
       "angle": "One of Middlesex's oldest clubs (1868) and a near neighbour — a proper local.",
       "travel": "~7 miles west",
       "wikipedia": "https://en.wikipedia.org/wiki/Harefield_United_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Harefield United trace their roots to 1868, which makes them the oldest club in Middlesex, and they played under several names before a 1934 merger produced the current one. They won titles in the Great Western Combination, the Parthenon League and the Middlesex League, then had a decade in the Isthmian League. Back in the Spartan South Midlands League, they won Division One unbeaten in 2018-19. They moved across to the Combined Counties League in 2022.",
+      "historyFacts": [
+        "Formed in 1868; Wikipedia describes it as the oldest club in Middlesex.",
+        "Took the name Harefield United after a 1934 merger with Harefield FC.",
+        "Great Western Combination champions in 1950-51 and Parthenon League champions in 1964-65.",
+        "Played in the Isthmian League from the mid-1980s until 1996.",
+        "Won Spartan South Midlands Division One unbeaten in 2018-19 and joined the Combined Counties Premier North in 2022."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Harefield_United_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None. 'Oldest in Middlesex' is Wikipedia's claim and has not been independently checked. Season of the Parthenon League title is my inference from 'debut season' after joining in 1964. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Northwood",
@@ -36,7 +66,21 @@
       "angle": "A short hop up the road — a genuine local derby against the Woods.",
       "travel": "~4-5 miles NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Northwood_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Northwood are generally dated to 1926, although a club existed in the area earlier. They won the Harrow & Wembley League several times either side of the Second World War. After winning the Middlesex League in 1978 they climbed through the Hellenic and Spartan leagues, winning the Spartan title in 1991-92 to join the Isthmian League. Their best era came in the early 2000s, when they reached the Isthmian Premier Division. They have played at Northwood Park on Chestnut Avenue for many years.",
+      "historyFacts": [
+        "Believed to have been formed in 1926 (an earlier Northwood club existed from 1899); joined the Harrow & Wembley League in 1931.",
+        "Won the Middlesex League in 1978 and the Hellenic League Division One in their first season after that.",
+        "Spartan League Premier Division champions in 1991-92, then admitted to the Isthmian League.",
+        "Won Isthmian Division One North in 2002-03, reaching step three for the first time.",
+        "Won the Middlesex Senior Cup in 2006-07, beating Hayes on penalties."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Northwood_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "opponents.json honours says 'Hellenic Premier champs 1991-92' - WRONG according to Wikipedia: the 1991-92 title was the Spartan League Premier Division. Northwood's Hellenic title was Division One (about 1978-79). Founded year 1926 is given as 'believed', with an earlier 1899 club in the area. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "North Greenford United",
@@ -48,7 +92,21 @@
       "angle": "One of our closest away trips — a west London neighbour.",
       "travel": "~4 miles SE",
       "wikipedia": "https://en.wikipedia.org/wiki/North_Greenford_United_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "North Greenford United started in 1944 as a youth club and were playing adult football within two years. After winning the Middlesex League in 1982-83 they had a spell in the London Spartan League, then dropped back to rebuild and upgrade their ground. They joined the Combined Counties League in 2002 and were its champions in 2009-10. Six seasons in the Southern League followed. Since returning to step five they have reached an FA Vase quarter-final.",
+      "historyFacts": [
+        "Established in 1944, originally as a youth club; first played senior football in 1946-47.",
+        "Middlesex League Premier Division champions in 1982-83, promoted to the London Spartan League.",
+        "Elected to the Combined Counties League in 2002.",
+        "Combined Counties League champions in 2009-10, promoted to Southern League Division One Central, and won the Middlesex Senior Charity Cup the same season.",
+        "Relegated from the Southern League in 2016; reached the FA Vase quarter-finals in 2023-24."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/North_Greenford_United_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Ground left null: the Wikipedia text read did not name the ground, so 'Berkeley Fields' in opponents.json is unverified. Nickname 'The Blues' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Hilltop",
@@ -60,7 +118,21 @@
       "angle": "Founded 2005 as a club for NW London's Somali community — a real community story, short trip east.",
       "travel": "~3-4 miles east",
       "wikipedia": "https://en.wikipedia.org/wiki/Hilltop_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Hilltop were founded in 2005 to give north-west London's Somali community a football club of its own. They entered the Middlesex County League in 2007 and, after a break, came back to win successive divisional titles in 2017-18 and 2018-19. That run carried them into the Combined Counties League in 2021. They first played in the FA Vase that season and in the FA Cup a year later, and they share Hendon's Silver Jubilee Park.",
+      "historyFacts": [
+        "Formed in 2005 as a club for the Somali community of north-west London.",
+        "Joined the Middlesex County League Division Three in 2007, left in 2010 and returned in 2014.",
+        "Won Middlesex County League Division Two in 2017-18 and Division One West in 2018-19.",
+        "Admitted to Combined Counties League Division One in 2021.",
+        "Reached the FA Vase fifth round in 2023-24."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hilltop_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "opponents.json says 'Middlesex County League Div One champions 2019' and town 'Kingsbury NW9'; Wikipedia lists the title as Division One West 2018-19 and gives the club's base as Stonebridge. How Hilltop reached the Premier Division North from Division One is not stated in the article read. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Bedfont",
@@ -72,7 +144,21 @@
       "angle": "Yellow vs Yellow — a colour clash of community clubs.",
       "travel": "~20-25 mins SW",
       "wikipedia": "https://en.wikipedia.org/wiki/Bedfont_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Bedfont in their current form came about in 2012, when a social club linked to the old, dissolved Bedfont side merged with Feltham. The new club began under Feltham's name, became Bedfont & Feltham a year later and settled on Bedfont in 2022. They had one season in the Combined Counties top flight after finishing second in 2015-16. In 2025-26 they won the Division One play-offs and the Middlesex Premier Cup to earn their place at this level.",
+      "historyFacts": [
+        "Formed in May 2012 by a merger of Bedfont Football & Social Club and Feltham, taking Feltham's Combined Counties Division One place.",
+        "Played as Feltham in 2012-13, then as Bedfont & Feltham, and renamed Bedfont in 2022.",
+        "Won the Middlesex Premier Cup in 2013-14 and 2025-26.",
+        "Division One runners-up in 2015-16, promoted to the Premier Division, relegated in 2016-17.",
+        "Won the 2025-26 Division One play-off final against Brook House to reach the Premier Division North."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Bedfont_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "opponents.json honours mentions only the 2015-16 runners-up finish; Wikipedia shows they were also Division One runners-up and play-off winners in 2025-26. Nickname 'The Yellows' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Amersham Town",
@@ -84,7 +170,21 @@
       "angle": "One of the oldest sides in the division (1890) — the Magpies, at a classic old-school ground.",
       "travel": "~25-30 mins NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Amersham_Town_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Amersham Town date back to a meeting at the town's Crown Hotel in October 1890 and have played at Spratleys Meadow since 1920. They helped found the Hellenic League in 1953 and were its Premier Division champions a decade later. Long spells in the Spartan and Spartan South Midlands leagues followed, including some lean seasons in the lower divisions. A switch to the Combined Counties League in 2023 brought immediate success, with the Division One title earning promotion.",
+      "historyFacts": [
+        "Formed at a meeting in the Crown Hotel on 13 October 1890.",
+        "Founder members of the Hellenic League in 1953 and winners of its first League Cup in 1953-54.",
+        "Hellenic League Premier Division champions in 1963-64.",
+        "Moved to Spratleys Meadow in 1920; its stand was destroyed in the Great Storm of 1987.",
+        "Won Combined Counties League Division One in 2023-24 with 111 points."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Amersham_Town_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None on founded year or ground. Nickname 'The Magpies' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Burnham",
@@ -96,7 +196,21 @@
       "angle": "Founded 1878 — they named the ground 'The 1878 Stadium' to prove it. 2,500-cap, FIFA 3G pitch.",
       "travel": "~30 mins west",
       "wikipedia": "https://en.wikipedia.org/wiki/Burnham_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Burnham, near Slough, were founded in 1878 and stayed in local leagues for decades before joining senior football with the Hellenic League in 1971. They were Hellenic champions in 1975-76 and later won the London Spartan League. A merger with Hillingdon in 1985 gave them a Southern League place. Their best spell came in the 2010s, with promotion to the Southern Premier Division in 2013. They play at the redeveloped ground they renamed The 1878 Stadium.",
+      "historyFacts": [
+        "Founded in 1878, described as the second-oldest club in Buckinghamshire.",
+        "Hellenic League Premier Division champions in 1975-76.",
+        "Won the London Spartan League in 1984-85 at the first attempt, then merged with Hillingdon to take a Southern League place.",
+        "Reached the FA Cup first round proper in 2005-06, losing 3-1 to Aldershot Town.",
+        "Southern League Division One Central champions in 2012-13, reaching the Southern Premier Division for the first time."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Burnham_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "opponents.json honours says 'Hellenic Premier & League Cup 1975-76'; the Wikipedia text read confirms only the 1975-76 Premier Division title, not a League Cup that season. Treat the League Cup claim as unverified. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Holyport",
@@ -108,7 +222,21 @@
       "angle": "A proper village club, founded in a pub in 1897 — enter over a bridge past the cricket club.",
       "travel": "~18 miles west",
       "wikipedia": "https://en.wikipedia.org/wiki/Holyport_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Holyport, a village club near Maidenhead, were founded in 1897 after a meeting at a local pub. They folded during the Second World War and were reformed in 1956, playing in local Maidenhead and East Berkshire football. Three East Berkshire titles took them into the Hellenic League, where they won Division One East in 2010-11. Promotion to the Combined Counties Premier North came in 2021. They have played at Summerleaze Village since 2005.",
+      "historyFacts": [
+        "Founded on 1 September 1897 after a meeting at the George pub.",
+        "Disbanded during the Second World War and reformed in 1956.",
+        "East Berkshire League Premier Division champions in 1998-99, 1999-2000 and 2001-02.",
+        "Hellenic Division One East champions in 2010-11.",
+        "Promoted to the Combined Counties Premier North in 2021; lost 4-0 to Rayners Lane in the 2023-24 play-off semi-final."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Holyport_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None. Nickname 'The Villagers' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Kidlington",
@@ -120,7 +248,21 @@
       "angle": "A club that's tasted Southern League football — the Greens will fancy it.",
       "travel": "~45 miles NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Kidlington_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Kidlington were established in 1909 and moved up from village football to the Oxfordshire Senior League, which they won in 1952-53. They then spent six decades in the Hellenic League, moving between its divisions, until they won the Premier Division in 2015-16. That earned a place in the Southern League, where they stayed until relegation in 2024-25 brought them into this division. In 2025-26 they lifted their first Oxfordshire Senior Cup.",
+      "historyFacts": [
+        "Established in 1909.",
+        "Oxfordshire Senior League champions in 1952-53, joining the Hellenic League in 1954.",
+        "Hellenic League Premier Division champions in 2015-16, promoted to the Southern League.",
+        "Relegated from Southern League Division One Central in 2024-25 to the Combined Counties Premier North.",
+        "Won the Oxfordshire Senior Cup for the first time in 2025-26, beating Oxford City 4-0."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kidlington_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None. Nickname 'The Greens' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Ardley United",
@@ -132,7 +274,21 @@
       "angle": "A tiny village club near Bicester whose pitch sits in the middle of the village — proper grassroots.",
       "travel": "~1 hr NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Ardley_United_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Ardley United, from the village of Ardley near Bicester, were formed in 1945 and grew up in local Oxfordshire football. They climbed through the Oxfordshire Senior League into the Hellenic League in 1993, winning Division One twice in the late 1990s and later reaching the Premier Division. A first Oxfordshire Senior Cup came in 2013-14. League restructuring then took them to the Spartan South Midlands League in 2021 and on to the Combined Counties League two years later.",
+      "historyFacts": [
+        "Founded in 1945 and spent early decades in the Banbury District and Lord Jersey League.",
+        "Oxfordshire Senior League Premier Division champions in 1990-91.",
+        "Hellenic League Division One champions in 1996-97 and 1997-98.",
+        "Won the Oxfordshire Senior Cup in 2013-14, beating Kidlington 4-0 in the final.",
+        "Moved to the Spartan South Midlands League in 2021 and to the Combined Counties Premier North in 2023."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ardley_United_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Existing ground 'Ardley Playing Fields'; Wikipedia says 'the Playing Fields' on Oxford Road - consistent. Nickname not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Easington Sports",
@@ -144,7 +300,21 @@
       "angle": "Started on farmland with no changing rooms — fundraised to floodlights in 2015. Fabric-of-the-community.",
       "travel": "~50 miles NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Easington_Sports_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Easington Sports come from the Easington area of Banbury and were set up in 1946. They won consecutive Oxfordshire Senior League titles in the late 1950s, had a short stint in the Warwickshire Combination, and joined the Hellenic League in 1971. They spent many seasons in its lower divisions before winning Division One West in 2018-19. Restructuring moved them to the United Counties League in 2021 and then to the Combined Counties League for 2026-27.",
+      "historyFacts": [
+        "Established in 1946 in the Easington ward of Banbury.",
+        "Oxfordshire Senior League Premier Division champions in 1957-58 and 1958-59.",
+        "Joined the Hellenic League in 1971.",
+        "Hellenic Division One West champions in 2018-19.",
+        "Moved to the United Counties League in 2021 and to the Combined Counties Premier North at the end of 2025-26."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Easington_Sports_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None. Wikipedia states the transfer to the Combined Counties Premier North came after 2025-26, so this is their first season in the division. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "North Leigh",
@@ -156,7 +326,21 @@
       "angle": "The Millers — named after the village's 1833 tower mill; ground on the Eynsham Hall estate.",
       "travel": "~55 miles W",
       "wikipedia": "https://en.wikipedia.org/wiki/North_Leigh_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "North Leigh were founded in 1908 and dominated the Witney & District League for long periods, winning its top division twelve times. They joined the Hellenic League in 1990 and won its Premier Division three times. They had to wait until the 2007-08 title for promotion, because their ground had not met Southern League standards before then. They spent seventeen seasons in the Southern League, including one in the Premier Division South, before dropping into this division in 2025.",
+      "historyFacts": [
+        "Established in 1908 in the Witney & District League, which they won twelve times.",
+        "Joined the Hellenic League in 1990.",
+        "Hellenic League Premier Division champions in 2001-02, 2002-03 and 2007-08; promoted to the Southern League after the 2007-08 title.",
+        "Won the Southern League Division One Central play-offs in 2021-22.",
+        "Relegated to the Combined Counties Premier North after finishing bottom of Division One Central in 2024-25."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/North_Leigh_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None on founded year or ground. Nickname 'The Millers' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Reading City",
@@ -168,7 +352,21 @@
       "angle": "Rebranded from Highmoor Ibis in 2018 with ambitions to be Reading's city club.",
       "travel": "~28-30 miles W",
       "wikipedia": "https://en.wikipedia.org/wiki/Reading_City_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Reading City were formed in 2001 when two Reading Senior League sides, Highmoor and Ibis, merged as Highmoor Ibis. They won the league's Senior Division without losing a match in 2003-04 and won it again in 2010-11 to step up to the Hellenic League. A second promotion came at once. After a few years at Palmer Park they returned to Scours Lane in 2016, at the renamed Rivermoor Stadium. They took the Reading City name in 2018.",
+      "historyFacts": [
+        "Formed in 2001 as Highmoor Ibis, a merger of the Reading Senior League clubs Highmoor and Ibis.",
+        "Reading League Senior Division champions in 2003-04 (unbeaten) and 2010-11.",
+        "Promoted to the Hellenic League in 2011 and to its Premier Division after one season.",
+        "Renamed Reading City in June 2018.",
+        "Moved to the Combined Counties Premier North in 2021; reached the FA Vase fourth round in 2025-26."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Reading_City_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Internal Wikipedia conflict: the history text dates the Reading Senior Cup win to 2005-06, but the honours list gives 2006-07. Omitted from facts until checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Thatcham Town",
@@ -180,7 +378,21 @@
       "angle": "FA Vase winners at Wembley in 2018 — one of the biggest names in this division, and a proper test of where we are.",
       "travel": "~45-50 miles W (longest league trip)",
       "wikipedia": "https://en.wikipedia.org/wiki/Thatcham_Town_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Thatcham Town were founded in 1894 and spent more than half a century in the Reading Temperance League before helping to set up the Hellenic League in 1953. They were Hellenic champions in 1974-75, later won the Wessex League, and moved to Waterside Park in the early 1990s. Their finest season was 2017-18, when they won the FA Vase at Wembley and the Hellenic Premier Division. They have since played in the Southern and Isthmian leagues.",
+      "historyFacts": [
+        "Founded in 1894; added 'Town' to the name in 1974.",
+        "Founder members of the Hellenic League in 1953 and its champions in 1974-75.",
+        "Joined the Wessex League in 1986 and won it in 1995-96.",
+        "Moved to Waterside Park during 1992-93.",
+        "Won the FA Vase at Wembley in 2017-18, and the Hellenic Premier Division in the same season."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Thatcham_Town_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "The Wikipedia history is out of date (it stops around 2021-22 in the Isthmian League), but the lead says they are now in the Combined Counties Premier North; the summary does not say how they got there. Nickname 'The Kingfishers' is supported by the article ('the Kingfishers'). Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Wallingford & Crowmarsh",
@@ -193,7 +405,21 @@
       "travel": "~35-40 miles W",
       "wikipedia": "https://en.wikipedia.org/wiki/Wallingford_%26_Crowmarsh_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
-      "foundedNote": "Merged 1995 as AFC Wallingford, from Wallingford Town (1922) and Wallingford United (1934); renamed Wallingford & Crowmarsh June 2022. Their own infobox dates the club to 1922 — if a hook uses a year, use 1922 or say \"merged in 1995\", never \"founded 1995\"."
+      "foundedNote": "Merged 1995 as AFC Wallingford, from Wallingford Town (1922) and Wallingford United (1934); renamed Wallingford & Crowmarsh June 2022. Their own infobox dates the club to 1922 — if a hook uses a year, use 1922 or say \"merged in 1995\", never \"founded 1995\".",
+      "historySummary": "Wallingford & Crowmarsh go back to the 1995 merger of Wallingford Town and Wallingford United, which created AFC Wallingford. The new club won the Chiltonian League and then the Combined Counties League in 2001-02, but their ground at the Hithercroft was not graded for further promotion. After years in the Hellenic and North Berks leagues they returned to the Combined Counties set-up. They won promotion in 2022, the same year they joined with Crowmarsh Youth and took their present name.",
+      "historyFacts": [
+        "Formed in 1995 as AFC Wallingford, a merger of Wallingford Town (founded 1922) and Wallingford United (founded 1934).",
+        "Chiltonian League champions in 1997-98, then promoted to the Combined Counties League.",
+        "Combined Counties League champions in 2001-02; record crowd of 2,350 against AFC Wimbledon in 2002.",
+        "Reverted to the name Wallingford Town in 2013.",
+        "Won the 2021-22 Combined Counties Division One play-offs (beating Rayners Lane in the semi-final) and became Wallingford & Crowmarsh after a 2022 link-up with Crowmarsh Youth FC."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wallingford_%26_Crowmarsh_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Wikipedia's honours list Combined Counties League champions 1998-99 as well as 2001-02, but the history text mentions only 2001-02, so 1998-99 needs a second source (opponents.json repeats both). Founding: 1995 for the merged club; the original Wallingford Town dates from 1922. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Wokingham Town",
@@ -205,7 +431,21 @@
       "angle": "The 'Satsumas' (the orange shirts) restored their historic name in 2024 for their 150th year. Once held Cardiff City in the FA Cup.",
       "travel": "~25-30 miles WSW",
       "wikipedia": "https://en.wikipedia.org/wiki/Wokingham_Town_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Wokingham Town are usually dated to 1875 and grew from local Ascot and Reading leagues into the Athenian and Isthmian leagues. They won Isthmian Division One in 1981-82 and spent over a decade in the Premier Division, also taking Cardiff City to an FA Cup replay. Debts forced the sale of their Finchampstead Road ground in 1999. The club merged with Emmbrook Sports in 2004, moved to Lowther Road and returned to the Wokingham Town name in 2024.",
+      "historyFacts": [
+        "Reported founded in 1875, with reports of club meetings in October 1874.",
+        "Isthmian League Division One champions in 1981-82, promoted to the Isthmian Premier Division.",
+        "Reached the FA Cup first round in 1982-83, drawing 1-1 with Cardiff City before losing the replay.",
+        "Won the Berks & Bucks Senior Cup in 1968-69, 1982-83, 1984-85 and 1995-96.",
+        "Merged with Emmbrook Sports in 2004 as Wokingham & Emmbrook and went back to the name Wokingham Town in 2024."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wokingham_Town_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Founding year is 1875 in opponents.json, but Wikipedia notes reports of meetings in October 1874. Nickname 'The Satsumas' is confirmed by Wikipedia. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Abingdon United",
@@ -217,7 +457,21 @@
       "angle": "A settled Oxfordshire community club that has just committed to a 60-year lease at The Northcourt. Worth knowing before you set off: there's a theatre of the same name in the town, so check the sat-nav.",
       "travel": "~50 mins NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Abingdon_United_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "Abingdon United were set up in 1946 by former servicemen who wanted a second senior club in the town. After early years in the North Berks League they spent decades in the Hellenic League, enjoying a cup treble in 1996-97. A spell in the Southern League followed from 2006 until 2013. Having dropped back into the Hellenic League's lower division, they won the 2024-25 play-offs to step up to this division. Their Northcourt home has been secured on a new sixty-year lease.",
+      "historyFacts": [
+        "Formed in 1946 by ex-servicemen at the Anchor pub, as a rival to Abingdon Town.",
+        "Joined the Hellenic League in 1958, first reaching its Premier Division after 1976-77.",
+        "Won the Berks & Bucks Senior Trophy in 1996-97 and 1997-98.",
+        "Promoted to Southern League Division One South & West in 2006, returning to the Hellenic League in 2013.",
+        "Won the 2024-25 Hellenic Division One play-off final against Wantage Town to move up to the Combined Counties Premier North."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Abingdon_United_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "None found against opponents.json. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "London Lions",
@@ -230,7 +484,22 @@
       "travel": "~10-12 miles NE (FA Cup)",
       "wikipedia": "https://en.wikipedia.org/wiki/London_Lions_F.C.",
       "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
-      "note": "Founded by Maccabi London; see their Wikipedia article. Deliberately not used in matchday copy — a club's religious or ethnic identity is theirs to lead on, not ours."
+      "note": "Founded by Maccabi London; see their Wikipedia article. Deliberately not used in matchday copy — a club's religious or ethnic identity is theirs to lead on, not ours.",
+      "historySummary": "London Lions began in 1995 as MALEX, a Saturday team set up by Maccabi Association London, and took the Lions name in 1999. They won titles in the Hertfordshire Senior County League and the Spartan South Midlands League, moving between the two more than once. A Combined Counties Division One title in 2021-22 was followed by a return to the Spartan South Midlands League. They play at Rowley Lane in Arkley.",
+      "historyFacts": [
+        "Founded as MALEX in 1995 by Maccabi Association London; renamed London Lions in 1999, later Maccabi London Lions.",
+        "Hertfordshire Senior County League Premier Division champions in 2009-10 and 2016-17.",
+        "Spartan South Midlands Division One champions in 2012-13.",
+        "Combined Counties League Division One champions in 2021-22.",
+        "Promoted to Southern League Division One Central through the 2024-25 Spartan South Midlands play-offs."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/London_Lions_F.C.",
+        "https://en.wikipedia.org/wiki/Maccabi_London_Lions_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "MAJOR: the Wikipedia title redirects to Maccabi London Lions F.C., which it says now plays in Southern League Division One Central after the 2024-25 play-offs. opponents.json also records that promotion. That conflicts with them being a 2026-27 Combined Counties Premier North opponent. Check the fixture list and the league's club list before printing anything; the summary avoids saying which league they are in now. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "New Bradwell St Peter",
@@ -242,7 +511,21 @@
       "angle": "an old church club (founded 1895 by a curate of St James') from Milton Keynes — cup football at Tithe Farm.",
       "travel": "~40-45 miles NW (FA Vase, home tie)",
       "wikipedia": "https://en.wikipedia.org/wiki/New_Bradwell_St_Peter_F.C.",
-      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026"
+      "source": "Club-supplied, cross-checked against Wikipedia (CC BY-SA) July 2026",
+      "historySummary": "New Bradwell St Peter began as a church side in Milton Keynes in the 1890s and took their present name after a merger in 1946. They won the North Bucks & District League three times before stepping up to the South Midlands League in 1970, where they twice won Division One. They were the first Senior Division champions of the merged Spartan South Midlands League in 1997-98. The present club took on the historic name in 2018.",
+      "historyFacts": [
+        "Established by 1895 as Stantonbury St James by the Rev. Edmund Marshall; took the current name after a 1946 merger with New Bradwell Corinthians.",
+        "North Bucks & District League champions in 1912-13, 1913-14 and 1938-39.",
+        "South Midlands League Division One champions in 1976-77 and 1983-84.",
+        "Spartan South Midlands Senior Division champions in 1997-98 and Berks & Bucks Senior Trophy winners in 1999-2000.",
+        "The original club resigned in 2017; in 2018 Loughton Manor adopted the New Bradwell St Peter name and moved to the Recreation Ground."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/New_Bradwell_St_Peter_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "MAJOR: Wikipedia says they are in Spartan South Midlands League Division One, which conflicts with a 2026-27 Combined Counties Premier North place; confirm with the league. Lineage: the original club resigned in 2017 and the name was taken on by Loughton Manor in 2018, so 'founded 1895' (opponents.json) describes the historic club, not the present organisation. Wikipedia says 'by 1895', not exactly 1895. Nickname 'The Saints' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     },
     {
       "key": "Penn & Tylers Green",
@@ -254,8 +537,23 @@
       "angle": "French School Meadow is named after an 18th-century school for orphans of the French Revolution — the pupils' blue uniforms with white feathers are why Penn play in blue and white. Record crowd of 1,237 there in Oct 2025 against EFL side Wycombe Wanderers.",
       "travel": "~40 mins NW",
       "wikipedia": "https://en.wikipedia.org/wiki/Penn_%26_Tylers_Green_F.C.",
-      "source": "Wikipedia (CC BY-SA), verified July 2026"
+      "source": "Wikipedia (CC BY-SA), verified July 2026",
+      "historySummary": "Penn & Tylers Green, from near Beaconsfield, adopted their first formal constitution in 1905 and spent decades collecting Wycombe league titles. They bought French School Meadow in 1949; the ground's name and the club's blue and white colours both come from an old school for French orphans. They helped found the Chiltonian League in 1984 and joined the Hellenic League in 2000. They won Combined Counties Division One in 2025-26 to reach this division.",
+      "historyFacts": [
+        "Formally established in 1905; first won the Wycombe League in 1911-12.",
+        "Bought French School Meadow in 1949.",
+        "Founder members of the Chiltonian League in 1984.",
+        "Hellenic Division One East champions in 2015-16 and 2016-17, and runners-up in 2002-03.",
+        "Combined Counties League Division One champions in 2025-26; record crowd of 1,237 against Wycombe Wanderers in October 2025."
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Penn_%26_Tylers_Green_F.C."
+      ],
+      "reviewedOn": "2026-11-16",
+      "verification": "Wikipedia only — confirm with the club before relying on it",
+      "reviewNote": "Wikipedia's honours list Hellenic Division One East titles in 2015-16 and 2016-17, which sits oddly with no promotion being mentioned; treat these as needing a second source. Nickname 'Penn' not checked. Only Wikipedia was read; no club official site was checked in this pass."
     }
   ],
-  "updatedAt": "2026-07-15"
+  "updatedAt": "2026-07-15",
+  "_profilesNote": "historySummary is original club-history copy for the programme opposition page; editors adjust it per edition without changing this master profile. Current manager, squad and results are deliberately NOT stored here."
 }

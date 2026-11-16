@@ -1,0 +1,20 @@
+/* Programme print page toolbar + screen scaling. Print output is untouched:
+   everything here is screen-only or removed under @media print. */
+.px-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.px-btn{appearance:none;border:2px solid #FFD100;background:transparent;color:#FFD100;font:700 15px/1 var(--fc,system-ui);
+  letter-spacing:.04em;min-height:48px;padding:0 18px;border-radius:var(--r-md);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.px-btn--main{background:#FFD100;color:#0a0a0a}
+.px-btn[disabled]{opacity:.45;cursor:not-allowed}
+.px-btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.px-status{flex-basis:100%;margin:0;font:600 14px/1.45 var(--fb,system-ui);color:#ddd}
+.px-status--ok{color:#9be3a6}.px-status--warn{color:#FFD100}.px-status--err{color:#ff8a80}
+.px-note{flex-basis:100%;margin:0;font:500 13px/1.45 var(--fb,system-ui);color:#aaa}
+.px-result{display:flex;flex-wrap:wrap;gap:10px;flex-basis:100%}
+.px-result[hidden]{display:none}
+.px-banner{max-width:794px;margin:0 auto 14px;padding:12px 16px;border-radius:var(--r-md);font:600 14px/1.5 var(--fb,system-ui)}
+.px-banner--warn{background:#FFD100;color:#0a0a0a}.px-banner--err{background:#7f1d1d;color:#fff}
+@media screen{
+  .pages.px-scaled{zoom:var(--px-scale,1)}
+  .px-exporting .page{height:297mm}
+}
+@media print{.bar,.px-banner{display:none!important}.pages{zoom:1!important}}
