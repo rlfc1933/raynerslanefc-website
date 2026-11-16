@@ -6209,6 +6209,8 @@ function nwSaveDraft() {
 function nwPreview() {
   var d = nwForm(), box = document.getElementById('nw-preview');
   var img = imgStore['nw'] ? imgStore['nw'].dataUrl : d.image;
+  // Only an image URL can become a src: no javascript:, no other schemes.
+  if (img && !/^(data:image\/(png|jpe?g|gif|webp);|img\/|\/img\/|https:\/\/)/i.test(String(img))) img = '';
   box.hidden = false;
   box.innerHTML = '<div class="nw-pv__k">Preview — not published</div>' + (img ? '<img src="' + escH(img) + '" alt="">' : '') +
     '<div class="nw-pv__cat">' + escH(d.category) + (d.date ? ' &middot; ' + escH(d.date) : '') + '</div><h3>' + escH(d.title || '(no headline)') + '</h3>' +
@@ -9171,34 +9173,55 @@ function addMeeting() {
   commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting saved to the club records <i class="ico ico-check"></i> — see it under "Saved meetings"');
   mtActionsToTasks(meetings[0]);
 }
-/* AGREED ACTIONS BECOME TASKS. "Next steps — who does what" used to be text
-   that someone had to retype into Tasks. Each line written as
-   "Name — what they will do" becomes a task owned by that person, linked back
-   to the meeting. The key is per meeting and line, so saving again (or a
-   dropped connection and retry) never creates a duplicate. Lines without a
-   name are listed, not guessed. */
-function mtParseActions(text) {
-  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, i) {
+/* AGREED ACTIONS BECOME TASKS. Each line written as "Name — what they will
+   do" becomes a task linked back to the meeting.
+   IDEMPOTENCY: the key is meeting id + the action's own text (normalised), never
+   its line number — so editing the meeting, reordering lines or inserting one
+   and saving again never creates a duplicate or moves a task to someone else.
+   OWNERS ARE NEVER GUESSED: a name must match exactly one committee member
+   (full name, or a first name only one member has). "Nigel & Jenny", unknown
+   names and lines with no name become a task with NO owner and a note
+   "owner unclear: <text>". */
+function mtNorm(t) { return String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function mtKey(meetingId, title) {
+  var t = mtNorm(title), h = 5381;
+  for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+  return 'meeting:' + meetingId + ':a' + h.toString(36) + ':' + t.length;
+}
+function mtResolveOwner(raw, people) {
+  var n = mtNorm(raw); if (!n) return null;
+  if (/[&+\/,]|\band\b/.test(n)) return null;                       // several people: unclear
+  var names = (people || []).map(function (p) { return String((p && p.name) || p || '').trim(); }).filter(Boolean);
+  var full = names.filter(function (x) { return mtNorm(x) === n; });
+  if (full.length === 1) return full[0];
+  var first = names.filter(function (x) { return mtNorm(x).split(' ')[0] === n; });
+  return first.length === 1 ? first[0] : null;
+}
+function mtParseActions(text, people) {
+  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
     var m = l.match(/^([^—–:-]{2,40}?)\s*[—–:-]\s+(.+)$/);
     var iso = l.match(/\b(20\d\d-\d\d-\d\d)\b/);
-    return m ? { i: i, owner: m[1].trim(), title: m[2].trim(), due: iso ? iso[1] : null } : { i: i, title: l, owner: null };
+    var title = m ? m[2].trim() : l, said = m ? m[1].trim() : null;
+    var owner = said && people ? mtResolveOwner(said, people) : (people ? null : said);
+    return { title: title, owner: owner, said: said, due: iso ? iso[1] : null,
+      unclear: owner ? null : 'owner unclear: ' + (said || 'no name given'), key: function (id) { return mtKey(id, title); } };
   });
 }
 function mtActionsToTasks(mt) {
   var el = document.getElementById('dep-meetings');
-  var acts = mtParseActions(mt && mt.nextSteps);
+  var acts = mtParseActions(mt && mt.nextSteps, committee || []);
   if (!acts.length) return;
   if (!window.HQShell || !HQShell.write) { if (el) showDep(el, 'warn', 'Meeting saved. Actions were not turned into tasks: Tasks is not available on this page.'); return; }
-  var named = acts.filter(function (a) { return a.owner; }), loose = acts.filter(function (a) { return !a.owner; });
-  Promise.all(named.map(function (a) {
-    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner, due_date: a.due || undefined,
-      idempotency_key: 'meeting:' + mt.id + ':' + a.i, source: 'meeting:' + mt.id,
-      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date } });
+  var loose = acts.filter(function (a) { return !a.owner; });
+  Promise.all(acts.map(function (a) {
+    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner || undefined, due_date: a.due || undefined,
+      idempotency_key: mtKey(mt.id, a.title), source: 'meeting:' + mt.id, next_action: a.unclear || undefined,
+      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date, note: a.unclear || undefined } });
   })).then(function (rs) {
-    var ok = rs.filter(function (r) { return r && r.ok; }).length, bad = rs.length - ok;
-    var msg = ok + ' action' + (ok === 1 ? '' : 's') + ' added to Tasks with an owner.';
+    var ok = rs.filter(function (r) { return r && r.ok && !r.duplicate; }).length, same = rs.filter(function (r) { return r && r.ok && r.duplicate; }).length, bad = rs.filter(function (r) { return !r || !r.ok; }).length;
+    var msg = ok + ' new action' + (ok === 1 ? '' : 's') + ' added to Tasks.' + (same ? ' ' + same + ' already there (unchanged).' : '');
     if (bad) msg += ' ' + bad + ' could not be added (' + escH(((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error) || 'error') + ') — add them in Tasks.';
-    if (loose.length) msg += ' ' + loose.length + ' line' + (loose.length === 1 ? ' has' : 's have') + ' no name (“Name — action”), so no task was made.';
+    if (loose.length) msg += ' ' + loose.length + ' task' + (loose.length === 1 ? ' has' : 's have') + ' no owner (owner unclear — not guessed). Give ' + (loose.length === 1 ? 'it' : 'them') + ' an owner in Tasks.';
     if (el) showDep(el, bad ? 'err' : (loose.length ? 'warn' : 'ok'), msg);
   });
 }
