@@ -27,28 +27,45 @@ global.fetch = async (url, opt = {}) => {
   }
   const b = JSON.parse(opt.body); const f = files[p];
   if (f && b.sha !== f.sha) return { ok: false, status: 409, json: async () => ({ message: 'sha' }) };
+  ghWrites.push(p);
   files[p] = { content: b.content, sha: 's' + (++n) };
   return { ok: true, status: 200, json: async () => ({ commit: { sha: 'c' + n } }) };
 };
 const save = require(path.join(__dirname, '..', 'netlify/functions/save-data.js'));
+// Drafts live in a private Blobs store, never in the public repository.
+const blobs = {};
+save._setDraftStore({ get: async (k) => (k in blobs ? JSON.parse(blobs[k]) : null), setJSON: async (k, v) => { blobs[k] = JSON.stringify(v); } });
+let ghWrites = [];
 const call = async (b) => { const r = await save.handler({ httpMethod: 'POST', body: JSON.stringify(Object.assign({ pin: PIN }, b)) }); return { status: r.statusCode, j: JSON.parse(r.body) }; };
 const json = (p) => JSON.parse(Buffer.from(files[p].content, 'base64').toString());
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64');
 
 test('a stale device cannot overwrite a newer programme draft', async () => {
-  reset({ 'data/programme-draft.json': { revision: 3, savedBy: 'Russell', savedAt: '2026-11-16T10:00:00Z', opponent: 'Burnham' } });
+  reset({}); ghWrites = [];
+  blobs['programme-draft'] = JSON.stringify({ revision: 3, savedBy: 'Russell', savedAt: '2026-11-16T10:00:00Z', opponent: 'Burnham' });
   const r = await call({ path: 'data/programme-draft.json', content: b64({ revision: 3, opponent: 'Hilltop' }), expectRevision: 2 });
   assert.strictEqual(r.status, 409);
   assert.strictEqual(r.j.current.savedBy, 'Russell', 'the refusal says who saved the newer one');
-  assert.strictEqual(json('data/programme-draft.json').opponent, 'Burnham', 'nothing was overwritten');
+  assert.strictEqual(JSON.parse(blobs['programme-draft']).opponent, 'Burnham', 'nothing was overwritten');
   const ok = await call({ path: 'data/programme-draft.json', content: b64({ revision: 4, opponent: 'Burnham' }), expectRevision: 3 });
   assert.strictEqual(ok.status, 200);
+  assert.deepStrictEqual(ghWrites, [], 'a draft is never committed to the public repository');
 });
 
 test('a first save is refused if someone else created the draft meanwhile', async () => {
-  reset({ 'data/programme-draft.json': { revision: 1 } });
+  blobs['programme-draft'] = JSON.stringify({ revision: 1 });
   const r = await call({ path: 'data/programme-draft.json', content: b64({ revision: 1 }), expectRevision: 0 });
   assert.strictEqual(r.status, 409);
+});
+
+test('news drafts merge privately and never reach the repository', async () => {
+  reset({}); ghWrites = []; delete blobs['news-drafts'];
+  const r = await call({ merge: true, domain: 'news-drafts', key: 'drafts', idField: 'id', upserts: [{ id: 'draft-1', title: 'Unannounced signing' }] });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(JSON.parse(blobs['news-drafts']).drafts[0].title, 'Unannounced signing');
+  assert.deepStrictEqual(ghWrites, []);
+  const rd = await call({ read: true, path: 'data/news-drafts.json' });
+  assert.strictEqual(rd.j.data.drafts.length, 1);
 });
 
 test('a draft can never replace a published archive edition', async () => {
@@ -71,7 +88,7 @@ test('two publishes of the same edition cannot overwrite each other', async () =
 });
 
 test('the editor can read the authoritative copy, and only data files', async () => {
-  reset({ 'data/programme-draft.json': { revision: 7 } });
+  blobs['programme-draft'] = JSON.stringify({ revision: 7 });
   const r = await call({ read: true, path: 'data/programme-draft.json' });
   assert.strictEqual(r.j.data.revision, 7);
   const missing = await call({ read: true, path: 'data/nothing.json' });

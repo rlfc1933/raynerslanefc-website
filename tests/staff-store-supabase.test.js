@@ -272,8 +272,9 @@ test('the only remaining Blobs use is the unrelated sponsor radar', () => {
       if (/getStore\(/.test(code)) hits.push(path.relative(dir, p));
     });
   }(dir));
-  assert.deepStrictEqual(hits.sort(), ['lib/radar.js'],
-    'staff auth must not depend on Blobs; the radar cache legitimately may');
+  // save-data keeps unpublished drafts out of the public git repository.
+  assert.deepStrictEqual(hits.sort(), ['lib/radar.js', 'save-data.js'],
+    'staff auth must not depend on Blobs; the radar cache and private drafts legitimately may');
 });
 
 // ── 6 · SYSTEM MAINTAINER ───────────────────────────────────────────────────

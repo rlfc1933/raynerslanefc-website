@@ -30,6 +30,27 @@ const API    = 'https://api.github.com/repos/' + REPO + '/contents/';
 const PATH_OK = /^(data\/[\w-]+\.json|img\/uploads\/[\w.\-]+)$/;
 const DOMAIN_OK = /^[\w-]+$/;
 
+// ── PRIVATE DRAFTS ───────────────────────────────────────────────────────
+// The repository is public, so anything committed is readable on GitHub no
+// matter what the website serves. Unpublished drafts therefore never go to
+// git: these paths live in a private Netlify Blobs store instead, reached only
+// through this function and the committee password. The browser uses the same
+// paths and the same three modes (read / whole-file with expectRevision /
+// merge), so callers did not have to change.
+// Blobs 8.2 has no conditional write, so the revision check is read-then-write
+// in one invocation: a far smaller window than the old client-side check, but
+// not an atomic compare-and-swap.
+const PRIVATE = { 'data/programme-draft.json': 'programme-draft', 'data/news-drafts.json': 'news-drafts' };
+let draftStore = null, lastEvent = null;
+async function drafts() {
+  if (draftStore) return draftStore;
+  const b = await import('@netlify/blobs');
+  if (b.connectLambda && lastEvent) { try { b.connectLambda(lastEvent); } catch (e) { /* newer runtime injects context */ } }
+  return b.getStore({ name: 'rlfc-private-drafts', consistency: 'strong' });
+}
+async function privRead(path) { const st = await drafts(); const d = await st.get(PRIVATE[path], { type: 'json' }); return d == null ? null : d; }
+async function privWrite(path, obj) { const st = await drafts(); await st.setJSON(PRIVATE[path], obj); }
+
 function resp(code, obj) {
   return {
     statusCode: code,
@@ -80,6 +101,13 @@ async function handleMerge(payload, ghHeaders) {
   const upserts    = Array.isArray(payload.upserts) ? payload.upserts : [];
   const deletedIds = Array.isArray(payload.deletedIds) ? payload.deletedIds : [];
   const extra      = (payload.extra && typeof payload.extra === 'object') ? payload.extra : null;
+  if (PRIVATE[path]) {
+    const obj = (await privRead(path)) || {};
+    const merged = mergeArray(Array.isArray(obj[key]) ? obj[key] : [], upserts, deletedIds, idField);
+    obj[key] = merged; obj.updatedAt = new Date().toISOString();
+    await privWrite(path, obj);
+    return resp(200, { ok: true, merged: merged, count: merged.length, skipped: [], private: true });
+  }
 
   // Up to 5 read-merge-write attempts; each retry re-reads the latest sha so a
   // concurrent commit never causes a lost update — it just makes us merge again.
@@ -156,6 +184,7 @@ async function handleMerge(payload, ghHeaders) {
 async function handleRead(payload, ghHeaders) {
   const path = payload.path;
   if (!path || !/^data\/[\w-]+\.json$/.test(path)) return resp(400, { error: 'Invalid path' });
+  if (PRIVATE[path]) { const d = await privRead(path); return resp(200, { ok: true, exists: d != null, data: d, private: true }); }
   const cur = await fetch(API + path + '?ref=' + BRANCH, { headers: ghHeaders });
   if (cur.status === 404) return resp(200, { ok: true, exists: false, data: null });
   if (!cur.ok) return resp(cur.status, { error: 'Could not read ' + path });
@@ -170,6 +199,18 @@ async function handleRaw(payload, ghHeaders) {
   const path = payload.path, content = payload.content;
   if (!path || typeof content !== 'string' || !PATH_OK.test(path)) {
     return resp(400, { error: 'Invalid path or content' });
+  }
+  if (PRIVATE[path]) {
+    let next; try { next = JSON.parse(Buffer.from(content, 'base64').toString('utf8')); } catch (e) { return resp(400, { error: 'Draft must be JSON' }); }
+    const cur = await privRead(path);
+    if (payload.expectRevision != null) {
+      const have = cur ? (Number(cur.revision) || 0) : 0;
+      if (have !== (Number(payload.expectRevision) || 0)) {
+        return resp(409, { error: 'stale', current: cur ? { revision: have, savedAt: cur.savedAt || cur.updatedAt || null, savedBy: cur.savedBy || null, opponent: cur.opponent || null, fixtureId: cur.fixtureId || null } : null });
+      }
+    }
+    await privWrite(path, next);
+    return resp(200, { ok: true, private: true });
   }
   let sha;
   const cur = await fetch(API + path + '?ref=' + BRANCH, { headers: ghHeaders });
@@ -207,10 +248,12 @@ async function handleRaw(payload, ghHeaders) {
   return resp(200, { ok: true, commit: result.commit && result.commit.sha, purged: purged });
 }
 
+exports._setDraftStore = function (st) { draftStore = st; };
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return resp(204, {});
   if (event.httpMethod !== 'POST')    return resp(405, { error: 'POST only' });
 
+  lastEvent = event;
   const token = process.env.GITHUB_TOKEN;
   if (!token) return resp(500, { error: 'Server not configured — set GITHUB_TOKEN in Netlify environment variables' });
 
