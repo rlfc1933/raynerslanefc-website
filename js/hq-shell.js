@@ -326,7 +326,7 @@
         'Fixtures come from the football registry; nothing is shown rather than an out-of-date list. Try Refresh.</p></section>';
     }
     if (!nx || !nx.fixture) {
-      return '<section class="hq-match hq-match--none" aria-label="Next match"><p>No upcoming fixture in the registry.</p></section>';
+      return '<section class="hq-match hq-match--none" aria-label="Next match"><p>No upcoming fixture in the registry. Next step: press Refresh, or ask the Secretary to check the fixture feed.</p></section>';
     }
     var f = nx.fixture;
     var tasks = M.tasksForFixture(d.items.task, f.id);
@@ -357,7 +357,7 @@
     var groups = S.groups;
     var out = '';
     if (!groups.length) {
-      out += '<p class="hq-empty"><b>Nothing needs doing right now.</b> Every check below found nothing outstanding.</p>';
+      out += '<p class="hq-empty"><b>Nothing needs doing right now.</b> Every check below found nothing outstanding. Next step: open Matchday preparation for the next home game.</p>';
     } else {
       out += '<ul class="hq-pri" role="list">' + groups.map(groupRow).join('') + '</ul>';
     }
@@ -416,7 +416,7 @@
     ];
     var empty = !enq && !props && !live && !grants && !approve && !(m && (m.owed_pence || m.contracted_pence));
     return '<ul class="hq-rows" role="list">' + rows.join('') + '</ul>' +
-      (empty ? '<p class="hq-muted">No sponsorship activity recorded yet. Enquiries from the website arrive here automatically; prospects are added in Business outreach.</p>' : '');
+      (empty ? '<p class="hq-muted">No sponsorship activity recorded yet. Enquiries from the website arrive here automatically. Next step: add a prospect in Business outreach.</p>' : '');
   }
 
   function fanRows(nx) {
@@ -437,8 +437,8 @@
       out.push(row('Unread website enquiries', '—', 'records', 'Could not be read'));
     }
     var att = lastAttendance();
-    out.push(row('Last home attendance', att ? String(att.n) : (d.md && d.md.rows ? 'Not recorded' : 'Unavailable'), 'mdops',
-      att ? att.label : (d.md && d.md.rows ? 'No completed count for a past home match yet' : 'Attendance records could not be loaded')));
+    out.push(row('Last home attendance', att && att.n != null ? String(att.n) : (d.md && d.md.rows ? 'Not recorded' : 'Unavailable'), 'mdops',
+      att ? att.label : (d.md && d.md.rows ? 'Next step: record the official attendance for the last home match in Matchday ops' : 'Attendance records could not be loaded')));
     var nh = d.fixtures ? M.nextHome(d.fixtures, now()) : null;
     if (nh) out.push(row('Promote the next home match', '', 'poststudio', nh.opponent + ', ' + T.kickoffLabel(nh, now()) + ' — make the matchday graphic'));
     return '<ul class="hq-rows" role="list">' + out.join('') + '</ul>';
@@ -456,12 +456,13 @@
     var done = d.md.rows.filter(function (r) {
       var rec = r.record, f = r.fixture || {};
       if (!rec || ['completed', 'locked'].indexOf(rec.status) < 0) return false;
-      if (String(f.date || '').slice(0, 10) > today) return false;
-      var n = rec.attendance_official != null ? rec.attendance_official : rec.attendance_calculated;
-      return n != null && n !== '';
+      return String(f.date || '').slice(0, 10) <= today;
     }).sort(function (a, b) { return String(b.fixture.date).localeCompare(String(a.fixture.date)); })[0];
     if (!done) return null;
-    var rec = done.record, n = rec.attendance_official != null ? rec.attendance_official : rec.attendance_calculated;
+    // The latest completed match decides: a recorded 0 is a real 0; no figure
+    // at all is "Not recorded" for THAT match, never an older match's figure.
+    var rec = done.record, n = rec.attendance_official != null && rec.attendance_official !== '' ? rec.attendance_official : rec.attendance_calculated;
+    if (n === '' || n == null) n = null; else n = Number(n);
     return { n: n, label: done.fixture.opponent + ', ' + T.shortDate(done.fixture.date) + (rec.attendance_official != null ? ' · official' : ' · gate count') };
   }
 
@@ -568,7 +569,7 @@
     var d = S.data;
     if (!d.fixtures) { el.innerHTML = '<p class="hq-empty"><b>The fixture registry could not be read.</b> Nothing is shown rather than an out-of-date fixture list.</p>'; return; }
     var f = selectedFixture();
-    if (!f) { el.innerHTML = '<p class="hq-empty">There is no upcoming fixture in the registry.</p>'; return; }
+    if (!f) { el.innerHTML = '<p class="hq-empty">There is no upcoming fixture in the registry. Next step: press Refresh; if it is still empty, ask the Secretary to check the fixture feed.</p>'; return; }
     var home = f.isHome !== false;
     // The fixture chosen here travels with the person into Programme (and any
     // other panel that reads it), so they do not pick the match twice.
@@ -600,7 +601,7 @@
     if (!d.summary && !d.items.task) {
       list = '<p class="hq-empty">Club tasks could not be loaded' + (d.listErr ? ': ' + h(d.listErr) : '') + '.</p>';
     } else if (!tasks.length) {
-      list = '<div class="hq-empty"><p><b>No matchday checklist for this fixture yet.</b> ' +
+      list = '<div class="hq-empty"><p><b>No matchday checklist for this fixture yet.</b> Next step: press Create the checklist below. ' +
         (home ? 'Twelve jobs, from officials to the takings sheet' : 'Five jobs for an away fixture') +
         ', each with an owner and a date. Creating it twice makes nothing new.</p>' +
         '<button type="button" class="hq-btn hq-btn--primary" data-hq-make-list>Create the checklist</button></div>';
@@ -717,7 +718,7 @@
     if (!S.notes) { el.innerHTML = '<p class="hq-muted hq-pad">Loading…</p>'; return; }
     var list = S.notes.list.slice().sort(function (a, b) { return (a.read - b.read) || 0; });
     var html = '';
-    if (!list.length) html += '<p class="hq-empty hq-pad"><b>You are up to date.</b> Nothing needs a person right now.</p>';
+    if (!list.length) html += '<p class="hq-empty hq-pad"><b>You are up to date.</b> Nothing needs a person right now. Next step: check Matchday preparation for the next home game.</p>';
     else html += '<ul class="hq-notes-list" role="list">' + list.map(function (n) {
       return '<li class="hq-note' + (n.read ? ' is-read' : '') + ' hq-sev--' + n.severity + '">' +
         '<div class="hq-note__meta"><span class="hq-dot" aria-hidden="true"></span>' + h(CAT[n.category] || 'Update') + ' · ' + h(T.ago(n.since, now())) + (n.read ? '' : ' · <b>Unread</b>') + '</div>' +

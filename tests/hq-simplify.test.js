@@ -37,14 +37,14 @@ test('the official figure wins, and an unfinished count is not zero', () => {
 });
 
 test('meeting actions become owned tasks, once, and unnamed lines are not guessed', () => {
-  const src = admin.slice(admin.indexOf('function mtParseActions(text) {'), admin.indexOf('function mtActionsToTasks(mt) {'));
+  const src = admin.slice(admin.indexOf('function mtNorm(t) {'), admin.indexOf('function mtActionsToTasks(mt) {'));
   const parse = new Function(src + '; return mtParseActions;')();
   const a = parse('Nigel — approach 5 firms for boards\nJenny: start Football Foundation grant 2026-12-01\nsort the raffle');
   assert.deepStrictEqual(a.map((x) => x.owner), ['Nigel', 'Jenny', null]);
   assert.strictEqual(a[1].due, '2026-12-01');
   const fn = admin.slice(admin.indexOf('function mtActionsToTasks(mt) {'), admin.indexOf('function mtActionsToTasks(mt) {') + 2000);
-  assert.match(fn, /idempotency_key: 'meeting:' \+ mt\.id \+ ':' \+ a\.i/, 'saving twice creates nothing twice');
-  assert.match(fn, /no name/, 'unnamed lines are reported, not assigned');
+  assert.match(fn, /idempotency_key: mtKey\(mt\.id, a\.title\)/, 'saving twice creates nothing twice');
+  assert.match(fn, /no owner \(owner unclear — not guessed\)/, 'unnamed lines are reported, not assigned');
 });
 
 test('the stale "pre-season" explanation is gone from Committee meetings', () => {

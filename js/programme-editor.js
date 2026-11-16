@@ -101,6 +101,7 @@
     PRE.oppRecent = d.oppRecentResults || null;
     renderCarry(); renderOppSource(); loadRegistries();
     loadOfficials(); PRE.refreshOppResults(false);
+    PRE.loadFixtureSponsors(d.fixtureId || '');
     bindDeviceAutosave();
     offerHqFixture(d);
     prStep(1);
@@ -239,6 +240,7 @@
           status('ok', '<b>Approved for publication' + (ed.editorial_approved_by ? ' by ' + h(ed.editorial_approved_by) : '') + '.</b> ' +
             h(r.j.message || '') + (r.j.sections ? ' ' + r.j.sections.length + ' section(s) on the club’s record.' : '') +
             (arch ? '' : ' (The print-edition archive copy could not be updated; the published edition is unaffected.)'));
+          return global.prRecordFulfilment(doc, { editionId: r.j && r.j.editionId, published: !!(r.j && r.j.published === true) });
         });
       });
     }).catch(function (e) {
@@ -340,6 +342,7 @@
       }
       origFromFixture(id, quiet);
       PRE.lastFixtureId = id;
+      PRE.loadFixtureSponsors(id);
       renderCarry(); renderOppSource();
       // A different opponent's results must not ride along into this edition.
       if (f && oldOpp && f.opponent !== oldOpp) PRE.oppRecent = null;
@@ -579,13 +582,94 @@
   }
   PRE.loadOfficials = loadOfficials; PRE.renderOppResults = renderOppResults; PRE.renderOfficialsUse = renderOfficialsUse;
 
+  /* ── SPONSORS: only confirmed bookings for THIS fixture are offered ─── */
+  // Which booking slot fills which sponsor box.
+  var SPONSOR_BOXES = [['pr-matchsponsor', 'matchSponsor', 'matchday', 'Match sponsor'], ['pr-matchdaysponsor', 'matchdaySponsor', 'matchday', 'Matchday sponsor'], ['pr-ballsponsor', 'ballSponsor', 'matchball', 'Match ball sponsor']];
+  function nm(s) { return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
+  PRE.fxSponsors = null;   // null = not loaded (unknown), never "no sponsors"
+  PRE.loadFixtureSponsors = function (fixtureId) {
+    PRE.fxSponsors = null; PRE.fxSponsorsFor = fixtureId || '';
+    if (!fixtureId || !global.ClubOS || !ClubOS.call) { renderFixtureSponsors(); return Promise.resolve(null); }
+    return ClubOS.call('fixtureSponsors', { fixture_id: fixtureId }).then(function (r) {
+      if (PRE.fxSponsorsFor !== fixtureId) return null;            // a later fixture choice wins
+      PRE.fxSponsors = r && r.ok ? { offers: r.offers || [], notConfirmed: r.notConfirmed || [], conflicts: r.conflicts || [] } : { error: (r && r.error) || 'Sponsor bookings could not be read.' };
+      renderFixtureSponsors(); return PRE.fxSponsors;
+    });
+  };
+  // Confirmed offers for one sponsor box. Pure: fs is PRE.fxSponsors.
+  PRE.sponsorOffers = function (fs, boxId) {
+    var box = SPONSOR_BOXES.filter(function (b) { return b[0] === boxId; })[0]; if (!box || !fs || !fs.offers) return [];
+    return fs.offers.filter(function (o) { return o.slot === box[2]; });
+  };
+  // The approved artwork for whatever sponsor is in a box, or '' (never an unapproved file).
+  PRE.artFor = function (boxId, name) {
+    var o = PRE.sponsorOffers(PRE.fxSponsors, boxId).filter(function (x) { return nm(x.sponsor) === nm(name != null ? name : val(boxId)); })[0];
+    return o && o.artwork === 'approved' && o.artwork_path ? o.artwork_path : '';
+  };
+  var ART = { approved: 'artwork approved', awaiting_approval: 'artwork awaiting approval', missing: 'artwork missing' };
+  function renderFixtureSponsors() {
+    var el = $('pr-fx-sponsors'), fs = PRE.fxSponsors; if (!el) return;
+    SPONSOR_BOXES.forEach(function (b) {
+      var inp = $(b[0]); if (!inp) return;
+      var dl = $(b[0] + '-dl'); if (!dl) { dl = document.createElement('datalist'); dl.id = b[0] + '-dl'; inp.parentNode.appendChild(dl); }
+      inp.setAttribute('list', dl.id);
+      dl.innerHTML = PRE.sponsorOffers(fs, b[0]).map(function (o) { return '<option value="' + h(o.sponsor) + '">'; }).join('');
+    });
+    if (!PRE.fxSponsorsFor) { el.innerHTML = '<p class="pr-muted">Choose the match in stage 1 to see its confirmed sponsor bookings.</p>'; return; }
+    if (!fs) { el.innerHTML = '<p class="pr-muted">Checking this match’s sponsor bookings…</p>'; return; }
+    if (fs.error) { el.innerHTML = '<p class="pr-muted"><b>Sponsor bookings not checked:</b> ' + h(fs.error) + ' Nothing is offered until they can be read.</p>'; return; }
+    var rows = fs.offers.map(function (o) {
+      return '<li>' + h(o.sponsor) + ' · ' + (o.slot === 'matchball' ? 'match ball' : 'matchday') + ' · <b>confirmed</b> · ' + h(ART[o.artwork] || o.artwork) +
+        ' <button type="button" class="pr-link" data-use="' + h(o.opportunity_id) + '">Use</button></li>';
+    }).concat(fs.notConfirmed.map(function (o) { return '<li>' + h(o.sponsor) + ' · <b>not confirmed</b> (' + h(o.why) + ') — not offered</li>'; }));
+    el.innerHTML = rows.length ? '<p class="pr-muted">Sponsor bookings for this match (from Club OS):</p><ul>' + rows.join('') + '</ul>'
+      : '<p class="pr-muted">No confirmed sponsor bookings for this match. Book one in Club OS (deal → Approve package → Book a home fixture → won) before naming a sponsor here.</p>';
+    el.querySelectorAll('[data-use]').forEach(function (btn) { btn.onclick = function () {
+      var o = fs.offers.filter(function (x) { return x.opportunity_id === btn.getAttribute('data-use'); })[0]; if (!o) return;
+      var box = o.slot === 'matchball' ? 'pr-ballsponsor' : 'pr-matchsponsor';
+      var e = $(box); if (e) { e.value = o.sponsor; e.dispatchEvent(new Event('input', { bubbles: true })); }
+    }; });
+  }
+  // Commercial checks for the programme: pure given doc + PRE.fxSponsors.
+  PRE.commercialChecks = function (doc, fs) {
+    var out = [];
+    function add(level, text, el, cat) { out.push({ level: level, kind: 'Club', cat: cat || 'club-policy', text: text, el: el }); }
+    var named = SPONSOR_BOXES.filter(function (b) { return String(doc[b[1]] || '').trim(); });
+    if (!fs) { if (named.length) add('warn', 'Sponsor bookings have not been checked for this match yet, so the named sponsors are unconfirmed.', named[0][0]); return out; }
+    if (fs.error) { if (named.length) add('warn', 'Sponsor bookings could not be read (' + fs.error + '). The named sponsors are unconfirmed — missing is not the same as fine.', named[0][0]); return out; }
+    (fs.conflicts || []).forEach(function (c) { add('must', 'Conflicting sponsor bookings for this match (' + (c.slot || 'slot') + ': ' + c.why + '). Resolve it in Club OS → Matchday sponsor slots.', 'pr-matchsponsor'); });
+    named.forEach(function (b) {
+      var name = String(doc[b[1]]).trim();
+      var o = PRE.sponsorOffers(fs, b[0]).filter(function (x) { return nm(x.sponsor) === nm(name); })[0];
+      if (!o) { add('must', b[3] + ' “' + name + '” is not a confirmed booking for this match (not confirmed). Only agreed deals print.', b[0]); return; }
+      if (o.artwork !== 'approved') add('must', b[3] + ' “' + name + '”: ' + ART[o.artwork] + '. Approve the artwork in Club OS before publishing.', b[0]);
+    });
+    (fs.offers || []).forEach(function (o) {
+      var placed = SPONSOR_BOXES.some(function (b) { return b[2] === o.slot && nm(doc[b[1]]) === nm(o.sponsor); });
+      if (!placed) add('warn', o.sponsor + ' has a confirmed ' + (o.slot === 'matchball' ? 'match-ball' : 'matchday') + ' booking for this match but is not in the programme (placement unfulfilled).', o.slot === 'matchball' ? 'pr-ballsponsor' : 'pr-matchsponsor');
+    });
+    return out;
+  };
+  // After a SUCCESSFUL publish only: record fulfilment against the published
+  // edition id. Never for a draft, preview or an approval that has not published.
+  global.prRecordFulfilment = function (doc, result) {
+    var r = result || {}, fs = PRE.fxSponsors;
+    if (!r.editionId || r.published !== true || !fs || !fs.offers || !global.ClubOS || !ClubOS.write) return Promise.resolve({ recorded: 0, skipped: true });
+    var used = fs.offers.filter(function (o) { return SPONSOR_BOXES.some(function (b) { return b[2] === o.slot && nm(doc[b[1]]) === nm(o.sponsor); }); });
+    return Promise.all(used.map(function (o) {
+      return ClubOS.write('recordFulfilment', { opportunity_id: o.opportunity_id, edition_id: String(r.editionId), published: true, fixture_id: doc.fixtureId || null });
+    })).then(function (res) { return { recorded: res.filter(function (x) { return x && x.ok; }).length, results: res }; });
+  };
+
   /* ── CHECKS ─────────────────────────────────────────────────────────── */
   var PLACEHOLDER = /\b(test(ing)?|lorem|ipsum|placeholder|xxx+|tbc|tba|asdf|dummy|sample)\b/i;
   PRE.checks = function () {
     var out = [], doc = global.prBuildDoc();
     var fx = (global._prFixtures || []).filter(function (f) { return f.id === doc.fixtureId; })[0];
     var src = PRE.compliance ? ' (' + (PRE.compliance.season || '') + ' league guidance)' : '';
-    function add(level, kind, text, el) { out.push({ level: level, kind: kind, text: text, el: el }); }
+    // cat: the compliance category (data/programme-compliance.json statuses).
+    var DEF = { League: 'when-publishing', Club: 'club-policy', Optional: 'recommended' };
+    function add(level, kind, text, el, cat) { out.push({ level: level, kind: kind, cat: cat || DEF[kind] || 'club-policy', text: text, el: el }); }
     if (!fx) add('must', 'Club', 'No fixture chosen. The programme must belong to one match.', 'pr-fixture');
     else {
       if (/postpon|cancel|abandon|void/i.test(fx.status || '')) add('must', 'Club', 'This match is marked ' + fx.status + '. Do not publish a programme for it.', 'pr-fixture');
@@ -631,7 +715,9 @@
     else if (!doc.officialsSource) add('warn', 'Club', 'Officials are marked confirmed but the source is blank.', 'pr-off-source');
     if (!doc.oppCrest) add('warn', 'Club', 'No opposition crest: the cover will use initials.', 'pr-oppcrest');
     var adv = (doc.customPages || []).map(function (p) { return String(p.title || '') + ' ' + String(p.caption || ''); }).join(' ');
-    if (!/cherry red|mjm|pst/i.test(adv)) add('warn', 'League', 'League sponsor adverts not found among your extra pages. When a programme is produced, Rule 8.14 requires the official adverts the League supplies (currently listed: Cherry Red Records, MJM Sports, PST Sport — confirm the current set with the secretary). A sponsor logo is not the advert.', 'pr-pages-list');
+    if (!/cherry red|mjm|pst/i.test(adv)) add('warn', 'League', 'League sponsor adverts not found among your extra pages. Required when publishing: Rule 8.14 says a programme that is produced includes the official adverts the League supplies. A sponsor logo is not an advert.', 'pr-pages-list', 'when-publishing');
+    add('info', 'League', 'Confirm with the secretary which official League adverts apply this season (the League’s downloads currently list Cherry Red Records, MJM Sports and PST Sport).', 'pr-pages-list', 'awaiting-secretary');
+    PRE.commercialChecks(doc, PRE.fxSponsors).forEach(function (c) { out.push(c); });
     if (PRE.deviceOnly) add('warn', 'Club', 'Latest changes are on this device only. Save to the club.', 'pr-save-btn');
     if (!doc.managerNotes && !doc.storylines && !doc.welcomeNotes) add('info', 'Optional', 'No manager’s notes, preview or welcome yet. Optional, but the edition has little of its own without them.', 'pr-mgr');
     return out;
@@ -640,14 +726,18 @@
     var el = $('pr-checks'); if (!el) return;
     var list = PRE.checks(); var order = { must: 0, warn: 1, info: 2 };
     list.sort(function (a, b) { return order[a.level] - order[b.level]; });
-    if (!list.length) { el.innerHTML = '<p class="pr-check-ok">No problems found. Open the pages and check them by eye before printing.</p>'; return; }
+    if (!list.length) { el.innerHTML = '<p class="pr-check-ok">No problems found. Open the pages and check them by eye before printing.</p><p class="pr-muted">' + DISCLAIMER + '</p>'; return; }
     var name = { must: 'Must fix', warn: 'Check', info: 'Optional' };
+    var CAT = PRE.CHECK_CATEGORIES;
     el.innerHTML = '<ul>' + list.map(function (i, n) {
-      return '<li class="pr-ck pr-ck--' + i.level + '"><span class="pr-ck__lvl">' + name[i.level] + '</span><span class="pr-ck__kind">' + h(i.kind) + '</span>' +
+      return '<li class="pr-ck pr-ck--' + i.level + '"><span class="pr-ck__lvl">' + name[i.level] + '</span><span class="pr-ck__kind">' + h(CAT[i.cat] || i.kind) + '</span>' +
         '<span class="pr-ck__t">' + h(i.text) + '</span>' + (i.el ? '<button type="button" class="pr-link" data-go="' + h(i.el) + '">Go to it</button>' : '') + '</li>';
-    }).join('') + '</ul><p class="pr-muted">League = what the league asks of a programme when one is produced. Club = Rayners Lane’s own policy. Optional = editorial choice.</p>';
+    }).join('') + '</ul><p class="pr-muted">When publishing = applies only because the club chooses to produce a programme (producing one is not mandatory). Club policy = Rayners Lane’s own choice. Recommended = good practice. Awaiting secretary = the secretary confirms the current position. No league rule text is marked verified: the League has not published a current handbook.</p><p class="pr-muted">' + DISCLAIMER + '</p>';
     el.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { goTo(b.getAttribute('data-go')); }; });
   }
+  var DISCLAIMER = 'This checklist does not certify legal or league compliance.';
+  PRE.DISCLAIMER = DISCLAIMER;
+  PRE.CHECK_CATEGORIES = { 'competition-verified': 'League rule (verified)', 'when-publishing': 'When publishing', 'club-policy': 'Club policy', recommended: 'Recommended', 'awaiting-secretary': 'Awaiting secretary' };
   PRE.renderChecks = renderChecks;
   PRE.fixtureOptions = fixtureOptions;
 })(window);

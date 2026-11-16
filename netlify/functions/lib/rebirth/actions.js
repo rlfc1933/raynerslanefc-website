@@ -14,6 +14,7 @@ const VOL = require('./volunteers');
 const FIN = require('./finance');
 const SC = require('./scorecard');
 const SEEDS = require('./seeds');
+const CM = require('./commercial');
 
 const SEASON = () => process.env.FWP_SEASON || '2026-2027';
 const SYSTEM = 'Club OS (automatic)';
@@ -157,10 +158,16 @@ function install(A, H) {
     const mine = await sb('GET', 'hq_fixture_slots?opportunity_id=eq.' + q(opp.id) + '&select=*');
     if (mine && mine[0]) return fail('This deal already holds a fixture. Release it first to change the date.');
     try { await sb('POST', 'hq_fixture_slots', { fixture_id: f.id, slot: pkg.slot, opportunity_id: opp.id, held_by: actor }, 'return=minimal'); }
-    catch (e) { if (e.duplicate) return fail(`The ${pkg.slot === 'matchball' ? 'match-ball' : 'matchday'} slot for ${f.opponent || 'that match'} is already taken. Choose another home fixture.`); throw e; }
-    const data = Object.assign({}, opp.data, { fixture_id: f.id, fixture_label: `${f.opponent || 'Home match'} · ${SJ.londonLabel(f.kickoffAt)}`, fixture_date: SJ.londonDate(f.kickoffAt), rebook_needed: false, rebook_reason: null });
+    catch (e) {
+      if (!e.duplicate) throw e;
+      // Show the conflict: who already holds this slot.
+      const held = await soft(sb('GET', 'hq_fixture_slots?fixture_id=eq.' + q(f.id) + '&slot=eq.' + q(pkg.slot) + '&select=*'), []);
+      const holder = held && held[0] ? await getItem(held[0].opportunity_id) : null;
+      return fail(CM.conflictMessage(pkg.slot, f, holder), { conflict: { fixture_id: f.id, slot: pkg.slot, opportunity_id: holder ? holder.id : null, title: holder ? holder.title : null, stage: holder ? holder.stage : null } });
+    }
+    const data = Object.assign({}, opp.data, { slot: pkg.slot, booking_org_id: opp.org_id || null, fixture_id: f.id, fixture_label: `${f.opponent || 'Home match'} · ${SJ.londonLabel(f.kickoffAt)}`, fixture_date: SJ.londonDate(f.kickoffAt), rebook_needed: false, rebook_reason: null });
     const [after] = await sb('PATCH', 'hq_items?id=eq.' + q(opp.id), { data, next_action: opp.next_action && /Re-book/.test(opp.next_action) ? 'Tell the sponsor the new date' : 'Confirm the date with the sponsor, then mark it won' });
-    await audit(actor, 'book-slot', 'item', opp.id, null, { fixture_id: f.id, slot: pkg.slot });
+    await audit(actor, 'book-slot', 'item', opp.id, null, { fixture_id: f.id, slot: pkg.slot, org_id: opp.org_id || null });
     return { ok: true, item: after };
   };
   A.release = async (b, actor) => {
@@ -183,14 +190,75 @@ function install(A, H) {
     const key = 'enq:' + enq.id + ':opp';
     const ex = await sb('GET', 'hq_items?idempotency_key=eq.' + q(key) + '&select=*');
     if (ex && ex[0]) return { ok: true, item: ex[0], duplicate: true };
-    const org = enq.org_id ? await getOrg(enq.org_id) : null;
+    // The organisation: the enquiry's own, or an existing one a person confirmed,
+    // or a new one only when nothing on record matches. Never a silent duplicate.
+    let orgId = enq.org_id || null;
+    if (!orgId) {
+      const name = str(b.org_name, 200) || String(enq.title || '').replace(/^Sponsorship enquiry\s+—\s+/, '');
+      const cand = { name, website: str(b.website, 300) || (enq.data || {}).website, contact_email: str(b.contact_email, 200) || (enq.data || {}).email };
+      const matches = CM.orgMatches(cand, await sb('GET', 'hq_orgs?select=id,name,name_key,website,website_host,contact_email,relationship') || []);
+      if (b.use_org_id) {
+        if (!matches.some((m) => m.id === b.use_org_id)) return fail('That organisation does not match this enquiry.');
+        orgId = b.use_org_id;
+      } else if (matches.length) {
+        return fail('This looks like an organisation already on record (' + matches.map((m) => m.name).join(', ') + '). Confirm which one to use — no second record is created.', { org_matches: matches, needsConfirm: true });
+      } else {
+        if (!name) return fail('Name the organisation.');
+        const so = await A.saveOrg({ name, kind: 'business', relationship: 'prospect', website: cand.website, contact_email: cand.contact_email }, actor);
+        if (!so.ok) return so;
+        orgId = so.org.id;
+      }
+      await sb('PATCH', 'hq_items?id=eq.' + q(enq.id), { org_id: orgId }, 'return=minimal');
+      await audit(actor, 'link-org', 'item', enq.id, { org_id: null }, { org_id: orgId });
+    }
+    const org = orgId ? await getOrg(orgId) : null;
     const pkg = SJ.FIXTURE_PACKAGES[str(b.package, 40)] ? str(b.package, 40) : null;
-    const [opp] = await sb('POST', 'hq_items', { kind: 'opportunity', stage: 'responded', title: (org ? org.name : enq.title) + ' — sponsorship', owner, org_id: enq.org_id, parent_id: enq.id,
+    const [opp] = await sb('POST', 'hq_items', { kind: 'opportunity', stage: 'responded', title: (org ? org.name : enq.title) + ' — sponsorship', owner, org_id: orgId, parent_id: enq.id,
       next_action: pkg ? 'Approve the package and book a home fixture' : 'Agree a package and send a proposal', idempotency_key: key, source: 'enquiry', created_by: actor,
       data: { package: pkg, season: str(b.season, 20) || null, enquiry_interest: (enq.data || {}).interest || null } });
     await audit(actor, 'create', 'item', opp.id, null, { kind: 'opportunity', title: opp.title, stage: opp.stage, from_enquiry: enq.id });
     if (['new', 'acknowledged'].includes(enq.stage)) await A.move({ id: enq.id, to: 'assigned', owner }, actor);
     return { ok: true, item: opp };
+  };
+  // ── Artwork: attached, then approved by a named person ────────────────
+  A.submitArtwork = async (b, actor) => {
+    if (!UUID.test(b.opportunity_id || '')) return fail('Bad id.');
+    const opp = await getItem(b.opportunity_id); if (!opp || opp.kind !== 'opportunity') return fail('Not a deal.');
+    const path = str(b.artwork_path, 300);
+    if (!path || !/^(img|brand|uploads)\/[\w\-./]+\.(png|jpe?g|svg|webp|pdf)$/i.test(path) || path.indexOf('..') > -1) return fail('Give the artwork file path in the site (e.g. img/sponsors/hanlon.png).');
+    const data = Object.assign({}, opp.data, { artwork_path: path, artwork_status: 'submitted', artwork_submitted_by: actor, artwork_approved_by: null, artwork_approved_at: null });
+    const [after] = await sb('PATCH', 'hq_items?id=eq.' + q(opp.id), { data });
+    await audit(actor, 'artwork-submit', 'item', opp.id, { artwork_path: (opp.data || {}).artwork_path || null }, { artwork_path: path, artwork_status: 'submitted' });
+    return { ok: true, item: after, artwork: CM.artworkState(after.data) };
+  };
+  A.approveArtwork = async (b, actor) => {
+    if (!UUID.test(b.opportunity_id || '')) return fail('Bad id.');
+    const opp = await getItem(b.opportunity_id); if (!opp || opp.kind !== 'opportunity') return fail('Not a deal.');
+    const why = CM.artworkApproveGuard(opp, actor); if (why) return fail(why);
+    const data = Object.assign({}, opp.data, { artwork_status: 'approved', artwork_approved_by: actor, artwork_approved_at: new Date().toISOString() });
+    const [after] = await sb('PATCH', 'hq_items?id=eq.' + q(opp.id), { data });
+    await audit(actor, 'artwork-approve', 'item', opp.id, { artwork_status: (opp.data || {}).artwork_status || null }, { artwork_status: 'approved' });
+    return { ok: true, item: after, artwork: CM.artworkState(after.data) };
+  };
+  // ── What the programme editor may offer for one fixture (read only) ────
+  A.fixtureSponsors = async (b) => {
+    const fid = str(b.fixture_id, 120); if (!fid) return fail('Which fixture?');
+    const slots = (await soft(sb('GET', 'hq_fixture_slots?fixture_id=eq.' + q(fid) + '&select=*'), [])) || [];
+    const opps = (await sb('GET', 'hq_items?kind=eq.opportunity&select=id,title,stage,org_id,data&limit=1000')) || [];
+    const ids = Array.from(new Set(opps.map((o) => o.org_id).filter(Boolean)));
+    const orgs = ids.length ? await sb('GET', 'hq_orgs?id=in.(' + ids.map(q).join(',') + ')&select=id,name') : [];
+    return Object.assign({ ok: true, fixture_id: fid }, CM.fixtureSponsors(fid, slots, opps, orgs || []));
+  };
+  // ── Fulfilment: only against a published edition id ────────────────────
+  A.recordFulfilment = async (b, actor) => {
+    if (!UUID.test(b.opportunity_id || '')) return fail('Bad id.');
+    const opp = await getItem(b.opportunity_id);
+    const res = { editionId: str(b.edition_id, 120), published: b.published === true };
+    const why = CM.fulfilmentGuard(opp, res); if (why) return fail(why);
+    const d = opp.data || {};
+    if (d.fulfilled_edition === res.editionId) return { ok: true, item: opp, duplicate: true };
+    if (b.fixture_id && d.fixture_id && String(b.fixture_id) !== String(d.fixture_id)) return fail('This deal is booked on a different fixture.');
+    return A.update({ id: opp.id, data: { fulfilled_edition: res.editionId, fulfilled_at: new Date().toISOString() }, note: 'Programme published: edition ' + res.editionId }, actor);
   };
   A.renew = async (b, actor) => {
     if (!UUID.test(b.id || '')) return fail('Bad id.');

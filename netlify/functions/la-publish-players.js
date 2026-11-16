@@ -28,11 +28,11 @@ async function putFile(path, obj) {
 async function publish(dryRun) {
   const rows = await L.sel('la_players?select=*&status=in.(active,injured)&order=id');
   const profiles = rows.map(function (p) {
-    return { id: slug(p.name), number: p.squad_no || 0, name: p.name, position: p.position || '', role: p.role || '', age: p.age || 0,
+    return { id: slug(p.name), number: p.squad_no == null ? null : p.squad_no, name: p.name, position: p.position || '', role: p.role || '', age: p.age == null ? null : p.age,
       nationality: p.nationality || '', nickname: p.nickname || '', bio: p.bio || '', apps: p.apps == null ? null : p.apps, goals: p.goals == null ? null : p.goals, assists: p.assists == null ? null : p.assists, photo: p.photo_url || '' };
   });
   const grid = rows.map(function (p) {
-    return { id: slug(p.name), no: p.squad_no || 0, name: p.name, pos: p.position || '', role: p.role || '', age: p.age || 0, apps: p.apps == null ? null : p.apps, goals: p.goals == null ? null : p.goals, photo: p.photo_url || '' };
+    return { id: slug(p.name), no: p.squad_no == null ? null : p.squad_no, name: p.name, pos: p.position || '', role: p.role || '', age: p.age == null ? null : p.age, apps: p.apps == null ? null : p.apps, goals: p.goals == null ? null : p.goals, photo: p.photo_url || '' };
   });
   const now = new Date().toISOString();
   if (dryRun) return { ok: true, dryRun: true, count: profiles.length, players: profiles, squad: grid };

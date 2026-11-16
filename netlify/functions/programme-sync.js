@@ -606,6 +606,13 @@ exports.handler = async function (event) {
         await S.rest('programme_editions?id=eq.' + edition.id, {
           method: 'PATCH', body: patch, headers: { Prefer: 'return=minimal' },
         });
+        // Sponsors booked on this match are delivered now that supporters can
+        // read it. Never fatal to the run: a failure is reported in outcomes.
+        let fulfilment = null;
+        if (patch.published_at && !edition.published_at) {
+          try { fulfilment = await require('./club-os').recordProgrammeFulfilment([edition.fixture_id, key], edition.id); }
+          catch (e) { fulfilment = { ok: false, error: String(e && e.message || e) }; }
+        }
 
         outcomes.push({
           fixture: key, opponent: fx._awayName,
@@ -619,6 +626,7 @@ exports.handler = async function (event) {
           recovery: !!stage.recovery,
           fullTime: !!finalMatch,
           reasons: decision.reasons,
+          fulfilment: fulfilment,
         });
       } catch (err) {
         // One bad fixture never stops the rest of the season. The error is

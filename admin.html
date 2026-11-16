@@ -1571,13 +1571,14 @@
 
       <div class="div"></div>
       <div class="slbl">Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing prints</span></div>
-      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Start typing and <strong style="color:var(--w)">pick one of your club sponsors</strong> — their <strong style="color:var(--w)">logo</strong> then prints automatically on the cover and in “Today’s Sponsors”. (New sponsor? Add them in the <strong>Sponsors</strong> tab first with their logo, then pick them here.)</p></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Only <strong style="color:var(--w)">confirmed bookings for this match</strong> are offered — their <strong style="color:var(--w)">approved artwork</strong> then prints on the cover and in “Today’s Sponsors”. (New sponsor? In Club OS: deal → Approve package → Book a home fixture → artwork approved → won.)</p></div>
       <div class="field"><label class="fl">This match is sponsored by <span style="color:var(--gr);font-weight:400">— printed across the top of the cover</span></label><input type="text" id="pr-matchsponsor" list="pr-sponsors-dl" placeholder="e.g. Hanlon Dry Lining"></div>
       <div class="row2">
         <div class="field"><label class="fl">Match ball sponsor</label><input type="text" id="pr-ballsponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
         <div class="field"><label class="fl">Matchday sponsor</label><input type="text" id="pr-matchdaysponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
       </div>
       <datalist id="pr-sponsors-dl"></datalist>
+      <div id="pr-fx-sponsors" class="pr-muted"></div>
 
       <button type="button" class="save" onclick="prStep(3)">Next: add stories &rarr;</button>
       </section>
@@ -3831,6 +3832,12 @@ function sponsorLogoFor(name) {
   var s = sponsors.filter(function (x) { return (x.name || '').trim().toLowerCase() === String(name).trim().toLowerCase(); })[0];
   return (s && s.logo) ? s.logo : '';
 }
+// The approved artwork of a confirmed booking wins; otherwise the club sponsor
+// logo (the programme checks flag any sponsor that is not a confirmed booking).
+function prSponsorArt(id) {
+  var name = (document.getElementById(id) || {}).value || '';
+  return (window.PRE && PRE.artFor && PRE.artFor(id, name)) || sponsorLogoFor(name);
+}
 function populateSponsorDatalist() {
   var dl = document.getElementById('pr-sponsors-dl');
   if (dl) dl.innerHTML = sponsors.map(function (s) { return '<option value="' + escH(s.name || '') + '">'; }).join('');
@@ -5216,7 +5223,7 @@ function sendPushAlert() {
 }
 
 // ── PROGRAMME ──
-// FA Step 5 standard club statements — pre-written, editable per programme.
+// Club statements (club policy, not league rules) — pre-written, editable per programme.
 var PR_DEFAULTS = {
   admission: 'General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card',
   rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
@@ -5538,7 +5545,7 @@ function prBuildDoc() {
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
-    matchSponsorLogo: sponsorLogoFor(gv('pr-matchsponsor')), ballSponsorLogo: sponsorLogoFor(gv('pr-ballsponsor')), matchdaySponsorLogo: sponsorLogoFor(gv('pr-matchdaysponsor')),
+    matchSponsorLogo: prSponsorArt('pr-matchsponsor'), ballSponsorLogo: prSponsorArt('pr-ballsponsor'), matchdaySponsorLogo: prSponsorArt('pr-matchdaysponsor'),
     storylines: gv('pr-storylines'), keyPlayers: gv('pr-keyplayers'),
     oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
@@ -6221,6 +6228,8 @@ function nwSaveDraft() {
 function nwPreview() {
   var d = nwForm(), box = document.getElementById('nw-preview');
   var img = imgStore['nw'] ? imgStore['nw'].dataUrl : d.image;
+  // Only an image URL can become a src: no javascript:, no other schemes.
+  if (img && !/^(data:image\/(png|jpe?g|gif|webp);|img\/|\/img\/|https:\/\/)/i.test(String(img))) img = '';
   box.hidden = false;
   box.innerHTML = '<div class="nw-pv__k">Preview — not published</div>' + (img ? '<img src="' + escH(img) + '" alt="">' : '') +
     '<div class="nw-pv__cat">' + escH(d.category) + (d.date ? ' &middot; ' + escH(d.date) : '') + '</div><h3>' + escH(d.title || '(no headline)') + '</h3>' +
@@ -9183,34 +9192,55 @@ function addMeeting() {
   commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting saved to the club records <i class="ico ico-check"></i> — see it under "Saved meetings"');
   mtActionsToTasks(meetings[0]);
 }
-/* AGREED ACTIONS BECOME TASKS. "Next steps — who does what" used to be text
-   that someone had to retype into Tasks. Each line written as
-   "Name — what they will do" becomes a task owned by that person, linked back
-   to the meeting. The key is per meeting and line, so saving again (or a
-   dropped connection and retry) never creates a duplicate. Lines without a
-   name are listed, not guessed. */
-function mtParseActions(text) {
-  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, i) {
+/* AGREED ACTIONS BECOME TASKS. Each line written as "Name — what they will
+   do" becomes a task linked back to the meeting.
+   IDEMPOTENCY: the key is meeting id + the action's own text (normalised), never
+   its line number — so editing the meeting, reordering lines or inserting one
+   and saving again never creates a duplicate or moves a task to someone else.
+   OWNERS ARE NEVER GUESSED: a name must match exactly one committee member
+   (full name, or a first name only one member has). "Nigel & Jenny", unknown
+   names and lines with no name become a task with NO owner and a note
+   "owner unclear: <text>". */
+function mtNorm(t) { return String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function mtKey(meetingId, title) {
+  var t = mtNorm(title), h = 5381;
+  for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+  return 'meeting:' + meetingId + ':a' + h.toString(36) + ':' + t.length;
+}
+function mtResolveOwner(raw, people) {
+  var n = mtNorm(raw); if (!n) return null;
+  if (/[&+\/,]|\band\b/.test(n)) return null;                       // several people: unclear
+  var names = (people || []).map(function (p) { return String((p && p.name) || p || '').trim(); }).filter(Boolean);
+  var full = names.filter(function (x) { return mtNorm(x) === n; });
+  if (full.length === 1) return full[0];
+  var first = names.filter(function (x) { return mtNorm(x).split(' ')[0] === n; });
+  return first.length === 1 ? first[0] : null;
+}
+function mtParseActions(text, people) {
+  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
     var m = l.match(/^([^—–:-]{2,40}?)\s*[—–:-]\s+(.+)$/);
     var iso = l.match(/\b(20\d\d-\d\d-\d\d)\b/);
-    return m ? { i: i, owner: m[1].trim(), title: m[2].trim(), due: iso ? iso[1] : null } : { i: i, title: l, owner: null };
+    var title = m ? m[2].trim() : l, said = m ? m[1].trim() : null;
+    var owner = said && people ? mtResolveOwner(said, people) : (people ? null : said);
+    return { title: title, owner: owner, said: said, due: iso ? iso[1] : null,
+      unclear: owner ? null : 'owner unclear: ' + (said || 'no name given'), key: function (id) { return mtKey(id, title); } };
   });
 }
 function mtActionsToTasks(mt) {
   var el = document.getElementById('dep-meetings');
-  var acts = mtParseActions(mt && mt.nextSteps);
+  var acts = mtParseActions(mt && mt.nextSteps, committee || []);
   if (!acts.length) return;
   if (!window.HQShell || !HQShell.write) { if (el) showDep(el, 'warn', 'Meeting saved. Actions were not turned into tasks: Tasks is not available on this page.'); return; }
-  var named = acts.filter(function (a) { return a.owner; }), loose = acts.filter(function (a) { return !a.owner; });
-  Promise.all(named.map(function (a) {
-    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner, due_date: a.due || undefined,
-      idempotency_key: 'meeting:' + mt.id + ':' + a.i, source: 'meeting:' + mt.id,
-      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date } });
+  var loose = acts.filter(function (a) { return !a.owner; });
+  Promise.all(acts.map(function (a) {
+    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner || undefined, due_date: a.due || undefined,
+      idempotency_key: mtKey(mt.id, a.title), source: 'meeting:' + mt.id, next_action: a.unclear || undefined,
+      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date, note: a.unclear || undefined } });
   })).then(function (rs) {
-    var ok = rs.filter(function (r) { return r && r.ok; }).length, bad = rs.length - ok;
-    var msg = ok + ' action' + (ok === 1 ? '' : 's') + ' added to Tasks with an owner.';
+    var ok = rs.filter(function (r) { return r && r.ok && !r.duplicate; }).length, same = rs.filter(function (r) { return r && r.ok && r.duplicate; }).length, bad = rs.filter(function (r) { return !r || !r.ok; }).length;
+    var msg = ok + ' new action' + (ok === 1 ? '' : 's') + ' added to Tasks.' + (same ? ' ' + same + ' already there (unchanged).' : '');
     if (bad) msg += ' ' + bad + ' could not be added (' + escH(((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error) || 'error') + ') — add them in Tasks.';
-    if (loose.length) msg += ' ' + loose.length + ' line' + (loose.length === 1 ? ' has' : 's have') + ' no name (“Name — action”), so no task was made.';
+    if (loose.length) msg += ' ' + loose.length + ' task' + (loose.length === 1 ? ' has' : 's have') + ' no owner (owner unclear — not guessed). Give ' + (loose.length === 1 ? 'it' : 'them') + ' an owner in Tasks.';
     if (el) showDep(el, bad ? 'err' : (loose.length ? 'warn' : 'ok'), msg);
   });
 }
