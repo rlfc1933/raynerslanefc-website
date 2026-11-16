@@ -28,6 +28,8 @@
   <script src="js/hq-time.js"></script>
   <script src="js/hq-model.js"></script>
   <script src="js/hq-shell.js"></script>
+  <script src="js/match-officials.js?v=1" defer></script>
+  <script src="js/opp-results.js?v=1" defer></script>
   <script src="js/programme-editor.js?v=1" defer></script>
   <link rel="stylesheet" href="css/programme-editor.css?v=1">
   <script src="js/hq-pwa.js"></script>
@@ -1541,6 +1543,14 @@
         <div class="field"><label class="fl" for="pr-off-source">Confirmed by / source</label><input type="text" id="pr-off-source" placeholder="e.g. League appointments email"></div>
       </div>
       <div class="field"><label class="fl" for="pr-off-checked">Last checked</label><input type="date" id="pr-off-checked"></div>
+      <div id="pr-off-use" class="pr-off-use"></div>
+      <details class="pr-offimp" id="pr-offimp"><summary>Import appointments (paste from the league or referees&rsquo; secretary)</summary>
+        <div class="snote"><p>Paste the appointments message. Each fixture line needs the date and the opponent, e.g. <em>Sat 28 Nov Rayners Lane v Broadfields United — Referee: A Name; AR1: B Name; AR2: C Name; 4th: D Name</em>. Only names and roles are kept: phone numbers, emails and addresses are removed, and any line about assessment or marking is refused.</p></div>
+        <div class="field"><label class="fl" for="pr-offimp-label">Source</label><input type="text" id="pr-offimp-label" placeholder="e.g. League appointments email"></div>
+        <div class="field"><label class="fl" for="pr-offimp-text">Appointments text</label><textarea id="pr-offimp-text" rows="6"></textarea></div>
+        <button type="button" class="save sec" onclick="prParseAppointments()">Preview</button>
+        <div id="pr-offimp-preview" class="pr-offimp-preview"></div>
+      </details>
 
       <div class="div"></div>
       <div class="slbl">Playing colours <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— as confirmed for this match</span></div>
@@ -1561,13 +1571,14 @@
 
       <div class="div"></div>
       <div class="slbl">Sponsors <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— leave blank if none; nothing prints</span></div>
-      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Start typing and <strong style="color:var(--w)">pick one of your club sponsors</strong> — their <strong style="color:var(--w)">logo</strong> then prints automatically on the cover and in “Today’s Sponsors”. (New sponsor? Add them in the <strong>Sponsors</strong> tab first with their logo, then pick them here.)</p></div>
+      <div class="snote" style="border-color:rgba(255,209,0,.3);background:rgba(255,209,0,.06);margin-bottom:10px"><p><i class="ico ico-lightbulb"></i> Only <strong style="color:var(--w)">confirmed bookings for this match</strong> are offered — their <strong style="color:var(--w)">approved artwork</strong> then prints on the cover and in “Today’s Sponsors”. (New sponsor? In Club OS: deal → Approve package → Book a home fixture → artwork approved → won.)</p></div>
       <div class="field"><label class="fl">This match is sponsored by <span style="color:var(--gr);font-weight:400">— printed across the top of the cover</span></label><input type="text" id="pr-matchsponsor" list="pr-sponsors-dl" placeholder="e.g. Hanlon Dry Lining"></div>
       <div class="row2">
         <div class="field"><label class="fl">Match ball sponsor</label><input type="text" id="pr-ballsponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
         <div class="field"><label class="fl">Matchday sponsor</label><input type="text" id="pr-matchdaysponsor" list="pr-sponsors-dl" placeholder="Optional"></div>
       </div>
       <datalist id="pr-sponsors-dl"></datalist>
+      <div id="pr-fx-sponsors" class="pr-muted"></div>
 
       <button type="button" class="save" onclick="prStep(3)">Next: add stories &rarr;</button>
       </section>
@@ -1598,6 +1609,8 @@
 
       <div class="field"><label class="fl">Opposition summary (scouting)</label><textarea id="pr-oppsum" rows="3" placeholder="Their form, where they sit, danger men..."></textarea></div>
       <div class="field"><label class="fl">Head to Head / History</label><textarea id="pr-h2h" rows="3" placeholder="Any history between the clubs..."></textarea></div>
+      <div class="slbl">Recent results <span style="color:var(--gr);font-weight:400;font-family:var(--fb)">— completed matches only; prints with its source and cut-off date</span></div>
+      <div id="pr-oppres" class="pr-oppres"></div>
 
 
       <div class="div"></div>
@@ -1615,9 +1628,11 @@
       <button type="button" class="save sec" id="pr-save-btn" onclick="saveProgramme()">&#10003; Save to the club</button>
       <div class="snote" style="margin-top:10px"><p>Saving stores this draft on the club&rsquo;s system so it can be finished on another device. It does <strong style="color:var(--w)">not</strong> put the programme on the website.</p></div>
       <div class="slbl"><i class="ico ico-printer"></i> PDF and printing</div>
-      <div class="snote"><p>Opens the finished pages with a <strong style="color:var(--w)">Download PDF</strong> button. This PDF is for reading, sharing and home or office printing; a commercial printer will give you their own requirements (size, bleed, colour).</p></div>
-      <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDF</button>
+      <div class="snote"><p>Opens the finished pages with two downloads: <strong style="color:var(--w)">Reading PDF</strong> (the pages as designed) and <strong style="color:var(--w)">Booklet PDF</strong> (padded to a multiple of four with club pages before the back cover, still in reading order — your printer or print dialogue does the booklet imposition, 2-up, saddle stitch). A4 page images with selectable text, RGB, no bleed: for reading, sharing and home or office printing, not press-ready.</p></div>
+      <button type="button" class="save sec" onclick="prPrintEdition()">Open pages &amp; download PDFs</button>
       <div class="slbl" style="margin-top:14px">Publish</div>
+      <button type="button" class="save sec" id="pr-preflight-btn" onclick="prCheckReadiness()">Check readiness</button>
+      <div id="pr-preflight" class="pr-checks" aria-live="polite" hidden></div>
       <button type="button" class="save" id="pr-publish-btn" style="background:var(--su);color:#06210f" onclick="publishProgramme()">&#127760; Publish to website</button>
       <div class="snote" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06)"><p><strong style="color:var(--w)">Publishing freezes this edition.</strong> Fans can see it, and its match details, player figures and league table stay exactly as they are today.</p></div>
       <div class="dep" id="dep-programme"></div>
@@ -1630,6 +1645,9 @@
       <details class="pr-more pr-advanced"><summary>More options: cover colours, ground details, club statements, feature pages</summary>
       <div class="slbl"><i class="ico ico-palette"></i> Cover colour scheme</div>
       <div id="pr-themes" class="pr-themes"></div>
+      <div class="field"><label class="fl" for="pr-coverasset">Cover photograph <span style="color:var(--gr);font-weight:400">— approved club photos from Asset Studio only</span></label>
+        <select id="pr-coverasset"><option value="">Club default (Tithe Farm goalmouth)</option></select>
+        <img id="pr-coverasset-thumb" alt="" style="display:none;margin-top:8px;max-width:220px;border-radius:var(--r-md)"></div>
         <div class="field"><label class="fl">Pitch / ground note</label><input type="text" id="pr-pitch" placeholder="Grass pitch · Main stand"></div>
       <div class="field"><label class="fl">Ground address</label><input type="text" id="pr-address" value="151 Rayners Lane, Harrow HA2 0XH"></div>
 <div class="slbl">Matchday information</div>
@@ -3817,6 +3835,12 @@ function sponsorLogoFor(name) {
   var s = sponsors.filter(function (x) { return (x.name || '').trim().toLowerCase() === String(name).trim().toLowerCase(); })[0];
   return (s && s.logo) ? s.logo : '';
 }
+// The approved artwork of a confirmed booking wins; otherwise the club sponsor
+// logo (the programme checks flag any sponsor that is not a confirmed booking).
+function prSponsorArt(id) {
+  var name = (document.getElementById(id) || {}).value || '';
+  return (window.PRE && PRE.artFor && PRE.artFor(id, name)) || sponsorLogoFor(name);
+}
 function populateSponsorDatalist() {
   var dl = document.getElementById('pr-sponsors-dl');
   if (dl) dl.innerHTML = sponsors.map(function (s) { return '<option value="' + escH(s.name || '') + '">'; }).join('');
@@ -5202,7 +5226,7 @@ function sendPushAlert() {
 }
 
 // ── PROGRAMME ──
-// FA Step 5 standard club statements — pre-written, editable per programme.
+// Club statements (club policy, not league rules) — pre-written, editable per programme.
 var PR_DEFAULTS = {
   admission: 'General £9 · Concessions £6 · Under 16s £2 · Under 10s free · Cash or card',
   rules: 'No smoking or vaping in the stand · Respect all officials · Supporters welcome behind the barriers',
@@ -5231,7 +5255,8 @@ function applyProgrammeData(d) {
   setVal('pr-clubinfo', d.clubInfo || ''); setVal('pr-captainname', d.captainName || ''); setVal('pr-potm', d.potm || ''); setVal('pr-captainnotes', d.captainNotes || '');
   setVal('pr-off-status', d.officialsStatus || 'awaiting'); setVal('pr-off-source', d.officialsSource || ''); setVal('pr-off-checked', d.officialsCheckedAt || '');
   setVal('pr-homekit', d.homeKit || ''); setVal('pr-awaykit', d.awayKit || ''); var _ko = document.getElementById('pr-kit-ok'); if (_ko) _ko.checked = !!d.awayKitConfirmed;
-  if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; }
+  if (window.PRE) { PRE.carry = d.carryReview || null; PRE.oppSource = d.oppProfileSource || null; PRE.oppRecent = d.oppRecentResults || null; }
+  prLoadCoverAssets(d.coverAsset || '');
   setVal('pr-clubhistory', d.clubHistory || ''); setVal('pr-community', d.community || ''); setVal('pr-academy', d.academy || ''); setVal('pr-womens', d.womens || ''); setVal('pr-supporters', d.supporters || ''); setVal('pr-groundinfo', d.groundInfo || '');
   // Opponent crest: an uploaded image (cup/friendly) vs one picked from the list.
   var oc = document.getElementById('pr-oppcrest');
@@ -5241,6 +5266,23 @@ function applyProgrammeData(d) {
   prCoverTheme = (d.coverTheme && COVER_THEMES[d.coverTheme]) ? d.coverTheme : 'black-yellow';
   prCustomPages = Array.isArray(d.customPages) ? d.customPages.map(function (p) { return { title: p.title || '', caption: p.caption || '', image: p.image || '' }; }) : [];
   prRenderThemes(); prRenderPreview(); prRenderPages();
+}
+/* COVER PHOTO: the same approved library Asset Studio uses
+   (js/studio/library-seed.json) — photographs only, never crests or generated
+   artwork. The print page applies the same rule (ProgrammeEdition.coverPhoto). */
+function prLoadCoverAssets(current) {
+  var sel = document.getElementById('pr-coverasset'); if (!sel) return;
+  fetch('js/studio/library-seed.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    var photos = ((j && j.assets) || []).filter(function (a) { return a.approval === 'approved' && ['ground', 'player', 'matchday', 'team', 'action'].indexOf(a.category) > -1 && a.src; });
+    sel.innerHTML = '<option value="">Club default (Tithe Farm goalmouth)</option>' + photos.map(function (a) {
+      return '<option value="' + escH(a.id) + '" data-src="' + escH(a.src) + '">' + escH(a.title || a.src) + (a.rights_holder ? ' — ' + escH(a.rights_holder) : '') + '</option>';
+    }).join('');
+    sel.value = current || '';
+    var th = document.getElementById('pr-coverasset-thumb');
+    function show() { var o = sel.options[sel.selectedIndex]; var src = o && o.getAttribute('data-src'); th.style.display = src ? 'block' : 'none'; if (src) th.src = src; }
+    if (!sel._bound) { sel._bound = 1; sel.addEventListener('change', function () { show(); if (typeof prRenderPreview === 'function') prRenderPreview(); }); }
+    show();
+  }).catch(function () {});
 }
 function prFillCrests() {
   var sel = document.getElementById('pr-oppcrest'); if (!sel) return;
@@ -5269,7 +5311,7 @@ function initProgramme() {
     }
     _prReady.fixtures = true; prMaybeSeed();
   });
-  (window.PRE ? PRE.loadDraft() : new Promise(function (ok) { fetchJSON('programme', ok); })).then(function (d) {
+  (window.PRE ? PRE.loadDraft() : Promise.resolve({})).then(function (d) {
     applyProgrammeData(d);
     if (window.PRE) PRE.afterLoad(d);
     // The fixture this programme belongs to, remembered across reloads.
@@ -5286,7 +5328,7 @@ function initProgramme() {
 // O3: the programme is almost always for the NEXT game, so open on it rather
 // than on "— pick a fixture —" and five empty fields.
 //
-// Runs only AFTER fetchJSON('programme') has applied the saved data — an earlier
+// Runs only AFTER the programme draft (PRE.loadDraft) has applied the saved data — an earlier
 // version raced it, and whichever fetch finished last won. Guards on the SAVED
 // state, not on whatever happens to be in the inputs at the time.
 //
@@ -5432,35 +5474,36 @@ function prInitials(name) {
   var ini = w.slice(0, 3).map(function (x) { return (x[0] || '').toUpperCase(); }).join('');
   return 'data:image/svg+xml,' + encodeURIComponent('<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="58" fill="%230d0d0d" stroke="%23ffffff" stroke-width="3"/><text x="60" y="72" text-anchor="middle" font-family="Arial Black" font-size="' + (ini.length > 2 ? '30' : '38') + '" font-weight="900" fill="white">' + ini + '</text></svg>');
 }
+/* THE PREVIEW IS THE PRINT COVER.
+   It used to be a second, hand-drawn cover in inline styles that drifted from
+   the real one. Now the form is handed over exactly as the print page reads
+   it ('rlfc_programme_draft') and programme-print.html?embed=cover renders
+   page 1 in an iframe, scaled to the aside. Debounced: one re-render ~600ms
+   after typing stops, not one per keystroke. */
+var prPreviewTimer = null;
 function prRenderPreview() {
+  clearTimeout(prPreviewTimer);
+  prPreviewTimer = setTimeout(prRenderPreviewNow, 600);
+}
+function prRenderPreviewNow() {
   var box = document.getElementById('pr-preview'); if (!box) return;
-  var t = COVER_THEMES[prCoverTheme] || COVER_THEMES['black-yellow'];
-  var opp = gv('pr-opp') || 'TBC';
-  var ocFile = prCurrentOppCrest();
-  var oppImg = ocFile || prInitials(opp);
-  var comp = gv('pr-comp') || 'Combined Counties Premier Division North';
-  var venue = gv('pr-venue') || 'Tithe Farm';
-  var date = (typeof fxFmtDate === 'function' && gv('pr-date')) ? fxFmtDate(gv('pr-date')) : (gv('pr-date') || 'TBC');
-  var ms = gv('pr-matchsponsor');
-  function meta(l, v) { return '<div style="text-align:center;min-width:0"><div style="font-family:var(--fc);font-size:6px;font-weight:700;letter-spacing:.1em;color:' + t.accent + '">' + l + '</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:11px;color:' + t.ink + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px">' + esc(v) + '</div></div>'; }
-  box.innerHTML =
-    '<div style="width:100%;height:100%;display:flex;flex-direction:column;background:' + t.bg + ';color:' + t.ink + '">' +
-      (ms ? '<div style="background:' + t.accent + ';color:' + t.accentInk + ';text-align:center;font-family:var(--fc);font-weight:700;font-size:7.5px;letter-spacing:.03em;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">SPONSORED BY ' + esc(ms).toUpperCase() + '</div>' : '') +
-      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 12px 10px;position:relative;overflow:hidden">' +
-        '<div style="position:absolute;right:-26px;bottom:-26px;width:160px;height:160px;background:url(img/badge.png) center/contain no-repeat;opacity:.06"></div>' +
-        '<img src="img/badge.png" style="width:40px;height:40px;object-fit:contain">' +
-        '<div style="font-family:var(--fc);font-weight:700;font-size:6.5px;letter-spacing:.26em;color:' + t.accent + ';margin-top:6px">OFFICIAL MATCHDAY PROGRAMME</div>' +
-        '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:23px;letter-spacing:1px;line-height:.95;margin-top:1px;color:' + t.ink + '">RAYNERS LANE FC</div>' +
-        '<div style="font-family:var(--fc);font-size:6.5px;letter-spacing:.08em;color:' + t.soft + ';margin-top:1px">' + esc(comp) + '</div>' +
-        '<div style="display:flex;align-items:center;gap:9px;margin:auto 0;position:relative;z-index:1">' +
-          '<div style="text-align:center"><img src="img/badge.png" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + '">RAYNERS LANE</div></div>' +
-          '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:25px;color:' + t.accent + '">VS</div>' +
-          '<div style="text-align:center"><img src="' + esc(oppImg) + '" style="width:46px;height:46px;object-fit:contain"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:10px;margin-top:2px;color:' + t.ink + ';max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(opp).toUpperCase() + '</div></div>' +
-        '</div>' +
-        '<div style="display:flex;gap:10px;margin-top:auto;position:relative;z-index:1">' + meta('DATE', date) + meta('K.O.', prTo12(gv('pr-ko'))) + meta('VENUE', venue) + '</div>' +
-      '</div>' +
-      '<div style="background:' + t.accent + ';color:' + t.accentInk + ';display:flex;justify-content:space-between;padding:5px 10px;font-family:var(--fc);font-weight:700;font-size:7px;letter-spacing:.06em"><span>THE LANE · EST. 1933</span><span>RAYNERSLANEFC.CO.UK</span></div>' +
-    '</div>';
+  try {
+    var doc = prBuildDoc();
+    localStorage.setItem('rlfc_programme_draft', JSON.stringify({ savedAt: new Date().toISOString(), doc: doc }));
+  } catch (e) { /* storage full or blocked: the iframe says there is no preview */ }
+  var fr = box.querySelector('iframe.pr-preview-frame');
+  if (!fr) {
+    box.innerHTML = '';
+    fr = document.createElement('iframe');
+    fr.className = 'pr-preview-frame';
+    fr.title = 'Programme cover preview';
+    fr.setAttribute('tabindex', '-1');
+    fr.style.cssText = 'width:100%;height:100%;border:0;display:block;background:#0d0d0d';
+    fr.src = 'programme-print.html?embed=cover';
+    box.appendChild(fr);
+  } else {
+    try { fr.contentWindow.location.reload(); } catch (e) { fr.src = 'programme-print.html?embed=cover&t=' + Date.now(); }
+  }
 }
 
 // ── CUSTOM PAGES — editor adds/removes branded pages with their own artwork ──
@@ -5524,15 +5567,17 @@ function prBuildDoc() {
     admission: gv('pr-admission'), groundRules: gv('pr-rules'), firstAid: gv('pr-firstaid'),
     respect: gv('pr-respect'), safeguarding: gv('pr-safe'), equality: gv('pr-equality'), affiliation: gv('pr-affil'),
     matchSponsor: gv('pr-matchsponsor'), ballSponsor: gv('pr-ballsponsor'), matchdaySponsor: gv('pr-matchdaysponsor'),
-    matchSponsorLogo: sponsorLogoFor(gv('pr-matchsponsor')), ballSponsorLogo: sponsorLogoFor(gv('pr-ballsponsor')), matchdaySponsorLogo: sponsorLogoFor(gv('pr-matchdaysponsor')),
+    matchSponsorLogo: prSponsorArt('pr-matchsponsor'), ballSponsorLogo: prSponsorArt('pr-ballsponsor'), matchdaySponsorLogo: prSponsorArt('pr-matchdaysponsor'),
     storylines: gv('pr-storylines'), keyPlayers: gv('pr-keyplayers'),
     oppFounded: gv('pr-oppfounded'), oppGround: gv('pr-oppground'), oppManager: gv('pr-oppmanager'), oppOnesToWatch: gv('pr-opponestowatch'),
     clubInfo: gv('pr-clubinfo'), captainName: gv('pr-captainname'), potm: gv('pr-potm'), captainNotes: gv('pr-captainnotes'),
     clubHistory: gv('pr-clubhistory'), community: gv('pr-community'), academy: gv('pr-academy'), womens: gv('pr-womens'), supporters: gv('pr-supporters'), groundInfo: gv('pr-groundinfo'),
-    oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme,
+    oppCrest: prCurrentOppCrest(), coverTheme: prCoverTheme, coverAsset: gv('pr-coverasset') || undefined,
     officialsStatus: gv('pr-off-status') || 'awaiting', officialsSource: gv('pr-off-source'), officialsCheckedAt: gv('pr-off-checked'),
     homeKit: gv('pr-homekit'), awayKit: gv('pr-awaykit'), awayKitConfirmed: !!(document.getElementById('pr-kit-ok') || {}).checked,
     carryReview: (window.PRE && PRE.carry) || null, oppProfileSource: (window.PRE && PRE.oppSource) || null,
+    // Chosen by the editor (js/programme-editor.js), never by a background refresh.
+    oppRecentResults: (window.PRE && PRE.oppRecent) || null,
     customPages: prCustomPages.filter(function (p) { return p.image || p.title || p.caption; }),
     updatedAt: new Date().toISOString(),
   };
@@ -5871,6 +5916,9 @@ async function prFreezeEdition(base) {
     doc.nextHomeFixture = up.filter(function (f) { return f.isHome !== false; })[0] || null;
   } catch (e) { /* no snapshot is honest; a later season's fixture is not */ }
 
+  // OPPOSITION RESULTS are already a copy (doc.oppRecentResults, chosen in
+  // the editor with their cut-off date). They are kept exactly as chosen:
+  // never re-fetched here, so the edition prints what the editor approved.
   doc.published = true;
   doc.publishedAt = new Date().toISOString();
   doc.snapshotOf = doc.fixtureId || doc.id;
@@ -6202,6 +6250,8 @@ function nwSaveDraft() {
 function nwPreview() {
   var d = nwForm(), box = document.getElementById('nw-preview');
   var img = imgStore['nw'] ? imgStore['nw'].dataUrl : d.image;
+  // Only an image URL can become a src: no javascript:, no other schemes.
+  if (img && !/^(data:image\/(png|jpe?g|gif|webp);|img\/|\/img\/|https:\/\/)/i.test(String(img))) img = '';
   box.hidden = false;
   box.innerHTML = '<div class="nw-pv__k">Preview — not published</div>' + (img ? '<img src="' + escH(img) + '" alt="">' : '') +
     '<div class="nw-pv__cat">' + escH(d.category) + (d.date ? ' &middot; ' + escH(d.date) : '') + '</div><h3>' + escH(d.title || '(no headline)') + '</h3>' +
@@ -9164,34 +9214,55 @@ function addMeeting() {
   commitDomain('meetings', 'meetings', 'id', meetings, meetingsDeleted, null, 'dep-meetings', 'Meeting saved to the club records <i class="ico ico-check"></i> — see it under "Saved meetings"');
   mtActionsToTasks(meetings[0]);
 }
-/* AGREED ACTIONS BECOME TASKS. "Next steps — who does what" used to be text
-   that someone had to retype into Tasks. Each line written as
-   "Name — what they will do" becomes a task owned by that person, linked back
-   to the meeting. The key is per meeting and line, so saving again (or a
-   dropped connection and retry) never creates a duplicate. Lines without a
-   name are listed, not guessed. */
-function mtParseActions(text) {
-  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l, i) {
+/* AGREED ACTIONS BECOME TASKS. Each line written as "Name — what they will
+   do" becomes a task linked back to the meeting.
+   IDEMPOTENCY: the key is meeting id + the action's own text (normalised), never
+   its line number — so editing the meeting, reordering lines or inserting one
+   and saving again never creates a duplicate or moves a task to someone else.
+   OWNERS ARE NEVER GUESSED: a name must match exactly one committee member
+   (full name, or a first name only one member has). "Nigel & Jenny", unknown
+   names and lines with no name become a task with NO owner and a note
+   "owner unclear: <text>". */
+function mtNorm(t) { return String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function mtKey(meetingId, title) {
+  var t = mtNorm(title), h = 5381;
+  for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+  return 'meeting:' + meetingId + ':a' + h.toString(36) + ':' + t.length;
+}
+function mtResolveOwner(raw, people) {
+  var n = mtNorm(raw); if (!n) return null;
+  if (/[&+\/,]|\band\b/.test(n)) return null;                       // several people: unclear
+  var names = (people || []).map(function (p) { return String((p && p.name) || p || '').trim(); }).filter(Boolean);
+  var full = names.filter(function (x) { return mtNorm(x) === n; });
+  if (full.length === 1) return full[0];
+  var first = names.filter(function (x) { return mtNorm(x).split(' ')[0] === n; });
+  return first.length === 1 ? first[0] : null;
+}
+function mtParseActions(text, people) {
+  return String(text || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
     var m = l.match(/^([^—–:-]{2,40}?)\s*[—–:-]\s+(.+)$/);
     var iso = l.match(/\b(20\d\d-\d\d-\d\d)\b/);
-    return m ? { i: i, owner: m[1].trim(), title: m[2].trim(), due: iso ? iso[1] : null } : { i: i, title: l, owner: null };
+    var title = m ? m[2].trim() : l, said = m ? m[1].trim() : null;
+    var owner = said && people ? mtResolveOwner(said, people) : (people ? null : said);
+    return { title: title, owner: owner, said: said, due: iso ? iso[1] : null,
+      unclear: owner ? null : 'owner unclear: ' + (said || 'no name given'), key: function (id) { return mtKey(id, title); } };
   });
 }
 function mtActionsToTasks(mt) {
   var el = document.getElementById('dep-meetings');
-  var acts = mtParseActions(mt && mt.nextSteps);
+  var acts = mtParseActions(mt && mt.nextSteps, committee || []);
   if (!acts.length) return;
   if (!window.HQShell || !HQShell.write) { if (el) showDep(el, 'warn', 'Meeting saved. Actions were not turned into tasks: Tasks is not available on this page.'); return; }
-  var named = acts.filter(function (a) { return a.owner; }), loose = acts.filter(function (a) { return !a.owner; });
-  Promise.all(named.map(function (a) {
-    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner, due_date: a.due || undefined,
-      idempotency_key: 'meeting:' + mt.id + ':' + a.i, source: 'meeting:' + mt.id,
-      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date } });
+  var loose = acts.filter(function (a) { return !a.owner; });
+  Promise.all(acts.map(function (a) {
+    return HQShell.write('create', { kind: 'task', title: a.title, owner: a.owner || undefined, due_date: a.due || undefined,
+      idempotency_key: mtKey(mt.id, a.title), source: 'meeting:' + mt.id, next_action: a.unclear || undefined,
+      data: { area: 'Committee', meeting: mt.id, meeting_title: mt.title, meeting_date: mt.date, note: a.unclear || undefined } });
   })).then(function (rs) {
-    var ok = rs.filter(function (r) { return r && r.ok; }).length, bad = rs.length - ok;
-    var msg = ok + ' action' + (ok === 1 ? '' : 's') + ' added to Tasks with an owner.';
+    var ok = rs.filter(function (r) { return r && r.ok && !r.duplicate; }).length, same = rs.filter(function (r) { return r && r.ok && r.duplicate; }).length, bad = rs.filter(function (r) { return !r || !r.ok; }).length;
+    var msg = ok + ' new action' + (ok === 1 ? '' : 's') + ' added to Tasks.' + (same ? ' ' + same + ' already there (unchanged).' : '');
     if (bad) msg += ' ' + bad + ' could not be added (' + escH(((rs.filter(function (r) { return !r || !r.ok; })[0] || {}).error) || 'error') + ') — add them in Tasks.';
-    if (loose.length) msg += ' ' + loose.length + ' line' + (loose.length === 1 ? ' has' : 's have') + ' no name (“Name — action”), so no task was made.';
+    if (loose.length) msg += ' ' + loose.length + ' task' + (loose.length === 1 ? ' has' : 's have') + ' no owner (owner unclear — not guessed). Give ' + (loose.length === 1 ? 'it' : 'them') + ' an owner in Tasks.';
     if (el) showDep(el, bad ? 'err' : (loose.length ? 'warn' : 'ok'), msg);
   });
 }

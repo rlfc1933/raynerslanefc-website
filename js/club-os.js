@@ -690,12 +690,24 @@
       b += '<button class="cos-btn" data-j="pkg">' + (d.package_approved_by ? 'Change package' : 'Approve package') + '</button>';
       if (PKG_LIST[d.package] && d.package_approved_by) b += d.fixture_id ? '<button class="cos-btn" data-j="release">Release fixture</button>' : '<button class="cos-btn" data-j="book">Book a home fixture</button>';
     }
+    if (it.kind === 'opportunity') b += '<button class="cos-btn" data-j="art">' + (d.artwork_path ? 'Replace artwork' : 'Add artwork') + '</button>' +
+      (d.artwork_path && artworkState(d) !== 'approved' ? '<button class="cos-btn" data-j="artok">Approve artwork</button>' : '');
     if (it.kind === 'opportunity' && it.stage === 'won') b += '<button class="cos-btn" data-j="renew">Start renewal</button>';
     if (it.kind === 'volunteer_offer' && it.parent_id) b += '<button class="cos-btn" data-j="instr">Instructions for the volunteer</button>';
     return b;
   }
+  // Mirrors artworkState() in lib/rebirth/commercial.js.
+  function artworkState(d) { d = d || {}; return !d.artwork_path ? 'missing' : (d.artwork_status === 'approved' && d.artwork_approved_by ? 'approved' : 'awaiting_approval'); }
+  var ART_LABEL = { missing: 'Artwork: missing', awaiting_approval: 'Artwork: awaiting approval', approved: 'Artwork: approved' };
   function journeyNotes(it) {
     var d = it.data || {}, out = '';
+    if (it.kind === 'opportunity') {
+      var as = artworkState(d);
+      out += '<p class="' + (as === 'approved' ? 'cos-muted' : 'cos-send is-no') + '">' + h(ART_LABEL[as]) + (d.artwork_path ? ' · ' + h(d.artwork_path) : '') +
+        (as === 'approved' ? ' · approved by ' + h(d.artwork_approved_by) : ' — a programme placement needs approved artwork. A logo is not an advert.') +
+        (['won', 'agreed'].indexOf(it.stage) > -1 ? '' : ' · Not a confirmed sponsorship until the deal is won.') +
+        (d.fulfilled_edition ? ' · Fulfilled in programme edition ' + h(d.fulfilled_edition) : '') + '</p>';
+    }
     if (it.kind === 'opportunity' && d.rebook_needed) out += '<p class="cos-send is-no">The booked fixture was postponed or rearranged (' + h(d.rebook_reason || '') + '). Book the new date and tell the sponsor.</p>';
     if (it.kind === 'opportunity' && d.package_approved_by) out += '<p class="cos-muted">Package approved by ' + h(d.package_approved_by) + ' · ' + money(d.package_price_pence) + (d.fixture_label ? ' · booked: ' + h(d.fixture_label) : '') + '</p>';
     return out;
@@ -709,7 +721,16 @@
         if (j === 'convert') return askForm(dl, 'Turn this enquiry into a deal', fld('cosj-o', 'Who owns the relationship?', '<input id="cosj-o" value="' + h(it.owner || actor()) + '">') +
           fld('cosj-p', 'Package (if they asked for one)', '<select id="cosj-p"><option value="">Not decided yet</option><option value="matchball">Match-ball sponsor (one home game)</option><option value="match">Matchday sponsor (one home game)</option></select>'),
           'Create the deal', function (f, done) {
-            write('convertEnquiry', { id: it.id, owner: f.querySelector('#cosj-o').value.trim(), package: f.querySelector('#cosj-p').value }).then(function (r) {
+            var body = { id: it.id, owner: f.querySelector('#cosj-o').value.trim(), package: f.querySelector('#cosj-p').value };
+            write('convertEnquiry', body).then(function again(r) {
+              // An existing organisation matches: a person confirms which one, never a second record.
+              if (!r.ok && r.org_matches && r.org_matches.length) {
+                var pick = r.org_matches.length === 1
+                  ? (confirm(r.error + '\n\nUse “' + r.org_matches[0].name + '”?') ? r.org_matches[0].id : '')
+                  : (function () { var n = prompt(r.error + '\n\n' + r.org_matches.map(function (m, i) { return (i + 1) + '. ' + m.name; }).join('\n') + '\n\nType the number to use:'); var m = r.org_matches[(+n || 0) - 1]; return m ? m.id : ''; })();
+                if (!pick) return done('Not converted: choose the existing organisation to use.');
+                return write('convertEnquiry', Object.assign({}, body, { use_org_id: pick })).then(again);
+              }
               if (!r.ok) return done(r.error); toast(r.duplicate ? 'This enquiry already has a deal' : 'Deal created'); openRecord('commercial', pipeline, r.item.id);
             });
           });
@@ -750,6 +771,14 @@
             if (!r.ok && r.needsConfirm) { if (!confirm(r.error + '\n\nRelease it now?')) return; return write('release', { opportunity_id: it.id, reason: why, confirm: true }).then(function (r2) { if (!r2.ok) { err.textContent = r2.error; return; } openRecord(area, k, it.id); }); }
             if (!r.ok) { err.textContent = r.error; return; } toast('Booking released'); openRecord(area, k, it.id);
           });
+        }
+        if (j === 'art') {
+          var p0 = prompt('Artwork file in the site (e.g. img/sponsors/hanlon.png). It then needs approval by a named person.', (it.data || {}).artwork_path || ''); if (!p0) return;
+          return write('submitArtwork', { opportunity_id: it.id, artwork_path: p0.trim() }).then(function (r) { if (!r.ok) { err.textContent = r.error; return; } toast('Artwork added — awaiting approval'); openRecord(area, k, it.id); });
+        }
+        if (j === 'artok') {
+          if (!confirm('Approve this artwork for print? Your name is recorded as the approver.')) return;
+          return write('approveArtwork', { opportunity_id: it.id }).then(function (r) { if (!r.ok) { err.textContent = r.error; return; } toast('Artwork approved'); openRecord(area, k, it.id); });
         }
         if (j === 'renew') return write('renew', { id: it.id }).then(function (r) { if (!r.ok) { err.textContent = r.error; return; } toast(r.duplicate ? 'Renewal already started' : 'Renewal started'); openRecord('commercial', pipeline, r.item.id); });
         if (j === 'instr') return call('volunteerInstructions', { id: it.id }).then(function (r) {
@@ -1042,6 +1071,7 @@
     render: function (name, el) { if (!el) return; el.setAttribute('data-cos', name); open(name); },
     PANELS: PANEL_META.map(function (p) { return p.id; }),
     PANEL_META: PANEL_META,
+    call: call, write: write, artworkState: artworkState,
     _AREAS: AREAS,
   };
 })(window);

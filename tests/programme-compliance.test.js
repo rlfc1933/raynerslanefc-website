@@ -36,7 +36,7 @@ const print = read('programme-print.html');
 test('every league claim carries a source that exists', () => {
   const ids = new Set(MANIFEST.sources.map((s) => s.id));
   MANIFEST.requirements
-    .filter((r) => r.status.startsWith('league'))
+    .filter((r) => ['when-publishing', 'competition-verified'].includes(r.status))
     .forEach((r) => {
       assert.ok(r.source, `"${r.requirement}" claims a league status with no source`);
       assert.ok(ids.has(r.source), `unknown source "${r.source}"`);
@@ -53,11 +53,11 @@ test('club preferences are never dressed up as regulation', () => {
     assert.strictEqual(r.source, null);
   });
   const acerbis = MANIFEST.requirements.find((x) => x.id === 'acerbis');
-  assert.strictEqual(acerbis.status, 'optional');
+  assert.strictEqual(acerbis.status, 'recommended');
 });
 
 test('the status vocabulary is closed', () => {
-  const allowed = ['league-when-produced', 'league-baseline', 'club-policy', 'recommended', 'optional'];
+  const allowed = ['competition-verified', 'when-publishing', 'club-policy', 'recommended', 'awaiting-secretary'];
   MANIFEST.requirements.forEach((r) =>
     assert.ok(allowed.includes(r.status), `unknown status "${r.status}"`));
 });
@@ -65,7 +65,7 @@ test('the status vocabulary is closed', () => {
 test('the advert requirement is sourced to the rule, not the guide', () => {
   const r = MANIFEST.requirements.find((x) => x.id === 'league-adverts');
   assert.strictEqual(r.source, 'rule-8-14');
-  assert.strictEqual(r.status, 'league-when-produced');
+  assert.strictEqual(r.status, 'when-publishing');
   assert.match(r.quote, /official sponsor provided advertisements/);
 });
 

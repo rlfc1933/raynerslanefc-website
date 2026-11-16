@@ -43,6 +43,13 @@
       .catch(function () { return null; });
   }
 
+  // The programme draft is private: read only through the signed-in reader the
+  // programme editor exposes (PRE.readDraft). No reader, no draft — never the public site.
+  function draft() {
+    try { if (global.PRE && typeof PRE.readDraft === 'function') return Promise.resolve(PRE.readDraft()).catch(function () { return null; }); } catch (e) {}
+    return Promise.resolve(null);
+  }
+
   // ── FIXTURE SELECTION ────────────────────────────────────────────────────
 
   function kickoffMs(f) {
@@ -336,7 +343,7 @@
 
   function load() {
     if (S.loaded) return Promise.resolve(S);
-    return Promise.all([j('data/fixtures.json'), j('data/programme.json')])
+    return Promise.all([j('data/fixtures.json'), draft()])
       .then(function (r) {
         var list = (r[0] && r[0].fixtures) || [];
         var got = pick(list);

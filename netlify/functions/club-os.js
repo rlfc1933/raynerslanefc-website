@@ -431,10 +431,27 @@ function pick(o, keys) { const r = {}; for (const k of keys) r[k] = o ? o[k] : u
 // API, its storage helpers, its audit log and its password check.
 const H = { sb, q, audit, str, fail, getItem, getOrg, UUID, DATE, OS, suppressionSet };
 require('./lib/rebirth/actions').install(A, H);
+// FULFILMENT, recorded by the programme sync at the moment an edition actually
+// goes public (not when it is approved, and never from a draft preview). Each
+// fixture slot booked on that match is marked fulfilled against the edition id.
+// Idempotent: A.recordFulfilment returns `duplicate` for an edition it already
+// recorded. The fixture may be known by registry id or by its fwp- key.
+exports.recordProgrammeFulfilment = async function (fixtureIds, editionId) {
+  if (!SB_KEY) return { ok: false, error: 'no-supabase' };
+  const ids = (fixtureIds || []).filter(Boolean).map(String);
+  if (!ids.length || !editionId) return { ok: false, error: 'fixture and edition required' };
+  const slots = (await sb('GET', 'hq_fixture_slots?fixture_id=in.(' + ids.map(q).join(',') + ')&select=*')) || [];
+  const out = [];
+  for (const sl of slots) {
+    if (!sl.opportunity_id) continue;
+    out.push(await A.recordFulfilment({ opportunity_id: sl.opportunity_id, edition_id: String(editionId), published: true, fixture_id: sl.fixture_id }, 'programme publication'));
+  }
+  return { ok: true, recorded: out.filter((r) => r && r.ok && !r.duplicate).length, results: out };
+};
 exports.intakeVolunteer = (sub) => (SB_KEY ? H.intakeVolunteer(sub, 'website') : Promise.resolve({ ok: false, error: 'no-supabase' }));
 
 const WRITES = new Set(['create', 'update', 'move', 'pay', 'saveOrg', 'suppress', 'redeem', 'seed',
-  'importStage', 'checkEmail', 'draftOutreach', 'approvePackage', 'book', 'release', 'convertEnquiry', 'renew',
+  'importStage', 'checkEmail', 'draftOutreach', 'approvePackage', 'book', 'release', 'convertEnquiry', 'renew', 'submitArtwork', 'approveArtwork', 'recordFulfilment',
   'recordAttendance', 'verifyAttendance', 'collectVolunteerOffers', 'seedRebirth']);
 // Finance actions sign with the verified staff identity instead of the typed name.
 const FINANCE = new Set(['finance', 'saveFinanceLine', 'archiveFinanceLine']);

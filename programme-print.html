@@ -20,9 +20,10 @@
      printed a black page with a badge on it for every fixture of the season. -->
 <script src="js/competition-brand.js?v=1"></script>
 <script src="js/brand-palette.js"></script>
+<script src="js/programme-edition.js?v=1"></script>
 <link rel="stylesheet" href="brand/tokens.css">
 <link rel="stylesheet" href="css/programme-export.css?v=1">
-<script src="js/programme-export.js?v=3" defer></script>
+<script src="js/programme-export.js?v=4" defer></script>
 <style>
   /* Brand values derive from the single source of truth (brand/tokens.css) */
   :root{ --y:var(--yellow); --g:var(--green); --gd:#0e3d20; --ink:var(--print-ink); --soft:var(--print-soft); --line:var(--print-line); --fd:var(--font-d); --fc:var(--font-c); --fb:var(--font-b); --fm:'Roboto Mono',monospace; }
@@ -136,6 +137,8 @@
   .page--opp .opp-name{font-family:var(--fd);font-size:46px;line-height:.92;color:var(--ink);letter-spacing:.3px}
   .page--opp .opp-facts{margin-bottom:6px}
   .page--opp .opp-src{font-size:10.5px;margin-top:10px}
+  .page--opp .opp-res{width:100%;border-collapse:collapse;font-size:12px}
+  .page--opp .opp-res td{padding:3px 6px 3px 0;border-bottom:1px solid rgba(0,0,0,.08)}
   /* team sheets */
   .ts-team{ font-family:var(--fd); font-size:23px; letter-spacing:.5px; color:#fff; background:var(--g); padding:6px 13px; }
   .ts-team.away{ background:#0d0d0d; }
@@ -238,7 +241,7 @@
      No card, no border, no radius, no statistics. Number, face, name,
      position. A squad page in a media guide carries exactly that and nothing
      more, because that is all a reader wants from it. */
-  .sq-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:11px 9px; }
+  .sq-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:12px 8px; }
   .sq{ position:relative; }
   .sq-ph{ aspect-ratio:1/1; background:linear-gradient(160deg,#14532d,#0b2a1a);
           position:relative; overflow:hidden; display:flex; align-items:center;
@@ -259,9 +262,9 @@
   .sq-no{ position:absolute; top:0; left:0; background:var(--y); color:#0d0d0d;
           font-family:var(--fd); font-size:15px; line-height:1; padding:2px 5px 1px;
           font-variant-numeric:tabular-nums; }
-  .sq-nm{ font-family:var(--fd); font-size:12.5px; line-height:1; letter-spacing:.2px;
+  .sq-nm{ font-family:var(--fd); font-size:15px; line-height:1; letter-spacing:.2px;
           color:var(--ink); margin-top:5px; }
-  .sq-po{ font-family:var(--fc); font-size:7px; font-weight:700; letter-spacing:.13em;
+  .sq-po{ font-family:var(--fc); font-size:8.5px; font-weight:700; letter-spacing:.1em;
           text-transform:uppercase; color:var(--g); margin-top:2px; }
 
   /* ═══ CLUB DIRECTORY — a masthead, not a spreadsheet ═════════════════════
@@ -384,105 +387,65 @@
 
   /* COVER */
   /* ── THE COVER ─────────────────────────────────────────────────────────
-     A4 portrait. Designed to be kept, not skimmed: one confrontation, one
-     competition, one date, and the club's own light over all of it.
+     A4 portrait, designed to be kept. The same masthead every issue — THE
+     LANE — so a run of programmes on a shelf reads as one publication, with
+     the issue number and season beside it the way a magazine carries them.
 
-     PRINT NOTE. This relies on background graphics being enabled in the print
-     dialog, which the instruction bar at the top of the page already tells the
-     operator to switch on, and which the existing cover needed too. */
-  .pc{
-    position:relative; overflow:hidden; padding:0; color:#fff;
-    display:flex; flex-direction:column;
-    background:
-      radial-gradient(120% 80% at 50% 0%,   rgba(255,209,0,.10), transparent 60%),
-      radial-gradient(100% 70% at 12% 100%, rgba(26,92,50,.55),  transparent 62%),
-      linear-gradient(168deg,#0f1a12 0%, #0a0a0a 55%, #080808 100%);
-  }
-  /* The opponent's confirmed colour, entering from their side of the lockup —
-     the right, because the cover always reads Rayners Lane first. */
-  .pc--tinted{
-    background:
-      radial-gradient(85% 55% at 100% 62%, color-mix(in srgb, var(--pc-opp) 42%, transparent), transparent 70%),
-      radial-gradient(120% 80% at 50% 0%,   rgba(255,209,0,.10), transparent 60%),
-      radial-gradient(100% 70% at 12% 100%, rgba(26,92,50,.55),  transparent 62%),
-      linear-gradient(168deg,#0f1a12 0%, #0a0a0a 55%, #080808 100%);
-  }
-  .pc__pres{
-    position:relative; z-index:2; display:flex; align-items:center; justify-content:center;
-    gap:10px; background:var(--y); color:#0d0d0d;
-    font-family:var(--fc); font-weight:700; font-size:13px; letter-spacing:.03em;
-    padding:8px 12px;
-  }
-  .pc__pres img{ height:26px; max-width:110px; object-fit:contain; background:#fff; padding:2px 5px; }
-  .pc__pres b{ text-transform:uppercase; }
-  .pc__body{ position:relative; z-index:1; flex:1; padding:15mm 15mm 0; display:flex; flex-direction:column; }
-  /* Low and off the edge, so it is atmosphere behind the baseline block rather
-     than a dark shape sitting on top of the opponent's own crest. */
-  .pc__ghost{
-    position:absolute; right:-52mm; bottom:-26mm; width:145mm; height:145mm;
-    object-fit:contain; opacity:.075; filter:grayscale(1); z-index:0; pointer-events:none;
-  }
-  .pc__head{ display:flex; align-items:center; gap:12px; position:relative; z-index:1; }
-  .pc__badge{ width:64px; height:64px; object-fit:contain; flex:0 0 auto; }
-  .pc__mast{ display:flex; flex-direction:column; min-width:0; }
-  .pc__kick{
-    font-family:var(--fc); font-weight:700; font-size:9.5px; letter-spacing:.26em;
-    text-transform:uppercase; color:var(--y);
-  }
-  .pc__club{ font-family:var(--fd); font-size:34px; line-height:.98; letter-spacing:1px; margin-top:2px; }
-  .pc__season{
-    font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.18em;
-    text-transform:uppercase; color:rgba(255,255,255,.55); margin-top:3px;
-  }
-  /* The competition, given the room an issued mark deserves.
-     A FIXED top margin, not `auto`. Two auto margins — one here and one on the
-     date block — split the leftover page equally and opened a 280px void
-     directly under the masthead. The content now sits as one column from the
-     top, and the single remaining gap falls above the baseline block, where it
-     reads as deliberate air rather than a hole in the middle of the cover. */
-  .pc__comp{
-    position:relative; z-index:1; margin:14mm 0 0;
-    display:flex; flex-direction:column; align-items:center; gap:9px; text-align:center;
-  }
-  .pc__mark{ height:96px; width:auto; max-width:72mm; object-fit:contain; }
-  .pc__compname{
-    font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.2em;
-    text-transform:uppercase; color:#fff;
-  }
-  .pc__round{
-    font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.2em;
-    text-transform:uppercase; color:var(--y);
-  }
-  /* The confrontation. Large, because it is the reason the programme exists. */
-  .pc__fix{
-    position:relative; z-index:1; display:grid; grid-template-columns:1fr auto 1fr;
-    align-items:center; gap:5mm; margin:12mm 0 0;
-  }
-  .pc__side{ display:flex; flex-direction:column; align-items:center; gap:11px; min-width:0; }
-  .pc__crest{ width:52mm; height:52mm; object-fit:contain; }
-  .pc__team{
-    font-family:var(--fd); font-size:23px; letter-spacing:.04em; text-align:center;
-    line-height:1.02; text-transform:uppercase; text-wrap:balance;
-  }
-  .pc__v{ font-family:var(--fd); font-size:40px; color:var(--y); letter-spacing:.04em; }
-  .pc__when{
-    position:relative; z-index:1; margin:auto 0 12mm; display:grid;
-    grid-template-columns:auto auto 1fr; gap:0 9mm; align-items:end;
-    border-top:1.5px solid rgba(255,255,255,.16); padding-top:6mm;
-  }
-  .pc__w{ display:flex; flex-direction:column; gap:3px; min-width:0; }
-  .pc__wl{
-    font-family:var(--fc); font-weight:700; font-size:9px; letter-spacing:.2em;
-    text-transform:uppercase; color:var(--y);
-  }
-  .pc__wv{ font-family:var(--fd); font-size:22px; letter-spacing:.03em; }
-  .pc__w--venue .pc__wv{ font-size:15px; line-height:1.15; }
-  .pc__foot{
-    position:relative; z-index:2; background:var(--y); color:#0d0d0d;
-    padding:10px 15mm; display:flex; justify-content:space-between; align-items:center;
-    font-family:var(--fc); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:11px;
-  }
+     Then a real club photograph (never generated artwork), then the fixture:
+     competition, crest v crest, date, kick-off, venue. Flat club colours —
+     near-black, deep green, yellow, white — and no decorative gradients.
 
+     The opponent's CONFIRMED colour appears only as the rule under their
+     crest. An unconfirmed club gets no colour at all, never a guess.
+
+     PRINT NOTE. Needs background graphics on in the print dialog (the bar at
+     the top of the page says so); the PDF export needs nothing. */
+  .pc{ position:relative; overflow:hidden; padding:0; color:#fff; background:#0d0d0d;
+       display:flex; flex-direction:column; }
+  .pc__mh{ padding:11mm 13mm 6mm; }
+  .pc__mhrow{ display:flex; align-items:flex-end; justify-content:space-between; gap:8mm; }
+  .pc__title{ font-family:var(--fd); font-size:150px; line-height:.74; letter-spacing:.01em;
+              color:var(--y); white-space:nowrap; }
+  .pc__badge{ width:31mm; height:31mm; object-fit:contain; flex:0 0 auto; }
+  .pc__sub{ margin-top:5mm; padding-top:3mm; border-top:3px solid var(--y);
+            display:flex; justify-content:space-between; gap:6mm; flex-wrap:wrap;
+            font-family:var(--fc); font-weight:700; font-size:11px; letter-spacing:.22em;
+            text-transform:uppercase; color:#fff; }
+  .pc__sub i{ font-style:normal; color:var(--y); }
+  .pc__photo{ position:relative; margin:0; min-height:80mm; background:#1a1a1a; flex:1 1 auto; }
+  .pc__photo img{ position:absolute; inset:0; }
+  .pc__photo img{ width:100%; height:100%; object-fit:cover; object-position:50% 55%; display:block; }
+  .pc__photo figcaption{ position:absolute; right:3mm; bottom:2mm; font-family:var(--fc); font-size:7px;
+            font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.85);
+            text-shadow:0 1px 2px rgba(0,0,0,.8); }
+  .pc__body{ flex:0 0 auto; background:var(--gd); padding:6mm 13mm 6mm; display:flex; flex-direction:column;
+             border-top:5px solid var(--y); }
+  .pc__comp{ display:flex; align-items:center; justify-content:center; gap:12px; text-align:center; min-height:12mm; }
+  .pc__mark{ height:15mm; width:auto; max-width:46mm; object-fit:contain; }
+  .pc__compname{ font-family:var(--fc); font-weight:700; font-size:12px; letter-spacing:.2em;
+                 text-transform:uppercase; color:#fff; }
+  .pc__round{ font-family:var(--fc); font-weight:700; font-size:10px; letter-spacing:.2em;
+              text-transform:uppercase; color:var(--y); }
+  .pc__fix{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:5mm; margin:6mm 0 0; }
+  .pc__side{ display:flex; flex-direction:column; align-items:center; gap:8px; min-width:0; }
+  .pc__crest{ width:36mm; height:36mm; object-fit:contain; }
+  .pc__team{ font-family:var(--fd); font-size:34px; letter-spacing:.03em; text-align:center; line-height:.95;
+             text-transform:uppercase; text-wrap:balance; color:#fff; padding-bottom:4px;
+             border-bottom:3px solid transparent; }
+  .pc__side--us .pc__team{ border-bottom-color:var(--y); }
+  .pc--tinted .pc__side--them .pc__team{ border-bottom-color:var(--pc-opp); }
+  .pc__v{ font-family:var(--fd); font-size:44px; color:var(--y); }
+  .pc__when{ margin-top:7mm; display:grid; grid-template-columns:auto auto 1fr; gap:0 9mm; align-items:end;
+             border-top:1px solid rgba(255,255,255,.3); padding-top:4mm; }
+  .pc__w{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .pc__wl{ font-family:var(--fc); font-weight:700; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--y); }
+  .pc__wv{ font-family:var(--fd); font-size:25px; letter-spacing:.03em; line-height:1; }
+  .pc__w--venue .pc__wv{ font-size:17px; line-height:1.1; }
+  .pc__foot{ background:var(--y); color:#0d0d0d; padding:8px 13mm; display:flex; justify-content:space-between;
+             align-items:center; gap:10px; font-family:var(--fc); font-weight:700; letter-spacing:.1em;
+             text-transform:uppercase; font-size:10.5px; }
+  .pc__foot img{ height:22px; max-width:90px; object-fit:contain; background:#fff; padding:2px 4px; }
+  .pc__foot .pc__pres{ display:flex; align-items:center; gap:8px; }
   .cover{ background:linear-gradient(160deg,#0d0d0d,#161208 70%); color:#fff; padding:0; display:flex; flex-direction:column; }
   .cover-sponsor{ background:var(--y); color:#0d0d0d; text-align:center; font-family:var(--fc); font-weight:700; font-size:14px; letter-spacing:.04em; padding:9px 12px; }
   .cover-sponsor b{ text-transform:uppercase; }
@@ -587,6 +550,58 @@
   .advert .big{ font-family:var(--fd); font-size:46px; line-height:.95; letter-spacing:1px; margin:6px 0; }
   .advert .meta{ font-family:var(--fc); font-size:15px; letter-spacing:.06em; }
 
+  /* Editorial: photo slot and pull-quote (the writer's own sentence). */
+  .ed-photo{ margin:0 0 14px; }
+  .ed-photo img{ width:100%; height:68mm; object-fit:cover; display:block; }
+  .ed-photo figcaption{ font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.14em;
+       text-transform:uppercase; color:var(--soft); padding-top:6px; border-top:2px solid var(--ink); margin-top:6px; }
+  .body .pq{ font-family:var(--fd); font-size:30px; line-height:1.02; letter-spacing:.3px; color:var(--g);
+       border-top:3px solid var(--y); border-bottom:1px solid var(--line); padding:10px 0 12px; margin:6px 0 14px;
+       max-width:44ch; quotes:'“' '”'; }
+  .body .pq::before{ content:open-quote; color:var(--y); -webkit-text-stroke:.6px var(--ink); }
+  .body .pq::after{ content:close-quote; color:var(--y); -webkit-text-stroke:.6px var(--ink); }
+
+  /* ═══ COMPLETION PAGES (Booklet PDF only) ════════════════════════════ */
+  .page--xinfo .xi-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 30px; }
+  .xi-l{ display:block; font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.2em;
+         text-transform:uppercase; color:var(--soft); border-bottom:2px solid var(--ink);
+         padding-bottom:4px; margin:0 0 7px; }
+  .xi-t{ font-family:var(--fb); font-size:12px; line-height:1.6; color:#222; margin-bottom:16px; }
+  .xi-cred{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px 24px; }
+  .xi-cred div{ font-family:var(--fd); font-size:20px; line-height:1.05; color:var(--ink); }
+  .xi-cred b{ display:block; font-family:var(--fc); font-size:9px; font-weight:700; letter-spacing:.18em;
+              text-transform:uppercase; color:var(--g); margin-bottom:3px; }
+  .xi-small{ font-family:var(--fb); font-size:10px; line-height:1.55; color:var(--soft); margin-top:16px; max-width:70ch; }
+  .page--xnotes .xn-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px;
+         border-bottom:3px solid var(--ink); padding-bottom:8px; }
+  .xn-head .kick{ font-family:var(--fc); font-size:9.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--soft); }
+  .xn-head h2{ font-family:var(--fd); font-size:54px; line-height:.85; font-weight:400; color:var(--ink); margin-top:4px; }
+  .xn-head img{ width:22mm; height:22mm; object-fit:contain; }
+  .xn-lines{ margin-top:4mm; }
+  .xn-lines i{ display:block; height:9.2mm; border-bottom:1px solid #bdbdbd; }
+  .xn-lines i:nth-child(5n){ border-bottom-color:var(--g); }
+  .xn-score{ display:flex; align-items:center; gap:10px; margin-top:8mm; font-family:var(--fd); font-size:22px; color:var(--ink); }
+  .xn-score b{ width:16mm; height:14mm; border:2px solid var(--ink); }
+  .xn-score .xn-dash{ color:var(--y); -webkit-text-stroke:.6px var(--ink); }
+  .xn-boxes{ display:grid; grid-template-columns:repeat(3,1fr); gap:5mm; }
+  .xn-boxes i{ height:24mm; border:1px dashed #9a9a9a; border-top:3px solid var(--y); }
+  .xn-boxes--full{ grid-template-columns:repeat(2,1fr); margin-top:8mm; }
+  .xn-boxes--full i{ height:38mm; }
+  .xf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  table.xf{ font-size:10.5px; }
+  table.xf td{ padding:4.5px 4px; }
+  table.xf td em{ font-style:normal; color:var(--soft); font-family:var(--fc); font-weight:700; font-size:9px; letter-spacing:.08em; }
+  table.xf b{ font-family:var(--fc); font-weight:700; }
+  table.xf .rW{ color:var(--g); } table.xf .rL{ color:#b42318; } table.xf .rD{ color:var(--soft); }
+
+  /* ═══ ?embed=cover — the editor's live preview ═════════════════════════ */
+  html.px-embed body{ background:transparent; overflow:hidden; }
+  html.px-embed .bar, html.px-embed #px-banner, html.px-embed #px-extra{ display:none !important; }
+  html.px-embed .pages{ padding:0; }
+  html.px-embed .page{ margin:0; box-shadow:none; height:297mm; }
+  .px-embed-empty{ display:flex; align-items:center; justify-content:center; text-align:center;
+                   background:#0d0d0d; color:#fff; font:600 34px/1.3 var(--fb); padding:30mm; }
+
   @media print{
     @page{ size:A4 portrait; margin:0; }
     body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -616,16 +631,23 @@
 
 <div class="bar px-bar">
   <h1>Programme — Print Edition</h1>
-  <button class="px-btn px-btn--main" id="px-pdf" type="button" disabled>Download PDF</button>
+  <button class="px-btn px-btn--main" id="px-pdf" type="button" disabled>Reading PDF</button>
+  <button class="px-btn px-btn--main" id="px-booklet" type="button" disabled>Booklet PDF</button>
   <button class="px-btn" id="px-print" type="button" disabled><i class="ico ico-printer"></i> Print</button>
   <span class="sp"></span>
   <a href="programme.html" style="color:#aaa;font-family:var(--fc);font-size:13px">← Digital version</a>
   <p class="px-status" id="px-status" role="status" aria-live="polite">Building your programme…</p>
   <div class="px-result" id="px-result" hidden></div>
-  <p class="px-note">This PDF is for reading, sharing and printing at home or the office (A4, colour, no bleed). It is not a press-ready file: a commercial printer will tell you their size, bleed and colour requirements.</p>
+  <p class="px-note"><b>Reading PDF</b> — the pages as designed, in order.</p>
+  <p class="px-note" id="px-booklet-note">Booklet PDF — 20 pages in reading order; your printer or print dialogue does the booklet imposition (2-up, saddle stitch).</p>
+  <p class="px-note">Format: A4 page images (about 240 dpi on a computer, 180 dpi on a phone) with selectable, searchable text. RGB colour, no bleed, not press-ready: for reading, sharing and home or office printing. A commercial printer will give you their own size, bleed and colour requirements.</p>
 </div>
 <div id="px-banner"></div>
 
+<!-- Completion pages for the Booklet PDF. Never shown, never printed by
+     Print; programme-export.js moves the ones it needs in before the back
+     cover for the booklet export only. -->
+<div id="px-extra" hidden></div>
 <div class="pages" id="pages">
   <div class="page" style="display:flex;align-items:center;justify-content:center;color:#888;font-family:var(--fc)">Building your programme…</div>
 </div>
@@ -633,7 +655,7 @@
 <script>
 (function () {
   var SITE = 'https://raynerslanefc.co.uk';
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function lines(t){ return String(t||'').split('\n').map(function(l){return l.trim();}).filter(Boolean); }
   /* EDITORS WRITE MARKDOWN WHETHER OR NOT WE SUPPORT IT.
      The Hilltop preview opened with "**OLD PATHS. NEW CHAPTER.**" and that is
@@ -657,6 +679,29 @@
       if (m) return '<p class="standfirst">'+inline(m[1])+'</p>';
       return '<p>'+inline(l)+'</p>';
     }).join('');
+  }
+  /* Editorial hierarchy for the long pieces, built ONLY from the writer's own
+     words: the opening paragraph becomes the standfirst (unless they wrote
+     one), and a piece of four or more paragraphs gets a pull-quote lifted
+     verbatim from its own body. Nothing is paraphrased, nothing invented. */
+  function pullQuote(paras){
+    var best = '';
+    paras.slice(1).forEach(function(p){
+      (String(p).replace(/\*+/g,'').match(/[^.!?]+[.!?]+/g) || []).forEach(function(s){
+        s = s.trim();
+        if (s.length >= 60 && s.length <= 170 && s.length > best.length) best = s;
+      });
+    });
+    return best;
+  }
+  function editorial(t){
+    var L = lines(t); if (!L.length) return '';
+    var first = /^\*\*(.+)\*\*$/.test(L[0]) || L.length < 2 ? '' : '<p class="standfirst">'+inline(L[0])+'</p>';
+    var rest = first ? L.slice(1) : L;
+    var blocks = rest.map(function(l){ return notes(l); });
+    var q = L.length >= 4 ? pullQuote(L) : '';
+    if (q) blocks.splice(Math.min(2, blocks.length), 0, '<blockquote class="pq">'+esc(q)+'</blockquote>');
+    return first + blocks.join('');
   }
   function to12(t){ if(!t||!/^\d{1,2}:\d{2}/.test(t))return t||'3:00 PM'; var p=t.split(':'),h=parseInt(p[0],10),m=p[1].slice(0,2),ap=h>=12?'PM':'AM'; h=h%12; if(h===0)h=12; return h+':'+m+' '+ap; }
   function niceDate(d){ if(!d)return ''; var dt=new Date(d.length===10?d+'T12:00:00':d); return isNaN(dt.getTime())?d:dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
@@ -797,14 +842,30 @@
   }
   function qp(k){ var m=location.search.match(new RegExp('[?&]'+k+'=([^&]*)')); return m?decodeURIComponent(m[1]):''; }
   function pxNote(kind, html){ var b=document.getElementById('px-banner'); if(b) b.innerHTML='<div class="px-banner px-banner--'+kind+'">'+html+'</div>'; }
+  /* ?embed=cover — the editor's live cover preview.
+     The HQ programme editor writes the form to the same local hand-over
+     ('rlfc_programme_draft') and loads this page in an iframe, so the preview
+     IS the print cover rather than a second drawing of it. Only page 1 is
+     rendered, there is no toolbar, nothing can be exported, and it never
+     falls back to a saved or published file: no hand-over, no cover. */
+  var EMBED = qp('embed') === 'cover';
+  if (EMBED) document.documentElement.classList.add('px-embed');
+  function embedDoc(){
+    try {
+      var o = JSON.parse(localStorage.getItem('rlfc_programme_draft') || 'null');
+      if (o && o.doc && o.savedAt && (Date.now() - Date.parse(o.savedAt)) <= 30 * 60 * 1000) return o.doc;
+    } catch (e) {}
+    window.__pxBlocked = 'No preview';
+    return null;
+  }
   function loadProgrammeDoc(){
+    if (EMBED) return Promise.resolve(embedDoc() || {});
     var wantFx = qp('fx'), wantRev = qp('rev');
     if (/[?&]draft=1/.test(location.search)) {
       var local = draftSnapshot();
       if (local && (!wantFx || local.fixtureId === wantFx)) { pxNote('warn','Draft from this device'+(local.revision?' (based on version '+esc(local.revision)+')':'')+'. Not published.'); return Promise.resolve(local); }
-      // Before the first save under the new editor there is no draft file yet;
-      // the working draft is still the old single file.
-      return clubDraft().then(function(d){ return d || getJSON('programme').then(function(o){ return (o && !o.published) ? o : null; }); }).then(function(d){
+      // Only the signed-in club copy. There is no public draft file to fall back to.
+      return clubDraft().then(function(d){
         if (!d) { window.__pxBlocked = 'No draft found'; pxNote('err','The draft this link points to could not be opened here. Sign in to Lane HQ on this device and open it from Programmes. Nothing has been made, so nothing can be printed by mistake.'); return {}; }
         if (wantFx && d.fixtureId !== wantFx) {
           pxNote('err','This link was for a different match. The club’s saved draft is now for <b>'+esc(d.opponent||'another match')+'</b> ('+esc(d.date||'')+'), so that is what is shown. Do not print this for the original match.');
@@ -817,8 +878,10 @@
       });
     }
     var id = paramId();
-    if (!id) return getJSON('programme').then(function(d){ if (d && !d.published) pxNote('warn','This is an unpublished draft, not a published programme.'); return d; });
-    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0];
+    // No edition named: never render a draft. Point at the published archive.
+    if (!id) { window.__pxBlocked = 'No edition chosen'; pxNote('err','No programme edition was chosen, so nothing is shown. Published programmes are in the <a href="programmes.html">programme archive</a>.'); return Promise.resolve({}); }
+    // The print archive lists PUBLISHED editions only; an unpublished item is never printed from a public link.
+    return getJSON('programmes').then(function(a){ var items=(a&&a.items)||[]; var hit=items.filter(function(it){return it.id===id;})[0]; if (hit && hit.published!==true) hit=null;
       if (!hit) { window.__pxBlocked = 'No such edition'; pxNote('err','There is no archived edition called “'+esc(id)+'”. Nothing is shown in its place.'); return {}; }
       return hit; });
   }
@@ -869,9 +932,13 @@
   }
 
   Promise.all([ loadProgrammeDoc(), getJSON('crests'), getJSON('sponsors'), getJSON('fixtures'),
-    fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    EMBED ? null : fetch('/.netlify/functions/fetch-table').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     getJSON('committee'), getJSON('officials'), getJSON('emails'), getJSON('players'), getJSON('squad'),
-    getJSON('config'), loadCampaignRegistries()
+    getJSON('config'),
+    // The club's approved photography, from the same library Asset Studio
+    // starts from. Only `approved` photographs can reach the cover.
+    fetch('js/studio/library-seed.json').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    loadCampaignRegistries()
   ]).then(function (res) {
     cfgKit = (res[10] && res[10].kit) || null;
     var d = res[0]||{}, crests=(res[1]&&res[1].crests)||[], sponsors=(res[2]&&res[2].sponsors)||[], fixtures=(res[3]&&res[3].fixtures)||[];
@@ -894,9 +961,11 @@
       : (liveTable.length ? liveTable : (frozenTable || []));
     var club = {
       committee:(res[5]&&res[5].members)||[], officials:res[6]||{}, emails:(res[7]&&res[7].accounts)||[],
-      players:((res[8]&&res[8].players)||(res[9]&&res[9].players)||[])
+      players:((res[8]&&res[8].players)||(res[9]&&res[9].players)||[]),
+      assets:(res[11]&&res[11].assets)||[]
     };
-    return loadSeasonStats(d).then(function(ps){
+    // The embedded cover needs no player figures.
+    return (EMBED ? Promise.resolve(null) : loadSeasonStats(d)).then(function(ps){
       // Overwrite on a draft. `!d.playerStats` was the same truthiness trap:
       // a draft carrying a stale empty snapshot would discard the figures we
       // had just gone and fetched.
@@ -929,9 +998,16 @@
      button into view; programme-export.js enables it once every page, font
      and picture has actually finished loading. */
   function afterRender(d){
+    if (EMBED) { embedFit(); window.addEventListener('resize', embedFit); document.documentElement.setAttribute('data-px-embed-ready', '1'); return; }
     if (window.ProgrammeExport) window.ProgrammeExport.ready(d);
     else window.addEventListener('load', function(){ if (window.ProgrammeExport) window.ProgrammeExport.ready(d); }, { once:true });
     if (/[?&](print|auto)=1/.test(location.search)) { var b=document.getElementById('px-pdf'); if (b) b.scrollIntoView({block:'center'}); }
+  }
+
+  /* The embedded cover is one A4 sheet scaled to the iframe's width. */
+  function embedFit(){
+    var host = document.getElementById('pages'); if (!host) return;
+    host.style.zoom = (document.documentElement.clientWidth / (210 / 25.4 * 96)).toFixed(4);
   }
 
   function render(d, crests, sponsors, fixtures, table, club) {
@@ -1014,6 +1090,8 @@
       try {
         if (window.BrandPalette && BrandPalette.glowable) oppC = BrandPalette.glowable(cPal.primary, '#0a0a0a');
       } catch (e) { oppC = cPal.primary; }
+      // Only a plain hex colour may reach a style attribute.
+      if (!/^#[0-9a-f]{3,8}$/i.test(String(oppC || ''))) oppC = '';
     }
     var season = d.season || '2026-27';
     var compMk = (cIdent && cIdent.logo)
@@ -1022,40 +1100,42 @@
     var compNm = (cIdent && cIdent.label) ? cIdent.label : comp;
     var compRd = (cIdent && cIdent.round) ? cIdent.round : '';
 
+    /* Issue identity: the same masthead every issue, the number counted from
+       the fixture list (home fixtures this season up to and including this
+       one). Unknown stays unknown: no number is printed rather than a guess. */
+    var issueNo = (window.ProgrammeEdition && ProgrammeEdition.issueNumber(fixtures, d)) || null;
+    var photo = window.ProgrammeEdition ? ProgrammeEdition.coverPhoto(d, club.assets) : null;
+    var issueBits = [];
+    if (issueNo) issueBits.push('Issue No. ' + issueNo);
+    issueBits.push('Season ' + season);
+    if (d.price) issueBits.push(String(d.price));
+
     P.push('<div class="page pc' + (oppC ? ' pc--tinted' : '') + '"' +
         (oppC ? ' style="--pc-opp:' + esc(oppC) + '"' : '') + '>' +
 
-      // Every sponsor obligation the club has sold, before the masthead.
-      (d.matchSponsor
-        ? '<div class="pc__pres">' +
-            (d.matchSponsorLogo ? '<img src="' + esc(d.matchSponsorLogo) + '" alt="' + esc(d.matchSponsor) + '">' : '') +
-            '<span>Today’s match presented by <b>' + esc(d.matchSponsor) + '</b></span>' +
-          '</div>'
+      '<header class="pc__mh">' +
+        '<div class="pc__mhrow"><span class="pc__title">The Lane</span>' +
+          '<img class="pc__badge" src="img/badge.png" alt="Rayners Lane FC"></div>' +
+        '<div class="pc__sub"><span>Rayners Lane FC &mdash; Official Matchday Programme</span>' +
+          '<span class="pc__issue">' + issueBits.map(function (b, i) { return (i ? ' <i>&middot;</i> ' : '') + esc(b); }).join('') + '</span></div>' +
+      '</header>' +
+
+      (photo
+        ? '<figure class="pc__photo"><img src="' + esc(photo.src) + '" alt="">' +
+            (photo.credit ? '<figcaption>Photo: ' + esc(photo.credit) + '</figcaption>' : '') + '</figure>'
         : '') +
 
       '<div class="pc__body">' +
-        // The opponent's crest, very large and very faint, on their side.
-        '<img class="pc__ghost" src="' + esc(oppCrest) + '" alt="">' +
-
-        '<div class="pc__head">' +
-          '<img class="pc__badge" src="img/badge.png" alt="Rayners Lane FC">' +
-          '<div class="pc__mast">' +
-            '<span class="pc__kick">Official Matchday Programme</span>' +
-            '<span class="pc__club">Rayners Lane FC</span>' +
-            '<span class="pc__season">Season ' + esc(season) + '</span>' +
-          '</div>' +
-        '</div>' +
-
         '<div class="pc__comp">' + compMk +
-          '<span class="pc__compname">' + esc(compNm) + '</span>' +
-          (compRd ? '<span class="pc__round">' + esc(compRd) + '</span>' : '') +
+          '<span><span class="pc__compname">' + esc(compNm) + '</span>' +
+          (compRd ? '<br><span class="pc__round">' + esc(compRd) + '</span>' : '') + '</span>' +
         '</div>' +
 
         '<div class="pc__fix">' +
-          '<div class="pc__side"><img class="pc__crest" src="img/badge.png" alt="">' +
+          '<div class="pc__side pc__side--us"><img class="pc__crest" src="img/badge.png" alt="">' +
             '<span class="pc__team">Rayners Lane</span></div>' +
           '<span class="pc__v">V</span>' +
-          '<div class="pc__side"><img class="pc__crest" src="' + esc(oppCrest) + '" alt="">' +
+          '<div class="pc__side pc__side--them"><img class="pc__crest" src="' + esc(oppCrest) + '" alt="">' +
             '<span class="pc__team">' + esc(opp) + '</span></div>' +
         '</div>' +
 
@@ -1066,12 +1146,26 @@
         '</div>' +
       '</div>' +
 
-      '<div class="pc__foot"><span>The Lane &middot; Yellow Army &middot; Est. 1933</span>' +
+      // Every sponsor obligation the club has sold, on the cover.
+      '<div class="pc__foot">' +
+        (d.matchSponsor
+          ? '<span class="pc__pres">' + (d.matchSponsorLogo ? '<img src="' + esc(d.matchSponsorLogo) + '" alt="' + esc(d.matchSponsor) + '">' : '') +
+              '<span>Today’s match presented by <b>' + esc(d.matchSponsor) + '</b></span></span>'
+          : '<span>Est. 1933 &middot; Tithe Farm, Harrow</span>') +
         '<span>raynerslanefc.co.uk</span></div>' +
     '</div>');
-
+    /* A photograph slot for a short editorial page: only an APPROVED club
+       photograph from the Asset Studio library, and only when the writing
+       leaves room for it — a long piece keeps the whole page. */
+    function photoSlot(assetId, text){
+      if (String(text||'').length > 1800) return '';
+      var a = (club.assets||[]).filter(function(x){ return x.id === assetId && x.approval === 'approved'; })[0];
+      if (!a) return '';
+      return '<figure class="ed-photo"><img src="'+esc(a.src)+'" alt=""><figcaption>'+esc(a.title||'')+
+        (a.rights_holder ? ' &middot; Photo: '+esc(a.rights_holder) : '')+'</figcaption></figure>';
+    }
     // Editorial page — renders only if the editor wrote something (never half-filled).
-    function edPage(kick,title,text,extra){ if(!lines(text).length) return; P.push('<div class="page">'+banner(kick,title)+(extra||'')+'<div class="body">'+notes(text)+'</div>'+foot()+'</div>'); }
+    function edPage(kick,title,text,extra){ if(!lines(text).length) return; P.push('<div class="page">'+banner(kick,title)+(extra||'')+'<div class="body">'+editorial(text)+'</div>'+foot()+'</div>'); }
 
     /* CLUB INFORMATION */
     var OFF = club.officials||{};
@@ -1088,8 +1182,9 @@
     /* 2 — WELCOME & MANAGER'S NOTES */
     if (lines(d.welcomeNotes).length || lines(d.managerNotes).length || lines(d.lookingForward).length) {
       P.push('<div class="page page--edit">'+ banner('From The Lane','Welcome to Tithe Farm')+
+        photoSlot('repo:img/ground/tithe-farm-aerial-clubhouse-1600.jpg', [d.welcomeNotes,d.managerNotes,d.lookingForward].join(' '))+
         '<div class="lead">'+esc(niceDate(d.date))+' &middot; Kick-off '+esc(to12(d.kickoff))+' &middot; '+esc(venue)+'</div>'+
-        (lines(d.welcomeNotes).length?'<div class="body">'+notes(d.welcomeNotes)+'</div>':'')+
+        (lines(d.welcomeNotes).length?'<div class="body">'+editorial(d.welcomeNotes)+'</div>':'')+
         (lines(d.managerNotes).length?'<div class="divider"><span class="lbl">From the Dugout</span></div><div class="body">'+notes(d.managerNotes)+'</div>':'')+
         (lines(d.lookingForward).length?'<div class="divider"><span class="lbl">Looking Forward</span></div><div class="body">'+notes(d.lookingForward)+'</div>':'')+
         foot()+'</div>');
@@ -1102,7 +1197,13 @@
        history comes from the club's reviewed profile, edited per edition;
        current names and results are kept apart from the historical facts. */
     var oppFacts=[ d.oppFounded?['Founded',d.oppFounded]:null, d.oppGround?['Home ground',d.oppGround]:null, d.oppManager?['Manager',d.oppManager]:null ].filter(Boolean);
-    var hasOpp = oppFacts.length || lines(d.oppSummary).length || lines(d.oppOnesToWatch).length || lines(d.headToHead).length;
+    /* Recent results: exactly the set the editor chose (doc.oppRecentResults),
+       completed matches only, always with the cut-off date and source. */
+    var oppRes = (d.oppRecentResults && d.oppRecentResults.items || []).filter(function(r){ return r && r.date && typeof r.homeScore==='number' && typeof r.awayScore==='number'; });
+    var oppResHtml = oppRes.length ? '<div class="divider"><span class="lbl">Recent Results</span></div><table class="opp-res"><tbody>'+oppRes.map(function(r){
+        return '<tr><td>'+esc(shortDate(r.date)||r.date)+'</td><td>'+esc(r.home)+' '+r.homeScore+'–'+r.awayScore+' '+esc(r.away)+'</td><td class="muted">'+esc(r.competition||'')+'</td></tr>'; }).join('')+
+      '</tbody></table><p class="muted opp-src">Results to '+esc(shortDate(d.oppRecentResults.cutoff)||d.oppRecentResults.cutoff||'—')+' · '+esc(d.oppRecentResults.source||'source not recorded')+'</p>' : '';
+    var hasOpp = oppFacts.length || lines(d.oppSummary).length || lines(d.oppOnesToWatch).length || lines(d.headToHead).length || oppRes.length;
     if (hasOpp) {
       var srcLine = d.oppProfileSource && (d.oppProfileSource.reviewedOn || d.oppProfileSource.source)
         ? '<p class="muted opp-src">Club history from '+esc(d.oppProfileSource.source||'the club profile')+(d.oppProfileSource.reviewedOn?', checked '+esc(d.oppProfileSource.reviewedOn):'')+'.</p>' : '';
@@ -1113,12 +1214,12 @@
         (lines(d.oppSummary).length?'<div class="divider"><span class="lbl">The Club</span></div><div class="body">'+notes(d.oppSummary)+'</div>':'')+
         (lines(d.oppOnesToWatch).length?'<div class="divider"><span class="lbl">This Season</span></div><div class="body">'+notes(d.oppOnesToWatch)+'</div>':'')+
         (lines(d.headToHead).length?'<div class="divider"><span class="lbl">Head to Head</span></div><div class="body">'+notes(d.headToHead)+'</div>':'')+
-        srcLine+ foot()+'</div>');
+        oppResHtml+ srcLine+ foot()+'</div>');
     }
     /* MATCH PREVIEW (storylines + key players) */
     if (lines(d.storylines).length || lines(d.keyPlayers).length) {
       P.push('<div class="page page--edit">'+ banner('Today’s Match','The Preview')+
-        (lines(d.storylines).length?'<div class="body">'+notes(d.storylines)+'</div>':'')+
+        (lines(d.storylines).length?photoSlot('repo:img/ground/tithe-farm-aerial-wide-1600.jpg', d.storylines)+'<div class="body">'+editorial(d.storylines)+'</div>':'')+
         (lines(d.keyPlayers).length?'<div class="divider"><span class="lbl">Lane Players to Watch</span></div><div class="body">'+notes(d.keyPlayers)+'</div>':'')+
         foot()+'</div>');
     }
@@ -1671,7 +1772,107 @@
       '<div class="cover-bottom"><span>raynerslanefc.co.uk</span><span>@RaynersLaneFC · #UpTheLane</span></div>'+
     '</div>');
 
-    document.getElementById('pages').innerHTML = P.join('');
+    /* ═══ COMPLETION PAGES — only for the folded booklet ═════════════════════
+       A saddle-stitched booklet needs a multiple of four pages. Rather than
+       print blank sheets, the Booklet PDF inserts as many of these designed
+       pages as it needs (ProgrammeEdition.bookletPlan), always BEFORE the
+       back cover. They are rendered here, held out of the reading edition in
+       #px-extra, and moved into place only for the booklet export.
+
+       None of them repeats the membership promotion: that is the back
+       cover's job. Their footers carry no rotating call-to-action for the
+       same reason. Every fact on them comes from club data; anything the
+       club has not recorded is left off rather than filled in. */
+    function xHead(kick, title){
+      return '<div class="mh"><span class="n"></span><div class="tx"><span class="kick">'+esc(kick)+'</span><h2>'+esc(title)+'</h2></div></div>';
+    }
+    function xFoot(){ return '<div class="pcta"><span>RAYNERS LANE FC</span><span>Official Matchday Programme &middot; '+esc(season)+'</span><span class="pg" data-pg></span></div>'; }
+    var X = {};
+
+    // (a) Club information & credits — officers by role only, no numbers.
+    (function(){
+      var OFFR = /chair|president|secretary|treasurer|welfare/i;
+      var seen = {}, officers = [];
+      function add(name, role){ name=String(name||'').trim(); role=String(role||'').trim(); if(!name||!role) return;
+        var k=role.toLowerCase(); if(seen[k]) return; seen[k]=1; officers.push([role,name]); }
+      add(OFF.chairman, 'Chairman');
+      (club.committee||[]).forEach(function(m){ if (OFFR.test(m.role||'')) add(m.name, m.role); });
+      add(OFF.secretary, 'Club Secretary');
+      add(OFF.welfareOfficer, 'Club Welfare Officer');
+      var photoCredits = [];
+      if (photo && photo.credit) photoCredits.push(photo.credit);
+      if ((club.players||[]).some(function(p){ return p.photo||p.image; })) {
+        var sq = (club.assets||[]).filter(function(a){ return a.category==='player' && a.approval==='approved'; })[0];
+        var sqc = sq ? sq.rights_holder : '';
+        if (sqc && photoCredits.indexOf(sqc) < 0) photoCredits.push(sqc);
+      }
+      var credits = [['Produced by','Rayners Lane FC']];
+      if ((d.savedBy||'').trim()) credits.push(['Edited by', d.savedBy.trim()]);
+      if (photoCredits.length) credits.push(['Photography', photoCredits.join(' · ')]);
+      X.credits = '<div class="page page--edit page--xinfo" data-x="credits">'+ xHead('About this programme','Club Information & Credits')+
+        '<div class="xi-grid">'+
+          '<section><b class="xi-l">Club officers</b>'+
+            (officers.length ? officers.map(function(o){ return '<div class="md-p"><span class="nm">'+esc(o[1])+'</span><span class="rl">'+esc(o[0])+'</span></div>'; }).join('')
+                             : '<p class="muted body">See the Club Directory.</p>')+
+          '</section>'+
+          '<section><b class="xi-l">The ground</b><p class="xi-t">'+esc(venue)+'<br>'+esc(d.address||'151 Rayners Lane, Harrow HA2 0XH')+'</p>'+
+            '<b class="xi-l">Affiliation</b><p class="xi-t">'+esc(d.affiliation||DEF.affil)+'</p>'+
+            '<b class="xi-l">Contact</b><p class="xi-t">info@raynerslanefc.co.uk<br>raynerslanefc.co.uk</p>'+
+          '</section>'+
+        '</div>'+
+        '<div class="rule"><span>Programme credits</span></div>'+
+        '<div class="xi-cred">'+credits.map(function(c){ return '<div><b>'+esc(c[0])+'</b>'+esc(c[1])+'</div>'; }).join('')+'</div>'+
+        '<p class="xi-small">© Rayners Lane FC. Line-ups and fixtures are subject to late change. Images © the club and contributors. Rayners Lane FC shares Tithe Farm Sports &amp; Social Club.</p>'+
+        xFoot()+'</div>';
+    })();
+
+    // (b) Matchday notes & autographs — ruled, crested, never a blank sheet.
+    var rules = ''; for (var ri = 0; ri < 15; ri++) rules += '<i></i>';
+    var boxes = ''; for (var bi = 0; bi < 6; bi++) boxes += '<i></i>';
+    X.notes = '<div class="page page--xnotes" data-x="notes">'+
+      '<div class="xn-head"><div><span class="kick">'+esc(shortDate(d.date)||season)+' &middot; Rayners Lane v '+esc(opp)+'</span>'+
+        '<h2>Matchday Notes</h2></div><img src="img/badge.png" alt=""></div>'+
+      '<div class="xn-lines">'+rules+'</div>'+
+      '<div class="xn-score"><span>Rayners Lane</span><b></b><span class="xn-dash">&ndash;</span><b></b><span>'+esc(opp)+'</span></div>'+
+      '<div class="rule"><span>Autographs</span></div>'+
+      '<div class="xn-boxes">'+boxes+'</div>'+
+      xFoot()+'</div>';
+
+    // (c) Season fixtures at a glance — real fixtures only, results as recorded.
+    var seasonFx = fixtures.filter(function(f){ return f && f.date && (!f.season || f.season === season); })
+      .sort(function(a,b){ return fxKey(a).localeCompare(fxKey(b)); });
+    if (seasonFx.length) {
+      var fxRow = function(f){
+        var st = String(f.status||''), res;
+        if (/postpon/i.test(st)) res = '<em>P&ndash;P</em>';
+        else if (/cancel|void|abandon/i.test(st)) res = '<em>'+esc(st.toUpperCase().slice(0,4))+'</em>';
+        else if (f.us!=null && f.them!=null) { var o = f.us>f.them?'W':(f.us===f.them?'D':'L'); res = '<b class="r'+o+'">'+o+'</b> '+esc(f.us)+'&ndash;'+esc(f.them); }
+        else res = esc(to12(f.kickoff));
+        var me = (d.fixtureId && f.id === d.fixtureId);
+        return '<tr'+(me?' class="me"':'')+'><td class="l">'+esc(shortDate(f.date))+'</td><td>'+(f.isHome===false?'A':'H')+'</td><td class="l">'+esc(f.opponent||'TBC')+'</td><td>'+res+'</td></tr>';
+      };
+      var half = Math.ceil(seasonFx.length/2);
+      var tbl = function(list){ return '<table class="lt xf"><thead><tr><th class="l">Date</th><th></th><th class="l">Opponent</th><th>Result / KO</th></tr></thead><tbody>'+list.map(fxRow).join('')+'</tbody></table>'; };
+      X.fixtures = '<div class="page page--data" data-x="fixtures">'+ xHead('Season '+season,'Fixtures at a Glance')+
+        '<div class="xf-grid">'+tbl(seasonFx.slice(0,half))+tbl(seasonFx.slice(half))+'</div>'+
+        '<p class="xi-small">From the club’s fixture list when this edition was made. H home &middot; A away &middot; P&ndash;P postponed. Today’s match is highlighted. Check raynerslanefc.co.uk for changes.</p>'+
+        xFoot()+'</div>';
+    }
+
+    // (d) Autographs — the designed last resort when no fixture list exists.
+    var abox = ''; for (var ai = 0; ai < 10; ai++) abox += '<i></i>';
+    X.autographs = '<div class="page page--xnotes" data-x="autographs">'+
+      '<div class="xn-head"><div><span class="kick">Rayners Lane v '+esc(opp)+'</span><h2>Autographs</h2></div><img src="img/badge.png" alt=""></div>'+
+      '<div class="xn-boxes xn-boxes--full">'+abox+'</div>'+ xFoot()+'</div>';
+
+    window.__pxExtra = { available: { fixtures: !!X.fixtures } };
+    var extraHost = document.getElementById('px-extra');
+    if (extraHost && !EMBED) extraHost.innerHTML = ['credits','notes','fixtures','autographs'].map(function(k){ return X[k]||''; }).join('');
+
+    if (EMBED && window.__pxBlocked) P = ['<div class="page px-embed-empty"><p>Choose the match and the cover appears here.</p></div>'];
+    // No edition: never draw an empty "TBC" programme that could be printed.
+    else if (window.__pxBlocked) P = [];
+    document.getElementById('pages').innerHTML = EMBED ? P[0] : P.join('');
     // Auto-fit safety net: a page is a fixed A4 sheet (297mm). If a long
     // manager's note / welcome / scouting write-up makes a page taller than one
     // sheet, its free-text (.body/.lead) is shrunk a touch until the page fits —
